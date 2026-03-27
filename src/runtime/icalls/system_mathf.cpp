@@ -12,8 +12,8 @@ RtResult<float> SystemMathF::acos(float value)
     RET_OK(std::acos(value));
 }
 /// @icall: System.MathF::Acos(System.Single)
-static RtResultVoid acos_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid acos_invoker_mathf(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<float>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(float, result, SystemMathF::acos(value));
@@ -339,7 +339,7 @@ static RtResultVoid modf_invoker(metadata::RtManagedMethodPointer, const metadat
 }
 
 static vm::InternalCallEntry s_entries[] = {
-    {"System.MathF::Acos(System.Single)", (vm::InternalCallFunction)&SystemMathF::acos, acos_invoker},
+    {"System.MathF::Acos(System.Single)", (vm::InternalCallFunction)&SystemMathF::acos, acos_invoker_mathf},
     {"System.MathF::Acosh(System.Single)", (vm::InternalCallFunction)&SystemMathF::acosh, acosh_invoker},
     {"System.MathF::Asin(System.Single)", (vm::InternalCallFunction)&SystemMathF::asin, asin_invoker},
     {"System.MathF::Asinh(System.Single)", (vm::InternalCallFunction)&SystemMathF::asinh, asinh_invoker},

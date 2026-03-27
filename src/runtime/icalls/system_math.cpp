@@ -13,8 +13,8 @@ RtResult<double> SystemMath::round(double value)
 }
 
 /// @icall: System.Math::Round(System.Double)
-static RtResultVoid round_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                  interp::RtStackObject* ret)
+static RtResultVoid round_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                       const interp::RtStackObject* params, interp::RtStackObject* ret)
 {
     (void)methodPtr;
     (void)method;
@@ -30,8 +30,8 @@ RtResult<float> SystemMath::abs_f32(float value)
 }
 
 /// @icall: System.Math::Abs(System.Single)
-static RtResultVoid abs_f32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                    interp::RtStackObject* ret)
+static RtResultVoid abs_f32_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                         const interp::RtStackObject* params, interp::RtStackObject* ret)
 {
     (void)methodPtr;
     (void)method;
@@ -47,8 +47,8 @@ RtResult<double> SystemMath::abs_f64(double value)
 }
 
 /// @icall: System.Math::Abs(System.Double)
-static RtResultVoid abs_f64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                    interp::RtStackObject* ret)
+static RtResultVoid abs_f64_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                         const interp::RtStackObject* params, interp::RtStackObject* ret)
 {
     (void)methodPtr;
     (void)method;
@@ -63,8 +63,8 @@ RtResult<double> SystemMath::acos(double value)
     RET_OK(std::acos(value));
 }
 /// @icall: System.Math::Acos(System.Double)
-static RtResultVoid acos_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid acos_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::acos(value));
@@ -77,8 +77,8 @@ RtResult<double> SystemMath::acosh(double value)
     RET_OK(std::acosh(value));
 }
 /// @icall: System.Math::Acosh(System.Double)
-static RtResultVoid acosh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                  interp::RtStackObject* ret)
+static RtResultVoid acosh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                       interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::acosh(value));
@@ -91,8 +91,8 @@ RtResult<double> SystemMath::asin(double value)
     RET_OK(std::asin(value));
 }
 /// @icall: System.Math::Asin(System.Double)
-static RtResultVoid asin_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid asin_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::asin(value));
@@ -105,8 +105,8 @@ RtResult<double> SystemMath::asinh(double value)
     RET_OK(std::asinh(value));
 }
 /// @icall: System.Math::Asinh(System.Double)
-static RtResultVoid asinh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                  interp::RtStackObject* ret)
+static RtResultVoid asinh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                       interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::asinh(value));
@@ -119,8 +119,8 @@ RtResult<double> SystemMath::atan(double value)
     RET_OK(std::atan(value));
 }
 /// @icall: System.Math::Atan(System.Double)
-static RtResultVoid atan_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid atan_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::atan(value));
@@ -133,8 +133,8 @@ RtResult<double> SystemMath::atan2(double y, double x)
     RET_OK(std::atan2(y, x));
 }
 /// @icall: System.Math::Atan2(System.Double,System.Double)
-static RtResultVoid atan2_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                  interp::RtStackObject* ret)
+static RtResultVoid atan2_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                       interp::RtStackObject* ret)
 {
     auto y = EvalStackOp::get_param<double>(params, 0);
     auto x = EvalStackOp::get_param<double>(params, 1);
@@ -148,8 +148,8 @@ RtResult<double> SystemMath::atanh(double value)
     RET_OK(std::atanh(value));
 }
 /// @icall: System.Math::Atanh(System.Double)
-static RtResultVoid atanh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                  interp::RtStackObject* ret)
+static RtResultVoid atanh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                       interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::atanh(value));
@@ -162,8 +162,8 @@ RtResult<double> SystemMath::cbrt(double value)
     RET_OK(std::cbrt(value));
 }
 /// @icall: System.Math::Cbrt(System.Double)
-static RtResultVoid cbrt_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid cbrt_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::cbrt(value));
@@ -176,8 +176,8 @@ RtResult<double> SystemMath::ceil(double value)
     RET_OK(std::ceil(value));
 }
 /// @icall: System.Math::Ceil(System.Double)
-static RtResultVoid ceil_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid ceil_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::ceil(value));
@@ -190,8 +190,8 @@ RtResult<double> SystemMath::cos(double value)
     RET_OK(std::cos(value));
 }
 /// @icall: System.Math::Cos(System.Double)
-static RtResultVoid cos_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret)
+static RtResultVoid cos_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                     interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::cos(value));
@@ -204,8 +204,8 @@ RtResult<double> SystemMath::cosh(double value)
     RET_OK(std::cosh(value));
 }
 /// @icall: System.Math::Cosh(System.Double)
-static RtResultVoid cosh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid cosh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::cosh(value));
@@ -218,8 +218,8 @@ RtResult<double> SystemMath::exp(double value)
     RET_OK(std::exp(value));
 }
 /// @icall: System.Math::Exp(System.Double)
-static RtResultVoid exp_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret)
+static RtResultVoid exp_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                     interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::exp(value));
@@ -232,8 +232,8 @@ RtResult<double> SystemMath::floor(double value)
     RET_OK(std::floor(value));
 }
 /// @icall: System.Math::Floor(System.Double)
-static RtResultVoid floor_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                  interp::RtStackObject* ret)
+static RtResultVoid floor_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                       interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::floor(value));
@@ -246,8 +246,8 @@ RtResult<double> SystemMath::log(double value)
     RET_OK(std::log(value));
 }
 /// @icall: System.Math::Log(System.Double)
-static RtResultVoid log_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret)
+static RtResultVoid log_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                     interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::log(value));
@@ -260,8 +260,8 @@ RtResult<double> SystemMath::log10(double value)
     RET_OK(std::log10(value));
 }
 /// @icall: System.Math::Log10(System.Double)
-static RtResultVoid log10_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                  interp::RtStackObject* ret)
+static RtResultVoid log10_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                       interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::log10(value));
@@ -274,8 +274,8 @@ RtResult<double> SystemMath::pow(double x, double y)
     RET_OK(std::pow(x, y));
 }
 /// @icall: System.Math::Pow(System.Double,System.Double)
-static RtResultVoid pow_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret)
+static RtResultVoid pow_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                     interp::RtStackObject* ret)
 {
     auto x = EvalStackOp::get_param<double>(params, 0);
     auto y = EvalStackOp::get_param<double>(params, 1);
@@ -289,8 +289,8 @@ RtResult<double> SystemMath::sin(double value)
     RET_OK(std::sin(value));
 }
 /// @icall: System.Math::Sin(System.Double)
-static RtResultVoid sin_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret)
+static RtResultVoid sin_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                     interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::sin(value));
@@ -303,8 +303,8 @@ RtResult<double> SystemMath::sinh(double value)
     RET_OK(std::sinh(value));
 }
 /// @icall: System.Math::Sinh(System.Double)
-static RtResultVoid sinh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid sinh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::sinh(value));
@@ -317,8 +317,8 @@ RtResult<double> SystemMath::sqrt(double value)
     RET_OK(std::sqrt(value));
 }
 /// @icall: System.Math::Sqrt(System.Double)
-static RtResultVoid sqrt_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid sqrt_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::sqrt(value));
@@ -331,8 +331,8 @@ RtResult<double> SystemMath::tan(double value)
     RET_OK(std::tan(value));
 }
 /// @icall: System.Math::Tan(System.Double)
-static RtResultVoid tan_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret)
+static RtResultVoid tan_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                     interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::tan(value));
@@ -345,8 +345,8 @@ RtResult<double> SystemMath::tanh(double value)
     RET_OK(std::tanh(value));
 }
 /// @icall: System.Math::Tanh(System.Double)
-static RtResultVoid tanh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid tanh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::tanh(value));
@@ -359,8 +359,8 @@ RtResult<double> SystemMath::fmod(double x, double y)
     RET_OK(std::fmod(x, y));
 }
 /// @icall: System.Math::FMod(System.Double,System.Double)
-static RtResultVoid fmod_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid fmod_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto x = EvalStackOp::get_param<double>(params, 0);
     auto y = EvalStackOp::get_param<double>(params, 1);
@@ -379,8 +379,8 @@ RtResult<double> SystemMath::modf(double value, double* intpart)
 }
 
 /// @icall: System.Math::ModF(System.Double,System.Double*)
-static RtResultVoid modf_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret)
+static RtResultVoid modf_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret)
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     auto intpart_ptr = EvalStackOp::get_param<double*>(params, 1);
@@ -389,38 +389,38 @@ static RtResultVoid modf_invoker(metadata::RtManagedMethodPointer, const metadat
     RET_VOID_OK();
 }
 
-static vm::InternalCallEntry s_entries[] = {
-    {"System.Math::Round(System.Double)", (vm::InternalCallFunction)&SystemMath::round, round_invoker},
-    {"System.Math::Abs(System.Single)", (vm::InternalCallFunction)&SystemMath::abs_f32, abs_f32_invoker},
-    {"System.Math::Abs(System.Double)", (vm::InternalCallFunction)&SystemMath::abs_f64, abs_f64_invoker},
-    {"System.Math::Acos(System.Double)", (vm::InternalCallFunction)&SystemMath::acos, acos_invoker},
-    {"System.Math::Acosh(System.Double)", (vm::InternalCallFunction)&SystemMath::acosh, acosh_invoker},
-    {"System.Math::Asin(System.Double)", (vm::InternalCallFunction)&SystemMath::asin, asin_invoker},
-    {"System.Math::Asinh(System.Double)", (vm::InternalCallFunction)&SystemMath::asinh, asinh_invoker},
-    {"System.Math::Atan(System.Double)", (vm::InternalCallFunction)&SystemMath::atan, atan_invoker},
-    {"System.Math::Atan2(System.Double,System.Double)", (vm::InternalCallFunction)&SystemMath::atan2, atan2_invoker},
-    {"System.Math::Atanh(System.Double)", (vm::InternalCallFunction)&SystemMath::atanh, atanh_invoker},
-    {"System.Math::Cbrt(System.Double)", (vm::InternalCallFunction)&SystemMath::cbrt, cbrt_invoker},
-    {"System.Math::Ceil(System.Double)", (vm::InternalCallFunction)&SystemMath::ceil, ceil_invoker},
-    {"System.Math::Cos(System.Double)", (vm::InternalCallFunction)&SystemMath::cos, cos_invoker},
-    {"System.Math::Cosh(System.Double)", (vm::InternalCallFunction)&SystemMath::cosh, cosh_invoker},
-    {"System.Math::Exp(System.Double)", (vm::InternalCallFunction)&SystemMath::exp, exp_invoker},
-    {"System.Math::Floor(System.Double)", (vm::InternalCallFunction)&SystemMath::floor, floor_invoker},
-    {"System.Math::Log(System.Double)", (vm::InternalCallFunction)&SystemMath::log, log_invoker},
-    {"System.Math::Log10(System.Double)", (vm::InternalCallFunction)&SystemMath::log10, log10_invoker},
-    {"System.Math::Pow(System.Double,System.Double)", (vm::InternalCallFunction)&SystemMath::pow, pow_invoker},
-    {"System.Math::Sin(System.Double)", (vm::InternalCallFunction)&SystemMath::sin, sin_invoker},
-    {"System.Math::Sinh(System.Double)", (vm::InternalCallFunction)&SystemMath::sinh, sinh_invoker},
-    {"System.Math::Sqrt(System.Double)", (vm::InternalCallFunction)&SystemMath::sqrt, sqrt_invoker},
-    {"System.Math::Tan(System.Double)", (vm::InternalCallFunction)&SystemMath::tan, tan_invoker},
-    {"System.Math::Tanh(System.Double)", (vm::InternalCallFunction)&SystemMath::tanh, tanh_invoker},
-    {"System.Math::FMod(System.Double,System.Double)", (vm::InternalCallFunction)&SystemMath::fmod, fmod_invoker},
-    {"System.Math::ModF(System.Double,System.Double*)", (vm::InternalCallFunction)&SystemMath::modf, modf_invoker},
+static vm::InternalCallEntry s_entries_system_math[] = {
+    {"System.Math::Round(System.Double)", (vm::InternalCallFunction)&SystemMath::round, round_invoker_math},
+    {"System.Math::Abs(System.Single)", (vm::InternalCallFunction)&SystemMath::abs_f32, abs_f32_invoker_math},
+    {"System.Math::Abs(System.Double)", (vm::InternalCallFunction)&SystemMath::abs_f64, abs_f64_invoker_math},
+    {"System.Math::Acos(System.Double)", (vm::InternalCallFunction)&SystemMath::acos, acos_invoker_math},
+    {"System.Math::Acosh(System.Double)", (vm::InternalCallFunction)&SystemMath::acosh, acosh_invoker_math},
+    {"System.Math::Asin(System.Double)", (vm::InternalCallFunction)&SystemMath::asin, asin_invoker_math},
+    {"System.Math::Asinh(System.Double)", (vm::InternalCallFunction)&SystemMath::asinh, asinh_invoker_math},
+    {"System.Math::Atan(System.Double)", (vm::InternalCallFunction)&SystemMath::atan, atan_invoker_math},
+    {"System.Math::Atan2(System.Double,System.Double)", (vm::InternalCallFunction)&SystemMath::atan2, atan2_invoker_math},
+    {"System.Math::Atanh(System.Double)", (vm::InternalCallFunction)&SystemMath::atanh, atanh_invoker_math},
+    {"System.Math::Cbrt(System.Double)", (vm::InternalCallFunction)&SystemMath::cbrt, cbrt_invoker_math},
+    {"System.Math::Ceil(System.Double)", (vm::InternalCallFunction)&SystemMath::ceil, ceil_invoker_math},
+    {"System.Math::Cos(System.Double)", (vm::InternalCallFunction)&SystemMath::cos, cos_invoker_math},
+    {"System.Math::Cosh(System.Double)", (vm::InternalCallFunction)&SystemMath::cosh, cosh_invoker_math},
+    {"System.Math::Exp(System.Double)", (vm::InternalCallFunction)&SystemMath::exp, exp_invoker_math},
+    {"System.Math::Floor(System.Double)", (vm::InternalCallFunction)&SystemMath::floor, floor_invoker_math},
+    {"System.Math::Log(System.Double)", (vm::InternalCallFunction)&SystemMath::log, log_invoker_math},
+    {"System.Math::Log10(System.Double)", (vm::InternalCallFunction)&SystemMath::log10, log10_invoker_math},
+    {"System.Math::Pow(System.Double,System.Double)", (vm::InternalCallFunction)&SystemMath::pow, pow_invoker_math},
+    {"System.Math::Sin(System.Double)", (vm::InternalCallFunction)&SystemMath::sin, sin_invoker_math},
+    {"System.Math::Sinh(System.Double)", (vm::InternalCallFunction)&SystemMath::sinh, sinh_invoker_math},
+    {"System.Math::Sqrt(System.Double)", (vm::InternalCallFunction)&SystemMath::sqrt, sqrt_invoker_math},
+    {"System.Math::Tan(System.Double)", (vm::InternalCallFunction)&SystemMath::tan, tan_invoker_math},
+    {"System.Math::Tanh(System.Double)", (vm::InternalCallFunction)&SystemMath::tanh, tanh_invoker_math},
+    {"System.Math::FMod(System.Double,System.Double)", (vm::InternalCallFunction)&SystemMath::fmod, fmod_invoker_math},
+    {"System.Math::ModF(System.Double,System.Double*)", (vm::InternalCallFunction)&SystemMath::modf, modf_invoker_math},
 };
 
 utils::Span<vm::InternalCallEntry> SystemMath::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries_system_math, sizeof(s_entries_system_math) / sizeof(s_entries_system_math[0]));
 }
 
 } // namespace icalls
