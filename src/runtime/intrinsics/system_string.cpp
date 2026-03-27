@@ -41,7 +41,7 @@ RtResultVoid get_chars_invoker(metadata::RtManagedMethodPointer methodPtr, const
 }
 
 /// @intrinsic: System.String::get_Length
-RtResultVoid get_length_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
+RtResultVoid get_length_invoker_intrinsics_system_string(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                 interp::RtStackObject* ret)
 {
     vm::RtString* s = interp::EvalStackOp::get_param<vm::RtString*>(params, 0);
@@ -64,7 +64,7 @@ static RtResultVoid get_hash_code_invoker(metadata::RtManagedMethodPointer metho
 // Intrinsic registry
 static vm::IntrinsicEntry s_intrinsic_entries_system_string[] = {
     {"System.String::get_Chars", (vm::IntrinsicFunction)&SystemString::get_chars, get_chars_invoker},
-    {"System.String::get_Length", (vm::IntrinsicFunction)&SystemString::get_length, get_length_invoker},
+    {"System.String::get_Length", (vm::IntrinsicFunction)&SystemString::get_length, get_length_invoker_intrinsics_system_string},
     {"System.String::GetHashCode", (vm::IntrinsicFunction)&SystemString::get_hash_code, get_hash_code_invoker},
     // redirected to intrinsic
     {"System.String::GetLegacyNonRandomizedHashCode", (vm::IntrinsicFunction)&SystemString::get_hash_code, get_hash_code_invoker},

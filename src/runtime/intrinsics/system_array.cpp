@@ -42,7 +42,7 @@ RtResultVoid SystemArray::set_generic_value_impl(vm::RtArray* arr, int32_t index
 }
 
 /// @intrinsic: System.Array::get_Length
-static RtResultVoid get_length_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
+static RtResultVoid get_length_invoker_intrinsics_system_array(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                        interp::RtStackObject* ret)
 {
     vm::RtArray* arr = interp::EvalStackOp::get_param<vm::RtArray*>(params, 0);
@@ -89,7 +89,7 @@ static RtResultVoid set_generic_value_impl_invoker(metadata::RtManagedMethodPoin
 
 // Intrinsic registry
 static vm::IntrinsicEntry s_intrinsic_entries_system_array[] = {
-    {"System.Array::get_Length", (vm::IntrinsicFunction)&SystemArray::get_length, get_length_invoker},
+    {"System.Array::get_Length", (vm::IntrinsicFunction)&SystemArray::get_length, get_length_invoker_intrinsics_system_array},
     {"System.Array::get_LongLength", (vm::IntrinsicFunction)&SystemArray::get_long_length, get_long_length_invoker},
     {"System.Array::GetGenericValueImpl<>", (vm::IntrinsicFunction)&SystemArray::get_generic_value_impl, get_generic_value_impl_invoker},
     {"System.Array::SetGenericValueImpl<>", (vm::IntrinsicFunction)&SystemArray::set_generic_value_impl, set_generic_value_impl_invoker},

@@ -39,7 +39,7 @@ RtResult<vm::RtCustomAttribute*> SystemReflectionFieldInfo::get_marshal_info(vm:
 // ========== Invoker Functions ==========
 
 /// @icall: System.Reflection.FieldInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)
-static RtResultVoid internal_from_handle_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+static RtResultVoid internal_from_handle_type_invoker_fieldinfo(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                       interp::RtStackObject* ret)
 {
     metadata::RtFieldInfo* field = EvalStackOp::get_param<metadata::RtFieldInfo*>(params, 0);
@@ -63,7 +63,7 @@ static RtResultVoid get_marshal_info_invoker(metadata::RtManagedMethodPointer, c
 
 static vm::InternalCallEntry s_internal_call_entries_system_reflection_fieldinfo[] = {
     {"System.Reflection.FieldInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)",
-     (vm::InternalCallFunction)&SystemReflectionFieldInfo::internal_from_handle_type, internal_from_handle_type_invoker},
+     (vm::InternalCallFunction)&SystemReflectionFieldInfo::internal_from_handle_type, internal_from_handle_type_invoker_fieldinfo},
     {"System.Reflection.FieldInfo::get_marshal_info()", (vm::InternalCallFunction)&SystemReflectionFieldInfo::get_marshal_info, get_marshal_info_invoker},
 };
 

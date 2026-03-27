@@ -131,7 +131,7 @@ RtResult<int32_t> SystemReflectionRuntimePropertyInfo::get_metadata_token(vm::Rt
 // ========== Invoker Functions ==========
 
 /// @icall: System.Reflection.RuntimePropertyInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)
-static RtResultVoid internal_from_handle_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+static RtResultVoid internal_from_handle_type_invoker_runtimepropertyinfo(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                       interp::RtStackObject* ret)
 {
     metadata::RtPropertyInfo* property = EvalStackOp::get_param<metadata::RtPropertyInfo*>(params, 0);
@@ -191,7 +191,7 @@ static RtResultVoid get_metadata_token_invoker_system_reflection_runtimeproperty
 
 static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimepropertyinfo[] = {
     {"System.Reflection.RuntimePropertyInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)",
-     (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::internal_from_handle_type, internal_from_handle_type_invoker},
+     (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::internal_from_handle_type, internal_from_handle_type_invoker_runtimepropertyinfo},
     {"System.Reflection.RuntimePropertyInfo::get_property_info", (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::get_property_info,
      get_property_info_invoker},
     {"System.Reflection.RuntimePropertyInfo::GetTypeModifiers(System.Reflection.RuntimePropertyInfo,System.Boolean)",

@@ -37,7 +37,7 @@ RtResult<int32_t> SystemArray::get_length(vm::RtArray* arr, int32_t dimension)
     return vm::Array::get_array_length_at_dimension(arr, dimension);
 }
 
-static RtResultVoid get_length_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+static RtResultVoid get_length_invoker_icalls_system_array(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                        interp::RtStackObject* ret)
 {
     auto arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
@@ -340,7 +340,7 @@ static RtResultVoid clear_internal_invoker(metadata::RtManagedMethodPointer, con
 // Internal call registry
 static vm::InternalCallEntry s_internal_call_entries_system_array[] = {
     {"System.Array::GetRank", (vm::InternalCallFunction)&SystemArray::get_rank, get_rank_invoker},
-    {"System.Array::GetLength", (vm::InternalCallFunction)&SystemArray::get_length, get_length_invoker},
+    {"System.Array::GetLength", (vm::InternalCallFunction)&SystemArray::get_length, get_length_invoker_icalls_system_array},
     {"System.Array::GetLowerBound", (vm::InternalCallFunction)&SystemArray::get_lower_bound, get_lower_bound_invoker},
     {"System.Array::GetValue(System.Int32[])", (vm::InternalCallFunction)&SystemArray::get_value, get_value_invoker},
     {"System.Array::SetValue(System.Object,System.Int32[])", (vm::InternalCallFunction)&SystemArray::set_value, set_value_invoker},

@@ -29,7 +29,7 @@ RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_ha
 }
 
 /// @icall: System.Reflection.EventInfo::internal_from_handle_type
-static RtResultVoid internal_from_handle_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+static RtResultVoid internal_from_handle_type_invoker_eventinfo(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
                                                       const interp::RtStackObject* params, interp::RtStackObject* ret)
 {
     (void)methodPtr;
@@ -45,7 +45,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionEventInfo::get_internal_call_
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Reflection.EventInfo::internal_from_handle_type", (vm::InternalCallFunction)&SystemReflectionEventInfo::internal_from_handle_type,
-         internal_from_handle_type_invoker},
+         internal_from_handle_type_invoker_eventinfo},
     };
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
