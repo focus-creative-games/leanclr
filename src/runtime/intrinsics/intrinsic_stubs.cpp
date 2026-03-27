@@ -2,7 +2,7 @@
 #include "system_array.h"
 #include "system_object.h"
 #include "system_span.h"
-#include "system_string.h"
+#include "intrinsics/system_string.h"
 #include "system_threading_interlocked.h"
 #include "system_threading_volatile.h"
 #include "system_numerics_vector.h"

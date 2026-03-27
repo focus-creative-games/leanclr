@@ -10,7 +10,7 @@
 #include "system_runtime_compilerservices_runtimehelpers.h"
 #include "system_runtimetype.h"
 #include "system_runtimetypehandle.h"
-#include "system_string.h"
+#include "icalls/system_string.h"
 #include "system_globalization_cultureinfo.h"
 #include "system_globalization_compareinfo.h"
 #include "system_threading_interlocked.h"

@@ -3,7 +3,7 @@
 #include "gc/garbage_collector.h"
 #include "class.h"
 #include "field.h"
-#include "utf8/utf8.h"
+#include "3rd/utf8/utf8.h"
 #include <vector>
 #include <string>
 #include <cstring>

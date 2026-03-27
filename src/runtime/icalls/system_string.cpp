@@ -1,5 +1,5 @@
 #include <limits>
-#include "system_string.h"
+#include "icalls/system_string.h"
 
 #include "icall_base.h"
 #include "vm/rt_string.h"

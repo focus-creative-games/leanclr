@@ -1,4 +1,4 @@
-#include "system_string.h"
+#include "intrinsics/system_string.h"
 
 #include "interp/eval_stack_op.h"
 #include "vm/rt_string.h"
