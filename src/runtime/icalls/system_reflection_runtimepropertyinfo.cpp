@@ -176,8 +176,10 @@ static RtResultVoid get_default_value_invoker(metadata::RtManagedMethodPointer, 
 }
 
 /// @icall: System.Reflection.RuntimePropertyInfo::get_metadata_token(System.Reflection.RuntimePropertyInfo)
-static RtResultVoid get_metadata_token_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret)
+static RtResultVoid get_metadata_token_invoker_system_reflection_runtimepropertyinfo(metadata::RtManagedMethodPointer,
+                                                                                     const metadata::RtMethodInfo*,
+                                                                                     const interp::RtStackObject* params,
+                                                                                     interp::RtStackObject* ret)
 {
     vm::RtReflectionProperty* property = EvalStackOp::get_param<vm::RtReflectionProperty*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, SystemReflectionRuntimePropertyInfo::get_metadata_token(property));
@@ -197,7 +199,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimepr
     {"System.Reflection.RuntimePropertyInfo::get_default_value(System.Reflection.RuntimePropertyInfo)",
      (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::get_default_value, get_default_value_invoker},
     {"System.Reflection.RuntimePropertyInfo::get_metadata_token(System.Reflection.RuntimePropertyInfo)",
-     (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::get_metadata_token, get_metadata_token_invoker},
+     (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::get_metadata_token,
+     get_metadata_token_invoker_system_reflection_runtimepropertyinfo},
 };
 
 utils::Span<vm::InternalCallEntry> SystemReflectionRuntimePropertyInfo::get_internal_call_entries()

@@ -96,8 +96,10 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeFieldInfo::get_type_modifiers(vm::
 // ========== Invoker Functions ==========
 
 /// @icall: System.Reflection.RuntimeFieldInfo::get_metadata_token
-static RtResultVoid get_metadata_token_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret)
+static RtResultVoid get_metadata_token_invoker_system_reflection_runtimefieldinfo(metadata::RtManagedMethodPointer,
+                                                                                  const metadata::RtMethodInfo*,
+                                                                                  const interp::RtStackObject* params,
+                                                                                  interp::RtStackObject* ret)
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, result, SystemReflectionRuntimeFieldInfo::get_metadata_token(field));
@@ -194,7 +196,7 @@ static RtResultVoid get_type_modifiers_invoker(metadata::RtManagedMethodPointer,
 
 static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimefieldinfo[] = {
     {"System.Reflection.RuntimeFieldInfo::get_metadata_token", (vm::InternalCallFunction)&SystemReflectionRuntimeFieldInfo::get_metadata_token,
-     get_metadata_token_invoker},
+     get_metadata_token_invoker_system_reflection_runtimefieldinfo},
     {"System.Reflection.RuntimeFieldInfo::GetFieldOffset", (vm::InternalCallFunction)&SystemReflectionRuntimeFieldInfo::get_field_offset,
      get_field_offset_invoker},
     {"System.Reflection.RuntimeFieldInfo::GetRawConstantValue", (vm::InternalCallFunction)&SystemReflectionRuntimeFieldInfo::get_raw_const_value,

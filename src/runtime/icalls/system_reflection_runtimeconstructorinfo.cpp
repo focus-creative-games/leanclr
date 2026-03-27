@@ -30,7 +30,8 @@ RtResult<RtObject*> SystemReflectionRuntimeConstructorInfo::internal_invoke(RtRe
 // Invoker functions
 
 /// @icall: System.Reflection.RuntimeConstructorInfo::get_metadata_token
-static RtResultVoid get_metadata_token_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret)
+static RtResultVoid get_metadata_token_invoker_system_reflection_runtimeconstructorinfo(RtManagedMethodPointer, const RtMethodInfo*,
+                                                                                        const RtStackObject* params, RtStackObject* ret)
 {
     RtReflectionConstructor* constructor = EvalStackOp::get_param<RtReflectionConstructor*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, token, SystemReflectionRuntimeConstructorInfo::get_metadata_token(constructor));
@@ -55,7 +56,7 @@ static RtResultVoid internal_invoke_invoker(RtManagedMethodPointer, const RtMeth
 
 static InternalCallEntry s_internal_call_entries_system_reflection_runtimeconstructorinfo[] = {
     {"System.Reflection.RuntimeConstructorInfo::get_metadata_token", (InternalCallFunction)&SystemReflectionRuntimeConstructorInfo::get_metadata_token,
-     get_metadata_token_invoker},
+     get_metadata_token_invoker_system_reflection_runtimeconstructorinfo},
     {"System.Reflection.RuntimeConstructorInfo::InternalInvoke(System.Object,System.Object[],System.Exception&)",
      (InternalCallFunction)&SystemReflectionRuntimeConstructorInfo::internal_invoke, internal_invoke_invoker},
 };

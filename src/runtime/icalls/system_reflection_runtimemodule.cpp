@@ -22,8 +22,10 @@ RtResult<int32_t> SystemReflectionRuntimeModule::get_metadata_token(vm::RtReflec
 }
 
 /// @icall: System.Reflection.RuntimeModule::get_MetadataToken(System.Reflection.Module)
-static RtResultVoid get_metadata_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+static RtResultVoid get_metadata_token_invoker_system_reflection_runtimemodule(metadata::RtManagedMethodPointer methodPtr,
+                                                                               const metadata::RtMethodInfo* method,
+                                                                               const interp::RtStackObject* params,
+                                                                               interp::RtStackObject* ret)
 {
     auto module = EvalStackOp::get_param<vm::RtReflectionModule*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, SystemReflectionRuntimeModule::get_metadata_token(module));
@@ -531,7 +533,8 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeModule::get_internal_c
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Reflection.RuntimeModule::get_MetadataToken(System.Reflection.Module)",
-         (vm::InternalCallFunction)&SystemReflectionRuntimeModule::get_metadata_token, get_metadata_token_invoker},
+         (vm::InternalCallFunction)&SystemReflectionRuntimeModule::get_metadata_token,
+         get_metadata_token_invoker_system_reflection_runtimemodule},
         {"System.Reflection.RuntimeModule::GetMDStreamVersion(System.IntPtr)", (vm::InternalCallFunction)&SystemReflectionRuntimeModule::get_md_stream_version,
          get_md_stream_version_invoker},
         {"System.Reflection.RuntimeModule::InternalGetTypes(System.IntPtr)", (vm::InternalCallFunction)&SystemReflectionRuntimeModule::internal_get_types,

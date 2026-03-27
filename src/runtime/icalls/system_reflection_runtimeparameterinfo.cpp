@@ -61,8 +61,10 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeParameterInfo::get_type_modifiers(
 }
 
 /// @icall: System.Reflection.RuntimeParameterInfo::GetMetadataToken()
-static RtResultVoid get_metadata_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+static RtResultVoid get_metadata_token_invoker_system_reflection_runtimeparameterinfo(metadata::RtManagedMethodPointer methodPtr,
+                                                                                      const metadata::RtMethodInfo* method,
+                                                                                      const interp::RtStackObject* params,
+                                                                                      interp::RtStackObject* ret)
 {
     (void)methodPtr;
     (void)method;
@@ -92,7 +94,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeParameterInfo::get_int
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Reflection.RuntimeParameterInfo::GetMetadataToken()", (vm::InternalCallFunction)&SystemReflectionRuntimeParameterInfo::get_metadata_token,
-         get_metadata_token_invoker},
+         get_metadata_token_invoker_system_reflection_runtimeparameterinfo},
         {"System.Reflection.RuntimeParameterInfo::GetTypeModifiers(System.Type,System.Reflection.MemberInfo,System.Int32,System.Boolean)",
          (vm::InternalCallFunction)&SystemReflectionRuntimeParameterInfo::get_type_modifiers, get_type_modifiers_invoker},
     };

@@ -288,8 +288,10 @@ static RtResultVoid get_attributes_invoker(metadata::RtManagedMethodPointer meth
 }
 
 /// @icall: System.RuntimeTypeHandle::GetMetadataToken(System.RuntimeType)
-static RtResultVoid get_metadata_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+static RtResultVoid get_metadata_token_invoker_system_runtimetypehandle(metadata::RtManagedMethodPointer methodPtr,
+                                                                        const metadata::RtMethodInfo* method,
+                                                                        const interp::RtStackObject* params,
+                                                                        interp::RtStackObject* ret)
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, SystemRuntimeTypeHandle::get_metadata_token(runtime_type));
@@ -494,7 +496,7 @@ static RtResultVoid internal_from_name_invoker(metadata::RtManagedMethodPointer 
 static vm::InternalCallEntry s_internal_call_entries_system_runtimetypehandle[] = {
     {"System.RuntimeTypeHandle::GetAttributes", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_attributes), get_attributes_invoker},
     {"System.RuntimeTypeHandle::GetMetadataToken(System.RuntimeType)", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_metadata_token),
-     get_metadata_token_invoker},
+     get_metadata_token_invoker_system_runtimetypehandle},
     {"System.RuntimeTypeHandle::GetCorElementType", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_cor_element_type),
      get_cor_element_type_invoker},
     {"System.RuntimeTypeHandle::HasInstantiation", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::has_instantiation),

@@ -345,8 +345,10 @@ static RtResultVoid get_base_method_invoker(metadata::RtManagedMethodPointer met
 }
 
 /// @icall: System.Reflection.RuntimeMethodInfo::get_metadata_token(System.Reflection.RuntimeMethodInfo)
-static RtResultVoid get_metadata_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+static RtResultVoid get_metadata_token_invoker_system_reflection_runtimemethodinfo(metadata::RtManagedMethodPointer methodPtr,
+                                                                                    const metadata::RtMethodInfo* method,
+                                                                                    const interp::RtStackObject* params,
+                                                                                    interp::RtStackObject* ret)
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, SystemReflectionRuntimeMethodInfo::get_metadata_token(ref_method));
@@ -444,7 +446,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimeme
     {"System.Reflection.RuntimeMethodInfo::get_base_method(System.Reflection.RuntimeMethodInfo,System.Boolean)",
      (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_base_method, get_base_method_invoker},
     {"System.Reflection.RuntimeMethodInfo::get_metadata_token(System.Reflection.RuntimeMethodInfo)",
-     (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_metadata_token, get_metadata_token_invoker},
+     (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_metadata_token, get_metadata_token_invoker_system_reflection_runtimemethodinfo},
     {"System.Reflection.RuntimeMethodInfo::get_IsGenericMethodDefinition",
      (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_is_generic_method_definition, get_is_generic_method_definition_invoker},
     {"System.Reflection.RuntimeMethodInfo::GetGenericArguments", (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_generic_arguments,
