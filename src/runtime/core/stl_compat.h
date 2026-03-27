@@ -16,6 +16,11 @@
 #define LEANCLR_CPLUSPLUS __cplusplus
 #endif
 
+#if LEANCLR_CPLUSPLUS >= 201703L
+#include <optional>
+#include <string_view>
+#endif
+
 #if LEANCLR_CPLUSPLUS < 201703L
 namespace std
 {

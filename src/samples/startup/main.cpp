@@ -1,8 +1,14 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
-#include <filesystem> // For std::filesystem::current_path
+
+#ifdef _WIN32
+#include <direct.h>
+#else
+#include <unistd.h>
+#endif
 
 #include "alloc/general_allocation.h"
 #include "metadata/pe_image_reader.h"
@@ -16,6 +22,21 @@ using namespace leanclr;
 
 // Global library search directories
 static std::vector<std::string> g_lib_dirs;
+
+static std::string get_current_working_directory()
+{
+    char buffer[4096];
+#ifdef _WIN32
+    if (_getcwd(buffer, sizeof(buffer)) == nullptr)
+#else
+    if (getcwd(buffer, sizeof(buffer)) == nullptr)
+#endif
+    {
+        return ".";
+    }
+    return std::string(buffer);
+}
+
 static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const char* extension)
 {
     for (const auto& dir : g_lib_dirs)
@@ -52,7 +73,7 @@ static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, co
 static void setup_default_lib_dirs()
 {
     g_lib_dirs.push_back("."); // Current directory
-    std::string cur_dir = std::filesystem::current_path().string();
+    std::string cur_dir = get_current_working_directory();
 
     std::string library_dir;
     size_t pos = cur_dir.find("samples");

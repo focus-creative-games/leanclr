@@ -3,8 +3,8 @@
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
+#include <string>
 #include <vector>
-#include <filesystem>
 
 #include "alloc/general_allocation.h"
 #include "metadata/pe_image_reader.h"
@@ -22,12 +22,30 @@
 
 #ifdef _WIN32
 #include <windows.h>
+#include <direct.h>
+#else
+#include <unistd.h>
 #endif
 
 using namespace leanclr;
 
 // Global library search directories
 static std::vector<std::string> g_lib_dirs;
+
+static std::string get_current_working_directory()
+{
+    char buffer[4096];
+#ifdef _WIN32
+    if (_getcwd(buffer, sizeof(buffer)) == nullptr)
+#else
+    if (getcwd(buffer, sizeof(buffer)) == nullptr)
+#endif
+    {
+        return ".";
+    }
+    return std::string(buffer);
+}
+
 static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const char* ext)
 {
     for (const auto& dir : g_lib_dirs)
@@ -64,7 +82,7 @@ static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, co
 static void setup_default_lib_dirs()
 {
     g_lib_dirs.push_back("."); // Current directory
-    std::string cur_dir = std::filesystem::current_path().string();
+    std::string cur_dir = get_current_working_directory();
 
     size_t pos = cur_dir.find("src");
     if (pos != std::string::npos)
