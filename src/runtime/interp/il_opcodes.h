@@ -3,7 +3,11 @@
 #include "rt_managed_types.h"
 #include "interp_defs.h"
 
-namespace leanclr::interp::il
+namespace leanclr
+{
+namespace interp
+{
+namespace il
 {
 enum class OpCodeValue : uint8_t
 {
@@ -680,4 +684,6 @@ class OpCodes
     static bool try_decode_opcode_info(const uint8_t* codes_cur, const uint8_t* codes_end, const OpCodeInfo*& out_opcode_info);
     static size_t get_opcode_size(const uint8_t* codes_cur, const OpCodeInfo* opcode_info);
 };
-} // namespace leanclr::interp::il
+} // namespace il
+} // namespace interp
+} // namespace leanclr

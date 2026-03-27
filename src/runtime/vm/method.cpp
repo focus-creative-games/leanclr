@@ -1,6 +1,6 @@
 #include <algorithm>
 #include <cstring>
-#include <optional>
+#include "core/stl_compat.h"
 
 #include "method.h"
 

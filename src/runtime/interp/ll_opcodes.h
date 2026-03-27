@@ -4,7 +4,11 @@
 #include "interp_defs.h"
 #include "vm/field.h"
 
-namespace leanclr::interp::ll
+namespace leanclr
+{
+namespace interp
+{
+namespace ll
 {
 
 enum class OpCodeEnum
@@ -7400,4 +7404,6 @@ class OpCodes
     static size_t s_opsizes[static_cast<size_t>(OpCodeEnum::__Count)];
 };
 
-} // namespace leanclr::interp::ll
+} // namespace ll
+} // namespace interp
+} // namespace leanclr

@@ -10,3 +10,4 @@ namespace icalls
 {
 using interp::EvalStackOp;
 }
+} // namespace leanclr

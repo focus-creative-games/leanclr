@@ -1,7 +1,11 @@
 #include "il_opcodes.h"
 #include "utils/mem_op.h"
 
-namespace leanclr::interp::il
+namespace leanclr
+{
+namespace interp
+{
+namespace il
 {
 
 static const OpCodeInfo g_opcodes[] = {
@@ -357,4 +361,6 @@ size_t OpCodes::get_opcode_size(const uint8_t* codes_cur, const OpCodeInfo* opco
     return 1 + sizeof(uint32_t) + (sizeof(uint32_t) * utils::MemOp::read_u32_may_unaligned(codes_cur + 1));
 }
 
-} // namespace leanclr::interp::il
+} // namespace il
+} // namespace interp
+} // namespace leanclr

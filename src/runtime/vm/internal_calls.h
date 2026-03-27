@@ -1,6 +1,6 @@
 #pragma once
 
-#include <optional>
+#include "core/stl_compat.h"
 
 #include "rt_managed_types.h"
 #include "utils/hashmap.h"
@@ -59,4 +59,5 @@ class InternalCalls
     static InternalCallInvoker get_internal_call_invoker_by_id_unchecked(uint16_t id);
 };
 
-}; // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

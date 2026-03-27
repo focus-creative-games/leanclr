@@ -106,4 +106,5 @@ struct Variable
     }
 };
 
-}; // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

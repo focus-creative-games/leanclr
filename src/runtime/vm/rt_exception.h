@@ -9,8 +9,6 @@ namespace interp
 struct InterpFrame;
 }
 
-namespace leanclr
-{
 namespace vm
 {
 class Exception

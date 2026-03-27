@@ -1,6 +1,8 @@
 #pragma once
 #include <cassert>
-#include <variant>
+#include <new>
+#include <type_traits>
+#include <utility>
 
 namespace leanclr
 {
@@ -14,32 +16,73 @@ struct Unit
 template <typename T, typename E>
 class Result
 {
-    std::variant<T, E> _data;
+    typedef typename std::aligned_storage<(sizeof(T) > sizeof(E) ? sizeof(T) : sizeof(E)),
+                                          (alignof(T) > alignof(E) ? alignof(T) : alignof(E))>::type StorageType;
+
+    StorageType _data;
+    bool _is_ok;
 #ifndef NDEBUG
     mutable bool _checked = false;
 #endif
 
+    T* ok_ptr()
+    {
+        return reinterpret_cast<T*>(&_data);
+    }
+
+    const T* ok_ptr() const
+    {
+        return reinterpret_cast<const T*>(&_data);
+    }
+
+    E* err_ptr()
+    {
+        return reinterpret_cast<E*>(&_data);
+    }
+
+    const E* err_ptr() const
+    {
+        return reinterpret_cast<const E*>(&_data);
+    }
+
+    void destroy_active()
+    {
+        if (_is_ok)
+            ok_ptr()->~T();
+        else
+            err_ptr()->~E();
+    }
+
   public:
-    Result(const T& value) noexcept : _data(value)
+    Result(const T& value) noexcept : _is_ok(true)
     {
+        new (&_data) T(value);
     }
-    Result(T&& value) noexcept : _data(std::move(value))
+    Result(T&& value) noexcept : _is_ok(true)
     {
-    }
-
-    Result(const E& error) noexcept : _data(error)
-    {
+        new (&_data) T(std::move(value));
     }
 
-    Result(E&& error) noexcept : _data(std::move(error))
+    Result(const E& error) noexcept : _is_ok(false)
     {
+        new (&_data) E(error);
+    }
+
+    Result(E&& error) noexcept : _is_ok(false)
+    {
+        new (&_data) E(std::move(error));
     }
 
     Result(const Result<T, E>& other) = delete;
     Result<T, E>& operator=(const Result<T, E>& other) = delete;
 
-    Result(Result<T, E>&& other) noexcept : _data(std::move(other._data))
+    Result(Result<T, E>&& other) noexcept : _is_ok(other._is_ok)
     {
+        if (_is_ok)
+            new (&_data) T(std::move(*other.ok_ptr()));
+        else
+            new (&_data) E(std::move(*other.err_ptr()));
+
 #ifndef NDEBUG
         _checked = other._checked;
         other._checked = true;
@@ -60,6 +103,12 @@ class Result
     ~Result()
     {
         assert(_checked && "Result value was not checked before destruction");
+        destroy_active();
+    }
+#else
+    ~Result()
+    {
+        destroy_active();
     }
 #endif
 
@@ -68,7 +117,7 @@ class Result
 #ifndef NDEBUG
         _checked = true;
 #endif
-        return std::holds_alternative<T>(_data);
+        return _is_ok;
     }
 
     bool is_err() const
@@ -76,19 +125,19 @@ class Result
 #ifndef NDEBUG
         _checked = true;
 #endif
-        return std::holds_alternative<E>(_data);
+        return !_is_ok;
     }
 
     T& unwrap()
     {
         assert(is_ok() && "Result::unwrap() called on error value");
-        return std::get<T>(_data);
+        return *ok_ptr();
     }
 
     const T& unwrap() const
     {
         assert(is_ok() && "Result::unwrap() called on error value");
-        return std::get<T>(_data);
+        return *ok_ptr();
     }
 
     // T& unwrap_ref()
@@ -100,21 +149,23 @@ class Result
     E unwrap_err() const
     {
         assert(is_err() && "Result::unwrap_err() called on ok value");
-        return std::get<E>(_data);
+        return *err_ptr();
     }
 
     template <typename F>
     auto map_err(F f) -> Result<T, decltype(f(std::declval<E>()))>
     {
-        return is_err() ? Result<T, F>::Err(f(unwrap_err())) : Result<T, F>::Ok(unwrap());
+        typedef decltype(f(std::declval<E>())) NewErrorType;
+        return is_err() ? Result<T, NewErrorType>::Err(f(unwrap_err())) : Result<T, NewErrorType>::Ok(unwrap());
     }
 
     template <typename F>
-    auto map(F f) -> Result<decltype(f(std::get<T>(_data))), E>
+    auto map(F f) -> Result<decltype(f(std::declval<T>())), E>
     {
+        typedef decltype(f(std::declval<T>())) NewValueType;
         if (is_ok())
-            return Result(f(unwrap()));
-        return Result(unwrap_err());
+            return Result<NewValueType, E>::Ok(f(unwrap()));
+        return Result<NewValueType, E>::Err(unwrap_err());
     }
 
     template <typename U>

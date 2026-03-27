@@ -279,7 +279,7 @@ class RtModuleDef
         auto it = _nestedTypeDefRid2EnclosingTypeDefRidMap.find(rid);
         if (it != _nestedTypeDefRid2EnclosingTypeDefRidMap.end())
         {
-            return std::optional(it->second);
+            return std::optional<uint32_t>(it->second);
         }
         return std::nullopt;
     }

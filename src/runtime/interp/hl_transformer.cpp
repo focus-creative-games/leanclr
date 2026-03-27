@@ -16,7 +16,11 @@
 #include "utils/mem_op.h"
 #include "const_strs.h"
 
-namespace leanclr::interp::hl
+namespace leanclr
+{
+namespace interp
+{
+namespace hl
 {
 
 Transformer::Transformer(metadata::RtModuleDef* mod, const metadata::RtMethodInfo* method_info, const metadata::RtMethodBody& method_body,
@@ -3932,4 +3936,6 @@ RtResultVoid Transformer::transform_body()
     RET_VOID_OK();
 }
 
-} // namespace leanclr::interp::hl
+} // namespace hl
+} // namespace interp
+} // namespace leanclr

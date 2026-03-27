@@ -9,15 +9,11 @@ namespace metadata
 struct RtClass;
 }
 
-namespace leanclr
-{
 namespace vm
 {
 struct RtObject;
 }
 
-namespace leanclr
-{
 namespace gc
 {
 

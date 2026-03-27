@@ -2,7 +2,7 @@
 
 #include <algorithm>
 #include <cstring>
-#include <optional>
+#include "core/stl_compat.h"
 #include <utility>
 
 #include "utils/mem_op.h"
@@ -15,6 +15,7 @@ namespace leanclr
 namespace utils
 {
 class MemPool;
+}
 }
 
 namespace leanclr

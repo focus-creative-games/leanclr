@@ -1,6 +1,6 @@
 #pragma once
 
-#include <optional>
+#include "core/stl_compat.h"
 
 #include "rt_managed_types.h"
 #include "runtime.h"

@@ -1,4 +1,4 @@
-#include <optional>
+#include "core/stl_compat.h"
 
 #include "customattribute.h"
 #include "class.h"
@@ -63,7 +63,7 @@ static RtResult<std::optional<utils::Span<const char>>> read_ser_string(utils::B
         {
             RET_ERR(RtErr::BadImageFormat);
         }
-        return std::optional(utils::Span<const char>(reinterpret_cast<const char*>(str_ptr), len));
+        return std::optional<utils::Span<const char>>(utils::Span<const char>(reinterpret_cast<const char*>(str_ptr), len));
     }
 }
 

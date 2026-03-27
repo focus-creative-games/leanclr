@@ -1,7 +1,11 @@
 #include "ll_opcodes.h"
 #include "ll_transformer.h"
 
-namespace leanclr::interp::ll
+namespace leanclr
+{
+namespace interp
+{
+namespace ll
 {
 
 size_t OpCodes::get_switch_instruction_size(const GeneralInst& inst)
@@ -6678,4 +6682,6 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
     }
 }
 
-} // namespace leanclr::interp::ll
+} // namespace ll
+} // namespace interp
+} // namespace leanclr

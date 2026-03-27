@@ -1,5 +1,5 @@
 #pragma once
-#include <optional>
+#include "core/stl_compat.h"
 
 #include "module_def.h"
 

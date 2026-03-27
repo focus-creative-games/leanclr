@@ -12,7 +12,11 @@
 #include "utils/platform.h"
 #include "const_strs.h"
 
-namespace leanclr::interp::ll
+namespace leanclr
+{
+namespace interp
+{
+namespace ll
 {
 
 GeneralInst::GeneralInst(const hl::GeneralInst& hl_inst)
@@ -2297,4 +2301,6 @@ RtResult<const RtInterpMethodInfo*> Transformer::build_interp_method_info()
     RET_OK(interp_method);
 }
 
-} // namespace leanclr::interp::ll
+} // namespace ll
+} // namespace interp
+} // namespace leanclr

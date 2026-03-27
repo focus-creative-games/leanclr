@@ -6,7 +6,11 @@
 #include "utils/not_free_list.h"
 #include "utils/hashmap.h"
 
-namespace leanclr::interp::hl
+namespace leanclr
+{
+namespace interp
+{
+namespace hl
 {
 
 struct GeneralInst;
@@ -620,4 +624,6 @@ class Transformer
 
     int32_t _cur_il_offset{-1};
 };
-} // namespace leanclr::interp::hl
+} // namespace hl
+} // namespace interp
+} // namespace leanclr

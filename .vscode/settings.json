@@ -25,5 +25,8 @@
         "${workspaceFolder}/src/runtime/3rd"
     ],
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
-    "dotnet.preferCSharpExtension": true
+    "dotnet.preferCSharpExtension": true,
+    "files.associations": {
+        "type_traits": "cpp"
+    }
 }

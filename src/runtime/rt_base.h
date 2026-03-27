@@ -3,6 +3,7 @@
 // this header must be included before any other runtime headers
 
 #include "build_config.h"
+#include "core/stl_compat.h"
 #include "core/rt_err.h"
 #include "core/rt_result.h"
 

@@ -5,14 +5,18 @@
 #include "utils/not_free_list.h"
 #include "utils/hashmap.h"
 
-namespace leanclr::interp::hl
+namespace leanclr
+{
+namespace interp
+{
+namespace hl
 {
 struct GeneralInst;
 struct BasicBlock;
 class Transformer;
-}; // namespace leanclr::interp::hl
+} // namespace hl
 
-namespace leanclr::interp::ll
+namespace ll
 {
 
 struct GeneralInst;
@@ -517,4 +521,6 @@ class Transformer
     RtResult<uint32_t> translate_il_offset_to_ir_offset(uint32_t il_offset);
     RtResultVoid build_codes(RtInterpMethodInfo* interp_method);
 };
-} // namespace leanclr::interp::ll
+} // namespace ll
+} // namespace interp
+} // namespace leanclr

@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <functional>
-#include <optional>
+#include "core/stl_compat.h"
 #include <vector>
 
 #include "rt_array.h"

@@ -13,8 +13,6 @@ namespace utils
 class MemPool;
 }
 
-namespace leanclr
-{
 namespace metadata
 {
 

@@ -263,16 +263,21 @@ RtResultVoid RtModuleDef::setup_nested_classes()
         _nestedTypeDefRid2EnclosingTypeDefRidMap.insert({nestedTypeDefRid, enclosingTypeDefRid});
         ++_enclosingTypeDefRid2StartRidMap[enclosingTypeDefRid].count;
     }
-    for (auto& [key, value] : _enclosingTypeDefRid2StartRidMap)
+    for (utils::HashMap<uint32_t, EnclosingTypeInfo>::iterator it = _enclosingTypeDefRid2StartRidMap.begin();
+         it != _enclosingTypeDefRid2StartRidMap.end(); ++it)
     {
+        EnclosingTypeInfo& value = it->second;
         value.nested_type_def_rids = _pool.calloc_any<uint32_t>(value.count);
         value.count = 0;
     }
-    for (auto& [nestedTypeDefRid, enclosingTypeDefRid] : _nestedTypeDefRid2EnclosingTypeDefRidMap)
+    for (utils::HashMap<uint32_t, uint32_t>::const_iterator map_it = _nestedTypeDefRid2EnclosingTypeDefRidMap.begin();
+         map_it != _nestedTypeDefRid2EnclosingTypeDefRidMap.end(); ++map_it)
     {
-        auto it = _enclosingTypeDefRid2StartRidMap.find(enclosingTypeDefRid);
-        assert(it != _enclosingTypeDefRid2StartRidMap.end());
-        EnclosingTypeInfo& eti = it->second;
+        uint32_t nestedTypeDefRid = map_it->first;
+        uint32_t enclosingTypeDefRid = map_it->second;
+        utils::HashMap<uint32_t, EnclosingTypeInfo>::iterator found_it = _enclosingTypeDefRid2StartRidMap.find(enclosingTypeDefRid);
+        assert(found_it != _enclosingTypeDefRid2StartRidMap.end());
+        EnclosingTypeInfo& eti = found_it->second;
         eti.nested_type_def_rids[eti.count++] = nestedTypeDefRid;
     }
     RET_VOID_OK();
@@ -634,15 +639,23 @@ RtResult<RtClass*> RtModuleDef::get_class_by_name2(const char* namespace_name, c
     }
     else
     {
-        for (const auto& [key, rid] : _typeDefFullName2TypeDefRidMap)
+        for (utils::HashMap<utils::FullNameStr, uint32_t, utils::FullNameStrHasher, utils::FullNameStrCompare>::const_iterator it =
+                 _typeDefFullName2TypeDefRidMap.begin();
+             it != _typeDefFullName2TypeDefRidMap.end(); ++it)
         {
+            const utils::FullNameStr& key = it->first;
+            uint32_t rid = it->second;
             if (utils::StringUtil::equals_ignorecase(key.namespace_name, namespace_name) && utils::StringUtil::equals_ignorecase(key.name, name))
             {
                 return get_class_by_type_def_rid(rid);
             }
         }
-        for (const auto& [key, token] : _typeDefFullName2ExportedTypeRidMap)
+        for (utils::HashMap<utils::FullNameStr, RtToken, utils::FullNameStrHasher, utils::FullNameStrCompare>::const_iterator it =
+                 _typeDefFullName2ExportedTypeRidMap.begin();
+             it != _typeDefFullName2ExportedTypeRidMap.end(); ++it)
         {
+            const utils::FullNameStr& key = it->first;
+            const RtToken& token = it->second;
             if (utils::StringUtil::equals_ignorecase(key.namespace_name, namespace_name) && utils::StringUtil::equals_ignorecase(key.name, name))
             {
                 return get_exported_class_by_token(token, namespace_name, name, true, throw_exception_when_not_found);
@@ -1558,7 +1571,7 @@ RtResult<std::optional<RtMethodBody>> RtModuleDef::read_method_body(EncodedToken
     {
         RET_ERR(result.unwrap_err());
     }
-    RET_OK(std::optional(result.unwrap()));
+    RET_OK(std::optional<RtMethodBody>(result.unwrap()));
 }
 
 RtResult<RtMethodBody> RtModuleDef::read_method_body_from_rva(uint32_t rva)

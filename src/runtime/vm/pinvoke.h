@@ -1,6 +1,6 @@
 #pragma once
 
-#include <optional>
+#include "core/stl_compat.h"
 
 #include "rt_managed_types.h"
 #include "utils/hashmap.h"
@@ -43,5 +43,5 @@ class PInvokes
     static const PInvokeRegistry* get_pinvoke(const char* name);
     static RtResult<const PInvokeRegistry*> get_pinvoke_by_method(const metadata::RtMethodInfo* method);
 };
-
-}; // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

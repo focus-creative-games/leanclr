@@ -6,7 +6,7 @@
 #include "cli_image.h"
 
 #include <cstring>
-#include <optional>
+#include "core/stl_compat.h"
 
 namespace leanclr
 {

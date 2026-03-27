@@ -1,6 +1,6 @@
 #pragma once
 
-#include <optional>
+#include "core/stl_compat.h"
 
 #include "rt_managed_types.h"
 #include "utils/hashmap.h"
@@ -58,4 +58,5 @@ class Intrinsics
     static uint16_t register_intrinsic_invoker_id(IntrinsicInvoker invoker);
     static IntrinsicInvoker get_intrinsic_invoker_by_id_unchecked(uint16_t id);
 };
-}; // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

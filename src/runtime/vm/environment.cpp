@@ -158,8 +158,10 @@ RtResult<RtArray*> Environment::get_environment_variable_names()
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, names_array,
                                             Array::new_szarray_from_ele_klass(string_class, static_cast<int32_t>(s_environment_variables_map.size())));
     size_t index = 0;
-    for (const auto& [key, value] : s_environment_variables_map)
+    for (utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>::const_iterator it = s_environment_variables_map.begin();
+         it != s_environment_variables_map.end(); ++it)
     {
+        const char* key = it->first;
         RtString* name_str = String::create_string_from_utf8cstr(key);
         Array::set_array_data_at<RtString*>(names_array, static_cast<int32_t>(index), name_str);
         ++index;
