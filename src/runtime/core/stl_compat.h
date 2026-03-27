@@ -24,7 +24,7 @@
 #if LEANCLR_CPLUSPLUS >= 201703L
 #include <string_view>
 #define LEANCLR_HAS_STD_STRING_VIEW 1
-#elif defined(__has_include)
+#elif !defined(_MSC_VER) && defined(__has_include)
 #if __has_include(<string_view>)
 #include <string_view>
 #if defined(__cpp_lib_string_view) || defined(_LIBCPP_VERSION)
