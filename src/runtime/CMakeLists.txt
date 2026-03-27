@@ -36,13 +36,10 @@ endif()
 
 target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS)
 
-set(_include_dirs ${CMAKE_CURRENT_LIST_DIR})
-foreach(dir ${RUNTIME_DIRS})
-    list(APPEND _include_dirs "${CMAKE_CURRENT_LIST_DIR}/${dir}")
-endforeach()
-
-target_include_directories(leanclr PUBLIC ${_include_dirs})
-target_include_directories(leanclr PUBLIC ${CMAKE_CURRENT_LIST_DIR}/3rd)
+target_include_directories(leanclr PUBLIC
+    ${CMAKE_CURRENT_LIST_DIR}
+    ${CMAKE_CURRENT_LIST_DIR}/3rd
+)
 
 set_target_properties(leanclr PROPERTIES
     CXX_STANDARD 11

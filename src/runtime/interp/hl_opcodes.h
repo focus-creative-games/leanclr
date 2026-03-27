@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rt_managed_types.h"
+#include "vm/rt_managed_types.h"
 #include "interp_defs.h"
 #include "ll_opcodes.h"
 

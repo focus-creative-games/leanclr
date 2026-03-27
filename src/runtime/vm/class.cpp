@@ -14,7 +14,7 @@
 #include "array_class.h"
 #include "generic_class.h"
 #include "field.h"
-#include "layout.h"
+#include "metadata/layout.h"
 #include "method.h"
 #include "shim.h"
 #include "customattribute.h"

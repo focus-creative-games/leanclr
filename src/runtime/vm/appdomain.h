@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rt_metadata.h"
+#include "metadata/rt_metadata.h"
 #include "rt_managed_types.h"
 #include "utils/rt_span.h"
 
