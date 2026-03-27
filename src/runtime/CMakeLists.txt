@@ -10,6 +10,7 @@ set(RUNTIME_DIRS
     core
     gc
     icalls
+    il2cpp
     interp
     intrinsics
     log
