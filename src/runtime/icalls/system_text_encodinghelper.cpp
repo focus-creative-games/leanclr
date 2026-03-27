@@ -1,6 +1,5 @@
 #include "system_text_encodinghelper.h"
 
-#include "icall_base.h"
 #include "vm/rt_string.h"
 
 namespace leanclr
@@ -27,13 +26,15 @@ static RtResultVoid internal_code_page_invoker(RtManagedMethodPointer /*method_p
     RET_VOID_OK();
 }
 
+static vm::InternalCallEntry s_internal_call_entries_system_text_encodinghelper[] = {
+    {"System.Text.EncodingHelper::InternalCodePage(System.Int32&)", (vm::InternalCallFunction)&SystemTextEncodingHelper::internal_code_page,
+     internal_code_page_invoker},
+};
+
 utils::Span<vm::InternalCallEntry> SystemTextEncodingHelper::get_internal_call_entries()
 {
-    static vm::InternalCallEntry s_entries[] = {
-        {"System.Text.EncodingHelper::InternalCodePage(System.Int32&)", (vm::InternalCallFunction)&SystemTextEncodingHelper::internal_code_page,
-         internal_code_page_invoker},
-    };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_text_encodinghelper, sizeof(s_internal_call_entries_system_text_encodinghelper) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

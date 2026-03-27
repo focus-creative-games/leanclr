@@ -38,7 +38,6 @@ target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS)
 
 target_include_directories(leanclr PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}
-    ${CMAKE_CURRENT_LIST_DIR}/3rd
 )
 
 set_target_properties(leanclr PROPERTIES

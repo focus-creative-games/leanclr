@@ -147,7 +147,7 @@ RtResultVoid SystemEnvironment::exit(int32_t code)
 }
 
 /// @icall: System.Environment::Exit
-static RtResultVoid exit_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+static RtResultVoid exit_invoker_system_environment(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* /*ret*/)
 {
     int32_t code = EvalStackOp::get_param<int32_t>(params, 0);
@@ -354,7 +354,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_environment[] = {
     {"System.Environment::GetOSVersionString", nullptr, get_os_version_string_invoker},
     {"System.Environment::get_TickCount", nullptr, get_tick_count_invoker},
     {"System.Environment::get_UserName", nullptr, get_user_name_invoker},
-    {"System.Environment::Exit", nullptr, exit_invoker},
+    {"System.Environment::Exit", nullptr, exit_invoker_system_environment},
     {"System.Environment::GetCommandLineArgs", nullptr, get_command_line_args_invoker},
     {"System.Environment::internalGetEnvironmentVariable_native", nullptr, internal_get_environment_variable_native_invoker},
     {"System.Environment::InternalSetEnvironmentVariable(System.Char*,System.Int32,System.Char*,System.Int32)", nullptr,
