@@ -247,7 +247,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemEnum::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, std::size(s_internal_call_entries));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]));
 }
 
 } // namespace icalls

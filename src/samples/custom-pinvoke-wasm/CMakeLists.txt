@@ -10,7 +10,7 @@ add_executable(lean main.cpp)
 target_link_libraries(lean PRIVATE leanclr)
 
 set_target_properties(lean PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 11
     CXX_STANDARD_REQUIRED ON
 )
 

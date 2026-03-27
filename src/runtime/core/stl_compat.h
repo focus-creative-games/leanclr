@@ -9,6 +9,7 @@
 #include <string>
 #include <type_traits>
 #include <utility>
+#include <cstdlib>
 
 #if defined(_MSVC_LANG)
 #define LEANCLR_CPLUSPLUS _MSVC_LANG
@@ -18,7 +19,22 @@
 
 #if LEANCLR_CPLUSPLUS >= 201703L
 #include <optional>
+#endif
+
+#if LEANCLR_CPLUSPLUS >= 201703L
 #include <string_view>
+#define LEANCLR_HAS_STD_STRING_VIEW 1
+#elif defined(__has_include)
+#if __has_include(<string_view>)
+#include <string_view>
+#if defined(__cpp_lib_string_view) || defined(_LIBCPP_VERSION)
+#define LEANCLR_HAS_STD_STRING_VIEW 1
+#endif
+#endif
+#endif
+
+#ifndef LEANCLR_HAS_STD_STRING_VIEW
+#define LEANCLR_HAS_STD_STRING_VIEW 0
 #endif
 
 #if LEANCLR_CPLUSPLUS < 201703L
@@ -181,14 +197,20 @@ class optional
     T& value()
     {
         if (!_has_value)
-            throw std::logic_error("bad optional access");
+        {
+            assert(false && "bad optional access");
+            std::abort();
+        }
         return *ptr();
     }
 
     const T& value() const
     {
         if (!_has_value)
-            throw std::logic_error("bad optional access");
+        {
+            assert(false && "bad optional access");
+            std::abort();
+        }
         return *ptr();
     }
 
@@ -228,7 +250,12 @@ optional<typename std::decay<T>::type> make_optional(T&& value)
     typedef typename std::decay<T>::type U;
     return optional<U>(std::forward<T>(value));
 }
+} // namespace std
+#endif
 
+#if !LEANCLR_HAS_STD_STRING_VIEW
+namespace std
+{
 class string_view
 {
   public:
@@ -279,8 +306,7 @@ class string_view
 
     string_view substr(size_t pos, size_t count = npos) const
     {
-        if (pos > _size)
-            throw std::out_of_range("string_view::substr");
+        assert(pos <= _size);
         size_t remaining = _size - pos;
         size_t len = count < remaining ? count : remaining;
         return string_view(_data + pos, len);

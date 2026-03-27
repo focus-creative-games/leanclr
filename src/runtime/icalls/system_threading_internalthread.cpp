@@ -32,7 +32,7 @@ static vm::InternalCallEntry s_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemThreadingInternalThread::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
+    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
 } // namespace icalls

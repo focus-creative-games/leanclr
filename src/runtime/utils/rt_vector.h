@@ -18,7 +18,7 @@ namespace utils
 template <typename T, typename Allocator = alloc::GeneralAllocator<T>>
 class Vector
 {
-    static_assert(std::is_standard_layout_v<T> && std::is_trivial_v<T>, "T must be a POD type");
+    static_assert(std::is_standard_layout<T>::value && std::is_trivial<T>::value, "T must be a POD type");
 
   public:
     // Standard container type aliases (required for std::back_inserter)
