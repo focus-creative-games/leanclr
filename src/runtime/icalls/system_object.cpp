@@ -66,7 +66,7 @@ static RtResultVoid memberwise_clone_invoker(metadata::RtManagedMethodPointer, c
 }
 
 // Internal call registry
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_object[] = {
     {"System.Object::InternalGetHashCode", (vm::InternalCallFunction)&SystemObject::get_hash_code, get_hash_code_invoker},
     {"System.Object::GetType", (vm::InternalCallFunction)&SystemObject::get_type, get_type_invoker},
     {"System.Object::MemberwiseClone", (vm::InternalCallFunction)&SystemObject::memberwise_clone, memberwise_clone_invoker},
@@ -74,7 +74,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemObject::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_object, sizeof(s_internal_call_entries_system_object) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

@@ -53,7 +53,7 @@ static RtResultVoid gfree_invoker(RtManagedMethodPointer, const RtMethodInfo*, c
 
 // ========== Registration ==========
 
-static InternalCallEntry s_internal_call_entries[] = {
+static InternalCallEntry s_internal_call_entries_mono_safestringmarshal[] = {
     {"Mono.SafeStringMarshal::StringToUtf8_icall(System.String&)", (InternalCallFunction)&MonoSafeStringMarshal::string_to_utf8_bytes,
      string_to_utf8_bytes_invoker},
     {"Mono.SafeStringMarshal::GFree(System.IntPtr)", (InternalCallFunction)&MonoSafeStringMarshal::gfree, gfree_invoker},
@@ -61,8 +61,8 @@ static InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<InternalCallEntry> MonoSafeStringMarshal::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_mono_safestringmarshal) / sizeof(s_internal_call_entries_mono_safestringmarshal[0]);
+    return utils::Span<InternalCallEntry>(s_internal_call_entries_mono_safestringmarshal, entry_count);
 }
 
 } // namespace icalls

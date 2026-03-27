@@ -88,7 +88,7 @@ static RtResultVoid set_generic_value_impl_invoker(metadata::RtManagedMethodPoin
 }
 
 // Intrinsic registry
-static vm::IntrinsicEntry s_intrinsic_entries[] = {
+static vm::IntrinsicEntry s_intrinsic_entries_system_array[] = {
     {"System.Array::get_Length", (vm::IntrinsicFunction)&SystemArray::get_length, get_length_invoker},
     {"System.Array::get_LongLength", (vm::IntrinsicFunction)&SystemArray::get_long_length, get_long_length_invoker},
     {"System.Array::GetGenericValueImpl<>", (vm::IntrinsicFunction)&SystemArray::get_generic_value_impl, get_generic_value_impl_invoker},
@@ -97,7 +97,7 @@ static vm::IntrinsicEntry s_intrinsic_entries[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemArray::get_intrinsic_entries()
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, sizeof(s_intrinsic_entries) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_array, sizeof(s_intrinsic_entries_system_array) / sizeof(vm::IntrinsicEntry));
 }
 
 } // namespace intrinsics

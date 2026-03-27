@@ -53,7 +53,7 @@ static RtResultVoid internal_invoke_invoker(RtManagedMethodPointer, const RtMeth
 
 // Internal call entries
 
-static InternalCallEntry s_internal_call_entries[] = {
+static InternalCallEntry s_internal_call_entries_system_reflection_runtimeconstructorinfo[] = {
     {"System.Reflection.RuntimeConstructorInfo::get_metadata_token", (InternalCallFunction)&SystemReflectionRuntimeConstructorInfo::get_metadata_token,
      get_metadata_token_invoker},
     {"System.Reflection.RuntimeConstructorInfo::InternalInvoke(System.Object,System.Object[],System.Exception&)",
@@ -62,8 +62,8 @@ static InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<InternalCallEntry> SystemReflectionRuntimeConstructorInfo::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_runtimeconstructorinfo) / sizeof(s_internal_call_entries_system_reflection_runtimeconstructorinfo[0]);
+    return utils::Span<InternalCallEntry>(s_internal_call_entries_system_reflection_runtimeconstructorinfo, entry_count);
 }
 
 } // namespace icalls

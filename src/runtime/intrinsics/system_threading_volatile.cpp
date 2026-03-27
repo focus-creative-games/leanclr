@@ -506,7 +506,7 @@ static RtResultVoid write_ref_invoker(metadata::RtManagedMethodPointer methodPtr
 
 // ========== Intrinsic Entries ==========
 
-static vm::IntrinsicEntry s_intrinsic_entries[] = {
+static vm::IntrinsicEntry s_intrinsic_entries_system_threading_volatile[] = {
     // Read operations
     {"System.Threading.Volatile::Read(System.Boolean&)", (vm::IntrinsicFunction)&SystemThreadingVolatile::read_bool, read_bool_invoker},
     {"System.Threading.Volatile::Read(System.Byte&)", (vm::IntrinsicFunction)&SystemThreadingVolatile::read_byte, read_byte_invoker},
@@ -541,8 +541,8 @@ static vm::IntrinsicEntry s_intrinsic_entries[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemThreadingVolatile::get_intrinsic_entries()
 {
-    constexpr size_t entry_count = sizeof(s_intrinsic_entries) / sizeof(s_intrinsic_entries[0]);
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_intrinsic_entries_system_threading_volatile) / sizeof(s_intrinsic_entries_system_threading_volatile[0]);
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_threading_volatile, entry_count);
 }
 
 } // namespace intrinsics

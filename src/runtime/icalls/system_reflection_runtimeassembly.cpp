@@ -273,7 +273,7 @@ static RtResultVoid get_files_internal_invoker(metadata::RtManagedMethodPointer,
     RET_VOID_OK();
 }
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimeassembly[] = {
     {"System.Reflection.RuntimeAssembly::GetManifestResourceInternal",
      (vm::InternalCallFunction)&SystemReflectionRuntimeAssembly::get_manifest_resource_internal, get_manifest_resource_internal_invoker},
     {"System.Reflection.RuntimeAssembly::get_code_base(System.Reflection.Assembly,System.Boolean)",
@@ -304,7 +304,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeAssembly::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimeassembly, sizeof(s_internal_call_entries_system_reflection_runtimeassembly) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

@@ -187,7 +187,7 @@ static RtResultVoid get_metadata_token_invoker(metadata::RtManagedMethodPointer,
 
 // ========== Registration ==========
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimepropertyinfo[] = {
     {"System.Reflection.RuntimePropertyInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)",
      (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::internal_from_handle_type, internal_from_handle_type_invoker},
     {"System.Reflection.RuntimePropertyInfo::get_property_info", (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::get_property_info,
@@ -202,8 +202,8 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemReflectionRuntimePropertyInfo::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo) / sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo[0]);
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimepropertyinfo, entry_count);
 }
 
 } // namespace icalls

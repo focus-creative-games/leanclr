@@ -241,7 +241,7 @@ static RtResultVoid internal_is_interned_invoker(metadata::RtManagedMethodPointe
 }
 
 // Internal call registry
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_string[] = {
     {"System.String::FastAllocateString", (vm::InternalCallFunction)&SystemString::fast_allocate_string, fast_allocate_string_invoker},
     {"System.String::InternalIntern", (vm::InternalCallFunction)&SystemString::internal_intern, internal_intern_invoker},
     {"System.String::InternalIsInterned", (vm::InternalCallFunction)&SystemString::internal_is_interned, internal_is_interned_invoker},
@@ -261,7 +261,7 @@ static vm::NewobjInternalCallEntry s_newobj_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemString::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_string, sizeof(s_internal_call_entries_system_string) / sizeof(vm::InternalCallEntry));
 }
 
 utils::Span<vm::NewobjInternalCallEntry> SystemString::get_newobj_internal_call_entries()

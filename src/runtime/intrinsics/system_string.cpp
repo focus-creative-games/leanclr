@@ -62,7 +62,7 @@ static RtResultVoid get_hash_code_invoker(metadata::RtManagedMethodPointer metho
 }
 
 // Intrinsic registry
-static vm::IntrinsicEntry s_intrinsic_entries[] = {
+static vm::IntrinsicEntry s_intrinsic_entries_system_string[] = {
     {"System.String::get_Chars", (vm::IntrinsicFunction)&SystemString::get_chars, get_chars_invoker},
     {"System.String::get_Length", (vm::IntrinsicFunction)&SystemString::get_length, get_length_invoker},
     {"System.String::GetHashCode", (vm::IntrinsicFunction)&SystemString::get_hash_code, get_hash_code_invoker},
@@ -72,7 +72,7 @@ static vm::IntrinsicEntry s_intrinsic_entries[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemString::get_intrinsic_entries()
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, sizeof(s_intrinsic_entries) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_string, sizeof(s_intrinsic_entries_system_string) / sizeof(vm::IntrinsicEntry));
 }
 
 } // namespace intrinsics

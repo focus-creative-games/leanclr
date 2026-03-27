@@ -491,7 +491,7 @@ static RtResultVoid internal_from_name_invoker(metadata::RtManagedMethodPointer 
 }
 
 // Internal call registry
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_runtimetypehandle[] = {
     {"System.RuntimeTypeHandle::GetAttributes", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_attributes), get_attributes_invoker},
     {"System.RuntimeTypeHandle::GetMetadataToken(System.RuntimeType)", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_metadata_token),
      get_metadata_token_invoker},
@@ -532,7 +532,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeTypeHandle::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetypehandle, sizeof(s_internal_call_entries_system_runtimetypehandle) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

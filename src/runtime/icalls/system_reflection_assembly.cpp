@@ -278,7 +278,7 @@ static RtResultVoid internal_get_referenced_assemblies_invoker(metadata::RtManag
 
 // ========== Internal Call Entries ==========
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_reflection_assembly[] = {
     {"System.Reflection.Assembly::GetExecutingAssembly", (vm::InternalCallFunction)&SystemReflectionAssembly::get_executing_assembly,
      get_executing_assembly_invoker},
     {"System.Reflection.Assembly::GetCallingAssembly", (vm::InternalCallFunction)&SystemReflectionAssembly::get_calling_assembly, get_calling_assembly_invoker},
@@ -299,8 +299,8 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemReflectionAssembly::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_assembly) / sizeof(s_internal_call_entries_system_reflection_assembly[0]);
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_assembly, entry_count);
 }
 
 } // namespace icalls

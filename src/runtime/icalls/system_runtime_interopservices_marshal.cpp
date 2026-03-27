@@ -801,7 +801,7 @@ static RtResultVoid prelink_invoker(metadata::RtManagedMethodPointer, const meta
 
 // ========== Registration ==========
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_runtime_interopservices_marshal[] = {
     // Memory allocation
     {"System.Runtime.InteropServices.Marshal::AllocHGlobal(System.IntPtr)", (vm::InternalCallFunction)&SystemRuntimeInteropServicesMarshal::alloc_hglobal,
      alloc_hglobal_invoker},
@@ -910,7 +910,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesMarshal::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_interopservices_marshal, sizeof(s_internal_call_entries_system_runtime_interopservices_marshal) / sizeof(s_internal_call_entries_system_runtime_interopservices_marshal[0]));
 }
 
 } // namespace icalls

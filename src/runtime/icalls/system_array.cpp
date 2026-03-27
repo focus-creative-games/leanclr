@@ -338,7 +338,7 @@ static RtResultVoid clear_internal_invoker(metadata::RtManagedMethodPointer, con
 }
 
 // Internal call registry
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_array[] = {
     {"System.Array::GetRank", (vm::InternalCallFunction)&SystemArray::get_rank, get_rank_invoker},
     {"System.Array::GetLength", (vm::InternalCallFunction)&SystemArray::get_length, get_length_invoker},
     {"System.Array::GetLowerBound", (vm::InternalCallFunction)&SystemArray::get_lower_bound, get_lower_bound_invoker},
@@ -353,7 +353,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemArray::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_array, sizeof(s_internal_call_entries_system_array) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

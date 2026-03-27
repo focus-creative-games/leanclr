@@ -123,7 +123,7 @@ static RtResultVoid monitor_test_owner_invoker(metadata::RtManagedMethodPointer,
     RET_VOID_OK();
 }
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_threading_monitor[] = {
     {"System.Threading.Monitor::Enter", (vm::InternalCallFunction)&SystemThreadingMonitor::enter, enter_invoker},
     {"System.Threading.Monitor::Exit", (vm::InternalCallFunction)&SystemThreadingMonitor::exit, exit_invoker},
     {"System.Threading.Monitor::Monitor_test_synchronised", (vm::InternalCallFunction)&SystemThreadingMonitor::monitor_test_synchronized,
@@ -138,7 +138,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemThreadingMonitor::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_monitor, sizeof(s_internal_call_entries_system_threading_monitor) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

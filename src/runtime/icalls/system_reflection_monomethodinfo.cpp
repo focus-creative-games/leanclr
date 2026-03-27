@@ -125,7 +125,7 @@ static RtResultVoid get_retval_marshal_invoker(RtManagedMethodPointer, const RtM
 
 // Internal call entries
 
-static InternalCallEntry s_internal_call_entries[] = {
+static InternalCallEntry s_internal_call_entries_system_reflection_monomethodinfo[] = {
     {"System.Reflection.MonoMethodInfo::get_parameter_info", (InternalCallFunction)&SystemReflectionMonoMethodInfo::get_parameter_info,
      get_parameter_info_invoker},
     {"System.Reflection.MonoMethodInfo::get_method_attributes", (InternalCallFunction)&SystemReflectionMonoMethodInfo::get_method_attributes,
@@ -137,8 +137,8 @@ static InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<InternalCallEntry> SystemReflectionMonoMethodInfo::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_monomethodinfo) / sizeof(s_internal_call_entries_system_reflection_monomethodinfo[0]);
+    return utils::Span<InternalCallEntry>(s_internal_call_entries_system_reflection_monomethodinfo, entry_count);
 }
 
 } // namespace icalls

@@ -132,7 +132,7 @@ static RtResultVoid internal_block_copy_invoker(RtManagedMethodPointer, const Rt
 
 // Internal call entries
 
-static InternalCallEntry s_internal_call_entries[] = {
+static InternalCallEntry s_internal_call_entries_system_buffer[] = {
     {"System.Buffer::_ByteLength(System.Array)", (InternalCallFunction)&SystemBuffer::byte_length, byte_length_invoker},
     {"System.Buffer::InternalMemcpy(System.Byte*,System.Byte*,System.Int32)", (InternalCallFunction)&SystemBuffer::internal_memcpy, internal_memcpy_invoker},
     {"System.Buffer::InternalBlockCopy(System.Array,System.Int32,System.Array,System.Int32,System.Int32)",
@@ -141,8 +141,8 @@ static InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<InternalCallEntry> SystemBuffer::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_buffer) / sizeof(s_internal_call_entries_system_buffer[0]);
+    return utils::Span<InternalCallEntry>(s_internal_call_entries_system_buffer, entry_count);
 }
 
 } // namespace icalls

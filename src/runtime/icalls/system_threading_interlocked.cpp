@@ -486,7 +486,7 @@ static RtResultVoid read_invoker(RtManagedMethodPointer, const RtMethodInfo*, co
 
 // ========== Registration ==========
 
-static InternalCallEntry s_internal_call_entries[] = {
+static InternalCallEntry s_internal_call_entries_system_threading_interlocked[] = {
     {"System.Threading.Interlocked::Add(System.Int32&,System.Int32)", (InternalCallFunction)&SystemThreadingInterlocked::add_i32, add_i32_invoker},
     {"System.Threading.Interlocked::Add(System.Int64&,System.Int64)", (InternalCallFunction)&SystemThreadingInterlocked::add_i64, add_i64_invoker},
     {"System.Threading.Interlocked::Increment(System.Int32&)", (InternalCallFunction)&SystemThreadingInterlocked::increment_i32, increment_i32_invoker},
@@ -528,8 +528,8 @@ static InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<InternalCallEntry> SystemThreadingInterlocked::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_threading_interlocked) / sizeof(s_internal_call_entries_system_threading_interlocked[0]);
+    return utils::Span<InternalCallEntry>(s_internal_call_entries_system_threading_interlocked, entry_count);
 }
 
 } // namespace icalls

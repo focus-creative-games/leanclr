@@ -235,7 +235,7 @@ static RtResultVoid get_hash_code_invoker(metadata::RtManagedMethodPointer, cons
 
 // ========== Registration ==========
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_enum[] = {
     {"System.Enum::InternalCompareTo", (vm::InternalCallFunction)&SystemEnum::internal_compare_to, internal_compare_to_invoker},
     {"System.Enum::InternalGetUnderlyingType", (vm::InternalCallFunction)&SystemEnum::internal_get_underlying_type, internal_get_underlying_type_invoker},
     {"System.Enum::GetEnumValuesAndNames", (vm::InternalCallFunction)&SystemEnum::get_enum_values_and_names, get_enum_values_and_names_invoker},
@@ -247,7 +247,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemEnum::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_enum, sizeof(s_internal_call_entries_system_enum) / sizeof(s_internal_call_entries_system_enum[0]));
 }
 
 } // namespace icalls

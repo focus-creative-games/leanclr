@@ -463,14 +463,14 @@ static RtResultVoid internal_get_hash_code_invoker(metadata::RtManagedMethodPoin
     RET_VOID_OK();
 }
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_valuetype[] = {
     {"System.ValueType::InternalEquals(System.Object,System.Object,System.Object[]&)", nullptr, internal_equals_invoker},
     {"System.ValueType::InternalGetHashCode(System.Object,System.Object[]&)", nullptr, internal_get_hash_code_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemValueType::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_valuetype, sizeof(s_internal_call_entries_system_valuetype) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

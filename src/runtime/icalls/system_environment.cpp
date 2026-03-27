@@ -344,7 +344,7 @@ static RtResultVoid get_page_size_invoker(metadata::RtManagedMethodPointer, cons
     RET_VOID_OK();
 }
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_environment[] = {
     {"System.Environment::get_ExitCode", nullptr, get_exit_code_invoker},
     {"System.Environment::set_ExitCode", nullptr, set_exit_code_invoker},
     {"System.Environment::get_HasShutdownStarted", nullptr, get_has_shutdown_started_invoker},
@@ -373,7 +373,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemEnvironment::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_environment, sizeof(s_internal_call_entries_system_environment) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

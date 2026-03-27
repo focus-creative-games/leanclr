@@ -42,15 +42,15 @@ static RtResultVoid get_item_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 // ========== Intrinsic Entries ==========
 
-static vm::IntrinsicEntry s_intrinsic_entries[] = {
+static vm::IntrinsicEntry s_intrinsic_entries_system_span[] = {
     {"System.Span`1::get_Item", (vm::IntrinsicFunction)&SystemSpan::get_item, get_item_invoker},
     {"System.ReadOnlySpan`1::get_Item", (vm::IntrinsicFunction)&SystemSpan::get_item, get_item_invoker},
 };
 
 utils::Span<vm::IntrinsicEntry> SystemSpan::get_intrinsic_entries()
 {
-    constexpr size_t entry_count = sizeof(s_intrinsic_entries) / sizeof(s_intrinsic_entries[0]);
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_intrinsic_entries_system_span) / sizeof(s_intrinsic_entries_system_span[0]);
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_span, entry_count);
 }
 
 } // namespace intrinsics

@@ -68,7 +68,7 @@ static RtResultVoid get_custom_attributes_data_internal_invoker(RtManagedMethodP
 
 // Internal call entries
 
-static InternalCallEntry s_internal_call_entries[] = {
+static InternalCallEntry s_internal_call_entries_system_monocustomattrs[] = {
     {"System.MonoCustomAttrs::IsDefinedInternal", (InternalCallFunction)&SystemMonoCustomAttrs::is_defined_internal, is_defined_internal_invoker},
     {"System.MonoCustomAttrs::GetCustomAttributesInternal", (InternalCallFunction)&SystemMonoCustomAttrs::get_custom_attributes_internal,
      get_custom_attributes_internal_invoker},
@@ -78,8 +78,8 @@ static InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<InternalCallEntry> SystemMonoCustomAttrs::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_monocustomattrs) / sizeof(s_internal_call_entries_system_monocustomattrs[0]);
+    return utils::Span<InternalCallEntry>(s_internal_call_entries_system_monocustomattrs, entry_count);
 }
 
 } // namespace icalls

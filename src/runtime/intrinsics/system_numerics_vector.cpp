@@ -25,14 +25,14 @@ static RtResultVoid get_is_hardware_accelerated_invoker(metadata::RtManagedMetho
 }
 
 // Intrinsic registry
-static vm::IntrinsicEntry s_intrinsic_entries[] = {
+static vm::IntrinsicEntry s_intrinsic_entries_system_numerics_vector[] = {
     {"System.Numerics.Vector::get_IsHardwareAccelerated", (vm::IntrinsicFunction)&SystemNumericsVector::get_is_hardware_accelerated,
      get_is_hardware_accelerated_invoker},
 };
 
 utils::Span<vm::IntrinsicEntry> SystemNumericsVector::get_intrinsic_entries()
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, sizeof(s_intrinsic_entries) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_numerics_vector, sizeof(s_intrinsic_entries_system_numerics_vector) / sizeof(vm::IntrinsicEntry));
 }
 
 } // namespace intrinsics

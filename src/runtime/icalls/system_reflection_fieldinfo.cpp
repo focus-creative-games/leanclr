@@ -61,7 +61,7 @@ static RtResultVoid get_marshal_info_invoker(metadata::RtManagedMethodPointer, c
 
 // ========== Registration ==========
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_reflection_fieldinfo[] = {
     {"System.Reflection.FieldInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)",
      (vm::InternalCallFunction)&SystemReflectionFieldInfo::internal_from_handle_type, internal_from_handle_type_invoker},
     {"System.Reflection.FieldInfo::get_marshal_info()", (vm::InternalCallFunction)&SystemReflectionFieldInfo::get_marshal_info, get_marshal_info_invoker},
@@ -69,8 +69,8 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemReflectionFieldInfo::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_fieldinfo) / sizeof(s_internal_call_entries_system_reflection_fieldinfo[0]);
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_fieldinfo, entry_count);
 }
 
 } // namespace icalls

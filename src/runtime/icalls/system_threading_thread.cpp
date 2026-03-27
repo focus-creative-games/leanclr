@@ -831,7 +831,7 @@ static RtResultVoid get_stack_traces_invoker(metadata::RtManagedMethodPointer me
 }
 
 // Internal call registry
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_threading_thread[] = {
     {"System.Threading.Thread::GetCurrentThread_icall", (vm::InternalCallFunction)&SystemThreadingThread::get_current_thread_icall,
      get_current_thread_icall_invoker},
     {"System.Threading.Thread::ResetAbortNative", (vm::InternalCallFunction)&SystemThreadingThread::reset_abort_native, reset_abort_native_invoker},
@@ -917,7 +917,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemThreadingThread::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_thread, sizeof(s_internal_call_entries_system_threading_thread) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

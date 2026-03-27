@@ -37,14 +37,14 @@ static RtResultVoid get_current_method_invoker(metadata::RtManagedMethodPointer 
 
 // ========== Internal Call Entries ==========
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_reflection_methodbase[] = {
     {"System.Reflection.MethodBase::GetCurrentMethod", (vm::InternalCallFunction)&SystemReflectionMethodBase::get_current_method, get_current_method_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemReflectionMethodBase::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries) / sizeof(s_internal_call_entries[0]);
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, entry_count);
+    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_methodbase) / sizeof(s_internal_call_entries_system_reflection_methodbase[0]);
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_methodbase, entry_count);
 }
 
 } // namespace icalls

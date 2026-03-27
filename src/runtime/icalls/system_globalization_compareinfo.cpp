@@ -142,7 +142,7 @@ static RtResultVoid internal_index_icall_invoker(metadata::RtManagedMethodPointe
     RET_VOID_OK();
 }
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_globalization_compareinfo[] = {
     {"System.Globalization.CompareInfo::internal_compare_icall", (vm::InternalCallFunction)&SystemGlobalizationCompareInfo::internal_compare_icall,
      internal_compare_icall_invoker},
     {"System.Globalization.CompareInfo::internal_index_icall(System.Char*,System.Int32,System.Int32,System.Char*,System.Int32,System.Boolean)",
@@ -151,7 +151,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCompareInfo::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_compareinfo, sizeof(s_internal_call_entries_system_globalization_compareinfo) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

@@ -35,23 +35,23 @@ RtResultVoid newobj_ctor_invoker(metadata::RtManagedMethodPointer methodPtr, con
 }
 
 // Intrinsic registry
-static vm::IntrinsicEntry s_intrinsic_entries[] = {
+static vm::IntrinsicEntry s_intrinsic_entries_system_object[] = {
     {"System.Object::.ctor()", (vm::IntrinsicFunction)&SystemObject::ctor, ctor_invoker},
 };
 
 // Newobj intrinsic registry
-static vm::NewobjIntrinsicEntry s_newobj_intrinsic_entries[] = {
+static vm::NewobjIntrinsicEntry s_newobj_intrinsic_entries_system_object[] = {
     {"System.Object::.ctor()", newobj_ctor_invoker},
 };
 
 utils::Span<vm::IntrinsicEntry> SystemObject::get_intrinsic_entries()
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, sizeof(s_intrinsic_entries) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_object, sizeof(s_intrinsic_entries_system_object) / sizeof(vm::IntrinsicEntry));
 }
 
 utils::Span<vm::NewobjIntrinsicEntry> SystemObject::get_newobj_intrinsic_entries()
 {
-    return utils::Span<vm::NewobjIntrinsicEntry>(s_newobj_intrinsic_entries, sizeof(s_newobj_intrinsic_entries) / sizeof(vm::NewobjIntrinsicEntry));
+    return utils::Span<vm::NewobjIntrinsicEntry>(s_newobj_intrinsic_entries_system_object, sizeof(s_newobj_intrinsic_entries_system_object) / sizeof(vm::NewobjIntrinsicEntry));
 }
 
 } // namespace intrinsics

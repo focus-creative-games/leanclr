@@ -125,7 +125,7 @@ RtResultVoid run_module_constructor_invoker(metadata::RtManagedMethodPointer met
 }
 
 // Internal call registry
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_runtime_compilerservices_runtimehelpers[] = {
     {"System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray",
      (vm::InternalCallFunction)&SystemRuntimeCompilerServicesRuntimeHelpers::initialize_array, initialize_array_invoker},
     {"System.Runtime.CompilerServices.RuntimeHelpers::get_OffsetToStringData",
@@ -142,7 +142,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeCompilerServicesRuntimeHelpers::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers, sizeof(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

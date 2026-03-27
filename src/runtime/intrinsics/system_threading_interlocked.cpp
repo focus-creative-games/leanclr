@@ -121,7 +121,7 @@ static RtResultVoid memory_barrier_invoker(RtManagedMethodPointer _method_pointe
 // Intrinsic Registration
 // ============================================
 
-static vm::IntrinsicEntry s_intrinsic_entries[] = {
+static vm::IntrinsicEntry s_intrinsic_entries_system_threading_interlocked[] = {
     {"System.Threading.Interlocked::Exchange(System.Object&,System.Object)", (vm::IntrinsicFunction)&SystemThreadingInterlocked::exchange_object,
      exchange_object_invoker},
     {"System.Threading.Interlocked::Exchange<>", (vm::IntrinsicFunction)&SystemThreadingInterlocked::exchange, exchange_invoker},
@@ -131,7 +131,7 @@ static vm::IntrinsicEntry s_intrinsic_entries[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemThreadingInterlocked::get_intrinsic_entries()
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, sizeof(s_intrinsic_entries) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_threading_interlocked, sizeof(s_intrinsic_entries_system_threading_interlocked) / sizeof(vm::IntrinsicEntry));
 }
 
 } // namespace intrinsics

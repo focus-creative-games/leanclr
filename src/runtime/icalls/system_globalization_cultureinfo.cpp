@@ -71,7 +71,7 @@ static RtResultVoid internal_get_cultures_invoker(metadata::RtManagedMethodPoint
     RET_VOID_OK();
 }
 
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultureinfo[] = {
     {"System.Globalization.CultureInfo::construct_internal_locale_from_lcid(System.Int32)", nullptr, construct_internal_locale_from_lcid_invoker},
     {"System.Globalization.CultureInfo::construct_internal_locale_from_name(System.String)", nullptr, construct_internal_locale_from_name_invoker},
     {"System.Globalization.CultureInfo::get_current_locale_name", nullptr, get_current_locale_name_invoker},
@@ -80,7 +80,7 @@ static vm::InternalCallEntry s_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_cultureinfo, sizeof(s_internal_call_entries_system_globalization_cultureinfo) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

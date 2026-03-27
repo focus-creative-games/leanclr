@@ -28,13 +28,13 @@ static RtResultVoid internal_from_handle_invoker(metadata::RtManagedMethodPointe
 }
 
 // Internal call registry
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_type[] = {
     {"System.Type::internal_from_handle", (vm::InternalCallFunction)&SystemType::internal_from_handle, internal_from_handle_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemType::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_type, sizeof(s_internal_call_entries_system_type) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

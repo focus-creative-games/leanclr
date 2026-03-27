@@ -26,13 +26,13 @@ static RtResultVoid gptr_array_free_invoker(metadata::RtManagedMethodPointer, co
 }
 
 // Internal call registry
-static vm::InternalCallEntry s_internal_call_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_mono_runtimegptrarrayhandle[] = {
     {"Mono.RuntimeGPtrArrayHandle::GPtrArrayFree", (vm::InternalCallFunction)&MonoRuntimeGPtrArrayHandle::gptr_array_free, gptr_array_free_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> MonoRuntimeGPtrArrayHandle::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_mono_runtimegptrarrayhandle, sizeof(s_internal_call_entries_mono_runtimegptrarrayhandle) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls
