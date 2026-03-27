@@ -4,7 +4,9 @@
 #include "utf8/utf8.h"
 #include "string_builder.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 const char* StringUtil::strdup(const char* str)
 {
@@ -112,4 +114,5 @@ void StringUtil::utf16_to_utf8(const Utf16Char* utf16_str, size_t utf16_len, Str
     // Assign to output string
     out_utf8_str.resize(actual_size);
 }
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

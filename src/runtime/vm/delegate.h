@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Delegate
 {
@@ -25,4 +27,5 @@ class Delegate
     static RtResultVoid newobj_delegate_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                 const interp::RtStackObject* params, interp::RtStackObject* ret);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

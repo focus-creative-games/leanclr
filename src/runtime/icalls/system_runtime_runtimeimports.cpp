@@ -1,7 +1,9 @@
 #include "system_runtime_runtimeimports.h"
 #include <cstring>
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 using namespace interp;
@@ -122,4 +124,5 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeRuntimeImports::get_internal_cal
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

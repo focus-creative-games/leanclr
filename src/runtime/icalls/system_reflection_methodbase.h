@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionMethodBase
@@ -14,4 +16,5 @@ class SystemReflectionMethodBase
     static RtResult<vm::RtReflectionMethod*> get_current_method();
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

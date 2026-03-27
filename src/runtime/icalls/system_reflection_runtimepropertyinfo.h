@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionRuntimePropertyInfo
@@ -26,4 +28,5 @@ class SystemReflectionRuntimePropertyInfo
     static RtResult<int32_t> get_metadata_token(vm::RtReflectionProperty* property);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

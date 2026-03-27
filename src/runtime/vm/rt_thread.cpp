@@ -4,7 +4,9 @@
 #include "rt_managed_types.h"
 #include "alloc/general_allocation.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 static RtThread* g_current_thread = nullptr;
 static int32_t g_priority = static_cast<int32_t>(ThreadPriority::Normal);
@@ -146,4 +148,5 @@ void Thread::set_priority_native(RtThread* thread, int32_t priority)
     g_priority = priority;
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

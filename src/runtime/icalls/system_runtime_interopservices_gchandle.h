@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemRuntimeInteropServicesGCHandle
@@ -17,4 +19,5 @@ class SystemRuntimeInteropServicesGCHandle
     static RtResult<void*> get_addr_of_pinned_object(void* handle);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

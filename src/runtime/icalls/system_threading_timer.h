@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemThreadingTimer
@@ -13,4 +15,5 @@ class SystemThreadingTimer
     static RtResult<int64_t> get_time_monotonic();
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

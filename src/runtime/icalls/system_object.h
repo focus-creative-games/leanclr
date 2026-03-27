@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemObject
@@ -16,4 +18,5 @@ class SystemObject
     static RtResult<vm::RtObject*> memberwise_clone(vm::RtObject* obj);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

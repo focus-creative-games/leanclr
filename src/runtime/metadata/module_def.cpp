@@ -12,7 +12,9 @@
 #include "vm/class.h"
 #include "vm/method.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 // Helper constants
@@ -30,7 +32,6 @@ static uint32_t allocate_image_id()
 
 static utils::Vector<RtModuleDef*> g_loadedModuleDefs;
 static RtModuleDef* g_corlibModule = nullptr;
-
 
 void RtModuleDef::register_module_def(RtModuleDef* moduleDef)
 {
@@ -2189,4 +2190,5 @@ void RtModuleDef::fill_assembly_name(RtMonoAssemblyName& out) const
     out.flags = _assemblyName.flags;
 }
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

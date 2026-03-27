@@ -2,7 +2,9 @@
 
 #include "vm/internal_calls.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemGlobalizationCultureInfo
@@ -17,4 +19,5 @@ class SystemGlobalizationCultureInfo
     static RtResult<vm::RtArray*> internal_get_cultures(bool neutral, bool specific, bool installed);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

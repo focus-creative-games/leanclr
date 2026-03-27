@@ -2,7 +2,9 @@
 
 #include "vm/rt_string.h"
 
-namespace leanclr::os
+namespace leanclr
+{
+namespace os
 {
 vm::RtString* Architecture::get_architecture_name()
 {
@@ -19,4 +21,5 @@ vm::RtString* Architecture::get_os_name()
 {
     return vm::String::get_empty_string();
 }
-} // namespace leanclr::os
+} // namespace os
+} // namespace leanclr

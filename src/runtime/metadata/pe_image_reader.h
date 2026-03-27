@@ -6,12 +6,16 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 class MemPool;
 }
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 class PeImageReader
@@ -27,4 +31,5 @@ class PeImageReader
 
     RtResult<CliImage*> ReadCliImage(alloc::MemPool& imagePrivatePool);
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

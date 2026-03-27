@@ -12,7 +12,9 @@
 #include "utils/string_util.h"
 #include "utils/rt_span.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 struct ClassLayoutData
@@ -440,4 +442,5 @@ class RtModuleDef
 
     utils::HashMap<uint32_t, vm::RtString*> _userStringMap;
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemRuntimeInteropServicesMarshal
@@ -71,4 +73,5 @@ class SystemRuntimeInteropServicesMarshal
     static RtResultVoid prelink(vm::RtObject* method_info);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

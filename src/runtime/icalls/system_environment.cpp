@@ -9,7 +9,9 @@
 
 #include "platform/rt_time.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<int32_t> SystemEnvironment::get_exit_code()
@@ -374,4 +376,5 @@ utils::Span<vm::InternalCallEntry> SystemEnvironment::get_internal_call_entries(
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

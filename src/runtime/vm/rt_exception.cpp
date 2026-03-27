@@ -9,7 +9,9 @@
 #include "interp/machine_state.h"
 #include "settings.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 static RtException** s_ref_exceptions = nullptr;
@@ -186,4 +188,5 @@ RtResultVoid Exception::report_unhandled_exception(RtException* exception)
     RET_VOID_OK();
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

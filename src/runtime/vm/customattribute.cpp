@@ -17,7 +17,9 @@
 #include "metadata/module_def.h"
 #include "const_strs.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Helper structures
@@ -1230,4 +1232,5 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(me
     RET_OK(ca_data_arr);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

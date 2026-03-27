@@ -6,7 +6,9 @@
 #include "utils/binary_reader.h"
 #include "alloc/mem_pool.h"
 #include "utils/rt_vector.h"
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 using utils::BinaryReader;
 
@@ -1737,4 +1739,5 @@ std::optional<RowCustomDebugInformation> CliImage::read_custom_debug_information
     row.value = read_column_u32(row_data, table.row_fields[2]);
     return row;
 }
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

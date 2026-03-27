@@ -9,7 +9,9 @@
 #include "vm/rt_string.h"
 #include "vm/type.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<intptr_t> SystemReflectionRuntimeAssembly::get_manifest_resource_internal(vm::RtReflectionAssembly* ref_ass, vm::RtString* name, int32_t* size,
@@ -305,4 +307,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeAssembly::get_internal
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 class Debugger
@@ -11,4 +13,5 @@ class Debugger
     static void log(int32_t level, RtString* category, RtString* message);
 };
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -1,7 +1,9 @@
 #include "metadata_compare.h"
 #include "vm/method.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 // Type signature comparison (from metadata_compare.rs)
@@ -91,4 +93,5 @@ bool MetadataCompare::is_method_signature_equal(const RtMethodInfo* a, const RtM
         return false;
     return true;
 }
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

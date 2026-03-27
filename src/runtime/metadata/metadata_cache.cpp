@@ -7,7 +7,9 @@
 #include "metadata/metadata_hash.h"
 #include "alloc/metadata_allocation.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 // ===== Corlib Type Sigs =====
@@ -554,4 +556,5 @@ RtResult<const RtTypeSig*> MetadataCache::get_pooled_array_typesig_by_element_ty
     RtTypeSigByValRef pair = res.unwrap();
     RET_OK(byRef ? pair.by_ref : pair.by_val);
 }
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

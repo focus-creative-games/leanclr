@@ -4,7 +4,9 @@
 #include "vm/method.h"
 #include "module_def.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 // Helper to append class full name recursively (namespace + name, handling nested types)
@@ -249,4 +251,5 @@ RtResultVoid MetadataName::append_method_full_name_with_params(utils::StringBuil
 //     RET_OK(sb.dup_to_zero_end_cstr());
 // }
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

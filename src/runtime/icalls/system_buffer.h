@@ -2,7 +2,9 @@
 
 #include "vm/internal_calls.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemBuffer
@@ -20,4 +22,5 @@ class SystemBuffer
     static RtResult<bool> internal_block_copy(vm::RtArray* src, int32_t src_offset, vm::RtArray* dst, int32_t dst_offset, int32_t count);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

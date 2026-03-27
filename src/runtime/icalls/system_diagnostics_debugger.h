@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemDiagnosticsDebugger
@@ -20,4 +22,5 @@ class SystemDiagnosticsDebugger
     static RtResultVoid log_icall(int32_t level, vm::RtString** category, vm::RtString** message);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

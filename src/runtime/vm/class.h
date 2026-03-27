@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 struct CorLibTypes
 {
@@ -238,4 +240,5 @@ class Class
     static RtResultVoid setup_events_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_vtable_typedef(metadata::RtClass* klass);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionEventInfo
@@ -13,4 +15,5 @@ class SystemReflectionEventInfo
     static RtResult<vm::RtReflectionEventInfo*> internal_from_handle_type(metadata::RtEventInfo* event, const metadata::RtTypeSig* type_sig);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionAssemblyName
@@ -15,4 +17,5 @@ class SystemReflectionAssemblyName
     static RtResult<metadata::RtMonoAssemblyName*> get_native_name(metadata::RtAssembly* ass);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

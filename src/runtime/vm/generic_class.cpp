@@ -9,7 +9,9 @@
 #include "metadata/module_def.h"
 #include "alloc/metadata_allocation.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 using namespace leanclr::metadata;
 using namespace leanclr::core;
@@ -395,4 +397,5 @@ RtResultVoid GenericClass::setup_vtables(RtClass* klass)
     RET_VOID_OK();
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

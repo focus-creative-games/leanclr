@@ -1,6 +1,8 @@
 #pragma once
 
-namespace leanclr::log
+namespace leanclr
+{
+namespace log
 {
 
 #define LOG_LEVEL_DEBUG 0
@@ -27,4 +29,5 @@ class InternalLogger
     static void error(const char* message);
     static void fatal(const char* message);
 };
-} // namespace leanclr::log
+} // namespace log
+} // namespace leanclr

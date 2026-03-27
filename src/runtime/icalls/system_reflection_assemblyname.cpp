@@ -4,7 +4,9 @@
 #include "vm/type.h"
 #include <cstring>
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<bool> SystemReflectionAssemblyName::parse_assembly_name(intptr_t name_cstr, metadata::RtMonoAssemblyName* aname, bool* is_version_defined,
@@ -89,4 +91,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionAssemblyName::get_internal_ca
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

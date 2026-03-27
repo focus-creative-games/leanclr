@@ -3,7 +3,9 @@
 #include "build_config.h"
 #include "alloc/general_allocation.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 
 template <typename T>
@@ -71,4 +73,5 @@ class SafeGPtrArray
         _length = 0;
     }
 };
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

@@ -1,7 +1,9 @@
 #include "metadata_hash.h"
 #include "utils/hash_util.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 size_t MetadataHash::hash_type_sig_ignore_attrs(const RtTypeSig* a)
 {
@@ -46,4 +48,5 @@ size_t MetadataHash::hash_type_sig_ignore_attrs(const RtTypeSig* a)
     }
     return h;
 }
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

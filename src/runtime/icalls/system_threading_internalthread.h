@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 class SystemThreadingInternalThread
 {
@@ -13,4 +15,5 @@ class SystemThreadingInternalThread
     static RtResultVoid thread_free_internal(vm::RtInternalThread* this_thread);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

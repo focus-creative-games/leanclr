@@ -8,7 +8,9 @@
 #include "utils/string_util.h"
 #include "metadata/module_def.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 namespace
@@ -163,4 +165,5 @@ utils::Span<metadata::RtModuleDef*> AppDomain::get_modules()
 {
     return metadata::RtModuleDef::get_registered_modules();
 }
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

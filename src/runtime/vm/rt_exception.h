@@ -2,12 +2,16 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 struct InterpFrame;
 }
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Exception
 {
@@ -17,7 +21,7 @@ class Exception
     static RtException* get_and_clear_current_exception();
     static RtException* raise_error_as_exception(RtErr err, interp::InterpFrame* frame, const void* ip);
     static RtException* raise_aot_error_as_exception(RtErr err, const metadata::RtMethodInfo* methodInfo, int32_t ip);
-    static RtException* raise_aot_exception( RtException* ex, const metadata::RtMethodInfo* methodInfo, int32_t ip);
+    static RtException* raise_aot_exception(RtException* ex, const metadata::RtMethodInfo* methodInfo, int32_t ip);
     static void raise_internal_runtime_error_as_exception(RtErr err, const char* message);
     static RtException* raise_exception(RtException* ex, interp::InterpFrame* frame, const void* ip);
     static RtException* raise_internal_runtime_exception(metadata::RtClass* ex_klass, const char* message);
@@ -42,4 +46,5 @@ class Exception
         RET_ERR(RtErr::ManagedException);                                   \
     } while (0)
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -5,7 +5,9 @@
 #include "vm/rt_string.h"
 #include "vm/class.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<bool> SystemCurrentSystemTimeZone::get_time_zone_data(int32_t year, vm::RtArray** data, vm::RtArray** names, bool* daylight)
@@ -66,4 +68,5 @@ utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_cal
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

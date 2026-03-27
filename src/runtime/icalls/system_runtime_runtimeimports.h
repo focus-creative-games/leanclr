@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemRuntimeRuntimeImports
@@ -23,4 +25,5 @@ class SystemRuntimeRuntimeImports
     static utils::Span<vm::InternalCallEntry> get_internal_call_entries();
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

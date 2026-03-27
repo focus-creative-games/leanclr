@@ -25,7 +25,9 @@
 #include "utils/hashmap.h"
 #include "utils/string_builder.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 namespace
 {
@@ -479,4 +481,5 @@ RtResult<RtObject*> Reflection::invoke_method(const metadata::RtMethodInfo* meth
     return Runtime::invoke_array_arguments_with_run_cctor(method, obj, params);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

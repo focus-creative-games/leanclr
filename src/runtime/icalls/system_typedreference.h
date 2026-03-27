@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 class SystemTypedReference
 {
@@ -15,4 +17,5 @@ class SystemTypedReference
     static RtResult<vm::RtObject*> internal_to_object(const vm::RtTypedReference* typed_ref);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

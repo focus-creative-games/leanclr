@@ -10,7 +10,9 @@
 #include "rt_exception.h"
 #include "interp/eval_stack_op.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 using PInvokeFunction = metadata::RtManagedMethodPointer;

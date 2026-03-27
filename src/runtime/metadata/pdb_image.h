@@ -6,7 +6,9 @@
 #include "utils/hashmap.h"
 #include "utils/rt_span.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 struct IR2ILMapEntry
 {
@@ -82,4 +84,5 @@ class PdbImage
         return document ? document->sourceFiles : nullptr;
     }
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

@@ -4,7 +4,9 @@
 #include "interp/eval_stack_op.h"
 #include "vm/object.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 using namespace leanclr::metadata;
 using namespace leanclr::interp;
@@ -132,4 +134,5 @@ utils::Span<vm::IntrinsicEntry> SystemThreadingInterlocked::get_intrinsic_entrie
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, sizeof(s_intrinsic_entries) / sizeof(vm::IntrinsicEntry));
 }
 
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

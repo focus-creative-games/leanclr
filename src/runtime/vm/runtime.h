@@ -3,7 +3,9 @@
 #include "rt_managed_types.h"
 #include "interp/interp_defs.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 class Runtime
@@ -35,4 +37,5 @@ class Runtime
 
   private:
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

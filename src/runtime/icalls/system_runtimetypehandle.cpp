@@ -11,7 +11,9 @@
 #include "interp/interp_defs.h"
 #include "metadata/module_def.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // Implementation functions
@@ -533,4 +535,5 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeTypeHandle::get_internal_call_en
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

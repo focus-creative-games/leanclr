@@ -12,7 +12,9 @@
 #include "metadata/metadata_cache.h"
 #include "utils/string_builder.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 RtResult<bool> Type::is_value_type(const metadata::RtTypeSig* typeSig)
 {
@@ -740,4 +742,5 @@ RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, meta
 
     RET_VOID_OK();
 }
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -3,7 +3,9 @@
 #include "rt_metadata.h"
 #include "utils/string_builder.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 class MetadataName
 {
@@ -17,4 +19,5 @@ class MetadataName
     // static RtResult<const char*> build_method_full_name_with_params(const RtMethodInfo* method);
     // static RtResult<const char*> build_method_full_name_without_params(const RtMethodInfo* method);
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

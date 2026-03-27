@@ -3,7 +3,9 @@
 #include "icall_base.h"
 #include "alloc/general_allocation.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResultVoid MonoRuntimeMarshal::free_assembly_name(metadata::RtMonoAssemblyName* aname, bool free_struct)
@@ -39,4 +41,5 @@ utils::Span<vm::InternalCallEntry> MonoRuntimeMarshal::get_internal_call_entries
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "platform/architecture.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<vm::RtString*> SystemRuntimeInteropServicesRuntimeInformation::get_runtime_architecture()
@@ -50,4 +52,5 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesRuntimeInformatio
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

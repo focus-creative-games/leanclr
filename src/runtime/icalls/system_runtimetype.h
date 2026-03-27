@@ -3,7 +3,9 @@
 #include "icall_base.h"
 #include "utils/safegptrarray.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemRuntimeType
@@ -46,4 +48,5 @@ class SystemRuntimeType
     static RtResult<vm::RtString*> get_namespace(vm::RtReflectionRuntimeType* runtime_type);
     static RtResult<vm::RtArray*> get_interfaces(vm::RtReflectionRuntimeType* runtime_type);
 };
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

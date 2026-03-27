@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Reflection
 {
@@ -19,4 +21,5 @@ class Reflection
     static RtResult<RtReflectionModule*> get_module_reflection_object(metadata::RtModuleDef* mod);
     static RtResult<RtObject*> invoke_method(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params, RtObject** out_ex);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

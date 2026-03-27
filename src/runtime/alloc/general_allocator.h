@@ -5,7 +5,9 @@
 
 #include "general_allocation.h"
 
-namespace leanclr::alloc
+namespace leanclr
+{
+namespace alloc
 {
 
 template <typename T>
@@ -76,4 +78,5 @@ class GeneralAllocator
     }
 };
 
-} // namespace leanclr::alloc
+} // namespace alloc
+} // namespace leanclr

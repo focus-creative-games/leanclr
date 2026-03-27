@@ -7,7 +7,9 @@
 #include "utils/string_util.h"
 #include "metadata/metadata_name.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Static maps for internal call functions
@@ -101,4 +103,5 @@ void PInvokes::initialize()
     }
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

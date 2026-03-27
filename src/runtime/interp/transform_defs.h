@@ -2,7 +2,9 @@
 
 #include "interp_defs.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 // Extra value union for instruction data
 

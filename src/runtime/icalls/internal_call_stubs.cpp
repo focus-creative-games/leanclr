@@ -61,7 +61,9 @@
 #include "system_mathf.h"
 #include "interop.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 template <typename T>
@@ -143,4 +145,5 @@ void InternalCallStubs::get_newobj_internal_call_entries(utils::Vector<vm::Newob
     Append(entries, SystemString::get_newobj_internal_call_entries());
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

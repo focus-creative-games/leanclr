@@ -2,7 +2,9 @@
 
 #include "vm/intrinsics.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 class SystemObject
 {
@@ -14,4 +16,5 @@ class SystemObject
     static utils::Span<vm::IntrinsicEntry> get_intrinsic_entries();
     static utils::Span<vm::NewobjIntrinsicEntry> get_newobj_intrinsic_entries();
 };
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

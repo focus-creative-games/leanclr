@@ -6,7 +6,9 @@
 
 #include "alloc/general_allocation.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 class MemOp
 {
@@ -197,4 +199,5 @@ class MemOp
         return dst;
     }
 };
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

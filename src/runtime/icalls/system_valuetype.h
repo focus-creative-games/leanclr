@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemValueType
@@ -15,4 +17,5 @@ class SystemValueType
     static RtResult<int32_t> internal_get_hash_code(vm::RtObject* obj, vm::RtArray** uncompared_field_objs);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

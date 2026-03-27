@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemDelegate
@@ -21,4 +23,5 @@ class SystemDelegate
     static RtResult<vm::RtMulticastDelegate*> alloc_delegate_like_internal(vm::RtDelegate* source);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

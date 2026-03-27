@@ -4,7 +4,9 @@
 #include "vm/rt_managed_types.h"
 #include "vm/rt_thread.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // Thread cleanup
@@ -33,4 +35,5 @@ utils::Span<vm::InternalCallEntry> SystemThreadingInternalThread::get_internal_c
     return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

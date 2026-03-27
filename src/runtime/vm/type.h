@@ -2,7 +2,9 @@
 #include "rt_managed_types.h"
 #include "utils/string_builder.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 struct AssemblyQualifiedNames
@@ -45,4 +47,5 @@ class Type
     static RtResultVoid parse_assembly_name(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info, bool* is_version_defined,
                                             bool* is_token_defined);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

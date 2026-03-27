@@ -5,7 +5,9 @@
 #include "vm/intrinsics.h"
 #include "vm/rt_managed_types.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 class SystemArray
 {
@@ -24,4 +26,5 @@ class SystemArray
 
     static utils::Span<vm::IntrinsicEntry> get_intrinsic_entries();
 };
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

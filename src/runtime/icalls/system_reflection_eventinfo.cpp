@@ -3,7 +3,9 @@
 #include "vm/class.h"
 #include "vm/reflection.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_handle_type(metadata::RtEventInfo* event, const metadata::RtTypeSig* type_sig)
@@ -48,4 +50,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionEventInfo::get_internal_call_
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -4,7 +4,9 @@
 #include "vm/object.h"
 #include "vm/rt_string.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, EncodedTokenId token, const RtTypeSig* typeSig)
@@ -46,4 +48,5 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
     }
 }
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

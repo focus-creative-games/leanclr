@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemMath
@@ -38,4 +40,5 @@ class SystemMath
     static RtResult<double> modf(double value, double* intpart);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

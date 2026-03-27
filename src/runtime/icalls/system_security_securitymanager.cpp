@@ -1,6 +1,8 @@
 #include "system_security_securitymanager.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<bool> SystemSecuritySecurityManager::get_security_enabled()
@@ -25,4 +27,5 @@ utils::Span<vm::InternalCallEntry> SystemSecuritySecurityManager::get_internal_c
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 class SystemType
 {
@@ -11,4 +13,5 @@ class SystemType
 
     static RtResult<vm::RtReflectionType*> internal_from_handle(size_t handle);
 };
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

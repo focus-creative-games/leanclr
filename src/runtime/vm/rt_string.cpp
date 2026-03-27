@@ -10,7 +10,9 @@
 #include "utils/hashset.h"
 #include "utils/hash_util.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 static metadata::RtClass* g_stringClass = nullptr;
@@ -180,4 +182,5 @@ bool String::is_interned_string(RtString* s)
     return g_internTable.find(s) != g_internTable.end();
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

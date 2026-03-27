@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionRuntimeConstructorInfo
@@ -18,4 +20,5 @@ class SystemReflectionRuntimeConstructorInfo
                                                    vm::RtObject** out_exc);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

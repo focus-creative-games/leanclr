@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class MonoRuntimeClassHandle
@@ -14,4 +16,5 @@ class MonoRuntimeClassHandle
     static RtResult<const metadata::RtTypeSig*> get_type_from_class(metadata::RtClass* klass);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

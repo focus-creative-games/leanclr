@@ -2,7 +2,9 @@
 
 #include "module_def.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 uint32_t RtMetadata::encode_gid_by_rid(RtModuleDef& module, uint32_t rid)
@@ -11,4 +13,5 @@ uint32_t RtMetadata::encode_gid_by_rid(RtModuleDef& module, uint32_t rid)
     return (module.get_id() << MODULE_ID_SHIFT_AMOUNT) | rid;
 }
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

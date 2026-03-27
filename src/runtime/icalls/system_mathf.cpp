@@ -2,7 +2,9 @@
 
 #include <cmath>
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<float> SystemMathF::acos(float value)
@@ -367,4 +369,5 @@ utils::Span<vm::InternalCallEntry> SystemMathF::get_internal_call_entries()
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemGC
@@ -24,4 +26,5 @@ class SystemGC
     static RtResult<int64_t> get_total_memory(bool force_full_collection);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

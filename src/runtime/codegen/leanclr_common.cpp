@@ -2,7 +2,9 @@
 #include "vm/object.h"
 #include "metadata/module_def.h"
 
-namespace leanclr::codegen
+namespace leanclr
+{
+namespace codegen
 {
 
 vm::RtString* resolve_string_literal(metadata::RtModuleDef* mod, uint32_t token)
@@ -142,4 +144,5 @@ void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const m
     }
     }
 }
-} // namespace leanclr::codegen
+} // namespace codegen
+} // namespace leanclr

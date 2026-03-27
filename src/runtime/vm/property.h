@@ -3,7 +3,9 @@
 #include "rt_managed_types.h"
 #include "utils/rt_vector.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Property
 {
@@ -14,4 +16,5 @@ class Property
     static RtResult<vm::RtObject*> get_const_object(const metadata::RtPropertyInfo* property);
     static RtResultVoid get_property_modifiers(const metadata::RtPropertyInfo* property, bool optional, utils::Vector<metadata::RtClass*>& modifiers);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

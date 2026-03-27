@@ -2,11 +2,14 @@
 
 #include "vm/rt_managed_types.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 class MetadataConst
 {
   public:
     static RtResult<vm::RtObject*> decode_const_object(RtModuleDef* mod, EncodedTokenId token, const RtTypeSig* typeSig);
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

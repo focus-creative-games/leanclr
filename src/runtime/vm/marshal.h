@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Marshal
 {
@@ -42,4 +44,5 @@ class Marshal
     static int32_t get_last_win32_error();
     static void set_last_win32_error(int32_t error);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

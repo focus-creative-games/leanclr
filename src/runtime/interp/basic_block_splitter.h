@@ -6,7 +6,9 @@
 #include "alloc/mem_pool.h"
 #include "il_opcodes.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 class BasicBlockSplitter
 {
@@ -30,4 +32,5 @@ class BasicBlockSplitter
     uint32_t* _valid_il_offsets;
     size_t _valid_il_offsets_count;
 };
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

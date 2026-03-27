@@ -2,7 +2,9 @@
 
 #include "rt_base.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 enum class TableType : uint8_t
@@ -416,4 +418,5 @@ struct RtToken
     }
 };
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

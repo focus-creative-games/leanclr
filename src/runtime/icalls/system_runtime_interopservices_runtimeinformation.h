@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemRuntimeInteropServicesRuntimeInformation
@@ -14,4 +16,5 @@ class SystemRuntimeInteropServicesRuntimeInformation
     static RtResult<vm::RtString*> get_os_name();
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

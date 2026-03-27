@@ -6,7 +6,9 @@
 #include <cstring>
 #include <wctype.h>
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // CompareOptions enum values
@@ -152,4 +154,5 @@ utils::Span<vm::InternalCallEntry> SystemGlobalizationCompareInfo::get_internal_
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

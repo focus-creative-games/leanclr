@@ -3,7 +3,9 @@
 #include <cstddef>
 #include <cstdint>
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 template <typename T>
 class Span
@@ -55,4 +57,5 @@ class Span
 using ByteSpan = Span<uint8_t>;
 using ConstByteSpan = Span<const uint8_t>;
 
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

@@ -3,7 +3,9 @@
 #include "icall_base.h"
 #include "vm/stacktrace.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<bool> SystemDiagnosticsStackFrame::get_frame_info(int32_t skip, bool need_file_info, vm::RtReflectionMethod** method, int32_t* il_offset,
@@ -42,4 +44,5 @@ utils::Span<vm::InternalCallEntry> SystemDiagnosticsStackFrame::get_internal_cal
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

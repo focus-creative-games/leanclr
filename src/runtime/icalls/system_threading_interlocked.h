@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemThreadingInterlocked
@@ -47,4 +49,5 @@ class SystemThreadingInterlocked
     static RtResult<int64_t> read(int64_t* location);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

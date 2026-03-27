@@ -2,7 +2,9 @@
 
 #include "rt_metadata.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class ArrayClass
 {
@@ -24,4 +26,5 @@ class ArrayClass
     // Interface method initialization
     static RtResultVoid initialize_array_interface_methods();
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

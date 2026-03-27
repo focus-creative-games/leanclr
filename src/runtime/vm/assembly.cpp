@@ -13,7 +13,9 @@
 #include "reflection.h"
 #include "log/internal_logger.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 RtResult<metadata::RtAssembly*> Assembly::load_corlib()
@@ -163,4 +165,5 @@ RtResult<RtArray*> Assembly::get_types(metadata::RtAssembly* ass, bool exported_
     RET_OK(types_arr);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "platform/rt_time.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<int64_t> SystemThreadingTimer::get_time_monotonic()
@@ -30,4 +32,5 @@ utils::Span<vm::InternalCallEntry> SystemThreadingTimer::get_internal_call_entri
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

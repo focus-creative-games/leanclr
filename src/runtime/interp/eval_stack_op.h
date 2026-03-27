@@ -2,7 +2,9 @@
 
 #include "interp_defs.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 class EvalStackOp
 {
@@ -34,4 +36,5 @@ class EvalStackOp
     }
 };
 
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

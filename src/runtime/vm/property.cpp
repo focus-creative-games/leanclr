@@ -4,7 +4,9 @@
 #include "metadata/metadata_const.h"
 #include "metadata/module_def.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 bool Property::is_static(const metadata::RtPropertyInfo* property)
@@ -70,4 +72,5 @@ RtResultVoid Property::get_property_modifiers(const metadata::RtPropertyInfo* pr
     return mod->read_property_type_modifier(blobReader, optional, gcc, nullptr, modifiers);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

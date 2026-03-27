@@ -1,6 +1,8 @@
 #include "monitor.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 void Monitor::enter(RtObject* obj)
@@ -39,4 +41,5 @@ bool Monitor::monitor_test_owner(RtObject* obj)
     return true;
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -14,7 +14,9 @@
 #include "metadata/module_def.h"
 #include "metadata/aot_module.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Static function pointers for invokers
@@ -336,4 +338,5 @@ metadata::RtManagedMethodPointer Shim::get_method_pointer(const metadata::RtMeth
     return reinterpret_cast<metadata::RtManagedMethodPointer>(fn_not_implemented_method_pointer);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -5,7 +5,9 @@
 #include "vm/rt_array.h"
 #include "vm/rt_string.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResultVoid SystemReflectionRuntimeEventInfo::get_event_info(vm::RtReflectionEventInfo* ref_event, vm::RtReflectionMonoEventInfo* ref_event_info)
@@ -100,4 +102,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeEventInfo::get_interna
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

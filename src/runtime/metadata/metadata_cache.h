@@ -2,7 +2,9 @@
 
 #include "rt_metadata.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 struct RtTypeSigByValRef
@@ -36,4 +38,5 @@ class MetadataCache
     static RtResult<RtTypeSigByValRef> get_pooled_array_typesigs_by_element_typesig(const RtTypeSig* elementType, uint8_t rank);
     static RtResult<const RtTypeSig*> get_pooled_array_typesig_by_element_typesig(const RtTypeSig* elementType, uint8_t rank, bool byRef);
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

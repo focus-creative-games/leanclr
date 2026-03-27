@@ -6,7 +6,9 @@
 #include <cstdint>
 #include <cstring>
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 class BinaryReader
 {
@@ -332,4 +334,5 @@ class BinaryReader
         return true;
     }
 };
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

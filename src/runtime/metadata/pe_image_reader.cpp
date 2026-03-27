@@ -8,7 +8,9 @@
 #include <cstring>
 #include <optional>
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 struct PEHeader
@@ -149,4 +151,5 @@ RtResult<CliImage*> PeImageReader::ReadCliImage(alloc::MemPool& imagePrivatePool
 }
 
 #undef RET_BAD_IMAGE_ON_FALSE
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

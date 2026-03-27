@@ -81,22 +81,24 @@
 #define LEANCLR_CODEGEN_CHECK_NOT_NULL_OR_THROW_NULL_REFERENCE_EXCEPTION(checkVar, methodInfo, ip)               \
     do                                                                                                           \
     {                                                                                                            \
-        if (!(checkVar))                                                                               \
+        if (!(checkVar))                                                                                         \
         {                                                                                                        \
             leanclr::vm::Exception::raise_aot_error_as_exception(leanclr::RtErr::NullReference, methodInfo, ip); \
             return leanclr::RtErr::ManagedException;                                                             \
         }                                                                                                        \
     } while (0)
 
-#define LEANCLR_CODEGEN_THROW_EXCEPTION(ex, methodInfo, ip)                                   \
-    do                                                                                        \
-    {                                                                                         \
-        LEANCLR_CODEGEN_CHECK_NOT_NULL_OR_THROW_NULL_REFERENCE_EXCEPTION(ex, methodInfo, ip); \
-        leanclr::vm::Exception::raise_aot_exception((leanclr::vm::RtException*)ex, methodInfo, ip);                      \
-        return leanclr::RtErr::ManagedException;                                              \
+#define LEANCLR_CODEGEN_THROW_EXCEPTION(ex, methodInfo, ip)                                         \
+    do                                                                                              \
+    {                                                                                               \
+        LEANCLR_CODEGEN_CHECK_NOT_NULL_OR_THROW_NULL_REFERENCE_EXCEPTION(ex, methodInfo, ip);       \
+        leanclr::vm::Exception::raise_aot_exception((leanclr::vm::RtException*)ex, methodInfo, ip); \
+        return leanclr::RtErr::ManagedException;                                                    \
     } while (0)
 
-namespace leanclr::codegen
+namespace leanclr
+{
+namespace codegen
 {
 
 template <typename T>
@@ -359,4 +361,5 @@ inline intptr_t cast_float_to_intptr(Src value)
     return interp::cast_float_to_intptr<Src, Dst>(value);
 }
 
-} // namespace leanclr::codegen
+} // namespace codegen
+} // namespace leanclr

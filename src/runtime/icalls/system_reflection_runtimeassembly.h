@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionRuntimeAssembly
@@ -54,4 +56,5 @@ class SystemReflectionRuntimeAssembly
     static RtResult<vm::RtObject*> get_files_internal(vm::RtReflectionAssembly* ref_ass, vm::RtString* path, bool get_resource_modules);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

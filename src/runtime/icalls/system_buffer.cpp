@@ -7,7 +7,9 @@ using namespace leanclr::vm;
 using namespace leanclr::metadata;
 using namespace leanclr::interp;
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // Implementation functions
@@ -143,4 +145,5 @@ utils::Span<InternalCallEntry> SystemBuffer::get_internal_call_entries()
     return utils::Span<InternalCallEntry>(s_internal_call_entries, entry_count);
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

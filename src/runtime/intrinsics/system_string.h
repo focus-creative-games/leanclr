@@ -4,7 +4,9 @@
 
 #include "vm/intrinsics.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 class SystemString
 {
@@ -18,4 +20,5 @@ class SystemString
 
     static utils::Span<vm::IntrinsicEntry> get_intrinsic_entries();
 };
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

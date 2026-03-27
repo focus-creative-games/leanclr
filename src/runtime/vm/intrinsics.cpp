@@ -7,7 +7,9 @@
 #include "metadata/metadata_name.h"
 #include "intrinsics/intrinsic_stubs.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Static maps for intrinsic functions
@@ -133,4 +135,5 @@ void Intrinsics::initialize()
         register_newobj_intrinsic(entry.name, entry.invoker);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemArgIterator
@@ -23,4 +25,5 @@ class SystemArgIterator
     static RtResult<intptr_t> int_get_next_arg_type();
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -4,7 +4,9 @@
 
 #include "rt_base.h"
 
-namespace leanclr::misc
+namespace leanclr
+{
+namespace misc
 {
 class RngCryptoServiceProvider
 {
@@ -14,4 +16,5 @@ class RngCryptoServiceProvider
     static intptr_t get_bytes(intptr_t handle, uint8_t* buffer, intptr_t length);
     static void close(intptr_t handle);
 };
-} // namespace leanclr::misc
+} // namespace misc
+} // namespace leanclr

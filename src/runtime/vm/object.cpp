@@ -5,7 +5,9 @@
 #include "rt_managed_types.h"
 #include "rt_array.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Helper: Create a new boxed object for internal use
@@ -336,4 +338,5 @@ RtResult<RtObject*> Object::clone(RtObject* obj)
     RET_OK(result);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

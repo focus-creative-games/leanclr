@@ -2,7 +2,9 @@
 #include "icall_base.h"
 #include "vm/monitor.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResultVoid SystemThreadingMonitor::enter(vm::RtObject* monitor)
@@ -139,4 +141,5 @@ utils::Span<vm::InternalCallEntry> SystemThreadingMonitor::get_internal_call_ent
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

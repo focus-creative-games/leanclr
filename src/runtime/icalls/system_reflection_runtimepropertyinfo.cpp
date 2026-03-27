@@ -6,7 +6,9 @@
 #include "vm/rt_array.h"
 #include "vm/rt_string.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // ========== PInfo enum ==========
@@ -204,4 +206,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimePropertyInfo::get_inte
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, entry_count);
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

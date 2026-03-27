@@ -2,7 +2,9 @@
 
 #include "vm/intrinsics.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 
 class SystemNumericsVector
@@ -14,4 +16,5 @@ class SystemNumericsVector
     static RtResult<bool> get_is_hardware_accelerated();
 };
 
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

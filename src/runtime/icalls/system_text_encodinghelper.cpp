@@ -3,7 +3,9 @@
 #include "icall_base.h"
 #include "vm/rt_string.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 using namespace metadata;
@@ -34,4 +36,5 @@ utils::Span<vm::InternalCallEntry> SystemTextEncodingHelper::get_internal_call_e
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

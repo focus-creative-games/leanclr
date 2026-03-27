@@ -9,7 +9,9 @@
 #include "general_allocation.h"
 #include "utils/mem_op.h"
 
-namespace leanclr::alloc
+namespace leanclr
+{
+namespace alloc
 {
 class MemPool
 {
@@ -176,4 +178,5 @@ class MemPool
         }
     }
 };
-} // namespace leanclr::alloc
+} // namespace alloc
+} // namespace leanclr

@@ -26,7 +26,9 @@
 #include "interp/machine_state.h"
 #include "utils/rt_vector.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Helper structure for managing temporary buffers during method invocation
@@ -552,4 +554,5 @@ RtResultVoid Runtime::invoke_stackobject_arguments_with_run_cctor(const metadata
     return invoke_stackobject_arguments_without_run_cctor(method, params, ret);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -4,7 +4,9 @@
 #include "vm/generic_class.h"
 #include "metadata/module_def.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 using namespace leanclr::utils;
 
@@ -147,4 +149,5 @@ RtResult<SizeAndAlignment> Layout::compute_explicit_layout(RtModuleDef* mod, uti
     RET_OK(result);
 }
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

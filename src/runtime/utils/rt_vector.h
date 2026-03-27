@@ -10,7 +10,9 @@
 
 #include "alloc/general_allocator.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 
 template <typename T, typename Allocator = alloc::GeneralAllocator<T>>
@@ -297,4 +299,5 @@ class Vector
     size_t capacity_;
 };
 
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

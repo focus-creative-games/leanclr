@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Monitor
 {
@@ -17,4 +19,5 @@ class Monitor
     static void monitor_try_enter_with_atomic_var(RtObject* obj, int32_t timeout, bool* lock_taken);
     static bool monitor_test_owner(RtObject* obj);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

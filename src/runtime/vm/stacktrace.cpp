@@ -9,7 +9,9 @@
 #include "interp/machine_state.h"
 #include "metadata/module_def.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 static bool is_frame_should_be_counted_to_stacktrace(const interp::InterpFrame* frame)
@@ -143,4 +145,5 @@ RtResult<RtArray*> StackTrace::get_stack_trace(RtException* ex, int32_t skip_fra
 
     RET_OK(result_array);
 }
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

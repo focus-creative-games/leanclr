@@ -2,7 +2,9 @@
 
 #include "vm/internal_calls.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemArray
@@ -23,4 +25,5 @@ class SystemArray
     static RtResultVoid clear_internal(vm::RtArray* arr, int32_t index, int32_t length);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

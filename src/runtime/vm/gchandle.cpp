@@ -5,7 +5,9 @@
 #include "metadata/metadata_cache.h"
 #include "alloc/general_allocation.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 enum class GCHandleType : int32_t
 {
@@ -158,4 +160,5 @@ bool GCHandle::is_type_pinned(metadata::RtClass* klass)
     return Class::is_string_class(klass) || Class::is_blittable(klass);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -3,7 +3,9 @@
 #include "rt_metadata.h"
 #include "utils/rt_vector.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 struct SizeAndAlignment
 {
@@ -19,4 +21,5 @@ class Layout
     static RtResult<SizeAndAlignment> compute_layout(utils::Vector<const RtFieldInfo*>& fields, uint32_t parentSize, uint8_t parentAlignment, uint8_t packing);
     static RtResult<SizeAndAlignment> compute_explicit_layout(RtModuleDef* mod, utils::Vector<const RtFieldInfo*>& fields, uint8_t packing);
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

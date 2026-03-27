@@ -1,6 +1,8 @@
 #include "system_threading_volatile.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<int64_t> SystemThreadingVolatile::read_i64(const int64_t* location)
@@ -127,4 +129,5 @@ utils::Span<vm::InternalCallEntry> SystemThreadingVolatile::get_internal_call_en
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

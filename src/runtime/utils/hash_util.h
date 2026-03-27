@@ -1,6 +1,8 @@
 #pragma once
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 class HashUtil
 {
@@ -11,4 +13,5 @@ class HashUtil
     }
 };
 
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

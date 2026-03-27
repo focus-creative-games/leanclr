@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionCustomAttributeData
@@ -14,4 +16,5 @@ class SystemReflectionCustomAttributeData
                                                    vm::RtArray** typed_arg_arr_ptr, vm::RtArray** named_arg_arr_ptr);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

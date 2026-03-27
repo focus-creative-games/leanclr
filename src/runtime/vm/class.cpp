@@ -19,7 +19,9 @@
 #include "shim.h"
 #include "customattribute.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 RtResult<metadata::RtClass*> get_class_must_exist(metadata::RtModuleDef* corlib, const char* full_name)
@@ -2325,4 +2327,5 @@ bool Class::is_pointer_element_compatible_with(metadata::RtClass* fromClass, met
     return fromClass->cast_class == toClass->cast_class;
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

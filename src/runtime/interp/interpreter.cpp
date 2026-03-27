@@ -18,7 +18,9 @@
 #include "vm/rt_exception.h"
 #include "vm/enum.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 
 static RtResult<const RtInterpMethodInfo*> transform(const metadata::RtMethodInfo* method)
@@ -8146,4 +8148,5 @@ unwind_exception_handler:
 end_loop:
     RET_OK(ret);
 }
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

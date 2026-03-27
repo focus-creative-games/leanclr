@@ -3,7 +3,9 @@
 #include "general_allocation.h"
 #include "mem_pool.h"
 
-namespace leanclr::alloc
+namespace leanclr
+{
+namespace alloc
 {
 class MetadataAllocation
 {
@@ -44,4 +46,5 @@ class MetadataAllocation
   private:
     static MemPool s_memPool;
 };
-} // namespace leanclr::alloc
+} // namespace alloc
+} // namespace leanclr

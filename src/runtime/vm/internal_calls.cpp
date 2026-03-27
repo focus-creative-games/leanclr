@@ -7,7 +7,9 @@
 #include "metadata/metadata_name.h"
 #include "icalls/internal_call_stubs.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Static maps for internal call functions
@@ -139,4 +141,5 @@ void InternalCalls::initialize()
         register_newobj_internal_call(entry.name, entry.invoker);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

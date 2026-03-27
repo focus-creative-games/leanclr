@@ -7,7 +7,9 @@
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 static int32_t s_exit_code = 0;
@@ -206,4 +208,5 @@ int32_t Environment::get_page_size()
     return 4096;
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -3,7 +3,9 @@
 #include "icall_base.h"
 #include "vm/rt_exception.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResultVoid SystemException::report_unhandled_exception(vm::RtException* exception)
@@ -29,4 +31,5 @@ utils::Span<vm::InternalCallEntry> SystemException::get_internal_call_entries()
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

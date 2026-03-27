@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Thread priority levels
@@ -58,4 +60,5 @@ class Thread
     static void set_priority_native(RtThread* thread, int32_t priority);
 };
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

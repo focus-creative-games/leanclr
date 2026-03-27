@@ -4,7 +4,9 @@
 #include <cstring>
 #include "alloc/general_allocation.h"
 
-namespace leanclr::misc
+namespace leanclr
+{
+namespace misc
 {
 
 namespace
@@ -80,4 +82,5 @@ void RngCryptoServiceProvider::close(intptr_t handle)
 {
     alloc::GeneralAllocation::free(reinterpret_cast<void*>(handle));
 }
-} // namespace leanclr::misc
+} // namespace misc
+} // namespace leanclr

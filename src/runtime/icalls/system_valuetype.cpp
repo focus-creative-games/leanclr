@@ -8,7 +8,9 @@
 #include "vm/rt_array.h"
 #include "utils/rt_vector.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 template <typename T>
@@ -471,4 +473,5 @@ utils::Span<vm::InternalCallEntry> SystemValueType::get_internal_call_entries()
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

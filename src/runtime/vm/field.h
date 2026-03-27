@@ -6,7 +6,9 @@
 #include "utils/binary_reader.h"
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Field
 {
@@ -78,4 +80,5 @@ class Field
     // Get field modifiers
     static RtResultVoid get_field_modifiers(const metadata::RtFieldInfo* field, bool optional, utils::Vector<metadata::RtClass*>& modifiers);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

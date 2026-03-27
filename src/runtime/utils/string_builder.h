@@ -6,7 +6,9 @@
 #include "alloc/general_allocation.h"
 #include "string_util.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 
 class StringBuilder
@@ -272,4 +274,5 @@ class StringBuilder
     }
 };
 
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

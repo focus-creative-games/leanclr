@@ -4,7 +4,9 @@
 #include "metadata/rt_metadata.h"
 #include "interp/interp_defs.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Array
 {
@@ -114,4 +116,5 @@ class Array
     // Array cloning
     static RtResult<RtArray*> clone(RtArray* old_arr);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

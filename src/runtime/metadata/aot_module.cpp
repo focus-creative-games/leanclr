@@ -2,7 +2,9 @@
 #include "utils/hashmap.h"
 #include "utils/string_util.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 utils::HashMap<const char*, const RtAotModuleData*, utils::CStrHasher, utils::CStrCompare> s_aotModuleMap;
@@ -67,4 +69,5 @@ const RtAotMethodDefData* AotModule::find_aot_method_def_impl(const RtModuleDef*
     return nullptr;
 }
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

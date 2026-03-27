@@ -11,7 +11,9 @@
 #include "metadata/module_def.h"
 #include "metadata/metadata_cache.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<int32_t> SystemReflectionRuntimeModule::get_metadata_token(vm::RtReflectionModule* module)
@@ -556,4 +558,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeModule::get_internal_c
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

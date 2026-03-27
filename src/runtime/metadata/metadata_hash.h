@@ -5,7 +5,9 @@
 
 // Type signature hashing (from metadata_hash.rs)
 // Forward declaration for RtTypeSig
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 class MetadataHash
@@ -56,4 +58,5 @@ struct GenericMethodHash
     }
 };
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

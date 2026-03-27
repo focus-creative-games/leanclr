@@ -3,7 +3,9 @@
 #include "icall_base.h"
 #include "vm/class.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<const metadata::RtTypeSig*> MonoRuntimeClassHandle::get_type_from_class(metadata::RtClass* klass)
@@ -29,4 +31,5 @@ utils::Span<vm::InternalCallEntry> MonoRuntimeClassHandle::get_internal_call_ent
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

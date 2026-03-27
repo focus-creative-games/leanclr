@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class StackTrace
 {
@@ -15,4 +17,5 @@ class StackTrace
 
     static RtResult<RtArray*> get_stack_trace(RtException* ex, int32_t skip_frames, bool need_file_info);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

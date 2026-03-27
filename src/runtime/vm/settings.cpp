@@ -1,7 +1,9 @@
 #include "settings.h"
 #include "utils/string_builder.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 static void default_debugger_log_function(int32_t level, const uint16_t* category, size_t category_len, const uint16_t* message, size_t message_len);
 
@@ -124,4 +126,5 @@ void Settings::set_default_frame_stack_size(size_t size)
     g_default_frame_stack_size = size;
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

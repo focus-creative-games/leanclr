@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionRuntimeModule
@@ -51,4 +53,5 @@ class SystemReflectionRuntimeModule
     static RtResult<vm::RtArray*> resolve_signature(metadata::RtModuleDef* module, int32_t token, int32_t* error);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

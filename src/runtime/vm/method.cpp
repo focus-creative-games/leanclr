@@ -19,7 +19,9 @@
 #include "metadata/module_def.h"
 #include "interp/interp_defs.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 using namespace leanclr::metadata;
 using namespace leanclr::core;
@@ -671,4 +673,5 @@ RtResultVoid Method::get_parameter_modifiers(const RtMethodInfo* method, int32_t
     return mod->read_parameter_modifier(reader, index, optional, RtGenericContainerContext{}, nullptr, modifiers);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

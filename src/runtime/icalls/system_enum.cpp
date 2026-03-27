@@ -5,7 +5,9 @@
 #include "vm/object.h"
 #include "vm/reflection.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // ========== Enum comparison result enum ==========
@@ -248,4 +250,5 @@ utils::Span<vm::InternalCallEntry> SystemEnum::get_internal_call_entries()
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, std::size(s_internal_call_entries));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

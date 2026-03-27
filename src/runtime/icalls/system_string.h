@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 class SystemString
 {
@@ -23,4 +25,5 @@ class SystemString
     static RtResult<vm::RtString*> internal_intern(vm::RtString* s);
     static RtResult<vm::RtString*> internal_is_interned(vm::RtString* s);
 };
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -4,7 +4,9 @@
 #include "utils/rt_span.h"
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 struct FileData
@@ -46,4 +48,5 @@ class Settings
     static const metadata::RtAotModulesData* get_aot_modules_data();
     static void set_aot_modules_data(const metadata::RtAotModulesData* modules_data);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

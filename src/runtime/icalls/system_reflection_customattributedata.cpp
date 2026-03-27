@@ -3,7 +3,9 @@
 #include "vm/customattribute.h"
 #include "utils/binary_reader.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResultVoid SystemReflectionCustomAttributeData::resolve_arguments_internal(vm::RtReflectionMethod* ctor, vm::RtReflectionAssembly* ctor_assembly,
@@ -48,4 +50,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionCustomAttributeData::get_inte
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

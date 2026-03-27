@@ -3,7 +3,9 @@
 #include "interp/eval_stack_op.h"
 #include "vm/rt_array.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 
 RtResult<int32_t> SystemArray::get_length(vm::RtArray* arr)
@@ -98,4 +100,5 @@ utils::Span<vm::IntrinsicEntry> SystemArray::get_intrinsic_entries()
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, sizeof(s_intrinsic_entries) / sizeof(vm::IntrinsicEntry));
 }
 
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

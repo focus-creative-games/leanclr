@@ -3,7 +3,9 @@
 #include "rt_managed_types.h"
 #include <tuple>
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Enum
 {
@@ -19,4 +21,5 @@ class Enum
     // Get hash code of enum object
     static RtResult<int32_t> get_hash_code(RtObject* obj);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

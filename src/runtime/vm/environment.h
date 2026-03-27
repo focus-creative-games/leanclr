@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 enum class Platform
 {
@@ -48,4 +50,5 @@ class Environment
     static int32_t get_processor_count();
     static int32_t get_page_size();
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

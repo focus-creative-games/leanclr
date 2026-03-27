@@ -4,7 +4,9 @@
 #include "vm/object.h"
 #include "vm/reflection.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 /// @icall: System.Object::InternalGetHashCode
@@ -75,4 +77,5 @@ utils::Span<vm::InternalCallEntry> SystemObject::get_internal_call_entries()
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -7,7 +7,9 @@
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 static int32_t s_last_win32_error = 0;
@@ -162,4 +164,5 @@ void Marshal::set_last_win32_error(int32_t error)
     s_last_win32_error = error;
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

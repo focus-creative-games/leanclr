@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionRuntimeFieldInfo
@@ -38,4 +40,5 @@ class SystemReflectionRuntimeFieldInfo
     static RtResult<vm::RtArray*> get_type_modifiers(vm::RtReflectionField* field, bool optional);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

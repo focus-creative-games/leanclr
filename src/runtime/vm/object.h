@@ -3,7 +3,9 @@
 #include "rt_base.h"
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 class Object
@@ -38,4 +40,5 @@ class Object
     static void extends_to_eval_stack(const void* src, interp::RtStackObject* dst, metadata::RtClass* ele_klass);
 };
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

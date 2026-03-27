@@ -2,7 +2,9 @@
 
 #include "build_config.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 class Platform
 {
@@ -23,4 +25,5 @@ class Platform
 #endif
     }
 };
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

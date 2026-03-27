@@ -12,7 +12,9 @@
 #include "generic_method.h"
 #include "shim.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 using namespace leanclr::utils;
 using namespace leanclr::metadata;
@@ -494,4 +496,5 @@ RtResultVoid ArrayClass::initialize()
     RET_VOID_OK();
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

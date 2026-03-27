@@ -7,7 +7,9 @@
 #include "rt_managed_types.h"
 #include "interp/eval_stack_op.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Constants
@@ -552,4 +554,5 @@ RtResult<RtArray*> Array::clone(RtArray* old_arr)
     RET_OK(new_arr);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

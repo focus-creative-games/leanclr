@@ -3,7 +3,9 @@
 #include "metadata/rt_metadata.h"
 #include "vm/rt_managed_types.h"
 
-namespace leanclr::gc
+namespace leanclr
+{
+namespace gc
 {
 void GarbageCollector::initialize()
 {
@@ -39,4 +41,5 @@ vm::RtObject* GarbageCollector::allocate_array(metadata::RtClass* arrClass, size
 {
     return allocate_object(arrClass, totalBytes);
 }
-} // namespace leanclr::gc
+} // namespace gc
+} // namespace leanclr

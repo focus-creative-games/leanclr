@@ -6,7 +6,9 @@
 #include "interp_defs.h"
 #include "utils/rt_span.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 
 struct InterpFrame
@@ -124,4 +126,5 @@ struct MachineStateSavePoint
     uint32_t _old_frame_stack_top;
 };
 
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

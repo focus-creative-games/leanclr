@@ -3,7 +3,9 @@
 
 #include "module_def.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 typedef RtInvokeMethodPointer AotInvoker;
 
@@ -15,4 +17,5 @@ class AotModule
     static std::optional<RtAotMethodImplData> find_aot_method_impl(const RtMethodInfo* method);
     static const RtAotMethodDefData* find_aot_method_def_impl(const RtModuleDef* module, EncodedTokenId token);
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

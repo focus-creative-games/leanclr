@@ -3,7 +3,9 @@
 #include "rt_metadata.h"
 #include "utils/rt_vector.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 class GenericMetadata
 {
@@ -15,4 +17,5 @@ class GenericMetadata
     // Inflate a class with generic context
     static RtResult<RtClass*> inflate_class(RtClass* klass, const RtGenericContext* genericContext);
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

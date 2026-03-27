@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemThreadingVolatile
@@ -19,4 +21,5 @@ class SystemThreadingVolatile
     static RtResultVoid write_f64(double* location, double value);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

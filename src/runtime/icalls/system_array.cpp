@@ -6,7 +6,9 @@
 #include "vm/array_class.h"
 #include <cstring>
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 /// @icall: System.Array::GetRank
@@ -354,4 +356,5 @@ utils::Span<vm::InternalCallEntry> SystemArray::get_internal_call_entries()
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

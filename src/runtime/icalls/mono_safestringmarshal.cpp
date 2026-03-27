@@ -5,7 +5,9 @@
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 using namespace leanclr::interp;
 using namespace leanclr::vm;
@@ -63,4 +65,5 @@ utils::Span<InternalCallEntry> MonoSafeStringMarshal::get_internal_call_entries(
     return utils::Span<InternalCallEntry>(s_internal_call_entries, entry_count);
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

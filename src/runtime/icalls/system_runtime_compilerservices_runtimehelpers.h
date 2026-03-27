@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 class SystemRuntimeCompilerServicesRuntimeHelpers
 {
@@ -16,4 +18,5 @@ class SystemRuntimeCompilerServicesRuntimeHelpers
     static RtResult<bool> sufficient_execution_stack();
     static RtResultVoid run_module_constructor(intptr_t module_handle);
 };
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemGlobalizationCompareInfo
@@ -18,4 +20,5 @@ class SystemGlobalizationCompareInfo
                                                   int32_t value_length, bool first);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

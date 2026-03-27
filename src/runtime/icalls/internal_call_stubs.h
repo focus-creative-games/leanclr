@@ -4,7 +4,9 @@
 #include "utils/rt_vector.h"
 #include "vm/internal_calls.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 class InternalCallStubs
 {
@@ -13,4 +15,5 @@ class InternalCallStubs
 
     static void get_newobj_internal_call_entries(utils::Vector<vm::NewobjInternalCallEntry>& entries);
 };
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

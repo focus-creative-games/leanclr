@@ -9,7 +9,9 @@
 #include "utils/rt_span.h"
 #include "interp/eval_stack_op.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 using IntrinsicFunction = metadata::RtManagedMethodPointer;

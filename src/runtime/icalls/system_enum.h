@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemEnum
@@ -32,4 +34,5 @@ class SystemEnum
     static RtResult<int32_t> get_hash_code(vm::RtObject* obj);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

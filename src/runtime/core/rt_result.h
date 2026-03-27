@@ -2,7 +2,9 @@
 #include <cassert>
 #include <variant>
 
-namespace leanclr::core
+namespace leanclr
+{
+namespace core
 {
 
 struct Unit
@@ -183,7 +185,8 @@ class ResultVoid
     }
 };
 
-} // namespace leanclr::core
+} // namespace core
+} // namespace leanclr
 
 #define RET_ERR_ON_FAIL(expr)         \
     do                                \

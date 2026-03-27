@@ -8,7 +8,9 @@
 
 #include "alloc/mem_pool.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 
 constexpr std::size_t NOT_FREE_LIST_DEFAULT_CAPACITY = 4;
@@ -176,4 +178,5 @@ class NotFreeList
     alloc::MemPool* pool_;
 };
 
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

@@ -1,7 +1,9 @@
 #pragma once
 #include "rt_base.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 template <typename Src, typename Dst>
 inline int32_t cast_float_to_small_int(Src value)
@@ -38,13 +40,12 @@ inline int64_t cast_float_to_i64(Src value)
 template <typename Src, typename Dst>
 inline intptr_t cast_float_to_intptr(Src value)
 {
-    #if LEANCLR_ARCH_64BIT
+#if LEANCLR_ARCH_64BIT
     return (intptr_t)cast_float_to_i64<Src, Dst>(value);
-    #else
+#else
     return (intptr_t)cast_float_to_i32<Src, Dst>(value);
-    #endif
+#endif
 }
-
 
 // Compiler-agnostic overflow checking wrappers
 // Use built-in functions when available (GCC/Clang), fall back to manual checks for MSVC
@@ -237,4 +238,5 @@ inline bool check_mul_overflow_uintptr(uintptr_t a, uintptr_t b, uintptr_t* resu
 #define CHECK_MUL_OVERFLOW_UINTPTR(a, b, result) leanclr::interp::check_mul_overflow_uintptr(a, b, result)
 #endif
 
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

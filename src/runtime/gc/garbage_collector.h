@@ -2,17 +2,23 @@
 
 #include "rt_base.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 struct RtClass;
 }
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 struct RtObject;
 }
 
-namespace leanclr::gc
+namespace leanclr
+{
+namespace gc
 {
 
 class GarbageCollector
@@ -31,4 +37,5 @@ class GarbageCollector
         *obj_ref_location = new_obj;
     }
 };
-} // namespace leanclr::gc
+} // namespace gc
+} // namespace leanclr

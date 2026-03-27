@@ -3,7 +3,9 @@
 #include "vm/object.h"
 #include "vm/class.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 
 RtResultVoid SystemObject::ctor(vm::RtObject* obj)
@@ -52,4 +54,5 @@ utils::Span<vm::NewobjIntrinsicEntry> SystemObject::get_newobj_intrinsic_entries
     return utils::Span<vm::NewobjIntrinsicEntry>(s_newobj_intrinsic_entries, sizeof(s_newobj_intrinsic_entries) / sizeof(vm::NewobjIntrinsicEntry));
 }
 
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

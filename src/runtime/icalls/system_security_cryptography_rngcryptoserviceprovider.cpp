@@ -2,7 +2,9 @@
 
 #include "misc/rng_crypto_service_provider.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 using namespace interp;
@@ -84,4 +86,5 @@ utils::Span<vm::InternalCallEntry> SystemSecurityCryptographyRNGCryptoServicePro
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

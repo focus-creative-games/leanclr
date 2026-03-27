@@ -10,12 +10,16 @@
 #include "cli_metadata.h"
 #include "utils/binary_reader.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 class MemPool;
 }
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 struct CliSection
@@ -321,4 +325,5 @@ class CliImage
     bool blob_heap_size_4_byte;
 };
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

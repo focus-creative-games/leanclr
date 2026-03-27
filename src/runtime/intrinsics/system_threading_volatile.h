@@ -2,7 +2,9 @@
 
 #include "vm/intrinsics.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 class SystemThreadingVolatile
 {
@@ -41,4 +43,5 @@ class SystemThreadingVolatile
     static RtResultVoid write_f64(double* location, double value);
     static RtResultVoid write_ref(vm::RtObject** location, vm::RtObject* value);
 };
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

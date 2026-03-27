@@ -10,7 +10,9 @@
 #include "metadata/metadata_cache.h"
 #include "metadata/module_def.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<vm::RtReflectionMethodBody*> SystemReflectionRuntimeMethodInfo::get_method_body_internal(const metadata::RtMethodInfo* method)
@@ -464,4 +466,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeMethodInfo::get_intern
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionFieldInfo
@@ -17,4 +19,5 @@ class SystemReflectionFieldInfo
     static RtResult<vm::RtCustomAttribute*> get_marshal_info(vm::RtReflectionField* field);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -5,7 +5,9 @@
 #include "object.h"
 #include "rt_string.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 int32_t Enum::get_enum_long_hash_code(int64_t value)
@@ -199,4 +201,5 @@ RtResult<int32_t> Enum::get_hash_code(RtObject* obj)
     RET_OK(result);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

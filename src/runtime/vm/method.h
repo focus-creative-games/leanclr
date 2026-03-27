@@ -7,7 +7,9 @@
 #include "core/rt_result.h"
 #include "utils/rt_vector.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class Method
 {
@@ -78,4 +80,5 @@ class Method
     static RtResultVoid get_parameter_modifiers(const metadata::RtMethodInfo* method, int32_t index, bool optional,
                                                 utils::Vector<metadata::RtClass*>& modifiers);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -3,7 +3,9 @@
 #include "rt_managed_types.h"
 #include "utils/binary_reader.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 struct CustomAttributeProvider
@@ -49,4 +51,5 @@ class CustomAttribute
     static RtResult<RtArray*> get_customattributes_data_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token);
 };
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

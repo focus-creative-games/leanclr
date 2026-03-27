@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 class Interop
 {
@@ -11,4 +13,5 @@ class Interop
 
     static RtResult<int32_t> double_to_string(double value, const char* format, char* buffer, int32_t buffer_size);
 };
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

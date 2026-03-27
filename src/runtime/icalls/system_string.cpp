@@ -7,7 +7,9 @@
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<vm::RtString*> SystemString::newobj_char_array(vm::RtArray* charArray)
@@ -268,4 +270,5 @@ utils::Span<vm::NewobjInternalCallEntry> SystemString::get_newobj_internal_call_
                                                     sizeof(s_newobj_internal_call_entries) / sizeof(vm::NewobjInternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemException
@@ -14,4 +16,5 @@ class SystemException
     static RtResultVoid report_unhandled_exception(vm::RtException* exception);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

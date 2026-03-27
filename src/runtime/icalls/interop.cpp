@@ -1,6 +1,8 @@
 #include "interop.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<int32_t> Interop::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size)
@@ -30,4 +32,5 @@ utils::Span<vm::InternalCallEntry> Interop::get_internal_call_entries()
 {
     return utils::Span<vm::InternalCallEntry>(s_interop_internal_call_entries, sizeof(s_interop_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

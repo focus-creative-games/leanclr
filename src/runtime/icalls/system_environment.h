@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemEnvironment
@@ -39,4 +41,5 @@ class SystemEnvironment
     static RtResult<int32_t> get_page_size();
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

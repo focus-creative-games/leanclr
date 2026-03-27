@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemDiagnosticsStackFrame
@@ -15,4 +17,5 @@ class SystemDiagnosticsStackFrame
                                          vm::RtString** file_name, int32_t* line_number, int32_t* column_number);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

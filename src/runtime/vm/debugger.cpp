@@ -2,7 +2,9 @@
 #include "rt_string.h"
 #include "settings.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 void Debugger::log(int32_t level, RtString* category, RtString* message)
@@ -18,4 +20,5 @@ void Debugger::log(int32_t level, RtString* category, RtString* message)
     }
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

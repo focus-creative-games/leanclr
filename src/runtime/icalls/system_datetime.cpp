@@ -3,7 +3,9 @@
 #include "icall_base.h"
 #include "platform/rt_time.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<int64_t> SystemDateTime::get_system_time_as_file_time()
@@ -32,4 +34,5 @@ utils::Span<vm::InternalCallEntry> SystemDateTime::get_internal_call_entries()
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

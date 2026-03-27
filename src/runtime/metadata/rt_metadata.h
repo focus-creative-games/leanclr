@@ -3,13 +3,18 @@
 #include "cli_metadata.h"
 #include "utils/rt_vector.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 union RtStackObject;
 struct RtInterpMethodInfo;
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 typedef void (*RtFnPtr)();
@@ -1315,4 +1320,5 @@ class RtMetadata
     }
 };
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemRuntimeTypeHandle
@@ -72,4 +74,5 @@ class SystemRuntimeTypeHandle
                                                               bool throw_on_error, bool ignore_case, bool reflection_only);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

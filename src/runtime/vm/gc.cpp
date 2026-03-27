@@ -1,7 +1,9 @@
 #include "gc.h"
 #include "appdomain.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 vm::RtObject* GC::get_ephemeron_tombstone()
@@ -66,4 +68,5 @@ int64_t GC::get_total_memory(bool force_full_collection)
     return 0;
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

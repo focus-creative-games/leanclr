@@ -3,7 +3,9 @@
 #include "icall_base.h"
 #include "vm/gc.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<vm::RtObject*> SystemGC::get_ephemeron_tombstone()
@@ -236,4 +238,5 @@ utils::Span<vm::InternalCallEntry> SystemGC::get_internal_call_entries()
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

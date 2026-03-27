@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemCurrentSystemTimeZone
@@ -14,4 +16,5 @@ class SystemCurrentSystemTimeZone
     static RtResult<bool> get_time_zone_data(int32_t year, vm::RtArray** data, vm::RtArray** names, bool* daylight);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

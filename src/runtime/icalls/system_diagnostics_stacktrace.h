@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemDiagnosticsStackTrace
@@ -14,4 +16,5 @@ class SystemDiagnosticsStackTrace
     static RtResult<vm::RtArray*> get_trace(vm::RtException* ex, int32_t skip_frames, bool need_file_info);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

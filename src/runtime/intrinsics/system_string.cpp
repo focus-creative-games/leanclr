@@ -3,7 +3,9 @@
 #include "interp/eval_stack_op.h"
 #include "vm/rt_string.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 
 RtResult<uint16_t> SystemString::get_chars(vm::RtString* s, int32_t index)
@@ -73,4 +75,5 @@ utils::Span<vm::IntrinsicEntry> SystemString::get_intrinsic_entries()
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, sizeof(s_intrinsic_entries) / sizeof(vm::IntrinsicEntry));
 }
 
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

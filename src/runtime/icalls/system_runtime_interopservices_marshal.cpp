@@ -10,7 +10,9 @@
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // ========== Memory allocation ==========
@@ -911,4 +913,5 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesMarshal::get_inte
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, std::size(s_internal_call_entries));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

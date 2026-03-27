@@ -3,7 +3,9 @@
 #include "interp/interp_defs.h"
 #include "interp/eval_stack_op.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 
 // ========== Implementation Functions ==========
@@ -51,4 +53,5 @@ utils::Span<vm::IntrinsicEntry> SystemSpan::get_intrinsic_entries()
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, entry_count);
 }
 
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

@@ -4,7 +4,9 @@
 #include "alloc/metadata_allocation.h"
 #include <cstring>
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 using namespace leanclr::core;
 using namespace leanclr::alloc;
@@ -254,4 +256,5 @@ RtResult<RtClass*> GenericMetadata::inflate_class(RtClass* klass, const RtGeneri
     return vm::Class::get_class_from_typesig(inflatedTypeSig);
 }
 
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

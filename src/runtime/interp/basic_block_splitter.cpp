@@ -1,6 +1,8 @@
 #include "basic_block_splitter.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 BasicBlockSplitter::BasicBlockSplitter(const metadata::RtMethodBody* method_body, alloc::MemPool* pool)
     : _method_body(method_body), _split_offsets(), _valid_il_offsets(nullptr), _valid_il_offsets_count(0)
@@ -160,4 +162,5 @@ bool BasicBlockSplitter::validate_offsets() const
     return true;
 }
 
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

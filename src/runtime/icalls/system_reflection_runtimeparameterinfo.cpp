@@ -5,7 +5,9 @@
 #include "vm/reflection.h"
 #include "vm/rt_array.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<int32_t> SystemReflectionRuntimeParameterInfo::get_metadata_token(const vm::RtReflectionParameter* param)
@@ -97,4 +99,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeParameterInfo::get_int
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

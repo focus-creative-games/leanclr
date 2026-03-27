@@ -2,7 +2,9 @@
 #include "interp/interp_defs.h"
 #include "platform/hardware.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 
 RtResult<bool> SystemNumericsVector::get_is_hardware_accelerated()
@@ -33,4 +35,5 @@ utils::Span<vm::IntrinsicEntry> SystemNumericsVector::get_intrinsic_entries()
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries, sizeof(s_intrinsic_entries) / sizeof(vm::IntrinsicEntry));
 }
 
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

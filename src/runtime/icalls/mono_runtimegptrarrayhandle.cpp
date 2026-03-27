@@ -2,7 +2,9 @@
 #include "icall_base.h"
 #include "utils/safegptrarray.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 /// @icall: Mono.RuntimeGPtrArrayHandle::GPtrArrayFree
@@ -33,4 +35,5 @@ utils::Span<vm::InternalCallEntry> MonoRuntimeGPtrArrayHandle::get_internal_call
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -6,7 +6,9 @@
 #include "rt_base.h"
 #include "hash_util.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 
 #define DUP_STR_TO_LOCAL_TEMP_ZERO_END_STR(local_temp_str, str, str_len) \
@@ -150,4 +152,5 @@ struct FullNameStrHasher
         return HashUtil::combine_hash(h1, h2);
     }
 };
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

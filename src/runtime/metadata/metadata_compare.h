@@ -2,7 +2,9 @@
 
 #include "rt_metadata.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 class MetadataCompare
 {
@@ -48,4 +50,5 @@ struct GenericMethodCompare
                a->generic_context.method_inst == b->generic_context.method_inst;
     }
 };
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

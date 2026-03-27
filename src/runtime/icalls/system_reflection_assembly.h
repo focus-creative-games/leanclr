@@ -2,7 +2,9 @@
 
 #include "vm/internal_calls.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemReflectionAssembly
@@ -42,4 +44,5 @@ class SystemReflectionAssembly
     static RtResult<intptr_t> internal_get_referenced_assemblies(vm::RtReflectionAssembly* ref_ass);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

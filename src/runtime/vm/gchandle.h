@@ -2,7 +2,9 @@
 
 #include "vm/rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 class GCHandle
@@ -14,4 +16,5 @@ class GCHandle
     static void* get_addr_of_pinned_object(void* handle);
     static bool is_type_pinned(metadata::RtClass* klass);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

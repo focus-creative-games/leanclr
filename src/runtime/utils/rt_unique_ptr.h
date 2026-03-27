@@ -2,7 +2,9 @@
 
 #include "alloc/general_allocation.h"
 
-namespace leanclr::utils
+namespace leanclr
+{
+namespace utils
 {
 template <typename T>
 class UniquePtr
@@ -102,4 +104,5 @@ UniquePtr<T> make_unique(Args&&... args)
     T* obj = new (memory) T(std::forward<Args>(args)...);
     return UniquePtr<T>(obj);
 }
-} // namespace leanclr::utils
+} // namespace utils
+} // namespace leanclr

@@ -6,7 +6,9 @@
 #include "vm/object.h"
 #include "vm/rt_managed_types.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // TypedReference operations
@@ -101,4 +103,5 @@ utils::Span<vm::InternalCallEntry> SystemTypedReference::get_internal_call_entri
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

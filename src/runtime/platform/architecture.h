@@ -2,7 +2,9 @@
 
 #include "vm/rt_managed_types.h"
 
-namespace leanclr::os
+namespace leanclr
+{
+namespace os
 {
 class Architecture
 {
@@ -10,4 +12,5 @@ class Architecture
     static vm::RtString* get_architecture_name();
     static vm::RtString* get_os_name();
 };
-} // namespace leanclr::os
+} // namespace os
+} // namespace leanclr

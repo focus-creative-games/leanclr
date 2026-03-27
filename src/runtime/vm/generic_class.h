@@ -2,7 +2,9 @@
 
 #include "rt_metadata.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class GenericClass
 {
@@ -18,4 +20,5 @@ class GenericClass
     static RtResultVoid setup_events(metadata::RtClass* klass);
     static RtResultVoid setup_vtables(metadata::RtClass* klass);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -14,7 +14,9 @@
 #include "metadata/generic_metadata.h"
 #include "metadata/metadata_const.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Check if field is instance field (not static)
@@ -327,4 +329,5 @@ RtResultVoid Field::get_field_modifiers(const metadata::RtFieldInfo* field, bool
     return mod->read_member_modifier(blobReader, optional, gcc, nullptr, modifiers);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

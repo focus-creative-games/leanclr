@@ -5,7 +5,9 @@
 #include "vm/settings.h"
 #include "interpreter.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 void MachineState::initialize()
 {
@@ -171,4 +173,5 @@ void MachineState::leave_frame_from_icall_or_intrinsic(uint32_t old_frame_top)
     _frame_stack_top = old_frame_top;
 }
 
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

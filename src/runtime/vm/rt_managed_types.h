@@ -2,7 +2,9 @@
 
 #include "metadata/rt_metadata.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 // Array bounds structure
 struct ArrayBounds
@@ -649,4 +651,5 @@ const uint32_t RT_TYPED_REFERENCE_SIZE = sizeof(RtTypedReference);
 const size_t RT_PUBLIC_KEY_BYTES_LEN = 8;
 const size_t RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH = 17;
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

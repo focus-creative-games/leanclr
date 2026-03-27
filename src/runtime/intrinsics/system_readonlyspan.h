@@ -2,10 +2,13 @@
 
 #include "vm/intrinsics.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 class SystemReadOnlySpan
 {
   public:
 };
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

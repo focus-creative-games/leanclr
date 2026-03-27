@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemAppDomain
@@ -82,4 +84,5 @@ class SystemAppDomain
     static RtResultVoid do_unhandled_exception(vm::RtObject* ex);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

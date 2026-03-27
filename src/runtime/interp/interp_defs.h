@@ -2,7 +2,9 @@
 
 #include "vm/rt_managed_types.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 // Stack object union for interpreter execution
 union RtStackObject
@@ -97,4 +99,5 @@ class InterpDefs
     static size_t get_stack_object_size_by_byte_size(size_t byte_size);
 };
 
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

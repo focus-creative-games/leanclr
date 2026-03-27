@@ -6,7 +6,9 @@
 #include "class.h"
 #include "interp/eval_stack_op.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 RtResultVoid Delegate::initialize()
 {
@@ -162,4 +164,5 @@ RtResultVoid Delegate::end_invoke_delegate_invoker(metadata::RtManagedMethodPoin
 {
     RET_ERR(RtErr::NotImplemented);
 }
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

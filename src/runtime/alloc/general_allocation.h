@@ -5,7 +5,9 @@
 
 #include "rt_base.h"
 
-namespace leanclr::alloc
+namespace leanclr
+{
+namespace alloc
 {
 class GeneralAllocation
 {
@@ -89,4 +91,5 @@ class GeneralAllocation
         }
     }
 };
-} // namespace leanclr::alloc
+} // namespace alloc
+} // namespace leanclr

@@ -1,7 +1,9 @@
 #include "system_runtime_interopservices_gchandle.h"
 #include "vm/gchandle.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<bool> SystemRuntimeInteropServicesGCHandle::check_current_domain(void* handle)
@@ -111,4 +113,5 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesGCHandle::get_int
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemDateTime
@@ -14,4 +16,5 @@ class SystemDateTime
     static RtResult<int64_t> get_system_time_as_file_time();
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

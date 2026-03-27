@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 /// @icall: System.ArgIterator::Setup(System.IntPtr,System.IntPtr)
@@ -83,4 +85,5 @@ utils::Span<vm::InternalCallEntry> SystemArgIterator::get_internal_call_entries(
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

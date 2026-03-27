@@ -8,7 +8,9 @@ using namespace leanclr::vm;
 using namespace leanclr::metadata;
 using namespace leanclr::interp;
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // ========== Implementation Functions ==========
@@ -530,4 +532,5 @@ utils::Span<InternalCallEntry> SystemThreadingInterlocked::get_internal_call_ent
     return utils::Span<InternalCallEntry>(s_internal_call_entries, entry_count);
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

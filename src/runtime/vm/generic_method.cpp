@@ -10,7 +10,9 @@
 #include "utils/hashmap.h"
 #include "alloc/mem_pool.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 using namespace leanclr::metadata;
 using namespace leanclr::core;
@@ -167,4 +169,5 @@ RtResult<const RtMethodInfo*> GenericMethod::get_method_from_pooled_generic_meth
     RET_OK(new_method);
 }
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

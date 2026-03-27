@@ -4,7 +4,9 @@
 #include "rt_managed_types.h"
 #include "utils/rt_span.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 class AppDomain
 {
@@ -26,4 +28,5 @@ class AppDomain
 
     static utils::Span<metadata::RtModuleDef*> get_modules();
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

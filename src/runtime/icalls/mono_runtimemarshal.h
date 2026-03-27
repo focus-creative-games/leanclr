@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class MonoRuntimeMarshal
@@ -14,4 +16,5 @@ class MonoRuntimeMarshal
     static RtResultVoid free_assembly_name(metadata::RtMonoAssemblyName* aname, bool free_struct);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

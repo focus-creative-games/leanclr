@@ -3,7 +3,9 @@
 #include "vm/class.h"
 #include "vm/reflection.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // ========== Implementation Functions ==========
@@ -71,4 +73,5 @@ utils::Span<vm::InternalCallEntry> SystemReflectionFieldInfo::get_internal_call_
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, entry_count);
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "vm/intrinsics.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 class SystemSpan
 {
@@ -12,4 +14,5 @@ class SystemSpan
     // Get item at index from a Span (delegates to ReadOnlySpan)
     static RtResult<const uint8_t*> get_item(const vm::RtReadOnlySpan<uint8_t>& span, int32_t index, size_t ele_size);
 };
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

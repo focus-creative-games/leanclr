@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemMonoCustomAttrs
@@ -20,4 +22,5 @@ class SystemMonoCustomAttrs
     static RtResult<vm::RtArray*> get_custom_attributes_data_internal(vm::RtObject* obj);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

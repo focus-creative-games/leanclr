@@ -7,7 +7,9 @@
 #include "system_threading_volatile.h"
 #include "system_numerics_vector.h"
 
-namespace leanclr::intrinsics
+namespace leanclr
+{
+namespace intrinsics
 {
 template <typename T>
 static void Append(utils::Vector<T>& entries, const utils::Span<T>& sub_entries)
@@ -34,4 +36,5 @@ void IntrinsicStubs::get_newobj_intrinsic_entries(utils::Vector<vm::NewobjIntrin
     Append(entries, SystemObject::get_newobj_intrinsic_entries());
     // append newobj intrinsic entries from various classes
 }
-} // namespace leanclr::intrinsics
+} // namespace intrinsics
+} // namespace leanclr

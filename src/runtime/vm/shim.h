@@ -4,7 +4,9 @@
 #include "metadata/rt_metadata.h"
 #include "interp/interp_defs.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 // Structure containing invoker type and pointer
@@ -34,4 +36,5 @@ class Shim
     static metadata::RtManagedMethodPointer get_method_pointer(const metadata::RtMethodInfo* method);
 };
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

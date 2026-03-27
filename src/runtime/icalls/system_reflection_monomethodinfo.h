@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 // CallingConventions enum values (matches .NET)
@@ -33,4 +35,5 @@ class SystemReflectionMonoMethodInfo
     static RtResult<vm::RtObject*> get_retval_marshal(const metadata::RtMethodInfo* method);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 class SystemReflectionRuntimeMethodInfo
 {
@@ -23,4 +25,5 @@ class SystemReflectionRuntimeMethodInfo
     static RtResult<vm::RtObject*> internal_invoke(vm::RtReflectionMethod* ref_method, vm::RtObject* obj, vm::RtArray* parameters, vm::RtObject** exc);
     static RtResultVoid get_pinvoke(vm::RtReflectionMethod* method, int32_t* flags, vm::RtString** entry_name, vm::RtString** dll_name);
 };
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

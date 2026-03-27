@@ -4,7 +4,9 @@
 #include "vm/debugger.h"
 #include "vm/rt_string.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResult<bool> SystemDiagnosticsDebugger::is_attached_internal()
@@ -65,4 +67,5 @@ utils::Span<vm::InternalCallEntry> SystemDiagnosticsDebugger::get_internal_call_
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

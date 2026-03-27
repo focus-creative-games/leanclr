@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class MonoSafeStringMarshal
@@ -17,4 +19,5 @@ class MonoSafeStringMarshal
     static RtResultVoid gfree(void* ptr);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

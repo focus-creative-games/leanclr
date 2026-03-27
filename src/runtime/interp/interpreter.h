@@ -3,7 +3,9 @@
 #include "interp_defs.h"
 #include "vm/rt_managed_types.h"
 
-namespace leanclr::interp
+namespace leanclr
+{
+namespace interp
 {
 class Interpreter
 {
@@ -12,4 +14,5 @@ class Interpreter
     static RtResult<const RtInterpMethodInfo*> init_interpreter_method(const metadata::RtMethodInfo* method);
     static RtResult<const interp::RtStackObject*> execute(const metadata::RtMethodInfo* method, const interp::RtStackObject* params);
 };
-} // namespace leanclr::interp
+} // namespace interp
+} // namespace leanclr

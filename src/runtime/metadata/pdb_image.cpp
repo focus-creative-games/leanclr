@@ -3,7 +3,9 @@
 #include "utils/string_builder.h"
 #include "log/internal_logger.h"
 
-namespace leanclr::metadata
+namespace leanclr
+{
+namespace metadata
 {
 
 constexpr uint32_t kHiddenLine = 0xFEEFEE;
@@ -307,4 +309,5 @@ RtResult<const PdbImage::SymbolMethodDefData*> PdbImage::GetMethodDataFromCache(
     _methods.insert({methodToken, methodData});
     return methodData;
 }
-} // namespace leanclr::metadata
+} // namespace metadata
+} // namespace leanclr

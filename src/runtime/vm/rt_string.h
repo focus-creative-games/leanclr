@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 class String
@@ -67,4 +69,5 @@ class String
     static RtString* intern_string(RtString* s);
     static bool is_interned_string(RtString* s);
 };
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr

@@ -2,7 +2,9 @@
 
 #include "icall_base.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 class SystemThreadingMonitor
@@ -35,4 +37,5 @@ class SystemThreadingMonitor
     static RtResult<bool> monitor_test_owner(vm::RtObject* monitor);
 };
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

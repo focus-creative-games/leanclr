@@ -8,7 +8,9 @@
 #include "vm/runtime.h"
 #include "vm/rt_string.h"
 
-namespace leanclr::icalls
+namespace leanclr
+{
+namespace icalls
 {
 
 RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::initialize_array(vm::RtArray* arr, size_t runtime_field_handle)
@@ -143,4 +145,5 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeCompilerServicesRuntimeHelpers::
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries, sizeof(s_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }
 
-} // namespace leanclr::icalls
+} // namespace icalls
+} // namespace leanclr

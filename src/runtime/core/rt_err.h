@@ -1,6 +1,8 @@
 #pragma once
 
-namespace leanclr::core
+namespace leanclr
+{
+namespace core
 {
 enum class RtErr : uint8_t
 {
@@ -35,4 +37,5 @@ enum class RtErr : uint8_t
     InvalidOperation,
     ModuleAlreadyLoaded,
 };
-} // namespace leanclr::core
+} // namespace core
+} // namespace leanclr

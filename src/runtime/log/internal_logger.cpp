@@ -2,7 +2,9 @@
 
 #include "internal_logger.h"
 
-namespace leanclr::log
+namespace leanclr
+{
+namespace log
 {
 
 void InternalLogger::debug(const char* message)
@@ -40,4 +42,5 @@ void InternalLogger::fatal(const char* message)
 #endif
 }
 
-} // namespace leanclr::log
+} // namespace log
+} // namespace leanclr

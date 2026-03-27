@@ -4,7 +4,9 @@
 
 using namespace std::chrono;
 
-namespace leanclr::os
+namespace leanclr
+{
+namespace os
 {
 
 // Returns milliseconds since steady_clock epoch (monotonic, not wall clock)
@@ -50,4 +52,5 @@ int64_t Time::get_system_time_as_file_time()
     int64_t ticks = duration_cast<ticks_100ns>(now.time_since_epoch()).count();
     return ticks + SEC_TO_UNIX_EPOCH * WINDOWS_TICK;
 }
-} // namespace leanclr::os
+} // namespace os
+} // namespace leanclr

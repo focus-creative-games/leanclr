@@ -2,7 +2,9 @@
 
 #include "rt_managed_types.h"
 
-namespace leanclr::vm
+namespace leanclr
+{
+namespace vm
 {
 
 class GC
@@ -22,4 +24,5 @@ class GC
     static int64_t get_total_memory(bool force_full_collection);
 };
 
-} // namespace leanclr::vm
+} // namespace vm
+} // namespace leanclr
