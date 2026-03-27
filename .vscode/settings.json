@@ -20,6 +20,10 @@
         "editor.defaultFormatter": "ms-dotnettools.csharp"
     },
     "cmake.sourceDirectory": "${workspaceFolder}/src/runtime",
+    "C_Cpp.default.includePath": [
+        "${workspaceFolder}/src/runtime",
+        "${workspaceFolder}/src/runtime/3rd"
+    ],
     "terminal.integrated.defaultProfile.windows": "Command Prompt",
     "dotnet.preferCSharpExtension": true
 }

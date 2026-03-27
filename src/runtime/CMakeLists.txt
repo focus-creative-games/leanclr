@@ -44,7 +44,7 @@ target_include_directories(leanclr PUBLIC ${_include_dirs})
 target_include_directories(leanclr PUBLIC ${CMAKE_CURRENT_LIST_DIR}/3rd)
 
 set_target_properties(leanclr PROPERTIES
-    CXX_STANDARD 17
+    CXX_STANDARD 11
     CXX_STANDARD_REQUIRED ON
 )
 
