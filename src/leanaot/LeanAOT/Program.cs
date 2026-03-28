@@ -1,3 +1,4 @@
+using System.Linq;
 using LeanAOT.GenerationPlan;
 using LeanAOT.ToCpp;
 using NLog;
@@ -58,6 +59,9 @@ internal class Program
 
         [Option("print-command-line", Required = false, HelpText = "Print the effective command line to stdout.")]
         public bool PrintCommandLine { get; set; }
+
+        [Option("compiler-flags", Required = false, HelpText = "IL2CPP: C++ compiler flags (e.g. -fno-exceptions). Repeatable; stored in config, LeanAOT does not compile C++.")]
+        public IEnumerable<string> CompilerFlags { get; set; }
     }
 
     private static Logger s_logger;
@@ -214,6 +218,26 @@ internal class Program
         config.PrintCommandLine = options.PrintCommandLine;
         config.SymbolsFolder = options.SymbolsFolder;
         config.DataFolder = options.DataFolder;
+        config.CompilerFlags = NormalizeCompilerFlags(options.CompilerFlags);
+    }
+
+    /// <summary>
+    /// 合并多次 <c>--compiler-flags</c>，去掉空白与 CR，单条内 trim。
+    /// </summary>
+    private static string NormalizeCompilerFlags(IEnumerable<string> rawParts)
+    {
+        if (rawParts == null)
+            return null;
+        var tokens = new List<string>();
+        foreach (var raw in rawParts)
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
+            var t = raw.Trim().Replace("\r", string.Empty).Trim();
+            if (t.Length > 0)
+                tokens.Add(t);
+        }
+        return tokens.Count == 0 ? null : string.Join(" ", tokens);
     }
 
     /// <summary>
