@@ -252,5 +252,7 @@ internal class Program
         Directory.CreateDirectory(confBuilder.outputCodeDir);
         var conf = confBuilder.Build();
         generator.Generate(conf);
+
+        Il2CppCompatibilityOutputs.EmitIfRequested(globalServices.Config, manifest, dllSearchPaths, aotAssemblyNames, metaService);
     }
 }
