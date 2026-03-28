@@ -63,7 +63,7 @@ RtResult<vm::RtObject*> SystemTypedReference::internal_to_object(const vm::RtTyp
 
 /// @icall: System.TypedReference::InternalMakeTypedReference
 static RtResultVoid invoker_internal_make_typed_reference(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                          const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                          const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)method_pointer;
     (void)method;
@@ -79,7 +79,7 @@ static RtResultVoid invoker_internal_make_typed_reference(metadata::RtManagedMet
 
 /// @icall: System.TypedReference::InternalToObject
 static RtResultVoid invoker_internal_to_object(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)method_pointer;
     (void)method;

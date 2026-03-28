@@ -30,7 +30,7 @@ RtResult<int32_t> SystemString::get_hash_code(vm::RtString* str)
 
 /// @intrinsic: System.String::get_Chars
 RtResultVoid get_chars_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                               interp::RtStackObject* ret)
+                               interp::RtStackObject* ret) noexcept
 {
     vm::RtString* s = interp::EvalStackOp::get_param<vm::RtString*>(params, 0);
     int32_t index = interp::EvalStackOp::get_param<int32_t>(params, 1);
@@ -42,7 +42,7 @@ RtResultVoid get_chars_invoker(metadata::RtManagedMethodPointer methodPtr, const
 
 /// @intrinsic: System.String::get_Length
 RtResultVoid get_length_invoker_intrinsics_system_string(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret)
+                                interp::RtStackObject* ret) noexcept
 {
     vm::RtString* s = interp::EvalStackOp::get_param<vm::RtString*>(params, 0);
 
@@ -53,7 +53,7 @@ RtResultVoid get_length_invoker_intrinsics_system_string(metadata::RtManagedMeth
 
 /// @intrinsic: System.String::GetHashCode()
 static RtResultVoid get_hash_code_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     auto str = interp::EvalStackOp::get_param<vm::RtString*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, hash, SystemString::get_hash_code(str));

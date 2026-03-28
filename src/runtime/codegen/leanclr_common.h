@@ -125,42 +125,42 @@ void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const m
 vm::RtString* resolve_string_literal(metadata::RtModuleDef* mod, uint32_t token);
 
 template <typename ArgType>
-void expand_argument_to_eval_stack(const ArgType arg, interp::RtStackObject* ret)
+void expand_argument_to_eval_stack(const ArgType arg, interp::RtStackObject* ret) noexcept
 {
     *(ArgType*)ret = arg;
 }
 
-inline void expand_argument_to_eval_stack(const bool arg, interp::RtStackObject* ret)
+inline void expand_argument_to_eval_stack(const bool arg, interp::RtStackObject* ret) noexcept
 {
     *(int32_t*)ret = arg ? 1 : 0;
 }
 
-inline void expand_argument_to_eval_stack(const int8_t arg, interp::RtStackObject* ret)
+inline void expand_argument_to_eval_stack(const int8_t arg, interp::RtStackObject* ret) noexcept
 {
     *(int32_t*)ret = arg;
 }
 
-inline void expand_argument_to_eval_stack(const uint8_t arg, interp::RtStackObject* ret)
+inline void expand_argument_to_eval_stack(const uint8_t arg, interp::RtStackObject* ret) noexcept
 {
     *(int32_t*)ret = arg;
 }
 
-inline void expand_argument_to_eval_stack(const int16_t arg, interp::RtStackObject* ret)
+inline void expand_argument_to_eval_stack(const int16_t arg, interp::RtStackObject* ret) noexcept
 {
     *(int32_t*)ret = arg;
 }
 
-inline void expand_argument_to_eval_stack(const uint16_t arg, interp::RtStackObject* ret)
+inline void expand_argument_to_eval_stack(const uint16_t arg, interp::RtStackObject* ret) noexcept
 {
     *(int32_t*)ret = arg;
 }
 
-inline void expand_argument_to_eval_stack(const int32_t arg, interp::RtStackObject* ret)
+inline void expand_argument_to_eval_stack(const int32_t arg, interp::RtStackObject* ret) noexcept
 {
     *(int32_t*)ret = arg;
 }
 
-inline void expand_argument_to_eval_stack(const uint32_t arg, interp::RtStackObject* ret)
+inline void expand_argument_to_eval_stack(const uint32_t arg, interp::RtStackObject* ret) noexcept
 {
     *(int32_t*)ret = arg;
 }
@@ -172,7 +172,7 @@ constexpr size_t get_stack_object_size_for_type()
 }
 
 template <typename T>
-RtResultVoid set_ret_or_return_error(const RtResult<T>& result, interp::RtStackObject* ret)
+RtResultVoid set_ret_or_return_error(const RtResult<T>& result, interp::RtStackObject* ret) noexcept
 {
     if (result.is_ok())
     {
@@ -186,7 +186,7 @@ RtResultVoid set_ret_or_return_error(const RtResult<T>& result, interp::RtStackO
 }
 
 template <typename T>
-T get_eval_stack_value_as_type(const interp::RtStackObject* ret)
+T get_eval_stack_value_as_type(const interp::RtStackObject* ret) noexcept
 {
     return *(T*)ret;
 }

@@ -18,7 +18,7 @@ RtResult<vm::RtString*> SystemTextEncodingHelper::internal_code_page(int32_t* co
 }
 
 static RtResultVoid internal_code_page_invoker(RtManagedMethodPointer /*method_pointer*/, const RtMethodInfo* /*method*/, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret)
+                                               interp::RtStackObject* ret) noexcept
 {
     int32_t* code_page_ptr = EvalStackOp::get_param<int32_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, name, SystemTextEncodingHelper::internal_code_page(code_page_ptr));

@@ -1,4 +1,4 @@
-﻿using dnlib.DotNet;
+using dnlib.DotNet;
 using LeanAOT.Core;
 using System.Text;
 
@@ -203,7 +203,7 @@ namespace LeanAOT.ToCpp
 
         public string GenerateMethodDeclaring()
         {
-            return $"{MethodGenerationUtil.GetResultTypeName(_retType)} {_uniqueName}({CreateMethodParameters()})";
+            return $"{MethodGenerationUtil.GetResultTypeName(_retType)} {_uniqueName}({CreateMethodParameters()}){ConstStrings.CppFunctionNoexcept}";
         }
 
         public string CreateMethodFunctionTypedefStatement(string cppTypedefName)
@@ -238,6 +238,7 @@ namespace LeanAOT.ToCpp
                 sb.Append(MethodGenerationUtil.GetExactTypeName(param.Type));
             }
             sb.Append(')');
+            sb.Append(ConstStrings.CppFunctionNoexcept);
             return sb.ToString();
         }
 
@@ -258,6 +259,7 @@ namespace LeanAOT.ToCpp
                 sb.Append(MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed));
             }
             sb.Append(')');
+            sb.Append(ConstStrings.CppFunctionNoexcept);
             return sb.ToString();
         }
     }

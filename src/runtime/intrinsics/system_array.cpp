@@ -43,7 +43,7 @@ RtResultVoid SystemArray::set_generic_value_impl(vm::RtArray* arr, int32_t index
 
 /// @intrinsic: System.Array::get_Length
 static RtResultVoid get_length_invoker_intrinsics_system_array(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     vm::RtArray* arr = interp::EvalStackOp::get_param<vm::RtArray*>(params, 0);
 
@@ -54,7 +54,7 @@ static RtResultVoid get_length_invoker_intrinsics_system_array(metadata::RtManag
 
 /// @intrinsic: System.Array::get_LongLength
 static RtResultVoid get_long_length_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     vm::RtArray* arr = interp::EvalStackOp::get_param<vm::RtArray*>(params, 0);
 
@@ -65,7 +65,7 @@ static RtResultVoid get_long_length_invoker(metadata::RtManagedMethodPointer met
 
 /// @intrinsic: System.Array::GetGenericValueImpl<>
 static RtResultVoid get_generic_value_impl_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     vm::RtArray* arr = interp::EvalStackOp::get_param<vm::RtArray*>(params, 0);
     int32_t index = interp::EvalStackOp::get_param<int32_t>(params, 1);
@@ -77,7 +77,7 @@ static RtResultVoid get_generic_value_impl_invoker(metadata::RtManagedMethodPoin
 
 /// @intrinsic: System.Array::SetGenericValueImpl<>
 static RtResultVoid set_generic_value_impl_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     vm::RtArray* arr = interp::EvalStackOp::get_param<vm::RtArray*>(params, 0);
     int32_t index = interp::EvalStackOp::get_param<int32_t>(params, 1);

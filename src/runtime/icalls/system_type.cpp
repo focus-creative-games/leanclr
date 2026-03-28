@@ -19,7 +19,7 @@ RtResult<vm::RtReflectionType*> SystemType::internal_from_handle(size_t handle)
 
 /// @icall: System.Type::internal_from_handle
 static RtResultVoid internal_from_handle_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto handle = EvalStackOp::get_param<size_t>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, type_obj, SystemType::internal_from_handle(handle));

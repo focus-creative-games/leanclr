@@ -16,7 +16,7 @@ RtResultVoid SystemArgIterator::setup(intptr_t sig, intptr_t first_arg)
 }
 
 static RtResultVoid setup_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                  interp::RtStackObject* ret)
+                                  interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto sig = EvalStackOp::get_param<intptr_t>(params, 0);
@@ -33,7 +33,7 @@ RtResultVoid SystemArgIterator::int_get_next_arg(void* value)
 }
 
 static RtResultVoid int_get_next_arg_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto value = EvalStackOp::get_param<void*>(params, 0);
@@ -50,7 +50,7 @@ RtResultVoid SystemArgIterator::int_get_next_arg_with_type(void* value, intptr_t
 }
 
 static RtResultVoid int_get_next_arg_with_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                       const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto value = EvalStackOp::get_param<void*>(params, 0);
@@ -66,7 +66,7 @@ RtResult<intptr_t> SystemArgIterator::int_get_next_arg_type()
 }
 
 static RtResultVoid int_get_next_arg_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, result, SystemArgIterator::int_get_next_arg_type());
     EvalStackOp::set_return(ret, result);

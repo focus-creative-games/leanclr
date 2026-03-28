@@ -147,7 +147,7 @@ RtResult<intptr_t> SystemReflectionAssembly::internal_get_referenced_assemblies(
 
 // @icall: System.Reflection.Assembly::GetExecutingAssembly
 static RtResultVoid get_executing_assembly_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -159,7 +159,7 @@ static RtResultVoid get_executing_assembly_invoker(metadata::RtManagedMethodPoin
 
 // @icall: System.Reflection.Assembly::GetCallingAssembly
 static RtResultVoid get_calling_assembly_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -171,7 +171,7 @@ static RtResultVoid get_calling_assembly_invoker(metadata::RtManagedMethodPointe
 
 // @icall: System.Reflection.Assembly::InternalGetType
 static RtResultVoid internal_get_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -188,7 +188,7 @@ static RtResultVoid internal_get_type_invoker(metadata::RtManagedMethodPointer m
 
 // @icall: System.Reflection.Assembly::GetTypes(System.Boolean)
 static RtResultVoid get_types_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -201,7 +201,7 @@ static RtResultVoid get_types_invoker(metadata::RtManagedMethodPointer methodPtr
 
 // @icall: System.Reflection.Assembly::InternalGetAssemblyName(System.String,Mono.MonoAssemblyName&,System.String&)
 static RtResultVoid internal_get_assembly_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                       const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -214,7 +214,7 @@ static RtResultVoid internal_get_assembly_name_invoker(metadata::RtManagedMethod
 
 // @icall: System.Reflection.Assembly::GetEntryAssembly
 static RtResultVoid get_entry_assembly_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -226,7 +226,7 @@ static RtResultVoid get_entry_assembly_invoker(metadata::RtManagedMethodPointer 
 
 // @icall: System.Reflection.Assembly::LoadFrom(System.String,System.Boolean,System.Threading.StackCrawlMark&)
 static RtResultVoid load_from_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -240,7 +240,7 @@ static RtResultVoid load_from_invoker(metadata::RtManagedMethodPointer methodPtr
 
 // @icall: System.Reflection.Assembly::LoadFile_internal(System.String,System.Threading.StackCrawlMark&)
 static RtResultVoid load_file_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -253,7 +253,7 @@ static RtResultVoid load_file_internal_invoker(metadata::RtManagedMethodPointer 
 
 // @icall: System.Reflection.Assembly::load_with_partial_name(System.String,System.Security.Policy.Evidence)
 static RtResultVoid load_with_partial_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -266,7 +266,7 @@ static RtResultVoid load_with_partial_name_invoker(metadata::RtManagedMethodPoin
 
 // @icall: System.Reflection.Assembly::InternalGetReferencedAssemblies(System.Reflection.Assembly)
 static RtResultVoid internal_get_referenced_assemblies_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

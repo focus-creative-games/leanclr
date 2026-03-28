@@ -322,7 +322,7 @@ RtResultVoid SystemThreadingThread::get_stack_traces(vm::RtArray** threads, vm::
 // Invoker functions
 /// @icall: System.Threading.Thread::GetCurrentThread_icall
 static RtResultVoid get_current_thread_icall_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                     const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto thread_ref_ptr = EvalStackOp::get_param<vm::RtThread**>(params, 0);
     RET_ERR_ON_FAIL(SystemThreadingThread::get_current_thread_icall(thread_ref_ptr));
@@ -331,7 +331,7 @@ static RtResultVoid get_current_thread_icall_invoker(metadata::RtManagedMethodPo
 
 /// @icall: System.Threading.Thread::ResetAbortNative
 static RtResultVoid reset_abort_native_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     RET_ERR_ON_FAIL(SystemThreadingThread::reset_abort_native(this_thread));
@@ -340,7 +340,7 @@ static RtResultVoid reset_abort_native_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::SuspendInternal
 static RtResultVoid suspend_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     RET_ERR_ON_FAIL(SystemThreadingThread::suspend_internal(this_thread));
@@ -349,7 +349,7 @@ static RtResultVoid suspend_internal_invoker(metadata::RtManagedMethodPointer me
 
 /// @icall: System.Threading.Thread::ResumeInternal
 static RtResultVoid resume_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     RET_ERR_ON_FAIL(SystemThreadingThread::resume_internal(this_thread));
@@ -358,7 +358,7 @@ static RtResultVoid resume_internal_invoker(metadata::RtManagedMethodPointer met
 
 /// @icall: System.Threading.Thread::InterruptInternal
 static RtResultVoid interrupt_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     RET_ERR_ON_FAIL(SystemThreadingThread::interrupt_internal(this_thread));
@@ -367,7 +367,7 @@ static RtResultVoid interrupt_internal_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::GetPriorityNative
 static RtResultVoid get_priority_native_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, priority, SystemThreadingThread::get_priority_native(this_thread));
@@ -377,7 +377,7 @@ static RtResultVoid get_priority_native_invoker(metadata::RtManagedMethodPointer
 
 /// @icall: System.Threading.Thread::SetPriorityNative(System.Int32)
 static RtResultVoid set_priority_native_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     auto priority = EvalStackOp::get_param<int32_t>(params, 1);
@@ -387,7 +387,7 @@ static RtResultVoid set_priority_native_invoker(metadata::RtManagedMethodPointer
 
 /// @icall: System.Threading.Thread::JoinInternal(System.Int32)
 static RtResultVoid join_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     auto ms = EvalStackOp::get_param<int32_t>(params, 1);
@@ -398,7 +398,7 @@ static RtResultVoid join_internal_invoker(metadata::RtManagedMethodPointer metho
 
 /// @icall: System.Threading.Thread::SleepInternal(System.Int32)
 static RtResultVoid sleep_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ms = EvalStackOp::get_param<int32_t>(params, 0);
     RET_ERR_ON_FAIL(SystemThreadingThread::sleep_internal(ms));
@@ -407,7 +407,7 @@ static RtResultVoid sleep_internal_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.Threading.Thread::YieldInternal
 static RtResultVoid yield_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemThreadingThread::yield_internal());
     EvalStackOp::set_return(ret, static_cast<int32_t>(result));
@@ -416,7 +416,7 @@ static RtResultVoid yield_internal_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.Threading.Thread::MemoryBarrier
 static RtResultVoid memory_barrier_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     RET_ERR_ON_FAIL(SystemThreadingThread::memory_barrier());
     RET_VOID_OK();
@@ -424,7 +424,7 @@ static RtResultVoid memory_barrier_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.Threading.Thread::ConstructInternalThread
 static RtResultVoid construct_internal_thread_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                      const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                      const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     RET_ERR_ON_FAIL(SystemThreadingThread::construct_internal_thread(this_thread));
@@ -433,7 +433,7 @@ static RtResultVoid construct_internal_thread_invoker(metadata::RtManagedMethodP
 
 /// @icall: System.Threading.Thread::ByteArrayToRootDomain(System.Byte[])
 static RtResultVoid byte_array_to_root_domain_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                      const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                      const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, result, SystemThreadingThread::byte_array_to_root_domain(arr));
@@ -443,7 +443,7 @@ static RtResultVoid byte_array_to_root_domain_invoker(metadata::RtManagedMethodP
 
 /// @icall: System.Threading.Thread::ByteArrayToCurrentDomain(System.Byte[])
 static RtResultVoid byte_array_to_current_domain_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                         const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, result, SystemThreadingThread::byte_array_to_current_domain(arr));
@@ -453,7 +453,7 @@ static RtResultVoid byte_array_to_current_domain_invoker(metadata::RtManagedMeth
 
 /// @icall: System.Threading.Thread::GetDomainID
 static RtResultVoid get_domain_id_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, id, SystemThreadingThread::get_domain_id());
     EvalStackOp::set_return(ret, id);
@@ -462,7 +462,7 @@ static RtResultVoid get_domain_id_invoker(metadata::RtManagedMethodPointer metho
 
 /// @icall: System.Threading.Thread::Thread_internal(System.MulticastDelegate)
 static RtResultVoid thread_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     auto start = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -473,7 +473,7 @@ static RtResultVoid thread_internal_invoker(metadata::RtManagedMethodPointer met
 
 /// @icall: System.Threading.Thread::GetName_internal(System.Threading.InternalThread)
 static RtResultVoid get_name_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto internal_thread = EvalStackOp::get_param<vm::RtInternalThread*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, name, SystemThreadingThread::get_name_internal(internal_thread));
@@ -483,7 +483,7 @@ static RtResultVoid get_name_internal_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::SetName_icall(System.Threading.InternalThread,System.Char*,System.Int32)
 static RtResultVoid set_name_icall_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto internal_thread = EvalStackOp::get_param<vm::RtInternalThread*>(params, 0);
     auto name = EvalStackOp::get_param<const uint16_t*>(params, 1);
@@ -494,7 +494,7 @@ static RtResultVoid set_name_icall_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.Threading.Thread::Abort_internal(System.Threading.InternalThread,System.Object)
 static RtResultVoid abort_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto internal_thread = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     auto state = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -504,7 +504,7 @@ static RtResultVoid abort_internal_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.Threading.Thread::GetAbortExceptionState
 static RtResultVoid get_abort_exception_state_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                      const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                      const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, SystemThreadingThread::get_abort_exception_state());
     EvalStackOp::set_return(ret, result);
@@ -513,7 +513,7 @@ static RtResultVoid get_abort_exception_state_invoker(metadata::RtManagedMethodP
 
 /// @icall: System.Threading.Thread::SpinWait_nop
 static RtResultVoid spin_wait_nop_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     RET_ERR_ON_FAIL(SystemThreadingThread::spin_wait_nop());
     RET_VOID_OK();
@@ -521,7 +521,7 @@ static RtResultVoid spin_wait_nop_invoker(metadata::RtManagedMethodPointer metho
 
 /// @icall: System.Threading.Thread::SetState(System.Threading.InternalThread,System.Threading.ThreadState)
 static RtResultVoid set_state_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto internal_thread = EvalStackOp::get_param<vm::RtInternalThread*>(params, 0);
     auto state = EvalStackOp::get_param<int32_t>(params, 1);
@@ -531,7 +531,7 @@ static RtResultVoid set_state_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @icall: System.Threading.Thread::ClrState(System.Threading.InternalThread,System.Threading.ThreadState)
 static RtResultVoid clr_state_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto internal_thread = EvalStackOp::get_param<vm::RtInternalThread*>(params, 0);
     auto state = EvalStackOp::get_param<int32_t>(params, 1);
@@ -541,7 +541,7 @@ static RtResultVoid clr_state_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @icall: System.Threading.Thread::GetState(System.Threading.InternalThread)
 static RtResultVoid get_state_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto internal_thread = EvalStackOp::get_param<vm::RtInternalThread*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, state, SystemThreadingThread::get_state(internal_thread));
@@ -552,7 +552,7 @@ static RtResultVoid get_state_invoker(metadata::RtManagedMethodPointer methodPtr
 // Volatile read invokers
 /// @icall: System.Threading.Thread::VolatileRead(System.Byte&)
 static RtResultVoid volatile_read_u8_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uint8_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint8_t, v, SystemThreadingThread::volatile_read_u8(p));
@@ -562,7 +562,7 @@ static RtResultVoid volatile_read_u8_invoker(metadata::RtManagedMethodPointer me
 
 /// @icall: System.Threading.Thread::VolatileRead(System.SByte&)
 static RtResultVoid volatile_read_i8_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<int8_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int8_t, v, SystemThreadingThread::volatile_read_i8(p));
@@ -572,7 +572,7 @@ static RtResultVoid volatile_read_i8_invoker(metadata::RtManagedMethodPointer me
 
 /// @icall: System.Threading.Thread::VolatileRead(System.UInt16&)
 static RtResultVoid volatile_read_u16_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uint16_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint16_t, v, SystemThreadingThread::volatile_read_u16(p));
@@ -582,7 +582,7 @@ static RtResultVoid volatile_read_u16_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileRead(System.Int16&)
 static RtResultVoid volatile_read_i16_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<int16_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int16_t, v, SystemThreadingThread::volatile_read_i16(p));
@@ -592,7 +592,7 @@ static RtResultVoid volatile_read_i16_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileRead(System.UInt32&)
 static RtResultVoid volatile_read_u32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uint32_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, v, SystemThreadingThread::volatile_read_u32(p));
@@ -602,7 +602,7 @@ static RtResultVoid volatile_read_u32_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileRead(System.Int32&)
 static RtResultVoid volatile_read_i32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<int32_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, v, SystemThreadingThread::volatile_read_i32(p));
@@ -612,7 +612,7 @@ static RtResultVoid volatile_read_i32_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileRead(System.UInt64&)
 static RtResultVoid volatile_read_u64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uint64_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint64_t, v, SystemThreadingThread::volatile_read_u64(p));
@@ -622,7 +622,7 @@ static RtResultVoid volatile_read_u64_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileRead(System.Int64&)
 static RtResultVoid volatile_read_i64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<int64_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int64_t, v, SystemThreadingThread::volatile_read_i64(p));
@@ -632,7 +632,7 @@ static RtResultVoid volatile_read_i64_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileRead(System.Single&)
 static RtResultVoid volatile_read_f32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<float*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(float, v, SystemThreadingThread::volatile_read_f32(p));
@@ -642,7 +642,7 @@ static RtResultVoid volatile_read_f32_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileRead(System.Double&)
 static RtResultVoid volatile_read_f64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<double*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, v, SystemThreadingThread::volatile_read_f64(p));
@@ -652,7 +652,7 @@ static RtResultVoid volatile_read_f64_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileRead(System.IntPtr&)
 static RtResultVoid volatile_read_intptr_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<intptr_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, v, SystemThreadingThread::volatile_read_intptr(p));
@@ -662,7 +662,7 @@ static RtResultVoid volatile_read_intptr_invoker(metadata::RtManagedMethodPointe
 
 /// @icall: System.Threading.Thread::VolatileRead(System.UIntPtr&)
 static RtResultVoid volatile_read_uintptr_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uintptr_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uintptr_t, v, SystemThreadingThread::volatile_read_uintptr(p));
@@ -672,7 +672,7 @@ static RtResultVoid volatile_read_uintptr_invoker(metadata::RtManagedMethodPoint
 
 /// @icall: System.Threading.Thread::VolatileRead(System.Object&)
 static RtResultVoid volatile_read_object_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<vm::RtObject**>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, v, SystemThreadingThread::volatile_read_object(p));
@@ -683,7 +683,7 @@ static RtResultVoid volatile_read_object_invoker(metadata::RtManagedMethodPointe
 // Volatile write invokers
 /// @icall: System.Threading.Thread::VolatileWrite(System.Byte&,System.Byte)
 static RtResultVoid volatile_write_u8_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uint8_t*>(params, 0);
     auto v = EvalStackOp::get_param<uint8_t>(params, 1);
@@ -693,7 +693,7 @@ static RtResultVoid volatile_write_u8_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.SByte&,System.SByte)
 static RtResultVoid volatile_write_i8_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<int8_t*>(params, 0);
     auto v = EvalStackOp::get_param<int8_t>(params, 1);
@@ -703,7 +703,7 @@ static RtResultVoid volatile_write_i8_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.UInt16&,System.UInt16)
 static RtResultVoid volatile_write_u16_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uint16_t*>(params, 0);
     auto v = EvalStackOp::get_param<uint16_t>(params, 1);
@@ -713,7 +713,7 @@ static RtResultVoid volatile_write_u16_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.Int16&,System.Int16)
 static RtResultVoid volatile_write_i16_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<int16_t*>(params, 0);
     auto v = EvalStackOp::get_param<int16_t>(params, 1);
@@ -723,7 +723,7 @@ static RtResultVoid volatile_write_i16_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.UInt32&,System.UInt32)
 static RtResultVoid volatile_write_u32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uint32_t*>(params, 0);
     auto v = EvalStackOp::get_param<uint32_t>(params, 1);
@@ -733,7 +733,7 @@ static RtResultVoid volatile_write_u32_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.Int32&,System.Int32)
 static RtResultVoid volatile_write_i32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<int32_t*>(params, 0);
     auto v = EvalStackOp::get_param<int32_t>(params, 1);
@@ -743,7 +743,7 @@ static RtResultVoid volatile_write_i32_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.UInt64&,System.UInt64)
 static RtResultVoid volatile_write_u64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uint64_t*>(params, 0);
     auto v = EvalStackOp::get_param<uint64_t>(params, 1);
@@ -753,7 +753,7 @@ static RtResultVoid volatile_write_u64_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.Int64&,System.Int64)
 static RtResultVoid volatile_write_i64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<int64_t*>(params, 0);
     auto v = EvalStackOp::get_param<int64_t>(params, 1);
@@ -763,7 +763,7 @@ static RtResultVoid volatile_write_i64_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.Single&,System.Single)
 static RtResultVoid volatile_write_f32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<float*>(params, 0);
     auto v = EvalStackOp::get_param<float>(params, 1);
@@ -773,7 +773,7 @@ static RtResultVoid volatile_write_f32_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.Double&,System.Double)
 static RtResultVoid volatile_write_f64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<double*>(params, 0);
     auto v = EvalStackOp::get_param<double>(params, 1);
@@ -783,7 +783,7 @@ static RtResultVoid volatile_write_f64_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.IntPtr&,System.IntPtr)
 static RtResultVoid volatile_write_intptr_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<intptr_t*>(params, 0);
     auto v = EvalStackOp::get_param<intptr_t>(params, 1);
@@ -793,7 +793,7 @@ static RtResultVoid volatile_write_intptr_invoker(metadata::RtManagedMethodPoint
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.UIntPtr&,System.UIntPtr)
 static RtResultVoid volatile_write_uintptr_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<uintptr_t*>(params, 0);
     auto v = EvalStackOp::get_param<uintptr_t>(params, 1);
@@ -803,7 +803,7 @@ static RtResultVoid volatile_write_uintptr_invoker(metadata::RtManagedMethodPoin
 
 /// @icall: System.Threading.Thread::VolatileWrite(System.Object&,System.Object)
 static RtResultVoid volatile_write_object_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto p = EvalStackOp::get_param<vm::RtObject**>(params, 0);
     auto v = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -813,7 +813,7 @@ static RtResultVoid volatile_write_object_invoker(metadata::RtManagedMethodPoint
 
 /// @icall: System.Threading.Thread::SystemMaxStackStize
 static RtResultVoid system_max_stack_stize_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, size, SystemThreadingThread::system_max_stack_stize());
     EvalStackOp::set_return(ret, size);
@@ -822,7 +822,7 @@ static RtResultVoid system_max_stack_stize_invoker(metadata::RtManagedMethodPoin
 
 /// @icall: System.Threading.Thread::GetStackTraces(System.Threading.Thread[]&,System.Object[]&)
 static RtResultVoid get_stack_traces_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto threads = EvalStackOp::get_param<vm::RtArray**>(params, 0);
     auto stack_frames = EvalStackOp::get_param<vm::RtArray**>(params, 1);

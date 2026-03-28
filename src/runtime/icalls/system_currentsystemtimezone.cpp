@@ -46,7 +46,7 @@ RtResult<bool> SystemCurrentSystemTimeZone::get_time_zone_data(int32_t year, vm:
 
 /// @icall: System.CurrentSystemTimeZone::GetTimeZoneData(System.Int32,System.Int64[]&,System.String[]&,System.Boolean&)
 static RtResultVoid get_time_zone_data_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto year = EvalStackOp::get_param<int32_t>(params, 0);

@@ -15,7 +15,7 @@ RtResult<vm::RtObject*> SystemGC::get_ephemeron_tombstone()
 
 /// @icall: System.GC::get_ephemeron_tombstone
 static RtResultVoid get_ephemeron_tombstone_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                    const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                    const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -33,7 +33,7 @@ RtResultVoid SystemGC::register_ephemeron_array(vm::RtObject* arr)
 
 /// @icall: System.GC::register_ephemeron_array
 static RtResultVoid register_ephemeron_array_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                     const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -50,7 +50,7 @@ RtResult<int32_t> SystemGC::get_collection_count(int32_t generation)
 
 /// @icall: System.GC::GetCollectionCount(System.Int32)
 static RtResultVoid get_collection_count_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -67,7 +67,7 @@ RtResult<int32_t> SystemGC::get_max_generation()
 
 /// @icall: System.GC::GetMaxGeneration()
 static RtResultVoid get_max_generation_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -85,7 +85,7 @@ RtResultVoid SystemGC::internal_collect(int32_t generation)
 
 /// @icall: System.GC::InternalCollect(System.Int32)
 static RtResultVoid internal_collect_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -103,7 +103,7 @@ RtResultVoid SystemGC::record_pressure(int64_t bytes)
 
 /// @icall: System.GC::RecordPressure(System.Int64)
 static RtResultVoid record_pressure_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -120,7 +120,7 @@ RtResult<int64_t> SystemGC::get_allocated_bytes_for_current_thread()
 
 /// @icall: System.GC::GetAllocatedBytesForCurrentThread()
 static RtResultVoid get_allocated_bytes_for_current_thread_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -137,7 +137,7 @@ RtResult<int32_t> SystemGC::get_generation(vm::RtObject* obj)
 
 /// @icall: System.GC::GetGeneration(System.Object)
 static RtResultVoid get_generation_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -155,7 +155,7 @@ RtResultVoid SystemGC::wait_for_pending_finalizers()
 
 /// @icall: System.GC::WaitForPendingFinalizers()
 static RtResultVoid wait_for_pending_finalizers_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -173,7 +173,7 @@ RtResultVoid SystemGC::suppress_finalize(vm::RtObject* obj)
 
 /// @icall: System.GC::_SuppressFinalize(System.Object)
 static RtResultVoid suppress_finalize_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -191,7 +191,7 @@ RtResultVoid SystemGC::reregister_for_finalize(vm::RtObject* obj)
 
 /// @icall: System.GC::_ReRegisterForFinalize(System.Object)
 static RtResultVoid reregister_for_finalize_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                    const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                    const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -208,7 +208,7 @@ RtResult<int64_t> SystemGC::get_total_memory(bool force_full_collection)
 
 /// @icall: System.GC::GetTotalMemory(System.Boolean)
 static RtResultVoid get_total_memory_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

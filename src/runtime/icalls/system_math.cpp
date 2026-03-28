@@ -14,7 +14,7 @@ RtResult<double> SystemMath::round(double value)
 
 /// @icall: System.Math::Round(System.Double)
 static RtResultVoid round_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                       const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -31,7 +31,7 @@ RtResult<float> SystemMath::abs_f32(float value)
 
 /// @icall: System.Math::Abs(System.Single)
 static RtResultVoid abs_f32_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                         const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -48,7 +48,7 @@ RtResult<double> SystemMath::abs_f64(double value)
 
 /// @icall: System.Math::Abs(System.Double)
 static RtResultVoid abs_f64_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                         const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -64,7 +64,7 @@ RtResult<double> SystemMath::acos(double value)
 }
 /// @icall: System.Math::Acos(System.Double)
 static RtResultVoid acos_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::acos(value));
@@ -78,7 +78,7 @@ RtResult<double> SystemMath::acosh(double value)
 }
 /// @icall: System.Math::Acosh(System.Double)
 static RtResultVoid acosh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::acosh(value));
@@ -92,7 +92,7 @@ RtResult<double> SystemMath::asin(double value)
 }
 /// @icall: System.Math::Asin(System.Double)
 static RtResultVoid asin_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::asin(value));
@@ -106,7 +106,7 @@ RtResult<double> SystemMath::asinh(double value)
 }
 /// @icall: System.Math::Asinh(System.Double)
 static RtResultVoid asinh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::asinh(value));
@@ -120,7 +120,7 @@ RtResult<double> SystemMath::atan(double value)
 }
 /// @icall: System.Math::Atan(System.Double)
 static RtResultVoid atan_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::atan(value));
@@ -134,7 +134,7 @@ RtResult<double> SystemMath::atan2(double y, double x)
 }
 /// @icall: System.Math::Atan2(System.Double,System.Double)
 static RtResultVoid atan2_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     auto y = EvalStackOp::get_param<double>(params, 0);
     auto x = EvalStackOp::get_param<double>(params, 1);
@@ -149,7 +149,7 @@ RtResult<double> SystemMath::atanh(double value)
 }
 /// @icall: System.Math::Atanh(System.Double)
 static RtResultVoid atanh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::atanh(value));
@@ -163,7 +163,7 @@ RtResult<double> SystemMath::cbrt(double value)
 }
 /// @icall: System.Math::Cbrt(System.Double)
 static RtResultVoid cbrt_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::cbrt(value));
@@ -177,7 +177,7 @@ RtResult<double> SystemMath::ceil(double value)
 }
 /// @icall: System.Math::Ceil(System.Double)
 static RtResultVoid ceil_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::ceil(value));
@@ -191,7 +191,7 @@ RtResult<double> SystemMath::cos(double value)
 }
 /// @icall: System.Math::Cos(System.Double)
 static RtResultVoid cos_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::cos(value));
@@ -205,7 +205,7 @@ RtResult<double> SystemMath::cosh(double value)
 }
 /// @icall: System.Math::Cosh(System.Double)
 static RtResultVoid cosh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::cosh(value));
@@ -219,7 +219,7 @@ RtResult<double> SystemMath::exp(double value)
 }
 /// @icall: System.Math::Exp(System.Double)
 static RtResultVoid exp_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::exp(value));
@@ -233,7 +233,7 @@ RtResult<double> SystemMath::floor(double value)
 }
 /// @icall: System.Math::Floor(System.Double)
 static RtResultVoid floor_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::floor(value));
@@ -247,7 +247,7 @@ RtResult<double> SystemMath::log(double value)
 }
 /// @icall: System.Math::Log(System.Double)
 static RtResultVoid log_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::log(value));
@@ -261,7 +261,7 @@ RtResult<double> SystemMath::log10(double value)
 }
 /// @icall: System.Math::Log10(System.Double)
 static RtResultVoid log10_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::log10(value));
@@ -275,7 +275,7 @@ RtResult<double> SystemMath::pow(double x, double y)
 }
 /// @icall: System.Math::Pow(System.Double,System.Double)
 static RtResultVoid pow_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     auto x = EvalStackOp::get_param<double>(params, 0);
     auto y = EvalStackOp::get_param<double>(params, 1);
@@ -290,7 +290,7 @@ RtResult<double> SystemMath::sin(double value)
 }
 /// @icall: System.Math::Sin(System.Double)
 static RtResultVoid sin_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::sin(value));
@@ -304,7 +304,7 @@ RtResult<double> SystemMath::sinh(double value)
 }
 /// @icall: System.Math::Sinh(System.Double)
 static RtResultVoid sinh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::sinh(value));
@@ -318,7 +318,7 @@ RtResult<double> SystemMath::sqrt(double value)
 }
 /// @icall: System.Math::Sqrt(System.Double)
 static RtResultVoid sqrt_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::sqrt(value));
@@ -332,7 +332,7 @@ RtResult<double> SystemMath::tan(double value)
 }
 /// @icall: System.Math::Tan(System.Double)
 static RtResultVoid tan_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::tan(value));
@@ -346,7 +346,7 @@ RtResult<double> SystemMath::tanh(double value)
 }
 /// @icall: System.Math::Tanh(System.Double)
 static RtResultVoid tanh_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::tanh(value));
@@ -360,7 +360,7 @@ RtResult<double> SystemMath::fmod(double x, double y)
 }
 /// @icall: System.Math::FMod(System.Double,System.Double)
 static RtResultVoid fmod_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto x = EvalStackOp::get_param<double>(params, 0);
     auto y = EvalStackOp::get_param<double>(params, 1);
@@ -380,7 +380,7 @@ RtResult<double> SystemMath::modf(double value, double* intpart)
 
 /// @icall: System.Math::ModF(System.Double,System.Double*)
 static RtResultVoid modf_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     auto intpart_ptr = EvalStackOp::get_param<double*>(params, 1);

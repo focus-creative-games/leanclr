@@ -28,7 +28,7 @@ RtResult<vm::RtString*> SystemString::newobj_char_array(vm::RtArray* charArray)
 
 /// @newobj: System.String::.ctor(System.Char[])
 static RtResultVoid newobj_char_array_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto charArray = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, SystemString::newobj_char_array(charArray));
@@ -55,7 +55,7 @@ RtResult<vm::RtString*> SystemString::newobj_char_array_range(vm::RtArray* charA
 
 /// @newobj: System.String::.ctor(System.Char[],System.Int32,System.Int32)
 static RtResultVoid newobj_char_array_range_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                    const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                    const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto charArray = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     auto startIndex = EvalStackOp::get_param<int32_t>(params, 1);
@@ -75,7 +75,7 @@ RtResult<vm::RtString*> SystemString::newobj_utf16chars(const Utf16Char* chars)
 
 /// @newobj: System.String::.ctor(System.Char*)
 static RtResultVoid newobj_utf16chars_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto chars = EvalStackOp::get_param<const Utf16Char*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, SystemString::newobj_utf16chars(chars));
@@ -96,7 +96,7 @@ RtResult<vm::RtString*> SystemString::newobj_utf16chars_range(const Utf16Char* c
 
 /// @newobj: System.String::.ctor(System.Char*,System.Int32,System.Int32)
 static RtResultVoid newobj_utf16chars_range_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                    const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                    const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto chars = EvalStackOp::get_param<const Utf16Char*>(params, 0);
     auto startIndex = EvalStackOp::get_param<int32_t>(params, 1);
@@ -115,7 +115,7 @@ RtResult<vm::RtString*> SystemString::newobj_utf8chars(const char* chars)
 
 /// @newobj: System.String::.ctor(System.SByte*)
 static RtResultVoid newobj_utf8chars_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto chars = EvalStackOp::get_param<const char*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, SystemString::newobj_utf8chars(chars));
@@ -135,7 +135,7 @@ RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const char* chars, 
 
 /// @newobj: System.String::.ctor(System.SByte*,System.Int32,System.Int32)
 static RtResultVoid newobj_utf8chars_range_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto chars = EvalStackOp::get_param<const char*>(params, 0);
     auto startIndex = EvalStackOp::get_param<int32_t>(params, 1);
@@ -157,7 +157,7 @@ RtResult<vm::RtString*> SystemString::newobj_char_count(Utf16Char c, int32_t cha
 
 /// @newobj: System.String::.ctor(System.Char,System.Int32)
 static RtResultVoid newobj_char_count_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto c = EvalStackOp::get_param<Utf16Char>(params, 0);
     auto charCount = EvalStackOp::get_param<int32_t>(params, 1);
@@ -174,7 +174,7 @@ RtResult<vm::RtString*> SystemString::newobj_readonlyspan(const vm::RtReadOnlySp
 
 /// @newobj: System.String::.ctor(System.ReadOnlySpan`1<System.Char>)
 static RtResultVoid newobj_readonlyspan_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto span = EvalStackOp::get_param<vm::RtReadOnlySpan<Utf16Char>>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, SystemString::newobj_readonlyspan(span));
@@ -193,7 +193,7 @@ RtResult<vm::RtString*> SystemString::fast_allocate_string(int32_t length)
 
 /// @icall: System.String::FastAllocateString
 static RtResultVoid fast_allocate_string_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto length = EvalStackOp::get_param<int32_t>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, SystemString::fast_allocate_string(length));
@@ -222,7 +222,7 @@ RtResult<vm::RtString*> SystemString::internal_is_interned(vm::RtString* s)
 
 /// @icall: System.String::InternalIntern
 static RtResultVoid internal_intern_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto s = EvalStackOp::get_param<vm::RtString*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, res, SystemString::internal_intern(s));
@@ -232,7 +232,7 @@ static RtResultVoid internal_intern_invoker(metadata::RtManagedMethodPointer met
 
 /// @icall: System.String::InternalIsInterned
 static RtResultVoid internal_is_interned_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto s = EvalStackOp::get_param<vm::RtString*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, res, SystemString::internal_is_interned(s));

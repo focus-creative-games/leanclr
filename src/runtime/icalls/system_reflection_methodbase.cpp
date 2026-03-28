@@ -25,7 +25,7 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionMethodBase::get_current_method
 
 /// @icall: System.Reflection.MethodBase::GetCurrentMethod
 static RtResultVoid get_current_method_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

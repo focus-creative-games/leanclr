@@ -15,7 +15,7 @@ RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_lc
 
 /// @icall: System.Globalization.CultureInfo::construct_internal_locale_from_lcid(System.Int32)
 static RtResultVoid construct_internal_locale_from_lcid_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto _this = EvalStackOp::get_param<vm::RtCultureInfo*>(params, 0);
     auto culture_lcid = EvalStackOp::get_param<int32_t>(params, 1);
@@ -31,7 +31,7 @@ RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_na
 
 /// @icall: System.Globalization.CultureInfo::construct_internal_locale_from_name(System.String)
 static RtResultVoid construct_internal_locale_from_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto _this = EvalStackOp::get_param<vm::RtCultureInfo*>(params, 0);
     auto name = EvalStackOp::get_param<vm::RtString*>(params, 1);
@@ -47,7 +47,7 @@ RtResult<vm::RtString*> SystemGlobalizationCultureInfo::get_current_locale_name(
 
 /// @icall: System.Globalization.CultureInfo::get_current_locale_name
 static RtResultVoid get_current_locale_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                    const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                    const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, locale_name, SystemGlobalizationCultureInfo::get_current_locale_name());
     EvalStackOp::set_return(ret, locale_name);
@@ -61,7 +61,7 @@ RtResult<vm::RtArray*> SystemGlobalizationCultureInfo::internal_get_cultures(boo
 
 /// @icall: System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)
 static RtResultVoid internal_get_cultures_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto neutral = EvalStackOp::get_param<bool>(params, 0);
     auto specific = EvalStackOp::get_param<bool>(params, 1);

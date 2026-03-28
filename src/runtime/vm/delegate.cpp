@@ -15,7 +15,7 @@ RtResultVoid Delegate::initialize()
     RET_VOID_OK();
 }
 
-RtResultVoid Delegate::constructor_delegate(RtMulticastDelegate* del, RtObject* target, const metadata::RtMethodInfo* method)
+RtResultVoid Delegate::constructor_delegate(RtMulticastDelegate* del, RtObject* target, const metadata::RtMethodInfo* method) noexcept
 {
     auto& sub_del = del->dele;
     sub_del.target = target;
@@ -33,7 +33,7 @@ RtResultVoid Delegate::constructor_delegate(RtMulticastDelegate* del, RtObject* 
     RET_VOID_OK();
 }
 
-RtResult<RtMulticastDelegate*> Delegate::new_delegate(metadata::RtClass* delelgate_type, RtObject* target, const metadata::RtMethodInfo* method)
+RtResult<RtMulticastDelegate*> Delegate::new_delegate(metadata::RtClass* delelgate_type, RtObject* target, const metadata::RtMethodInfo* method) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, del_obj, Object::new_object(delelgate_type));
     RtMulticastDelegate* del = reinterpret_cast<RtMulticastDelegate*>(del_obj);
@@ -43,7 +43,7 @@ RtResult<RtMulticastDelegate*> Delegate::new_delegate(metadata::RtClass* delelga
 
 // Placeholder delegate invokers (to be implemented)
 RtResultVoid Delegate::call_delegate_ctor_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     RtMulticastDelegate* del_obj = interp::EvalStackOp::get_param<RtMulticastDelegate*>(params, 0);
     RtObject* target = interp::EvalStackOp::get_param<RtObject*>(params, 1);
@@ -54,7 +54,7 @@ RtResultVoid Delegate::call_delegate_ctor_invoker(metadata::RtManagedMethodPoint
 }
 
 RtResultVoid Delegate::newobj_delegate_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     RtObject* target = interp::EvalStackOp::get_param<RtObject*>(params, 0);
     const metadata::RtMethodInfo* method_info = interp::EvalStackOp::get_param<const metadata::RtMethodInfo*>(params, 1);
@@ -67,7 +67,7 @@ constexpr size_t MAX_DELEGATE_RESULT_OBJECT_SIZE = 1024;
 static interp::RtStackObject s_tempReturnValueBuffer[MAX_DELEGATE_RESULT_OBJECT_SIZE];
 
 RtResultVoid Delegate::invoke_delegate_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     interp::RtStackObject* args = const_cast<interp::RtStackObject*>(params);
     RtMulticastDelegate* del = interp::EvalStackOp::get_param<RtMulticastDelegate*>(args, 0);
@@ -154,13 +154,13 @@ RtResultVoid Delegate::invoke_delegate_invoker(metadata::RtManagedMethodPointer 
 }
 
 RtResultVoid Delegate::begin_invoke_delegate_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                     const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     RET_ERR(RtErr::NotImplemented);
 }
 
 RtResultVoid Delegate::end_invoke_delegate_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     RET_ERR(RtErr::NotImplemented);
 }

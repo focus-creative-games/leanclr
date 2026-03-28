@@ -99,7 +99,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeFieldInfo::get_type_modifiers(vm::
 static RtResultVoid get_metadata_token_invoker_system_reflection_runtimefieldinfo(metadata::RtManagedMethodPointer,
                                                                                   const metadata::RtMethodInfo*,
                                                                                   const interp::RtStackObject* params,
-                                                                                  interp::RtStackObject* ret)
+                                                                                  interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, result, SystemReflectionRuntimeFieldInfo::get_metadata_token(field));
@@ -109,7 +109,7 @@ static RtResultVoid get_metadata_token_invoker_system_reflection_runtimefieldinf
 
 /// @icall: System.Reflection.RuntimeFieldInfo::GetFieldOffset
 static RtResultVoid get_field_offset_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                             interp::RtStackObject* ret)
+                                             interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, SystemReflectionRuntimeFieldInfo::get_field_offset(field));
@@ -119,7 +119,7 @@ static RtResultVoid get_field_offset_invoker(metadata::RtManagedMethodPointer, c
 
 /// @icall: System.Reflection.RuntimeFieldInfo::GetRawConstantValue
 static RtResultVoid get_raw_const_value_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                interp::RtStackObject* ret)
+                                                interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, SystemReflectionRuntimeFieldInfo::get_raw_const_value(field));
@@ -129,7 +129,7 @@ static RtResultVoid get_raw_const_value_invoker(metadata::RtManagedMethodPointer
 
 /// @icall: System.Reflection.RuntimeFieldInfo::GetValueInternal
 static RtResultVoid get_value_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret)
+                                               interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -140,7 +140,7 @@ static RtResultVoid get_value_internal_invoker(metadata::RtManagedMethodPointer,
 
 /// @icall: System.Reflection.RuntimeFieldInfo::UnsafeGetValue
 static RtResultVoid unsafe_get_value_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                             interp::RtStackObject* ret)
+                                             interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -151,7 +151,7 @@ static RtResultVoid unsafe_get_value_invoker(metadata::RtManagedMethodPointer, c
 
 /// @icall: System.Reflection.RuntimeFieldInfo::SetValueInternal(System.Reflection.FieldInfo,System.Object,System.Object)
 static RtResultVoid set_value_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret)
+                                               interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
@@ -162,7 +162,7 @@ static RtResultVoid set_value_internal_invoker(metadata::RtManagedMethodPointer,
 
 /// @icall: System.Reflection.RuntimeFieldInfo::GetParentType
 static RtResultVoid get_parent_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                            interp::RtStackObject* ret)
+                                            interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     bool declaring = EvalStackOp::get_param<bool>(params, 1);
@@ -173,7 +173,7 @@ static RtResultVoid get_parent_type_invoker(metadata::RtManagedMethodPointer, co
 
 /// @icall: System.Reflection.RuntimeFieldInfo::ResolveType
 static RtResultVoid resolve_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                         interp::RtStackObject* ret)
+                                         interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, result, SystemReflectionRuntimeFieldInfo::resolve_type(field));
@@ -183,7 +183,7 @@ static RtResultVoid resolve_type_invoker(metadata::RtManagedMethodPointer, const
 
 /// @icall: System.Reflection.RuntimeFieldInfo::GetTypeModifiers(System.Boolean)
 static RtResultVoid get_type_modifiers_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret)
+                                               interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     bool optional = EvalStackOp::get_param<bool>(params, 1);

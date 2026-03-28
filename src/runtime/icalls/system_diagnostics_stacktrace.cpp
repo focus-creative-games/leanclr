@@ -15,7 +15,7 @@ RtResult<vm::RtArray*> SystemDiagnosticsStackTrace::get_trace(vm::RtException* e
 
 /// @icall: System.Diagnostics.StackTrace::get_trace(System.Exception,System.Int32,System.Boolean)
 static RtResultVoid get_trace_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto exception = EvalStackOp::get_param<vm::RtException*>(params, 0);
     auto skip_frames = EvalStackOp::get_param<int32_t>(params, 1);

@@ -33,7 +33,7 @@ RtResult<vm::RtReflectionMethod*> SystemDelegate::get_virtual_method_internal(vm
 
 /// @icall: System.Delegate::GetVirtualMethod_internal()
 static RtResultVoid get_virtual_method_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_delegate = EvalStackOp::get_param<vm::RtDelegate*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionMethod*, reflection_method, SystemDelegate::get_virtual_method_internal(this_delegate));
@@ -55,7 +55,7 @@ RtResult<vm::RtMulticastDelegate*> SystemDelegate::create_delegate_internal(vm::
 
 /// @icall: System.Delegate::CreateDelegate_internal(System.Type,System.Object,System.Reflection.MethodInfo,System.Boolean)
 static RtResultVoid create_delegate_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                     const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto delegate_type = EvalStackOp::get_param<vm::RtReflectionType*>(params, 0);
     auto target = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -87,7 +87,7 @@ RtResult<vm::RtMulticastDelegate*> SystemDelegate::alloc_delegate_like_internal(
 
 /// @icall: System.Delegate::AllocDelegateLike_internal(System.Delegate)
 static RtResultVoid alloc_delegate_like_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                         const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto source = EvalStackOp::get_param<vm::RtDelegate*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtMulticastDelegate*, new_delegate, SystemDelegate::alloc_delegate_like_internal(source));

@@ -25,7 +25,7 @@ namespace
 
 // Interpreter invoker
 RtResultVoid fn_interpreter_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                    interp::RtStackObject* ret)
+                                    interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const interp::RtStackObject*, result, interp::Interpreter::execute(method, params));
     if (method->ret_stack_object_size > 0)
@@ -37,7 +37,7 @@ RtResultVoid fn_interpreter_invoker(metadata::RtManagedMethodPointer method_poin
 
 // Interpreter virtual adjust thunk invoker
 RtResultVoid fn_interpreter_virtual_adjust_thunk_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                         const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     const_cast<interp::RtStackObject*>(params)[0].obj = params[0].obj + 1;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const interp::RtStackObject*, result, interp::Interpreter::execute(method, params));
@@ -50,7 +50,7 @@ RtResultVoid fn_interpreter_virtual_adjust_thunk_invoker(metadata::RtManagedMeth
 
 // Not implemented internal call invoker
 RtResultVoid fn_not_implemented_internal_call_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                      const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                      const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
 #ifndef NDEBUG
     utils::StringBuilder sb;
@@ -62,7 +62,7 @@ RtResultVoid fn_not_implemented_internal_call_invoker(metadata::RtManagedMethodP
 
 // Not implemented intrinsic invoker
 RtResultVoid fn_not_implemented_intrinsic_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
 #ifndef NDEBUG
     utils::StringBuilder sb;
@@ -74,7 +74,7 @@ RtResultVoid fn_not_implemented_intrinsic_invoker(metadata::RtManagedMethodPoint
 
 // PInvoke invoker (not implemented)
 RtResultVoid fn_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret)
+                                interp::RtStackObject* ret) noexcept
 {
 #ifndef NDEBUG
     utils::StringBuilder sb;
@@ -86,7 +86,7 @@ RtResultVoid fn_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer,
 
 // Not implemented PInvoke invoker
 RtResultVoid fn_not_implemented_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
 #ifndef NDEBUG
     utils::StringBuilder sb;
@@ -98,7 +98,7 @@ RtResultVoid fn_not_implemented_pinvoke_invoker(metadata::RtManagedMethodPointer
 
 // Not implemented runtime impl invoker
 RtResultVoid fn_not_implemented_runtime_impl_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                     const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
 #ifndef NDEBUG
     utils::StringBuilder sb;
@@ -111,7 +111,7 @@ RtResultVoid fn_not_implemented_runtime_impl_invoker(metadata::RtManagedMethodPo
 
 // Not implemented generic invoker
 RtResultVoid fn_not_implemented_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
 #ifndef NDEBUG
     utils::StringBuilder sb;
@@ -123,7 +123,7 @@ RtResultVoid fn_not_implemented_invoker(metadata::RtManagedMethodPointer method_
 }
 
 // Method pointer placeholder
-void fn_not_implemented_method_pointer()
+void fn_not_implemented_method_pointer() noexcept
 {
     // Placeholder - would panic in debug builds
 }

@@ -524,7 +524,7 @@ RtResult<RtObject*> Runtime::invoke_array_arguments_with_run_cctor(const metadat
 }
 
 RtResultVoid Runtime::invoke_stackobject_arguments_without_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                                                     interp::RtStackObject* ret)
+                                                                     interp::RtStackObject* ret) noexcept
 {
     assert(method);
 
@@ -533,7 +533,7 @@ RtResultVoid Runtime::invoke_stackobject_arguments_without_run_cctor(const metad
 }
 
 RtResultVoid Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                                                             interp::RtStackObject* ret)
+                                                                             interp::RtStackObject* ret) noexcept
 {
     assert(method);
 
@@ -542,7 +542,7 @@ RtResultVoid Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(con
 }
 
 RtResultVoid Runtime::invoke_stackobject_arguments_with_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                                                  interp::RtStackObject* ret)
+                                                                  interp::RtStackObject* ret) noexcept
 {
     assert(method);
 

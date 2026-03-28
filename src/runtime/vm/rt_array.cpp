@@ -383,7 +383,7 @@ RtResult<int32_t> Array::get_mdarray_global_index_from_indices3(const RtArray* a
 // Method invoker implementations
 
 RtResultVoid Array::szarray_new_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     assert(method && params && ret);
     assert(method->parameter_count == 1);
@@ -397,7 +397,7 @@ RtResultVoid Array::szarray_new_invoker(metadata::RtManagedMethodPointer method_
 }
 
 RtResultVoid Array::szarray_get_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     assert(method && params && ret);
     assert(method->parameter_count == 1);
@@ -413,7 +413,7 @@ RtResultVoid Array::szarray_get_invoker(metadata::RtManagedMethodPointer method_
 }
 
 RtResultVoid Array::szarray_set_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     assert(method && params);
     assert(method->parameter_count == 2);
@@ -430,7 +430,7 @@ RtResultVoid Array::szarray_set_invoker(metadata::RtManagedMethodPointer method_
 }
 
 RtResultVoid Array::szarray_address_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     assert(method && params && ret);
     assert(method->parameter_count == 1);
@@ -444,7 +444,7 @@ RtResultVoid Array::szarray_address_invoker(metadata::RtManagedMethodPointer met
 }
 
 RtResultVoid Array::newmdarray_lengths_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     assert(method && params && ret);
 
@@ -463,7 +463,7 @@ RtResultVoid Array::newmdarray_lengths_invoker(metadata::RtManagedMethodPointer 
 }
 
 RtResultVoid Array::newmdarray_lengths_lower_bounds_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     assert(method && params && ret);
 
@@ -486,7 +486,7 @@ RtResultVoid Array::newmdarray_lengths_lower_bounds_invoker(metadata::RtManagedM
 }
 
 RtResultVoid Array::mdarray_get_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     assert(params && ret);
 
@@ -502,7 +502,7 @@ RtResultVoid Array::mdarray_get_invoker(metadata::RtManagedMethodPointer method_
 }
 
 RtResultVoid Array::mdarray_set_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     assert(method && params);
 
@@ -519,7 +519,7 @@ RtResultVoid Array::mdarray_set_invoker(metadata::RtManagedMethodPointer method_
 }
 
 RtResultVoid Array::mdarray_address_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     assert(params && ret);
 
@@ -533,7 +533,7 @@ RtResultVoid Array::mdarray_address_invoker(metadata::RtManagedMethodPointer met
 
 // Array cloning
 
-RtResult<RtArray*> Array::clone(RtArray* old_arr)
+RtResult<RtArray*> Array::clone(RtArray* old_arr) noexcept
 {
     assert(old_arr);
 

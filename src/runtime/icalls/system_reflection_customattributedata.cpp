@@ -23,7 +23,7 @@ RtResultVoid SystemReflectionCustomAttributeData::resolve_arguments_internal(vm:
 /// @icall:
 /// System.Reflection.CustomAttributeData::ResolveArgumentsInternal(System.Reflection.ConstructorInfo,System.Reflection.Assembly,System.IntPtr,System.UInt32,System.Object[]&,System.Object[]&)
 static RtResultVoid resolve_arguments_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                       const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

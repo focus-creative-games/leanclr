@@ -83,7 +83,7 @@ static void nop_function()
 }
 
 static RtResultVoid nop_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret)
+                                interp::RtStackObject* ret) noexcept
 {
     RET_VOID_OK();
 }

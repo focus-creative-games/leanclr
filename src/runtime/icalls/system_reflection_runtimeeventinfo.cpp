@@ -62,7 +62,7 @@ RtResultVoid SystemReflectionRuntimeEventInfo::get_event_info(vm::RtReflectionEv
 
 /// @icall: System.Reflection.RuntimeEventInfo::get_event_info(System.Reflection.RuntimeEventInfo,System.Reflection.MonoEventInfo&)
 static RtResultVoid get_event_info_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -83,7 +83,7 @@ RtResult<int32_t> SystemReflectionRuntimeEventInfo::get_metadata_token(vm::RtRef
 static RtResultVoid get_metadata_token_invoker_system_reflection_runtimeeventinfo(metadata::RtManagedMethodPointer methodPtr,
                                                                                   const metadata::RtMethodInfo* method,
                                                                                   const interp::RtStackObject* params,
-                                                                                  interp::RtStackObject* ret)
+                                                                                  interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

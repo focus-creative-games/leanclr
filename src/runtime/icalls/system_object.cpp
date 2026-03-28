@@ -19,7 +19,7 @@ RtResult<int32_t> SystemObject::get_hash_code(vm::RtObject* obj)
 }
 
 static RtResultVoid get_hash_code_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     auto obj = EvalStackOp::get_this(params);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, hash_code, SystemObject::get_hash_code(obj));
@@ -38,7 +38,7 @@ RtResult<vm::RtReflectionType*> SystemObject::get_type(vm::RtObject* obj)
 }
 
 static RtResultVoid get_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     auto obj = EvalStackOp::get_this(params);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, type_obj, SystemObject::get_type(obj));
@@ -57,7 +57,7 @@ RtResult<vm::RtObject*> SystemObject::memberwise_clone(vm::RtObject* obj)
 }
 
 static RtResultVoid memberwise_clone_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                             interp::RtStackObject* ret)
+                                             interp::RtStackObject* ret) noexcept
 {
     auto obj = EvalStackOp::get_this(params);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, cloned_obj, SystemObject::memberwise_clone(obj));

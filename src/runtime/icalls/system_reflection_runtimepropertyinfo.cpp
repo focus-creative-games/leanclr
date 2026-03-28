@@ -132,7 +132,7 @@ RtResult<int32_t> SystemReflectionRuntimePropertyInfo::get_metadata_token(vm::Rt
 
 /// @icall: System.Reflection.RuntimePropertyInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)
 static RtResultVoid internal_from_handle_type_invoker_runtimepropertyinfo(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* ret)
+                                                      interp::RtStackObject* ret) noexcept
 {
     metadata::RtPropertyInfo* property = EvalStackOp::get_param<metadata::RtPropertyInfo*>(params, 0);
     const metadata::RtTypeSig* type_sig = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 1);
@@ -145,7 +145,7 @@ static RtResultVoid internal_from_handle_type_invoker_runtimepropertyinfo(metada
 /// @icall:
 /// System.Reflection.RuntimePropertyInfo::System.Reflection.RuntimePropertyInfo::get_property_info
 static RtResultVoid get_property_info_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                              interp::RtStackObject* ret)
+                                              interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     vm::RtReflectionProperty* property = EvalStackOp::get_param<vm::RtReflectionProperty*>(params, 0);
@@ -156,7 +156,7 @@ static RtResultVoid get_property_info_invoker(metadata::RtManagedMethodPointer, 
 
 /// @icall: System.Reflection.RuntimePropertyInfo::GetTypeModifiers(System.Reflection.RuntimePropertyInfo,System.Boolean)
 static RtResultVoid get_type_modifiers_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret)
+                                               interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionProperty* property = EvalStackOp::get_param<vm::RtReflectionProperty*>(params, 0);
     bool optional = EvalStackOp::get_param<bool>(params, 1);
@@ -167,7 +167,7 @@ static RtResultVoid get_type_modifiers_invoker(metadata::RtManagedMethodPointer,
 
 /// @icall: System.Reflection.RuntimePropertyInfo::get_default_value(System.Reflection.RuntimePropertyInfo)
 static RtResultVoid get_default_value_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                              interp::RtStackObject* ret)
+                                              interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionProperty* property = EvalStackOp::get_param<vm::RtReflectionProperty*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, SystemReflectionRuntimePropertyInfo::get_default_value(property));
@@ -179,7 +179,7 @@ static RtResultVoid get_default_value_invoker(metadata::RtManagedMethodPointer, 
 static RtResultVoid get_metadata_token_invoker_system_reflection_runtimepropertyinfo(metadata::RtManagedMethodPointer,
                                                                                      const metadata::RtMethodInfo*,
                                                                                      const interp::RtStackObject* params,
-                                                                                     interp::RtStackObject* ret)
+                                                                                     interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionProperty* property = EvalStackOp::get_param<vm::RtReflectionProperty*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, SystemReflectionRuntimePropertyInfo::get_metadata_token(property));

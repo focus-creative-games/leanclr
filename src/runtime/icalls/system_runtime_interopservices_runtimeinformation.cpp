@@ -19,7 +19,7 @@ RtResult<vm::RtString*> SystemRuntimeInteropServicesRuntimeInformation::get_os_n
 
 /// @icall: System.Runtime.InteropServices.RuntimeInformation::GetRuntimeArchitecture
 static RtResultVoid get_runtime_architecture_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                     const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -31,7 +31,7 @@ static RtResultVoid get_runtime_architecture_invoker(metadata::RtManagedMethodPo
 
 /// @icall: System.Runtime.InteropServices.RuntimeInformation::GetOSName
 static RtResultVoid get_os_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                        interp::RtStackObject* ret)
+                                        interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

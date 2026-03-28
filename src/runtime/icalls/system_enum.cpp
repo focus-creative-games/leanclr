@@ -155,7 +155,7 @@ RtResult<int32_t> SystemEnum::get_hash_code(vm::RtObject* obj)
 
 /// @icall: System.Enum::InternalCompareTo
 static RtResultVoid internal_compare_to_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                interp::RtStackObject* ret)
+                                                interp::RtStackObject* ret) noexcept
 {
     vm::RtObject* enum_obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     vm::RtObject* other = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -166,7 +166,7 @@ static RtResultVoid internal_compare_to_invoker(metadata::RtManagedMethodPointer
 
 /// @icall: System.Enum::InternalGetUnderlyingType
 static RtResultVoid internal_get_underlying_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                         interp::RtStackObject* ret)
+                                                         interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionRuntimeType* enum_klass = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionRuntimeType*, underlying_type, SystemEnum::internal_get_underlying_type(enum_klass));
@@ -176,7 +176,7 @@ static RtResultVoid internal_get_underlying_type_invoker(metadata::RtManagedMeth
 
 /// @icall: System.Enum::GetEnumValuesAndNames
 static RtResultVoid get_enum_values_and_names_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* ret)
+                                                      interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionRuntimeType* enum_klass = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0);
     vm::RtArray* values = nullptr;
@@ -193,7 +193,7 @@ static RtResultVoid get_enum_values_and_names_invoker(metadata::RtManagedMethodP
 
 /// @icall: System.Enum::InternalBoxEnum
 static RtResultVoid internal_box_enum_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                              interp::RtStackObject* ret)
+                                              interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionRuntimeType* runtime_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0);
     uint64_t value = EvalStackOp::get_param<uint64_t>(params, 1);
@@ -204,7 +204,7 @@ static RtResultVoid internal_box_enum_invoker(metadata::RtManagedMethodPointer, 
 
 /// @icall: System.Enum::get_value
 static RtResultVoid get_value_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, value, SystemEnum::get_value(obj));
@@ -214,7 +214,7 @@ static RtResultVoid get_value_invoker(metadata::RtManagedMethodPointer, const me
 
 /// @icall: System.Enum::InternalHasFlag
 static RtResultVoid internal_has_flag_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                              interp::RtStackObject* ret)
+                                              interp::RtStackObject* ret) noexcept
 {
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     vm::RtObject* flag = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -225,7 +225,7 @@ static RtResultVoid internal_has_flag_invoker(metadata::RtManagedMethodPointer, 
 
 /// @icall: System.Enum::get_hashcode
 static RtResultVoid get_hash_code_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, hash_code, SystemEnum::get_hash_code(obj));

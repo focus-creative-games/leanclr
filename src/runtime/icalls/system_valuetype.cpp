@@ -256,7 +256,7 @@ RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject
 
 /// @icall: System.ValueType::InternalEquals(System.Object,System.Object,System.Object[]&)
 static RtResultVoid internal_equals_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto obj1 = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     auto obj2 = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -453,7 +453,7 @@ RtResult<int32_t> SystemValueType::internal_get_hash_code(vm::RtObject* obj, vm:
 
 /// @icall: System.ValueType::InternalGetHashCode(System.Object,System.Object[]&)
 static RtResultVoid internal_get_hash_code_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                   const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     auto uncomputed_field_objs_ptr = EvalStackOp::get_param<vm::RtArray**>(params, 1);

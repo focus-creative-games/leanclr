@@ -27,13 +27,13 @@ class Runtime
     static RtResult<RtObject*> invoke_array_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params);
 
     static RtResultVoid invoke_stackobject_arguments_without_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                                                       interp::RtStackObject* ret);
+                                                                       interp::RtStackObject* ret) noexcept;
 
     static RtResultVoid virtual_invoke_stackobject_arguments_without_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                                                               interp::RtStackObject* ret);
+                                                                               interp::RtStackObject* ret) noexcept;
 
     static RtResultVoid invoke_stackobject_arguments_with_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                                                    interp::RtStackObject* ret);
+                                                                    interp::RtStackObject* ret) noexcept;
 
   private:
 };

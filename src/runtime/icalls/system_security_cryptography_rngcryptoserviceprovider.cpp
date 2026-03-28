@@ -17,7 +17,7 @@ RtResult<bool> SystemSecurityCryptographyRNGCryptoServiceProvider::rng_open()
 }
 
 static RtResultVoid rng_open_invoker(RtManagedMethodPointer /*method_pointer*/, const RtMethodInfo* /*method*/, const interp::RtStackObject* /*params*/,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemSecurityCryptographyRNGCryptoServiceProvider::rng_open());
     EvalStackOp::set_return(ret, static_cast<int32_t>(result));
@@ -31,7 +31,7 @@ RtResult<intptr_t> SystemSecurityCryptographyRNGCryptoServiceProvider::rng_initi
 }
 
 static RtResultVoid rng_initialize_invoker(RtManagedMethodPointer /*method_pointer*/, const RtMethodInfo* /*method*/, const interp::RtStackObject* params,
-                                           interp::RtStackObject* ret)
+                                           interp::RtStackObject* ret) noexcept
 {
     const uint8_t* seed = EvalStackOp::get_param<const uint8_t*>(params, 0);
     intptr_t seed_len = EvalStackOp::get_param<intptr_t>(params, 1);
@@ -47,7 +47,7 @@ RtResult<intptr_t> SystemSecurityCryptographyRNGCryptoServiceProvider::rng_get_b
 }
 
 static RtResultVoid rng_get_bytes_invoker(RtManagedMethodPointer /*method_pointer*/, const RtMethodInfo* /*method*/, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     intptr_t handle = EvalStackOp::get_param<intptr_t>(params, 0);
     uint8_t* buf = EvalStackOp::get_param<uint8_t*>(params, 1);

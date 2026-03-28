@@ -17,7 +17,7 @@ RtResultVoid SystemThreadingInternalThread::thread_free_internal(vm::RtInternalT
 
 // Invoker function for thread_free_internal
 static RtResultVoid thread_free_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                 interp::RtStackObject* ret)
+                                                 interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto this_thread = EvalStackOp::get_param<vm::RtInternalThread*>(params, 0);

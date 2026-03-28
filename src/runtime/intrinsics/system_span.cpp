@@ -23,7 +23,7 @@ RtResult<const uint8_t*> SystemSpan::get_item(const vm::RtReadOnlySpan<uint8_t>&
 
 /// @intrinsic: System.Span`1::get_Item
 static RtResultVoid get_item_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     const vm::RtReadOnlySpan<uint8_t>& span = *interp::EvalStackOp::get_param<const vm::RtReadOnlySpan<uint8_t>*>(params, 0);

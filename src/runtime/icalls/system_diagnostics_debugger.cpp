@@ -16,7 +16,7 @@ RtResult<bool> SystemDiagnosticsDebugger::is_attached_internal()
 
 /// @icall: System.Diagnostics.Debugger::IsAttached_internal()
 static RtResultVoid is_attached_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemDiagnosticsDebugger::is_attached_internal());
     EvalStackOp::set_return(ret, static_cast<int32_t>(result));
@@ -30,7 +30,7 @@ RtResult<bool> SystemDiagnosticsDebugger::is_logging()
 
 /// @icall: System.Diagnostics.Debugger::IsLogging()
 static RtResultVoid is_logging_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemDiagnosticsDebugger::is_logging());
     EvalStackOp::set_return(ret, static_cast<int32_t>(result));
@@ -45,7 +45,7 @@ RtResultVoid SystemDiagnosticsDebugger::log_icall(int32_t level, vm::RtString** 
 
 /// @icall: System.Diagnostics.Debugger::Log_icall(System.Int32,System.String&,System.String&)
 static RtResultVoid log_icall_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto level = EvalStackOp::get_param<int32_t>(params, 0);

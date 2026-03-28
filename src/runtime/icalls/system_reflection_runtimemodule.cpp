@@ -25,7 +25,7 @@ RtResult<int32_t> SystemReflectionRuntimeModule::get_metadata_token(vm::RtReflec
 static RtResultVoid get_metadata_token_invoker_system_reflection_runtimemodule(metadata::RtManagedMethodPointer methodPtr,
                                                                                const metadata::RtMethodInfo* method,
                                                                                const interp::RtStackObject* params,
-                                                                               interp::RtStackObject* ret)
+                                                                               interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<vm::RtReflectionModule*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, SystemReflectionRuntimeModule::get_metadata_token(module));
@@ -42,7 +42,7 @@ RtResult<int32_t> SystemReflectionRuntimeModule::get_md_stream_version(intptr_t 
 
 /// @icall: System.Reflection.RuntimeModule::GetMDStreamVersion(System.IntPtr)
 static RtResultVoid get_md_stream_version_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<intptr_t>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, version, SystemReflectionRuntimeModule::get_md_stream_version(module));
@@ -57,7 +57,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeModule::internal_get_types(metadat
 
 /// @icall: System.Reflection.RuntimeModule::InternalGetTypes(System.IntPtr)
 static RtResultVoid internal_get_types_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, types, SystemReflectionRuntimeModule::internal_get_types(module));
@@ -74,7 +74,7 @@ RtResult<intptr_t> SystemReflectionRuntimeModule::get_hinstance(metadata::RtModu
 
 /// @icall: System.Reflection.RuntimeModule::GetHINSTANCE(System.IntPtr)
 static RtResultVoid get_hinstance_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, hinstance, SystemReflectionRuntimeModule::get_hinstance(module));
@@ -92,7 +92,7 @@ RtResultVoid SystemReflectionRuntimeModule::get_guid_internal(metadata::RtModule
 
 /// @icall: System.Reflection.RuntimeModule::GetGuidInternal(System.IntPtr,System.Byte[])
 static RtResultVoid get_guid_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
@@ -109,7 +109,7 @@ RtResult<vm::RtReflectionType*> SystemReflectionRuntimeModule::get_global_type(m
 
 /// @icall: System.Reflection.RuntimeModule::GetGlobalType(System.IntPtr)
 static RtResultVoid get_global_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, global_type, SystemReflectionRuntimeModule::get_global_type(module));
@@ -167,7 +167,7 @@ RtResult<const metadata::RtTypeSig*> SystemReflectionRuntimeModule::resolve_type
 
 /// @icall: System.Reflection.RuntimeModule::ResolveTypeToken(System.IntPtr,System.Int32,System.IntPtr[],System.IntPtr[],System.Reflection.ResolveTokenError&)
 static RtResultVoid resolve_type_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
     auto token = EvalStackOp::get_param<int32_t>(params, 1);
@@ -223,7 +223,7 @@ RtResult<const metadata::RtMethodInfo*> SystemReflectionRuntimeModule::resolve_m
 
 /// @icall: System.Reflection.RuntimeModule::ResolveMethodToken(System.IntPtr,System.Int32,System.IntPtr[],System.IntPtr[],System.Reflection.ResolveTokenError&)
 static RtResultVoid resolve_method_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
     auto token = EvalStackOp::get_param<int32_t>(params, 1);
@@ -279,7 +279,7 @@ RtResult<const metadata::RtFieldInfo*> SystemReflectionRuntimeModule::resolve_fi
 
 /// @icall: System.Reflection.RuntimeModule::ResolveFieldToken(System.IntPtr,System.Int32,System.IntPtr[],System.IntPtr[],System.Reflection.ResolveTokenError&)
 static RtResultVoid resolve_field_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
     auto token = EvalStackOp::get_param<int32_t>(params, 1);
@@ -314,7 +314,7 @@ RtResult<vm::RtString*> SystemReflectionRuntimeModule::resolve_string_token(meta
 
 /// @icall: System.Reflection.RuntimeModule::ResolveStringToken(System.IntPtr,System.Int32,System.Reflection.ResolveTokenError&)
 static RtResultVoid resolve_string_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
     auto token = EvalStackOp::get_param<int32_t>(params, 1);
@@ -504,7 +504,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeModule::resolve_signature(metadata
 
 /// @icall: System.Reflection.RuntimeModule::ResolveSignature(System.IntPtr,System.Int32,System.Reflection.ResolveTokenError&)
 static RtResultVoid resolve_signature_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
     auto token = EvalStackOp::get_param<int32_t>(params, 1);
@@ -516,7 +516,7 @@ static RtResultVoid resolve_signature_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Reflection.RuntimeModule::ResolveMemberToken(System.IntPtr,System.Int32,System.IntPtr[],System.IntPtr[],System.Reflection.ResolveTokenError&)
 static RtResultVoid resolve_member_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<metadata::RtModuleDef*>(params, 0);
     auto token = EvalStackOp::get_param<int32_t>(params, 1);

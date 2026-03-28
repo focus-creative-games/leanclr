@@ -11,7 +11,7 @@ RtResult<bool> SystemSecuritySecurityManager::get_security_enabled()
 }
 
 RtResultVoid get_security_enabled_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
-                                          const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                          const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemSecuritySecurityManager::get_security_enabled());
     EvalStackOp::set_return(ret, static_cast<int32_t>(result));

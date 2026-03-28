@@ -279,7 +279,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeTypeHandle::internal_from_name(vm::
 
 /// @icall: System.RuntimeTypeHandle::GetAttributes
 static RtResultVoid get_attributes_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, attributes, SystemRuntimeTypeHandle::get_attributes(runtime_type));
@@ -291,7 +291,7 @@ static RtResultVoid get_attributes_invoker(metadata::RtManagedMethodPointer meth
 static RtResultVoid get_metadata_token_invoker_system_runtimetypehandle(metadata::RtManagedMethodPointer methodPtr,
                                                                         const metadata::RtMethodInfo* method,
                                                                         const interp::RtStackObject* params,
-                                                                        interp::RtStackObject* ret)
+                                                                        interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, SystemRuntimeTypeHandle::get_metadata_token(runtime_type));
@@ -301,7 +301,7 @@ static RtResultVoid get_metadata_token_invoker_system_runtimetypehandle(metadata
 
 /// @icall: System.RuntimeTypeHandle::GetCorElementType
 static RtResultVoid get_cor_element_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtElementType, element_type, SystemRuntimeTypeHandle::get_cor_element_type(runtime_type));
@@ -311,7 +311,7 @@ static RtResultVoid get_cor_element_type_invoker(metadata::RtManagedMethodPointe
 
 /// @icall: System.RuntimeTypeHandle::HasInstantiation
 static RtResultVoid has_instantiation_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemRuntimeTypeHandle::has_instantiation(runtime_type));
@@ -321,7 +321,7 @@ static RtResultVoid has_instantiation_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.RuntimeTypeHandle::IsComObject(System.RuntimeType)
 static RtResultVoid is_com_object_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemRuntimeTypeHandle::is_com_object(runtime_type));
@@ -331,7 +331,7 @@ static RtResultVoid is_com_object_invoker(metadata::RtManagedMethodPointer metho
 
 /// @icall: System.RuntimeTypeHandle::HasReferences
 static RtResultVoid has_references_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_type = EvalStackOp::get_param<const vm::RtReflectionType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(ref_type->type_handle));
@@ -342,7 +342,7 @@ static RtResultVoid has_references_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.RuntimeTypeHandle::GetArrayRank(System.RuntimeType)
 static RtResultVoid get_array_rank_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, rank, SystemRuntimeTypeHandle::get_array_rank(runtime_type));
@@ -352,7 +352,7 @@ static RtResultVoid get_array_rank_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.RuntimeTypeHandle::GetElementType
 static RtResultVoid get_element_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionRuntimeType*, element_type, SystemRuntimeTypeHandle::get_element_type(runtime_type));
@@ -362,7 +362,7 @@ static RtResultVoid get_element_type_invoker(metadata::RtManagedMethodPointer me
 
 /// @icall: System.RuntimeTypeHandle::IsGenericVariable
 static RtResultVoid is_generic_variable_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemRuntimeTypeHandle::is_generic_variable(runtime_type));
@@ -372,7 +372,7 @@ static RtResultVoid is_generic_variable_invoker(metadata::RtManagedMethodPointer
 
 /// @icall: System.RuntimeTypeHandle::GetBaseType
 static RtResultVoid get_base_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionRuntimeType*, base_type, SystemRuntimeTypeHandle::get_base_type(runtime_type));
@@ -382,7 +382,7 @@ static RtResultVoid get_base_type_invoker(metadata::RtManagedMethodPointer metho
 
 /// @icall: System.RuntimeTypeHandle::IsGenericTypeDefinition
 static RtResultVoid is_generic_type_definition_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                       const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemRuntimeTypeHandle::is_generic_type_definition(runtime_type));
@@ -392,7 +392,7 @@ static RtResultVoid is_generic_type_definition_invoker(metadata::RtManagedMethod
 
 /// @icall: System.RuntimeTypeHandle::GetGenericParameterInfo(System.RuntimeType)
 static RtResultVoid get_generic_parameter_info_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                       const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtGenericParam*, generic_param, SystemRuntimeTypeHandle::get_generic_parameter_info(runtime_type));
@@ -402,7 +402,7 @@ static RtResultVoid get_generic_parameter_info_invoker(metadata::RtManagedMethod
 
 /// @icall: System.RuntimeTypeHandle::is_subclass_of
 static RtResultVoid is_subclass_of_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto child_type_sig = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 0);
     auto parent_type_sig = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 1);
@@ -413,7 +413,7 @@ static RtResultVoid is_subclass_of_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.RuntimeTypeHandle::IsByRefLike(System.RuntimeType)
 static RtResultVoid is_by_ref_like_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemRuntimeTypeHandle::is_by_ref_like(runtime_type));
@@ -423,7 +423,7 @@ static RtResultVoid is_by_ref_like_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.RuntimeTypeHandle::type_is_assignable_from
 static RtResultVoid type_is_assignable_from_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                    const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                    const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto to_ref_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0);
     auto from_ref_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 1);
@@ -434,7 +434,7 @@ static RtResultVoid type_is_assignable_from_invoker(metadata::RtManagedMethodPoi
 
 /// @icall: System.RuntimeTypeHandle::GetAssembly
 static RtResultVoid get_assembly_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                         interp::RtStackObject* ret)
+                                         interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionAssembly*, assembly, SystemRuntimeTypeHandle::get_assembly(runtime_type));
@@ -444,7 +444,7 @@ static RtResultVoid get_assembly_invoker(metadata::RtManagedMethodPointer method
 
 /// @icall: System.RuntimeTypeHandle::IsInstanceOfType
 static RtResultVoid is_instance_of_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     auto obj = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -455,7 +455,7 @@ static RtResultVoid is_instance_of_type_invoker(metadata::RtManagedMethodPointer
 
 /// @icall: System.RuntimeTypeHandle::GetGenericTypeDefinition_impl
 static RtResultVoid get_generic_type_definition_impl_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionRuntimeType*, generic_type_def,
@@ -466,7 +466,7 @@ static RtResultVoid get_generic_type_definition_impl_invoker(metadata::RtManaged
 
 /// @icall: System.RuntimeTypeHandle::GetModule(System.RuntimeType)
 static RtResultVoid get_module_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionModule*, module, SystemRuntimeTypeHandle::get_module(runtime_type));
@@ -477,7 +477,7 @@ static RtResultVoid get_module_invoker(metadata::RtManagedMethodPointer methodPt
 /// @icall:
 /// System.RuntimeTypeHandle::internal_from_name(System.String,System.Threading.StackCrawlMark&,System.Reflection.Assembly,System.Boolean,System.Boolean,System.Boolean)
 static RtResultVoid internal_from_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto name = EvalStackOp::get_param<vm::RtString*>(params, 0);
     auto stack_crawl_mark = EvalStackOp::get_param<int32_t*>(params, 1);

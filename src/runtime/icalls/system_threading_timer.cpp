@@ -14,7 +14,7 @@ RtResult<int64_t> SystemThreadingTimer::get_time_monotonic()
 
 /// @icall: System.Threading.Timer::GetTimeMonotonic()
 static RtResultVoid get_time_monotonic_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

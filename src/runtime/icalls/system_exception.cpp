@@ -15,7 +15,7 @@ RtResultVoid SystemException::report_unhandled_exception(vm::RtException* except
 
 /// @icall: System.Exception::ReportUnhandledException(System.Exception)
 static RtResultVoid report_unhandled_exception_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                       const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto exception = EvalStackOp::get_param<vm::RtException*>(params, 0);

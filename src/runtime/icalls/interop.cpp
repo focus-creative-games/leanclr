@@ -12,7 +12,7 @@ RtResult<int32_t> Interop::double_to_string(double value, const char* format, ch
 
 /// @icall: Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)
 RtResultVoid double_to_string_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     auto format = EvalStackOp::get_param<const char*>(params, 1);

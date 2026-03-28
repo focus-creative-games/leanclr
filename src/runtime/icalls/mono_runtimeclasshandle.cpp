@@ -15,7 +15,7 @@ RtResult<const metadata::RtTypeSig*> MonoRuntimeClassHandle::get_type_from_class
 
 /// @icall: Mono.RuntimeClassHandle::GetTypeFromClass
 static RtResultVoid get_type_from_class_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto klass = EvalStackOp::get_param<metadata::RtClass*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, type_sig, MonoRuntimeClassHandle::get_type_from_class(klass));

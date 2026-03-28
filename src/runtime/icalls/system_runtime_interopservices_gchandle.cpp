@@ -36,7 +36,7 @@ RtResult<void*> SystemRuntimeInteropServicesGCHandle::get_addr_of_pinned_object(
 
 /// @icall: System.Runtime.InteropServices.GCHandle::CheckCurrentDomain(System.IntPtr)
 static RtResultVoid check_current_domain_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                 const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -48,7 +48,7 @@ static RtResultVoid check_current_domain_invoker(metadata::RtManagedMethodPointe
 
 /// @icall: System.Runtime.InteropServices.GCHandle::GetTarget(System.IntPtr)
 static RtResultVoid get_target_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -60,7 +60,7 @@ static RtResultVoid get_target_invoker(metadata::RtManagedMethodPointer methodPt
 
 /// @icall: System.Runtime.InteropServices.GCHandle::GetTargetHandle(System.Object,System.IntPtr,System.Runtime.InteropServices.GCHandleType)
 static RtResultVoid get_target_handle_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -74,7 +74,7 @@ static RtResultVoid get_target_handle_invoker(metadata::RtManagedMethodPointer m
 
 /// @icall: System.Runtime.InteropServices.GCHandle::FreeHandle(System.IntPtr)
 static RtResultVoid free_handle_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                        interp::RtStackObject* ret)
+                                        interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -86,7 +86,7 @@ static RtResultVoid free_handle_invoker(metadata::RtManagedMethodPointer methodP
 
 /// @icall: System.Runtime.InteropServices.GCHandle::GetAddrOfPinnedObject(System.IntPtr)
 static RtResultVoid get_addr_of_pinned_object_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                      const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                      const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

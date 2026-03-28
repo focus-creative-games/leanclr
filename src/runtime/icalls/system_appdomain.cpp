@@ -23,7 +23,7 @@ RtResult<vm::RtObject*> SystemAppDomain::get_setup()
 
 /// @icall: System.AppDomain::getSetup()
 static RtResultVoid get_setup_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)params;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, SystemAppDomain::get_setup());
@@ -39,7 +39,7 @@ RtResult<vm::RtString*> SystemAppDomain::get_friendly_name()
 
 /// @icall: System.AppDomain::getFriendlyName()
 static RtResultVoid get_friendly_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                              interp::RtStackObject* ret)
+                                              interp::RtStackObject* ret) noexcept
 {
     (void)params;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemAppDomain::get_friendly_name());
@@ -54,7 +54,7 @@ RtResult<vm::RtAppDomain*> SystemAppDomain::get_cur_domain()
 
 /// @icall: System.AppDomain::getCurDomain()
 static RtResultVoid get_cur_domain_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                           interp::RtStackObject* ret)
+                                           interp::RtStackObject* ret) noexcept
 {
     (void)params;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtAppDomain*, result, SystemAppDomain::get_cur_domain());
@@ -69,7 +69,7 @@ RtResult<vm::RtAppDomain*> SystemAppDomain::get_root_domain()
 
 /// @icall: System.AppDomain::getRootDomain()
 static RtResultVoid get_root_domain_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                            interp::RtStackObject* ret)
+                                            interp::RtStackObject* ret) noexcept
 {
     (void)params;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtAppDomain*, result, SystemAppDomain::get_root_domain());
@@ -86,7 +86,7 @@ RtResult<int32_t> SystemAppDomain::execute_assembly(vm::RtObject* assembly, vm::
 
 /// @icall: System.AppDomain::ExecuteAssembly(System.Reflection.Assembly,System.String[])
 static RtResultVoid execute_assembly_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                             interp::RtStackObject* ret)
+                                             interp::RtStackObject* ret) noexcept
 {
     auto assembly_obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     auto args = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -111,7 +111,7 @@ RtResult<vm::RtArray*> SystemAppDomain::get_assemblies(bool ref_only)
 
 /// @icall: System.AppDomain::GetAssemblies(System.Boolean)
 static RtResultVoid get_assemblies_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                           interp::RtStackObject* ret)
+                                           interp::RtStackObject* ret) noexcept
 {
     auto ref_only = EvalStackOp::get_param<bool>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, result, SystemAppDomain::get_assemblies(ref_only));
@@ -127,7 +127,7 @@ RtResult<vm::RtObject*> SystemAppDomain::get_data(vm::RtAppDomain* this_domain, 
 
 /// @icall: System.AppDomain::GetData(System.String)
 static RtResultVoid get_data_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     auto this_domain = EvalStackOp::get_param<vm::RtAppDomain*>(params, 0);
     auto name = EvalStackOp::get_param<vm::RtString*>(params, 1);
@@ -145,7 +145,7 @@ RtResultVoid SystemAppDomain::set_data(vm::RtAppDomain* this_domain, vm::RtStrin
 
 /// @icall: System.AppDomain::SetData(System.String,System.Object)
 static RtResultVoid set_data_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto this_domain = EvalStackOp::get_param<vm::RtAppDomain*>(params, 0);
@@ -167,7 +167,7 @@ RtResult<vm::RtReflectionAssembly*> SystemAppDomain::load_assembly(vm::RtAppDoma
 
 /// @icall: System.AppDomain::LoadAssembly(System.String,System.Security.Policy.Evidence,System.Boolean,System.Threading.StackCrawlMark&)
 static RtResultVoid load_assembly_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     auto this_domain = EvalStackOp::get_param<vm::RtAppDomain*>(params, 0);
     auto name = EvalStackOp::get_param<vm::RtString*>(params, 1);
@@ -188,7 +188,7 @@ RtResult<vm::RtReflectionAssembly*> SystemAppDomain::load_assembly_raw(vm::RtApp
 
 /// @icall: System.AppDomain::LoadAssemblyRaw(System.Byte[],System.Byte[],System.Security.Policy.Evidence,System.Boolean)
 static RtResultVoid load_assembly_raw_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                              interp::RtStackObject* ret)
+                                              interp::RtStackObject* ret) noexcept
 {
     auto this_domain = EvalStackOp::get_param<vm::RtAppDomain*>(params, 0);
     auto raw = EvalStackOp::get_param<vm::RtArray*>(params, 1);
@@ -209,7 +209,7 @@ RtResult<vm::RtObject*> SystemAppDomain::internal_set_domain_by_id(int32_t id)
 
 /// @icall: System.AppDomain::InternalSetDomainByID(System.Int32)
 static RtResultVoid internal_set_domain_by_id_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* ret)
+                                                      interp::RtStackObject* ret) noexcept
 {
     auto id = EvalStackOp::get_param<int32_t>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, SystemAppDomain::internal_set_domain_by_id(id));
@@ -225,7 +225,7 @@ RtResult<vm::RtObject*> SystemAppDomain::internal_set_domain(vm::RtObject* domai
 
 /// @icall: System.AppDomain::InternalSetDomain(System.AppDomain)
 static RtResultVoid internal_set_domain_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                interp::RtStackObject* ret)
+                                                interp::RtStackObject* ret) noexcept
 {
     auto domain = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, SystemAppDomain::internal_set_domain(domain));
@@ -241,7 +241,7 @@ RtResultVoid SystemAppDomain::internal_push_domain_ref(vm::RtObject* domain)
 
 /// @icall: System.AppDomain::InternalPushDomainRef(System.AppDomain)
 static RtResultVoid internal_push_domain_ref_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                     interp::RtStackObject* ret)
+                                                     interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto domain = EvalStackOp::get_param<vm::RtObject*>(params, 0);
@@ -257,7 +257,7 @@ RtResultVoid SystemAppDomain::internal_push_domain_ref_by_id(int32_t id)
 
 /// @icall: System.AppDomain::InternalPushDomainRefByID(System.Int32)
 static RtResultVoid internal_push_domain_ref_by_id_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                           interp::RtStackObject* ret)
+                                                           interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto id = EvalStackOp::get_param<int32_t>(params, 0);
@@ -272,7 +272,7 @@ RtResultVoid SystemAppDomain::internal_pop_domain_ref()
 
 /// @icall: System.AppDomain::InternalPopDomainRef()
 static RtResultVoid internal_pop_domain_ref_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                    interp::RtStackObject* ret)
+                                                    interp::RtStackObject* ret) noexcept
 {
     (void)params;
     (void)ret;
@@ -288,7 +288,7 @@ RtResult<vm::RtObject*> SystemAppDomain::internal_set_context(vm::RtObject* ctx)
 
 /// @icall: System.AppDomain::InternalSetContext(System.Runtime.Remoting.Contexts.Context)
 static RtResultVoid internal_set_context_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                 interp::RtStackObject* ret)
+                                                 interp::RtStackObject* ret) noexcept
 {
     auto ctx = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, SystemAppDomain::internal_set_context(ctx));
@@ -303,7 +303,7 @@ RtResult<vm::RtAppContext*> SystemAppDomain::internal_get_context()
 
 /// @icall: System.AppDomain::InternalGetContext()
 static RtResultVoid internal_get_context_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                 interp::RtStackObject* ret)
+                                                 interp::RtStackObject* ret) noexcept
 {
     (void)params;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtAppContext*, result, SystemAppDomain::internal_get_context());
@@ -318,7 +318,7 @@ RtResult<vm::RtAppContext*> SystemAppDomain::internal_get_default_context()
 
 /// @icall: System.AppDomain::InternalGetDefaultContext()
 static RtResultVoid internal_get_default_context_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                         interp::RtStackObject* ret)
+                                                         interp::RtStackObject* ret) noexcept
 {
     (void)params;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtAppContext*, result, SystemAppDomain::internal_get_default_context());
@@ -334,7 +334,7 @@ RtResult<vm::RtString*> SystemAppDomain::internal_get_process_guid(vm::RtObject*
 
 /// @icall: System.AppDomain::InternalGetProcessGuid(System.String)
 static RtResultVoid internal_get_process_guid_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* ret)
+                                                      interp::RtStackObject* ret) noexcept
 {
     auto guid = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemAppDomain::internal_get_process_guid(guid));
@@ -351,7 +351,7 @@ RtResult<vm::RtObject*> SystemAppDomain::create_domain(vm::RtObject* friendly_na
 
 /// @icall: System.AppDomain::createDomain(System.String,System.AppDomainSetup)
 static RtResultVoid create_domain_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     auto friendly_name = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     auto setup = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -368,7 +368,7 @@ RtResult<bool> SystemAppDomain::internal_is_finalizing_for_unload(int32_t id)
 
 /// @icall: System.AppDomain::InternalIsFinalizingForUnload(System.Int32)
 static RtResultVoid internal_is_finalizing_for_unload_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
-                                                              const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto id = EvalStackOp::get_param<int32_t>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemAppDomain::internal_is_finalizing_for_unload(id));
@@ -384,7 +384,7 @@ RtResultVoid SystemAppDomain::internal_unload(int32_t id)
 
 /// @icall: System.AppDomain::InternalUnload(System.Int32)
 static RtResultVoid internal_unload_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                            interp::RtStackObject* ret)
+                                            interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto id = EvalStackOp::get_param<int32_t>(params, 0);
@@ -400,7 +400,7 @@ RtResultVoid SystemAppDomain::do_unhandled_exception(vm::RtObject* ex)
 
 /// @icall: System.AppDomain::DoUnhandledException(System.Exception)
 static RtResultVoid do_unhandled_exception_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                   interp::RtStackObject* ret)
+                                                   interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto ex = EvalStackOp::get_param<vm::RtObject*>(params, 0);

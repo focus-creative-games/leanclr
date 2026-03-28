@@ -26,7 +26,7 @@ RtResult<intptr_t> SystemReflectionRuntimeAssembly::get_manifest_resource_intern
 
 /// @icall: System.Reflection.RuntimeAssembly::GetManifestResourceInternal
 static RtResultVoid get_manifest_resource_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                           interp::RtStackObject* ret)
+                                                           interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     auto name = EvalStackOp::get_param<vm::RtString*>(params, 1);
@@ -47,7 +47,7 @@ RtResult<vm::RtString*> SystemReflectionRuntimeAssembly::get_code_base(vm::RtRef
 
 /// @icall: System.Reflection.RuntimeAssembly::get_code_base(System.Reflection.Assembly,System.Boolean)
 static RtResultVoid get_code_base_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     auto escaped = EvalStackOp::get_param<bool>(params, 1);
@@ -64,7 +64,7 @@ RtResult<vm::RtString*> SystemReflectionRuntimeAssembly::get_location(vm::RtRefl
 
 /// @icall: System.Reflection.RuntimeAssembly::get_location
 static RtResultVoid get_location_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                         interp::RtStackObject* ret)
+                                         interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemReflectionRuntimeAssembly::get_location(ref_ass));
@@ -82,7 +82,7 @@ RtResult<vm::RtString*> SystemReflectionRuntimeAssembly::get_fullname(vm::RtRefl
 
 /// @icall: System.Reflection.RuntimeAssembly::get_fullname(System.Reflection.Assembly)
 static RtResultVoid get_fullname_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                         interp::RtStackObject* ret)
+                                         interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemReflectionRuntimeAssembly::get_fullname(ref_ass));
@@ -99,7 +99,7 @@ RtResult<bool> SystemReflectionRuntimeAssembly::get_aot_id_internal(vm::RtReflec
 
 /// @icall: System.Reflection.RuntimeAssembly::GetAotIdInternal(System.Byte[])
 static RtResultVoid get_aot_id_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                interp::RtStackObject* ret)
+                                                interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     auto buffer = EvalStackOp::get_param<vm::RtArray*>(params, 1);
@@ -119,7 +119,7 @@ RtResult<vm::RtString*> SystemReflectionRuntimeAssembly::internal_image_runtime_
 
 /// @icall: System.Reflection.RuntimeAssembly::InternalImageRuntimeVersion(System.Reflection.Assembly)
 static RtResultVoid internal_image_runtime_version_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                           interp::RtStackObject* ret)
+                                                           interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemReflectionRuntimeAssembly::internal_image_runtime_version(ref_ass));
@@ -135,7 +135,7 @@ RtResult<bool> SystemReflectionRuntimeAssembly::get_global_assembly_cache(vm::Rt
 
 /// @icall: System.Reflection.RuntimeAssembly::get_global_assembly_cache
 static RtResultVoid get_global_assembly_cache_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* ret)
+                                                      interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemReflectionRuntimeAssembly::get_global_assembly_cache(ref_ass));
@@ -157,7 +157,7 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeAssembly::get_entry_poi
 
 /// @icall: System.Reflection.RuntimeAssembly::get_EntryPoint
 static RtResultVoid get_entry_point_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                            interp::RtStackObject* ret)
+                                            interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionMethod*, result, SystemReflectionRuntimeAssembly::get_entry_point(ref_ass));
@@ -173,7 +173,7 @@ RtResult<bool> SystemReflectionRuntimeAssembly::get_reflection_only(vm::RtReflec
 
 /// @icall: System.Reflection.RuntimeAssembly::get_ReflectionOnly
 static RtResultVoid get_reflection_only_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                interp::RtStackObject* ret)
+                                                interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemReflectionRuntimeAssembly::get_reflection_only(ref_ass));
@@ -191,7 +191,7 @@ RtResult<bool> SystemReflectionRuntimeAssembly::get_manifest_resource_info_inter
 
 /// @icall: System.Reflection.RuntimeAssembly::GetManifestResourceInfoInternal(System.String,System.Reflection.ManifestResourceInfo)
 static RtResultVoid get_manifest_resource_info_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
-                                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     auto name = EvalStackOp::get_param<vm::RtString*>(params, 1);
@@ -209,7 +209,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeAssembly::get_manifest_resource_na
 
 /// @icall: System.Reflection.RuntimeAssembly::GetManifestResourceNames
 static RtResultVoid get_manifest_resource_names_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                        interp::RtStackObject* ret)
+                                                        interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, result, SystemReflectionRuntimeAssembly::get_manifest_resource_names(ref_ass));
@@ -225,7 +225,7 @@ RtResult<vm::RtReflectionModule*> SystemReflectionRuntimeAssembly::get_manifest_
 
 /// @icall: System.Reflection.RuntimeAssembly::GetManifestModuleInternal
 static RtResultVoid get_manifest_module_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                         interp::RtStackObject* ret)
+                                                         interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionModule*, result, SystemReflectionRuntimeAssembly::get_manifest_module_internal(ref_ass));
@@ -245,7 +245,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeAssembly::get_modules_internal(vm:
 
 /// @icall: System.Reflection.RuntimeAssembly::GetModulesInternal
 static RtResultVoid get_modules_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                 interp::RtStackObject* ret)
+                                                 interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, result, SystemReflectionRuntimeAssembly::get_modules_internal(ref_ass));
@@ -263,7 +263,7 @@ RtResult<vm::RtObject*> SystemReflectionRuntimeAssembly::get_files_internal(vm::
 
 /// @icall: System.Reflection.RuntimeAssembly::GetFilesInternal(System.String,System.Boolean)
 static RtResultVoid get_files_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret)
+                                               interp::RtStackObject* ret) noexcept
 {
     auto ref_ass = EvalStackOp::get_param<vm::RtReflectionAssembly*>(params, 0);
     auto path = EvalStackOp::get_param<vm::RtString*>(params, 1);

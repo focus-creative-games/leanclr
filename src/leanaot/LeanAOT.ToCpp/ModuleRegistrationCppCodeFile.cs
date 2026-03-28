@@ -63,7 +63,7 @@ namespace LeanAOT.ToCpp
         private void AddModuleInitializationMethod()
         {
             _implWriter.AddLine();
-            _implWriter.AddLine($"void {ModuleGenerationUtil.GetModuleInitializeMethodName(_mod)}({ConstStrings.ModulePtrTypeName} mod)");
+            _implWriter.AddLine($"void {ModuleGenerationUtil.GetModuleInitializeMethodName(_mod)}({ConstStrings.ModulePtrTypeName} mod){ConstStrings.CppFunctionNoexcept}");
             _implWriter.AddLine("{");
             _implWriter.IncreaseIndent();
             _implWriter.AddLine($"{ModuleGenerationUtil.GetModuleGlobalVariableName(_mod)} = mod;");

@@ -14,7 +14,7 @@ RtResult<bool> SystemNumericsVector::get_is_hardware_accelerated()
 
 /// @intrinsic: System.Numerics.Vector::get_IsHardwareAccelerated
 static RtResultVoid get_is_hardware_accelerated_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

@@ -22,7 +22,7 @@ RtResult<bool> SystemReflectionAssemblyName::parse_assembly_name(intptr_t name_c
 
 /// @icall: System.Reflection.AssemblyName::ParseAssemblyName(System.IntPtr,Mono.MonoAssemblyName&,System.Boolean&,System.Boolean&)
 static RtResultVoid parse_assembly_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -47,7 +47,7 @@ RtResultVoid SystemReflectionAssemblyName::get_public_token(const uint8_t* publi
 
 /// @icall: System.Reflection.AssemblyName::get_public_token(System.Byte*,System.Byte*,System.Int32)
 static RtResultVoid get_public_token_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -67,7 +67,7 @@ RtResult<metadata::RtMonoAssemblyName*> SystemReflectionAssemblyName::get_native
 
 /// @icall: System.Reflection.AssemblyName::GetNativeName(System.IntPtr)
 static RtResultVoid get_native_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

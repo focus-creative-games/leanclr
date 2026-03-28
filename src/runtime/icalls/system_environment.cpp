@@ -21,7 +21,7 @@ RtResult<int32_t> SystemEnvironment::get_exit_code()
 
 /// @icall: System.Environment::get_ExitCode
 static RtResultVoid get_exit_code_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     int32_t code = vm::Environment::get_exit_code();
     EvalStackOp::set_return(ret, code);
@@ -49,7 +49,7 @@ RtResult<bool> SystemEnvironment::get_has_shutdown_started()
 
 /// @icall: System.Environment::get_HasShutdownStarted
 static RtResultVoid get_has_shutdown_started_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                                     interp::RtStackObject* ret)
+                                                     interp::RtStackObject* ret) noexcept
 {
     bool result = vm::Environment::has_shutdown_started();
     EvalStackOp::set_return(ret, static_cast<int32_t>(result));
@@ -63,7 +63,7 @@ RtResult<vm::RtString*> SystemEnvironment::get_machine_name()
 
 /// @icall: System.Environment::get_MachineName
 static RtResultVoid get_machine_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                             interp::RtStackObject* ret)
+                                             interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemEnvironment::get_machine_name());
     EvalStackOp::set_return(ret, result);
@@ -77,7 +77,7 @@ RtResult<vm::RtString*> SystemEnvironment::get_new_line()
 
 /// @icall: System.Environment::get_NewLine
 static RtResultVoid get_new_line_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                         interp::RtStackObject* ret)
+                                         interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemEnvironment::get_new_line());
     EvalStackOp::set_return(ret, result);
@@ -91,7 +91,7 @@ RtResult<int32_t> SystemEnvironment::get_platform()
 
 /// @icall: System.Environment::get_Platform
 static RtResultVoid get_platform_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                         interp::RtStackObject* ret)
+                                         interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, platform, SystemEnvironment::get_platform());
     EvalStackOp::set_return(ret, platform);
@@ -105,7 +105,7 @@ RtResult<vm::RtString*> SystemEnvironment::get_os_version_string()
 
 /// @icall: System.Environment::GetOSVersionString
 static RtResultVoid get_os_version_string_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                                  interp::RtStackObject* ret)
+                                                  interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, s, SystemEnvironment::get_os_version_string());
     EvalStackOp::set_return(ret, s);
@@ -119,7 +119,7 @@ RtResult<int32_t> SystemEnvironment::get_tick_count()
 
 /// @icall: System.Environment::get_TickCount
 static RtResultVoid get_tick_count_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                           interp::RtStackObject* ret)
+                                           interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(int32_t, ticks, SystemEnvironment::get_tick_count());
     EvalStackOp::set_return(ret, ticks);
@@ -133,7 +133,7 @@ RtResult<vm::RtString*> SystemEnvironment::get_user_name()
 
 /// @icall: System.Environment::get_UserName
 static RtResultVoid get_user_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, s, SystemEnvironment::get_user_name());
     EvalStackOp::set_return(ret, s);
@@ -162,7 +162,7 @@ RtResult<vm::RtArray*> SystemEnvironment::get_command_line_args()
 
 /// @icall: System.Environment::GetCommandLineArgs
 static RtResultVoid get_command_line_args_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                                  interp::RtStackObject* ret)
+                                                  interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, SystemEnvironment::get_command_line_args());
     EvalStackOp::set_return(ret, arr);
@@ -178,7 +178,7 @@ RtResult<vm::RtString*> SystemEnvironment::internal_get_environment_variable_nat
 
 /// @icall: System.Environment::internalGetEnvironmentVariable_native
 static RtResultVoid internal_get_environment_variable_native_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
-                                                                     const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     const char* name = EvalStackOp::get_param<const char*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, s, SystemEnvironment::internal_get_environment_variable_native(name));
@@ -211,7 +211,7 @@ RtResult<vm::RtArray*> SystemEnvironment::get_environment_variable_names()
 
 /// @icall: System.Environment::GetEnvironmentVariableNames
 static RtResultVoid get_environment_variable_names_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
-                                                           const interp::RtStackObject* /*params*/, interp::RtStackObject* ret)
+                                                           const interp::RtStackObject* /*params*/, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, SystemEnvironment::get_environment_variable_names());
     EvalStackOp::set_return(ret, arr);
@@ -225,7 +225,7 @@ RtResult<vm::RtString*> SystemEnvironment::get_windows_folder_path(int32_t folde
 
 /// @icall: System.Environment::GetWindowsFolderPath
 static RtResultVoid get_windows_folder_path_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                    interp::RtStackObject* ret)
+                                                    interp::RtStackObject* ret) noexcept
 {
     int32_t folder = EvalStackOp::get_param<int32_t>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, s, SystemEnvironment::get_windows_folder_path(folder));
@@ -240,7 +240,7 @@ RtResult<vm::RtArray*> SystemEnvironment::get_logical_drives_internal()
 
 /// @icall: System.Environment::GetLogicalDrivesInternal
 static RtResultVoid get_logical_drives_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
-                                                        const interp::RtStackObject* /*params*/, interp::RtStackObject* ret)
+                                                        const interp::RtStackObject* /*params*/, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, SystemEnvironment::get_logical_drives_internal());
     EvalStackOp::set_return(ret, arr);
@@ -254,7 +254,7 @@ RtResult<vm::RtString*> SystemEnvironment::get_machine_config_path()
 
 /// @icall: System.Environment::GetMachineConfigPath
 static RtResultVoid get_machine_config_path_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                                    interp::RtStackObject* ret)
+                                                    interp::RtStackObject* ret) noexcept
 {
     vm::RtString* s = vm::String::get_empty_string();
     EvalStackOp::set_return(ret, s);
@@ -268,7 +268,7 @@ RtResult<vm::RtString*> SystemEnvironment::internal_get_home()
 
 /// @icall: System.Environment::internalGetHome
 static RtResultVoid internal_get_home_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                              interp::RtStackObject* ret)
+                                              interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, s, SystemEnvironment::internal_get_home());
     EvalStackOp::set_return(ret, s);
@@ -282,7 +282,7 @@ RtResult<vm::RtString*> SystemEnvironment::get_bundled_machine_config()
 
 /// @icall: System.Environment::get_bundled_machine_config
 static RtResultVoid get_bundled_machine_config_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                                       interp::RtStackObject* ret)
+                                                       interp::RtStackObject* ret) noexcept
 {
     vm::RtString* s = vm::String::get_empty_string();
     EvalStackOp::set_return(ret, s);
@@ -310,7 +310,7 @@ RtResult<bool> SystemEnvironment::get_is_64bit_operating_system()
 
 /// @icall: System.Environment::get_Is64BitOperatingSystem
 static RtResultVoid get_is_64bit_operating_system_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
-                                                          const interp::RtStackObject* /*params*/, interp::RtStackObject* ret)
+                                                          const interp::RtStackObject* /*params*/, interp::RtStackObject* ret) noexcept
 {
     EvalStackOp::set_return(ret, static_cast<int32_t>(sizeof(void*) == 8));
     RET_VOID_OK();
@@ -323,7 +323,7 @@ RtResult<int32_t> SystemEnvironment::get_processor_count()
 
 /// @icall: System.Environment::get_ProcessorCount
 static RtResultVoid get_processor_count_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                                interp::RtStackObject* ret)
+                                                interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(int32_t, count, SystemEnvironment::get_processor_count());
     EvalStackOp::set_return(ret, count);
@@ -337,7 +337,7 @@ RtResult<int32_t> SystemEnvironment::get_page_size()
 
 /// @icall: System.Environment::GetPageSize
 static RtResultVoid get_page_size_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(int32_t, size, SystemEnvironment::get_page_size());
     EvalStackOp::set_return(ret, size);

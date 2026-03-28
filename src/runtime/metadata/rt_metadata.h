@@ -17,7 +17,8 @@ namespace leanclr
 namespace metadata
 {
 
-typedef void (*RtFnPtr)();
+// Note: MSVC C2279 disallows noexcept on function-pointer aliases; implementations are still noexcept.
+using RtFnPtr = void (*)();
 
 // Element type enumeration
 enum class RtElementType : uint8_t
@@ -493,13 +494,14 @@ struct RtMethodArgDesc
     uint16_t stack_object_size;
 };
 
-// Managed method pointer type
-typedef void (*RtManagedMethodPointer)();
+// Managed method pointer type (noexcept not on alias - MSVC C2279; all invokers implement noexcept)
+using RtManagedMethodPointer = void (*)();
 
-typedef RtResultVoid (*RtInvokeMethodPointer)(RtManagedMethodPointer method_ptr, const RtMethodInfo* method, const interp::RtStackObject* args,
-                                              interp::RtStackObject* ret);
-typedef void (*RtCInvokeMethodPointer)(RtManagedMethodPointer method_ptr, const RtMethodInfo* method, const interp::RtStackObject* args,
-                                       interp::RtStackObject* ret, RtErr* out_err);
+using RtInvokeMethodPointer = RtResultVoid (*)(RtManagedMethodPointer method_ptr, const RtMethodInfo* method, const interp::RtStackObject* args,
+                                               interp::RtStackObject* ret);
+
+using RtCInvokeMethodPointer = void (*)(RtManagedMethodPointer method_ptr, const RtMethodInfo* method, const interp::RtStackObject* args,
+                                        interp::RtStackObject* ret, RtErr* out_err);
 
 // Interface offset structure
 struct RtInterfaceOffset

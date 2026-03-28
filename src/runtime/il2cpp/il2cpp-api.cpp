@@ -1,4 +1,5 @@
 #include "vm/runtime.h"
+#include "vm/settings.h"
 
 using namespace leanclr;
 
@@ -136,10 +137,14 @@ typedef uintptr_t il2cpp_array_size_t;
 #define ARRAY_LENGTH_AS_INT32(a) ((int32_t)a)
 
 typedef uint8_t (*Il2CppAndroidUpStateFunc)(const char* ifName, uint8_t* is_up);
+
+extern leanclr::metadata::RtAotModulesData g_aot_modules_data;
+
 extern "C"
 {
     int il2cpp_init(const char* domain_name)
     {
+        vm::Settings::set_aot_modules_data(&g_aot_modules_data);
         auto ret = vm::Runtime::initialize();
         return ret.is_ok() ? 0 : -1;
     }

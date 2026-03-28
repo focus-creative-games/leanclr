@@ -51,7 +51,7 @@ namespace LeanAOT.ToCpp
 
             _invokerImplWriter.AddLine();
             //_invokerImplWriter.AddLine($"// Invoker for {method.FullName}");
-            _invokerImplWriter.AddLine($"{ConstStrings.RtResultVoidTypeName} {info.name}({ConstStrings.ManagedMethodPointerTypeName} method_ptr, {ConstStrings.MethodInfoPtrTypeName} method, const {ConstStrings.StackObjectTypeName}* args, {ConstStrings.StackObjectTypeName}* ret)");
+            _invokerImplWriter.AddLine($"{ConstStrings.RtResultVoidTypeName} {info.name}({ConstStrings.ManagedMethodPointerTypeName} method_ptr, {ConstStrings.MethodInfoPtrTypeName} method, const {ConstStrings.StackObjectTypeName}* args, {ConstStrings.StackObjectTypeName}* ret){ConstStrings.CppFunctionNoexcept}");
             _invokerImplWriter.AddLine("{");
             _invokerImplWriter.IncreaseIndent();
             _invokerImplWriter.AddLine($"{methodDetail.CreateRelaxMethodFunctionTypedefStatement("FuncType")};");

@@ -17,7 +17,7 @@ RtResult<bool> SystemDiagnosticsStackFrame::get_frame_info(int32_t skip, bool ne
 /// @icall:
 /// System.Diagnostics.StackFrame::get_frame_info(System.Int32,System.Boolean,System.Reflection.MethodBase&,System.Int32&,System.Int32&,System.String&,System.Int32&,System.Int32&)
 static RtResultVoid get_frame_info_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto skip = EvalStackOp::get_param<int32_t>(params, 0);
     auto need_file_info = EvalStackOp::get_param<bool>(params, 1);

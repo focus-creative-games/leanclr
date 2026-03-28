@@ -73,7 +73,7 @@ RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::run_module_constructor
 
 /// @icall: System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray
 RtResultVoid initialize_array_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     vm::RtArray* arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     size_t runtime_field_handle = EvalStackOp::get_param<size_t>(params, 1);
@@ -82,7 +82,7 @@ RtResultVoid initialize_array_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @icall: System.Runtime.CompilerServices.RuntimeHelpers::get_OffsetToStringData
 RtResultVoid get_offset_to_string_data_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, offset, SystemRuntimeCompilerServicesRuntimeHelpers::get_offset_to_string_data());
     EvalStackOp::set_return(ret, offset);
@@ -91,7 +91,7 @@ RtResultVoid get_offset_to_string_data_invoker(metadata::RtManagedMethodPointer 
 
 /// @icall: System.Runtime.CompilerServices.RuntimeHelpers::GetObjectValue(System.Object)
 RtResultVoid get_object_value_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, SystemRuntimeCompilerServicesRuntimeHelpers::get_object_value(obj));
@@ -101,7 +101,7 @@ RtResultVoid get_object_value_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @icall: System.Runtime.CompilerServices.RuntimeHelpers::RunClassConstructor(System.IntPtr)
 RtResultVoid run_class_constructor_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                           const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     intptr_t type_handle = EvalStackOp::get_param<intptr_t>(params, 0);
     return SystemRuntimeCompilerServicesRuntimeHelpers::run_class_constructor(type_handle);
@@ -109,7 +109,7 @@ RtResultVoid run_class_constructor_invoker(metadata::RtManagedMethodPointer meth
 
 /// @icall: System.Runtime.CompilerServices.RuntimeHelpers::SufficientExecutionStack
 RtResultVoid sufficient_execution_stack_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemRuntimeCompilerServicesRuntimeHelpers::sufficient_execution_stack());
     EvalStackOp::set_return(ret, static_cast<int32_t>(result));
@@ -118,7 +118,7 @@ RtResultVoid sufficient_execution_stack_invoker(metadata::RtManagedMethodPointer
 
 /// @icall: System.Runtime.CompilerServices.RuntimeHelpers::RunModuleConstructor(System.IntPtr)
 RtResultVoid run_module_constructor_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     intptr_t module_handle = EvalStackOp::get_param<intptr_t>(params, 0);
     return SystemRuntimeCompilerServicesRuntimeHelpers::run_module_constructor(module_handle);

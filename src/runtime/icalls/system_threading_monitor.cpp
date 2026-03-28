@@ -40,7 +40,7 @@ RtResult<bool> SystemThreadingMonitor::monitor_test_synchronized(vm::RtObject* m
 
 /// @icall: System.Threading.Monitor::Monitor_test_synchronised
 static RtResultVoid monitor_test_synchronized_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* ret)
+                                                      interp::RtStackObject* ret) noexcept
 {
     auto monitor = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemThreadingMonitor::monitor_test_synchronized(monitor));
@@ -83,7 +83,7 @@ RtResult<bool> SystemThreadingMonitor::monitor_wait(vm::RtObject* monitor, int32
 
 /// @icall: System.Threading.Monitor::Monitor_wait
 static RtResultVoid monitor_wait_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                         interp::RtStackObject* ret)
+                                         interp::RtStackObject* ret) noexcept
 {
     auto monitor = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     auto milliseconds_timeout = EvalStackOp::get_param<int32_t>(params, 1);
@@ -115,7 +115,7 @@ RtResult<bool> SystemThreadingMonitor::monitor_test_owner(vm::RtObject* monitor)
 
 /// @icall: System.Threading.Monitor::Monitor_test_owner
 static RtResultVoid monitor_test_owner_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret)
+                                               interp::RtStackObject* ret) noexcept
 {
     auto monitor = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemThreadingMonitor::monitor_test_owner(monitor));

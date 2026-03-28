@@ -15,7 +15,7 @@ RtResult<int64_t> SystemDateTime::get_system_time_as_file_time()
 
 /// @icall: System.DateTime::GetSystemTimeAsFileTime()
 static RtResultVoid get_system_time_as_file_time_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                         const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

@@ -17,7 +17,7 @@ RtResultVoid SystemRuntimeRuntimeImports::zero_memory(uint8_t* ptr, uintptr_t si
 }
 
 static RtResultVoid zero_memory_invoker(RtManagedMethodPointer method_pointer, const RtMethodInfo* method, const interp::RtStackObject* params,
-                                        interp::RtStackObject* ret)
+                                        interp::RtStackObject* ret) noexcept
 {
     uint8_t* ptr = EvalStackOp::get_param<uint8_t*>(params, 0);
     uintptr_t size = EvalStackOp::get_param<uintptr_t>(params, 1);
@@ -32,7 +32,7 @@ RtResultVoid SystemRuntimeRuntimeImports::memmove(uint8_t* dest, const uint8_t* 
 }
 
 static RtResultVoid memmove_invoker(RtManagedMethodPointer method_pointer, const RtMethodInfo* method, const interp::RtStackObject* params,
-                                    interp::RtStackObject* ret)
+                                    interp::RtStackObject* ret) noexcept
 {
     uint8_t* dest = EvalStackOp::get_param<uint8_t*>(params, 0);
     const uint8_t* src = EvalStackOp::get_param<const uint8_t*>(params, 1);
@@ -49,7 +49,7 @@ RtResultVoid SystemRuntimeRuntimeImports::memmove_wbarrier(uint8_t* dest, const 
 }
 
 static RtResultVoid memmove_wbarrier_invoker(RtManagedMethodPointer method_pointer, const RtMethodInfo* method, const interp::RtStackObject* params,
-                                             interp::RtStackObject* ret)
+                                             interp::RtStackObject* ret) noexcept
 {
     uint8_t* dest = EvalStackOp::get_param<uint8_t*>(params, 0);
     const uint8_t* src = EvalStackOp::get_param<const uint8_t*>(params, 1);
@@ -102,7 +102,7 @@ RtResultVoid SystemRuntimeRuntimeImports::ecvt_s(uint8_t* buffer, int32_t size, 
 }
 
 static RtResultVoid ecvt_s_invoker(RtManagedMethodPointer method_pointer, const RtMethodInfo* method, const interp::RtStackObject* params,
-                                   interp::RtStackObject* ret)
+                                   interp::RtStackObject* ret) noexcept
 {
     uint8_t* buffer = EvalStackOp::get_param<uint8_t*>(params, 0);
     int32_t size = EvalStackOp::get_param<int32_t>(params, 1);

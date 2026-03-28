@@ -83,7 +83,7 @@ RtResult<int32_t> SystemGlobalizationCompareInfo::internal_compare_icall(const c
 
 /// @icall: System.Globalization.CompareInfo::internal_compare_icall
 static RtResultVoid internal_compare_icall_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                   interp::RtStackObject* ret)
+                                                   interp::RtStackObject* ret) noexcept
 {
     auto str1 = EvalStackOp::get_param<const char16_t*>(params, 0);
     auto length1 = EvalStackOp::get_param<int32_t>(params, 1);
@@ -128,7 +128,7 @@ RtResult<int32_t> SystemGlobalizationCompareInfo::internal_index_icall(const cha
 
 /// @icall: System.Globalization.CompareInfo::internal_index_icall(System.Char*,System.Int32,System.Int32,System.Char*,System.Int32,System.Boolean)
 static RtResultVoid internal_index_icall_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                 interp::RtStackObject* ret)
+                                                 interp::RtStackObject* ret) noexcept
 {
     auto source = EvalStackOp::get_param<const char16_t*>(params, 0);
     auto source_start_index = EvalStackOp::get_param<int32_t>(params, 1);

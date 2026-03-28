@@ -40,7 +40,7 @@ RtResult<vm::RtCustomAttribute*> SystemReflectionFieldInfo::get_marshal_info(vm:
 
 /// @icall: System.Reflection.FieldInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)
 static RtResultVoid internal_from_handle_type_invoker_fieldinfo(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* ret)
+                                                      interp::RtStackObject* ret) noexcept
 {
     metadata::RtFieldInfo* field = EvalStackOp::get_param<metadata::RtFieldInfo*>(params, 0);
     const metadata::RtTypeSig* type_sig = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 1);
@@ -51,7 +51,7 @@ static RtResultVoid internal_from_handle_type_invoker_fieldinfo(metadata::RtMana
 
 /// @icall: System.Reflection.FieldInfo::get_marshal_info()
 static RtResultVoid get_marshal_info_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                             interp::RtStackObject* ret)
+                                             interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtCustomAttribute*, result, SystemReflectionFieldInfo::get_marshal_info(field));

@@ -44,5 +44,10 @@ namespace LeanAOT.ToCpp
         public const string errNameNullReference = "NullReference";
 
         public const string KlassFieldNameStaticFieldsData = "static_fields_data";
+
+        /// <summary>
+        /// 后缀：LeanAOT 生成的 C++ 函数均为非抛风格，与运行时约定一致。
+        /// </summary>
+        public const string CppFunctionNoexcept = " noexcept";
     }
 }

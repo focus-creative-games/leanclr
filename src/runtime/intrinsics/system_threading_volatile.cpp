@@ -168,7 +168,7 @@ RtResultVoid SystemThreadingVolatile::write_ref(vm::RtObject** location, vm::RtO
 
 /// @intrinsic: System.Threading.Volatile::Read(System.Boolean&)
 static RtResultVoid read_bool_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -180,7 +180,7 @@ static RtResultVoid read_bool_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Read(System.Byte&)
 static RtResultVoid read_byte_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -192,7 +192,7 @@ static RtResultVoid read_byte_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Read(System.SByte&)
 static RtResultVoid read_sbyte_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -204,7 +204,7 @@ static RtResultVoid read_sbyte_invoker(metadata::RtManagedMethodPointer methodPt
 
 /// @intrinsic: System.Threading.Volatile::Read(System.Int16&)
 static RtResultVoid read_i16_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -216,7 +216,7 @@ static RtResultVoid read_i16_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @intrinsic: System.Threading.Volatile::Read(System.UInt16&)
 static RtResultVoid read_u16_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -228,7 +228,7 @@ static RtResultVoid read_u16_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @intrinsic: System.Threading.Volatile::Read(System.Int32&)
 static RtResultVoid read_i32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -240,7 +240,7 @@ static RtResultVoid read_i32_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @intrinsic: System.Threading.Volatile::Read(System.UInt32&)
 static RtResultVoid read_u32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -252,7 +252,7 @@ static RtResultVoid read_u32_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @intrinsic: System.Threading.Volatile::Read(System.Int64&)
 static RtResultVoid read_i64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -264,7 +264,7 @@ static RtResultVoid read_i64_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @intrinsic: System.Threading.Volatile::Read(System.UInt64&)
 static RtResultVoid read_u64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -276,7 +276,7 @@ static RtResultVoid read_u64_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @intrinsic: System.Threading.Volatile::Read(System.IntPtr&)
 static RtResultVoid read_intptr_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                        interp::RtStackObject* ret)
+                                        interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -288,7 +288,7 @@ static RtResultVoid read_intptr_invoker(metadata::RtManagedMethodPointer methodP
 
 /// @intrinsic: System.Threading.Volatile::Read(System.UIntPtr&)
 static RtResultVoid read_uintptr_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                         interp::RtStackObject* ret)
+                                         interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -300,7 +300,7 @@ static RtResultVoid read_uintptr_invoker(metadata::RtManagedMethodPointer method
 
 /// @intrinsic: System.Threading.Volatile::Read(System.Single&)
 static RtResultVoid read_f32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -312,7 +312,7 @@ static RtResultVoid read_f32_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @intrinsic: System.Threading.Volatile::Read(System.Double&)
 static RtResultVoid read_f64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -324,7 +324,7 @@ static RtResultVoid read_f64_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @intrinsic: System.Threading.Volatile::Read<>
 static RtResultVoid read_ref_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -338,7 +338,7 @@ static RtResultVoid read_ref_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @intrinsic: System.Threading.Volatile::Write(System.Boolean&,System.Boolean)
 static RtResultVoid write_bool_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -350,7 +350,7 @@ static RtResultVoid write_bool_invoker(metadata::RtManagedMethodPointer methodPt
 
 /// @intrinsic: System.Threading.Volatile::Write(System.Byte&,System.Byte)
 static RtResultVoid write_byte_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret)
+                                       interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -362,7 +362,7 @@ static RtResultVoid write_byte_invoker(metadata::RtManagedMethodPointer methodPt
 
 /// @intrinsic: System.Threading.Volatile::Write(System.SByte&,System.SByte)
 static RtResultVoid write_sbyte_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                        interp::RtStackObject* ret)
+                                        interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -374,7 +374,7 @@ static RtResultVoid write_sbyte_invoker(metadata::RtManagedMethodPointer methodP
 
 /// @intrinsic: System.Threading.Volatile::Write(System.Int16&,System.Int16)
 static RtResultVoid write_i16_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -386,7 +386,7 @@ static RtResultVoid write_i16_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Write(System.UInt16&,System.UInt16)
 static RtResultVoid write_u16_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -398,7 +398,7 @@ static RtResultVoid write_u16_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Write(System.Int32&,System.Int32)
 static RtResultVoid write_i32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -410,7 +410,7 @@ static RtResultVoid write_i32_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Write(System.UInt32&,System.UInt32)
 static RtResultVoid write_u32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -422,7 +422,7 @@ static RtResultVoid write_u32_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Write(System.Int64&,System.Int64)
 static RtResultVoid write_i64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -434,7 +434,7 @@ static RtResultVoid write_i64_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Write(System.UInt64&,System.UInt64)
 static RtResultVoid write_u64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -446,7 +446,7 @@ static RtResultVoid write_u64_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Write(System.IntPtr&,System.IntPtr)
 static RtResultVoid write_intptr_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                         interp::RtStackObject* ret)
+                                         interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -458,7 +458,7 @@ static RtResultVoid write_intptr_invoker(metadata::RtManagedMethodPointer method
 
 /// @intrinsic: System.Threading.Volatile::Write(System.UIntPtr&,System.UIntPtr)
 static RtResultVoid write_uintptr_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret)
+                                          interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -470,7 +470,7 @@ static RtResultVoid write_uintptr_invoker(metadata::RtManagedMethodPointer metho
 
 /// @intrinsic: System.Threading.Volatile::Write(System.Single&,System.Single)
 static RtResultVoid write_f32_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -482,7 +482,7 @@ static RtResultVoid write_f32_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Write(System.Double&,System.Double)
 static RtResultVoid write_f64_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -494,7 +494,7 @@ static RtResultVoid write_f64_invoker(metadata::RtManagedMethodPointer methodPtr
 
 /// @intrinsic: System.Threading.Volatile::Write<>
 static RtResultVoid write_ref_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret)
+                                      interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

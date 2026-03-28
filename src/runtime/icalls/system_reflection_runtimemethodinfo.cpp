@@ -301,7 +301,7 @@ RtResultVoid SystemReflectionRuntimeMethodInfo::get_pinvoke(vm::RtReflectionMeth
 
 /// @icall: System.Reflection.RuntimeMethodInfo::GetMethodBodyInternal(System.IntPtr)
 static RtResultVoid get_method_body_internal_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                     const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto method_info = EvalStackOp::get_param<const metadata::RtMethodInfo*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionMethodBody*, body, SystemReflectionRuntimeMethodInfo::get_method_body_internal(method_info));
@@ -311,7 +311,7 @@ static RtResultVoid get_method_body_internal_invoker(metadata::RtManagedMethodPo
 
 /// @icall: System.Reflection.RuntimeMethodInfo::GetMethodFromHandleInternalType_native
 static RtResultVoid get_method_from_handle_internal_type_native_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                                        const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto method_handle = EvalStackOp::get_param<const metadata::RtMethodInfo*>(params, 0);
     auto type_handle = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 1);
@@ -325,7 +325,7 @@ static RtResultVoid get_method_from_handle_internal_type_native_invoker(metadata
 
 /// @icall: System.Reflection.RuntimeMethodInfo::get_name
 static RtResultVoid get_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret)
+                                     interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, name, SystemReflectionRuntimeMethodInfo::get_name(ref_method));
@@ -335,7 +335,7 @@ static RtResultVoid get_name_invoker(metadata::RtManagedMethodPointer methodPtr,
 
 /// @icall: System.Reflection.RuntimeMethodInfo::get_base_method(System.Reflection.RuntimeMethodInfo,System.Boolean)
 static RtResultVoid get_base_method_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     bool definition = EvalStackOp::get_param<bool>(params, 1);
@@ -348,7 +348,7 @@ static RtResultVoid get_base_method_invoker(metadata::RtManagedMethodPointer met
 static RtResultVoid get_metadata_token_invoker_system_reflection_runtimemethodinfo(metadata::RtManagedMethodPointer methodPtr,
                                                                                     const metadata::RtMethodInfo* method,
                                                                                     const interp::RtStackObject* params,
-                                                                                    interp::RtStackObject* ret)
+                                                                                    interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, SystemReflectionRuntimeMethodInfo::get_metadata_token(ref_method));
@@ -358,7 +358,7 @@ static RtResultVoid get_metadata_token_invoker_system_reflection_runtimemethodin
 
 /// @icall: System.Reflection.RuntimeMethodInfo::get_IsGenericMethodDefinition
 static RtResultVoid get_is_generic_method_definition_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                             const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, is_generic_def, SystemReflectionRuntimeMethodInfo::get_is_generic_method_definition(ref_method));
@@ -368,7 +368,7 @@ static RtResultVoid get_is_generic_method_definition_invoker(metadata::RtManaged
 
 /// @icall: System.Reflection.RuntimeMethodInfo::GetGenericArguments
 static RtResultVoid get_generic_arguments_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, args, SystemReflectionRuntimeMethodInfo::get_generic_arguments(ref_method));
@@ -378,7 +378,7 @@ static RtResultVoid get_generic_arguments_invoker(metadata::RtManagedMethodPoint
 
 /// @icall: System.Reflection.RuntimeMethodInfo::GetGenericMethodDefinition_impl()
 static RtResultVoid get_generic_method_definition_impl_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionMethod*, def_method,
@@ -389,7 +389,7 @@ static RtResultVoid get_generic_method_definition_impl_invoker(metadata::RtManag
 
 /// @icall: System.Reflection.RuntimeMethodInfo::MakeGenericMethod_impl
 static RtResultVoid make_generic_method_impl_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                     const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     auto generic_args = EvalStackOp::get_param<vm::RtArray*>(params, 1);
@@ -401,7 +401,7 @@ static RtResultVoid make_generic_method_impl_invoker(metadata::RtManagedMethodPo
 
 /// @icall: System.Reflection.RuntimeMethodInfo::get_IsGenericMethod
 static RtResultVoid get_is_generic_method_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                  const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, is_generic, SystemReflectionRuntimeMethodInfo::get_is_generic_method(ref_method));
@@ -411,7 +411,7 @@ static RtResultVoid get_is_generic_method_invoker(metadata::RtManagedMethodPoint
 
 /// @icall: System.Reflection.RuntimeMethodInfo::InternalInvoke
 static RtResultVoid internal_invoke_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                            const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     auto obj = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -425,7 +425,7 @@ static RtResultVoid internal_invoke_invoker(metadata::RtManagedMethodPointer met
 
 /// @icall: System.Reflection.RuntimeMethodInfo::GetPInvoke(System.Reflection.PInvokeAttributes&,System.String&,System.String&)
 static RtResultVoid get_pinvoke_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                        interp::RtStackObject* ret)
+                                        interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     auto flags_ptr = EvalStackOp::get_param<int32_t*>(params, 1);

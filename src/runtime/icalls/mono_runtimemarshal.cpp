@@ -22,7 +22,7 @@ RtResultVoid MonoRuntimeMarshal::free_assembly_name(metadata::RtMonoAssemblyName
 
 /// @icall: Mono.RuntimeMarshal::FreeAssemblyName(Mono.MonoAssemblyName&,System.Boolean)
 static RtResultVoid free_assembly_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                               const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)ret;
     auto aname = EvalStackOp::get_param<metadata::RtMonoAssemblyName*>(params, 0);

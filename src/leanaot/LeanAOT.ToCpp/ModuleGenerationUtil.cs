@@ -67,7 +67,7 @@ namespace LeanAOT.ToCpp
 
         public static string GetModuleInitializeMethodDeclaration(ModuleDef mod)
         {
-            return $"void {GetModuleInitializeMethodName(mod)}({ConstStrings.ModulePtrTypeName} mod);";
+            return $"void {GetModuleInitializeMethodName(mod)}({ConstStrings.ModulePtrTypeName} mod){ConstStrings.CppFunctionNoexcept};";
         }
 
         public static string GetGlobalAotModulesDataVariableName()

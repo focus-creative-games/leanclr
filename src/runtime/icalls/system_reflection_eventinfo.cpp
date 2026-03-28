@@ -30,7 +30,7 @@ RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_ha
 
 /// @icall: System.Reflection.EventInfo::internal_from_handle_type
 static RtResultVoid internal_from_handle_type_invoker_eventinfo(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                      const interp::RtStackObject* params, interp::RtStackObject* ret)
+                                                      const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
