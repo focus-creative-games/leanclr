@@ -72,7 +72,8 @@ internal class Program
         ThreadPool.SetMinThreads(Math.Max(4, processorCount), 0);
         ThreadPool.SetMaxThreads(Math.Max(16, processorCount * 2), 2);
 
-        LogManager.Setup().LoadConfigurationFromFile("nlog.xml");
+        var nlogConfigPath = Path.Combine(AppContext.BaseDirectory, "nlog.xml");
+        LogManager.Setup().LoadConfigurationFromFile(nlogConfigPath);
         s_logger = LogManager.GetCurrentClassLogger();
     }
 
