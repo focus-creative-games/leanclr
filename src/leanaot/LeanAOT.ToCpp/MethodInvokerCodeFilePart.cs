@@ -54,7 +54,7 @@ namespace LeanAOT.ToCpp
             _invokerImplWriter.AddLine($"{ConstStrings.RtResultVoidTypeName} {info.name}({ConstStrings.ManagedMethodPointerTypeName} method_ptr, {ConstStrings.MethodInfoPtrTypeName} method, const {ConstStrings.StackObjectTypeName}* args, {ConstStrings.StackObjectTypeName}* ret){ConstStrings.CppFunctionNoexcept}");
             _invokerImplWriter.AddLine("{");
             _invokerImplWriter.IncreaseIndent();
-            _invokerImplWriter.AddLine($"{methodDetail.CreateRelaxMethodFunctionTypedefStatement("FuncType")};");
+            var castFnPtrType = methodDetail.CreateRelaxMethodFunctionPointerTypeForCast();
             foreach (var param in methodDetail.ParamsIncludeThis)
             {
                 int paramIndex = param.Index;
@@ -63,11 +63,11 @@ namespace LeanAOT.ToCpp
             string args = string.Join(", ", methodDetail.ParamsIncludeThis.Select((param, index) => index == 0 && info.isVirtual ? "args[0].obj + 1" : $"*({MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed)}*)(args + ARG{index}_OFFSET)"));
             if (methodDetail.IsVoidReturn)
             {
-                _invokerImplWriter.AddLine($"return ((FuncType)method_ptr)({args});");
+                _invokerImplWriter.AddLine($"return (({castFnPtrType})method_ptr)({args});");
             }
             else
             {
-                _invokerImplWriter.AddLine($"return leanclr::codegen::set_ret_or_return_error(((FuncType)method_ptr)({args}), ret);");
+                _invokerImplWriter.AddLine($"return leanclr::codegen::set_ret_or_return_error((({castFnPtrType})method_ptr)({args}), ret);");
             }
             _invokerImplWriter.DecreaseIndent();
             _invokerImplWriter.AddLine("}");

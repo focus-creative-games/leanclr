@@ -216,6 +216,28 @@ namespace LeanAOT.ToCpp
             return $"typedef {CreateRelaxMethodFunctionTypeDefine(cppTypedefName)}";
         }
 
+        /// <summary>
+        /// ABI-relaxed function pointer type for a C-style cast on <c>method_ptr</c> (no typedef), including <c>noexcept</c> like the AOT method.
+        /// </summary>
+        public string CreateRelaxMethodFunctionPointerTypeForCast()
+        {
+            var sb = new StringBuilder();
+            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType));
+            sb.Append(" (*)(");
+            bool first = true;
+            foreach (var param in _paramsIncludeThis)
+            {
+                if (first)
+                    first = false;
+                else
+                    sb.Append(", ");
+                sb.Append(MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed));
+            }
+            sb.Append(')');
+            sb.Append(ConstStrings.CppFunctionNoexcept);
+            return sb.ToString();
+        }
+
         public string CreateMethodFunctionTypeDefineWithoutName()
         {
             return CreateMethodFunctionTypeDefine("");
