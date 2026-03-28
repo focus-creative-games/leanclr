@@ -216,6 +216,23 @@ internal class Program
         config.DataFolder = options.DataFolder;
     }
 
+    /// <summary>
+    /// IL2CPP 兼容：在 <see cref="GlobalConfig.ProfilerOutputFile"/> 中给出路径时，创建空文件（含父目录）。
+    /// </summary>
+    private static void EnsureEmptyProfilerOutputFile(GlobalConfig config)
+    {
+        var path = config.ProfilerOutputFile?.Trim();
+        if (string.IsNullOrEmpty(path))
+            return;
+
+        var full = Path.GetFullPath(path);
+        var dir = Path.GetDirectoryName(full);
+        if (!string.IsNullOrEmpty(dir))
+            Directory.CreateDirectory(dir);
+        File.WriteAllText(full, string.Empty);
+        s_logger.Info("Created empty profiler output file: {0}", full);
+    }
+
     private static void Run(List<string> dllSearchPaths, List<string> aotAssemblyNames, string outputCodeDir, CliOptions il2CppOptions)
     {
         var generator = new CppGenerator();
@@ -238,6 +255,8 @@ internal class Program
         };
         ApplyIl2CppOptionsToGlobalConfig(globalServices.Config, il2CppOptions);
         GlobalServices.Inst = globalServices;
+
+        EnsureEmptyProfilerOutputFile(globalServices.Config);
 
         var confBuilder = new GenerationConfigBuilder()
         {
