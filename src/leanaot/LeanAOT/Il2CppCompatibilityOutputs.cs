@@ -1,3 +1,4 @@
+using System.Linq;
 using System.Text;
 using dnlib.DotNet;
 using LeanAOT.GenerationPlan;
@@ -60,7 +61,7 @@ internal static class Il2CppCompatibilityOutputs
         WriteGlobalMetadataDat(datPath, dllSearchPaths, aotAssemblyNames);
 
         // Doc spelling "Resouces" (Unity compatibility)
-        var resourcesDir = Path.Combine(dataFolder, "Resouces");
+        var resourcesDir = Path.Combine(dataFolder, "Resources");
         Directory.CreateDirectory(resourcesDir);
         var emptyResources = Path.Combine(resourcesDir, "mscorlib.dll-resources.dat");
         if (File.Exists(emptyResources))
@@ -189,33 +190,180 @@ internal static class Il2CppCompatibilityOutputs
     }
 
     /// <summary>
-    /// Matches docs/unity.md examples (return type + declaring type + :: + name + params).
+    /// IL2CPP-style: return type, declaring type (with type generic args), method name (with method generic args), parameters.
+    /// Example: <c>T System.Array::InternalArray__get_Item&lt;T&gt;(System.Int32)</c> — Var/MVar use metadata generic parameter names;
+    /// <c>GenericInst</c> uses concrete type arguments (e.g. <c>UnityEngine.Plane</c> inside parameter lists).
     /// </summary>
     private static string FormatManagedMethodMapName(MethodDef method)
     {
-        if (method.IsConstructor)
+        try
         {
+            return MethodMapSignatureFormatter.Format(method);
+        }
+        catch (Exception ex)
+        {
+            s_logger.Warn(ex, "Falling back to dnlib FullName for method {0}", method.FullName);
             return method.FullName;
         }
+    }
 
-        var ret = method.MethodSig.RetType.ToString();
-        var decl = method.DeclaringType.FullName;
-        var sb = new StringBuilder();
-        sb.Append(ret);
-        sb.Append(' ');
-        sb.Append(decl);
-        sb.Append("::");
-        sb.Append(method.Name);
-        sb.Append('(');
-        var ps = method.MethodSig.Params;
-        for (int i = 0; i < ps.Count; i++)
+    /// <summary>
+    /// C#-like managed signatures for MethodMap.tsv (generic type + generic method + Var/MVar/GenericInst).
+    /// </summary>
+    private static class MethodMapSignatureFormatter
+    {
+        public static string Format(MethodDef method)
         {
-            if (i > 0)
-                sb.Append(',');
-            sb.Append(ps[i].ToString());
+            var ret = FormatTypeSigCSharp(method.MethodSig.RetType, method);
+            var decl = FormatTypeDefCSharp(method.DeclaringType);
+            var methodName = FormatMethodNameWithMethodGenericParams(method);
+            var sb = new StringBuilder();
+            sb.Append(ret);
+            sb.Append(' ');
+            sb.Append(decl);
+            sb.Append("::");
+            sb.Append(methodName);
+            sb.Append('(');
+            var ps = method.MethodSig.Params;
+            for (int i = 0; i < ps.Count; i++)
+            {
+                if (i > 0)
+                    sb.Append(',');
+                sb.Append(FormatTypeSigCSharp(ps[i], method));
+            }
+            sb.Append(')');
+            return sb.ToString();
         }
-        sb.Append(')');
-        return sb.ToString();
+
+        private static string FormatMethodNameWithMethodGenericParams(MethodDef method)
+        {
+            var name = method.Name;
+            if (method.GenericParameters.Count == 0)
+                return name;
+            var args = string.Join(",", method.GenericParameters.Select(p => p.Name));
+            return name + "<" + args + ">";
+        }
+
+        /// <summary>
+        /// Declaring type with nested path and type generic parameters (e.g. <c>System.Collections.Generic.List&lt;T&gt;</c>).
+        /// </summary>
+        private static string FormatTypeDefCSharp(TypeDef td)
+        {
+            if (td.DeclaringType != null)
+                return FormatTypeDefCSharp(td.DeclaringType) + "." + FormatTypeNameWithTypeGenericParams(td);
+
+            var ns = td.Namespace;
+            var name = FormatTypeNameWithTypeGenericParams(td);
+            return string.IsNullOrEmpty(ns) ? name : ns + "." + name;
+        }
+
+        private static string FormatTypeNameWithTypeGenericParams(TypeDef td)
+        {
+            var name = StripGenericAritySuffix(td.Name);
+            if (td.GenericParameters.Count == 0)
+                return name;
+            var args = string.Join(",", td.GenericParameters.Select(p => p.Name));
+            return name + "<" + args + ">";
+        }
+
+        private static string StripGenericAritySuffix(string name)
+        {
+            var tick = name.IndexOf('`');
+            return tick >= 0 ? name.Substring(0, tick) : name;
+        }
+
+        private static string FormatTypeDefOrRefAsCSharp(ITypeDefOrRef type, MethodDef method)
+        {
+            if (type is TypeDef td)
+                return FormatTypeDefCSharp(td);
+            if (type is TypeRef tr)
+            {
+                var resolved = tr.Resolve();
+                if (resolved != null)
+                    return FormatTypeDefCSharp(resolved);
+                return tr.FullName;
+            }
+            return type.FullName;
+        }
+
+        private static string FormatTypeDefNamespaceAndNestedNameForGenericInst(TypeDef td)
+        {
+            if (td.DeclaringType != null)
+                return FormatTypeDefNamespaceAndNestedNameForGenericInst(td.DeclaringType) + "." + StripGenericAritySuffix(td.Name);
+
+            var ns = td.Namespace;
+            var name = StripGenericAritySuffix(td.Name);
+            return string.IsNullOrEmpty(ns) ? name : ns + "." + name;
+        }
+
+        private static string FormatTypeSigCSharp(TypeSig sig, MethodDef method)
+        {
+            sig = sig.RemovePinnedAndModifiers();
+
+            switch (sig.ElementType)
+            {
+            case ElementType.Void:
+                return "System.Void";
+            case ElementType.Var:
+            {
+                var gv = (GenericVar)sig;
+                var td = method.DeclaringType;
+                if ((int)gv.Number < td.GenericParameters.Count)
+                    return td.GenericParameters[(int)gv.Number].Name;
+                return "!" + gv.Number;
+            }
+            case ElementType.MVar:
+            {
+                var gmv = (GenericMVar)sig;
+                if ((int)gmv.Number < method.GenericParameters.Count)
+                    return method.GenericParameters[(int)gmv.Number].Name;
+                return "!!" + gmv.Number;
+            }
+            case ElementType.GenericInst:
+            {
+                var gi = (GenericInstSig)sig;
+                var typeDef = gi.GenericType.TypeDefOrRef.ResolveTypeDef();
+                if (typeDef == null)
+                    return gi.ToString();
+                var head = FormatTypeDefNamespaceAndNestedNameForGenericInst(typeDef);
+                var args = string.Join(",", gi.GenericArguments.Select(a => FormatTypeSigCSharp(a, method)));
+                return head + "<" + args + ">";
+            }
+            case ElementType.SZArray:
+                return FormatTypeSigCSharp(((SZArraySig)sig).Next, method) + "[]";
+            case ElementType.Array:
+            {
+                var arr = (ArraySig)sig;
+                var inner = FormatTypeSigCSharp(arr.Next, method);
+                var commas = arr.Rank <= 1 ? "" : new string(',', (int)arr.Rank - 1);
+                return inner + "[" + commas + "]";
+            }
+            case ElementType.ByRef:
+                return FormatTypeSigCSharp(((ByRefSig)sig).Next, method) + "&";
+            case ElementType.Ptr:
+                return FormatTypeSigCSharp(((PtrSig)sig).Next, method) + "*";
+            case ElementType.Class:
+            case ElementType.ValueType:
+            {
+                var cv = (ClassOrValueTypeSig)sig;
+                return FormatTypeDefOrRefAsCSharp(cv.TypeDefOrRef, method);
+            }
+            case ElementType.Object:
+                return "System.Object";
+            case ElementType.String:
+                return "System.String";
+            case ElementType.TypedByRef:
+                return "System.TypedReference";
+            case ElementType.I:
+                return "System.IntPtr";
+            case ElementType.U:
+                return "System.UIntPtr";
+            default:
+                if (sig is CorLibTypeSig cor)
+                    return cor.FullName;
+                return sig.ToString();
+            }
+        }
     }
 
     private static string EscapeTsvField(string s)
