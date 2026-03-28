@@ -4,6 +4,11 @@
       "commandName": "Project",
       "commandLineArgs": "-o samples\\simple-aot\\cpp -d libraries\\dotnetframework4.x -d leanaot\\Test\\bin\\Debug -a mscorlib -a Test",
       "workingDirectory": "$(SolutionDir).."
+    },
+    "il2cpp": {
+      "commandName": "Project",
+      "commandLineArgs": "--convert-to-cpp --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/Assembly-CSharp.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/Mono.Security.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/mscorlib.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/System.Configuration.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/System.Core.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/System.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/System.Xml.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/UnityEngine.AudioModule.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/UnityEngine.CoreModule.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/UnityEngine.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/UnityEngine.PropertiesModule.dll --assembly=Library/Bee/artifacts/WebGL/ManagedStripped/UnityEngine.SharedInternalsModule.dll --generatedcppdir=D:/workspace/wasmclr/TestWeb/Library/Bee/artifacts/WebGL/il2cppOutput/cpp --symbols-folder=D:/workspace/wasmclr/TestWeb/Library/Bee/artifacts/WebGL/il2cppOutput/cpp/Symbols --enable-analytics --emit-null-checks --enable-array-bounds-check --emit-method-map --dotnetprofile=unityaot-linux --profiler-report --profiler-output-file=D:/workspace/wasmclr/TestWeb/Library/Bee/artifacts/il2cpp_conv_6gg8.traceevents --print-command-line --data-folder=D:/workspace/wasmclr/TestWeb/Library/Bee/artifacts/WebGL/il2cppOutput/data\r",
+      "workingDirectory": "D:\\workspace\\wasmclr\\TestWeb"
     }
   }
 }
