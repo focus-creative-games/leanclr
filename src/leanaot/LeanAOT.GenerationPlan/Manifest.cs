@@ -20,6 +20,7 @@ namespace LeanAOT.GenerationPlan
 
         public Manifest(ManifestArgs args)
         {
+            var r = new Random(0);
             foreach (var assName in args.aotAssemblyNames)
             {
 
@@ -49,7 +50,10 @@ namespace LeanAOT.GenerationPlan
                         {
                             continue;
                         }
-
+                        if (r.NextSingle() > 0.1f)
+                        {
+                            continue;
+                        }
                         var methodPlan = new MethodDefPlan()
                         {
                             MethodDef = method,

@@ -71,14 +71,6 @@ namespace LeanAOT.ToCpp
             }
 
             _forwardDeclsWriter.AddLine($"struct {type.InstanceTypeName};");
-            foreach (var field in type.InstanceFieldsIncludeParent)
-            {
-                AddTypeForwardDeclaration(field.Type);
-            }
-            foreach (var field in type.StaticFields)
-            {
-                AddTypeForwardDeclaration(field.Type);
-            }
             uint packingSize = typeDef.ClassLayout != null ? typeDef.PackingSize : 0u;
             uint classSize = typeDef.ClassLayout != null ? typeDef.ClassSize : 0;
             if (typeDef.IsValueType && typeDef.IsExplicitLayout)
@@ -177,6 +169,16 @@ namespace LeanAOT.ToCpp
 
         private void AddTypeDefinition(TypeDetail type)
         {
+
+            foreach (var field in type.InstanceFieldsIncludeParent)
+            {
+                AddTypeForwardDeclaration(field.Type);
+            }
+            foreach (var field in type.StaticFields)
+            {
+                AddTypeForwardDeclaration(field.Type);
+            }
+
             AddTypeNotStaticDefinition(type);
 
             _typeDefinesWriter.AddLine();
@@ -257,7 +259,10 @@ namespace LeanAOT.ToCpp
                 {
                     return;
                 }
-                AddTypeDefinition(_metadataService.GetTypeDetail(type));
+                if (_addedTypes.Add(type))
+                {
+                    AddTypeDefinition(_metadataService.GetTypeDetail(type));
+                }
                 break;
             }
             case ElementType.Ptr:
@@ -288,7 +293,7 @@ namespace LeanAOT.ToCpp
                     break;
                 }
                 TypeDef typeDef = type.ResolveTypeDef();
-                if (typeDef != null)
+                if (typeDef != null && _addedTypes.Add(typeDef))
                 {
                     AddTypeDefinition(_metadataService.GetTypeDetail(typeDef));
                 }

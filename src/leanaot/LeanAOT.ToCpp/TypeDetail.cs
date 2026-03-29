@@ -78,7 +78,7 @@ namespace LeanAOT.ToCpp
             var sb = new StringBuilder();
             sb.Append(MetaUtil.GetModuleNameWithoutExt(typeDef.Module));
             sb.Append('_');
-            sb.Append(type.FullName.Replace('.', '_').Replace('/', '_'));
+            sb.Append(typeDef.FullName.Replace('.', '_').Replace('/', '_'));
             sb.Append('_');
             sb.Append(typeDef.MDToken.ToInt32().ToString("X8"));
             sb.Append('_');

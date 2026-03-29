@@ -49,10 +49,9 @@ namespace LeanAOT.Core
             return sb.ToString();
         }
 
-        public static void AppendFullQualifiedTypeName(StringBuilder result, TypeSig type)
+        public static void AppendFullQualifiedTypeName(StringBuilder sb, TypeSig type)
         {
             type = type.RemovePinnedAndModifiers();
-            var sb = new StringBuilder();
             switch (type.ElementType)
             {
             case ElementType.Void:
