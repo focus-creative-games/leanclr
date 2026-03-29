@@ -8,7 +8,8 @@ namespace LeanAOT.ToCpp
     class ForwardDeclaration
     {
         private readonly CodeThrunkWriter _includesWriter;
-        private readonly CodeThrunkWriter _forwardDeclsWriter;
+        private readonly CodeThrunkWriter _typeDeclsWriter;
+        private readonly CodeThrunkWriter _methodDeclsWriter;
         private readonly CodeThrunkWriter _typeDefinesWriter;
 
         private readonly MetadataService _metadataService;
@@ -24,7 +25,8 @@ namespace LeanAOT.ToCpp
         public ForwardDeclaration(CodeThunkZone writer)
         {
             _includesWriter = writer.CreateThunk("includes");
-            _forwardDeclsWriter = writer.CreateThunk("forward_declarations");
+            _typeDeclsWriter = writer.CreateThunk("type_declarations");
+            _methodDeclsWriter = writer.CreateThunk("method_declarations");
             _typeDefinesWriter = writer.CreateThunk("type_definitions");
 
             var globalServices = GlobalServices.Inst;
@@ -49,7 +51,7 @@ namespace LeanAOT.ToCpp
         {
             if (!_addedModules.Add(mod))
                 return;
-            _forwardDeclsWriter.AddLine(ModuleGenerationUtil.GetModuleForwardDeclaration(mod));
+            _methodDeclsWriter.AddLine(ModuleGenerationUtil.GetModuleForwardDeclaration(mod));
         }
 
 
@@ -70,7 +72,7 @@ namespace LeanAOT.ToCpp
                 }
             }
 
-            _forwardDeclsWriter.AddLine($"struct {type.InstanceTypeName};");
+            _typeDeclsWriter.AddLine($"struct {type.InstanceTypeName};");
             uint packingSize = typeDef.ClassLayout != null ? typeDef.PackingSize : 0u;
             uint classSize = typeDef.ClassLayout != null ? typeDef.ClassSize : 0;
             if (typeDef.IsValueType && typeDef.IsExplicitLayout)
@@ -259,10 +261,7 @@ namespace LeanAOT.ToCpp
                 {
                     return;
                 }
-                if (_addedTypes.Add(type))
-                {
-                    AddTypeDefinition(_metadataService.GetTypeDetail(type));
-                }
+                AddTypeDefinition(_metadataService.GetTypeDetail(type));
                 break;
             }
             case ElementType.Ptr:
@@ -288,10 +287,6 @@ namespace LeanAOT.ToCpp
             case ElementType.U:
             case ElementType.Object:
             {
-                if (!_addedTypes.Add(type))
-                {
-                    break;
-                }
                 TypeDef typeDef = type.ResolveTypeDef();
                 if (typeDef != null && _addedTypes.Add(typeDef))
                 {
@@ -329,16 +324,16 @@ namespace LeanAOT.ToCpp
             {
                 return;
             }
-            _forwardDeclsWriter.AddLine($"{methodDetail.GenerateMethodDeclaring()};");
-            _forwardDeclsWriter.AddLine();
+            _methodDeclsWriter.AddLine($"{methodDetail.GenerateMethodDeclaring()};");
+            _methodDeclsWriter.AddLine();
         }
 
         public void AddInvokerForwardDeclaration(MethodInvokerInfo invoker)
         {
             if (!_addedInvokers.Add(invoker))
                 return;
-            _forwardDeclsWriter.AddLine($"{ConstStrings.RtResultVoidTypeName} {invoker.name}({ConstStrings.ManagedMethodPointerTypeName}, {ConstStrings.MethodInfoPtrTypeName}, const {ConstStrings.StackObjectTypeName}*, {ConstStrings.StackObjectTypeName}*){ConstStrings.CppFunctionNoexcept};");
-            _forwardDeclsWriter.AddLine();
+            _methodDeclsWriter.AddLine($"{ConstStrings.RtResultVoidTypeName} {invoker.name}({ConstStrings.ManagedMethodPointerTypeName}, {ConstStrings.MethodInfoPtrTypeName}, const {ConstStrings.StackObjectTypeName}*, {ConstStrings.StackObjectTypeName}*){ConstStrings.CppFunctionNoexcept};");
+            _methodDeclsWriter.AddLine();
         }
     }
 }
