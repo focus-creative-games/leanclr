@@ -139,6 +139,10 @@ namespace LeanAOT.ToCpp
                 {
                     typeDefinesWriter.AddLine($"{_typeNameService.GetCppTypeNameAsFieldOrArgOrLoc(field.Type, TypeNameRelaxLevel.Exactly)} {field.Name};");
                 }
+                if (!type.HasObjectHeader && type.InstanceFieldsIncludeParent.Count == 0)
+                {
+                    typeDefinesWriter.AddLine($"uint8_t __placeholderForEmptyStruct;");
+                }
                 if (classSize > 0)
                 {
                     typeDefinesWriter.DecreaseIndent();

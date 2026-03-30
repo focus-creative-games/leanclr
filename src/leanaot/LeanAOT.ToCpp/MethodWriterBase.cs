@@ -905,7 +905,15 @@ namespace LeanAOT.ToCpp
         private void EmitLoadInt64(Instruction inst, long value)
         {
             var newVar = PushStack(EvalDataType.Int64);
-            _bodyWriter.AddLine($"{GetTypeName(newVar)} {GetEvalVariableName(newVar)} = {value}L;");
+            _bodyWriter.AddLine($"{GetTypeName(newVar)} {GetEvalVariableName(newVar)} = {FormatInt64Literal(value)};");
+        }
+
+        // int64_t min: avoid -9223372036854775808L (Clang -Wimplicitly-unsigned-literal); stdint.h is pulled in via codegen headers.
+        private static string FormatInt64Literal(long value)
+        {
+            if (value == long.MinValue)
+                return "INT64_MIN";
+            return $"{value}L";
         }
 
         private string FormatFloatLiteral(float value)
