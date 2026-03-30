@@ -129,7 +129,7 @@ namespace LeanAOT.ToCpp
         {
             int partIndex = 0;
             var invokerFiles = new List<MethodInvokerCodeFilePart>();
-            var methodInvokerCodeFile = new MethodInvokerCodeFilePart($"{_config.outputCodeDir}/{ModuleGenerationUtil.GetMethodInvokerCppFileNameWithExt(partIndex)}");
+            var methodInvokerCodeFile = new MethodInvokerCodeFilePart($"{_config.outputCodeDir}/{ModuleGenerationUtil.GetMethodInvokerCppFileNameWithExt(partIndex++)}");
             invokerFiles.Add(methodInvokerCodeFile);
             var invokerService = GlobalServices.Inst.InvokerService;
             var methodInvokerInfos = invokerService.GetNotVirtualInvokers();

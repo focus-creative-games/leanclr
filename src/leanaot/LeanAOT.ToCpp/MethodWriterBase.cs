@@ -1700,6 +1700,22 @@ namespace LeanAOT.ToCpp
             return sb.ToString();
         }
 
+        private string CreateMethodFunctionArgsWithCast(MethodSig methodSig, List<EvalVariable> args)
+        {
+            var sb = new StringBuilder();
+            int index = 0;
+            foreach (var param in methodSig.Params)
+            {
+                if (index > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append($"{GetVariableMayCast(args[index], param)} ");
+                index++;
+            }
+            return sb.ToString();
+        }
+
 
         private string CreateNewobjFunctionArgsWithCast(MethodDetail methodDetail, List<EvalVariable> args)
         {
@@ -1976,16 +1992,46 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine("}");
         }
 
+        private string CreateMethodFunctionTypeDefine(MethodSig methodSig)
+        {
+            StringBuilder sb = new StringBuilder();
+            sb.Append(MethodGenerationUtil.GetResultTypeName(methodSig.RetType));
+            sb.Append($" (*)(");
+            bool first = true;
+            foreach (var param in methodSig.Params)
+            {
+                if (first)
+                    first = false;
+                else
+                {
+                    sb.Append(", ");
+                }
+                sb.Append(MethodGenerationUtil.GetExactTypeName(param));
+            }
+            sb.Append(')');
+            sb.Append(ConstStrings.CppFunctionNoexcept);
+            return sb.ToString();
+        }
+
         private void EmitCalli(Instruction inst, MethodSig callSite)
         {
-            // Implementation omitted for brevity
-            Pop(callSite.Params.Count);
+            int paramCount = callSite.Params.Count;
+            var args = new List<EvalVariable>(_curState.runStackDatas.GetRange(_curState.runStackDatas.Count - paramCount - 1, paramCount));
+            var ftnVar = _curState.runStackDatas.Last();
+            Pop(paramCount + 1);
+
+            var argsStr = CreateMethodFunctionArgsWithCast(callSite, args);
+            string methodFunctionTypeDefine = CreateMethodFunctionTypeDefine(callSite);
+            string methodPointerVarName = GetMethodPointerFromFullReferenceMethodVariable($"({GetEvalVariableExprWithCast(ftnVar, ConstStrings.MethodInfoPtrTypeName)})");
             if (!MetaUtil.IsVoidType(callSite.RetType))
             {
-                var retType = _method.InflateType(callSite.RetType);
-                PushStack(retType);
+                var retVar = PushStack(callSite.RetType);
+                EmitDeclaringAssignOrThrow(inst, retVar, $"(({methodFunctionTypeDefine}){methodPointerVarName})({argsStr})");
             }
-            throw new NotImplementedException();
+            else
+            {
+                EmitThrowOnError(inst, $"(({methodFunctionTypeDefine}){methodPointerVarName})({argsStr})");
+            }
         }
 
         private void EmitLdftn(Instruction inst, IMethod method)

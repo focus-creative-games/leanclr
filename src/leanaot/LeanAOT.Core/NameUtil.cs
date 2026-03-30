@@ -180,8 +180,9 @@ namespace LeanAOT.Core
                 sb.Append("real");
                 break;
             case ElementType.FnPtr:
-                // sb.Append("fnptr");
-                throw new NotSupportedException("FnPtr is not supported");
+                sb.Append("fnptr");
+                // throw new NotSupportedException("FnPtr is not supported");
+                break;
             default:
                 throw new NotSupportedException(type.ToString());
             }

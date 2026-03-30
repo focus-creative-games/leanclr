@@ -20,7 +20,6 @@ namespace LeanAOT.GenerationPlan
 
         public Manifest(ManifestArgs args)
         {
-            var r = new Random(0);
             foreach (var assName in args.aotAssemblyNames)
             {
 
@@ -47,10 +46,6 @@ namespace LeanAOT.GenerationPlan
                         }
                         string typeName = method.DeclaringType.Name;
                         if (method.CustomAttributes.Any(ca => ca.TypeFullName == "AotMethodAttribute" && ca.ConstructorArguments[0].Value.Equals(false)))
-                        {
-                            continue;
-                        }
-                        if (r.NextSingle() > 0.1f)
                         {
                             continue;
                         }
