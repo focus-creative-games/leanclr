@@ -27,6 +27,7 @@
 #include "utils/string_builder.h"
 #include "metadata/module_def.h"
 #include "fileloader.h"
+#include "statistic.h"
 
 using namespace leanclr;
 
@@ -47,6 +48,7 @@ typedef metadata::RtFieldInfo FieldInfo;
 typedef metadata::RtMethodInfo MethodInfo;
 typedef metadata::RtPropertyInfo PropertyInfo;
 typedef metadata::RtEventInfo EventInfo;
+typedef il2cpp::Il2CppStat Il2CppStat;
 
 // Opaque types that have no leanclr equivalent (forward declarations).
 struct Il2CppCustomAttrInfo;
@@ -103,18 +105,6 @@ typedef enum
 
 typedef enum
 {
-    IL2CPP_STAT_NEW_OBJECT_COUNT,
-    IL2CPP_STAT_INITIALIZED_CLASS_COUNT,
-    IL2CPP_STAT_METHOD_COUNT,
-    IL2CPP_STAT_CLASS_STATIC_DATA_SIZE,
-    IL2CPP_STAT_GENERIC_INSTANCE_COUNT,
-    IL2CPP_STAT_GENERIC_CLASS_COUNT,
-    IL2CPP_STAT_INFLATED_METHOD_COUNT,
-    IL2CPP_STAT_INFLATED_TYPE_COUNT,
-} Il2CppStat;
-
-typedef enum
-{
     IL2CPP_UNHANDLED_POLICY_LEGACY,
     IL2CPP_UNHANDLED_POLICY_CURRENT
 } Il2CppRuntimeUnhandledExceptionPolicy;
@@ -140,6 +130,8 @@ typedef uintptr_t il2cpp_array_size_t;
 #define ARRAY_LENGTH_AS_INT32(a) ((int32_t)(a))
 
 typedef uint8_t (*Il2CppAndroidUpStateFunc)(const char* ifName, uint8_t* is_up);
+
+using Il2CppExceptionWrapper = vm::AotExceptionWrapper;
 
 extern leanclr::metadata::RtAotModulesData g_aot_modules_data;
 
@@ -333,7 +325,7 @@ extern "C"
 
     int il2cpp_array_element_size(const Il2CppClass* klass)
     {
-        return static_cast<int>(vm::Array::get_array_element_size_by_klass(const_cast<Il2CppClass*>(klass)));
+        return static_cast<int>(vm::Array::get_array_element_size_by_klass(klass));
     }
 
     // -- assembly -------------------------------------------------------------
@@ -375,17 +367,17 @@ extern "C"
 
     bool il2cpp_class_is_inited(const Il2CppClass* klass)
     {
-        return vm::Class::is_initialized(const_cast<Il2CppClass*>(klass));
+        return vm::Class::is_initialized(klass);
     }
 
     bool il2cpp_class_is_generic(const Il2CppClass* klass)
     {
-        return vm::Class::is_generic(const_cast<Il2CppClass*>(klass));
+        return vm::Class::is_generic(klass);
     }
 
     bool il2cpp_class_is_inflated(const Il2CppClass* klass)
     {
-        return vm::Class::is_generic_inst(const_cast<Il2CppClass*>(klass));
+        return vm::Class::is_generic_inst(klass);
     }
 
     bool il2cpp_class_is_assignable_from(Il2CppClass* klass, Il2CppClass* oklass)
@@ -425,47 +417,139 @@ extern "C"
 
     const EventInfo* il2cpp_class_get_events(Il2CppClass* klass, void** iter)
     {
-        uintptr_t idx = reinterpret_cast<uintptr_t>(*iter);
-        if (idx >= klass->event_count)
+        if (!iter)
+        {
             return nullptr;
-        *iter = reinterpret_cast<void*>(idx + 1);
-        return &klass->events[idx];
+        }
+        if (!*iter)
+        {
+            auto ret = vm::Class::initialize_events(klass);
+            if (ret.is_err())
+            {
+                return nullptr;
+            }
+            *iter = (void*)(klass->events);
+            return klass->events;
+        }
+        const EventInfo* next_event = (const EventInfo*)(*iter) + 1;
+        if (next_event < klass->events + klass->event_count)
+        {
+            *iter = (void*)next_event;
+            return next_event;
+        }
+        return nullptr;
     }
 
     FieldInfo* il2cpp_class_get_fields(Il2CppClass* klass, void** iter)
     {
-        uintptr_t idx = reinterpret_cast<uintptr_t>(*iter);
-        if (idx >= klass->field_count)
+        if (!iter)
+        {
             return nullptr;
-        *iter = reinterpret_cast<void*>(idx + 1);
-        return const_cast<FieldInfo*>(&klass->fields[idx]);
+        }
+        if (!*iter)
+        {
+            auto ret = vm::Class::initialize_fields(klass);
+            if (ret.is_err())
+            {
+                return nullptr;
+            }
+            *iter = (void*)(klass->fields);
+            return const_cast<FieldInfo*>(klass->fields);
+        }
+        const FieldInfo* next_field = (const FieldInfo*)(*iter) + 1;
+        if (next_field < klass->fields + klass->field_count)
+        {
+            *iter = (void*)next_field;
+            return const_cast<FieldInfo*>(next_field);
+        }
+        return nullptr;
     }
 
     Il2CppClass* il2cpp_class_get_nested_types(Il2CppClass* klass, void** iter)
     {
-        uintptr_t idx = reinterpret_cast<uintptr_t>(*iter);
-        if (idx >= klass->nested_class_count)
+        if (!iter)
+        {
             return nullptr;
-        *iter = reinterpret_cast<void*>(idx + 1);
-        return const_cast<Il2CppClass*>(klass->nested_classes[idx]);
+        }
+        if (!*iter)
+        {
+            auto ret = vm::Class::initialize_nested_classes(klass);
+            if (ret.is_err())
+            {
+                return nullptr;
+            }
+            *iter = (void*)klass->nested_classes;
+            if (klass->nested_class_count == 0)
+            {
+                return nullptr;
+            }
+            return const_cast<Il2CppClass*>(klass->nested_classes[0]);
+        }
+        const Il2CppClass** next_nested_class_ptr = (const Il2CppClass**)(*iter) + 1;
+        if (next_nested_class_ptr < klass->nested_classes + klass->nested_class_count)
+        {
+            *iter = (void*)next_nested_class_ptr;
+            return const_cast<Il2CppClass*>(*next_nested_class_ptr);
+        }
+        return nullptr;
     }
 
     Il2CppClass* il2cpp_class_get_interfaces(Il2CppClass* klass, void** iter)
     {
-        uintptr_t idx = reinterpret_cast<uintptr_t>(*iter);
-        if (idx >= klass->interface_count)
+        if (!iter)
+        {
             return nullptr;
-        *iter = reinterpret_cast<void*>(idx + 1);
-        return const_cast<Il2CppClass*>(klass->interfaces[idx]);
+        }
+        if (!*iter)
+        {
+            auto ret = vm::Class::initialize_interfaces(klass);
+            if (ret.is_err())
+            {
+                return nullptr;
+            }
+            *iter = (void*)klass->interfaces;
+            if (klass->interface_count == 0)
+            {
+                return nullptr;
+            }
+            return const_cast<Il2CppClass*>(klass->interfaces[0]);
+        }
+        const Il2CppClass** next_interface_ptr = (const Il2CppClass**)(*iter) + 1;
+        if (next_interface_ptr < klass->interfaces + klass->interface_count)
+        {
+            *iter = (void*)next_interface_ptr;
+            return const_cast<Il2CppClass*>(*next_interface_ptr);
+        }
+        return nullptr;
     }
 
     const PropertyInfo* il2cpp_class_get_properties(Il2CppClass* klass, void** iter)
     {
-        uintptr_t idx = reinterpret_cast<uintptr_t>(*iter);
-        if (idx >= klass->property_count)
+        if (!iter)
+        {
             return nullptr;
-        *iter = reinterpret_cast<void*>(idx + 1);
-        return &klass->properties[idx];
+        }
+        if (!*iter)
+        {
+            auto ret = vm::Class::initialize_properties(klass);
+            if (ret.is_err())
+            {
+                return nullptr;
+            }
+            if (klass->property_count == 0)
+            {
+                return nullptr;
+            }
+            *iter = (void*)(klass->properties);
+            return klass->properties;
+        }
+        const PropertyInfo* next_property = (const PropertyInfo*)(*iter) + 1;
+        if (next_property < klass->properties + klass->property_count)
+        {
+            *iter = (void*)next_property;
+            return const_cast<PropertyInfo*>(next_property);
+        }
+        return nullptr;
     }
 
     const PropertyInfo* il2cpp_class_get_property_from_name(Il2CppClass* klass, const char* name)
@@ -480,11 +564,31 @@ extern "C"
 
     const MethodInfo* il2cpp_class_get_methods(Il2CppClass* klass, void** iter)
     {
-        uintptr_t idx = reinterpret_cast<uintptr_t>(*iter);
-        if (idx >= klass->method_count)
+        if (!iter)
+        {
             return nullptr;
-        *iter = reinterpret_cast<void*>(idx + 1);
-        return klass->methods[idx];
+        }
+        if (!*iter)
+        {
+            auto ret = vm::Class::initialize_methods(klass);
+            if (ret.is_err())
+            {
+                return nullptr;
+            }
+            if (klass->method_count == 0)
+            {
+                return nullptr;
+            }
+            *iter = (void*)(klass->methods);
+            return const_cast<MethodInfo*>(klass->methods[0]);
+        }
+        const MethodInfo** next_method_ptr = (const MethodInfo**)(*iter) + 1;
+        if (next_method_ptr < klass->methods + klass->method_count)
+        {
+            *iter = (void*)next_method_ptr;
+            return const_cast<MethodInfo*>(*next_method_ptr);
+        }
+        return nullptr;
     }
 
     const MethodInfo* il2cpp_class_get_method_from_name(Il2CppClass* klass, const char* name, int argsCount)
@@ -534,19 +638,26 @@ extern "C"
 
     bool il2cpp_class_is_valuetype(const Il2CppClass* klass)
     {
-        return vm::Class::is_value_type(const_cast<Il2CppClass*>(klass));
+        return vm::Class::is_value_type(klass);
     }
 
     bool il2cpp_class_is_blittable(const Il2CppClass* klass)
     {
-        return vm::Class::is_blittable(const_cast<Il2CppClass*>(klass));
+        return vm::Class::is_blittable(klass);
     }
 
     int32_t il2cpp_class_value_size(Il2CppClass* klass, uint32_t* align)
     {
+        auto ret = vm::Class::initialize_fields(klass);
+        if (ret.is_err())
+        {
+            if (align)
+                *align = 0;
+            return 0;
+        }
         if (align)
             *align = klass->alignment;
-        return vm::Class::is_value_type(klass) ? static_cast<int32_t>(klass->instance_size_without_header) : static_cast<int32_t>(sizeof(void*));
+        return vm::Class::get_instance_size_without_object_header(klass);
     }
 
     int il2cpp_class_get_flags(const Il2CppClass* klass)
@@ -556,17 +667,17 @@ extern "C"
 
     bool il2cpp_class_is_abstract(const Il2CppClass* klass)
     {
-        return vm::Class::is_abstract(const_cast<Il2CppClass*>(klass));
+        return vm::Class::is_abstract(klass);
     }
 
     bool il2cpp_class_is_interface(const Il2CppClass* klass)
     {
-        return vm::Class::is_interface(const_cast<Il2CppClass*>(klass));
+        return vm::Class::is_interface(klass);
     }
 
     int il2cpp_class_array_element_size(const Il2CppClass* klass)
     {
-        return static_cast<int>(vm::Array::get_array_element_size_by_klass(const_cast<Il2CppClass*>(klass)));
+        return static_cast<int>(vm::Array::get_array_element_size_by_klass(klass));
     }
 
     Il2CppClass* il2cpp_class_from_type(const Il2CppType* type)
@@ -598,7 +709,7 @@ extern "C"
 
     bool il2cpp_class_is_enum(const Il2CppClass* klass)
     {
-        return vm::Class::is_enum_type(const_cast<Il2CppClass*>(klass));
+        return vm::Class::is_enum_type(klass);
     }
 
     const Il2CppImage* il2cpp_class_get_image(Il2CppClass* klass)
@@ -613,7 +724,7 @@ extern "C"
 
     int il2cpp_class_get_rank(const Il2CppClass* klass)
     {
-        return static_cast<int>(vm::Class::get_rank(const_cast<Il2CppClass*>(klass)));
+        return static_cast<int>(vm::Class::get_rank(klass));
     }
 
     uint32_t il2cpp_class_get_data_size(const Il2CppClass* klass)
@@ -629,27 +740,25 @@ extern "C"
     // testing only
     size_t il2cpp_class_get_bitmap_size(const Il2CppClass* klass)
     {
-        // TODO: GC bitmap not exposed in leanclr
-        return 0;
+        return vm::Class::get_gc_bitmap_size(klass);
     }
 
     void il2cpp_class_get_bitmap(Il2CppClass* klass, size_t* bitmap)
     {
-        // TODO: GC bitmap not exposed in leanclr
+        size_t bitmap_size = 0;
+        vm::Class::get_gc_bitmap(klass, bitmap, bitmap_size);
     }
 
     // -- stats ----------------------------------------------------------------
 
     bool il2cpp_stats_dump_to_file(const char* path)
     {
-        // TODO: runtime stats not implemented
-        return false;
+        return il2cpp::Statistic::dump_to_file(path);
     }
 
     uint64_t il2cpp_stats_get_value(Il2CppStat stat)
     {
-        // TODO: runtime stats not implemented
-        return 0;
+        return il2cpp::Statistic::get_value(stat);
     }
 
     // -- domain ---------------------------------------------------------------
@@ -665,59 +774,86 @@ extern "C"
         return result.is_ok() ? result.unwrap() : nullptr;
     }
 
+    const Il2CppAssembly** s_cached_assemblies = nullptr;
+    size_t s_cached_assemblies_size = 0;
+
     const Il2CppAssembly** il2cpp_domain_get_assemblies(const Il2CppDomain* domain, size_t* size)
     {
         auto modules = metadata::RtModuleDef::get_registered_modules();
-        *size = modules.size();
-        if (modules.size() == 0)
-            return nullptr;
-
-        // Single-threaded wasm: a static buffer is safe.
-        static metadata::RtAssembly** s_buf = nullptr;
-        static size_t s_buf_cap = 0;
-        if (s_buf_cap < modules.size())
+        if (modules.size() != s_cached_assemblies_size)
         {
-            std::free(s_buf);
-            s_buf = static_cast<metadata::RtAssembly**>(std::malloc(modules.size() * sizeof(void*)));
-            s_buf_cap = modules.size();
+            // we don't free last cached assemblies, because they are still in use
+            // if (s_cached_assemblies)
+            // {
+            //     std::free(s_cached_assemblies);
+            // }
+            s_cached_assemblies = alloc::GeneralAllocation::calloc_any<const Il2CppAssembly*>(modules.size());
+            s_cached_assemblies_size = modules.size();
+            for (size_t i = 0; i < modules.size(); i++)
+                s_cached_assemblies[i] = modules[i]->get_assembly();
         }
-        for (size_t i = 0; i < modules.size(); i++)
-            s_buf[i] = modules[i]->get_assembly();
-        return const_cast<const Il2CppAssembly**>(s_buf);
+        *size = s_cached_assemblies_size;
+        return s_cached_assemblies;
     }
 
     // -- exception ------------------------------------------------------------
 
     void il2cpp_raise_exception(Il2CppException* exc)
     {
-        vm::Exception::set_current_exception(exc);
+        vm::Exception::raise_as_cpp_exception(exc);
     }
 
     Il2CppException* il2cpp_exception_from_name_msg(const Il2CppImage* image, const char* name_space, const char* name, const char* msg)
     {
-        // TODO: create a new instance of the specified exception class with the given message
-        return nullptr;
+        metadata::RtModuleDef* mod = const_cast<metadata::RtModuleDef*>(image);
+        auto ret = mod->get_class_by_name2(name_space, name, false, false);
+        if (ret.is_err())
+        {
+            return nullptr;
+        }
+        metadata::RtClass* klass = ret.unwrap();
+        auto ex_ret = vm::Object::new_object(klass);
+        if (ex_ret.is_err())
+        {
+            return nullptr;
+        }
+        vm::RtException* ex = reinterpret_cast<vm::RtException*>(ex_ret.unwrap());
+        ex->message = vm::String::create_string_from_utf8cstr(msg);
+        return ex;
     }
 
     Il2CppException* il2cpp_get_exception_argument_null(const char* arg)
     {
-        // TODO: create ArgumentNullException
-        return nullptr;
+        metadata::RtClass* ex_class = vm::Class::get_corlib_types().cls_argument_null_exception;
+        auto ex_ret = vm::Object::new_object(ex_class);
+        if (ex_ret.is_err())
+        {
+            return nullptr;
+        }
+        vm::RtException* ex = reinterpret_cast<vm::RtException*>(ex_ret.unwrap());
+        ex->message = vm::String::create_string_from_utf8cstr(arg);
+        return ex;
     }
 
     void il2cpp_format_exception(const Il2CppException* ex, char* message, int message_size)
     {
-        if (!ex || message_size <= 0)
-            return;
-        const char* klass_name = ex->klass ? ex->klass->name : "Exception";
-        std::snprintf(message, static_cast<size_t>(message_size), "%s", klass_name);
+        utils::StringBuilder sb;
+        vm::Exception::format_exception(const_cast<vm::RtException*>(ex), sb);
+        size_t copy_size = std::min(sb.length(), static_cast<size_t>(message_size) - 1);
+        std::memcpy(message, sb.as_cstr(), copy_size);
+        message[copy_size] = '\0';
     }
 
     void il2cpp_format_stack_trace(const Il2CppException* ex, char* output, int output_size)
     {
-        // TODO: format managed stack trace
-        if (output_size > 0)
-            output[0] = '\0';
+        utils::StringBuilder sb;
+        if (ex->stack_trace)
+        {
+            sb.append_utf16_str(vm::String::get_chars_ptr(ex->stack_trace), vm::String::get_length(ex->stack_trace));
+        }
+        size_t copy_size = std::min(sb.length(), static_cast<size_t>(output_size) - 1);
+        std::memcpy(output, sb.as_cstr(), copy_size);
+        output[copy_size] = '\0';
     }
 
     void il2cpp_unhandled_exception(Il2CppException* exc)
@@ -727,13 +863,10 @@ extern "C"
 
     void il2cpp_native_stack_trace(const Il2CppException* ex, uintptr_t** addresses, int* numFrames, char** imageUUID, char** imageName)
     {
-        // TODO: native stack trace not implemented
         *numFrames = 0;
         *addresses = nullptr;
-        if (imageUUID)
-            *imageUUID = nullptr;
-        if (imageName)
-            *imageName = nullptr;
+        *imageUUID = nullptr;
+        *imageName = nullptr;
     }
 
     // -- field ----------------------------------------------------------------
@@ -1182,7 +1315,7 @@ extern "C"
 
     Il2CppObject* il2cpp_object_new(const Il2CppClass* klass)
     {
-        auto result = vm::Object::new_object(const_cast<Il2CppClass*>(klass));
+        auto result = vm::Object::new_object(klass);
         return result.is_ok() ? result.unwrap() : nullptr;
     }
 

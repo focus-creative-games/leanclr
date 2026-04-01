@@ -6,6 +6,7 @@ project(leanclr CXX)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json for clangd / cpptools" FORCE)
 
 option(BUILD_SHARED_LEANCLR "Build leanclr as a shared (dynamic) library" OFF)
+option(LEANCLR_ENABLE_CPP_EXCEPTIONS "Enable C++ exceptions for runtime target" OFF)
 
 set(RUNTIME_DIRS
     alloc
@@ -50,11 +51,16 @@ set_target_properties(leanclr PROPERTIES
 
 if(MSVC)
     string(REGEX REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    target_compile_options(leanclr PRIVATE /EHs-c- /MP)
+    if(LEANCLR_ENABLE_CPP_EXCEPTIONS)
+        target_compile_options(leanclr PRIVATE /EHsc /MP)
+    else()
+        target_compile_options(leanclr PRIVATE /EHs-c- /MP)
+    endif()
 elseif(EMSCRIPTEN)
 
     target_compile_options(leanclr PRIVATE
-        -fno-exceptions
+        $<$<BOOL:${LEANCLR_ENABLE_CPP_EXCEPTIONS}>:-fexceptions>
+        $<$<NOT:$<BOOL:${LEANCLR_ENABLE_CPP_EXCEPTIONS}>>:-fno-exceptions>
         -fno-rtti
         -O2
     )
@@ -66,7 +72,11 @@ elseif(EMSCRIPTEN)
     )
 
 else()
-    target_compile_options(leanclr PRIVATE -fno-exceptions)
+    if(LEANCLR_ENABLE_CPP_EXCEPTIONS)
+        target_compile_options(leanclr PRIVATE -fexceptions)
+    else()
+        target_compile_options(leanclr PRIVATE -fno-exceptions)
+    endif()
 endif()
 
 if(WIN32)

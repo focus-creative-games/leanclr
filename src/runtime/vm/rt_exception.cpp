@@ -178,6 +178,11 @@ RtException* Exception::raise_internal_runtime_exception(metadata::RtClass* ex_c
     return nullptr;
 }
 
+void Exception::raise_as_cpp_exception(RtException* ex)
+{
+    throw AotExceptionWrapper{raise_aot_exception(ex, nullptr, -1)};
+}
+
 RtResultVoid Exception::report_unhandled_exception(RtException* exception)
 {
     auto handler = vm::Settings::get_report_unhandled_exception_function();
@@ -186,6 +191,23 @@ RtResultVoid Exception::report_unhandled_exception(RtException* exception)
         handler(exception);
     }
     RET_VOID_OK();
+}
+
+void Exception::format_exception(RtException* ex, utils::StringBuilder& sb)
+{
+    const metadata::RtClass* klass = ex->klass;
+    if (klass->namespaze && klass->namespaze[0] != 0)
+    {
+        sb.append_cstr(klass->namespaze);
+        sb.append_char('.');
+    }
+    sb.append_cstr(klass->name);
+    if (ex->message)
+    {
+        sb.append_cstr(": ");
+        sb.append_utf16_str(vm::String::get_chars_ptr(ex->message), vm::String::get_length(ex->message));
+    }
+    sb.sure_null_terminator_but_not_append();
 }
 
 } // namespace vm

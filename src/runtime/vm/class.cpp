@@ -2327,5 +2327,15 @@ bool Class::is_pointer_element_compatible_with(const metadata::RtClass* fromClas
     return fromClass->cast_class == toClass->cast_class;
 }
 
+size_t Class::get_gc_bitmap_size(const metadata::RtClass* klass)
+{
+    return 0;
+}
+
+void Class::get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size)
+{
+    bitmaps_size = 0;
+    return;
+}
 } // namespace vm
 } // namespace leanclr

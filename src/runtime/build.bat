@@ -50,9 +50,9 @@ pushd "%CMAKE_BUILD_DIR%"
 echo.
 echo [1/2] Generating Visual Studio solution...
 if %BUILD_SHARED%==1 (
-    cmake -G "Visual Studio %VS_VERSION%" -A %ARCH% -DBUILD_SHARED_LEANCLR=ON ..\..\
+    cmake -G "Visual Studio %VS_VERSION%" -A %ARCH% -DBUILD_SHARED_LEANCLR=ON  ..\..\
 ) else (
-    cmake -G "Visual Studio %VS_VERSION%" -A %ARCH% ..\..\
+    cmake -G "Visual Studio %VS_VERSION%" -A %ARCH%  ..\..\
 )
 if errorlevel 1 (
     echo ERROR: CMake generation failed.
@@ -63,7 +63,7 @@ if errorlevel 1 (
 :: Build the project
 echo.
 echo [2/2] Building project...
-cmake --build . --config %BUILD_TYPE% --parallel
+cmake --build . --config %BUILD_TYPE% --parallel 
 if errorlevel 1 (
     echo ERROR: Build failed.
     popd

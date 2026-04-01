@@ -228,6 +228,9 @@ class Class
     static bool is_subclass_of_initialized(const metadata::RtClass* fromClass, const metadata::RtClass* toClass, bool checkInterfaces);
     static bool is_pointer_element_compatible_with(const metadata::RtClass* fromClass, const metadata::RtClass* toClass);
 
+    static size_t get_gc_bitmap_size(const metadata::RtClass* klass);
+    static void get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size);
+
   private:
     static RtResultVoid setup_interfaces_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_nested_classes_typedef(metadata::RtClass* klass);
