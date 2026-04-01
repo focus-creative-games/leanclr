@@ -2,6 +2,9 @@
 cmake_minimum_required(VERSION 3.15)
 project(leanclr CXX)
 
+# Ninja / single-config generators: produces compile_commands.json for IDE IntelliSense (VS generator omits it on Windows).
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json for clangd / cpptools" FORCE)
+
 option(BUILD_SHARED_LEANCLR "Build leanclr as a shared (dynamic) library" OFF)
 
 set(RUNTIME_DIRS

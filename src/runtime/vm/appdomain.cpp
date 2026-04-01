@@ -7,6 +7,7 @@
 #include "utils/hashmap.h"
 #include "utils/string_util.h"
 #include "metadata/module_def.h"
+#include "settings.h"
 
 namespace leanclr
 {
@@ -51,7 +52,9 @@ RtResult<RtAppDomain*> AppDomain::init_default_app_domain()
     auto appdomain_setup = appdomain_setup_res.unwrap();
 
     mono_app_domain->domain_id = 1;
-    mono_app_domain->friendly_name = utils::StringUtil::strdup("LeanCLR-Domain");
+    const char* domain_name = Settings::get_domain_name();
+    // we has dup string in Settings, so we don't need to dup it here
+    mono_app_domain->friendly_name = domain_name != nullptr ? domain_name : utils::StringUtil::strdup("LeanCLR-Domain");
     mono_app_domain->appdomain = default_appdomain;
 
     auto ephemeron_res = Object::new_object(corlib_types.cls_object);

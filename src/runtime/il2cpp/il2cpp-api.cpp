@@ -24,7 +24,9 @@
 #include "vm/customattribute.h"
 #include "vm/stacktrace.h"
 #include "vm/internal_calls.h"
+#include "utils/string_builder.h"
 #include "metadata/module_def.h"
+#include "fileloader.h"
 
 using namespace leanclr;
 
@@ -173,22 +175,24 @@ static inline void* u32_to_handle(uint32_t v)
     return h;
 }
 
-// -- extern "C" ---------------------------------------------------------------
-
 extern "C"
 {
-    // -- init / shutdown ------------------------------------------------------
 
     int il2cpp_init(const char* domain_name)
     {
+        setlocale(LC_ALL, "");
+        vm::Settings::set_domain_name(domain_name);
+        vm::Settings::set_file_loader(il2cpp::assembly_file_loader);
         vm::Settings::set_aot_modules_data(&g_aot_modules_data);
         auto ret = vm::Runtime::initialize();
-        return ret.is_ok() ? 0 : -1;
+        return static_cast<int>(ret.unwrap_err());
     }
 
     int il2cpp_init_utf16(const Il2CppChar* domain_name)
     {
-        return il2cpp_init("");
+        utils::StringBuilder sb;
+        sb.append_utf16_str(domain_name, utils::StringUtil::get_utf16chars_length(domain_name));
+        return il2cpp_init(sb.as_cstr());
     }
 
     void il2cpp_shutdown()
@@ -196,52 +200,60 @@ extern "C"
         vm::Runtime::shutdown();
     }
 
-    void il2cpp_set_config_dir(const char* config_path) { }
-    void il2cpp_set_data_dir(const char* data_path) { }
-    void il2cpp_set_temp_dir(const char* temp_dir) { }
-    void il2cpp_set_commandline_arguments(int argc, const char* const argv[], const char* basedir) { }
-    void il2cpp_set_commandline_arguments_utf16(int argc, const Il2CppChar* const argv[], const char* basedir) { }
-    void il2cpp_set_config_utf16(const Il2CppChar* executablePath) { }
-    void il2cpp_set_config(const char* executablePath) { }
-    void il2cpp_set_memory_callbacks(Il2CppMemoryCallbacks* callbacks) { }
-    void il2cpp_memory_pool_set_region_size(size_t size) { }
-
-    size_t il2cpp_memory_pool_get_region_size()
+    void il2cpp_set_config_dir(const char* config_path)
     {
-        return 0;
+        vm::Settings::set_config_dir(config_path);
     }
 
-    // -- corlib ---------------------------------------------------------------
+    void il2cpp_set_config_utf16(const Il2CppChar* executablePath)
+     {
+        utils::StringBuilder sb;
+        sb.append_utf16_str(executablePath, utils::StringUtil::get_utf16chars_length(executablePath));
+        vm::Settings::set_config_dir(sb.as_cstr());
+    }
 
-    const Il2CppImage* il2cpp_get_corlib()
+    void il2cpp_set_data_dir(const char* data_path)
     {
-        auto* ass = vm::Assembly::get_corlib();
-        return ass ? ass->mod : nullptr;
+        vm::Settings::set_data_dir(data_path);
+    }
+
+    void il2cpp_set_temp_dir(const char* temp_dir)
+    {
+        vm::Settings::set_temp_dir(temp_dir);
+    }
+
+    void il2cpp_set_commandline_arguments(int argc, const char* const argv[], const char* basedir)
+    {
+        vm::Settings::set_command_line_arguments(argc, (const char**)argv);
+    }
+
+    void il2cpp_set_commandline_arguments_utf16(int argc, const Il2CppChar* const argv[], const char* basedir)
+    {
+        vm::Settings::set_command_line_arguments_utf16(argc, (const Il2CppChar**)argv);
     }
 
     // -- internal calls -------------------------------------------------------
 
     void il2cpp_add_internal_call(const char* name, Il2CppMethodPointer method)
     {
-        // TODO: leanclr's InternalCalls::register_internal_call also requires an invoker
+        vm::InternalCalls::register_il2cpp_internal_call(name, method);
     }
 
     Il2CppMethodPointer il2cpp_resolve_icall(const char* name)
     {
-        auto* reg = vm::InternalCalls::get_internal_call(name);
-        return reg ? reinterpret_cast<Il2CppMethodPointer>(reg->func) : nullptr;
+        return vm::InternalCalls::get_il2cpp_internal_call(name);
     }
 
     // -- memory ---------------------------------------------------------------
 
     void* il2cpp_alloc(size_t size)
     {
-        return std::malloc(size);
+        return alloc::GeneralAllocation::malloc(size);
     }
 
     void il2cpp_free(void* ptr)
     {
-        std::free(ptr);
+        alloc::GeneralAllocation::free(ptr);
     }
 
     // -- array ----------------------------------------------------------------

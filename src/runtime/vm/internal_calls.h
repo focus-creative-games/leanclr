@@ -17,6 +17,7 @@ namespace vm
 
 using InternalCallFunction = metadata::RtManagedMethodPointer;
 using InternalCallInvoker = metadata::RtInvokeMethodPointer;
+using Il2CppMethodPointer = metadata::RtManagedMethodPointer;
 
 // Registry struct for internal call functions
 struct InternalCallRegistry
@@ -43,6 +44,9 @@ class InternalCalls
   public:
     // Initialize internal calls
     static void initialize();
+
+    static void register_il2cpp_internal_call(const char* name, Il2CppMethodPointer func);
+    static Il2CppMethodPointer get_il2cpp_internal_call(const char* name);
 
     // Register/get internal call functions
     static void register_internal_call(const char* name, InternalCallFunction func, InternalCallInvoker invoker);

@@ -13,10 +13,26 @@ namespace vm
 {
 
 // Static maps for internal call functions
+static utils::HashMap<const char*, Il2CppMethodPointer, utils::CStrHasher, utils::CStrCompare> g_il2cppInternalCallMap;
 static utils::HashMap<const char*, InternalCallRegistry, utils::CStrHasher, utils::CStrCompare> g_pinvoke_map;
 static utils::HashMap<const char*, InternalCallInvoker, utils::CStrHasher, utils::CStrCompare> g_newobjInternalCallMap;
 static utils::Vector<InternalCallInvoker> g_internalCallInvokerIdList;
 static utils::HashMap<InternalCallInvoker, uint16_t> g_internalCallInvokerIdMap;
+
+void InternalCalls::register_il2cpp_internal_call(const char* name, Il2CppMethodPointer func)
+{
+    assert(g_il2cppInternalCallMap.find(name) == g_il2cppInternalCallMap.end() && "IL2CPP internal call already registered");
+    g_il2cppInternalCallMap[name] = func;
+}
+
+// Get IL2CPP internal call by name
+Il2CppMethodPointer InternalCalls::get_il2cpp_internal_call(const char* name)
+{
+    auto it = g_il2cppInternalCallMap.find(name);
+    if (it != g_il2cppInternalCallMap.end())
+        return it->second;
+    return nullptr;
+}
 
 // Register an internal call function by name
 void InternalCalls::register_internal_call(const char* name, InternalCallFunction func, InternalCallInvoker invoker)
