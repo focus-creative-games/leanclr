@@ -28,7 +28,7 @@ RtResult<const RtMethodInfo*> GenericMethod::get_method(const RtMethodInfo* meth
     assert(classInst != nullptr || methodInst != nullptr);
 
     bool need_inflate = false;
-    RtClass* parent = methodDef->parent;
+    const RtClass* parent = methodDef->parent;
     RtGenericInst* class_inst_mut = const_cast<RtGenericInst*>(classInst);
 
     // Check if class needs inflation
@@ -100,7 +100,7 @@ RtResult<const RtMethodInfo*> GenericMethod::get_method_from_pooled_generic_meth
     const RtGenericContext& generic_context = genericMethod->generic_context;
 
     // Determine parent class (inflated if needed)
-    RtClass* parent_klass = nullptr;
+    const RtClass* parent_klass = nullptr;
     if (generic_context.class_inst == nullptr)
     {
         parent_klass = base_method->parent;

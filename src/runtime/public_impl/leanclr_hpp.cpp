@@ -126,110 +126,110 @@ RtResult<metadata::RtClass*> RuntimeApi::get_class_by_name(metadata::RtModuleDef
     return mod->get_class_by_name(full_name, ignore_case, false);
 }
 
-metadata::RtModuleDef* RuntimeApi::get_class_module(metadata::RtClass* klass)
+metadata::RtModuleDef* RuntimeApi::get_class_module(const metadata::RtClass* klass)
 {
     return klass->image;
 }
 
-const char* RuntimeApi::get_class_namespace(metadata::RtClass* klass)
+const char* RuntimeApi::get_class_namespace(const metadata::RtClass* klass)
 {
     return klass->namespaze;
 }
 
-const char* RuntimeApi::get_class_name(metadata::RtClass* klass)
+const char* RuntimeApi::get_class_name(const metadata::RtClass* klass)
 {
     return klass->name;
 }
 
-const metadata::RtTypeSig* RuntimeApi::get_class_byval_typesig(metadata::RtClass* klass)
+const metadata::RtTypeSig* RuntimeApi::get_class_byval_typesig(const metadata::RtClass* klass)
 {
     return klass->by_val;
 }
 
-const metadata::RtTypeSig* RuntimeApi::get_class_byref_typesig(metadata::RtClass* klass)
+const metadata::RtTypeSig* RuntimeApi::get_class_byref_typesig(const metadata::RtClass* klass)
 {
     return klass->by_ref;
 }
 
-metadata::RtClass* RuntimeApi::get_class_parent(metadata::RtClass* klass)
+metadata::RtClass* RuntimeApi::get_class_parent(const metadata::RtClass* klass)
 {
-    return klass->parent;
+    return const_cast<metadata::RtClass*>(klass->parent);
 }
 
-RtResultVoid RuntimeApi::get_class_interfaces(metadata::RtClass* klass, const metadata::RtClass**& interfaces, size_t& count)
+RtResultVoid RuntimeApi::get_class_interfaces(const metadata::RtClass* klass, const metadata::RtClass**& interfaces, size_t& count)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_interfaces(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_interfaces(const_cast<metadata::RtClass*>(klass)));
     count = klass->interface_count;
     interfaces = (const metadata::RtClass**)klass->interfaces;
     RET_VOID_OK();
 }
 
-metadata::RtClass* RuntimeApi::get_class_enclosing_class(metadata::RtClass* klass)
+metadata::RtClass* RuntimeApi::get_class_enclosing_class(const metadata::RtClass* klass)
 {
-    return klass->declaring_class;
+    return const_cast<metadata::RtClass*>(klass->declaring_class);
 }
 
-RtResultVoid RuntimeApi::get_class_nested_classes(metadata::RtClass* klass, const metadata::RtClass**& nested_classes, size_t& count)
+RtResultVoid RuntimeApi::get_class_nested_classes(const metadata::RtClass* klass, const metadata::RtClass**& nested_classes, size_t& count)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_nested_classes(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_nested_classes(const_cast<metadata::RtClass*>(klass)));
     count = klass->nested_class_count;
     nested_classes = (const metadata::RtClass**)klass->nested_classes;
     RET_VOID_OK();
 }
 
-RtResultVoid RuntimeApi::get_class_methods(metadata::RtClass* klass, const metadata::RtMethodInfo**& methods, size_t& count)
+RtResultVoid RuntimeApi::get_class_methods(const metadata::RtClass* klass, const metadata::RtMethodInfo**& methods, size_t& count)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_methods(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_methods(const_cast<metadata::RtClass*>(klass)));
     count = klass->method_count;
     methods = (const metadata::RtMethodInfo**)klass->methods;
     RET_VOID_OK();
 }
 
-RtResult<const metadata::RtMethodInfo*> RuntimeApi::get_class_method_by_name(metadata::RtClass* klass, const char* method_name)
+RtResult<const metadata::RtMethodInfo*> RuntimeApi::get_class_method_by_name(const metadata::RtClass* klass, const char* method_name)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_methods(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_methods(const_cast<metadata::RtClass*>(klass)));
     RET_OK(vm::Class::get_method_for_name(klass, method_name, false));
 }
 
-RtResultVoid RuntimeApi::get_class_field(metadata::RtClass* klass, const metadata::RtFieldInfo*& fields, size_t& count)
+RtResultVoid RuntimeApi::get_class_field(const metadata::RtClass* klass, const metadata::RtFieldInfo*& fields, size_t& count)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_fields(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_fields(const_cast<metadata::RtClass*>(klass)));
     count = klass->field_count;
     fields = klass->fields;
     RET_VOID_OK();
 }
 
-RtResult<const metadata::RtFieldInfo*> RuntimeApi::get_class_field_by_name(metadata::RtClass* klass, const char* field_name)
+RtResult<const metadata::RtFieldInfo*> RuntimeApi::get_class_field_by_name(const metadata::RtClass* klass, const char* field_name)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_fields(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_fields(const_cast<metadata::RtClass*>(klass)));
     RET_OK(vm::Class::get_field_for_name(klass, field_name, false));
 }
 
-RtResultVoid RuntimeApi::get_class_properties(metadata::RtClass* klass, const metadata::RtPropertyInfo*& properties, size_t& count)
+RtResultVoid RuntimeApi::get_class_properties(const metadata::RtClass* klass, const metadata::RtPropertyInfo*& properties, size_t& count)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_properties(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_properties(const_cast<metadata::RtClass*>(klass)));
     count = klass->property_count;
     properties = klass->properties;
     RET_VOID_OK();
 }
 
-RtResult<const metadata::RtPropertyInfo*> RuntimeApi::get_class_property_by_name(metadata::RtClass* klass, const char* property_name)
+RtResult<const metadata::RtPropertyInfo*> RuntimeApi::get_class_property_by_name(const metadata::RtClass* klass, const char* property_name)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_properties(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_properties(const_cast<metadata::RtClass*>(klass)));
     RET_OK(vm::Class::get_property_for_name(klass, property_name, false));
 }
 
-RtResultVoid RuntimeApi::get_class_events(metadata::RtClass* klass, const metadata::RtEventInfo*& events, size_t& count)
+RtResultVoid RuntimeApi::get_class_events(const metadata::RtClass* klass, const metadata::RtEventInfo*& events, size_t& count)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_events(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_events(const_cast<metadata::RtClass*>(klass)));
     count = klass->event_count;
     events = klass->events;
     RET_VOID_OK();
 }
 
-RtResult<const metadata::RtEventInfo*> RuntimeApi::get_class_event_by_name(metadata::RtClass* klass, const char* event_name)
+RtResult<const metadata::RtEventInfo*> RuntimeApi::get_class_event_by_name(const metadata::RtClass* klass, const char* event_name)
 {
-    RET_ERR_ON_FAIL(vm::Class::initialize_events(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_events(const_cast<metadata::RtClass*>(klass)));
     RET_OK(vm::Class::get_event_for_name(klass, event_name, false));
 }
 } // namespace leanclr

@@ -36,7 +36,7 @@ static RtResult<RtClass*> get_class_from_pooled_generic_class(const RtGenericCla
 {
     if (genericClass->cache_klass)
     {
-        RET_OK(genericClass->cache_klass);
+        RET_OK(const_cast<RtClass*>(genericClass->cache_klass));
     }
 
     RtClass* new_class = MetadataAllocation::malloc_any_zeroed<RtClass>();
@@ -149,12 +149,12 @@ RtResultVoid GenericClass::setup_interfaces(RtClass* klass)
     if (base_generic_class->interfaces)
     {
         size_t interface_count = base_generic_class->interface_count;
-        RtClass** interfaces = pool.calloc_any<RtClass*>(interface_count);
+        const RtClass** interfaces = pool.calloc_any<const RtClass*>(interface_count);
 
         RtGenericContext generic_context{generic_class->class_inst, nullptr};
         for (size_t i = 0; i < interface_count; ++i)
         {
-            RtClass* base_interface = base_generic_class->interfaces[i];
+            const RtClass* base_interface = base_generic_class->interfaces[i];
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, interface_type_sig,
                                                     GenericMetadata::inflate_typesig(base_interface->by_val, &generic_context));
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, inflated_interface, Class::get_class_from_typesig(interface_type_sig));

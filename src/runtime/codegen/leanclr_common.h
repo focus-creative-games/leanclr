@@ -291,7 +291,7 @@ inline int32_t get_array_length(const vm::RtArray* array)
 
 inline metadata::RtClass* get_array_element_class(const vm::RtArray* array)
 {
-    return vm::Array::get_array_element_class(array);
+    return const_cast<metadata::RtClass*>(vm::Array::get_array_element_class(array));
 }
 
 inline bool is_array_index_out_of_range(const vm::RtArray* array, int32_t index)

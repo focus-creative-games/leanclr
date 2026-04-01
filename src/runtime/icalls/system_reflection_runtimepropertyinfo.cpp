@@ -27,13 +27,13 @@ enum class PInfo : int32_t
 RtResult<vm::RtReflectionProperty*> SystemReflectionRuntimePropertyInfo::internal_from_handle_type(metadata::RtPropertyInfo* property,
                                                                                                    const metadata::RtTypeSig* type_sig)
 {
-    metadata::RtClass* property_parent = property->parent;
+    const metadata::RtClass* property_parent = property->parent;
     if (type_sig == nullptr)
     {
         return vm::Reflection::get_property_reflection_object(property, property_parent);
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, cur_klass, vm::Class::get_class_from_typesig(type_sig));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtClass*, cur_klass, vm::Class::get_class_from_typesig(type_sig));
     while (cur_klass != nullptr)
     {
         if (cur_klass == property_parent)
@@ -51,7 +51,7 @@ RtResultVoid SystemReflectionRuntimePropertyInfo::get_property_info(vm::RtReflec
     {
         result_info->attrs = property->property->flags;
     }
-    metadata::RtClass* reflected_klass = property->klass;
+    const metadata::RtClass* reflected_klass = property->klass;
     const metadata::RtPropertyInfo* prop = property->property;
 
     if (pinfo & static_cast<int32_t>(PInfo::GetMethod))

@@ -105,28 +105,28 @@ class RuntimeApi
     static RtResultVoid get_classes(metadata::RtModuleDef* mod, bool export_only, utils::Vector<metadata::RtClass*>& classes);
     static RtResult<metadata::RtClass*> get_class_by_name(metadata::RtModuleDef* ass, const char* full_name, bool ignore_case);
 
-    static metadata::RtModuleDef* get_class_module(metadata::RtClass* klass);
-    static const char* get_class_namespace(metadata::RtClass* klass);
-    static const char* get_class_name(metadata::RtClass* klass);
-    static const metadata::RtTypeSig* get_class_byval_typesig(metadata::RtClass* klass);
-    static const metadata::RtTypeSig* get_class_byref_typesig(metadata::RtClass* klass);
-    static metadata::RtClass* get_class_parent(metadata::RtClass* klass);
-    static RtResultVoid get_class_interfaces(metadata::RtClass* klass, const metadata::RtClass**& interfaces, size_t& count);
+    static metadata::RtModuleDef* get_class_module(const metadata::RtClass* klass);
+    static const char* get_class_namespace(const metadata::RtClass* klass);
+    static const char* get_class_name(const metadata::RtClass* klass);
+    static const metadata::RtTypeSig* get_class_byval_typesig(const metadata::RtClass* klass);
+    static const metadata::RtTypeSig* get_class_byref_typesig(const metadata::RtClass* klass);
+    static metadata::RtClass* get_class_parent(const metadata::RtClass* klass);
+    static RtResultVoid get_class_interfaces(const metadata::RtClass* klass, const metadata::RtClass**& interfaces, size_t& count);
 
-    static metadata::RtClass* get_class_enclosing_class(metadata::RtClass* klass);
-    static RtResultVoid get_class_nested_classes(metadata::RtClass* klass, const metadata::RtClass**& nested_classes, size_t& count);
+    static metadata::RtClass* get_class_enclosing_class(const metadata::RtClass* klass);
+    static RtResultVoid get_class_nested_classes(const metadata::RtClass* klass, const metadata::RtClass**& nested_classes, size_t& count);
 
-    static RtResultVoid get_class_methods(metadata::RtClass* klass, const metadata::RtMethodInfo**& methods, size_t& count);
-    static RtResult<const metadata::RtMethodInfo*> get_class_method_by_name(metadata::RtClass* klass, const char* method_name);
+    static RtResultVoid get_class_methods(const metadata::RtClass* klass, const metadata::RtMethodInfo**& methods, size_t& count);
+    static RtResult<const metadata::RtMethodInfo*> get_class_method_by_name(const metadata::RtClass* klass, const char* method_name);
 
-    static RtResultVoid get_class_field(metadata::RtClass* klass, const metadata::RtFieldInfo*& fields, size_t& count);
-    static RtResult<const metadata::RtFieldInfo*> get_class_field_by_name(metadata::RtClass* klass, const char* field_name);
+    static RtResultVoid get_class_field(const metadata::RtClass* klass, const metadata::RtFieldInfo*& fields, size_t& count);
+    static RtResult<const metadata::RtFieldInfo*> get_class_field_by_name(const metadata::RtClass* klass, const char* field_name);
 
-    static RtResultVoid get_class_properties(metadata::RtClass* klass, const metadata::RtPropertyInfo*& properties, size_t& count);
-    static RtResult<const metadata::RtPropertyInfo*> get_class_property_by_name(metadata::RtClass* klass, const char* property_name);
+    static RtResultVoid get_class_properties(const metadata::RtClass* klass, const metadata::RtPropertyInfo*& properties, size_t& count);
+    static RtResult<const metadata::RtPropertyInfo*> get_class_property_by_name(const metadata::RtClass* klass, const char* property_name);
 
-    static RtResultVoid get_class_events(metadata::RtClass* klass, const metadata::RtEventInfo*& events, size_t& count);
-    static RtResult<const metadata::RtEventInfo*> get_class_event_by_name(metadata::RtClass* klass, const char* event_name);
+    static RtResultVoid get_class_events(const metadata::RtClass* klass, const metadata::RtEventInfo*& events, size_t& count);
+    static RtResult<const metadata::RtEventInfo*> get_class_event_by_name(const metadata::RtClass* klass, const char* event_name);
 };
 
 #define DECLARING_ALLOC_METHOD_ARGUMENT_BUFFER(arg_buff_name, offset, method)                                                         \

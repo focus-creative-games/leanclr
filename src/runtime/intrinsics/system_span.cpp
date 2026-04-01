@@ -29,7 +29,7 @@ static RtResultVoid get_item_invoker(metadata::RtManagedMethodPointer methodPtr,
     const vm::RtReadOnlySpan<uint8_t>& span = *interp::EvalStackOp::get_param<const vm::RtReadOnlySpan<uint8_t>*>(params, 0);
     int32_t index = interp::EvalStackOp::get_param<int32_t>(params, 1);
 
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
     const metadata::RtGenericClass* generic_class = klass->by_val->data.generic_class;
     const metadata::RtTypeSig* ele_type = *generic_class->class_inst->generic_args;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(interp::ReduceTypeAndSize, type_and_size, interp::InterpDefs::get_reduce_type_and_size_by_typesig(ele_type));

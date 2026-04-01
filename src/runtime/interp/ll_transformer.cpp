@@ -402,7 +402,7 @@ RtResultVoid Transformer::transform_cmp_op(GeneralInst* ll_inst, const hl::Gener
 RtResult<bool> Transformer::transform_special_call_methods(GeneralInst* ll_inst, const hl::GeneralInst* hl_inst)
 {
     const metadata::RtMethodInfo* method = hl_inst->get_method();
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
 
     if (!klass->image->is_corlib())
     {
@@ -533,7 +533,7 @@ RtResult<bool> Transformer::transform_special_newobj_methods(GeneralInst* ll_ins
 {
     ll_inst->set_opcode(OpCodeEnum::Illegal);
     const metadata::RtMethodInfo* method = hl_inst->get_method();
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
     if (!klass->image->is_corlib())
     {
         RET_OK(false);

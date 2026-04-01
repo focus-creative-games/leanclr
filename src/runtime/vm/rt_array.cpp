@@ -17,7 +17,7 @@ const int32_t MAX_ARRAY_INDEX = INT32_MAX;
 const int32_t MAX_ARRAY_RANK = 32;
 
 // Helper: Calculate total byte size for array including elements
-static size_t get_array_total_byte_size(metadata::RtClass* klass, int32_t length)
+static size_t get_array_total_byte_size(const metadata::RtClass* klass, int32_t length)
 {
     assert(klass && klass->element_class);
     size_t element_size = Class::get_stack_location_size(klass->element_class);
@@ -26,16 +26,16 @@ static size_t get_array_total_byte_size(metadata::RtClass* klass, int32_t length
 
 // Array creation methods
 
-RtResult<RtArray*> Array::new_empty_szarray_by_ele_klass(metadata::RtClass* ele_class)
+RtResult<RtArray*> Array::new_empty_szarray_by_ele_klass(const metadata::RtClass* ele_class)
 {
     return new_szarray_from_ele_klass(ele_class, 0);
 }
 
-RtResult<RtArray*> Array::new_szarray_from_array_klass(metadata::RtClass* klass, int32_t length)
+RtResult<RtArray*> Array::new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length)
 {
     assert(klass);
 
-    RET_ERR_ON_FAIL(Class::initialize_all(klass));
+    RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
 
     size_t arr_length = get_array_total_byte_size(klass, length);
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length));
@@ -49,7 +49,7 @@ RtResult<RtArray*> Array::new_szarray_from_array_klass(metadata::RtClass* klass,
     RET_OK(arr_obj);
 }
 
-RtResult<RtArray*> Array::new_szarray_from_ele_klass(metadata::RtClass* ele_class, int32_t length)
+RtResult<RtArray*> Array::new_szarray_from_ele_klass(const metadata::RtClass* ele_class, int32_t length)
 {
     assert(ele_class);
     if (length < 0)
@@ -72,14 +72,14 @@ RtResult<RtArray*> Array::new_szarray_from_ele_klass(metadata::RtClass* ele_clas
     RET_OK(arr_obj);
 }
 
-RtResult<RtArray*> Array::new_mdarray_from_array_klass(metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds)
+RtResult<RtArray*> Array::new_mdarray_from_array_klass(const metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds)
 {
     assert(arr_klass && lengths);
 
     // Verify it's an array type
     assert(arr_klass->by_val->ele_type == metadata::RtElementType::Array);
 
-    RET_ERR_ON_FAIL(Class::initialize_all(arr_klass));
+    RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(arr_klass)));
 
     const metadata::RtArrayType* arr_type = arr_klass->by_val->data.array_type;
     uint8_t rank = arr_type->rank;
@@ -98,7 +98,7 @@ RtResult<RtArray*> Array::new_mdarray_from_array_klass(metadata::RtClass* arr_kl
     }
 
     // Calculate data size
-    metadata::RtClass* ele_klass = arr_klass->element_class;
+    const metadata::RtClass* ele_klass = arr_klass->element_class;
     int32_t ele_size = static_cast<int32_t>(Class::get_stack_location_size(ele_klass));
 
     if (ele_size > MAX_ARRAY_INDEX / total_length)
@@ -129,7 +129,7 @@ RtResult<RtArray*> Array::new_mdarray_from_array_klass(metadata::RtClass* arr_kl
     RET_OK(arr_obj);
 }
 
-RtResult<RtArray*> Array::new_mdarray_from_ele_klass(metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds)
+RtResult<RtArray*> Array::new_mdarray_from_ele_klass(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds)
 {
     assert(ele_klass && lengths);
     if (rank < 1 || rank > MAX_ARRAY_RANK)
@@ -153,11 +153,11 @@ size_t Array::get_array_byte_length(const RtArray* array)
 size_t Array::get_array_element_size(const RtArray* array)
 {
     assert(array);
-    metadata::RtClass* ele_class = get_array_element_class(array);
+    const metadata::RtClass* ele_class = get_array_element_class(array);
     return Class::get_stack_location_size(ele_class);
 }
 
-size_t Array::get_array_element_size_by_klass(metadata::RtClass* array_klass)
+size_t Array::get_array_element_size_by_klass(const metadata::RtClass* array_klass)
 {
     assert(array_klass && array_klass->element_class);
     return Class::get_stack_location_size(array_klass->element_class);
@@ -198,7 +198,7 @@ RtResult<int32_t> Array::get_array_length_at_dimension(const RtArray* array, siz
 {
     assert(array);
 
-    metadata::RtClass* klass = array->klass;
+    const metadata::RtClass* klass = array->klass;
     const metadata::RtTypeSig* type_sig = klass->by_val;
 
     switch (type_sig->ele_type)
@@ -230,7 +230,7 @@ RtResult<int32_t> Array::get_array_lower_bound_at_dimension(const RtArray* array
 {
     assert(array);
 
-    metadata::RtClass* klass = array->klass;
+    const metadata::RtClass* klass = array->klass;
     const metadata::RtTypeSig* type_sig = klass->by_val;
 
     switch (type_sig->ele_type)
@@ -262,11 +262,11 @@ RtResult<int32_t> Array::get_global_index_from_indices(const RtArray* arr, RtArr
 {
     assert(arr && indices);
 
-    metadata::RtClass* indice_klass = indices->klass;
+    const metadata::RtClass* indice_klass = indices->klass;
     assert(indice_klass->by_val->ele_type == metadata::RtElementType::SZArray);
 
     int32_t indice_length = get_array_length(indices);
-    metadata::RtClass* klass = arr->klass;
+    const metadata::RtClass* klass = arr->klass;
     const metadata::RtTypeSig* type_sig = klass->by_val;
 
     int32_t index = 0;
@@ -320,7 +320,7 @@ RtResult<int32_t> Array::get_mdarray_global_index_from_indices2(const RtArray* a
 {
     assert(arr && indices);
 
-    metadata::RtClass* klass = arr->klass;
+    const metadata::RtClass* klass = arr->klass;
     const metadata::RtTypeSig* type_sig = klass->by_val;
 
     assert(type_sig->ele_type == metadata::RtElementType::Array);
@@ -352,7 +352,7 @@ RtResult<int32_t> Array::get_mdarray_global_index_from_indices3(const RtArray* a
 {
     assert(arr && indices);
 
-    metadata::RtClass* klass = arr->klass;
+    const metadata::RtClass* klass = arr->klass;
     const metadata::RtTypeSig* type_sig = klass->by_val;
 
     assert(type_sig->ele_type == metadata::RtElementType::Array);
@@ -405,7 +405,7 @@ RtResultVoid Array::szarray_get_invoker(metadata::RtManagedMethodPointer method_
     RtArray* arr = interp::EvalStackOp::get_param<RtArray*>(params, 0);
     int32_t index = interp::EvalStackOp::get_param<int32_t>(params, 1);
     const void* data_ptr = get_array_element_address_as_ptr_void(arr, index);
-    metadata::RtClass* ele_class = get_array_element_class(arr);
+    const metadata::RtClass* ele_class = get_array_element_class(arr);
 
     Object::extends_to_eval_stack(data_ptr, ret, ele_class);
 
@@ -494,7 +494,7 @@ RtResultVoid Array::mdarray_get_invoker(metadata::RtManagedMethodPointer method_
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, index, get_mdarray_global_index_from_indices2(arr, params + 1));
 
     const void* data_ptr = get_array_element_address_as_ptr_void(arr, index);
-    metadata::RtClass* ele_class = get_array_element_class(arr);
+    const metadata::RtClass* ele_class = get_array_element_class(arr);
 
     Object::extends_to_eval_stack(data_ptr, ret, ele_class);
 

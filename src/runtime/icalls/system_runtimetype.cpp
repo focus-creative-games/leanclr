@@ -183,7 +183,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> SystemRuntimeType::get_m
     bool case_insensitive = (bind_flags & BINDING_FLAGS_IGNORE_CASE) != 0 || list_type == MEMBER_LIST_TYPE_CASE_INSENSITIVE;
 
     // Traverse class hierarchy
-    metadata::RtClass* current_klass = klass;
+    const metadata::RtClass* current_klass = klass;
     while (current_klass != nullptr)
     {
         for (uint32_t i = 0; i < current_klass->method_count; ++i)
@@ -267,7 +267,7 @@ SystemRuntimeType::get_properties_by_name_native(vm::RtReflectionRuntimeType* ru
     properties.reserve(klass->property_count);
     bool case_insensitive = (bind_flags & BINDING_FLAGS_IGNORE_CASE) != 0 || list_type == MEMBER_LIST_TYPE_CASE_INSENSITIVE;
 
-    metadata::RtClass* current_klass = klass;
+    const metadata::RtClass* current_klass = klass;
     while (current_klass != nullptr)
     {
         for (uint32_t i = 0; i < current_klass->property_count; ++i)
@@ -397,7 +397,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtEventInfo>*> SystemRuntimeType::get_ev
     bool case_insensitive = list_type == MEMBER_LIST_TYPE_CASE_INSENSITIVE;
 
     // For events, we typically search the entire hierarchy
-    metadata::RtClass* current_klass = klass;
+    const metadata::RtClass* current_klass = klass;
     while (current_klass != nullptr)
     {
         for (uint32_t i = 0; i < current_klass->event_count; ++i)
@@ -443,7 +443,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtFieldInfo>*> SystemRuntimeType::get_fi
     fields.reserve(klass->field_count);
     bool case_insensitive = (bind_flags & BINDING_FLAGS_IGNORE_CASE) != 0 || list_type == MEMBER_LIST_TYPE_CASE_INSENSITIVE;
 
-    metadata::RtClass* current_klass = klass;
+    const metadata::RtClass* current_klass = klass;
     while (current_klass != nullptr)
     {
         for (uint32_t i = 0; i < current_klass->field_count; ++i)
@@ -834,7 +834,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtClass>*> SystemRuntimeType::get_nested
 
     for (uint32_t i = 0; i < klass->nested_class_count; ++i)
     {
-        metadata::RtClass* nested_klass = klass->nested_classes[i];
+        const metadata::RtClass* nested_klass = klass->nested_classes[i];
 
         // Check name match
         if (!matches_member_name(nested_klass->name, name, case_insensitive))
@@ -886,7 +886,7 @@ RtResult<vm::RtArray*> SystemRuntimeType::get_interfaces(vm::RtReflectionRuntime
     // Fill array with interface type references
     for (uint32_t i = 0; i < klass->interface_count; ++i)
     {
-        metadata::RtClass* interface_klass = klass->interfaces[i];
+        const metadata::RtClass* interface_klass = klass->interfaces[i];
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, interface_reflection, vm::Reflection::get_klass_reflection_object(interface_klass));
         vm::Array::set_array_data_at<vm::RtReflectionType*>(interface_array, i, interface_reflection);
     }

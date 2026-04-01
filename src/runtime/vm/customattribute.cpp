@@ -728,8 +728,8 @@ static RtResult<bool> is_type_match_for_custom_attribute_elem(metadata::RtElemen
 RtResult<RtObject*> CustomAttribute::read_custom_attribute(metadata::RtModuleDef* mod, const metadata::RtCustomAttributeRawData* data)
 {
     const metadata::RtMethodInfo* ctor_method = data->ctor;
-    metadata::RtClass* klass = ctor_method->parent;
-    RET_ERR_ON_FAIL(Class::initialize_all(klass));
+    const metadata::RtClass* klass = ctor_method->parent;
+    RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
 
     const CorLibTypes& types = Class::get_corlib_types();
     if (!Class::has_class_parent_fast(klass, types.cls_attribute))
@@ -865,7 +865,7 @@ RtResultVoid CustomAttribute::resolve_customattribute_data_arguments(utils::Bina
                                                                      const metadata::RtMethodInfo* ctor_method, RtArray** typed_arg_arr_ptr,
                                                                      RtArray** named_arg_arr_ptr)
 {
-    metadata::RtClass* klass = ctor_method->parent;
+    const metadata::RtClass* klass = ctor_method->parent;
     uint16_t prolog = 0;
     if (!reader->try_read_u16(prolog))
         RET_ERR(RtErr::BadImageFormat);
@@ -957,12 +957,12 @@ RtResultVoid CustomAttribute::resolve_customattribute_data_arguments(utils::Bina
     RET_VOID_OK();
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_target(metadata::RtModuleDef* mod, uint32_t target_token, metadata::RtClass* attr_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_target(metadata::RtModuleDef* mod, uint32_t target_token, const metadata::RtClass* attr_klass)
 {
     if (target_token == 0)
         RET_OK(false);
 
-    RET_ERR_ON_FAIL(Class::initialize_super_types(attr_klass));
+    RET_ERR_ON_FAIL(Class::initialize_super_types(const_cast<metadata::RtClass*>(attr_klass)));
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(metadata::RtCustomAttributeRidRange, rid_range, mod->get_custom_attribute_rid_range(target_token));
 
@@ -971,8 +971,8 @@ RtResult<bool> CustomAttribute::has_customattribute_on_target(metadata::RtModule
         uint32_t ca_rid = rid_range.start_rid + i;
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtCustomAttributeRawData, raw_data, mod->get_custom_attribute_raw_data(ca_rid));
 
-        metadata::RtClass* data_klass = raw_data.ctor->parent;
-        RET_ERR_ON_FAIL(Class::initialize_super_types(data_klass));
+        const metadata::RtClass* data_klass = raw_data.ctor->parent;
+        RET_ERR_ON_FAIL(Class::initialize_super_types(const_cast<metadata::RtClass*>(data_klass)));
 
         if (Class::has_class_parent_fast(data_klass, attr_klass))
             RET_OK(true);
@@ -981,37 +981,37 @@ RtResult<bool> CustomAttribute::has_customattribute_on_target(metadata::RtModule
     RET_OK(false);
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_field(const metadata::RtFieldInfo* field, metadata::RtClass* attr_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_field(const metadata::RtFieldInfo* field, const metadata::RtClass* attr_klass)
 {
     metadata::RtModuleDef* mod = field->parent->image;
     return has_customattribute_on_target(mod, field->token, attr_klass);
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_method(const metadata::RtMethodInfo* method, metadata::RtClass* customattribute_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_method(const metadata::RtMethodInfo* method, const metadata::RtClass* customattribute_klass)
 {
     metadata::RtModuleDef* mod = method->parent->image;
     return has_customattribute_on_target(mod, method->token, customattribute_klass);
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_class(metadata::RtClass* klass, metadata::RtClass* customattribute_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_class(const metadata::RtClass* klass, const metadata::RtClass* customattribute_klass)
 {
     metadata::RtModuleDef* mod = klass->image;
     return has_customattribute_on_target(mod, klass->token, customattribute_klass);
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_property(const metadata::RtPropertyInfo* property, metadata::RtClass* customattribute_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_property(const metadata::RtPropertyInfo* property, const metadata::RtClass* customattribute_klass)
 {
     metadata::RtModuleDef* mod = property->parent->image;
     return has_customattribute_on_target(mod, property->token, customattribute_klass);
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_event(const metadata::RtEventInfo* event, metadata::RtClass* customattribute_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_event(const metadata::RtEventInfo* event, const metadata::RtClass* customattribute_klass)
 {
     metadata::RtModuleDef* mod = event->parent->image;
     return has_customattribute_on_target(mod, event->token, customattribute_klass);
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_parameter(RtReflectionParameter* parameter, metadata::RtClass* customattribute_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_parameter(RtReflectionParameter* parameter, const metadata::RtClass* customattribute_klass)
 {
     auto ref_method = reinterpret_cast<RtReflectionMethod*>(parameter->member);
     const metadata::RtMethodInfo* method = ref_method->method;
@@ -1024,7 +1024,7 @@ RtResult<bool> CustomAttribute::has_customattribute_on_parameter(RtReflectionPar
     return has_customattribute_on_target(mod, param_token, customattribute_klass);
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_assembly(metadata::RtModuleDef* mod, metadata::RtClass* customattribute_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_assembly(metadata::RtModuleDef* mod, const metadata::RtClass* customattribute_klass)
 {
     uint32_t ass_token = mod->get_assembly_token();
     return has_customattribute_on_target(mod, ass_token, customattribute_klass);
@@ -1036,7 +1036,7 @@ static RtResult<CustomAttributeProvider> get_token_of_customattribute_provider(R
         RET_ERR(RtErr::NullReference);
 
     const CorLibTypes& corlib_types = Class::get_corlib_types();
-    metadata::RtClass* obj_klass = obj->klass;
+    const metadata::RtClass* obj_klass = obj->klass;
 
     CustomAttributeProvider provider{};
 
@@ -1110,13 +1110,13 @@ static RtResult<CustomAttributeProvider> get_token_of_customattribute_provider(R
     RET_OK(provider);
 }
 
-RtResult<bool> CustomAttribute::has_attribute(RtObject* obj, metadata::RtClass* attr_klass)
+RtResult<bool> CustomAttribute::has_attribute(RtObject* obj, const  metadata::RtClass* attr_klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(CustomAttributeProvider, provider, get_token_of_customattribute_provider(obj));
     return has_customattribute_on_target(provider.mod, provider.token, attr_klass);
 }
 
-RtResult<RtArray*> CustomAttribute::get_customattribute_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token, metadata::RtClass* attr_klass)
+RtResult<RtArray*> CustomAttribute::get_customattribute_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token, const metadata::RtClass* attr_klass)
 {
     const CorLibTypes& types = Class::get_corlib_types();
 
@@ -1127,7 +1127,7 @@ RtResult<RtArray*> CustomAttribute::get_customattribute_on_target_token(metadata
 
     if (attr_klass)
     {
-        RET_ERR_ON_FAIL(Class::initialize_super_types(attr_klass));
+        RET_ERR_ON_FAIL(Class::initialize_super_types(const_cast<metadata::RtClass*>(attr_klass)));
     }
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(metadata::RtCustomAttributeRidRange, rid_range, mod->get_custom_attribute_rid_range(target_token));
@@ -1160,7 +1160,7 @@ RtResult<RtArray*> CustomAttribute::get_customattribute_on_target_token(metadata
     return ca_arr;
 }
 
-RtResult<RtArray*> CustomAttribute::get_customattributes_on_target_object(RtObject* obj, metadata::RtClass* attr_klass)
+RtResult<RtArray*> CustomAttribute::get_customattributes_on_target_object(RtObject* obj, const metadata::RtClass* attr_klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(CustomAttributeProvider, provider, get_token_of_customattribute_provider(obj));
     return get_customattribute_on_target_token(provider.mod, provider.token, attr_klass);

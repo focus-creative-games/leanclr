@@ -22,21 +22,21 @@ class Method
     static uint32_t get_method_def_gid(const metadata::RtMethodInfo* method);
 
     // VTable helpers
-    static const metadata::RtVirtualInvokeData* get_vtable_method_invoke_data(metadata::RtClass* klass, size_t method_index);
-    static metadata::RtManagedMethodPointer get_vtable_method_ptr(metadata::RtClass* klass, size_t method_index);
-    static const metadata::RtMethodInfo* get_vtable_method(metadata::RtClass* klass, size_t method_index);
-    static RtResult<const metadata::RtVirtualInvokeData*> get_interface_method_invoke_data(metadata::RtClass* klass, metadata::RtClass* interface_klass,
+    static const metadata::RtVirtualInvokeData* get_vtable_method_invoke_data(const metadata::RtClass* klass, size_t method_index);
+    static metadata::RtManagedMethodPointer get_vtable_method_ptr(const metadata::RtClass* klass, size_t method_index);
+    static const metadata::RtMethodInfo* get_vtable_method(const metadata::RtClass* klass, size_t method_index);
+    static RtResult<const metadata::RtVirtualInvokeData*> get_interface_method_invoke_data(const metadata::RtClass* klass, const metadata::RtClass* interface_klass,
                                                                                            size_t slot);
     static RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl(RtObject* obj, const metadata::RtMethodInfo* virtual_method);
-    static RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl_on_klass(metadata::RtClass* klass, const metadata::RtMethodInfo* virtual_method);
+    static RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl_on_klass(const metadata::RtClass* klass, const metadata::RtMethodInfo* virtual_method);
 
     // Method queries/search
-    static const metadata::RtMethodInfo* find_matched_method_in_class(metadata::RtClass* klass, const metadata::RtMethodInfo* to_match_method);
-    static const metadata::RtMethodInfo* find_matched_method_in_class_by_name_and_signature(metadata::RtClass* klass, const char* name,
+    static const metadata::RtMethodInfo* find_matched_method_in_class(const metadata::RtClass* klass, const metadata::RtMethodInfo* to_match_method);
+    static const metadata::RtMethodInfo* find_matched_method_in_class_by_name_and_signature(const metadata::RtClass* klass, const char* name,
                                                                                             const metadata::RtTypeSig* const* param_type_sigs,
                                                                                             size_t param_count);
-    static const metadata::RtMethodInfo* find_matched_method_in_class_by_name(metadata::RtClass* klass, const char* name);
-    static const metadata::RtMethodInfo* find_matched_method_in_class_by_name_and_param_count(metadata::RtClass* klass, const char* name,
+    static const metadata::RtMethodInfo* find_matched_method_in_class_by_name(const metadata::RtClass* klass, const char* name);
+    static const metadata::RtMethodInfo* find_matched_method_in_class_by_name_and_param_count(const metadata::RtClass* klass, const char* name,
                                                                                               size_t parameter_count);
 
     // Attribute/flag helpers

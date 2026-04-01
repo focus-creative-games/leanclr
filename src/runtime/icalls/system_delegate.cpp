@@ -71,7 +71,7 @@ static RtResultVoid create_delegate_internal_invoker(metadata::RtManagedMethodPo
 RtResult<vm::RtMulticastDelegate*> SystemDelegate::alloc_delegate_like_internal(vm::RtDelegate* source)
 {
     // Get the delegate's class from the object header
-    metadata::RtClass* del_klass = source->klass;
+    const metadata::RtClass* del_klass = source->klass;
 
     // Allocate a new object of the same class
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, new_obj, vm::Object::new_object(del_klass));

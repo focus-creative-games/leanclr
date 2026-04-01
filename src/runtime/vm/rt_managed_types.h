@@ -16,7 +16,7 @@ struct ArrayBounds
 // Managed object header
 struct RtObject
 {
-    metadata::RtClass* klass;
+    const metadata::RtClass* klass;
     void* __sync_block;
 };
 
@@ -62,7 +62,7 @@ using RtReflectionMonoType = RtReflectionRuntimeType;
 struct RtReflectionField
 {
     RtObject header;
-    metadata::RtClass* klass;
+    const metadata::RtClass* klass;
     const metadata::RtFieldInfo* field;
     RtString* name;
     RtReflectionType* type_;
@@ -105,7 +105,7 @@ struct RtMonoPropertyInfo
 // Reflection property
 struct RtReflectionProperty : public RtObject
 {
-    metadata::RtClass* klass;
+    const metadata::RtClass* klass;
     const metadata::RtPropertyInfo* property;
     RtMonoPropertyInfo info;
     uint32_t cached;
@@ -197,7 +197,7 @@ struct RtTypedReference
 {
     const metadata::RtTypeSig* type_handle;
     const void* value;
-    metadata::RtClass* klass;
+    const metadata::RtClass* klass;
 };
 
 // Delegate data

@@ -10,7 +10,7 @@ namespace icalls
 
 RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_handle_type(metadata::RtEventInfo* event, const metadata::RtTypeSig* type_sig)
 {
-    metadata::RtClass* klass;
+    const metadata::RtClass* klass;
     if (!type_sig)
     {
         klass = event->parent;

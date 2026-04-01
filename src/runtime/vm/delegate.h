@@ -12,7 +12,7 @@ class Delegate
     // Static initializer
     static RtResultVoid initialize();
     static RtResultVoid constructor_delegate(RtMulticastDelegate* del, RtObject* target, const metadata::RtMethodInfo* method) noexcept;
-    static RtResult<RtMulticastDelegate*> new_delegate(metadata::RtClass* delelgate_type, RtObject* target, const metadata::RtMethodInfo* method) noexcept;
+    static RtResult<RtMulticastDelegate*> new_delegate(const metadata::RtClass* delelgate_type, RtObject* target, const metadata::RtMethodInfo* method) noexcept;
     // Placeholder delegate invokers (to be implemented)
     static RtResultVoid call_delegate_ctor_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                    const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;

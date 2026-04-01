@@ -69,7 +69,7 @@ static void setup_cast_class(RtClass* klass)
 }
 
 // Common setup for array classes
-static void setup_array_class_common(RtClass* array_class, RtClass* ele_class)
+static void setup_array_class_common(RtClass* array_class, const metadata::RtClass* ele_class)
 {
     const CorLibTypes& corlib = Class::get_corlib_types();
 
@@ -220,7 +220,7 @@ RtResult<RtClass*> ArrayClass::get_array_class_from_element_type(const RtTypeSig
 }
 
 // Get array class from element class
-RtResult<RtClass*> ArrayClass::get_array_class_from_element_klass(RtClass* ele_klass, uint8_t rank)
+RtResult<RtClass*> ArrayClass::get_array_class_from_element_klass(const metadata::RtClass* ele_klass, uint8_t rank)
 {
     if (rank > metadata::RT_MAX_ARRAY_RANK)
         RET_ERR(RtErr::IndexOutOfRange);
@@ -256,7 +256,7 @@ RtResult<RtClass*> ArrayClass::get_szarray_class_from_element_typesig(const RtTy
 }
 
 // Get single-dimensional zero-lower-bound array class from element class
-RtResult<RtClass*> ArrayClass::get_szarray_class_from_element_class(RtClass* ele_class)
+RtResult<RtClass*> ArrayClass::get_szarray_class_from_element_class(const metadata::RtClass* ele_class)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(metadata::RtTypeSigByValRef, types,
                                              MetadataCache::get_pooled_szarray_typesigs_by_element_typesig(ele_class->by_val));
@@ -301,7 +301,7 @@ RtResultVoid ArrayClass::setup_interfaces(RtClass* klass)
     };
 
     size_t interface_count = 5;
-    RtClass** interfaces = klass->image->get_mem_pool().calloc_any<RtClass*>(interface_count);
+    const RtClass** interfaces = klass->image->get_mem_pool().calloc_any<const RtClass*>(interface_count);
     for (size_t i = 0; i < interface_count; ++i)
     {
         uint32_t gid = Class::get_type_def_gid(to_inflate[i]);
@@ -405,7 +405,7 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
     }
 
     // Single-dimensional arrays: extend vtable with collection interfaces
-    metadata::RtClass* parent = klass->parent;
+    const metadata::RtClass* parent = klass->parent;
     size_t total_vtable_count = parent->vtable_count;
 
     // Build interface vtable offsets (parent offsets + new ones)
@@ -416,7 +416,7 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
 
     for (size_t i = 0; i < klass->interface_count; ++i)
     {
-        metadata::RtClass* iface = klass->interfaces[i];
+        const metadata::RtClass* iface = klass->interfaces[i];
         new_offsets.push_back(metadata::RtInterfaceOffset{iface, static_cast<uint16_t>(total_vtable_count)});
         total_vtable_count += iface->vtable_count;
     }
@@ -442,7 +442,7 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
     size_t current_slot = parent->vtable_count;
     for (size_t i = 0; i < klass->interface_count; ++i)
     {
-        metadata::RtClass* iface = klass->interfaces[i];
+        const metadata::RtClass* iface = klass->interfaces[i];
         std::memcpy(new_vtables + current_slot, iface->vtable, iface->vtable_count * sizeof(metadata::RtVirtualInvokeData));
 
         const char* iface_name = iface->name;

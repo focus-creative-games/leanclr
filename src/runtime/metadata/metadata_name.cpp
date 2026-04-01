@@ -10,7 +10,7 @@ namespace metadata
 {
 
 // Helper to append class full name recursively (namespace + name, handling nested types)
-RtResultVoid MetadataName::append_klass_full_name(utils::StringBuilder& sb, RtClass* klass)
+RtResultVoid MetadataName::append_klass_full_name(utils::StringBuilder& sb, const RtClass* klass)
 {
     // Check for enclosing type (nested class)
     if (klass->image)
@@ -188,7 +188,7 @@ RtResultVoid MetadataName::append_type_sig_name(utils::StringBuilder& sb, const 
 
 RtResultVoid MetadataName::append_method_full_name_without_params(utils::StringBuilder& sb, const RtMethodInfo* method)
 {
-    RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
 
     // Append class full name
     RET_ERR_ON_FAIL(append_klass_full_name(sb, klass));

@@ -60,7 +60,7 @@ void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const m
             return nullptr;
         }
         const metadata::RtMethodInfo* methodInfo = ret.unwrap();
-        if (vm::Class::initialize_all(methodInfo->parent).is_err())
+        if (vm::Class::initialize_all(const_cast<metadata::RtClass*>(methodInfo->parent)).is_err())
         {
             assert(false && "Failed to initialize method's declaring class in resolve_metadata_token");
             return nullptr;
@@ -76,7 +76,7 @@ void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const m
             return nullptr;
         }
         const metadata::RtFieldInfo* fieldInfo = ret.unwrap();
-        if (vm::Class::initialize_all(fieldInfo->parent).is_err())
+        if (vm::Class::initialize_all(const_cast<metadata::RtClass*>(fieldInfo->parent)).is_err())
         {
             assert(false && "Failed to initialize field's declaring class in resolve_metadata_token");
             return nullptr;
@@ -103,7 +103,7 @@ void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const m
                 return nullptr;
             }
             auto klass = ret2.unwrap();
-            if (vm::Class::initialize_all(klass).is_err())
+            if (vm::Class::initialize_all(const_cast<metadata::RtClass*>(klass)).is_err())
             {
                 assert(false && "Failed to initialize class in resolve_metadata_token (MemberRef)");
                 return nullptr;
@@ -113,7 +113,7 @@ void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const m
         case metadata::RtRuntimeHandleType::Method:
         {
             const metadata::RtMethodInfo* methodInfo = handle.method;
-            if (vm::Class::initialize_all(methodInfo->parent).is_err())
+            if (vm::Class::initialize_all(const_cast<metadata::RtClass*>(methodInfo->parent)).is_err())
             {
                 assert(false && "Failed to initialize method's declaring class in resolve_metadata_token (MemberRef)");
                 return nullptr;
@@ -123,7 +123,7 @@ void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const m
         case metadata::RtRuntimeHandleType::Field:
         {
             const metadata::RtFieldInfo* fieldInfo = handle.field;
-            if (vm::Class::initialize_all(fieldInfo->parent).is_err())
+            if (vm::Class::initialize_all(const_cast<metadata::RtClass*>(fieldInfo->parent)).is_err())
             {
                 assert(false && "Failed to initialize field's declaring class in resolve_metadata_token (MemberRef)");
                 return nullptr;

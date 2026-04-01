@@ -492,7 +492,7 @@ class Transformer
     Variable* push_i4_to_eval_stack();
     Variable* push_ref_or_ptr_to_eval_stack();
     RtResult<Variable*> push_typesig_to_eval_stack(const metadata::RtTypeSig* type_sig);
-    RtResult<Variable*> push_class_to_eval_stack(metadata::RtClass* klass);
+    RtResult<Variable*> push_class_to_eval_stack(const metadata::RtClass* klass);
     RtResult<const Variable*> get_top_var() const;
     RtResult<const Variable*> pop_eval_stack();
 

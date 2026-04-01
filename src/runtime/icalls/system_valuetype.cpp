@@ -25,8 +25,8 @@ RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject
 {
     *uncompared_field_objs = nullptr;
 
-    metadata::RtClass* klass1 = obj1->klass;
-    metadata::RtClass* klass2 = obj2->klass;
+    const metadata::RtClass* klass1 = obj1->klass;
+    const metadata::RtClass* klass2 = obj2->klass;
 
     if (klass1 != klass2)
         RET_OK(false);
@@ -271,7 +271,7 @@ RtResult<int32_t> SystemValueType::internal_get_hash_code(vm::RtObject* obj, vm:
 {
     *uncompared_field_objs = nullptr;
 
-    metadata::RtClass* klass = obj->klass;
+    const metadata::RtClass* klass = obj->klass;
     int32_t hash = static_cast<int32_t>(reinterpret_cast<uintptr_t>(klass));
 
     utils::Vector<vm::RtObject*> uncomputed_fields;

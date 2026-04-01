@@ -17,7 +17,7 @@ RtResult<int32_t> SystemArray::get_rank(vm::RtArray* arr)
     if (arr == nullptr)
         RET_ERR(RtErr::NullReference);
 
-    metadata::RtClass* klass = arr->klass;
+    const metadata::RtClass* klass = arr->klass;
     assert(vm::Class::is_array_or_szarray(klass));
     RET_OK(static_cast<int32_t>(vm::Class::get_rank(klass)));
 }
@@ -103,7 +103,7 @@ RtResult<vm::RtObject*> SystemArray::get_value_impl(vm::RtArray* arr, int32_t gl
     if (static_cast<uint32_t>(global_index) >= static_cast<uint32_t>(arr->length))
         RET_ERR(RtErr::IndexOutOfRange);
 
-    metadata::RtClass* ele_klass = vm::Array::get_array_element_class(arr);
+    const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(arr);
 
     if (vm::Class::is_value_type(ele_klass))
     {
@@ -136,7 +136,7 @@ RtResultVoid SystemArray::set_value_impl(vm::RtArray* arr, vm::RtObject* value, 
     if (static_cast<uint32_t>(global_index) >= static_cast<uint32_t>(arr->length))
         RET_ERR(RtErr::IndexOutOfRange);
 
-    metadata::RtClass* ele_klass = vm::Array::get_array_element_class(arr);
+    const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(arr);
 
     if (vm::Class::is_value_type(ele_klass))
     {
@@ -179,8 +179,8 @@ RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::R
         RET_ERR(RtErr::IndexOutOfRange);
     }
 
-    metadata::RtClass* src_klass = src->klass;
-    metadata::RtClass* dst_klass = dst->klass;
+    const metadata::RtClass* src_klass = src->klass;
+    const metadata::RtClass* dst_klass = dst->klass;
 
     // Fast path: same class
     if (src_klass == dst_klass)
@@ -213,8 +213,8 @@ RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::R
     if (src_ele_size != dst_ele_size)
         RET_OK(false);
 
-    metadata::RtClass* src_ele_klass = vm::Array::get_array_element_class(src);
-    metadata::RtClass* dst_ele_klass = vm::Array::get_array_element_class(dst);
+    const metadata::RtClass* src_ele_klass = vm::Array::get_array_element_class(src);
+    const metadata::RtClass* dst_ele_klass = vm::Array::get_array_element_class(dst);
 
     const void* src_data_ptr = vm::Array::get_array_data_start_as_ptr_void(src);
     void* dst_data_ptr = vm::Array::get_array_data_start_as_ptr_void(dst);
@@ -311,7 +311,7 @@ RtResultVoid SystemArray::clear_internal(vm::RtArray* arr, int32_t index, int32_
         RET_ERR(RtErr::IndexOutOfRange);
     }
 
-    metadata::RtClass* ele_klass = vm::Array::get_array_element_class(arr);
+    const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(arr);
     void* arr_data_ptr = vm::Array::get_array_data_start_as_ptr_void(arr);
 
     if (vm::Class::is_value_type(ele_klass))

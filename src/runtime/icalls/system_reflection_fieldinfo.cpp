@@ -12,13 +12,13 @@ namespace icalls
 
 RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle_type(metadata::RtFieldInfo* field, const metadata::RtTypeSig* type_sig)
 {
-    metadata::RtClass* field_parent = field->parent;
+    const metadata::RtClass* field_parent = field->parent;
     if (type_sig == nullptr)
     {
         return vm::Reflection::get_field_reflection_object(field, field_parent);
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, cur_klass, vm::Class::get_class_from_typesig(type_sig));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtClass*, cur_klass, vm::Class::get_class_from_typesig(type_sig));
     while (cur_klass != nullptr)
     {
         if (cur_klass == field_parent)

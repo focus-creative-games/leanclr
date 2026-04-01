@@ -62,7 +62,7 @@ RtResultVoid SystemReflectionRuntimeFieldInfo::set_value_internal(vm::RtReflecti
 
 RtResult<vm::RtReflectionType*> SystemReflectionRuntimeFieldInfo::get_parent_type(vm::RtReflectionField* field, bool declaring)
 {
-    metadata::RtClass* parent = declaring ? field->field->parent : field->klass;
+    const metadata::RtClass* parent = declaring ? field->field->parent : field->klass;
     return vm::Reflection::get_klass_reflection_object(parent);
 }
 

@@ -21,7 +21,7 @@ namespace icalls
 RtResult<RtArray*> SystemReflectionMonoMethodInfo::get_parameter_info(const RtMethodInfo* method, RtReflectionMethod* member)
 {
     RtReflectionType* ref_type = member->ref_type;
-    RtClass* klass = nullptr;
+    const RtClass* klass = nullptr;
     if (ref_type != nullptr)
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, resolved_klass, Class::get_class_from_typesig(ref_type->type_handle));

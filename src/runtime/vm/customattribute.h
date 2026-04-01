@@ -35,18 +35,18 @@ class CustomAttribute
                                                                const metadata::RtMethodInfo* ctor_method, RtArray** typed_arg_arr_ptr,
                                                                RtArray** named_arg_arr_ptr);
 
-    static RtResult<bool> has_customattribute_on_target(metadata::RtModuleDef* mod, uint32_t target_token, metadata::RtClass* attr_klass);
-    static RtResult<bool> has_customattribute_on_field(const metadata::RtFieldInfo* field, metadata::RtClass* attr_klass);
-    static RtResult<bool> has_customattribute_on_method(const metadata::RtMethodInfo* method, metadata::RtClass* customattribute_klass);
-    static RtResult<bool> has_customattribute_on_class(metadata::RtClass* klass, metadata::RtClass* customattribute_klass);
-    static RtResult<bool> has_customattribute_on_property(const metadata::RtPropertyInfo* property, metadata::RtClass* customattribute_klass);
-    static RtResult<bool> has_customattribute_on_event(const metadata::RtEventInfo* event, metadata::RtClass* customattribute_klass);
-    static RtResult<bool> has_customattribute_on_parameter(RtReflectionParameter* parameter, metadata::RtClass* customattribute_klass);
-    static RtResult<bool> has_customattribute_on_assembly(metadata::RtModuleDef* mod, metadata::RtClass* customattribute_klass);
-    static RtResult<bool> has_attribute(RtObject* obj, metadata::RtClass* attr_klass);
+    static RtResult<bool> has_customattribute_on_target(metadata::RtModuleDef* mod, uint32_t target_token, const metadata::RtClass* attr_klass);
+    static RtResult<bool> has_customattribute_on_field(const metadata::RtFieldInfo* field, const metadata::RtClass* attr_klass);
+    static RtResult<bool> has_customattribute_on_method(const metadata::RtMethodInfo* method, const metadata::RtClass* customattribute_klass);
+    static RtResult<bool> has_customattribute_on_class(const metadata::RtClass* klass, const metadata::RtClass* customattribute_klass);
+    static RtResult<bool> has_customattribute_on_property(const metadata::RtPropertyInfo* property, const metadata::RtClass* customattribute_klass);
+    static RtResult<bool> has_customattribute_on_event(const metadata::RtEventInfo* event, const metadata::RtClass* customattribute_klass);
+    static RtResult<bool> has_customattribute_on_parameter(RtReflectionParameter* parameter, const metadata::RtClass* customattribute_klass);
+    static RtResult<bool> has_customattribute_on_assembly(metadata::RtModuleDef* mod, const metadata::RtClass* customattribute_klass);
+    static RtResult<bool> has_attribute(RtObject* obj, const metadata::RtClass* attr_klass);
 
-    static RtResult<RtArray*> get_customattribute_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token, metadata::RtClass* attr_klass);
-    static RtResult<RtArray*> get_customattributes_on_target_object(RtObject* obj, metadata::RtClass* attr_klass);
+    static RtResult<RtArray*> get_customattribute_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token, const metadata::RtClass* attr_klass);
+    static RtResult<RtArray*> get_customattributes_on_target_object(RtObject* obj, const metadata::RtClass* attr_klass);
     static RtResult<RtArray*> get_customattributes_data_on_target(RtObject* obj);
     static RtResult<RtArray*> get_customattributes_data_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token);
 };

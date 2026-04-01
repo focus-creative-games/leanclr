@@ -62,24 +62,24 @@ uint32_t Method::get_method_def_gid(const metadata::RtMethodInfo* method)
     return RtMetadata::encode_gid_by_rid(*method->parent->image, RtToken::decode_rid(method->token));
 }
 
-const RtVirtualInvokeData* Method::get_vtable_method_invoke_data(RtClass* klass, size_t method_index)
+const RtVirtualInvokeData* Method::get_vtable_method_invoke_data(const RtClass* klass, size_t method_index)
 {
     return klass->vtable + method_index;
 }
 
-RtManagedMethodPointer Method::get_vtable_method_ptr(RtClass* klass, size_t method_index)
+RtManagedMethodPointer Method::get_vtable_method_ptr(const RtClass* klass, size_t method_index)
 {
     const RtVirtualInvokeData* data = get_vtable_method_invoke_data(klass, method_index);
     return data->method_impl->method_ptr;
 }
 
-const RtMethodInfo* Method::get_vtable_method(RtClass* klass, size_t method_index)
+const RtMethodInfo* Method::get_vtable_method(const RtClass* klass, size_t method_index)
 {
     const RtVirtualInvokeData* data = get_vtable_method_invoke_data(klass, method_index);
     return data->method;
 }
 
-RtResult<const RtVirtualInvokeData*> Method::get_interface_method_invoke_data(RtClass* klass, RtClass* interface_klass, size_t slot)
+RtResult<const RtVirtualInvokeData*> Method::get_interface_method_invoke_data(const RtClass* klass, const RtClass* interface_klass, size_t slot)
 {
     const RtInterfaceOffset* offsets = klass->interface_vtable_offsets;
     for (size_t i = 0; i < klass->interface_vtable_offset_count; ++i)
@@ -96,13 +96,13 @@ RtResult<const RtVirtualInvokeData*> Method::get_interface_method_invoke_data(Rt
 
 RtResult<const RtMethodInfo*> Method::get_virtual_method_impl(RtObject* obj, const RtMethodInfo* virtual_method)
 {
-    RtClass* klass = obj->klass;
+    const RtClass* klass = obj->klass;
     return get_virtual_method_impl_on_klass(klass, virtual_method);
 }
 
-RtResult<const RtMethodInfo*> Method::get_virtual_method_impl_on_klass(RtClass* klass, const RtMethodInfo* virtual_method)
+RtResult<const RtMethodInfo*> Method::get_virtual_method_impl_on_klass(const RtClass* klass, const RtMethodInfo* virtual_method)
 {
-    RtClass* declaring_klass = virtual_method->parent;
+    const RtClass* declaring_klass = virtual_method->parent;
     if (declaring_klass == klass || !is_virtual(virtual_method))
     {
         RET_OK(virtual_method);
@@ -139,7 +139,7 @@ RtResult<const RtMethodInfo*> Method::get_virtual_method_impl_on_klass(RtClass* 
     RET_OK(actual_method);
 }
 
-const RtMethodInfo* Method::find_matched_method_in_class(RtClass* klass, const RtMethodInfo* to_match_method)
+const RtMethodInfo* Method::find_matched_method_in_class(const RtClass* klass, const RtMethodInfo* to_match_method)
 {
     const RtMethodInfo** methods = klass->methods;
     for (size_t i = 0; i < klass->method_count; ++i)
@@ -153,7 +153,7 @@ const RtMethodInfo* Method::find_matched_method_in_class(RtClass* klass, const R
     return nullptr;
 }
 
-const RtMethodInfo* Method::find_matched_method_in_class_by_name_and_signature(RtClass* klass, const char* name, const RtTypeSig* const* param_type_sigs,
+const RtMethodInfo* Method::find_matched_method_in_class_by_name_and_signature(const RtClass* klass, const char* name, const RtTypeSig* const* param_type_sigs,
                                                                                size_t param_count)
 {
     const RtMethodInfo** methods = klass->methods;
@@ -169,7 +169,7 @@ const RtMethodInfo* Method::find_matched_method_in_class_by_name_and_signature(R
     return nullptr;
 }
 
-const RtMethodInfo* Method::find_matched_method_in_class_by_name(RtClass* klass, const char* name)
+const RtMethodInfo* Method::find_matched_method_in_class_by_name(const RtClass* klass, const char* name)
 {
     const RtMethodInfo** methods = klass->methods;
     for (size_t i = 0; i < klass->method_count; ++i)
@@ -183,7 +183,7 @@ const RtMethodInfo* Method::find_matched_method_in_class_by_name(RtClass* klass,
     return nullptr;
 }
 
-const RtMethodInfo* Method::find_matched_method_in_class_by_name_and_param_count(RtClass* klass, const char* name, size_t parameter_count)
+const RtMethodInfo* Method::find_matched_method_in_class_by_name_and_param_count(const RtClass* klass, const char* name, size_t parameter_count)
 {
     const RtMethodInfo** methods = klass->methods;
     for (size_t i = 0; i < klass->method_count; ++i)
@@ -321,7 +321,7 @@ bool Method::contains_not_instantiated_generic_param(const RtMethodInfo* method)
     {
         return true;
     }
-    RtClass* klass = method->parent;
+    const RtClass* klass = method->parent;
     if (klass->generic_container || Type::contains_generic_param(method->return_type))
     {
         return true;
@@ -394,7 +394,7 @@ RtResultVoid Method::build_method_arg_descs(RtMethodInfo* method)
 
 size_t Method::get_method_index_in_class(const RtMethodInfo* method)
 {
-    RtClass* parent = method->parent;
+    const RtClass* parent = method->parent;
     const RtMethodInfo** methods = parent->methods;
     if (method->token != 0)
     {
@@ -416,7 +416,7 @@ RtResult<const RtMethodInfo*> Method::inflate_method(const RtMethodInfo* method,
     {
         RET_OK(method);
     }
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
     if (!vm::Class::is_generic(klass) && !vm::Class::is_generic_inst(klass) && !method->generic_container)
     {
         assert(!klass->generic_container);

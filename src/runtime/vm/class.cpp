@@ -375,32 +375,32 @@ static void setup_cast_class(metadata::RtClass* klass)
 }
 
 // Public static member functions translating from EEClass methods
-bool Class::is_value_type(metadata::RtClass* klass)
+bool Class::is_value_type(const metadata::RtClass* klass)
 {
     return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::ValueType) != 0;
 }
 
-bool Class::is_reference_type(metadata::RtClass* klass)
+bool Class::is_reference_type(const metadata::RtClass* klass)
 {
     return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::ReferenceType) != 0;
 }
 
-bool Class::is_enum_type(metadata::RtClass* klass)
+bool Class::is_enum_type(const metadata::RtClass* klass)
 {
     return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::Enum) != 0;
 }
 
-bool Class::is_nullable_type(metadata::RtClass* klass)
+bool Class::is_nullable_type(const metadata::RtClass* klass)
 {
     return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::Nullable) != 0;
 }
 
-bool Class::is_multicastdelegate_subclass(metadata::RtClass* klass)
+bool Class::is_multicastdelegate_subclass(const metadata::RtClass* klass)
 {
     return klass->parent == g_corlibTypes.cls_multicastdelegate;
 }
 
-bool Class::get_has_references(metadata::RtClass* klass)
+bool Class::get_has_references(const metadata::RtClass* klass)
 {
     return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasReferences) != 0;
 }
@@ -410,57 +410,57 @@ void Class::set_has_references(metadata::RtClass* klass)
     klass->extra_flags |= (uint32_t)metadata::RtClassExtraAttribute::HasReferences;
 }
 
-bool Class::is_blittable(metadata::RtClass* klass)
+bool Class::is_blittable(const metadata::RtClass* klass)
 {
     return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasReferences) == 0;
 }
 
-bool Class::is_array_or_szarray(metadata::RtClass* klass)
+bool Class::is_array_or_szarray(const metadata::RtClass* klass)
 {
     return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::ArrayOrSZArray) != 0;
 }
 
-bool Class::is_ptr(metadata::RtClass* klass)
+bool Class::is_ptr(const metadata::RtClass* klass)
 {
     return klass->by_val->ele_type == metadata::RtElementType::Ptr;
 }
 
-bool Class::has_static_constructor(metadata::RtClass* klass)
+bool Class::has_static_constructor(const metadata::RtClass* klass)
 {
     return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasStaticConstructor) != 0;
 }
 
-bool Class::has_finalizer(metadata::RtClass* klass)
+bool Class::has_finalizer(const metadata::RtClass* klass)
 {
     return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasFinalizer) != 0;
 }
 
-bool Class::is_interface(metadata::RtClass* klass)
+bool Class::is_interface(const metadata::RtClass* klass)
 {
     return (klass->flags & (uint32_t)metadata::RtTypeAttribute::Interface) != 0;
 }
 
-bool Class::is_abstract(metadata::RtClass* klass)
+bool Class::is_abstract(const metadata::RtClass* klass)
 {
     return (klass->flags & (uint32_t)metadata::RtTypeAttribute::Abstract) != 0;
 }
 
-bool Class::is_sealed(metadata::RtClass* klass)
+bool Class::is_sealed(const metadata::RtClass* klass)
 {
     return (klass->flags & (uint32_t)metadata::RtTypeAttribute::Sealed) != 0;
 }
 
-bool Class::is_generic(metadata::RtClass* klass)
+bool Class::is_generic(const metadata::RtClass* klass)
 {
     return klass->generic_container != nullptr;
 }
 
-bool Class::is_generic_inst(metadata::RtClass* klass)
+bool Class::is_generic_inst(const metadata::RtClass* klass)
 {
     return klass->by_val->ele_type == metadata::RtElementType::GenericInst;
 }
 
-bool Class::is_cctor_not_finished(metadata::RtClass* klass)
+bool Class::is_cctor_not_finished(const metadata::RtClass* klass)
 {
     return (klass->init_flags & (uint32_t)metadata::RtClassInitPart::RuntimeClassInit) == 0;
 }
@@ -470,32 +470,32 @@ void Class::set_cctor_finished(metadata::RtClass* klass)
     klass->init_flags |= (uint32_t)metadata::RtClassInitPart::RuntimeClassInit;
 }
 
-const metadata::RtTypeSig* Class::get_by_val_type_sig(metadata::RtClass* klass)
+const metadata::RtTypeSig* Class::get_by_val_type_sig(const metadata::RtClass* klass)
 {
     return klass->by_val;
 }
 
-const metadata::RtTypeSig* Class::get_by_ref_type_sig(metadata::RtClass* klass)
+const metadata::RtTypeSig* Class::get_by_ref_type_sig(const metadata::RtClass* klass)
 {
     return klass->by_ref;
 }
 
-bool Class::is_object_class(metadata::RtClass* klass)
+bool Class::is_object_class(const metadata::RtClass* klass)
 {
     return klass->by_val->ele_type == metadata::RtElementType::Object;
 }
 
-bool Class::is_string_class(metadata::RtClass* klass)
+bool Class::is_string_class(const metadata::RtClass* klass)
 {
     return klass->by_val->ele_type == metadata::RtElementType::String;
 }
 
-bool Class::is_szarray_class(metadata::RtClass* klass)
+bool Class::is_szarray_class(const metadata::RtClass* klass)
 {
     return klass->by_val->ele_type == metadata::RtElementType::SZArray;
 }
 
-uint8_t Class::get_rank(metadata::RtClass* klass)
+uint8_t Class::get_rank(const metadata::RtClass* klass)
 {
     switch (klass->by_val->ele_type)
     {
@@ -508,54 +508,54 @@ uint8_t Class::get_rank(metadata::RtClass* klass)
     }
 }
 
-metadata::RtElementType Class::get_element_type(metadata::RtClass* klass)
+metadata::RtElementType Class::get_element_type(const metadata::RtClass* klass)
 {
     return klass->by_val->ele_type;
 }
 
-metadata::RtElementType Class::get_enum_element_type(metadata::RtClass* klass)
+metadata::RtElementType Class::get_enum_element_type(const metadata::RtClass* klass)
 {
     assert(is_enum_type(klass));
     return get_element_type(klass->element_class);
 }
 
-bool Class::is_by_ref(metadata::RtClass* klass)
+bool Class::is_by_ref(const metadata::RtClass* klass)
 {
     return klass->by_val->by_ref;
 }
 
-bool Class::is_public(metadata::RtClass* klass)
+bool Class::is_public(const metadata::RtClass* klass)
 {
     return (klass->flags & (uint32_t)metadata::RtTypeAttribute::Public) != 0;
 }
 
-bool Class::is_nested_public(metadata::RtClass* klass)
+bool Class::is_nested_public(const metadata::RtClass* klass)
 {
     return (klass->flags & (uint32_t)metadata::RtTypeAttribute::NestedPublic) != 0;
 }
 
-bool Class::is_initialized(metadata::RtClass* klass)
+bool Class::is_initialized(const metadata::RtClass* klass)
 {
     return (klass->init_flags & (uint32_t)metadata::RtClassInitPart::All) != 0;
 }
 
-bool Class::is_explicit_layout(metadata::RtClass* klass)
+bool Class::is_explicit_layout(const metadata::RtClass* klass)
 {
     return (klass->flags & (uint32_t)metadata::RtTypeAttribute::ExplicitLayout) != 0;
 }
 
-RtResult<bool> Class::is_by_ref_like(metadata::RtClass* klass)
+RtResult<bool> Class::is_by_ref_like(const metadata::RtClass* klass)
 {
     return CustomAttribute::has_customattribute_on_class(klass, g_corlibTypes.cls_byreflike);
 }
 
-static bool is_enum_type_internal(metadata::RtClass* klass)
+static bool is_enum_type_internal(const metadata::RtClass* klass)
 {
     auto parent = klass->parent;
     return parent && strcmp(parent->name, STR_ENUM) == 0 && parent->image->is_corlib();
 }
 
-static bool is_value_typedef(metadata::RtElementType eleType)
+static bool is_value_typedef(const metadata::RtElementType eleType)
 {
     switch (eleType)
     {
@@ -636,17 +636,17 @@ RtResult<metadata::RtClass*> Class::init_class_of_type_def(metadata::RtModuleDef
 }
 
 // Transliterated query and state management functions
-uint32_t Class::get_type_def_gid(metadata::RtClass* klass)
+uint32_t Class::get_type_def_gid(const metadata::RtClass* klass)
 {
     return klass->by_val->data.type_def_gid;
 }
 
-metadata::RtGenericContainerContext Class::get_generic_container_context(metadata::RtClass* klass)
+metadata::RtGenericContainerContext Class::get_generic_container_context(const metadata::RtClass* klass)
 {
     return metadata::RtGenericContainerContext{klass->generic_container, nullptr};
 }
 
-metadata::RtClass* Class::get_generic_base_klass_of_generic_class(metadata::RtClass* klass)
+metadata::RtClass* Class::get_generic_base_klass_of_generic_class(const metadata::RtClass* klass)
 {
     assert(is_generic_inst(klass));
     const metadata::RtGenericClass* gc = klass->by_val->data.generic_class;
@@ -654,22 +654,22 @@ metadata::RtClass* Class::get_generic_base_klass_of_generic_class(metadata::RtCl
     return res.is_ok() ? res.unwrap() : nullptr;
 }
 
-metadata::RtClass* Class::get_generic_base_klass_or_self(metadata::RtClass* klass)
+metadata::RtClass* Class::get_generic_base_klass_or_self(const metadata::RtClass* klass)
 {
     if (vm::Class::is_generic_inst(klass))
     {
         return vm::Class::get_generic_base_klass_of_generic_class(klass);
     }
-    return klass;
+    return const_cast<metadata::RtClass*>(klass);
 }
 
-bool Class::has_class_parent_fast(metadata::RtClass* klass, metadata::RtClass* parent)
+bool Class::has_class_parent_fast(const metadata::RtClass* klass, const metadata::RtClass* parent)
 {
     assert(has_initialized_part(klass, metadata::RtClassInitPart::SuperTypes));
     return parent->hierarchy_depth <= klass->hierarchy_depth && klass->super_types[parent->hierarchy_depth] == parent;
 }
 
-bool Class::has_initialized_part(metadata::RtClass* klass, metadata::RtClassInitPart parts)
+bool Class::has_initialized_part(const metadata::RtClass* klass, metadata::RtClassInitPart parts)
 {
     return (klass->init_flags & (uint32_t)parts) != 0;
 }
@@ -690,7 +690,7 @@ bool Class::try_set_initialized_part(metadata::RtClass* klass, metadata::RtClass
 }
 
 // Class family determination - transliterated from get_family()
-metadata::RtClassFamily Class::get_family(metadata::RtClass* klass)
+metadata::RtClassFamily Class::get_family(const metadata::RtClass* klass)
 {
     switch (klass->by_val->ele_type)
     {
@@ -733,9 +733,9 @@ metadata::RtClassFamily Class::get_family(metadata::RtClass* klass)
 }
 
 // Reflection/search functions
-const metadata::RtFieldInfo* Class::get_field_for_name(metadata::RtClass* klass, const char* name, bool search_parent)
+const metadata::RtFieldInfo* Class::get_field_for_name(const metadata::RtClass* klass, const char* name, bool search_parent)
 {
-    metadata::RtClass* cur = klass;
+    const metadata::RtClass* cur = klass;
     while (cur)
     {
         for (uint16_t i = 0; i < cur->field_count; ++i)
@@ -751,9 +751,9 @@ const metadata::RtFieldInfo* Class::get_field_for_name(metadata::RtClass* klass,
     return nullptr;
 }
 
-const metadata::RtFieldInfo* Class::get_field_for_name(metadata::RtClass* klass, const char* name, uint32_t name_len, bool search_parent)
+const metadata::RtFieldInfo* Class::get_field_for_name(const metadata::RtClass* klass, const char* name, uint32_t name_len, bool search_parent)
 {
-    metadata::RtClass* cur = klass;
+    const metadata::RtClass* cur = klass;
     while (cur)
     {
         for (uint16_t i = 0; i < cur->field_count; ++i)
@@ -769,9 +769,9 @@ const metadata::RtFieldInfo* Class::get_field_for_name(metadata::RtClass* klass,
     return nullptr;
 }
 
-const metadata::RtMethodInfo* Class::get_method_for_name(metadata::RtClass* klass, const char* name, bool search_parent)
+const metadata::RtMethodInfo* Class::get_method_for_name(const metadata::RtClass* klass, const char* name, bool search_parent)
 {
-    metadata::RtClass* cur = klass;
+    const metadata::RtClass* cur = klass;
     while (cur)
     {
         const metadata::RtMethodInfo** methods = cur->methods;
@@ -790,9 +790,9 @@ const metadata::RtMethodInfo* Class::get_method_for_name(metadata::RtClass* klas
     return nullptr;
 }
 
-const metadata::RtPropertyInfo* Class::get_property_for_name(metadata::RtClass* klass, const char* name, bool search_parent)
+const metadata::RtPropertyInfo* Class::get_property_for_name(const metadata::RtClass* klass, const char* name, bool search_parent)
 {
-    metadata::RtClass* cur = klass;
+    const metadata::RtClass* cur = klass;
     while (cur)
     {
         for (uint16_t i = 0; i < cur->property_count; ++i)
@@ -808,9 +808,9 @@ const metadata::RtPropertyInfo* Class::get_property_for_name(metadata::RtClass* 
     return nullptr;
 }
 
-const metadata::RtPropertyInfo* Class::get_property_for_name(metadata::RtClass* klass, const char* name, uint32_t name_len, bool search_parent)
+const metadata::RtPropertyInfo* Class::get_property_for_name(const metadata::RtClass* klass, const char* name, uint32_t name_len, bool search_parent)
 {
-    metadata::RtClass* cur = klass;
+    const metadata::RtClass* cur = klass;
     while (cur)
     {
         for (uint16_t i = 0; i < cur->property_count; ++i)
@@ -826,9 +826,9 @@ const metadata::RtPropertyInfo* Class::get_property_for_name(metadata::RtClass* 
     return nullptr;
 }
 
-const metadata::RtEventInfo* Class::get_event_for_name(metadata::RtClass* klass, const char* name, bool search_parent)
+const metadata::RtEventInfo* Class::get_event_for_name(const metadata::RtClass* klass, const char* name, bool search_parent)
 {
-    metadata::RtClass* cur = klass;
+    const metadata::RtClass* cur = klass;
     while (cur)
     {
         for (uint16_t i = 0; i < cur->event_count; ++i)
@@ -844,7 +844,7 @@ const metadata::RtEventInfo* Class::get_event_for_name(metadata::RtClass* klass,
     return nullptr;
 }
 
-const metadata::RtMethodInfo* Class::get_static_constructor(metadata::RtClass* klass)
+const metadata::RtMethodInfo* Class::get_static_constructor(const metadata::RtClass* klass)
 {
     assert(has_initialized_part(klass, metadata::RtClassInitPart::Method));
     if (!has_static_constructor(klass))
@@ -887,7 +887,7 @@ RtResultVoid Class::initialize_super_types(metadata::RtClass* klass)
     // Initialize parent class hierarchy
     if (klass->parent)
     {
-        RET_ERR_ON_FAIL(initialize_super_types(klass->parent));
+        RET_ERR_ON_FAIL(initialize_super_types(const_cast<metadata::RtClass*>(klass->parent)));
         klass->hierarchy_depth = klass->parent->hierarchy_depth + 1;
     }
     else
@@ -897,7 +897,7 @@ RtResultVoid Class::initialize_super_types(metadata::RtClass* klass)
 
     // Allocate and copy super_types array
     uint32_t super_types_count = klass->hierarchy_depth + 1;
-    klass->super_types = klass->image->get_mem_pool().calloc_any<metadata::RtClass*>(super_types_count);
+    klass->super_types = klass->image->get_mem_pool().calloc_any<const metadata::RtClass*>(super_types_count);
 
     if (klass->parent)
     {
@@ -916,7 +916,7 @@ RtResultVoid Class::initialize_interfaces(metadata::RtClass* klass)
     // Initialize parent interfaces
     if (klass->parent)
     {
-        RET_ERR_ON_FAIL(initialize_interfaces(klass->parent));
+        RET_ERR_ON_FAIL(initialize_interfaces(const_cast<metadata::RtClass*>(klass->parent)));
     }
 
     switch (get_family(klass))
@@ -964,7 +964,7 @@ RtResultVoid Class::setup_interfaces_typedef(metadata::RtClass* klass)
     {
         RET_ERR(RtErr::BadImageFormat);
     }
-    metadata::RtClass** interfaces = mod->get_mem_pool().calloc_any<metadata::RtClass*>(interfaceCount);
+    const metadata::RtClass** interfaces = mod->get_mem_pool().calloc_any<const metadata::RtClass*>(interfaceCount);
     for (uint32_t i = 0; i < interfaceCount; ++i)
     {
         uint32_t interfaceImplRid = typeDefRidRange.ridBegin + i;
@@ -972,7 +972,7 @@ RtResultVoid Class::setup_interfaces_typedef(metadata::RtClass* klass)
         metadata::RtToken interfaceTypeToken = metadata::RtMetadata::decode_type_def_ref_spec_coded_index(interfaceImplRow.interface_idx);
         metadata::RtGenericContainerContext gcc = get_generic_container_context(klass);
         UNWRAP_OR_RET_ERR_ON_FAIL(interfaces[i], mod->get_class_by_type_def_ref_spec_token(interfaceTypeToken, gcc, nullptr));
-        RET_ERR_ON_FAIL(initialize_all(interfaces[i]));
+        RET_ERR_ON_FAIL(initialize_all(const_cast<metadata::RtClass*>(interfaces[i])));
     }
     klass->interfaces = interfaces;
     klass->interface_count = interfaceCount;
@@ -987,7 +987,7 @@ RtResultVoid Class::initialize_nested_classes(metadata::RtClass* klass)
     // Initialize parent nested classes
     if (klass->parent)
     {
-        RET_ERR_ON_FAIL(initialize_nested_classes(klass->parent));
+        RET_ERR_ON_FAIL(initialize_nested_classes(const_cast<metadata::RtClass*>(klass->parent)));
     }
     switch (get_family(klass))
     {
@@ -1025,7 +1025,7 @@ RtResultVoid Class::setup_nested_classes_typedef(metadata::RtClass* klass)
         {
             RET_ERR(RtErr::BadImageFormat);
         }
-        klass->nested_classes = mod->get_mem_pool().calloc_any<metadata::RtClass*>(nestedClassCount);
+        klass->nested_classes = mod->get_mem_pool().calloc_any<const metadata::RtClass*>(nestedClassCount);
         for (size_t i = 0; i < nestedClassCount; ++i)
         {
             klass->nested_classes[i] = nestedClasses[i];
@@ -1080,7 +1080,7 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
     // Initialize parent fields
     if (klass->parent)
     {
-        RET_ERR_ON_FAIL(initialize_fields(klass->parent));
+        RET_ERR_ON_FAIL(initialize_fields(const_cast<metadata::RtClass*>(klass->parent)));
     }
 
     switch (get_family(klass))
@@ -1259,7 +1259,7 @@ RtResultVoid Class::initialize_methods(metadata::RtClass* klass)
 
     if (klass->parent)
     {
-        RET_ERR_ON_FAIL(initialize_methods(klass->parent));
+        RET_ERR_ON_FAIL(initialize_methods(const_cast<metadata::RtClass*>(klass->parent)));
     }
     switch (get_family(klass))
     {
@@ -1398,7 +1398,7 @@ RtResultVoid Class::initialize_properties(metadata::RtClass* klass)
     // Initialize parent properties
     if (klass->parent)
     {
-        RET_ERR_ON_FAIL(initialize_properties(klass->parent));
+        RET_ERR_ON_FAIL(initialize_properties(const_cast<metadata::RtClass*>(klass->parent)));
     }
     switch (get_family(klass))
     {
@@ -1492,7 +1492,7 @@ RtResultVoid Class::initialize_events(metadata::RtClass* klass)
     // Initialize parent events
     if (klass->parent)
     {
-        RET_ERR_ON_FAIL(initialize_events(klass->parent));
+        RET_ERR_ON_FAIL(initialize_events(const_cast<metadata::RtClass*>(klass->parent)));
     }
     switch (get_family(klass))
     {
@@ -1594,7 +1594,7 @@ RtResultVoid Class::initialize_vtables(metadata::RtClass* klass)
 
     if (klass->parent)
     {
-        RET_ERR_ON_FAIL(initialize_vtables(klass->parent));
+        RET_ERR_ON_FAIL(initialize_vtables(const_cast<metadata::RtClass*>(klass->parent)));
     }
 
     RET_ERR_ON_FAIL(initialize_super_types(klass));
@@ -1603,8 +1603,8 @@ RtResultVoid Class::initialize_vtables(metadata::RtClass* klass)
 
     for (uint16_t i = 0; i < klass->interface_count; ++i)
     {
-        metadata::RtClass* interfaceClass = klass->interfaces[i];
-        RET_ERR_ON_FAIL(initialize_vtables(interfaceClass));
+        const metadata::RtClass* interfaceClass = klass->interfaces[i];
+        RET_ERR_ON_FAIL(initialize_vtables(const_cast<metadata::RtClass*>(interfaceClass)));
     }
 
     switch (get_family(klass))
@@ -1641,7 +1641,7 @@ RtResultVoid Class::initialize_vtables(metadata::RtClass* klass)
     RET_VOID_OK();
 }
 
-static void collect_virtual_methods(metadata::RtClass* klass, utils::Vector<const metadata::RtMethodInfo*>& virtualMethods)
+static void collect_virtual_methods(const metadata::RtClass* klass, utils::Vector<const metadata::RtMethodInfo*>& virtualMethods)
 {
     if (klass->parent)
     {
@@ -1702,7 +1702,7 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
         RET_VOID_OK();
     }
 
-    metadata::RtClass* parent = klass->parent;
+    const metadata::RtClass* parent = klass->parent;
     if (self_new_slot_virtual_methods.size() == 0 && self_override_virtual_methods.size() == 0 && klass->interface_count == 0)
     {
         klass->vtable = parent->vtable;
@@ -1724,7 +1724,7 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
     size_t total_slot_count = parent->vtable_count;
     for (uint16_t i = 0; i < klass->interface_count; ++i)
     {
-        metadata::RtClass* interface_class = klass->interfaces[i];
+        const metadata::RtClass* interface_class = klass->interfaces[i];
         bool found = false;
         for (uint16_t j = 0; j < parent->interface_vtable_offset_count; ++j)
         {
@@ -1761,7 +1761,7 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
         const metadata::RtInterfaceOffset& offset_info = new_interface_vtable_offsets[i];
         if (offset_info.offset < parent->vtable_count)
             continue;
-        metadata::RtClass* interface_class = offset_info.interface;
+        const metadata::RtClass* interface_class = offset_info.interface;
         for (uint16_t j = 0; j < interface_class->vtable_count; ++j)
             new_vtable.push_back(interface_class->vtable[j]);
     }
@@ -1807,7 +1807,7 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
             if (!Method::is_virtual(declaration_method) || !Method::is_virtual(body_method))
                 RET_ERR(RtErr::BadImageFormat);
 
-            metadata::RtClass* declaration_klass = declaration_method->parent;
+            const metadata::RtClass* declaration_klass = declaration_method->parent;
             uint16_t declaration_slot = declaration_method->slot;
             if (declaration_slot == metadata::RT_INVALID_METHOD_SLOT)
                 RET_ERR(RtErr::BadImageFormat);
@@ -1896,7 +1896,7 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
             for (size_t idx : self_interface_vtable_offset_indexes)
             {
                 const metadata::RtInterfaceOffset& offset_info = klass->interface_vtable_offsets[idx];
-                metadata::RtClass* iface = offset_info.interface;
+                const metadata::RtClass* iface = offset_info.interface;
                 for (uint16_t i = 0; i < iface->vtable_count; ++i)
                 {
                     size_t final_slot = static_cast<size_t>(offset_info.offset) + i;
@@ -1951,21 +1951,21 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
     RET_VOID_OK();
 }
 
-metadata::RtClass* Class::get_array_element_class(metadata::RtClass* array_class)
+metadata::RtClass* Class::get_array_element_class(const metadata::RtClass* array_class)
 {
-    return array_class->element_class;
+    return const_cast<metadata::RtClass*>(array_class->element_class);
 }
 
-metadata::RtClass* Class::get_nullable_underlying_class(metadata::RtClass* klass)
+metadata::RtClass* Class::get_nullable_underlying_class(const metadata::RtClass* klass)
 {
     if (is_nullable_type(klass))
     {
-        return klass->element_class;
+        return const_cast<metadata::RtClass*>(klass->element_class);
     }
-    return klass;
+    return const_cast<metadata::RtClass*>(klass);
 }
 
-uint32_t Class::get_stack_location_size(metadata::RtClass* klass)
+uint32_t Class::get_stack_location_size(const metadata::RtClass* klass)
 {
     if (is_value_type(klass))
     {
@@ -2125,36 +2125,36 @@ RtResult<metadata::RtClass*> Class::get_generic_param_class_by_typesig(const met
     RET_OK(genericParamClass);
 }
 
-metadata::RtClass* Class::get_enclosing_class(metadata::RtClass* nestedClass)
+metadata::RtClass* Class::get_enclosing_class(const metadata::RtClass* nestedClass)
 {
-    return nestedClass->declaring_class;
+    return const_cast<metadata::RtClass*>(nestedClass->declaring_class);
 }
 
-RtResult<metadata::RtClass*> Class::find_nested_class_by_name(metadata::RtClass* enclosingClass, const char* nestedClassName, bool ignore_case)
+RtResult<metadata::RtClass*> Class::find_nested_class_by_name(const metadata::RtClass* enclosingClass, const char* nestedClassName, bool ignore_case)
 {
-    RET_ERR_ON_FAIL(initialize_nested_classes(enclosingClass));
+    RET_ERR_ON_FAIL(initialize_nested_classes(const_cast<metadata::RtClass*>(enclosingClass)));
     for (uint16_t i = 0; i < enclosingClass->nested_class_count; ++i)
     {
-        metadata::RtClass* nestedClass = enclosingClass->nested_classes[i];
+        const metadata::RtClass* nestedClass = enclosingClass->nested_classes[i];
         if (ignore_case)
         {
             if (utils::StringUtil::equals_ignorecase(nestedClass->name, nestedClassName))
             {
-                RET_OK(nestedClass);
+                RET_OK(const_cast<metadata::RtClass*>(nestedClass));
             }
         }
         else
         {
             if (strcmp(nestedClass->name, nestedClassName) == 0)
             {
-                RET_OK(nestedClass);
+                RET_OK(const_cast<metadata::RtClass*>(nestedClass));
             }
         }
     }
     RET_OK(nullptr);
 }
 
-bool Class::is_assignable_from_class(metadata::RtClass* fromClass, metadata::RtClass* toClass)
+bool Class::is_assignable_from_class(const metadata::RtClass* fromClass, const metadata::RtClass* toClass)
 {
     assert(has_initialized_part(fromClass, metadata::RtClassInitPart::SuperTypes));
     if (fromClass == toClass)
@@ -2247,10 +2247,10 @@ bool Class::is_assignable_from_class(metadata::RtClass* fromClass, metadata::RtC
     }
 }
 
-bool Class::is_assignable_from_interface(metadata::RtClass* fromClass, metadata::RtClass* toClass)
+bool Class::is_assignable_from_interface(const metadata::RtClass* fromClass, const metadata::RtClass* toClass)
 {
     assert(has_initialized_part(fromClass, metadata::RtClassInitPart::SuperTypes));
-    metadata::RtClass* currentClass = fromClass;
+    const metadata::RtClass* currentClass = fromClass;
     while (currentClass != nullptr)
     {
         for (uint16_t i = 0; i < currentClass->interface_count; ++i)
@@ -2265,7 +2265,7 @@ bool Class::is_assignable_from_interface(metadata::RtClass* fromClass, metadata:
     return false;
 }
 
-bool Class::is_assignable_from(metadata::RtClass* fromClass, metadata::RtClass* toClass)
+bool Class::is_assignable_from(const metadata::RtClass* fromClass, const metadata::RtClass* toClass)
 {
     assert(has_initialized_part(fromClass, metadata::RtClassInitPart::SuperTypes));
     if (fromClass == toClass)
@@ -2282,12 +2282,12 @@ bool Class::is_assignable_from(metadata::RtClass* fromClass, metadata::RtClass* 
     }
 }
 
-bool Class::is_exception_sub_class(metadata::RtClass* klass)
+bool Class::is_exception_sub_class(const metadata::RtClass* klass)
 {
     return has_class_parent_fast(klass, get_corlib_types().cls_exception);
 }
 
-bool Class::is_subclass_of_initialized(metadata::RtClass* fromClass, metadata::RtClass* toClass, bool checkInterfaces)
+bool Class::is_subclass_of_initialized(const metadata::RtClass* fromClass, const metadata::RtClass* toClass, bool checkInterfaces)
 {
     if (fromClass == toClass)
     {
@@ -2297,7 +2297,7 @@ bool Class::is_subclass_of_initialized(metadata::RtClass* fromClass, metadata::R
     {
         if (is_interface(toClass))
         {
-            metadata::RtClass* currentClass = fromClass;
+            const metadata::RtClass* currentClass = fromClass;
             while (currentClass != nullptr)
             {
                 for (uint16_t i = 0; i < currentClass->interface_count; ++i)
@@ -2322,7 +2322,7 @@ bool Class::is_subclass_of_initialized(metadata::RtClass* fromClass, metadata::R
     }
 }
 
-bool Class::is_pointer_element_compatible_with(metadata::RtClass* fromClass, metadata::RtClass* toClass)
+bool Class::is_pointer_element_compatible_with(const metadata::RtClass* fromClass, const metadata::RtClass* toClass)
 {
     return fromClass->cast_class == toClass->cast_class;
 }

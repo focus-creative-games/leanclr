@@ -10,7 +10,7 @@ namespace metadata
 class MetadataName
 {
   public:
-    static RtResultVoid append_klass_full_name(utils::StringBuilder& sb, RtClass* klass);
+    static RtResultVoid append_klass_full_name(utils::StringBuilder& sb, const RtClass* klass);
     static RtResultVoid append_type_sig_name(utils::StringBuilder& sb, const RtTypeSig* type_sig);
     static RtResultVoid append_method_full_name_with_params(utils::StringBuilder& sb, const RtMethodInfo* method);
     static RtResultVoid append_method_full_name_without_params(utils::StringBuilder& sb, const RtMethodInfo* method);

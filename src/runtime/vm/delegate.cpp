@@ -33,7 +33,7 @@ RtResultVoid Delegate::constructor_delegate(RtMulticastDelegate* del, RtObject* 
     RET_VOID_OK();
 }
 
-RtResult<RtMulticastDelegate*> Delegate::new_delegate(metadata::RtClass* delelgate_type, RtObject* target, const metadata::RtMethodInfo* method) noexcept
+RtResult<RtMulticastDelegate*> Delegate::new_delegate(const metadata::RtClass* delelgate_type, RtObject* target, const metadata::RtMethodInfo* method) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, del_obj, Object::new_object(delelgate_type));
     RtMulticastDelegate* del = reinterpret_cast<RtMulticastDelegate*>(del_obj);

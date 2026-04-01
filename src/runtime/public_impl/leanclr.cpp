@@ -185,7 +185,7 @@ extern "C"
 
     LeanclrClass* leanclr_get_class_parent(LeanclrClass* klass)
     {
-        return reinterpret_cast<LeanclrClass*>(((metadata::RtClass*)klass)->parent);
+        return const_cast<LeanclrClass*>(reinterpret_cast<const LeanclrClass*>(((const metadata::RtClass*)klass)->parent));
     }
 
     void leanclr_get_class_interfaces(LeanclrClass* klass, const LeanclrClass**& interfaces, size_t& count, LeanclrException** out_exception)
@@ -199,7 +199,7 @@ extern "C"
 
     LeanclrClass* leanclr_get_class_enclosing_class(LeanclrClass* klass)
     {
-        return reinterpret_cast<LeanclrClass*>(((metadata::RtClass*)klass)->declaring_class);
+        return const_cast<LeanclrClass*>(reinterpret_cast<const LeanclrClass*>(((const metadata::RtClass*)klass)->declaring_class));
     }
 
     void leanclr_get_class_nested_classes(LeanclrClass* klass, const LeanclrClass**& nested_classes, size_t& count, LeanclrException** out_exception)

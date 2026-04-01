@@ -118,7 +118,7 @@ RtResult<std::tuple<bool, RtArray*, RtArray*>> Enum::get_enum_values_and_names(m
 
 RtResult<uint64_t> Enum::get_boxed_enum_data_as_unsigned_and_extended_to_u64(RtObject* obj)
 {
-    metadata::RtClass* klass = obj->klass;
+    const metadata::RtClass* klass = obj->klass;
     assert(Class::is_enum_type(klass));
 
     const void* data_ptr = Object::get_boxed_enum_data_ptr(obj);
@@ -154,7 +154,7 @@ RtResult<uint64_t> Enum::get_boxed_enum_data_as_unsigned_and_extended_to_u64(RtO
 
 RtResult<int32_t> Enum::get_hash_code(RtObject* obj)
 {
-    metadata::RtClass* klass = obj->klass;
+    const metadata::RtClass* klass = obj->klass;
     assert(Class::is_enum_type(klass));
 
     const void* data_ptr = Object::get_boxed_enum_data_ptr(obj);

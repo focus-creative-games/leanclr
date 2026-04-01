@@ -14,7 +14,7 @@ class GCHandle
     static RtObject* get_target(void* handle);
     static void* get_target_handle(RtObject* obj, void* handle, int32_t handle_type);
     static void* get_addr_of_pinned_object(void* handle);
-    static bool is_type_pinned(metadata::RtClass* klass);
+    static bool is_type_pinned(const metadata::RtClass* klass);
 };
 } // namespace vm
 } // namespace leanclr

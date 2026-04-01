@@ -506,7 +506,7 @@ using RtCInvokeMethodPointer = void (*)(RtManagedMethodPointer method_ptr, const
 // Interface offset structure
 struct RtInterfaceOffset
 {
-    RtClass* interface;
+    const RtClass* interface;
     uint16_t offset;
 };
 
@@ -520,7 +520,7 @@ struct RtVirtualInvokeData
 // Method definition or reference
 struct RtMethodDefOrRef
 {
-    RtClass* parent;
+    const RtClass* parent;
     const RtMethodInfo* method;
 };
 
@@ -543,7 +543,7 @@ enum class RtInvokerType : uint8_t
 // Method information structure
 struct RtMethodInfo
 {
-    RtClass* parent;
+    const RtClass* parent;
     const char* name;
     const RtGenericContainer* generic_container;
     const RtGenericMethod* generic_method;
@@ -567,7 +567,7 @@ struct RtMethodInfo
 // Property information structure
 struct RtPropertyInfo
 {
-    RtClass* parent;
+    const RtClass* parent;
     const char* name;
     RtPropertySig property_sig;
     uint16_t flags;
@@ -579,7 +579,7 @@ struct RtPropertyInfo
 // Event information structure
 struct RtEventInfo
 {
-    RtClass* parent;
+    const RtClass* parent;
     const char* name;
     const RtTypeSig* type_sig;
     uint16_t flags;
@@ -596,8 +596,8 @@ struct RtGenericClass
     const RtGenericInst* class_inst;
     RtTypeSig by_val_type_sig;
     RtTypeSig by_ref_type_sig;
-    RtClass* cache_base_klass;
-    RtClass* cache_klass;
+    const RtClass* cache_base_klass;
+    const RtClass* cache_klass;
 };
 
 struct RtAssemblyName
@@ -659,17 +659,17 @@ class RtModuleDef;
 struct RtClass
 {
     RtModuleDef* image;
-    RtClass* parent;
+    const RtClass* parent;
     const char* namespaze;
     const char* name;
     const RtTypeSig* by_val;
     const RtTypeSig* by_ref;
-    RtClass* element_class;
-    RtClass* cast_class;
-    RtClass** super_types;
-    RtClass** interfaces;
-    RtClass* declaring_class; // TODO, may be we can optimize out it
-    RtClass** nested_classes; // TODO, may be we can optimize out it
+    const RtClass* element_class;
+    const RtClass* cast_class;
+    const RtClass** super_types;
+    const RtClass** interfaces;
+    const RtClass* declaring_class; // TODO, may be we can optimize out it
+    const RtClass** nested_classes; // TODO, may be we can optimize out it
     const RtGenericContainer* generic_container;
     const RtFieldInfo* fields;
     const RtMethodInfo** methods;

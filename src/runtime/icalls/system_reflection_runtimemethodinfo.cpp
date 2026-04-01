@@ -24,7 +24,7 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_method_
                                                                                                                  const metadata::RtTypeSig* type_sig,
                                                                                                                  bool check_same_generic_base)
 {
-    metadata::RtClass* klass = nullptr;
+    const metadata::RtClass* klass = nullptr;
     const metadata::RtMethodInfo* target_method = method;
 
     if (type_sig != nullptr)
@@ -33,13 +33,13 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_method_
         klass = resolved;
         if (check_same_generic_base)
         {
-            metadata::RtClass* method_klass = method->parent;
+            const metadata::RtClass* method_klass = method->parent;
             if (vm::Class::get_generic_base_klass_or_self(klass) != vm::Class::get_generic_base_klass_or_self(method_klass))
             {
                 RET_OK(nullptr);
             }
 
-            RET_ERR_ON_FAIL(vm::Class::initialize_methods(klass));
+            RET_ERR_ON_FAIL(vm::Class::initialize_methods(const_cast<metadata::RtClass*>(klass)));
             if (method_klass != klass)
             {
                 size_t index = vm::Method::get_method_index_in_class(method);
@@ -66,25 +66,25 @@ RtResult<vm::RtString*> SystemReflectionRuntimeMethodInfo::get_name(vm::RtReflec
     RET_OK(name);
 }
 
-static RtResult<std::pair<const metadata::RtMethodInfo*, metadata::RtClass*>> get_base_method_impl(const metadata::RtMethodInfo* method, bool definition)
+static RtResult<std::pair<const metadata::RtMethodInfo*, const metadata::RtClass*>> get_base_method_impl(const metadata::RtMethodInfo* method, bool definition)
 {
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
     if (!vm::Method::is_virtual(method) || vm::Method::is_new_slot(method) || vm::Class::is_interface(klass))
     {
         RET_OK(std::make_pair(method, klass));
     }
 
-    RET_ERR_ON_FAIL(vm::Class::initialize_vtables(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_vtables(const_cast<metadata::RtClass*>(klass)));
     uint16_t slot = method->slot;
     const metadata::RtMethodInfo* base_method = method;
-    metadata::RtClass* cur_klass = klass;
+    const metadata::RtClass* cur_klass = klass;
 
     if (definition)
     {
         while (cur_klass->parent)
         {
-            metadata::RtClass* next_klass = cur_klass->parent;
-            RET_ERR_ON_FAIL(vm::Class::initialize_vtables(next_klass));
+            const metadata::RtClass* next_klass = cur_klass->parent;
+            RET_ERR_ON_FAIL(vm::Class::initialize_vtables(const_cast<metadata::RtClass*>(next_klass)));
             if (next_klass->vtable_count <= slot)
             {
                 break;
@@ -108,7 +108,7 @@ static RtResult<std::pair<const metadata::RtMethodInfo*, metadata::RtClass*>> ge
     while (cur_klass->parent)
     {
         cur_klass = cur_klass->parent;
-        RET_ERR_ON_FAIL(vm::Class::initialize_vtables(cur_klass));
+        RET_ERR_ON_FAIL(vm::Class::initialize_vtables(const_cast<metadata::RtClass*>(cur_klass)));
         if (cur_klass->vtable_count <= slot)
         {
             break;
@@ -126,7 +126,7 @@ static RtResult<std::pair<const metadata::RtMethodInfo*, metadata::RtClass*>> ge
 RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_base_method(vm::RtReflectionMethod* method, bool definition)
 {
     const metadata::RtMethodInfo* m = method->method;
-    std::pair<const metadata::RtMethodInfo*, metadata::RtClass*> pair_result;
+    std::pair<const metadata::RtMethodInfo*, const metadata::RtClass*> pair_result;
     UNWRAP_OR_RET_ERR_ON_FAIL(pair_result, get_base_method_impl(m, definition));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionMethod*, ref_method,
                                             vm::Reflection::get_method_reflection_object(pair_result.first, pair_result.second));
@@ -141,7 +141,7 @@ RtResult<int32_t> SystemReflectionRuntimeMethodInfo::get_metadata_token(vm::RtRe
 RtResult<bool> SystemReflectionRuntimeMethodInfo::get_is_generic_method_definition(vm::RtReflectionMethod* method)
 {
     const metadata::RtMethodInfo* m = method->method;
-    metadata::RtClass* klass = m->parent;
+    const metadata::RtClass* klass = m->parent;
     RET_OK(vm::Class::is_generic(klass) || m->generic_container != nullptr);
 }
 
@@ -149,7 +149,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeMethodInfo::get_generic_arguments(
 {
     const metadata::RtMethodInfo* m = method->method;
     const auto& corlib = vm::Class::get_corlib_types();
-    metadata::RtClass* elem_klass = corlib.cls_systemtype;
+    const metadata::RtClass* elem_klass = corlib.cls_systemtype;
 
     if (m->generic_container != nullptr)
     {
@@ -188,7 +188,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeMethodInfo::get_generic_arguments(
 RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_generic_method_definition_impl(vm::RtReflectionMethod* method)
 {
     const metadata::RtMethodInfo* m = method->method;
-    metadata::RtClass* klass = m->parent;
+    const metadata::RtClass* klass = m->parent;
     if (m->generic_container != nullptr || klass->generic_container != nullptr)
     {
         RET_OK(method);

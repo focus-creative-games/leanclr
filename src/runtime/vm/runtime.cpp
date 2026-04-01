@@ -402,15 +402,15 @@ void Runtime::shutdown()
     // todo: implement shutdown logic
 }
 
-RtResultVoid Runtime::run_class_static_constructor(metadata::RtClass* klass)
+RtResultVoid Runtime::run_class_static_constructor(const metadata::RtClass* klass)
 {
     assert(klass);
 
     if (Class::is_cctor_not_finished(klass))
     {
         RET_ERR_ON_FAIL(run_module_static_constructor(klass->image));
-        RET_ERR_ON_FAIL(Class::initialize_all(klass));
-        Class::set_cctor_finished(klass);
+        RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
+        Class::set_cctor_finished(const_cast<metadata::RtClass*>(klass));
 
         const metadata::RtMethodInfo* cctor = Class::get_static_constructor(klass);
         if (cctor)

@@ -251,7 +251,7 @@ RtResult<metadata::RtRuntimeHandle> Transformer::get_raw_runtime_handle_from_tok
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const metadata::RtMethodInfo*, method,
                                                  mod->get_method_by_token(token, _generic_container_context, _generic_context));
-        RET_ERR_ON_FAIL(vm::Class::initialize_all(method->parent));
+        RET_ERR_ON_FAIL(vm::Class::initialize_all(const_cast<metadata::RtClass*>(method->parent)));
         RET_OK(metadata::RtRuntimeHandle(method));
     }
     case metadata::TableType::MemberRef:
@@ -262,7 +262,7 @@ RtResult<metadata::RtRuntimeHandle> Transformer::get_raw_runtime_handle_from_tok
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const metadata::RtFieldInfo*, field,
                                                  mod->get_field_by_token(token, _generic_container_context, _generic_context));
-        RET_ERR_ON_FAIL(vm::Class::initialize_all(field->parent));
+        RET_ERR_ON_FAIL(vm::Class::initialize_all(const_cast<metadata::RtClass*>(field->parent)));
         RET_OK(metadata::RtRuntimeHandle(field));
     }
     default:
@@ -371,7 +371,7 @@ RtResult<Variable*> Transformer::push_typesig_to_eval_stack(const metadata::RtTy
     RET_OK(eval_stack_var);
 }
 
-RtResult<Variable*> Transformer::push_class_to_eval_stack(metadata::RtClass* klass)
+RtResult<Variable*> Transformer::push_class_to_eval_stack(const metadata::RtClass* klass)
 {
     return push_typesig_to_eval_stack(klass->by_val);
 }
@@ -1072,7 +1072,7 @@ RtResultVoid Transformer::add_ckfinite()
 
 RtResult<const metadata::RtMethodInfo*> Transformer::try_redirect_newobj_method(const metadata::RtMethodInfo* method)
 {
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
     metadata::RtModuleDef* mod = klass->image;
 
     if (!mod->is_corlib())
@@ -1184,7 +1184,7 @@ RtResultVoid Transformer::add_call(const metadata::RtMethodInfo* method)
 
 RtResult<bool> Transformer::try_handle_newobj_intrinsic(const metadata::RtMethodInfo* method)
 {
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
     if (vm::Class::is_array_or_szarray(klass))
     {
         RET_ERR_ON_FAIL(add_call_common(method, metadata::RtInvokerType::NewObjIntrinsic, method->invoke_method_ptr, true, false));
@@ -1247,7 +1247,7 @@ RtResultVoid Transformer::add_newobj(const metadata::RtMethodInfo* method)
     size_t param_count = vm::Method::get_param_count_exclude_this(target_method);
     const Variable** params = param_count > 0 ? _pool->calloc_any<const Variable*>(param_count) : nullptr;
 
-    metadata::RtClass* klass = target_method->parent;
+    const metadata::RtClass* klass = target_method->parent;
     size_t old_eval_stack_top = get_cur_eval_stack_top();
     size_t new_eval_stack_top;
     if (vm::Class::is_value_type(klass))

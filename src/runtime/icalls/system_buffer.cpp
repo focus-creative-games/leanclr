@@ -16,9 +16,9 @@ namespace icalls
 
 RtResult<int32_t> SystemBuffer::byte_length(RtArray* arr)
 {
-    RtClass* klass = arr->klass;
+    const metadata::RtClass* klass = arr->klass;
     int32_t length = Array::get_array_length(arr);
-    RtClass* ele_klass = klass->element_class;
+    const metadata::RtClass* ele_klass = klass->element_class;
 
     metadata::RtElementType ele_type = Class::get_element_type(ele_klass);
     int32_t byte_length = 0;

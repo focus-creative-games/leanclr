@@ -558,14 +558,14 @@ RtResult<metadata::RtClass*> Type::get_declaring_type(const metadata::RtTypeSig*
         else
         {
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, Method::get_method_by_method_def_gid(owner->owner_gid));
-            RET_OK(method->parent);
+            RET_OK(const_cast<metadata::RtClass*>(method->parent));
         }
     }
     else
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, Class::get_class_from_typesig(typeSig));
-        metadata::RtClass* declaringClass = Class::get_enclosing_class(klass);
-        RET_OK(declaringClass);
+        const metadata::RtClass* declaringClass = Class::get_enclosing_class(klass);
+        RET_OK(const_cast<metadata::RtClass*>(declaringClass));
     }
 }
 

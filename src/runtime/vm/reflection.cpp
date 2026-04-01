@@ -34,25 +34,25 @@ namespace
 struct MethodKey
 {
     const metadata::RtMethodInfo* method;
-    metadata::RtClass* klass;
+    const metadata::RtClass* klass;
 };
 
 struct FieldKey
 {
     const metadata::RtFieldInfo* field;
-    metadata::RtClass* klass;
+    const metadata::RtClass* klass;
 };
 
 struct PropertyKey
 {
     const metadata::RtPropertyInfo* property;
-    metadata::RtClass* klass;
+    const metadata::RtClass* klass;
 };
 
 struct EventKey
 {
     metadata::RtEventInfo* event_info;
-    metadata::RtClass* klass;
+    const metadata::RtClass* klass;
 };
 
 struct MethodKeyHash
@@ -60,7 +60,7 @@ struct MethodKeyHash
     size_t operator()(const MethodKey& key) const noexcept
     {
         size_t h = std::hash<const void*>()(key.method);
-        return utils::HashUtil::combine_hash(h, std::hash<metadata::RtClass*>()(key.klass));
+        return utils::HashUtil::combine_hash(h, std::hash<const metadata::RtClass*>()(key.klass));
     }
 };
 
@@ -77,7 +77,7 @@ struct FieldKeyHash
     size_t operator()(const FieldKey& key) const noexcept
     {
         size_t h = std::hash<const void*>()(key.field);
-        return utils::HashUtil::combine_hash(h, std::hash<metadata::RtClass*>()(key.klass));
+        return utils::HashUtil::combine_hash(h, std::hash<const metadata::RtClass*>()(key.klass));
     }
 };
 
@@ -94,7 +94,7 @@ struct PropertyKeyHash
     size_t operator()(const PropertyKey& key) const noexcept
     {
         size_t h = std::hash<const void*>()(key.property);
-        return utils::HashUtil::combine_hash(h, std::hash<metadata::RtClass*>()(key.klass));
+        return utils::HashUtil::combine_hash(h, std::hash<const metadata::RtClass*>()(key.klass));
     }
 };
 
@@ -111,7 +111,7 @@ struct EventKeyHash
     size_t operator()(const EventKey& key) const noexcept
     {
         size_t h = std::hash<metadata::RtEventInfo*>()(key.event_info);
-        return utils::HashUtil::combine_hash(h, std::hash<metadata::RtClass*>()(key.klass));
+        return utils::HashUtil::combine_hash(h, std::hash<const metadata::RtClass*>()(key.klass));
     }
 };
 
@@ -130,11 +130,11 @@ static utils::HashMap<MethodKey, RtArray*, MethodKeyHash, MethodKeyEqual> s_meth
 static utils::HashMap<FieldKey, RtReflectionField*, FieldKeyHash, FieldKeyEqual> s_field_reflection_map;
 static utils::HashMap<PropertyKey, RtReflectionProperty*, PropertyKeyHash, PropertyKeyEqual> s_property_reflection_map;
 static utils::HashMap<EventKey, RtReflectionEventInfo*, EventKeyHash, EventKeyEqual> s_event_reflection_map;
-static utils::HashMap<metadata::RtAssembly*, RtReflectionAssembly*> s_assembly_reflection_map;
-static utils::HashMap<metadata::RtModuleDef*, RtReflectionModule*> s_module_reflection_map;
-static utils::HashMap<metadata::RtAssembly*, metadata::RtMonoAssemblyName*> s_assembly_name_map;
+static utils::HashMap<const metadata::RtAssembly*, RtReflectionAssembly*> s_assembly_reflection_map;
+static utils::HashMap<const metadata::RtModuleDef*, RtReflectionModule*> s_module_reflection_map;
+static utils::HashMap<const metadata::RtAssembly*, metadata::RtMonoAssemblyName*> s_assembly_name_map;
 
-static RtResult<int32_t> unbox_i32(RtObject* obj, metadata::RtClass* cls_i32)
+static RtResult<int32_t> unbox_i32(RtObject* obj, const metadata::RtClass* cls_i32)
 {
     if (obj == nullptr)
     {
@@ -232,12 +232,12 @@ RtResult<RtReflectionType*> Reflection::get_type_reflection_object(const metadat
     RET_OK(ref_obj);
 }
 
-RtResult<RtReflectionType*> Reflection::get_klass_reflection_object(metadata::RtClass* klass)
+RtResult<RtReflectionType*> Reflection::get_klass_reflection_object(const metadata::RtClass* klass)
 {
     return get_type_reflection_object(Class::get_by_val_type_sig(klass));
 }
 
-RtResult<RtReflectionMethod*> Reflection::get_method_reflection_object(const metadata::RtMethodInfo* method, metadata::RtClass* reflection_at_klass)
+RtResult<RtReflectionMethod*> Reflection::get_method_reflection_object(const metadata::RtMethodInfo* method, const metadata::RtClass* reflection_at_klass)
 {
     MethodKey key{method, reflection_at_klass};
     auto found = s_method_reflection_map.find(key);
@@ -257,7 +257,7 @@ RtResult<RtReflectionMethod*> Reflection::get_method_reflection_object(const met
     RET_OK(ref_obj);
 }
 
-RtResult<RtArray*> Reflection::get_param_objects(const metadata::RtMethodInfo* method, metadata::RtClass* reflection_at_klass)
+RtResult<RtArray*> Reflection::get_param_objects(const metadata::RtMethodInfo* method, const metadata::RtClass* reflection_at_klass)
 {
     MethodKey key{method, reflection_at_klass};
     auto found = s_method_params_map.find(key);
@@ -297,7 +297,7 @@ RtResult<RtArray*> Reflection::get_param_objects(const metadata::RtMethodInfo* m
     RET_OK(param_info_array_obj);
 }
 
-RtResult<RtReflectionField*> Reflection::get_field_reflection_object(const metadata::RtFieldInfo* field, metadata::RtClass* reflection_at_klass)
+RtResult<RtReflectionField*> Reflection::get_field_reflection_object(const metadata::RtFieldInfo* field, const metadata::RtClass* reflection_at_klass)
 {
     FieldKey key{field, reflection_at_klass};
     auto found = s_field_reflection_map.find(key);
@@ -320,7 +320,7 @@ RtResult<RtReflectionField*> Reflection::get_field_reflection_object(const metad
     RET_OK(ref_obj);
 }
 
-RtResult<RtReflectionProperty*> Reflection::get_property_reflection_object(const metadata::RtPropertyInfo* prop, metadata::RtClass* reflection_at_klass)
+RtResult<RtReflectionProperty*> Reflection::get_property_reflection_object(const metadata::RtPropertyInfo* prop, const metadata::RtClass* reflection_at_klass)
 {
     PropertyKey key{prop, reflection_at_klass};
     auto found = s_property_reflection_map.find(key);
@@ -339,7 +339,7 @@ RtResult<RtReflectionProperty*> Reflection::get_property_reflection_object(const
     RET_OK(ref_obj);
 }
 
-RtResult<RtReflectionEventInfo*> Reflection::get_event_reflection_object(metadata::RtEventInfo* event_info, metadata::RtClass* reflection_at_klass)
+RtResult<RtReflectionEventInfo*> Reflection::get_event_reflection_object(metadata::RtEventInfo* event_info, const metadata::RtClass* reflection_at_klass)
 {
     EventKey key{event_info, reflection_at_klass};
     auto found = s_event_reflection_map.find(key);
@@ -421,7 +421,7 @@ RtResult<RtReflectionModule*> Reflection::get_module_reflection_object(metadata:
 
 RtResult<RtObject*> Reflection::invoke_method(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params, RtObject** out_ex)
 {
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
     size_t method_param_count = method->parameter_count;
     size_t params_count = params == nullptr ? 0 : static_cast<size_t>(Array::get_array_length(params));
     auto& corlib_types = Class::get_corlib_types();

@@ -133,7 +133,7 @@ void fn_not_implemented_method_pointer() noexcept
 // Helper function to try setting up array or szarray invokers
 static metadata::RtInvokeMethodPointer try_setup_array_or_szarray_invoke(const metadata::RtMethodInfo* method)
 {
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
     const char* method_name = method->name;
     size_t param_count = method->parameter_count;
 
@@ -206,7 +206,7 @@ static metadata::RtInvokeMethodPointer try_setup_array_or_szarray_invoke(const m
 // Get invoker for a method
 RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* method)
 {
-    metadata::RtClass* klass = method->parent;
+    const metadata::RtClass* klass = method->parent;
 
     // Check for array/szarray methods
     if (Class::is_array_or_szarray(klass))

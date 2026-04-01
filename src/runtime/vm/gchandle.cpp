@@ -125,7 +125,7 @@ void* GCHandle::get_addr_of_pinned_object(void* handle)
         return nullptr;
     }
 
-    metadata::RtClass* klass = obj->klass;
+    const metadata::RtClass* klass = obj->klass;
 
     if (Class::is_array_or_szarray(klass))
     {
@@ -145,11 +145,11 @@ void* GCHandle::get_addr_of_pinned_object(void* handle)
     return obj + 1;
 }
 
-bool GCHandle::is_type_pinned(metadata::RtClass* klass)
+bool GCHandle::is_type_pinned(const metadata::RtClass* klass)
 {
     if (Class::is_array_or_szarray(klass))
     {
-        metadata::RtClass* ele_klass = klass->element_class;
+        const metadata::RtClass* ele_klass = klass->element_class;
         if (Class::is_string_class(ele_klass) || Class::is_array_or_szarray(ele_klass))
         {
             return false;

@@ -246,11 +246,11 @@ RtResultVoid GenericMetadata::inflate_typesigs(utils::Vector<const RtTypeSig*> t
     RET_VOID_OK();
 }
 
-RtResult<RtClass*> GenericMetadata::inflate_class(RtClass* klass, const RtGenericContext* genericContext)
+RtResult<RtClass*> GenericMetadata::inflate_class(const RtClass* klass, const RtGenericContext* genericContext)
 {
     if (!genericContext)
     {
-        RET_OK(klass);
+        RET_OK(const_cast<RtClass*>(klass));
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, inflatedTypeSig, inflate_typesig(klass->by_val, genericContext));
     return vm::Class::get_class_from_typesig(inflatedTypeSig);

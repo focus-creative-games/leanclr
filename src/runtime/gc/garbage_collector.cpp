@@ -23,21 +23,21 @@ vm::RtObject** GarbageCollector::allocate_fixed_reference_array(size_t length)
     return alloc::GeneralAllocation::calloc_any<vm::RtObject*>(length);
 }
 
-vm::RtObject* GarbageCollector::allocate_object(metadata::RtClass* klass, size_t size)
+vm::RtObject* GarbageCollector::allocate_object(const metadata::RtClass* klass, size_t size)
 {
     // TODO: Implement object allocation logic
     assert(size >= sizeof(vm::RtObject));
     auto obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(size);
-    obj->klass = klass;
+    obj->klass = const_cast<metadata::RtClass*>(klass);
     return obj;
 }
 
-vm::RtObject* GarbageCollector::allocate_object_not_contains_references(metadata::RtClass* klass, size_t size)
+vm::RtObject* GarbageCollector::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size)
 {
     return allocate_object(klass, size);
 }
 
-vm::RtObject* GarbageCollector::allocate_array(metadata::RtClass* arrClass, size_t totalBytes)
+vm::RtObject* GarbageCollector::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
 {
     return allocate_object(arrClass, totalBytes);
 }

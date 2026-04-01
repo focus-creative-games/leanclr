@@ -42,8 +42,8 @@ static EnumComparisonResult cmp_any(const void* p1, const void* p2)
 
 RtResult<int32_t> SystemEnum::internal_compare_to(vm::RtObject* obj1, vm::RtObject* obj2)
 {
-    metadata::RtClass* klass1 = obj1->klass;
-    metadata::RtClass* klass2 = obj2->klass;
+    const metadata::RtClass* klass1 = obj1->klass;
+    const metadata::RtClass* klass2 = obj2->klass;
 
     EnumComparisonResult result;
     if (klass1 != klass2)
@@ -134,7 +134,7 @@ RtResult<vm::RtObject*> SystemEnum::get_value(vm::RtObject* obj)
     }
 
     const void* data_ptr = vm::Object::get_boxed_enum_data_ptr(obj);
-    metadata::RtClass* element_class = obj->klass->element_class;
+    const metadata::RtClass* element_class = obj->klass->element_class;
     return vm::Object::box_object(element_class, data_ptr);
 }
 

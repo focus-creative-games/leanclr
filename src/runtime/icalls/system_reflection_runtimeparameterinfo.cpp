@@ -25,7 +25,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeParameterInfo::get_type_modifiers(
     (void)parameter_type;
 
     const metadata::RtMethodInfo* method = nullptr;
-    metadata::RtClass* member_klass = member->klass;
+    const metadata::RtClass* member_klass = member->klass;
     const metadata::RtClass* reflection_method_class = vm::Class::get_corlib_types().cls_reflection_method;
     const metadata::RtClass* reflection_constructor_class = vm::Class::get_corlib_types().cls_reflection_constructor;
 

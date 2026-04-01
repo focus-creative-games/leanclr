@@ -12,11 +12,11 @@ class Array
 {
   public:
     // Array creation methods
-    static RtResult<RtArray*> new_empty_szarray_by_ele_klass(metadata::RtClass* ele_class);
-    static RtResult<RtArray*> new_szarray_from_array_klass(metadata::RtClass* klass, int32_t length);
-    static RtResult<RtArray*> new_szarray_from_ele_klass(metadata::RtClass* ele_class, int32_t length);
-    static RtResult<RtArray*> new_mdarray_from_array_klass(metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds);
-    static RtResult<RtArray*> new_mdarray_from_ele_klass(metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds);
+    static RtResult<RtArray*> new_empty_szarray_by_ele_klass(const metadata::RtClass* ele_class);
+    static RtResult<RtArray*> new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length);
+    static RtResult<RtArray*> new_szarray_from_ele_klass(const metadata::RtClass* ele_class, int32_t length);
+    static RtResult<RtArray*> new_mdarray_from_array_klass(const metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds);
+    static RtResult<RtArray*> new_mdarray_from_ele_klass(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds);
 
     // Array information methods
     static int32_t get_array_length(const RtArray* array)
@@ -27,8 +27,8 @@ class Array
 
     static size_t get_array_byte_length(const RtArray* array);
     static size_t get_array_element_size(const RtArray* array);
-    static size_t get_array_element_size_by_klass(metadata::RtClass* array_klass);
-    static metadata::RtClass* get_array_element_class(const RtArray* array)
+    static size_t get_array_element_size_by_klass(const metadata::RtClass* array_klass);
+    static const metadata::RtClass* get_array_element_class(const RtArray* array)
     {
         assert(array);
         return array->klass->element_class;
