@@ -18,6 +18,11 @@ void* GarbageCollector::allocate_fixed(size_t size)
     return alloc::GeneralAllocation::malloc_zeroed(size);
 }
 
+void GarbageCollector::free_fixed(void* address)
+{
+    alloc::GeneralAllocation::free(address);
+}
+
 vm::RtObject** GarbageCollector::allocate_fixed_reference_array(size_t length)
 {
     return alloc::GeneralAllocation::calloc_any<vm::RtObject*>(length);

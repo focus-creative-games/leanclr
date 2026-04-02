@@ -60,9 +60,11 @@ class Field
     static RtResult<RtObject*> get_field_const_object(const metadata::RtFieldInfo* field);
 
     // Set instance field value
+    static RtResultVoid get_instance_value(const metadata::RtFieldInfo* field, void* obj, void* value);
     static RtResultVoid set_instance_value(const metadata::RtFieldInfo* field, void* obj, const void* value);
 
     // Set static field value
+    static RtResultVoid get_static_value(const metadata::RtFieldInfo* field, void* value);
     static RtResultVoid set_static_value(const metadata::RtFieldInfo* field, const void* value);
 
     // Get field size

@@ -26,6 +26,7 @@
 #include "vm/internal_calls.h"
 #include "utils/string_builder.h"
 #include "metadata/module_def.h"
+#include "gc/garbage_collector.h"
 #include "fileloader.h"
 #include "statistic.h"
 
@@ -96,12 +97,7 @@ typedef enum
     IL2CPP_GC_EVENT_POST_START_WORLD
 } Il2CppGCEvent;
 
-typedef enum
-{
-    IL2CPP_GC_MODE_DISABLED = 0,
-    IL2CPP_GC_MODE_ENABLED = 1,
-    IL2CPP_GC_MODE_MANUAL = 2
-} Il2CppGCMode;
+typedef vm::GCMode Il2CppGCMode;
 
 typedef enum
 {
@@ -898,22 +894,9 @@ extern "C"
 
     void il2cpp_field_get_value(Il2CppObject* obj, FieldInfo* field, void* value)
     {
-        auto sizeResult = vm::Field::get_field_size(field);
-        if (sizeResult.is_err())
-            return;
-        size_t sz = sizeResult.unwrap();
-
-        if (vm::Field::is_instance(field))
-        {
-            size_t offset = vm::Field::get_field_offset_includes_object_header_for_all_type(field);
-            std::memcpy(value, reinterpret_cast<const uint8_t*>(obj) + offset, sz);
-        }
-        else
-        {
-            if (!field->parent->static_fields_data)
-                return; // TODO: thread-static
-            std::memcpy(value, field->parent->static_fields_data + field->offset, sz);
-        }
+        assert(vm::Field::is_instance(field));
+        auto ret = vm::Field::get_instance_value(field, obj, value);
+        assert(ret.is_ok());
     }
 
     Il2CppObject* il2cpp_field_get_value_object(FieldInfo* field, Il2CppObject* obj)
@@ -930,30 +913,28 @@ extern "C"
 
     void il2cpp_field_set_value(Il2CppObject* obj, FieldInfo* field, void* value)
     {
-        if (vm::Field::is_instance(field))
-            vm::Field::set_instance_value(field, obj, value);
-        else
-            vm::Field::set_static_value(field, value);
+        assert(vm::Field::is_instance(field));
+        auto ret = vm::Field::set_instance_value(field, obj, value);
+        assert(ret.is_ok());
     }
 
     void il2cpp_field_set_value_object(Il2CppObject* objectInstance, FieldInfo* field, Il2CppObject* value)
     {
-        vm::Field::set_value_object(field, objectInstance, value);
+        assert(vm::Field::is_instance(field));
+        auto ret = vm::Field::set_value_object(field, objectInstance, value);
+        assert(ret.is_ok());
     }
 
     void il2cpp_field_static_get_value(FieldInfo* field, void* value)
     {
-        auto sizeResult = vm::Field::get_field_size(field);
-        if (sizeResult.is_err())
-            return;
-        if (!field->parent->static_fields_data)
-            return; // TODO: thread-static
-        std::memcpy(value, field->parent->static_fields_data + field->offset, sizeResult.unwrap());
+        auto ret = vm::Field::get_static_value(field, value);
+        assert(ret.is_ok());
     }
 
     void il2cpp_field_static_set_value(FieldInfo* field, void* value)
     {
-        vm::Field::set_static_value(field, value);
+        auto ret = vm::Field::set_static_value(field, value);
+        assert(ret.is_ok());
     }
 
     bool il2cpp_field_is_literal(FieldInfo* field)
@@ -965,124 +946,145 @@ extern "C"
 
     void il2cpp_gc_collect(int maxGenerations)
     {
-        vm::GC::internal_collect(maxGenerations);
+        vm::GC::collect(static_cast<int32_t>(maxGenerations));
     }
 
     int32_t il2cpp_gc_collect_a_little()
     {
-        vm::GC::internal_collect(0);
-        return 0;
+        return vm::GC::collect_a_little();
     }
 
     void il2cpp_gc_start_incremental_collection()
-    { /* TODO */
+    {
+        vm::GC::start_incremental_collection();
     }
     void il2cpp_gc_enable()
-    { /* TODO */
+    {
+        vm::GC::enable();
     }
     void il2cpp_gc_disable()
-    { /* TODO */
+    {
+        vm::GC::disable();
     }
 
     bool il2cpp_gc_is_disabled()
     {
-        return false; // TODO
+        return vm::GC::is_disabled();
     }
 
     void il2cpp_gc_set_mode(Il2CppGCMode mode)
-    { /* TODO */
+    {
+        vm::GC::set_mode(mode);
     }
 
     bool il2cpp_gc_is_incremental()
     {
-        return false;
+        return vm::GC::is_incremental();
     }
 
     int64_t il2cpp_gc_get_max_time_slice_ns()
     {
-        return 0;
+        return vm::GC::get_max_time_slice_ns();
     }
 
     void il2cpp_gc_set_max_time_slice_ns(int64_t maxTimeSlice)
-    { /* TODO */
+    {
+        vm::GC::set_max_time_slice_ns(maxTimeSlice);
     }
 
     int64_t il2cpp_gc_get_used_size()
     {
-        return vm::GC::get_total_memory(false);
+        return vm::GC::get_used_size();
     }
 
     int64_t il2cpp_gc_get_heap_size()
     {
-        return vm::GC::get_total_memory(false);
+        return vm::GC::get_heap_size();
     }
 
     void il2cpp_gc_foreach_heap(void (*func)(void* data, void* context), void* userData)
-    { /* TODO */
+    {
+        vm::GC::foreach_heap(func, userData);
     }
+
     void il2cpp_stop_gc_world()
-    { /* TODO */
+    {
+        vm::GC::stop_gc_world();
     }
+
     void il2cpp_start_gc_world()
-    { /* TODO */
+    {
+        vm::GC::start_gc_world();
     }
 
     void* il2cpp_gc_alloc_fixed(size_t size)
     {
-        // TODO: leanclr GC does not expose a pinned allocator; malloc as fallback
-        return std::malloc(size);
+        return vm::GC::alloc_fixed(size);
     }
 
     void il2cpp_gc_free_fixed(void* address)
     {
-        std::free(address);
+        vm::GC::free_fixed(address);
     }
 
     // -- gchandle -------------------------------------------------------------
 
     uint32_t il2cpp_gchandle_new(Il2CppObject* obj, bool pinned)
     {
-        // handle_type: 0=normal, 1=pinned
-        return handle_to_u32(vm::GCHandle::get_target_handle(obj, nullptr, pinned ? 1 : 0));
+        void* handle = vm::GCHandle::new_handle(obj, pinned);
+        return vm::GCHandle::get_handle_id(handle);
     }
 
     uint32_t il2cpp_gchandle_new_weakref(Il2CppObject* obj, bool track_resurrection)
     {
-        // handle_type: 2=weak, 3=weak+track resurrection
-        return handle_to_u32(vm::GCHandle::get_target_handle(obj, nullptr, track_resurrection ? 3 : 2));
+        void* handle = vm::GCHandle::new_weakref_handle(obj, track_resurrection);
+        return vm::GCHandle::get_handle_id(handle);
     }
 
     Il2CppObject* il2cpp_gchandle_get_target(uint32_t gchandle)
     {
-        return vm::GCHandle::get_target(u32_to_handle(gchandle));
+        void* handle = vm::GCHandle::get_handle_by_id(gchandle);
+        if (handle == nullptr)
+        {
+            return nullptr;
+        }
+        return vm::GCHandle::get_target(handle);
     }
 
     void il2cpp_gchandle_foreach_get_target(void (*func)(void*, void*), void* userData)
     {
-        // TODO: strong handle enumeration not exposed
+        vm::GCHandle::foreach_strong_handles(func, userData);
     }
 
     void il2cpp_gc_wbarrier_set_field(Il2CppObject* obj, void** targetAddress, void* object)
     {
-        // TODO: write barrier not exposed; bare pointer store as fallback
-        *targetAddress = object;
+        (void)obj;
+        vm::GC::write_barrier(reinterpret_cast<vm::RtObject**>(targetAddress), reinterpret_cast<vm::RtObject*>(object));
     }
 
     bool il2cpp_gc_has_strict_wbarriers()
     {
-        return false;
+        return vm::GC::has_strict_wbarriers();
     }
 
     void il2cpp_gc_set_external_allocation_tracker(void (*func)(void*, size_t, int))
-    { /* TODO */
+    {
+        vm::GC::set_external_allocation_tracker(func);
     }
+
     void il2cpp_gc_set_external_wbarrier_tracker(void (*func)(void**))
-    { /* TODO */
+    {
+        vm::GC::set_external_wbarrier_tracker(func);
     }
 
     void il2cpp_gchandle_free(uint32_t gchandle)
     {
-        vm::GCHandle::free_handle(u32_to_handle(gchandle));
+        void* handle = vm::GCHandle::get_handle_by_id(gchandle);
+        if (handle == nullptr)
+        {
+            return;
+        }
+        vm::GCHandle::free_handle(handle);
     }
 
     // -- vm runtime info ------------------------------------------------------

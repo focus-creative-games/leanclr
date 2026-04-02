@@ -153,6 +153,18 @@ RtResult<RtObject*> Field::get_field_const_object(const metadata::RtFieldInfo* f
     return metadata::MetadataConst::decode_const_object(field->parent->image, field->token, field->type_sig);
 }
 
+RtResultVoid Field::get_instance_value(const metadata::RtFieldInfo* field, void* obj, void* value)
+{
+    assert(is_instance(field));
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(size_t, size, get_field_size(field));
+
+    uint8_t* target = static_cast<uint8_t*>(obj) + field->offset;
+    std::memcpy(value, target, size);
+
+    RET_VOID_OK();
+}
+
 // Set instance field value
 RtResultVoid Field::set_instance_value(const metadata::RtFieldInfo* field, void* obj, const void* value)
 {
@@ -167,6 +179,19 @@ RtResultVoid Field::set_instance_value(const metadata::RtFieldInfo* field, void*
 }
 
 // Set static field value
+RtResultVoid Field::get_static_value(const metadata::RtFieldInfo* field, void* value)
+{
+    if (!is_static_excluded_literal_and_rva(field))
+    {
+        RET_ERR(RtErr::FieldAccess);
+    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(size_t, size, get_field_size(field));
+
+    std::memcpy(value, field->parent->static_fields_data + field->offset, size);
+
+    RET_VOID_OK();
+}
+
 RtResultVoid Field::set_static_value(const metadata::RtFieldInfo* field, const void* value)
 {
     if (!is_static_excluded_literal_and_rva(field))
@@ -275,6 +300,7 @@ RtResultVoid Field::set_value_object(const metadata::RtFieldInfo* field, RtObjec
     // Get the type class for the field
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, field_klass, Class::get_class_from_typesig(field->type_sig));
 
+    // FIXME: handle gc write barrier
     if (Class::is_value_type(field_klass))
     {
         if (value == nullptr)

@@ -23,6 +23,7 @@ class GarbageCollector
     static void initialize();
 
     static void* allocate_fixed(size_t size);
+    static void free_fixed(void* address);
     static vm::RtObject** allocate_fixed_reference_array(size_t length);
     static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size);
     static vm::RtObject* allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size);

@@ -4,6 +4,7 @@
 #include "class.h"
 #include "metadata/metadata_cache.h"
 #include "alloc/general_allocation.h"
+#include "utils/hashmap.h"
 
 namespace leanclr
 {
@@ -21,13 +22,15 @@ enum class GCHandleType : int32_t
 struct HandleInfo
 {
     RtObject* obj;
-    GCHandleType type_;
     HandleInfo* next;
+    GCHandleType type_;
+    uint32_t id;
 };
 
 // Head of the freed handle list
 static HandleInfo* s_freed_handle_head = nullptr;
-
+static uint32_t s_last_handle_id = 0;
+static utils::HashMap<uint32_t, HandleInfo*> s_handle_map;
 // Allocate a new handle or reuse a freed one
 static HandleInfo* alloc_handle()
 {
@@ -35,6 +38,9 @@ static HandleInfo* alloc_handle()
     {
         // Allocate a new handle
         HandleInfo* h = alloc::GeneralAllocation::malloc_any_zeroed<HandleInfo>();
+        assert(s_last_handle_id < UINT32_MAX);
+        h->id = ++s_last_handle_id;
+        s_handle_map[h->id] = h;
         return h;
     }
     else
@@ -42,6 +48,9 @@ static HandleInfo* alloc_handle()
         // Reuse a freed handle
         HandleInfo* h = s_freed_handle_head;
         s_freed_handle_head = h->next;
+        assert(h->id == 0);
+        h->id = ++s_last_handle_id;
+        s_handle_map[h->id] = h;
         return h;
     }
 }
@@ -58,10 +67,39 @@ static void free_handle_impl(HandleInfo* handle)
     handle->obj = nullptr;
     handle->type_ = GCHandleType::Normal;
     handle->next = s_freed_handle_head;
+    assert(s_handle_map.find(handle->id) != s_handle_map.end());
+    s_handle_map.erase(handle->id);
+    handle->id = 0;
     s_freed_handle_head = handle;
 }
 
 // Public API implementations
+
+uint32_t GCHandle::get_handle_id(void* handle)
+{
+    HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
+    return h->id;
+}
+
+void* GCHandle::get_handle_by_id(uint32_t id)
+{
+    auto it = s_handle_map.find(id);
+    if (it != s_handle_map.end())
+    {
+        return it->second;
+    }
+    return nullptr;
+}
+
+void* GCHandle::new_handle(RtObject* obj, bool pinned)
+{
+   return get_target_handle(obj, nullptr, (int32_t)(pinned ? GCHandleType::Pinned : GCHandleType::Normal));
+}
+
+void* GCHandle::new_weakref_handle(RtObject* obj, bool track_resurrection)
+{
+   return get_target_handle(obj, nullptr, (int32_t)(track_resurrection ? GCHandleType::WeakTrackResurrection : GCHandleType::Weak));
+}
 
 void GCHandle::free_handle(void* handle)
 {
@@ -158,6 +196,14 @@ bool GCHandle::is_type_pinned(const metadata::RtClass* klass)
     }
 
     return Class::is_string_class(klass) || Class::is_blittable(klass);
+}
+
+void GCHandle::foreach_strong_handles(void (*callback)(void*, void*), void* userData)
+{
+    for (auto it = s_handle_map.begin(); it != s_handle_map.end(); ++it)
+    {
+        callback(it->second->obj, userData);
+    }
 }
 
 } // namespace vm
