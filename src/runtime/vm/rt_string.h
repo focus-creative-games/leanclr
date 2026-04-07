@@ -65,6 +65,7 @@ class String
     static int32_t get_hash_code(RtString* str);
 
     // Runtime helpers mirrored from Rust vm::string
+    static int32_t get_string_allocation_size(int32_t length);
     static RtString* fast_allocate_string(int32_t length); // Declaration retained
     static RtString* intern_string(RtString* s);
     static bool is_interned_string(RtString* s);

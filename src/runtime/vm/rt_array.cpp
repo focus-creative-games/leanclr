@@ -17,7 +17,7 @@ const int32_t MAX_ARRAY_INDEX = INT32_MAX;
 const int32_t MAX_ARRAY_RANK = 32;
 
 // Helper: Calculate total byte size for array including elements
-static size_t get_array_total_byte_size(const metadata::RtClass* klass, int32_t length)
+size_t Array::get_array_allocation_size(const metadata::RtClass* klass, int32_t length)
 {
     assert(klass && klass->element_class);
     size_t element_size = Class::get_stack_location_size(klass->element_class);
@@ -37,7 +37,7 @@ RtResult<RtArray*> Array::new_szarray_from_array_klass(const metadata::RtClass* 
 
     RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
 
-    size_t arr_length = get_array_total_byte_size(klass, length);
+    size_t arr_length = get_array_allocation_size(klass, length);
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length));
 
     if (!arr_obj)
@@ -60,7 +60,7 @@ RtResult<RtArray*> Array::new_szarray_from_ele_klass(const metadata::RtClass* el
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, ArrayClass::get_szarray_class_from_element_class(ele_class));
     RET_ERR_ON_FAIL(Class::initialize_all(klass));
 
-    size_t arr_length = get_array_total_byte_size(klass, length);
+    size_t arr_length = get_array_allocation_size(klass, length);
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length));
 
     if (!arr_obj)
@@ -109,7 +109,7 @@ RtResult<RtArray*> Array::new_mdarray_from_array_klass(const metadata::RtClass* 
     int32_t total_data_bytes = total_length * ele_size;
 
     // Calculate layout: array header + data + bounds array
-    size_t arr_total_bytes_without_bounds = get_array_total_byte_size(arr_klass, 0) + total_data_bytes;
+    size_t arr_total_bytes_without_bounds = get_array_allocation_size(arr_klass, 0) + total_data_bytes;
     size_t bounds_start_index = utils::MemOp::align_up(arr_total_bytes_without_bounds, 8);
     size_t total_array_bytes = bounds_start_index + sizeof(ArrayBounds) * rank;
 
@@ -537,7 +537,7 @@ RtResult<RtArray*> Array::clone(RtArray* old_arr) noexcept
 {
     assert(old_arr);
 
-    size_t total_bytes = get_array_total_byte_size(old_arr->klass, old_arr->length);
+    size_t total_bytes = get_array_allocation_size(old_arr->klass, old_arr->length);
     RtArray* new_arr = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(old_arr->klass, total_bytes));
 
     if (!new_arr)

@@ -1213,12 +1213,16 @@ extern "C"
     uint32_t il2cpp_object_get_size(Il2CppObject* obj)
     {
         const Il2CppClass* klass = obj->klass;
+        if (vm::Class::is_string_class(klass))
+        {
+            return static_cast<uint32_t>(vm::String::get_string_allocation_size(((Il2CppString*)obj)->length));
+        }
         if (vm::Class::is_array_or_szarray(klass))
         {
             auto* arr = static_cast<vm::RtArray*>(obj);
-            return static_cast<uint32_t>(offsetof(vm::RtArray, first_data) + vm::Array::get_array_byte_length(arr));
+            return static_cast<uint32_t>(vm::Array::get_array_allocation_size(arr->klass, vm::Array::get_array_length(arr)));
         }
-        return vm::Class::get_instance_size_with_object_header(klass);
+        return static_cast<uint32_t>(vm::Class::get_instance_size_with_object_header(klass));
     }
 
     const MethodInfo* il2cpp_object_get_virtual_method(Il2CppObject* obj, const MethodInfo* method)

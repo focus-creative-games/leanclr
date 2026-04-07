@@ -12,6 +12,7 @@ class Array
 {
   public:
     // Array creation methods
+    static size_t get_array_allocation_size(const metadata::RtClass* klass, int32_t length);
     static RtResult<RtArray*> new_empty_szarray_by_ele_klass(const metadata::RtClass* ele_class);
     static RtResult<RtArray*> new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length);
     static RtResult<RtArray*> new_szarray_from_ele_klass(const metadata::RtClass* ele_class, int32_t length);
