@@ -74,6 +74,7 @@ class Method
     static RtResult<const metadata::RtMethodInfo*> inflate_method(const metadata::RtMethodInfo* method, const metadata::RtGenericContext* gc);
     static RtResult<std::optional<uint32_t>> get_parameter_token(const metadata::RtMethodInfo* method, int32_t index);
     static RtResult<vm::RtString*> get_parameter_name_by_token(metadata::RtModuleDef* ass, metadata::EncodedTokenId param_token);
+    static RtResult<const char*> get_parameter_c_name_by_token(metadata::RtModuleDef* ass, metadata::EncodedTokenId param_token);
     static RtResult<std::optional<metadata::RowImplMap>> get_imp_map_info(const metadata::RtMethodInfo* method);
     static RtResult<std::optional<metadata::RtMethodBody>> get_method_body(const metadata::RtMethodInfo* method);
     static RtResult<vm::RtReflectionMethodBody*> create_reflection_method_body(const metadata::RtMethodInfo* method);

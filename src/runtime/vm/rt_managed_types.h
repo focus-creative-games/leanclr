@@ -647,6 +647,10 @@ struct RtThread : public RtObject
 
 // Constants for managed types
 const uint32_t RT_OBJECT_HEADER_SIZE = sizeof(RtObject);
+const uint32_t RT_ARRAY_HEADER_SIZE = offsetof(RtArray, first_data);
+const uint32_t RT_ARRAY_FIRST_DATA_OFFSET = offsetof(RtArray, first_data);
+const uint32_t RT_ARRAY_LENGTH_OFFSET = offsetof(RtArray, length);
+const uint32_t RT_ARRAY_BOUNDS_OFFSET = offsetof(RtArray, bounds);
 const uint32_t RT_TYPED_REFERENCE_SIZE = sizeof(RtTypedReference);
 const size_t RT_PUBLIC_KEY_BYTES_LEN = 8;
 const size_t RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH = 17;

@@ -2,6 +2,8 @@
 #include <cstring>
 #include <cstdio>
 
+#include "il2cpp_api_types.h"
+
 #include "vm/runtime.h"
 #include "vm/settings.h"
 #include "vm/class.h"
@@ -29,105 +31,14 @@
 #include "gc/garbage_collector.h"
 #include "fileloader.h"
 #include "statistic.h"
+#include "liveness.h"
+#include "profiler.h"
 
-using namespace leanclr;
-
-typedef leanclr::Utf16Char Il2CppChar;
-typedef metadata::RtClass Il2CppClass;
-typedef vm::RtArray Il2CppArray;
-typedef vm::RtObject Il2CppObject;
-typedef vm::RtString Il2CppString;
-typedef vm::RtException Il2CppException;
-typedef metadata::RtModuleDef Il2CppImage;
-typedef metadata::RtAssembly Il2CppAssembly;
-typedef vm::RtAppDomain Il2CppDomain;
-typedef vm::RtThread Il2CppThread;
-typedef metadata::RtTypeSig Il2CppType;
-typedef vm::RtReflectionType Il2CppReflectionType;
-typedef vm::RtReflectionMethod Il2CppReflectionMethod;
-typedef metadata::RtFieldInfo FieldInfo;
-typedef metadata::RtMethodInfo MethodInfo;
-typedef metadata::RtPropertyInfo PropertyInfo;
-typedef metadata::RtEventInfo EventInfo;
-typedef il2cpp::Il2CppStat Il2CppStat;
-
-// Opaque types that have no leanclr equivalent (forward declarations).
-struct Il2CppCustomAttrInfo;
-struct Il2CppDebuggerTransport;
-struct Il2CppManagedMemorySnapshot;
-struct Il2CppMemoryCallbacks;
-struct Il2CppMethodDebugInfo;
-struct Il2CppProfiler;
-struct Il2CppRuntimeStats;
-struct Il2CppStackFrameInfo;
-
-#if _MSC_VER
-typedef wchar_t Il2CppNativeChar;
-#else
-typedef char Il2CppNativeChar;
-#endif
-
-typedef enum
-{
-    IL2CPP_PROFILE_NONE = 0,
-    IL2CPP_PROFILE_ENTER_LEAVE = 1 << 12,
-    IL2CPP_PROFILE_ALLOCATIONS = 1 << 7,
-    IL2CPP_PROFILE_GC = 1 << 8,
-    IL2CPP_PROFILE_FILEIO = 1 << 20,
-    IL2CPP_PROFILE_THREADS = 1 << 9,
-} Il2CppProfileFlags;
-
-typedef enum
-{
-    IL2CPP_PROFILE_FILEIO_WRITE = 0,
-    IL2CPP_PROFILE_FILEIO_READ
-} Il2CppProfileFileIOKind;
-
-typedef enum
-{
-    IL2CPP_GC_EVENT_START,
-    IL2CPP_GC_EVENT_MARK_START,
-    IL2CPP_GC_EVENT_MARK_END,
-    IL2CPP_GC_EVENT_RECLAIM_START,
-    IL2CPP_GC_EVENT_RECLAIM_END,
-    IL2CPP_GC_EVENT_END,
-    IL2CPP_GC_EVENT_PRE_STOP_WORLD,
-    IL2CPP_GC_EVENT_POST_STOP_WORLD,
-    IL2CPP_GC_EVENT_PRE_START_WORLD,
-    IL2CPP_GC_EVENT_POST_START_WORLD
-} Il2CppGCEvent;
+using namespace leanclr::il2cpp;
 
 typedef vm::GCMode Il2CppGCMode;
-
-typedef enum
-{
-    IL2CPP_UNHANDLED_POLICY_LEGACY,
-    IL2CPP_UNHANDLED_POLICY_CURRENT
-} Il2CppRuntimeUnhandledExceptionPolicy;
-
-typedef void (*il2cpp_register_object_callback)(Il2CppObject** arr, int size, void* userdata);
-typedef void* (*il2cpp_liveness_reallocate_callback)(void* ptr, size_t size, void* userdata);
-typedef void (*Il2CppFrameWalkFunc)(const Il2CppStackFrameInfo* info, void* user_data);
-typedef void (*Il2CppProfileFunc)(Il2CppProfiler* prof);
-typedef void (*Il2CppProfileMethodFunc)(Il2CppProfiler* prof, const MethodInfo* method);
-typedef void (*Il2CppProfileAllocFunc)(Il2CppProfiler* prof, Il2CppObject* obj, Il2CppClass* klass);
-typedef void (*Il2CppProfileGCFunc)(Il2CppProfiler* prof, Il2CppGCEvent event, int generation);
-typedef void (*Il2CppProfileGCResizeFunc)(Il2CppProfiler* prof, int64_t new_size);
-typedef void (*Il2CppProfileFileIOFunc)(Il2CppProfiler* prof, Il2CppProfileFileIOKind kind, int count);
-typedef void (*Il2CppProfileThreadFunc)(Il2CppProfiler* prof, unsigned long tid);
-
-typedef const Il2CppNativeChar* (*Il2CppSetFindPlugInCallback)(const Il2CppNativeChar*);
-typedef void (*Il2CppLogCallback)(const char*);
-
-typedef void (*Il2CppMethodPointer)();
-typedef size_t (*Il2CppBacktraceFunc)(Il2CppMethodPointer* buffer, size_t maxSize);
-
-typedef uintptr_t il2cpp_array_size_t;
-#define ARRAY_LENGTH_AS_INT32(a) ((int32_t)(a))
-
-typedef uint8_t (*Il2CppAndroidUpStateFunc)(const char* ifName, uint8_t* is_up);
-
-using Il2CppExceptionWrapper = vm::AotExceptionWrapper;
+typedef vm::AotExceptionWrapper Il2CppExceptionWrapper;
+typedef il2cpp::Il2CppStat Il2CppStat;
 
 extern leanclr::metadata::RtAotModulesData g_aot_modules_data;
 
@@ -1091,22 +1002,22 @@ extern "C"
 
     uint32_t il2cpp_object_header_size()
     {
-        return static_cast<uint32_t>(sizeof(vm::RtObject));
+        return leanclr::vm::RT_OBJECT_HEADER_SIZE;
     }
 
     uint32_t il2cpp_array_object_header_size()
     {
-        return static_cast<uint32_t>(offsetof(vm::RtArray, first_data));
+        return leanclr::vm::RT_ARRAY_HEADER_SIZE;
     }
 
     uint32_t il2cpp_offset_of_array_length_in_array_object_header()
     {
-        return static_cast<uint32_t>(offsetof(vm::RtArray, length));
+        return leanclr::vm::RT_ARRAY_LENGTH_OFFSET;
     }
 
     uint32_t il2cpp_offset_of_array_bounds_in_array_object_header()
     {
-        return static_cast<uint32_t>(offsetof(vm::RtArray, bounds));
+        return leanclr::vm::RT_ARRAY_BOUNDS_OFFSET;
     }
 
     uint32_t il2cpp_allocation_granularity()
@@ -1119,21 +1030,27 @@ extern "C"
     void* il2cpp_unity_liveness_allocate_struct(Il2CppClass* filter, int max_object_count, il2cpp_register_object_callback callback, void* userdata,
                                                 il2cpp_liveness_reallocate_callback reallocate)
     {
-        // TODO: liveness analysis not implemented
-        return nullptr;
+        return leanclr::il2cpp::Liveness::allocate_struct(filter, max_object_count, callback, userdata, reallocate);
     }
 
     void il2cpp_unity_liveness_calculation_from_root(Il2CppObject* root, void* state)
-    { /* TODO */
+    {
+        leanclr::il2cpp::Liveness::calculation_from_root(root, state);
     }
+
     void il2cpp_unity_liveness_calculation_from_statics(void* state)
-    { /* TODO */
+    {
+        leanclr::il2cpp::Liveness::calculation_from_statics(state);
     }
+
     void il2cpp_unity_liveness_finalize(void* state)
-    { /* TODO */
+    {
+        leanclr::il2cpp::Liveness::finalize(state);
     }
+    
     void il2cpp_unity_liveness_free_struct(void* state)
-    { /* TODO */
+    {
+        leanclr::il2cpp::Liveness::free_struct(state);
     }
 
     // -- method ---------------------------------------------------------------
@@ -1222,20 +1139,8 @@ extern "C"
         auto optToken = tokenResult.unwrap();
         if (!optToken.has_value())
             return nullptr;
-        auto nameResult = vm::Method::get_parameter_name_by_token(method->parent->image, optToken.value());
-        if (nameResult.is_err())
-            return nullptr;
-        // Single-threaded wasm: a static buffer is safe.
-        static char s_nameBuf[256];
-        Il2CppString* rtStr = nameResult.unwrap();
-        const Utf16Char* chars = vm::String::get_chars_ptr(rtStr);
-        int32_t len = vm::String::get_length(rtStr);
-        if (len > 255)
-            len = 255;
-        for (int32_t i = 0; i < len; i++)
-            s_nameBuf[i] = static_cast<char>(chars[i]);
-        s_nameBuf[len] = '\0';
-        return s_nameBuf;
+        auto nameResult = vm::Method::get_parameter_c_name_by_token(method->parent->image, optToken.value());
+        return nameResult.is_ok() ? nameResult.unwrap() : nullptr;
     }
 
     // -- profiler (no-op stubs) ------------------------------------------------
@@ -1243,24 +1148,31 @@ extern "C"
 #if IL2CPP_ENABLE_PROFILER
     void il2cpp_profiler_install(Il2CppProfiler* prof, Il2CppProfileFunc shutdown_callback)
     {
+        Profiler::install(prof, shutdown_callback);
     }
     void il2cpp_profiler_set_events(Il2CppProfileFlags events)
     {
+        Profiler::set_events(events);
     }
     void il2cpp_profiler_install_enter_leave(Il2CppProfileMethodFunc enter, Il2CppProfileMethodFunc flee)
     {
+        Profiler::install_enter_leave(enter, flee);
     }
     void il2cpp_profiler_install_allocation(Il2CppProfileAllocFunc callback)
     {
+        Profiler::install_allocation(callback);
     }
     void il2cpp_profiler_install_gc(Il2CppProfileGCFunc cb, Il2CppProfileGCResizeFunc resize_cb)
     {
+        Profiler::install_gc(cb, resize_cb);
     }
     void il2cpp_profiler_install_fileio(Il2CppProfileFileIOFunc callback)
     {
+        Profiler::install_fileio(callback);
     }
     void il2cpp_profiler_install_thread(Il2CppProfileThreadFunc start, Il2CppProfileThreadFunc end)
     {
+        Profiler::install_thread(start, end);
     }
 #endif
 

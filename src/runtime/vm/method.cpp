@@ -529,6 +529,18 @@ RtResult<RtString*> Method::get_parameter_name_by_token(RtModuleDef* mod, metada
     RET_OK(managed_name);
 }
 
+RtResult<const char*> Method::get_parameter_c_name_by_token(RtModuleDef* mod, metadata::EncodedTokenId param_token)
+{
+    uint32_t rid = metadata::RtToken::decode_rid(param_token);
+    auto opt_param_row = mod->get_cli_image().read_param(rid);
+    if (!opt_param_row)
+    {
+        RET_OK(nullptr);
+    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const char*, name, mod->get_string(opt_param_row->name));
+    RET_OK(name);
+}
+
 RtResult<std::optional<RowImplMap>> Method::get_imp_map_info(const RtMethodInfo* method)
 {
     RtModuleDef* ass = method->parent->image;
