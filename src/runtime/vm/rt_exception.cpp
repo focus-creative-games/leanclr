@@ -117,7 +117,7 @@ RtException* Exception::raise_error_as_exception(RtErr err, interp::InterpFrame*
         auto ex_ret2 = vm::Object::new_object(Class::get_corlib_types().cls_execution_engine_exception);
         if (ex_ret2.is_ok())
         {
-            return reinterpret_cast<RtException*>(ex_ret2.unwrap());
+            return raise_exception(reinterpret_cast<RtException*>(ex_ret2.unwrap()), frame, ip);
         }
         // Failed to create exception object, return nullptr
         return nullptr;

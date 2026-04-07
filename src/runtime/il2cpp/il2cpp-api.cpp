@@ -1,6 +1,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <cstdio>
+#include <vector>
 
 #include "il2cpp_api_types.h"
 
@@ -28,11 +29,15 @@
 #include "vm/internal_calls.h"
 #include "utils/string_builder.h"
 #include "metadata/module_def.h"
+#include "metadata/metadata_compare.h"
 #include "gc/garbage_collector.h"
+#include "interp/machine_state.h"
 #include "fileloader.h"
 #include "statistic.h"
 #include "liveness.h"
 #include "profiler.h"
+#include "runtime.h"
+#include "stacktrace.h"
 
 using namespace leanclr::il2cpp;
 
@@ -41,40 +46,6 @@ typedef vm::AotExceptionWrapper Il2CppExceptionWrapper;
 typedef il2cpp::Il2CppStat Il2CppStat;
 
 extern leanclr::metadata::RtAotModulesData g_aot_modules_data;
-
-// -- Helpers ------------------------------------------------------------------
-
-// Convert RtString (UTF-16) to a freshly malloc'd ASCII/UTF-8 char*.
-// Caller must free() the returned buffer.
-static char* rt_string_to_cstr_alloc(Il2CppString* s)
-{
-    if (!s)
-        return nullptr;
-    int32_t len = vm::String::get_length(s);
-    char* buf = static_cast<char*>(std::malloc(static_cast<size_t>(len) + 1));
-    if (!buf)
-        return nullptr;
-    const Utf16Char* chars = vm::String::get_chars_ptr(s);
-    for (int32_t i = 0; i < len; i++)
-        buf[i] = static_cast<char>(chars[i]);
-    buf[len] = '\0';
-    return buf;
-}
-
-// GCHandle: il2cpp uses uint32_t handles; leanclr uses void*.
-// On 32-bit wasm sizeof(void*) == sizeof(uint32_t), so this is lossless.
-static inline uint32_t handle_to_u32(void* h)
-{
-    uint32_t v;
-    std::memcpy(&v, &h, sizeof(v));
-    return v;
-}
-static inline void* u32_to_handle(uint32_t v)
-{
-    void* h;
-    std::memcpy(&h, &v, sizeof(h));
-    return h;
-}
 
 extern "C"
 {
@@ -1047,7 +1018,7 @@ extern "C"
     {
         leanclr::il2cpp::Liveness::finalize(state);
     }
-    
+
     void il2cpp_unity_liveness_free_struct(void* state)
     {
         leanclr::il2cpp::Liveness::free_struct(state);
@@ -1257,9 +1228,7 @@ extern "C"
 
     bool il2cpp_monitor_try_enter(Il2CppObject* obj, uint32_t timeout)
     {
-        bool lock_taken = false;
-        vm::Monitor::monitor_try_enter_with_atomic_var(obj, static_cast<int32_t>(timeout), &lock_taken);
-        return lock_taken;
+        return vm::Monitor::monitor_try_enter(obj, static_cast<int32_t>(timeout));
     }
 
     void il2cpp_monitor_exit(Il2CppObject* obj)
@@ -1291,8 +1260,15 @@ extern "C"
 
     Il2CppObject* il2cpp_runtime_invoke_convert_args(const MethodInfo* method, void* obj, Il2CppObject** params, int paramCount, Il2CppException** exc)
     {
-        // TODO: convert boxed Il2CppObject** params to raw value pointers before invoking
-        return nullptr;
+        auto ret = vm::Runtime::invoke_object_arguments_with_run_cctor(method, static_cast<vm::RtObject*>(obj), params, paramCount);
+        if (ret.is_err())
+        {
+            Il2CppException* ex = vm::Exception::raise_error_as_exception(ret.unwrap_err(), nullptr, nullptr);
+            if (exc)
+                *exc = ex;
+            return nullptr;
+        }
+        return ret.unwrap();
     }
 
     Il2CppObject* il2cpp_runtime_invoke(const MethodInfo* method, void* obj, void** params, Il2CppException** exc)
@@ -1300,8 +1276,9 @@ extern "C"
         auto result = vm::Runtime::invoke_with_run_cctor(method, static_cast<vm::RtObject*>(obj), reinterpret_cast<const void* const*>(params));
         if (result.is_err())
         {
+            Il2CppException* ex = vm::Exception::raise_error_as_exception(result.unwrap_err(), nullptr, nullptr);
             if (exc)
-                *exc = vm::Exception::get_and_clear_current_exception();
+                *exc = ex;
             return nullptr;
         }
         return result.unwrap();
@@ -1309,7 +1286,11 @@ extern "C"
 
     void il2cpp_runtime_class_init(Il2CppClass* klass)
     {
-        vm::Runtime::run_class_static_constructor(klass);
+        auto ret = vm::Runtime::run_class_static_constructor(klass);
+        if (ret.is_err())
+        {
+            // FIXME: should throw exception
+        }
     }
 
     void il2cpp_runtime_object_init(Il2CppObject* obj)
@@ -1323,15 +1304,25 @@ extern "C"
     {
         const MethodInfo* ctor = vm::Method::find_matched_method_in_class_by_name_and_param_count(obj->klass, ".ctor", 0);
         if (!ctor)
+        {
+            Il2CppException* ex = vm::Exception::raise_error_as_exception(RtErr::MissingMethod, nullptr, nullptr);
+            if (exc)
+                *exc = ex;
             return;
-        auto result = vm::Runtime::invoke_with_run_cctor(ctor, obj, nullptr);
-        if (result.is_err() && exc)
-            *exc = vm::Exception::get_and_clear_current_exception();
+        }
+
+        auto ret = vm::Runtime::invoke_object_arguments_with_run_cctor(ctor, obj, nullptr, 0);
+        if (ret.is_err())
+        {
+            Il2CppException* ex = vm::Exception::raise_error_as_exception(ret.unwrap_err(), nullptr, nullptr);
+            if (exc)
+                *exc = ex;
+        }
     }
 
     void il2cpp_runtime_unhandled_exception_policy_set(Il2CppRuntimeUnhandledExceptionPolicy value)
     {
-        // TODO
+        il2cpp::Runtime::set_unhandled_exception_policy(value);
     }
 
     // -- string ---------------------------------------------------------------
@@ -1389,61 +1380,94 @@ extern "C"
     }
 
     void il2cpp_thread_detach(Il2CppThread* thread)
-    { /* TODO */
+    {
+        vm::Thread::detach(thread);
     }
 
     Il2CppThread** il2cpp_thread_get_all_attached_threads(size_t* size)
     {
-        // TODO: thread enumeration not exposed
-        *size = 0;
-        return nullptr;
+        return vm::Thread::get_all_attached_threads(size);
     }
 
     bool il2cpp_is_vm_thread(Il2CppThread* thread)
     {
-        return false; // TODO
+        return vm::Thread::is_vm_thread(thread);
     }
 
     // -- stacktrace -----------------------------------------------------------
 
     void il2cpp_current_thread_walk_frame_stack(Il2CppFrameWalkFunc func, void* user_data)
-    { /* TODO */
+    {
+        auto& ms = interp::MachineState::get_global_machine_state();
+        auto frames = ms.get_active_frames();
+        for (auto& frame : frames)
+        {
+            func(&frame, user_data);
+        }
     }
+
     void il2cpp_thread_walk_frame_stack(Il2CppThread* thread, Il2CppFrameWalkFunc func, void* user_data)
-    { /* TODO */
+    {
+        assert(thread == vm::Thread::get_current_thread());
+        il2cpp_current_thread_walk_frame_stack(func, user_data);
     }
 
     bool il2cpp_current_thread_get_top_frame(Il2CppStackFrameInfo* frame)
     {
-        return false; /* TODO */
+        auto& ms = interp::MachineState::get_global_machine_state();
+        auto frames = ms.get_active_frames();
+        if (frames.size() == 0)
+        {
+            return false;
+        }
+        *frame = frames[frames.size() - 1];
+        return true;
     }
+
     bool il2cpp_thread_get_top_frame(Il2CppThread* thread, Il2CppStackFrameInfo* frame)
     {
-        return false; /* TODO */
+        assert(thread == vm::Thread::get_current_thread());
+        return il2cpp_current_thread_get_top_frame(frame);
     }
+
     bool il2cpp_current_thread_get_frame_at(int32_t offset, Il2CppStackFrameInfo* frame)
     {
-        return false; /* TODO */
+        auto& ms = interp::MachineState::get_global_machine_state();
+        auto frames = ms.get_active_frames();
+        if (frames.size() == 0)
+        {
+            return false;
+        }
+        *frame = frames[frames.size() - 1 - offset];
+        return true;
     }
+
     bool il2cpp_thread_get_frame_at(Il2CppThread* thread, int32_t offset, Il2CppStackFrameInfo* frame)
     {
-        return false; /* TODO */
+        assert(thread == vm::Thread::get_current_thread());
+        return il2cpp_current_thread_get_frame_at(offset, frame);
     }
 
     int32_t il2cpp_current_thread_get_stack_depth()
     {
-        return 0; /* TODO */
+        auto& ms = interp::MachineState::get_global_machine_state();
+        return static_cast<int32_t>(ms.get_active_frames().size());
     }
+
     int32_t il2cpp_thread_get_stack_depth(Il2CppThread* thread)
     {
-        return 0; /* TODO */
+        assert(thread == vm::Thread::get_current_thread());
+        return il2cpp_current_thread_get_stack_depth();
     }
 
     void il2cpp_set_default_thread_affinity(int64_t affinity_mask)
-    { /* TODO */
+    {
+        vm::Thread::set_default_affinity_mask(affinity_mask);
     }
+
     void il2cpp_override_stack_backtrace(Il2CppBacktraceFunc stackBacktraceFunc)
-    { /* TODO */
+    {
+        il2cpp::StackTrace::override_stack_backtrace(stackBacktraceFunc);
     }
 
     // -- type -----------------------------------------------------------------
@@ -1462,26 +1486,60 @@ extern "C"
 
     Il2CppClass* il2cpp_type_get_class_or_element_class(const Il2CppType* type)
     {
-        auto result = vm::Class::get_class_from_typesig(type);
-        return result.is_ok() ? result.unwrap() : nullptr;
+        switch (type->ele_type)
+        {
+        case metadata::RtElementType::Array:
+        {
+            auto result = vm::Class::get_class_from_typesig(type->data.array_type->ele_type);
+            return result.is_ok() ? result.unwrap() : nullptr;
+        }
+        case metadata::RtElementType::SZArray:
+        {
+            auto result = vm::Class::get_class_from_typesig(type->data.element_type);
+            return result.is_ok() ? result.unwrap() : nullptr;
+        }
+        default:
+        {
+            auto result = vm::Class::get_class_from_typesig(type);
+            return result.is_ok() ? result.unwrap() : nullptr;
+        }
+        }
     }
 
     char* il2cpp_type_get_name(const Il2CppType* type)
     {
-        auto result = vm::Type::get_full_name(type, true, false);
-        return result.is_ok() ? rt_string_to_cstr_alloc(result.unwrap()) : nullptr;
+        utils::StringBuilder sb;
+        vm::TypeNameFormat format = vm::TypeNameFormat::IL;
+        auto ret = vm::Type::append_type_full_name(sb, type, format, false);
+        if (ret.is_err())
+        {
+            return nullptr;
+        }
+        return sb.dup_to_zero_end_cstr();
     }
 
     char* il2cpp_type_get_assembly_qualified_name(const Il2CppType* type)
     {
-        auto result = vm::Type::get_full_name(type, true, true);
-        return result.is_ok() ? rt_string_to_cstr_alloc(result.unwrap()) : nullptr;
+        utils::StringBuilder sb;
+        vm::TypeNameFormat format = vm::TypeNameFormat::AssemblyQualified;
+        auto ret = vm::Type::append_type_full_name(sb, type, format, false);
+        if (ret.is_err())
+        {
+            return nullptr;
+        }
+        return sb.dup_to_zero_end_cstr();
     }
 
     char* il2cpp_type_get_reflection_name(const Il2CppType* type)
     {
-        auto result = vm::Type::get_full_name(type, true, false);
-        return result.is_ok() ? rt_string_to_cstr_alloc(result.unwrap()) : nullptr;
+        utils::StringBuilder sb;
+        vm::TypeNameFormat format = vm::TypeNameFormat::Reflection;
+        auto ret = vm::Type::append_type_full_name(sb, type, format, false);
+        if (ret.is_err())
+        {
+            return nullptr;
+        }
+        return sb.dup_to_zero_end_cstr();
     }
 
     bool il2cpp_type_is_byref(const Il2CppType* type)
@@ -1496,19 +1554,12 @@ extern "C"
 
     bool il2cpp_type_equals(const Il2CppType* type, const Il2CppType* otherType)
     {
-        if (type == otherType)
-            return true;
-        if (type->ele_type != otherType->ele_type)
-            return false;
-        if (type->by_ref != otherType->by_ref)
-            return false;
-        return type->data.dummy == otherType->data.dummy;
+        return metadata::MetadataCompare::is_typesig_equal_ignore_attrs(type, otherType, false);
     }
 
     bool il2cpp_type_is_static(const Il2CppType* type)
     {
-        constexpr uint8_t kStaticBit = 0x10; // RtFieldAttribute::Static
-        return (type->field_or_param_attrs & kStaticBit) != 0;
+        return (type->field_or_param_attrs & static_cast<uint32_t>(metadata::RtFieldAttribute::Static)) != 0;
     }
 
     bool il2cpp_type_is_pointer_type(const Il2CppType* type)
@@ -1535,8 +1586,18 @@ extern "C"
 
     const MethodInfo* il2cpp_image_get_entry_point(const Il2CppImage* image)
     {
-        // TODO: look up entry-point method from token
-        return nullptr;
+        metadata::EncodedTokenId entrypoint_token = image->get_entrypoint_token();
+        if (entrypoint_token == 0)
+        {
+            return nullptr;
+        }
+        uint32_t entrypoint_rid = metadata::RtToken::decode_rid(entrypoint_token);
+        auto result = const_cast<Il2CppImage*>(image)->get_method_by_rid(entrypoint_rid);
+        if (result.is_err())
+        {
+            return nullptr;
+        }
+        return result.unwrap();
     }
 
     size_t il2cpp_image_get_class_count(const Il2CppImage* image)

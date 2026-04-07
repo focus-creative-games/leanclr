@@ -31,6 +31,11 @@ bool Monitor::monitor_wait(RtObject* obj, int32_t milliseconds_timeout)
     return true;
 }
 
+bool Monitor::monitor_try_enter(RtObject* obj, int32_t timeout)
+{
+    return true;
+}
+
 void Monitor::monitor_try_enter_with_atomic_var(RtObject* obj, int32_t timeout, bool* lock_taken)
 {
     *lock_taken = true;

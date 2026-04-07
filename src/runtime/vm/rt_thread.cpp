@@ -23,6 +23,11 @@ RtThread* Thread::get_main_thread()
     return g_current_thread;
 }
 
+bool Thread::is_vm_thread(RtThread* thread)
+{
+    return true;
+}
+
 void Thread::setup_internal_thread(RtThread* thread)
 {
     assert(thread != nullptr);
@@ -55,6 +60,21 @@ RtThread* Thread::attach_current_thread(RtAppDomain* app_domain)
     setup_internal_thread(thread_obj);
     g_current_thread = thread_obj;
     return thread_obj;
+}
+
+void Thread::detach(RtThread* thread)
+{
+    assert(thread != nullptr && thread == g_current_thread);
+    free_internal_thread(thread->internal_thread);
+    g_current_thread = nullptr;
+}
+
+RtThread** Thread::get_all_attached_threads(size_t* size)
+{
+    assert(size != nullptr);
+    assert(g_current_thread != nullptr);
+    *size = 1;
+    return &g_current_thread;
 }
 
 RtResultVoid Thread::construct_internal_thread(RtThread* thread)
@@ -92,6 +112,7 @@ RtResultVoid Thread::free_internal_thread(vm::RtInternalThread* this_thread)
         alloc::GeneralAllocation::free(this_thread->handle);
         this_thread->handle = nullptr;
     }
+    this_thread->state = RtThreadState::Stopped;
 
     // NOTE: Other resources not freed as per Rust implementation:
     // - long_lived->sync_block_cache
@@ -146,6 +167,11 @@ void Thread::set_priority_native(RtThread* thread, int32_t priority)
 {
     // thread parameter unused for now
     g_priority = priority;
+}
+
+void Thread::set_default_affinity_mask(int64_t affinity_mask)
+{
+    
 }
 
 } // namespace vm

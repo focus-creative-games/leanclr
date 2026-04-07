@@ -256,14 +256,6 @@ RtResult<const metadata::RtTypeSig*> Type::resolve_assembly_qualified_name(metad
     }
 }
 
-enum class TypeNameFormat
-{
-    IL,
-    Reflection,
-    FullName,
-    AssemblyQualified,
-};
-
 static void append_public_key_token(utils::StringBuilder& sb, const uint8_t* token, size_t length)
 {
     for (size_t i = 0; i < length; ++i)
@@ -306,7 +298,7 @@ static void append_assembly_name(utils::StringBuilder& sb, const metadata::RtAss
     }
 }
 
-RtResultVoid append_type_full_name(utils::StringBuilder& sb, const metadata::RtTypeSig* typeSig, TypeNameFormat format, bool nested)
+RtResultVoid Type::append_type_full_name(utils::StringBuilder& sb, const metadata::RtTypeSig* typeSig, TypeNameFormat format, bool nested)
 {
     switch (typeSig->ele_type)
     {

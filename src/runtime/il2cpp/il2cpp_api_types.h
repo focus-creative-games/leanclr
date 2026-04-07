@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vm/rt_managed_types.h"
+#include "interp/machine_state.h"
 
 namespace leanclr
 {
@@ -33,7 +34,7 @@ struct Il2CppMemoryCallbacks;
 struct Il2CppMethodDebugInfo;
 struct Il2CppProfiler;
 struct Il2CppRuntimeStats;
-struct Il2CppStackFrameInfo;
+typedef interp::InterpFrame Il2CppStackFrameInfo;
 
 #if _MSC_VER
 typedef wchar_t Il2CppNativeChar;

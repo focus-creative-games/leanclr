@@ -25,9 +25,12 @@ class Thread
 
     // Get main thread
     static RtThread* get_main_thread();
+    static bool is_vm_thread(RtThread* thread);
 
     // Attach current thread to app domain
     static RtThread* attach_current_thread(RtAppDomain* app_domain);
+    static void detach(RtThread* thread);
+    static RtThread** get_all_attached_threads(size_t* size);
 
     // Setup internal thread structure
     static void setup_internal_thread(RtThread* thread);
@@ -58,6 +61,8 @@ class Thread
 
     // Set thread priority
     static void set_priority_native(RtThread* thread, int32_t priority);
+
+    static void set_default_affinity_mask(int64_t affinity_mask);
 };
 
 } // namespace vm

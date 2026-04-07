@@ -219,7 +219,7 @@ struct ScopeBufferGuard
         RET_OK(ArgsAndRetBuffers(args_buffer, ret_buffer));
     }
 
-    RtResult<ArgsAndRetBuffers> convert_object_array_params_to_temp_buffer(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params)
+    RtResult<ArgsAndRetBuffers> convert_object_params_to_temp_buffer(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params, int32_t paramCount)
     {
         if (Method::get_param_count_include_this(method) == 0 && Method::is_void_return(method))
         {
@@ -255,8 +255,6 @@ struct ScopeBufferGuard
             RET_OK(ArgsAndRetBuffers(args_buffer, ret_buffer));
         }
 
-        RtObject** params_arr_start = Array::get_array_data_start_as<RtObject*>(params);
-
         for (size_t i = 0; i < method_param_count; ++i)
         {
             const metadata::RtTypeSig* param_type_sig = method->parameters[i];
@@ -265,7 +263,7 @@ struct ScopeBufferGuard
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(interp::ReduceTypeAndSize, reduceTypeAndSize,
                                                     interp::InterpDefs::get_reduce_type_and_size_by_typesig(param_type_sig));
 
-            RtObject* param = params_arr_start[i];
+            RtObject* param = params[i];
             interp::RtStackObject& dst = args_buffer[dst_idx];
             dst_idx += interp::InterpDefs::get_stack_object_size_by_byte_size(reduceTypeAndSize.byte_size);
 
@@ -279,7 +277,7 @@ struct ScopeBufferGuard
                 }
                 else
                 {
-                    dst.ptr = &params_arr_start[i];
+                    dst.ptr = &params[i];
                 }
             }
             else
@@ -465,7 +463,10 @@ RtResult<RtObject*> Runtime::invoke_with_run_cctor(const metadata::RtMethodInfo*
     return invoke_without_run_cctor(method, obj, params);
 }
 
-RtResult<RtObject*> Runtime::invoke_array_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params)
+
+
+
+RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params, int32_t paramCount)
 {
     assert(method);
 
@@ -491,7 +492,7 @@ RtResult<RtObject*> Runtime::invoke_array_arguments_without_run_cctor(const meta
     }
 
     ScopeBufferGuard guard;
-    auto retBuffers = guard.convert_object_array_params_to_temp_buffer(actual_method, actual_obj, params);
+    auto retBuffers = guard.convert_object_params_to_temp_buffer(actual_method, actual_obj, params, paramCount);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL2(ScopeBufferGuard::ArgsAndRetBuffers, buffers, retBuffers);
 
     interp::RtStackObject* arg_buffer = buffers.args_buffer;
@@ -511,10 +512,37 @@ RtResult<RtObject*> Runtime::invoke_array_arguments_without_run_cctor(const meta
     }
 }
 
-RtResult<RtObject*> Runtime::invoke_array_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params)
+RtResult<RtObject*> Runtime::invoke_object_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params, int32_t paramCount)
 {
     assert(method);
 
+    if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))
+    {
+        RET_ERR_ON_FAIL(run_class_static_constructor(method->parent));
+    }
+
+    return invoke_object_arguments_without_run_cctor(method, obj, params, paramCount);
+}
+
+RtResult<RtObject*> Runtime::invoke_array_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params)
+{
+    RtObject** params_data_start;
+    int32_t paramCount;
+    if (params)
+    {
+        params_data_start = Array::get_array_data_start_as<RtObject*>(params);
+        paramCount = Array::get_array_length(params);
+    }
+    else
+    {
+        params_data_start = nullptr;
+        paramCount = 0;
+    }
+    return invoke_object_arguments_without_run_cctor(method, obj, params_data_start, paramCount);
+}
+
+RtResult<RtObject*> Runtime::invoke_array_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params)
+{
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))
     {
         RET_ERR_ON_FAIL(run_class_static_constructor(method->parent));
