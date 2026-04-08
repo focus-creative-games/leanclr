@@ -827,6 +827,10 @@ class RtEncodedRuntimeHandle
     {
     }
 
+    explicit RtEncodedRuntimeHandle(const void* v) : value((size_t)v)
+    {
+    }
+
     RtEncodedRuntimeHandle() : value(0)
     {
     }

@@ -38,6 +38,7 @@
 #include "profiler.h"
 #include "runtime.h"
 #include "stacktrace.h"
+#include "debugger.h"
 
 using namespace leanclr::il2cpp;
 
@@ -1616,40 +1617,46 @@ extern "C"
 
     Il2CppManagedMemorySnapshot* il2cpp_capture_memory_snapshot()
     {
-        return nullptr; /* TODO */
+        return il2cpp::Runtime::capture_memory_snapshot();
     }
     void il2cpp_free_captured_memory_snapshot(Il2CppManagedMemorySnapshot* s)
-    { /* TODO */
+    {
+        il2cpp::Runtime::free_captured_memory_snapshot(s);
     }
 
     // -- plugin / log / debugger ----------------------------------------------
 
     void il2cpp_set_find_plugin_callback(Il2CppSetFindPlugInCallback method)
-    { /* TODO */
+    {
+        il2cpp::Runtime::set_find_plugin_callback(method);
     }
     void il2cpp_register_log_callback(Il2CppLogCallback method)
-    { /* TODO */
+    {
+        il2cpp::Runtime::set_log_callback(method);
     }
     void il2cpp_debugger_set_agent_options(const char* options)
-    { /* TODO */
+    {
+        il2cpp::Debugger::set_agent_options(options);
     }
 
     bool il2cpp_is_debugger_attached()
     {
-        return false;
+        return il2cpp::Debugger::is_debugger_attached();
     }
 
     void il2cpp_register_debugger_agent_transport(Il2CppDebuggerTransport* t)
-    { /* TODO */
+    {
+        il2cpp::Debugger::register_debugger_agent_transport(t);
     }
 
     bool il2cpp_debug_get_method_info(const MethodInfo* method, Il2CppMethodDebugInfo* info)
     {
-        return false; // TODO
+        return il2cpp::Debugger::get_method_info(method, info);
     }
 
     void il2cpp_unity_install_unitytls_interface(const void* unitytlsInterfaceStruct)
-    { /* TODO */
+    {
+        il2cpp::Runtime::set_unitytls_interface(unitytlsInterfaceStruct);
     }
 
     // -- custom attributes ----------------------------------------------------
@@ -1660,37 +1667,44 @@ extern "C"
 
     Il2CppCustomAttrInfo* il2cpp_custom_attrs_from_class(Il2CppClass* klass)
     {
-        return reinterpret_cast<Il2CppCustomAttrInfo*>(reinterpret_cast<uintptr_t>(klass) | 0u);
+        metadata::RtRuntimeHandle handle(klass->by_val);
+        return (Il2CppCustomAttrInfo*)metadata::RtEncodedRuntimeHandle::encode(handle).get_encoded_value();
     }
 
     Il2CppCustomAttrInfo* il2cpp_custom_attrs_from_method(const MethodInfo* method)
     {
-        return reinterpret_cast<Il2CppCustomAttrInfo*>(reinterpret_cast<uintptr_t>(method) | 1u);
+        metadata::RtRuntimeHandle handle(method);
+        return (Il2CppCustomAttrInfo*)metadata::RtEncodedRuntimeHandle::encode(handle).get_encoded_value();
     }
 
     Il2CppCustomAttrInfo* il2cpp_custom_attrs_from_field(const FieldInfo* field)
     {
-        return reinterpret_cast<Il2CppCustomAttrInfo*>(reinterpret_cast<uintptr_t>(field) | 2u);
+        metadata::RtRuntimeHandle handle(field);
+        return (Il2CppCustomAttrInfo*)metadata::RtEncodedRuntimeHandle::encode(handle).get_encoded_value();
     }
 
     bool il2cpp_custom_attrs_has_attr(Il2CppCustomAttrInfo* ainfo, Il2CppClass* attr_klass)
     {
-        uintptr_t raw = reinterpret_cast<uintptr_t>(ainfo);
-        int tag = static_cast<int>(raw & 3u);
-        void* ptr = reinterpret_cast<void*>(raw & ~uintptr_t(3));
-        if (tag == 0)
+        metadata::RtEncodedRuntimeHandle encodedHandle(ainfo);
+        metadata::RtRuntimeHandle handle = metadata::RtEncodedRuntimeHandle::decode(encodedHandle);
+        if (handle.is_type())
         {
-            auto result = vm::CustomAttribute::has_customattribute_on_class(reinterpret_cast<Il2CppClass*>(ptr), attr_klass);
+            auto ret_klass = vm::Class::get_class_from_typesig(handle.typeSig);
+            if (ret_klass.is_err())
+            {
+                return false;
+            }
+            auto result = vm::CustomAttribute::has_customattribute_on_class(ret_klass.unwrap(), attr_klass);
             return result.is_ok() && result.unwrap();
         }
-        else if (tag == 1)
+        else if (handle.is_method())
         {
-            auto result = vm::CustomAttribute::has_customattribute_on_method(reinterpret_cast<const MethodInfo*>(ptr), attr_klass);
+            auto result = vm::CustomAttribute::has_customattribute_on_method(handle.method, attr_klass);
             return result.is_ok() && result.unwrap();
         }
-        else if (tag == 2)
+        else if (handle.is_field())
         {
-            auto result = vm::CustomAttribute::has_customattribute_on_field(reinterpret_cast<const FieldInfo*>(ptr), attr_klass);
+            auto result = vm::CustomAttribute::has_customattribute_on_field(handle.field, attr_klass);
             return result.is_ok() && result.unwrap();
         }
         return false;

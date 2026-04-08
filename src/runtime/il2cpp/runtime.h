@@ -10,6 +10,14 @@ class Runtime
 {
   public:
     static void set_unhandled_exception_policy(Il2CppRuntimeUnhandledExceptionPolicy policy);
+    static Il2CppManagedMemorySnapshot* capture_memory_snapshot();
+    static void free_captured_memory_snapshot(Il2CppManagedMemorySnapshot* s);
+
+    static void set_find_plugin_callback(Il2CppSetFindPlugInCallback method);
+    static void set_log_callback(Il2CppLogCallback method);
+    static Il2CppLogCallback get_log_callback();
+    static void set_unitytls_interface(const void* unitytlsInterfaceStruct);
+    static const void* get_unitytls_interface();
 };
 } // namespace il2cpp
 } // namespace leanclr
