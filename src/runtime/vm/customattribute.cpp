@@ -957,7 +957,7 @@ RtResultVoid CustomAttribute::resolve_customattribute_data_arguments(utils::Bina
     RET_VOID_OK();
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_target(metadata::RtModuleDef* mod, uint32_t target_token, const metadata::RtClass* attr_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_target(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token, const metadata::RtClass* attr_klass)
 {
     if (target_token == 0)
         RET_OK(false);
@@ -1110,13 +1110,13 @@ static RtResult<CustomAttributeProvider> get_token_of_customattribute_provider(R
     RET_OK(provider);
 }
 
-RtResult<bool> CustomAttribute::has_attribute(RtObject* obj, const  metadata::RtClass* attr_klass)
+RtResult<bool> CustomAttribute::has_attribute(RtObject* obj, const metadata::RtClass* attr_klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(CustomAttributeProvider, provider, get_token_of_customattribute_provider(obj));
     return has_customattribute_on_target(provider.mod, provider.token, attr_klass);
 }
 
-RtResult<RtArray*> CustomAttribute::get_customattribute_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token, const metadata::RtClass* attr_klass)
+RtResult<RtArray*> CustomAttribute::get_customattributes_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token, const metadata::RtClass* attr_klass)
 {
     const CorLibTypes& types = Class::get_corlib_types();
 
@@ -1163,7 +1163,7 @@ RtResult<RtArray*> CustomAttribute::get_customattribute_on_target_token(metadata
 RtResult<RtArray*> CustomAttribute::get_customattributes_on_target_object(RtObject* obj, const metadata::RtClass* attr_klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(CustomAttributeProvider, provider, get_token_of_customattribute_provider(obj));
-    return get_customattribute_on_target_token(provider.mod, provider.token, attr_klass);
+    return get_customattributes_on_target_token(provider.mod, provider.token, attr_klass);
 }
 
 RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target(RtObject* obj)
@@ -1191,7 +1191,7 @@ RtResult<const metadata::RtMethodInfo*> get_customattribute_data_ctor()
     RET_OK(s_customattribute_data_ctor);
 }
 
-RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token)
+RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token)
 {
     const CorLibTypes& types = Class::get_corlib_types();
 

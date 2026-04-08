@@ -678,6 +678,7 @@ struct RtClass
     const RtVirtualInvokeData* vtable;
     const RtInterfaceOffset* interface_vtable_offsets;
     uint8_t* static_fields_data;
+    void* unity_user_data;
     EncodedTokenId token;
     uint32_t instance_size_without_header;
     uint32_t static_size;
@@ -900,6 +901,8 @@ struct RtAotModulesData
     const RtAotModuleData** modules;
     uint32_t module_count;
 };
+
+typedef void (*ClassWalkCallback)(RtClass* klass, void* userData);
 
 class RtMetadata
 {

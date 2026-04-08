@@ -2337,5 +2337,13 @@ void Class::get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_
     bitmaps_size = 0;
     return;
 }
+
+void Class::walk_ptr_classes(metadata::ClassWalkCallback callback, void* userData)
+{
+    for (auto& entry : g_ptrClassCache)
+    {
+        callback(entry.second, userData);
+    }
+}
 } // namespace vm
 } // namespace leanclr

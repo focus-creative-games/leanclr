@@ -16,8 +16,6 @@ class Runtime
     static void set_find_plugin_callback(Il2CppSetFindPlugInCallback method);
     static void set_log_callback(Il2CppLogCallback method);
     static Il2CppLogCallback get_log_callback();
-    static void set_unitytls_interface(const void* unitytlsInterfaceStruct);
-    static const void* get_unitytls_interface();
 };
 } // namespace il2cpp
 } // namespace leanclr

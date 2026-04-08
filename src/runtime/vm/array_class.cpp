@@ -496,5 +496,13 @@ RtResultVoid ArrayClass::initialize()
     RET_VOID_OK();
 }
 
+void ArrayClass::walk_array_classes(metadata::ClassWalkCallback callback, void* userData)
+{
+    for (auto& entry : g_arrayClassMap)
+    {
+        callback(entry.second, userData);
+    }
+}
+
 } // namespace vm
 } // namespace leanclr

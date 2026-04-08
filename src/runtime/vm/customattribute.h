@@ -11,9 +11,9 @@ namespace vm
 struct CustomAttributeProvider
 {
     metadata::RtModuleDef* mod;
-    uint32_t token;
+    metadata::EncodedTokenId token;
 
-    CustomAttributeProvider(metadata::RtModuleDef* mod, uint32_t token) : mod(mod), token(token)
+    CustomAttributeProvider(metadata::RtModuleDef* mod, metadata::EncodedTokenId token) : mod(mod), token(token)
     {
     }
 
@@ -35,7 +35,7 @@ class CustomAttribute
                                                                const metadata::RtMethodInfo* ctor_method, RtArray** typed_arg_arr_ptr,
                                                                RtArray** named_arg_arr_ptr);
 
-    static RtResult<bool> has_customattribute_on_target(metadata::RtModuleDef* mod, uint32_t target_token, const metadata::RtClass* attr_klass);
+    static RtResult<bool> has_customattribute_on_target(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token, const metadata::RtClass* attr_klass);
     static RtResult<bool> has_customattribute_on_field(const metadata::RtFieldInfo* field, const metadata::RtClass* attr_klass);
     static RtResult<bool> has_customattribute_on_method(const metadata::RtMethodInfo* method, const metadata::RtClass* customattribute_klass);
     static RtResult<bool> has_customattribute_on_class(const metadata::RtClass* klass, const metadata::RtClass* customattribute_klass);
@@ -45,10 +45,10 @@ class CustomAttribute
     static RtResult<bool> has_customattribute_on_assembly(metadata::RtModuleDef* mod, const metadata::RtClass* customattribute_klass);
     static RtResult<bool> has_attribute(RtObject* obj, const metadata::RtClass* attr_klass);
 
-    static RtResult<RtArray*> get_customattribute_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token, const metadata::RtClass* attr_klass);
+    static RtResult<RtArray*> get_customattributes_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token, const metadata::RtClass* attr_klass);
     static RtResult<RtArray*> get_customattributes_on_target_object(RtObject* obj, const metadata::RtClass* attr_klass);
     static RtResult<RtArray*> get_customattributes_data_on_target(RtObject* obj);
-    static RtResult<RtArray*> get_customattributes_data_on_target_token(metadata::RtModuleDef* mod, uint32_t target_token);
+    static RtResult<RtArray*> get_customattributes_data_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token);
 };
 
 } // namespace vm

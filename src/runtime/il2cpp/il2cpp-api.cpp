@@ -30,6 +30,7 @@
 #include "utils/string_builder.h"
 #include "metadata/module_def.h"
 #include "metadata/metadata_compare.h"
+#include "metadata/metadata_cache.h"
 #include "gc/garbage_collector.h"
 #include "interp/machine_state.h"
 #include "fileloader.h"
@@ -39,6 +40,7 @@
 #include "runtime.h"
 #include "stacktrace.h"
 #include "debugger.h"
+#include "unityengine.h"
 
 using namespace leanclr::il2cpp;
 
@@ -1656,7 +1658,7 @@ extern "C"
 
     void il2cpp_unity_install_unitytls_interface(const void* unitytlsInterfaceStruct)
     {
-        il2cpp::Runtime::set_unitytls_interface(unitytlsInterfaceStruct);
+        il2cpp::UnityEngine::set_unitytls_interface(unitytlsInterfaceStruct);
     }
 
     // -- custom attributes ----------------------------------------------------
@@ -1712,14 +1714,84 @@ extern "C"
 
     Il2CppObject* il2cpp_custom_attrs_get_attr(Il2CppCustomAttrInfo* ainfo, Il2CppClass* attr_klass)
     {
-        // TODO: retrieve a single attribute instance
+        metadata::RtEncodedRuntimeHandle encodedHandle(ainfo);
+        metadata::RtRuntimeHandle handle = metadata::RtEncodedRuntimeHandle::decode(encodedHandle);
+        Il2CppImage* image = nullptr;
+        metadata::EncodedTokenId token;
+        if (handle.is_type())
+        {
+            auto ret_klass = vm::Class::get_class_from_typesig(handle.typeSig);
+            if (ret_klass.is_err())
+            {
+                return nullptr;
+            }
+            token = ret_klass.unwrap()->token;
+            image = ret_klass.unwrap()->image;
+        }
+        else if (handle.is_method())
+        {
+            token = handle.method->token;
+            image = handle.method->parent->image;
+        }
+        else if (handle.is_field())
+        {
+            token = handle.field->token;
+            image = handle.field->parent->image;
+        }
+        else
+        {
+            return nullptr;
+        }
+        auto result = vm::CustomAttribute::get_customattributes_on_target_token(image, token, nullptr);
+        if (result.is_err())
+        {
+            return nullptr;
+        }
+
+        Il2CppArray* attrs = result.unwrap();
+        if (attrs && attrs->length > 0)
+        {
+            return vm::Array::get_array_data_at<Il2CppObject*>(attrs, 0);
+        }
         return nullptr;
     }
 
     Il2CppArray* il2cpp_custom_attrs_construct(Il2CppCustomAttrInfo* ainfo)
     {
-        // TODO: construct all attribute instances
-        return nullptr;
+        metadata::RtEncodedRuntimeHandle encodedHandle(ainfo);
+        metadata::RtRuntimeHandle handle = metadata::RtEncodedRuntimeHandle::decode(encodedHandle);
+        Il2CppImage* image = nullptr;
+        metadata::EncodedTokenId token;
+        if (handle.is_type())
+        {
+            auto ret_klass = vm::Class::get_class_from_typesig(handle.typeSig);
+            if (ret_klass.is_err())
+            {
+                return nullptr;
+            }
+            token = ret_klass.unwrap()->token;
+            image = ret_klass.unwrap()->image;
+        }
+        else if (handle.is_method())
+        {
+            token = handle.method->token;
+            image = handle.method->parent->image;
+        }
+        else if (handle.is_field())
+        {
+            token = handle.field->token;
+            image = handle.field->parent->image;
+        }
+        else
+        {
+            return nullptr;
+        }
+        auto result = vm::CustomAttribute::get_customattributes_on_target_token(image, token, nullptr);
+        if (result.is_err())
+        {
+            return nullptr;
+        }
+        return result.unwrap();
     }
 
     void il2cpp_custom_attrs_free(Il2CppCustomAttrInfo* ainfo)
@@ -1731,26 +1803,28 @@ extern "C"
 
     void il2cpp_type_get_name_chunked(const Il2CppType* type, void (*chunkReportFunc)(void* data, void* userData), void* userData)
     {
-        // Delegate to il2cpp_type_get_name and report as a single chunk.
-        char* name = il2cpp_type_get_name(type);
-        if (name)
+        utils::StringBuilder sb;
+        vm::TypeNameFormat format = vm::TypeNameFormat::IL;
+        auto ret = vm::Type::append_type_full_name(sb, type, format, false);
+        if (ret.is_err())
         {
-            chunkReportFunc(name, userData);
-            std::free(name);
+            assert(false);
+            return;
         }
+        sb.sure_null_terminator_but_not_append();
+        chunkReportFunc((void*)sb.as_cstr(), userData);
     }
 
     // -- class user data ------------------------------------------------------
 
     void il2cpp_class_set_userdata(Il2CppClass* klass, void* userdata)
     {
-        // TODO: RtClass does not have a unity_user_data field
+        klass->unity_user_data = userdata;
     }
 
     int il2cpp_class_get_userdata_offset()
     {
-        // TODO: RtClass does not have a unity_user_data field
-        return -1;
+        return offsetof(Il2CppClass, unity_user_data);
     }
 
     // -- class enumeration ----------------------------------------------------
@@ -1769,11 +1843,16 @@ extern "C"
                     klassReportFunc(result.unwrap(), userData);
             }
         }
+        metadata::MetadataCache::walk_generic_classes(klassReportFunc, userData);
+        vm::ArrayClass::walk_array_classes(klassReportFunc, userData);
+        vm::Class::walk_ptr_classes(klassReportFunc, userData);
+        // FIXME: il2cpp doesn't walk generic param classes, is it a mistake?
     }
 
     // -- android --------------------------------------------------------------
 
     void il2cpp_unity_set_android_network_up_state_func(Il2CppAndroidUpStateFunc func)
-    { /* TODO */
+    {
+        il2cpp::UnityEngine::set_android_network_up_state_func(func);
     }
 }

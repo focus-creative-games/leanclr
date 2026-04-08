@@ -6,6 +6,7 @@ namespace leanclr
 {
 namespace vm
 {
+
 class ArrayClass
 {
   public:
@@ -25,6 +26,8 @@ class ArrayClass
 
     // Interface method initialization
     static RtResultVoid initialize_array_interface_methods();
+
+    static void walk_array_classes(metadata::ClassWalkCallback callback, void* userData);
 };
 } // namespace vm
 } // namespace leanclr

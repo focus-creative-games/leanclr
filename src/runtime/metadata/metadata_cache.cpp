@@ -556,5 +556,14 @@ RtResult<const RtTypeSig*> MetadataCache::get_pooled_array_typesig_by_element_ty
     RtTypeSigByValRef pair = res.unwrap();
     RET_OK(byRef ? pair.by_ref : pair.by_val);
 }
+
+void MetadataCache::walk_generic_classes(ClassWalkCallback callback, void* userData)
+{
+    for (auto& entry : g_genericClassCache)
+    {
+        callback(const_cast<RtClass*>(entry->cache_klass), userData);
+    }
+}
+
 } // namespace metadata
 } // namespace leanclr

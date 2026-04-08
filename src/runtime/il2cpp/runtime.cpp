@@ -8,7 +8,6 @@ namespace il2cpp
 
 static Il2CppSetFindPlugInCallback s_find_plugin_callback = nullptr;
 static Il2CppLogCallback s_log_callback = nullptr;
-static const void* s_unitytls_interface_struct = nullptr;
 
 void Runtime::set_unhandled_exception_policy(Il2CppRuntimeUnhandledExceptionPolicy policy)
 {
@@ -39,16 +38,6 @@ void Runtime::set_log_callback(Il2CppLogCallback method)
 Il2CppLogCallback Runtime::get_log_callback()
 {
     return s_log_callback;
-}
-
-void Runtime::set_unitytls_interface(const void* unitytlsInterfaceStruct)
-{
-    s_unitytls_interface_struct = unitytlsInterfaceStruct;
-}
-
-const void* Runtime::get_unitytls_interface()
-{
-    return s_unitytls_interface_struct;
 }
 
 } // namespace il2cpp

@@ -231,6 +231,7 @@ class Class
     static size_t get_gc_bitmap_size(const metadata::RtClass* klass);
     static void get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size);
 
+    static void walk_ptr_classes(metadata::ClassWalkCallback callback, void* userData);
   private:
     static RtResultVoid setup_interfaces_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_nested_classes_typedef(metadata::RtClass* klass);
