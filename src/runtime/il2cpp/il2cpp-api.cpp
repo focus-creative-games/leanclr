@@ -47,6 +47,7 @@ using namespace leanclr::il2cpp;
 typedef vm::GCMode Il2CppGCMode;
 typedef vm::AotExceptionWrapper Il2CppExceptionWrapper;
 typedef il2cpp::Il2CppStat Il2CppStat;
+typedef alloc::MemoryCallbacks Il2CppMemoryCallbacks;
 
 extern leanclr::metadata::RtAotModulesData g_aot_modules_data;
 
@@ -104,6 +105,26 @@ extern "C"
     void il2cpp_set_commandline_arguments_utf16(int argc, const Il2CppChar* const argv[], const char* basedir)
     {
         vm::Settings::set_command_line_arguments_utf16(argc, (const Il2CppChar**)argv);
+    }
+
+    void il2cpp_set_memory_callbacks(Il2CppMemoryCallbacks* callbacks)
+    {
+        alloc::GeneralAllocation::set_memory_callbacks(*callbacks);
+    }
+
+    void il2cpp_memory_pool_set_region_size(size_t size)
+    {
+        alloc::MemPool::set_default_region_size(size);
+    }
+
+    size_t il2cpp_memory_pool_get_region_size()
+    {
+        return alloc::MemPool::get_default_region_size();
+    }
+
+    const Il2CppImage* il2cpp_get_corlib()
+    {
+        return vm::Assembly::get_corlib()->mod;
     }
 
     // -- internal calls -------------------------------------------------------

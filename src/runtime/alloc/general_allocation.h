@@ -9,12 +9,31 @@ namespace leanclr
 {
 namespace alloc
 {
+struct MemoryCallbacks
+{
+    void* (*malloc)(size_t size);
+    void* (*aligned_malloc)(size_t size, size_t alignment);
+    void (*free)(void* ptr);
+    void (*aligned_free)(void* ptr);
+    void* (*calloc)(size_t nmemb, size_t size);
+    void* (*realloc)(void* ptr, size_t size);
+    void* (*aligned_realloc)(void* ptr, size_t size, size_t alignment);
+};
+
 class GeneralAllocation
 {
+  private:
+    static MemoryCallbacks s_memory_callbacks;
+
   public:
+    static void set_memory_callbacks(MemoryCallbacks callbacks)
+    {
+        s_memory_callbacks = callbacks;
+    }
+    
     static void* malloc(size_t size)
     {
-        return std::malloc(size);
+        return s_memory_callbacks.malloc(size);
     }
 
     template <typename T>
@@ -26,7 +45,7 @@ class GeneralAllocation
 
     static void* malloc_zeroed(size_t size)
     {
-        return std::calloc(1, size);
+        return s_memory_callbacks.calloc(1, size);
     }
 
     template <typename T>
@@ -38,7 +57,7 @@ class GeneralAllocation
 
     static void* calloc(size_t count, size_t size)
     {
-        return std::calloc(count, size);
+        return s_memory_callbacks.calloc(count, size);
     }
 
     template <typename T>
@@ -50,7 +69,17 @@ class GeneralAllocation
 
     static void* realloc(void* ptr, size_t size)
     {
-        return std::realloc(ptr, size);
+        return s_memory_callbacks.realloc(ptr, size);
+    }
+
+    static void* aligned_malloc(size_t size, size_t alignment)
+    {
+        return s_memory_callbacks.aligned_malloc(size, alignment);
+    }
+
+    static void* aligned_realloc(void* ptr, size_t size, size_t alignment)
+    {
+        return s_memory_callbacks.aligned_realloc(ptr, size, alignment);
     }
 
     template <typename T, typename... Args>
@@ -78,7 +107,15 @@ class GeneralAllocation
     {
         if (ptr)
         {
-            std::free(ptr);
+            s_memory_callbacks.free(ptr);
+        }
+    }
+
+    static void aligned_free(void* ptr)
+    {
+        if (ptr)
+        {
+            s_memory_callbacks.aligned_free(ptr);
         }
     }
 
@@ -86,7 +123,7 @@ class GeneralAllocation
     {
         if (ptr_location)
         {
-            std::free(ptr_location);
+            s_memory_callbacks.free(ptr_location);
             ptr_location = nullptr;
         }
     }

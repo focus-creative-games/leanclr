@@ -30,7 +30,6 @@ typedef metadata::RtEventInfo EventInfo;
 struct Il2CppCustomAttrInfo;
 struct Il2CppDebuggerTransport;
 struct Il2CppManagedMemorySnapshot;
-struct Il2CppMemoryCallbacks;
 struct Il2CppMethodDebugInfo;
 struct Il2CppProfiler;
 struct Il2CppRuntimeStats;
