@@ -899,13 +899,20 @@ namespace LeanAOT.ToCpp
         private void EmitLoadInt32(Instruction inst, int value)
         {
             var newVar = PushStack(EvalDataType.Int32);
-            _bodyWriter.AddLine($"{GetTypeName(newVar)} {GetEvalVariableName(newVar)} = {value};");
+            _bodyWriter.AddLine($"{GetTypeName(newVar)} {GetEvalVariableName(newVar)} = {FormatInt32Literal(value)};");
         }
 
         private void EmitLoadInt64(Instruction inst, long value)
         {
             var newVar = PushStack(EvalDataType.Int64);
             _bodyWriter.AddLine($"{GetTypeName(newVar)} {GetEvalVariableName(newVar)} = {FormatInt64Literal(value)};");
+        }
+
+        private static string FormatInt32Literal(int value)
+        {
+            if (value == int.MinValue)
+                return "INT32_MIN";
+            return $"{value}";
         }
 
         // int64_t min: avoid -9223372036854775808L (Clang -Wimplicitly-unsigned-literal); stdint.h is pulled in via codegen headers.
