@@ -21,7 +21,7 @@ MemPool::Region* MemPool::create_region(size_t capacity)
 {
     const size_t aligned_capacity = std::max(align_up(capacity, page_size_), region_size_);
 
-    auto* data = static_cast<uint8_t*>(malloc_zeroed(aligned_capacity));
+    auto* data = static_cast<uint8_t*>(alloc::GeneralAllocation::malloc_zeroed(aligned_capacity));
     if (!data)
     {
         return nullptr;

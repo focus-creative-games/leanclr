@@ -1,58 +1,36 @@
-#include <cstdlib>
-#include <cstring>
-#include <cstdio>
-#include <vector>
-
-#include "il2cpp_api_types.h"
-
-#include "vm/runtime.h"
-#include "vm/settings.h"
-#include "vm/class.h"
-#include "vm/object.h"
-#include "vm/rt_array.h"
-#include "vm/array_class.h"
-#include "vm/field.h"
-#include "vm/method.h"
-#include "vm/rt_string.h"
-#include "vm/reflection.h"
-#include "vm/assembly.h"
-#include "vm/rt_exception.h"
-#include "vm/monitor.h"
-#include "vm/property.h"
-#include "vm/gc.h"
-#include "vm/gchandle.h"
-#include "vm/type.h"
-#include "vm/appdomain.h"
-#include "vm/rt_thread.h"
-#include "vm/customattribute.h"
-#include "vm/stacktrace.h"
-#include "vm/internal_calls.h"
-#include "utils/string_builder.h"
-#include "metadata/module_def.h"
-#include "metadata/metadata_compare.h"
-#include "metadata/metadata_cache.h"
-#include "gc/garbage_collector.h"
-#include "interp/machine_state.h"
-#include "fileloader.h"
-#include "statistic.h"
-#include "liveness.h"
-#include "profiler.h"
-#include "runtime.h"
-#include "stacktrace.h"
-#include "debugger.h"
-#include "unityengine.h"
-
-using namespace leanclr::il2cpp;
-
-typedef vm::GCMode Il2CppGCMode;
-typedef vm::AotExceptionWrapper Il2CppExceptionWrapper;
-typedef il2cpp::Il2CppStat Il2CppStat;
-typedef alloc::MemoryCallbacks Il2CppMemoryCallbacks;
-
-extern leanclr::metadata::RtAotModulesData g_aot_modules_data;
+#include "il2cpp-api.h"
 
 extern "C"
 {
+#if IL2CPP_API_DYNAMIC_NO_DLSYM
+    typedef utils::HashMap<const char*, void*, utils::CStrHasher, utils::CStrCompare> SymbolTable;
+    static SymbolTable s_SymbolTable;
+
+    void* il2cpp_api_lookup_symbol(const char* name)
+    {
+        SymbolTable::iterator it = s_SymbolTable.find(name);
+        if (it != s_SymbolTable.end())
+        {
+            return it->second;
+        }
+        return NULL;
+    }
+
+    static void RegisterAPIFunction(const char* name, void* symbol)
+    {
+        s_SymbolTable.insert(std::make_pair(name, symbol));
+    }
+
+    void il2cpp_api_register_symbols(void)
+    {
+#define DO_API(r, n, p) RegisterAPIFunction(#n, (void*)n);
+#define DO_API_NO_RETURN(r, n, p) DO_API(r, n, p)
+#include "il2cpp-api-functions.h"
+#undef DO_API
+#undef DO_API_NO_RETURN
+    }
+#endif
+
     int il2cpp_init(const char* domain_name)
     {
         setlocale(LC_ALL, "");
@@ -80,13 +58,6 @@ extern "C"
         vm::Settings::set_config_dir(config_path);
     }
 
-    void il2cpp_set_config_utf16(const Il2CppChar* executablePath)
-    {
-        utils::StringBuilder sb;
-        sb.append_utf16_str(executablePath, utils::StringUtil::get_utf16chars_length(executablePath));
-        vm::Settings::set_config_dir(sb.as_cstr());
-    }
-
     void il2cpp_set_data_dir(const char* data_path)
     {
         vm::Settings::set_data_dir(data_path);
@@ -110,6 +81,18 @@ extern "C"
     void il2cpp_set_memory_callbacks(Il2CppMemoryCallbacks* callbacks)
     {
         alloc::GeneralAllocation::set_memory_callbacks(*callbacks);
+    }
+
+    void il2cpp_set_config_utf16(const Il2CppChar* executablePath)
+    {
+        utils::StringBuilder sb;
+        sb.append_utf16_str(executablePath, utils::StringUtil::get_utf16chars_length(executablePath));
+        vm::Settings::set_config(sb.as_cstr());
+    }
+
+    void il2cpp_set_config(const char* executablePath)
+    {
+        vm::Settings::set_config(executablePath);
     }
 
     void il2cpp_memory_pool_set_region_size(size_t size)

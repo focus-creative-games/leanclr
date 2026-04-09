@@ -10,6 +10,7 @@ static const char* g_domain_name = nullptr;
 static const char* g_config_dir = nullptr;
 static const char* g_data_dir = nullptr;
 static const char* g_temp_dir = nullptr;
+static const char* g_config = nullptr;
 
 static const char* g_commandline_arguments[1024] = {nullptr};
 static int32_t g_commandline_arguments_count = 0;
@@ -100,6 +101,19 @@ void Settings::set_temp_dir(const char* temp_dir)
     g_temp_dir = utils::StringUtil::strdup(temp_dir);
 }
 
+
+void Settings::set_config(const char* executablePath)
+{
+    assert(executablePath != nullptr);
+    assert(g_config == nullptr);
+    g_config = utils::StringUtil::strdup(executablePath);
+}
+
+
+const char* Settings::get_config()
+{
+    return g_config;
+}
 
 FileLoader Settings::get_file_loader()
 {

@@ -24,7 +24,7 @@ static bool s_bundle_loaded_ok = false;
 // Cache the entire global-metadata.dat in memory.
 static std::vector<uint8_t> s_cached_bundle_data;
 // Entries point directly into s_cached_bundle_data.
-static std::vector<AssemblyEntry> s_cached_assemblies;
+static std::vector<AssemblyEntry> s_cached_assembly_entries;
 
 static inline uint32_t read_u32_le(const uint8_t* p)
 {
@@ -57,7 +57,7 @@ static std::string build_global_metadata_path()
 static RtResultVoid load_global_metadata_bundle_once()
 {
     s_cached_bundle_data.clear();
-    s_cached_assemblies.clear();
+    s_cached_assembly_entries.clear();
     s_bundle_loaded_ok = false;
 
     std::string dat_path = build_global_metadata_path();
@@ -97,7 +97,7 @@ static RtResultVoid load_global_metadata_bundle_once()
 
     const uint32_t assembly_count = read_u32_le(s_cached_bundle_data.data() + 4);
     size_t cursor = 8;
-    s_cached_assemblies.reserve(assembly_count);
+    s_cached_assembly_entries.reserve(assembly_count);
     std::vector<uint32_t> rel_offsets;
     rel_offsets.reserve(assembly_count);
 
@@ -136,14 +136,14 @@ static RtResultVoid load_global_metadata_bundle_once()
         const uint32_t rel_offset = read_u32_le(s_cached_bundle_data.data() + cursor + 4);
         cursor += 8;
 
-        s_cached_assemblies.push_back(e);
+        s_cached_assembly_entries.push_back(e);
         rel_offsets.push_back(rel_offset);
     }
 
     const size_t assembly_bytes_base = cursor;
-    for (size_t i = 0; i < s_cached_assemblies.size(); i++)
+    for (size_t i = 0; i < s_cached_assembly_entries.size(); i++)
     {
-        AssemblyEntry& e = s_cached_assemblies[i];
+        AssemblyEntry& e = s_cached_assembly_entries[i];
         const uint32_t rel_offset = rel_offsets[i];
         const size_t abs_offset = assembly_bytes_base + static_cast<size_t>(rel_offset);
         const size_t abs_end = abs_offset + static_cast<size_t>(e.size);
@@ -191,7 +191,7 @@ RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const cha
     }
 
     const AssemblyEntry* matched = nullptr;
-    for (const auto& e : s_cached_assemblies)
+    for (const auto& e : s_cached_assembly_entries)
     {
         if (std::strcmp(e.name, assembly_name) == 0)
         {
@@ -204,7 +204,6 @@ RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const cha
         return RtErr::FileNotFound;
     }
     return vm::FileData{matched->file_data, matched->size};
-
 }
 
 } // namespace il2cpp

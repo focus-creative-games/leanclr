@@ -116,7 +116,7 @@ inline metadata::RtModuleDef* get_module(const char* module_name)
     return metadata::RtModuleDef::find_module(module_name);
 }
 
-inline RtResult<vm::RtObject*> new_object(metadata::RtClass* klass)
+inline RtResult<vm::RtObject*> new_object(const metadata::RtClass* klass)
 {
     return vm::Object::new_object(klass);
 }
@@ -191,12 +191,12 @@ T get_eval_stack_value_as_type(const interp::RtStackObject* ret) noexcept
     return *(T*)ret;
 }
 
-inline bool is_cctor_not_finished(metadata::RtClass* klass)
+inline bool is_cctor_not_finished(const metadata::RtClass* klass)
 {
     return vm::Class::is_cctor_not_finished(klass);
 }
 
-inline RtResultVoid run_class_static_constructor(metadata::RtClass* klass)
+inline RtResultVoid run_class_static_constructor(const metadata::RtClass* klass)
 {
     return vm::Runtime::run_class_static_constructor(klass);
 }
@@ -228,60 +228,60 @@ inline RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl(vm::RtObj
     return vm::Method::get_virtual_method_impl(obj, virtual_method);
 }
 
-inline vm::RtObject* is_inst(vm::RtObject* obj, metadata::RtClass* klass)
+inline vm::RtObject* is_inst(vm::RtObject* obj, const metadata::RtClass* klass)
 {
     return vm::Object::is_inst(obj, klass);
 }
 
-inline bool is_assignable_from(metadata::RtClass* fromClass, metadata::RtClass* toClass)
+inline bool is_assignable_from(const metadata::RtClass* fromClass, const metadata::RtClass* toClass)
 {
     return vm::Class::is_assignable_from(fromClass, toClass);
 }
 
-inline vm::RtObject* cast_class(vm::RtObject* obj, metadata::RtClass* klass)
+inline vm::RtObject* cast_class(vm::RtObject* obj, const metadata::RtClass* klass)
 {
     return vm::Object::cast_class(obj, klass);
 }
 
-inline RtResult<vm::RtObject*> box_object(metadata::RtClass* klass, const void* value)
+inline RtResult<vm::RtObject*> box_object(const metadata::RtClass* klass, const void* value)
 {
     return vm::Object::box_object(klass, value);
 }
 
-inline RtResultVoid unbox_any(const vm::RtObject* obj, metadata::RtClass* klass, void* dst, bool extend_to_stack)
+inline RtResultVoid unbox_any(const vm::RtObject* obj, const metadata::RtClass* klass, void* dst, bool extend_to_stack)
 {
     return vm::Object::unbox_any(obj, klass, dst, extend_to_stack);
 }
 
 // Unbox with exact type checking
-inline RtResult<const void*> unbox_ex(const vm::RtObject* obj, metadata::RtClass* unbox_class)
+inline RtResult<const void*> unbox_ex(const vm::RtObject* obj, const metadata::RtClass* unbox_class)
 {
     return vm::Object::unbox_ex(obj, unbox_class);
 }
 
-inline bool is_value_type(metadata::RtClass* klass)
+inline bool is_value_type(const metadata::RtClass* klass)
 {
     return vm::Class::is_value_type(klass);
 }
 
-inline RtResult<vm::RtArray*> new_szarray_from_ele_class(metadata::RtClass* ele_class, int32_t length)
+inline RtResult<vm::RtArray*> new_szarray_from_ele_class(const metadata::RtClass* ele_class, int32_t length)
 {
-    return vm::Array::new_szarray_from_ele_klass(ele_class, length);
+    return vm::Array::new_szarray_from_ele_klass(const_cast<metadata::RtClass*>(ele_class), length);
 }
 
-inline RtResult<vm::RtArray*> new_szarray_from_array_class(metadata::RtClass* klass, int32_t length)
+inline RtResult<vm::RtArray*> new_szarray_from_array_class(const metadata::RtClass* klass, int32_t length)
 {
-    return vm::Array::new_szarray_from_array_klass(klass, length);
+    return vm::Array::new_szarray_from_array_klass(const_cast<metadata::RtClass*>(klass), length);
 }
 
-inline RtResult<vm::RtArray*> new_mdarray_from_array_class(metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds)
+inline RtResult<vm::RtArray*> new_mdarray_from_array_class(const metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds)
 {
-    return vm::Array::new_mdarray_from_array_klass(arr_klass, lengths, lower_bounds);
+    return vm::Array::new_mdarray_from_array_klass(const_cast<metadata::RtClass*>(arr_klass), lengths, lower_bounds);
 }
 
-inline RtResult<vm::RtArray*> new_mdarray_from_ele_class(metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds)
+inline RtResult<vm::RtArray*> new_mdarray_from_ele_class(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds)
 {
-    return vm::Array::new_mdarray_from_ele_klass(ele_klass, rank, lengths, lower_bounds);
+    return vm::Array::new_mdarray_from_ele_klass(const_cast<metadata::RtClass*>(ele_klass), rank, lengths, lower_bounds);
 }
 
 inline int32_t get_array_length(const vm::RtArray* array)
@@ -299,7 +299,7 @@ inline bool is_array_index_out_of_range(const vm::RtArray* array, int32_t index)
     return vm::Array::is_out_of_range(array, index);
 }
 
-inline bool is_pointer_element_compatible_with(metadata::RtClass* fromClass, metadata::RtClass* toClass)
+inline bool is_pointer_element_compatible_with(const metadata::RtClass* fromClass, const metadata::RtClass* toClass)
 {
     return vm::Class::is_pointer_element_compatible_with(fromClass, toClass);
 }
@@ -327,7 +327,7 @@ inline RtResult<int32_t> get_mdarray_global_index_from_indices(const vm::RtArray
     return vm::Array::get_mdarray_global_index_from_indices3(arr, indices);
 }
 
-inline RtResult<vm::RtMulticastDelegate*> new_delegate(metadata::RtClass* delelgate_type, vm::RtObject* target, const metadata::RtMethodInfo* method)
+inline RtResult<vm::RtMulticastDelegate*> new_delegate(const metadata::RtClass* delelgate_type, vm::RtObject* target, const metadata::RtMethodInfo* method)
 {
     return vm::Delegate::new_delegate(delelgate_type, target, method);
 }

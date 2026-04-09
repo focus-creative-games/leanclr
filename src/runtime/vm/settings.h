@@ -34,6 +34,8 @@ class Settings
     static const char* get_data_dir();
     static void set_temp_dir(const char* temp_dir);
     static const char* get_temp_dir();
+    static void set_config(const char* executablePath);
+    static const char* get_config();
 
     static void set_command_line_arguments_utf16(int32_t argc, const Utf16Char** argv);
     /// for il2cpp end

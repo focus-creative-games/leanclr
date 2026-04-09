@@ -1,4 +1,4 @@
-#pragma
+#pragma once
 
 #include "rt_base.h"
 

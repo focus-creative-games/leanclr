@@ -96,6 +96,7 @@ void StringUtil::utf16_to_utf8(const Utf16Char* utf16_str, size_t utf16_len, Str
 {
     if (!utf16_str || utf16_len == 0)
     {
+        out_utf8_str.sure_null_terminator_but_not_append();
         return;
     }
 
