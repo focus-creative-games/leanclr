@@ -920,7 +920,7 @@ namespace LeanAOT.ToCpp
         {
             if (value == long.MinValue)
                 return "INT64_MIN";
-            return $"{value}L";
+            return $"{value}LL";
         }
 
         private string FormatFloatLiteral(float value)
