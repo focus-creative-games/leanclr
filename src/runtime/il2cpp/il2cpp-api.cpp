@@ -272,11 +272,21 @@ extern "C"
 
     bool il2cpp_class_is_subclass_of(Il2CppClass* klass, Il2CppClass* klassc, bool check_interfaces)
     {
+        auto ret = vm::Class::initialize_super_types(klass);
+        if (ret.is_err())
+        {
+            return false;
+        }
         return vm::Class::is_subclass_of_initialized(klass, klassc, check_interfaces);
     }
 
     bool il2cpp_class_has_parent(Il2CppClass* klass, Il2CppClass* klassc)
     {
+        auto ret = vm::Class::initialize_super_types(klass);
+        if (ret.is_err())
+        {
+            return false;
+        }
         return vm::Class::has_class_parent_fast(klass, klassc);
     }
 
@@ -439,11 +449,21 @@ extern "C"
 
     const PropertyInfo* il2cpp_class_get_property_from_name(Il2CppClass* klass, const char* name)
     {
-        return vm::Class::get_property_for_name(klass, name, true);
+        auto ret = vm::Class::initialize_properties(klass);
+        if (ret.is_err())
+        {
+            return nullptr;
+        }
+        return const_cast<PropertyInfo*>(vm::Class::get_property_for_name(klass, name, true));
     }
 
     FieldInfo* il2cpp_class_get_field_from_name(Il2CppClass* klass, const char* name)
     {
+        auto ret = vm::Class::initialize_fields(klass);
+        if (ret.is_err())
+        {
+            return nullptr;
+        }
         return const_cast<FieldInfo*>(vm::Class::get_field_for_name(klass, name, true));
     }
 
@@ -478,6 +498,11 @@ extern "C"
 
     const MethodInfo* il2cpp_class_get_method_from_name(Il2CppClass* klass, const char* name, int argsCount)
     {
+        auto ret = vm::Class::initialize_methods(klass);
+        if (ret.is_err())
+        {
+            return nullptr;
+        }
         for (const Il2CppClass* c = klass; c != nullptr; c = c->parent)
         {
             const MethodInfo* m;
@@ -659,7 +684,12 @@ extern "C"
 
     const Il2CppAssembly* il2cpp_domain_assembly_open(Il2CppDomain* domain, const char* name)
     {
-        auto result = vm::Assembly::load_by_name(name);
+        std::string dll_name(name);
+        if (dll_name.length() > 4 && dll_name.substr(dll_name.length() - 4) == ".dll")
+        {
+            dll_name = dll_name.substr(0, dll_name.length() - 4);
+        }
+        auto result = vm::Assembly::load_by_name(dll_name.c_str());
         return result.is_ok() ? result.unwrap() : nullptr;
     }
 

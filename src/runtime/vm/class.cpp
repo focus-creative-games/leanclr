@@ -735,6 +735,7 @@ metadata::RtClassFamily Class::get_family(const metadata::RtClass* klass)
 // Reflection/search functions
 const metadata::RtFieldInfo* Class::get_field_for_name(const metadata::RtClass* klass, const char* name, bool search_parent)
 {
+    assert(Class::has_initialized_part(klass, metadata::RtClassInitPart::Field));
     const metadata::RtClass* cur = klass;
     while (cur)
     {
@@ -753,6 +754,7 @@ const metadata::RtFieldInfo* Class::get_field_for_name(const metadata::RtClass* 
 
 const metadata::RtFieldInfo* Class::get_field_for_name(const metadata::RtClass* klass, const char* name, uint32_t name_len, bool search_parent)
 {
+    assert(Class::has_initialized_part(klass, metadata::RtClassInitPart::Field));
     const metadata::RtClass* cur = klass;
     while (cur)
     {
@@ -771,6 +773,7 @@ const metadata::RtFieldInfo* Class::get_field_for_name(const metadata::RtClass* 
 
 const metadata::RtMethodInfo* Class::get_method_for_name(const metadata::RtClass* klass, const char* name, bool search_parent)
 {
+    assert(Class::has_initialized_part(klass, metadata::RtClassInitPart::Method));
     const metadata::RtClass* cur = klass;
     while (cur)
     {
@@ -792,6 +795,7 @@ const metadata::RtMethodInfo* Class::get_method_for_name(const metadata::RtClass
 
 const metadata::RtPropertyInfo* Class::get_property_for_name(const metadata::RtClass* klass, const char* name, bool search_parent)
 {
+    assert(Class::has_initialized_part(klass, metadata::RtClassInitPart::Property));
     const metadata::RtClass* cur = klass;
     while (cur)
     {
@@ -810,6 +814,7 @@ const metadata::RtPropertyInfo* Class::get_property_for_name(const metadata::RtC
 
 const metadata::RtPropertyInfo* Class::get_property_for_name(const metadata::RtClass* klass, const char* name, uint32_t name_len, bool search_parent)
 {
+    assert(Class::has_initialized_part(klass, metadata::RtClassInitPart::Property));
     const metadata::RtClass* cur = klass;
     while (cur)
     {
@@ -828,6 +833,7 @@ const metadata::RtPropertyInfo* Class::get_property_for_name(const metadata::RtC
 
 const metadata::RtEventInfo* Class::get_event_for_name(const metadata::RtClass* klass, const char* name, bool search_parent)
 {
+    assert(Class::has_initialized_part(klass, metadata::RtClassInitPart::Event));
     const metadata::RtClass* cur = klass;
     while (cur)
     {
