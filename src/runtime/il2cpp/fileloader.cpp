@@ -51,7 +51,7 @@ static std::string build_global_metadata_path()
     }
 
     // Caller says Settings::get_data_dir() is the directory of global-metadata.dat.
-    return base + "global-metadata.dat";
+    return base + "Metadata/global-metadata.dat";
 }
 
 static RtResultVoid load_global_metadata_bundle_once()
