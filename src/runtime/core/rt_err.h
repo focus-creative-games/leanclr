@@ -30,7 +30,6 @@ enum class RtErr : uint8_t
     BadImageFormat,
     EntryPointNotFound,
     NotSupported,
-    TypeUnloaded,
     ArgumentOutOfRange,
     Argument,
     FileNotFound,

@@ -91,8 +91,6 @@ static metadata::RtClass* get_exception_klass_of_runtime_error(RtErr err)
         return types.cls_entry_point_not_found_exception;
     case RtErr::NotSupported:
         return types.cls_not_supported_exception;
-    case RtErr::TypeUnloaded:
-        return types.cls_type_unloaded_exception;
     default:
         assert(false && "Unknown runtime error");
         return types.cls_execution_engine_exception;

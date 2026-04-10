@@ -69,7 +69,7 @@ struct CorLibTypes
     metadata::RtClass* cls_missing_member_exception;
     metadata::RtClass* cls_not_supported_exception;
     metadata::RtClass* cls_not_implemented_exception;
-    metadata::RtClass* cls_type_unloaded_exception;
+    // metadata::RtClass* cls_type_unloaded_exception;
     metadata::RtClass* cls_type_initialization_exception;
     metadata::RtClass* cls_target_exception;
     metadata::RtClass* cls_target_invocation_exception;
