@@ -38,7 +38,7 @@ extern "C"
         vm::Settings::set_file_loader(il2cpp::assembly_file_loader);
         vm::Settings::set_aot_modules_data(&g_aot_modules_data);
         auto ret = vm::Runtime::initialize();
-        return static_cast<int>(ret.unwrap_err());
+        return ret.is_ok();
     }
 
     int il2cpp_init_utf16(const Il2CppChar* domain_name)
@@ -599,6 +599,10 @@ extern "C"
 
     const Il2CppImage* il2cpp_class_get_image(Il2CppClass* klass)
     {
+        if (!klass)
+        {
+            return nullptr;
+        }
         return klass->image;
     }
 
@@ -1071,7 +1075,7 @@ extern "C"
 
     uint32_t il2cpp_method_get_param_count(const MethodInfo* method)
     {
-        return static_cast<uint32_t>(method->parameter_count);
+        return method ? static_cast<uint32_t>(method->parameter_count) : 0;
     }
 
     const Il2CppType* il2cpp_method_get_param(const MethodInfo* method, uint32_t index)
@@ -1280,6 +1284,10 @@ extern "C"
 
     Il2CppObject* il2cpp_runtime_invoke(const MethodInfo* method, void* obj, void** params, Il2CppException** exc)
     {
+        if (!method)
+        {
+            return nullptr;
+        }
         auto result = vm::Runtime::invoke_with_run_cctor(method, static_cast<vm::RtObject*>(obj), reinterpret_cast<const void* const*>(params));
         if (result.is_err())
         {
