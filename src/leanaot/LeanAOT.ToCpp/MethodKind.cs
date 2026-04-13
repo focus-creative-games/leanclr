@@ -3,9 +3,9 @@ namespace LeanAOT.ToCpp
     public enum MethodKind
     {
         Normal,
-        Extern,
+        ICall,
         Intrinsic,
-        ExternNewObj,
+        ICallNewObj,
         IntrinsicNewObj,
     }
 }

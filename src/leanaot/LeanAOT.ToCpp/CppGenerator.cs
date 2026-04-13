@@ -41,6 +41,7 @@ namespace LeanAOT.ToCpp
 
     public class CppGenerator : GeneratorBase
     {
+        private static readonly NLog.Logger s_logger = NLog.LogManager.GetCurrentClassLogger();
 
         private readonly Dictionary<string, AssemblyGenerationContext> _assemblyContexts = new Dictionary<string, AssemblyGenerationContext>();
 
@@ -105,9 +106,31 @@ namespace LeanAOT.ToCpp
         {
             var invokerService = GlobalServices.Inst.InvokerService;
             invokerService.GetNotVirtualInvoker(plan.MethodDef);
-            invokerService.GetVirtualInvoker(plan.MethodDef);
+            MethodDef methodDef = plan.MethodDef;
+            invokerService.GetVirtualInvoker(methodDef);
             var methodCtx = (MethodDefGenerationContext)ctx;
-            var methodDetail = GlobalServices.Inst.MetadataService.GetMethodDetail(plan.MethodDef);
+            var methodDetail = GlobalServices.Inst.MetadataService.GetMethodDetail(methodDef);
+            var runtimeApiCatalog = GlobalServices.Inst.RuntimeApiCatalog;
+            if (runtimeApiCatalog.TryGetIcallOrIntrinsic(methodDef, out var entry, out var _methodKind))
+            {
+                var icallOrIntrinsicMethodWriter = new ICallOrIntrinsicMethodWriter(methodDetail, methodCtx.methodBodyCodeFile, entry);
+                icallOrIntrinsicMethodWriter.WriteCode();
+                return;
+            }
+            if (!methodDef.HasBody)
+            {
+                if (methodDef.IsPinvokeImpl)
+                {
+                    var pinvokeMethodWriter = new PInvokeMethodWriter(methodDetail, methodCtx.methodBodyCodeFile);
+                    pinvokeMethodWriter.WriteCode();
+                    return;
+                }
+                s_logger.Warn($"Method {methodDef.FullName} has no body and doesn't have icall or intrinsic entry");
+                var notImplementedMethodWriter = new NotImplementedMethodWriter(methodDetail, methodCtx.methodBodyCodeFile);
+                notImplementedMethodWriter.WriteCode();
+                return;
+            }
+
             var methodWriter = new MethodWriter(methodDetail, methodCtx.methodBodyCodeFile);
             methodWriter.WriteCode();
         }

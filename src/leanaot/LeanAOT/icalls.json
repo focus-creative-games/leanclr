@@ -315,6 +315,121 @@
     "header": "icalls/system_enum.h"
   },
   {
+    "name": "System.Environment::Exit",
+    "func": "SystemEnvironment::exit",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::FailFast",
+    "func": "SystemEnvironment::fail_fast",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_bundled_machine_config",
+    "func": "SystemEnvironment::get_bundled_machine_config",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_ExitCode",
+    "func": "SystemEnvironment::get_exit_code",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_HasShutdownStarted",
+    "func": "SystemEnvironment::get_has_shutdown_started",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_Is64BitOperatingSystem",
+    "func": "SystemEnvironment::get_is_64bit_operating_system",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_MachineName",
+    "func": "SystemEnvironment::get_machine_name",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_Platform",
+    "func": "SystemEnvironment::get_platform",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_ProcessorCount",
+    "func": "SystemEnvironment::get_processor_count",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_TickCount",
+    "func": "SystemEnvironment::get_tick_count",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_UserName",
+    "func": "SystemEnvironment::get_user_name",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::GetCommandLineArgs",
+    "func": "SystemEnvironment::get_command_line_args",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::GetEnvironmentVariableNames",
+    "func": "SystemEnvironment::get_environment_variable_names",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::GetLogicalDrivesInternal",
+    "func": "SystemEnvironment::get_logical_drives_internal",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::GetMachineConfigPath",
+    "func": "SystemEnvironment::get_machine_config_path",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::GetNewLine",
+    "func": "SystemEnvironment::get_new_line",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::GetOSVersionString",
+    "func": "SystemEnvironment::get_os_version_string",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::GetPageSize",
+    "func": "SystemEnvironment::get_page_size",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::GetWindowsFolderPath",
+    "func": "SystemEnvironment::get_windows_folder_path",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::internalGetEnvironmentVariable_native",
+    "func": "SystemEnvironment::internal_get_environment_variable_native",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::internalGetHome",
+    "func": "SystemEnvironment::internal_get_home",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::InternalSetEnvironmentVariable(System.Char*,System.Int32,System.Char*,System.Int32)",
+    "func": "SystemEnvironment::internal_set_environment_variable_native",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::set_ExitCode",
+    "func": "SystemEnvironment::set_exit_code",
+    "header": "icalls/system_environment.h"
+  },
+  {
     "name": "System.Exception::ReportUnhandledException(System.Exception)",
     "func": "SystemException::report_unhandled_exception",
     "header": "icalls/system_exception.h"
@@ -1493,6 +1608,106 @@
     "name": "System.RuntimeType::MakePointerType",
     "func": "SystemRuntimeType::make_pointer_type",
     "header": "icalls/system_runtimetype.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetArrayRank(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::get_array_rank",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetAssembly",
+    "func": "SystemRuntimeTypeHandle::get_assembly",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetAttributes",
+    "func": "SystemRuntimeTypeHandle::get_attributes",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetBaseType",
+    "func": "SystemRuntimeTypeHandle::get_base_type",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetCorElementType",
+    "func": "SystemRuntimeTypeHandle::get_cor_element_type",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetElementType",
+    "func": "SystemRuntimeTypeHandle::get_element_type",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetGenericParameterInfo(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::get_generic_parameter_info",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetGenericTypeDefinition_impl",
+    "func": "SystemRuntimeTypeHandle::get_generic_type_definition_impl",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetMetadataToken(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::get_metadata_token",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetModule(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::get_module",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::HasInstantiation",
+    "func": "SystemRuntimeTypeHandle::has_instantiation",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::HasReferences",
+    "func": "SystemRuntimeTypeHandle::has_references",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::internal_from_name(System.String,System.Threading.StackCrawlMark&,System.Reflection.Assembly,System.Boolean,System.Boolean,System.Boolean)",
+    "func": "SystemRuntimeTypeHandle::internal_from_name",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::is_subclass_of",
+    "func": "SystemRuntimeTypeHandle::is_subclass_of",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::IsByRefLike(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::is_by_ref_like",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::IsComObject(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::is_com_object",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::IsGenericTypeDefinition",
+    "func": "SystemRuntimeTypeHandle::is_generic_type_definition",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::IsGenericVariable",
+    "func": "SystemRuntimeTypeHandle::is_generic_variable",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::IsInstanceOfType",
+    "func": "SystemRuntimeTypeHandle::is_instance_of_type",
+    "header": "icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::type_is_assignable_from",
+    "func": "SystemRuntimeTypeHandle::type_is_assignable_from",
+    "header": "icalls/system_runtimetypehandle.h"
   },
   {
     "name": "System.Security.Cryptography.RNGCryptoServiceProvider::RngClose(System.IntPtr)",

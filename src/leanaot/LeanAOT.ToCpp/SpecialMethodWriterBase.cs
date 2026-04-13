@@ -1,0 +1,78 @@
+using dnlib.DotNet;
+
+namespace LeanAOT.ToCpp
+{
+    abstract class SpecialMethodWriterBase
+    {
+        protected readonly MethodDetail _method;
+        protected readonly RuntimeApiEntry _entry;
+        protected readonly ICorLibTypes _corlibTypes;
+        protected readonly MetadataService _metadataService;
+        protected readonly ManifestService _manifestService;
+
+        protected readonly IMethodBodyCodeFilePart _methodBodyCodeFile;
+        protected readonly ForwardDeclaration _forwardDeclaration;
+        protected readonly CodeThunkZone _writer;
+
+        protected readonly CodeThrunkWriter _bodyWriter;
+        protected SpecialMethodWriterBase(MethodDetail method, IMethodBodyCodeFilePart methodBodyCodeFile, RuntimeApiEntry entry)
+        {
+            _method = method;
+            _entry = entry;
+            _corlibTypes = method.ModuleOfMethodDef.CorLibTypes;
+            _metadataService = GlobalServices.Inst.MetadataService;
+            _manifestService = GlobalServices.Inst.ManifestService;
+            _methodBodyCodeFile = methodBodyCodeFile;
+            _forwardDeclaration = methodBodyCodeFile.ForwardDeclaration;
+            _writer = _methodBodyCodeFile.MethodWriter.CreateThunkCollection(_method.UniqueName);
+
+            _bodyWriter = _writer.CreateThunk("method_body");
+            _bodyWriter.AddLine();
+
+            InitMethodVariables();
+        }
+
+        protected virtual void InitMethodVariables()
+        {
+        }
+
+        public void WriteCode()
+        {
+            if (_entry != null)
+            {
+                _forwardDeclaration.AddInclude(_entry.Header);
+            }
+            AddParameterAndReturnTypeForwardDeclarations();
+            WriteMethodHeader();
+            WriteMethodBody();
+            WriteMethodEnd();
+            _writer.MarkAsArchived();
+        }
+
+
+        protected void AddParameterAndReturnTypeForwardDeclarations()
+        {
+            foreach (var param in _method.ParamsIncludeThis)
+            {
+                _forwardDeclaration.AddTypeForwardDeclaration(param.Type);
+            }
+            _forwardDeclaration.AddTypeForwardDeclaration(_method.RetType);
+        }
+
+        void WriteMethodHeader()
+        {
+            _bodyWriter.AddLine($"// Method: {_method.FullName}");
+            _bodyWriter.AddLine(_method.GenerateMethodDeclaring());
+            _bodyWriter.AddLine("{");
+            _bodyWriter.IncreaseIndent();
+        }
+
+        void WriteMethodEnd()
+        {
+            _bodyWriter.DecreaseIndent();
+            _bodyWriter.AddLine("}");
+        }
+
+        protected abstract void WriteMethodBody();
+    }
+}

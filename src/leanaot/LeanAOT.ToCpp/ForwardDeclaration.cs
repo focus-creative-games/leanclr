@@ -42,7 +42,7 @@ namespace LeanAOT.ToCpp
             AddInclude($"{ModuleGenerationUtil.GetModuleRegistrationHeaderFileNameWithExt(mod)}");
         }
 
-        private void AddInclude(string include)
+        public void AddInclude(string include)
         {
             if (!_addedIncludes.Add(include))
                 return;

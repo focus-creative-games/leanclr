@@ -35,10 +35,15 @@ namespace LeanAOT.GenerationPlan
                     classPlans.Add(classPlan);
                     foreach (var method in type.Methods)
                     {
-                        if (method.IsAbstract || method.HasGenericParameters || method.DeclaringType.HasGenericParameters)
+                        if (method.IsRuntime || method.IsAbstract || method.HasGenericParameters || method.DeclaringType.HasGenericParameters)
                             continue;
                         if (method.HasBody && method.Body.HasExceptionHandlers)
                             continue;
+                        // don't aot System.String's constructor, because we will handle it in a special way
+                        if (!method.HasBody && method.IsConstructor && type.FullName == "System.String")
+                        {
+                            continue;
+                        }
                         if (method.CallingConvention == CallingConvention.VarArg)
                         {
                             s_logger.Warn($"Skip method with vararg calling convention: {method.FullName} token: {method.MDToken}");

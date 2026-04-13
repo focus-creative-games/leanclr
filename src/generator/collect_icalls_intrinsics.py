@@ -185,7 +185,7 @@ def parse_concatenated_c_string_literals(blob: str) -> str:
 
 # First field: one or more string literals; second: (..InternalCallFunction..) & Class::method
 _ICALL_FP_RE = re.compile(
-    rf"\{{\s*((?:{_CSTRING_LITERAL_CHUNK}\s*)+),\s*\([^)]*InternalCallFunction\)\s*&\s*"
+    rf"\{{\s*((?:{_CSTRING_LITERAL_CHUNK}\s*)+),\s*\([^)]*InternalCallFunction\)\s*&?\s*"
     r"([A-Za-z_]\w*(?:::[A-Za-z_]\w*)*)\s*,",
     re.DOTALL,
 )
@@ -197,7 +197,7 @@ _ICALL_NULLPTR_RE = re.compile(
 )
 
 _INTRINSIC_ENTRY_RE = re.compile(
-    rf"\{{\s*((?:{_CSTRING_LITERAL_CHUNK}\s*)+),\s*\([^)]*IntrinsicFunction\)\s*&\s*"
+    rf"\{{\s*((?:{_CSTRING_LITERAL_CHUNK}\s*)+),\s*\([^)]*IntrinsicFunction\)\s*&?\s*"
     r"([A-Za-z_]\w*(?:::[A-Za-z_]\w*)*)\s*,",
     re.DOTALL,
 )

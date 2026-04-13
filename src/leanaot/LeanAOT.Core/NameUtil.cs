@@ -187,5 +187,102 @@ namespace LeanAOT.Core
                 throw new NotSupportedException(type.ToString());
             }
         }
+
+        public static void AppendCorlibTypeName(StringBuilder sb, TypeSig type)
+        {
+            type = type.RemovePinnedAndModifiers();
+            switch (type.ElementType)
+            {
+            case ElementType.Void:
+            case ElementType.Boolean:
+            case ElementType.Char:
+            case ElementType.I1:
+            case ElementType.U1:
+            case ElementType.I2:
+            case ElementType.U2:
+            case ElementType.I4:
+            case ElementType.U4:
+            case ElementType.I8:
+            case ElementType.U8:
+            case ElementType.R4:
+            case ElementType.R8:
+            case ElementType.String:
+            case ElementType.Object:
+            case ElementType.TypedByRef:
+            case ElementType.I:
+            case ElementType.U:
+            case ElementType.ValueType:
+            case ElementType.Class:
+            {
+                sb.Append(type.FullName);
+                break;
+            }
+            case ElementType.Ptr:
+            {
+                AppendCorlibTypeName(sb, type.Next);
+                sb.Append('*');
+                break;
+            }
+            case ElementType.ByRef:
+            {
+                AppendCorlibTypeName(sb, type.Next);
+                sb.Append('&');
+                break;
+            }
+            case ElementType.Array:
+            {
+                var arraySig = (ArraySig)type;
+                AppendCorlibTypeName(sb, arraySig.Next);
+                sb.Append('[');
+                for (int i = 0; i < arraySig.Rank - 1; i++)
+                {
+                    sb.Append(',');
+                }
+                sb.Append(']');
+                break;
+            }
+            case ElementType.SZArray:
+            {
+                var szArraySig = (SZArraySig)type;
+                AppendCorlibTypeName(sb, szArraySig.Next);
+                sb.Append("[]");
+                break;
+            }
+            case ElementType.GenericInst:
+            {
+                var genericInstSig = (GenericInstSig)type;
+                AppendCorlibTypeName(sb, genericInstSig.GenericType);
+                sb.Append('<');
+                foreach (var arg in genericInstSig.GenericArguments)
+                {
+                    AppendCorlibTypeName(sb, arg);
+                    sb.Append(',');
+                }
+                sb.Append('>');
+                break;
+            }
+            // case ElementType.Var:
+            // {
+            //     var genericVarSig = (GenericSig)type;
+            //     sb.Append('!');
+            //     sb.Append(genericVarSig.Number);
+            //     break;
+            // }
+            // case ElementType.MVar:
+            // {
+            //     var genericVarSig = (GenericSig)type;
+            //     sb.Append("!!");
+            //     sb.Append(genericVarSig.Number);
+            //     break;
+            // }
+            // case ElementType.R:
+            case ElementType.FnPtr:
+                sb.Append("fnptr");
+                // throw new NotSupportedException("FnPtr is not supported");
+                break;
+            default:
+                throw new NotSupportedException(type.ToString());
+            }
+        }
     }
 }

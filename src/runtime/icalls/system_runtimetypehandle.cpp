@@ -288,10 +288,8 @@ static RtResultVoid get_attributes_invoker(metadata::RtManagedMethodPointer meth
 }
 
 /// @icall: System.RuntimeTypeHandle::GetMetadataToken(System.RuntimeType)
-static RtResultVoid get_metadata_token_invoker_system_runtimetypehandle(metadata::RtManagedMethodPointer methodPtr,
-                                                                        const metadata::RtMethodInfo* method,
-                                                                        const interp::RtStackObject* params,
-                                                                        interp::RtStackObject* ret) noexcept
+static RtResultVoid get_metadata_token_invoker_system_runtimetypehandle(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, SystemRuntimeTypeHandle::get_metadata_token(runtime_type));
@@ -494,47 +492,39 @@ static RtResultVoid internal_from_name_invoker(metadata::RtManagedMethodPointer 
 
 // Internal call registry
 static vm::InternalCallEntry s_internal_call_entries_system_runtimetypehandle[] = {
-    {"System.RuntimeTypeHandle::GetAttributes", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_attributes), get_attributes_invoker},
-    {"System.RuntimeTypeHandle::GetMetadataToken(System.RuntimeType)", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_metadata_token),
+    {"System.RuntimeTypeHandle::GetAttributes", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_attributes, get_attributes_invoker},
+    {"System.RuntimeTypeHandle::GetMetadataToken(System.RuntimeType)", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_metadata_token,
      get_metadata_token_invoker_system_runtimetypehandle},
-    {"System.RuntimeTypeHandle::GetCorElementType", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_cor_element_type),
-     get_cor_element_type_invoker},
-    {"System.RuntimeTypeHandle::HasInstantiation", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::has_instantiation),
-     has_instantiation_invoker},
-    {"System.RuntimeTypeHandle::IsComObject(System.RuntimeType)", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::is_com_object),
-     is_com_object_invoker},
-    {"System.RuntimeTypeHandle::HasReferences", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::has_references), has_references_invoker},
-    {"System.RuntimeTypeHandle::GetArrayRank(System.RuntimeType)", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_array_rank),
-     get_array_rank_invoker},
-    {"System.RuntimeTypeHandle::GetElementType", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_element_type),
-     get_element_type_invoker},
-    {"System.RuntimeTypeHandle::IsGenericVariable", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::is_generic_variable),
-     is_generic_variable_invoker},
-    {"System.RuntimeTypeHandle::GetBaseType", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_base_type), get_base_type_invoker},
-    {"System.RuntimeTypeHandle::IsGenericTypeDefinition", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::is_generic_type_definition),
+    {"System.RuntimeTypeHandle::GetCorElementType", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_cor_element_type, get_cor_element_type_invoker},
+    {"System.RuntimeTypeHandle::HasInstantiation", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::has_instantiation, has_instantiation_invoker},
+    {"System.RuntimeTypeHandle::IsComObject(System.RuntimeType)", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::is_com_object, is_com_object_invoker},
+    {"System.RuntimeTypeHandle::HasReferences", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::has_references, has_references_invoker},
+    {"System.RuntimeTypeHandle::GetArrayRank(System.RuntimeType)", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_array_rank, get_array_rank_invoker},
+    {"System.RuntimeTypeHandle::GetElementType", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_element_type, get_element_type_invoker},
+    {"System.RuntimeTypeHandle::IsGenericVariable", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::is_generic_variable, is_generic_variable_invoker},
+    {"System.RuntimeTypeHandle::GetBaseType", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_base_type, get_base_type_invoker},
+    {"System.RuntimeTypeHandle::IsGenericTypeDefinition", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::is_generic_type_definition,
      is_generic_type_definition_invoker},
-    {"System.RuntimeTypeHandle::GetGenericParameterInfo(System.RuntimeType)",
-     reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_generic_parameter_info), get_generic_parameter_info_invoker},
-    {"System.RuntimeTypeHandle::is_subclass_of", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::is_subclass_of), is_subclass_of_invoker},
-    {"System.RuntimeTypeHandle::IsByRefLike(System.RuntimeType)", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::is_by_ref_like),
-     is_by_ref_like_invoker},
-    {"System.RuntimeTypeHandle::type_is_assignable_from", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::type_is_assignable_from),
+    {"System.RuntimeTypeHandle::GetGenericParameterInfo(System.RuntimeType)", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_generic_parameter_info,
+     get_generic_parameter_info_invoker},
+    {"System.RuntimeTypeHandle::is_subclass_of", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::is_subclass_of, is_subclass_of_invoker},
+    {"System.RuntimeTypeHandle::IsByRefLike(System.RuntimeType)", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::is_by_ref_like, is_by_ref_like_invoker},
+    {"System.RuntimeTypeHandle::type_is_assignable_from", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::type_is_assignable_from,
      type_is_assignable_from_invoker},
-    {"System.RuntimeTypeHandle::GetAssembly", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_assembly), get_assembly_invoker},
-    {"System.RuntimeTypeHandle::IsInstanceOfType", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::is_instance_of_type),
-     is_instance_of_type_invoker},
-    {"System.RuntimeTypeHandle::GetGenericTypeDefinition_impl",
-     reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_generic_type_definition_impl), get_generic_type_definition_impl_invoker},
-    {"System.RuntimeTypeHandle::GetModule(System.RuntimeType)", reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::get_module),
-     get_module_invoker},
+    {"System.RuntimeTypeHandle::GetAssembly", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_assembly, get_assembly_invoker},
+    {"System.RuntimeTypeHandle::IsInstanceOfType", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::is_instance_of_type, is_instance_of_type_invoker},
+    {"System.RuntimeTypeHandle::GetGenericTypeDefinition_impl", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_generic_type_definition_impl,
+     get_generic_type_definition_impl_invoker},
+    {"System.RuntimeTypeHandle::GetModule(System.RuntimeType)", (vm::InternalCallFunction)&SystemRuntimeTypeHandle::get_module, get_module_invoker},
     {"System.RuntimeTypeHandle::internal_from_name(System.String,System.Threading.StackCrawlMark&,System.Reflection.Assembly,System.Boolean,System.Boolean,"
      "System.Boolean)",
-     reinterpret_cast<vm::InternalCallFunction>(&SystemRuntimeTypeHandle::internal_from_name), internal_from_name_invoker},
+     (vm::InternalCallFunction)&SystemRuntimeTypeHandle::internal_from_name, internal_from_name_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeTypeHandle::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetypehandle, sizeof(s_internal_call_entries_system_runtimetypehandle) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetypehandle,
+                                              sizeof(s_internal_call_entries_system_runtimetypehandle) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls
