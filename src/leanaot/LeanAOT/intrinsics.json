@@ -1,0 +1,178 @@
+[
+  {
+    "name": "System.Array::get_Length",
+    "func": "SystemArray::get_length"
+  },
+  {
+    "name": "System.Array::get_LongLength",
+    "func": "SystemArray::get_long_length"
+  },
+  {
+    "name": "System.Array::GetGenericValueImpl<>",
+    "func": "SystemArray::get_generic_value_impl"
+  },
+  {
+    "name": "System.Array::SetGenericValueImpl<>",
+    "func": "SystemArray::set_generic_value_impl"
+  },
+  {
+    "name": "System.Numerics.Vector::get_IsHardwareAccelerated",
+    "func": "SystemNumericsVector::get_is_hardware_accelerated"
+  },
+  {
+    "name": "System.Object::.ctor()",
+    "func": "SystemObject::ctor"
+  },
+  {
+    "name": "System.ReadOnlySpan`1::get_Item",
+    "func": "SystemSpan::get_item"
+  },
+  {
+    "name": "System.Span`1::get_Item",
+    "func": "SystemSpan::get_item"
+  },
+  {
+    "name": "System.String::get_Chars",
+    "func": "SystemString::get_chars"
+  },
+  {
+    "name": "System.String::get_Length",
+    "func": "SystemString::get_length"
+  },
+  {
+    "name": "System.String::GetHashCode",
+    "func": "SystemString::get_hash_code"
+  },
+  {
+    "name": "System.String::GetLegacyNonRandomizedHashCode",
+    "func": "SystemString::get_hash_code"
+  },
+  {
+    "name": "System.Threading.Interlocked::CompareExchange<>",
+    "func": "SystemThreadingInterlocked::compare_exchange"
+  },
+  {
+    "name": "System.Threading.Interlocked::Exchange(System.Object&,System.Object)",
+    "func": "SystemThreadingInterlocked::exchange_object"
+  },
+  {
+    "name": "System.Threading.Interlocked::Exchange<>",
+    "func": "SystemThreadingInterlocked::exchange"
+  },
+  {
+    "name": "System.Threading.Interlocked::MemoryBarrier",
+    "func": "SystemThreadingInterlocked::memory_barrier"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.Boolean&)",
+    "func": "SystemThreadingVolatile::read_bool"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.Byte&)",
+    "func": "SystemThreadingVolatile::read_byte"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.Double&)",
+    "func": "SystemThreadingVolatile::read_f64"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.Int16&)",
+    "func": "SystemThreadingVolatile::read_i16"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.Int32&)",
+    "func": "SystemThreadingVolatile::read_i32"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.Int64&)",
+    "func": "SystemThreadingVolatile::read_i64"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.IntPtr&)",
+    "func": "SystemThreadingVolatile::read_intptr"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.SByte&)",
+    "func": "SystemThreadingVolatile::read_sbyte"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.Single&)",
+    "func": "SystemThreadingVolatile::read_f32"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.UInt16&)",
+    "func": "SystemThreadingVolatile::read_u16"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.UInt32&)",
+    "func": "SystemThreadingVolatile::read_u32"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.UInt64&)",
+    "func": "SystemThreadingVolatile::read_u64"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.UIntPtr&)",
+    "func": "SystemThreadingVolatile::read_uintptr"
+  },
+  {
+    "name": "System.Threading.Volatile::Read<>",
+    "func": "SystemThreadingVolatile::read_ref"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.Boolean&,System.Boolean)",
+    "func": "SystemThreadingVolatile::write_bool"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.Byte&,System.Byte)",
+    "func": "SystemThreadingVolatile::write_byte"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.Double&,System.Double)",
+    "func": "SystemThreadingVolatile::write_f64"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.Int16&,System.Int16)",
+    "func": "SystemThreadingVolatile::write_i16"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.Int32&,System.Int32)",
+    "func": "SystemThreadingVolatile::write_i32"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.Int64&,System.Int64)",
+    "func": "SystemThreadingVolatile::write_i64"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.IntPtr&,System.IntPtr)",
+    "func": "SystemThreadingVolatile::write_intptr"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.SByte&,System.SByte)",
+    "func": "SystemThreadingVolatile::write_sbyte"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.Single&,System.Single)",
+    "func": "SystemThreadingVolatile::write_f32"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.UInt16&,System.UInt16)",
+    "func": "SystemThreadingVolatile::write_u16"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.UInt32&,System.UInt32)",
+    "func": "SystemThreadingVolatile::write_u32"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.UInt64&,System.UInt64)",
+    "func": "SystemThreadingVolatile::write_u64"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.UIntPtr&,System.UIntPtr)",
+    "func": "SystemThreadingVolatile::write_uintptr"
+  },
+  {
+    "name": "System.Threading.Volatile::Write<>",
+    "func": "SystemThreadingVolatile::write_ref"
+  }
+]
