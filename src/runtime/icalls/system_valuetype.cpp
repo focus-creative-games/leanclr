@@ -464,8 +464,10 @@ static RtResultVoid internal_get_hash_code_invoker(metadata::RtManagedMethodPoin
 }
 
 static vm::InternalCallEntry s_internal_call_entries_system_valuetype[] = {
-    {"System.ValueType::InternalEquals(System.Object,System.Object,System.Object[]&)", nullptr, internal_equals_invoker},
-    {"System.ValueType::InternalGetHashCode(System.Object,System.Object[]&)", nullptr, internal_get_hash_code_invoker},
+    {"System.ValueType::InternalEquals(System.Object,System.Object,System.Object[]&)", (vm::InternalCallFunction)&SystemValueType::internal_equals,
+     internal_equals_invoker},
+    {"System.ValueType::InternalGetHashCode(System.Object,System.Object[]&)", (vm::InternalCallFunction)&SystemValueType::internal_get_hash_code,
+     internal_get_hash_code_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemValueType::get_internal_call_entries()

@@ -94,8 +94,9 @@ static RtResultVoid invoker_internal_to_object(metadata::RtManagedMethodPointer 
 
 // Internal call entries
 static vm::InternalCallEntry s_entries[] = {
-    {"System.TypedReference::InternalMakeTypedReference", nullptr, invoker_internal_make_typed_reference},
-    {"System.TypedReference::InternalToObject", nullptr, invoker_internal_to_object},
+    {"System.TypedReference::InternalMakeTypedReference", (vm::InternalCallFunction)&SystemTypedReference::internal_make_typed_reference,
+     invoker_internal_make_typed_reference},
+    {"System.TypedReference::InternalToObject", (vm::InternalCallFunction)&SystemTypedReference::internal_to_object, invoker_internal_to_object},
 };
 
 utils::Span<vm::InternalCallEntry> SystemTypedReference::get_internal_call_entries()

@@ -72,10 +72,14 @@ static RtResultVoid internal_get_cultures_invoker(metadata::RtManagedMethodPoint
 }
 
 static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultureinfo[] = {
-    {"System.Globalization.CultureInfo::construct_internal_locale_from_lcid(System.Int32)", nullptr, construct_internal_locale_from_lcid_invoker},
-    {"System.Globalization.CultureInfo::construct_internal_locale_from_name(System.String)", nullptr, construct_internal_locale_from_name_invoker},
-    {"System.Globalization.CultureInfo::get_current_locale_name", nullptr, get_current_locale_name_invoker},
-    {"System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)", nullptr, internal_get_cultures_invoker},
+    {"System.Globalization.CultureInfo::construct_internal_locale_from_lcid(System.Int32)",
+     (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::construct_internal_locale_from_lcid, construct_internal_locale_from_lcid_invoker},
+    {"System.Globalization.CultureInfo::construct_internal_locale_from_name(System.String)",
+     (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::construct_internal_locale_from_name, construct_internal_locale_from_name_invoker},
+    {"System.Globalization.CultureInfo::get_current_locale_name", (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::get_current_locale_name,
+     get_current_locale_name_invoker},
+    {"System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)",
+     (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::internal_get_cultures, internal_get_cultures_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries()
