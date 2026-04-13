@@ -52,7 +52,7 @@ namespace LeanAOT.ToCpp
             {
             case "Object":
             {
-                if (methodDef.Name == VmFunctionNames.Ctor)
+                if (methodName == VmFunctionNames.Ctor)
                 {
                     // System.Object's .ctor is an empty method, we can just ignore the call to it.
                     return true;
@@ -75,7 +75,7 @@ namespace LeanAOT.ToCpp
                 {
                 case "MulticastDelegate":
                 {
-                    if (methodDef.Name == VmFunctionNames.Ctor)
+                    if (methodName == VmFunctionNames.Ctor)
                     {
                         // If the method is an override of System.Object's .ctor, we can also ignore the call to it.
                         return true;

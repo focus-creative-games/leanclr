@@ -84,6 +84,7 @@ internal class Program
     static void Main(string[] args)
     {
         SetupApp();
+        var runtimeApiCatalog = LoadRuntimeApiCatalogFromCurrentDirectory();
 
         int exitCode = 0;
         var parser = new Parser(settings =>
@@ -106,10 +107,24 @@ internal class Program
                     return;
                 }
 
-                Run(dllSearchPaths, aotAssemblyNames, outputCodeDir, options);
+                Run(dllSearchPaths, aotAssemblyNames, outputCodeDir, options, runtimeApiCatalog);
             })
             .WithNotParsed(_ => exitCode = 1);
         Environment.ExitCode = exitCode;
+    }
+
+    private static RuntimeApiCatalog LoadRuntimeApiCatalogFromCurrentDirectory()
+    {
+        var baseDir = AppContext.BaseDirectory;
+        var catalog = RuntimeApiCatalog.LoadFromDirectory(baseDir);
+        s_logger.Info(
+            "Loaded runtime API configs from {0}: icalls={1}, intrinsics={2}, icalls_newobj={3}, intrinsics_newobj={4}",
+            baseDir,
+            catalog.IcallCount,
+            catalog.IntrinsicCount,
+            catalog.IcallNewobjCount,
+            catalog.IntrinsicNewobjCount);
+        return catalog;
     }
 
     private static bool TryNormalizeCli(
@@ -257,7 +272,8 @@ internal class Program
         s_logger.Info("Created empty profiler output file: {0}", full);
     }
 
-    private static void Run(List<string> dllSearchPaths, List<string> aotAssemblyNames, string outputCodeDir, CliOptions il2CppOptions)
+    private static void Run(List<string> dllSearchPaths, List<string> aotAssemblyNames, string outputCodeDir, CliOptions il2CppOptions,
+                            RuntimeApiCatalog runtimeApiCatalog)
     {
         var generator = new CppGenerator();
         var assemblyCache = new Core.AssemblyCache(new Core.MultiDirectoryAssemblyResolver(dllSearchPaths));
@@ -276,6 +292,7 @@ internal class Program
             TypeNameService = new TypeNameService(metaService),
             InvokerService = new InvokerService(metaService),
             MetadataService = metaService,
+            RuntimeApiCatalog = runtimeApiCatalog,
         };
         ApplyIl2CppOptionsToGlobalConfig(globalServices.Config, il2CppOptions);
         GlobalServices.Inst = globalServices;

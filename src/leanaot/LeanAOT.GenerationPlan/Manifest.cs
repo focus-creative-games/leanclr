@@ -35,9 +35,9 @@ namespace LeanAOT.GenerationPlan
                     classPlans.Add(classPlan);
                     foreach (var method in type.Methods)
                     {
-                        if (!method.HasBody || method.IsAbstract || method.HasGenericParameters || method.DeclaringType.HasGenericParameters)
+                        if (method.IsAbstract || method.HasGenericParameters || method.DeclaringType.HasGenericParameters)
                             continue;
-                        if (method.Body.HasExceptionHandlers)
+                        if (method.HasBody && method.Body.HasExceptionHandlers)
                             continue;
                         if (method.CallingConvention == CallingConvention.VarArg)
                         {
