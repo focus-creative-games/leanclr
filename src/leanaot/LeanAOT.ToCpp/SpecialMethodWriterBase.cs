@@ -1,4 +1,5 @@
 using dnlib.DotNet;
+using System.Text;
 
 namespace LeanAOT.ToCpp
 {
@@ -47,6 +48,20 @@ namespace LeanAOT.ToCpp
             WriteMethodBody();
             WriteMethodEnd();
             _writer.MarkAsArchived();
+        }
+        
+        protected string CreateMethodFunctionArgsWithCast()
+        {
+            var sb = new StringBuilder();
+            foreach (var param in _method.ParamsIncludeThis)
+            {
+                if (param.Index > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append($"{param.Name}");
+            }
+            return sb.ToString();
         }
 
 

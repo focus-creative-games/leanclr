@@ -114,12 +114,12 @@ extern "C"
 
     void il2cpp_add_internal_call(const char* name, Il2CppMethodPointer method)
     {
-        vm::InternalCalls::register_il2cpp_internal_call(name, method);
+        vm::InternalCalls::register_lite_internal_call(name, method);
     }
 
     Il2CppMethodPointer il2cpp_resolve_icall(const char* name)
     {
-        return vm::InternalCalls::get_il2cpp_internal_call(name);
+        return vm::InternalCalls::get_lite_internal_call(name);
     }
 
     // -- memory ---------------------------------------------------------------

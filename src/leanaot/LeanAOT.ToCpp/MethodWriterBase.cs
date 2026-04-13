@@ -1170,16 +1170,16 @@ namespace LeanAOT.ToCpp
                 // fix compiler warning C4312: "conversion from 'int' to 'void*' of greater size"
                 if (ret.type == EvalDataType.Int32 && GetEvalDataType(_method.RetType) == EvalDataType.Ref)
                 {
-                    _bodyWriter.AddLine($"LEANCLR_CODEGEN_RETURN(({ConstStrings.ObjectPtrTypeName})({ConstStrings.IntPtrTypeName}){GetEvalVariableName(ret)});");
+                    _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}(({ConstStrings.ObjectPtrTypeName})({ConstStrings.IntPtrTypeName}){GetEvalVariableName(ret)});");
                 }
                 else
                 {
-                    _bodyWriter.AddLine($"LEANCLR_CODEGEN_RETURN({GetVariableMayCast(ret, TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(_method.RetType, TypeNameRelaxLevel.AbiRelaxed))});");
+                    _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}({GetVariableMayCast(ret, TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(_method.RetType, TypeNameRelaxLevel.AbiRelaxed))});");
                 }
             }
             else
             {
-                _bodyWriter.AddLine("LEANCLR_CODEGEN_RETURN_VOID();");
+                _bodyWriter.AddLine($"{ConstStrings.CodegenReturnVoid}();");
             }
             _curState.runStackDatas.Clear();
         }

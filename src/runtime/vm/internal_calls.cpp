@@ -19,18 +19,35 @@ static utils::HashMap<const char*, InternalCallInvoker, utils::CStrHasher, utils
 static utils::Vector<InternalCallInvoker> g_internalCallInvokerIdList;
 static utils::HashMap<InternalCallInvoker, uint16_t> g_internalCallInvokerIdMap;
 
-void InternalCalls::register_il2cpp_internal_call(const char* name, Il2CppMethodPointer func)
+void InternalCalls::register_lite_internal_call(const char* name, Il2CppMethodPointer func)
 {
     assert(g_il2cppInternalCallMap.find(name) == g_il2cppInternalCallMap.end() && "IL2CPP internal call already registered");
     g_il2cppInternalCallMap[name] = func;
 }
 
 // Get IL2CPP internal call by name
-Il2CppMethodPointer InternalCalls::get_il2cpp_internal_call(const char* name)
+Il2CppMethodPointer InternalCalls::get_lite_internal_call(const char* name)
 {
     auto it = g_il2cppInternalCallMap.find(name);
     if (it != g_il2cppInternalCallMap.end())
         return it->second;
+
+    // Fallback: trim parameter list and retry with "Type::Method" key.
+    // Example:
+    //   Unity.Burst.LowLevel.BurstCompilerService::GetOrCreateSharedMemory(UnityEngine.Hash128&,System.UInt32,System.UInt32)
+    // -> Unity.Burst.LowLevel.BurstCompilerService::GetOrCreateSharedMemory
+    const char* params_start = std::strchr(name, '(');
+    if (params_start != nullptr && params_start > name)
+    {
+        utils::StringBuilder short_name;
+        short_name.append_cstr(reinterpret_cast<const uint8_t*>(name), static_cast<size_t>(params_start - name));
+        short_name.sure_null_terminator_but_not_append();
+
+        it = g_il2cppInternalCallMap.find(short_name.as_cstr());
+        if (it != g_il2cppInternalCallMap.end())
+            return it->second;
+    }
+
     return nullptr;
 }
 

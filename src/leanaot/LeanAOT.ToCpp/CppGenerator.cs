@@ -125,7 +125,13 @@ namespace LeanAOT.ToCpp
                     pinvokeMethodWriter.WriteCode();
                     return;
                 }
-                s_logger.Warn($"Method {methodDef.FullName} has no body and doesn't have icall or intrinsic entry");
+                else if (methodDef.IsInternalCall)
+                {
+                    var runtimeResolvedICallMethodWriter = new RuntimeResolvedICallMethodWriter(methodDetail, methodCtx.methodBodyCodeFile);
+                    runtimeResolvedICallMethodWriter.WriteCode();
+                    return;
+                }
+                // s_logger.Warn($"Method {methodDef.FullName} has no body and doesn't have icall or intrinsic entry");
                 var notImplementedMethodWriter = new NotImplementedMethodWriter(methodDetail, methodCtx.methodBodyCodeFile);
                 notImplementedMethodWriter.WriteCode();
                 return;

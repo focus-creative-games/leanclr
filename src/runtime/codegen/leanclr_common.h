@@ -10,6 +10,7 @@
 #include "vm/runtime.h"
 #include "vm/rt_array.h"
 #include "vm/delegate.h"
+#include "vm/internal_calls.h"
 #include "metadata/module_def.h"
 #include "interp/interp_defs.h"
 #include "interp/execution_helper.h"
@@ -359,6 +360,11 @@ template <typename Src, typename Dst>
 inline intptr_t cast_float_to_intptr(Src value)
 {
     return interp::cast_float_to_intptr<Src, Dst>(value);
+}
+
+inline vm::InternalCallFunction resolve_internal_call(const char* name)
+{
+    return (vm::InternalCallFunction)vm::InternalCalls::get_lite_internal_call(name);
 }
 
 } // namespace codegen

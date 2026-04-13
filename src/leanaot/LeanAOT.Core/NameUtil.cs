@@ -284,5 +284,29 @@ namespace LeanAOT.Core
                 throw new NotSupportedException(type.ToString());
             }
         }
+
+        public static string GetICallFullMethodName(MethodDef methodDef)
+        {
+            var result = new StringBuilder();
+            result.Append(methodDef.DeclaringType.FullName);
+            result.Append("::");
+            result.Append(methodDef.Name);
+            result.Append('(');
+            bool first = true;
+            foreach (var param in methodDef.GetParams())
+            {
+                if (first)
+                {
+                    first = false;
+                }
+                else
+                {
+                    result.Append(',');
+                }
+                AppendCorlibTypeName(result, param);
+            }
+            result.Append(')');
+            return result.ToString();
+        }
     }
 }

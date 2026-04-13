@@ -49,26 +49,7 @@ namespace LeanAOT.ToCpp
 
         private string GetFullMethodName(MethodDef methodDef)
         {
-            var result = new StringBuilder();
-            NameUtil.AppendCorlibTypeName(result, methodDef.DeclaringType.ToTypeSig());
-            result.Append("::");
-            result.Append(methodDef.Name);
-            result.Append('(');
-            bool first = true;
-            foreach (var param in methodDef.GetParams())
-            {
-                if (first)
-                {
-                    first = false;
-                }
-                else
-                {
-                    result.Append(',');
-                }
-                NameUtil.AppendCorlibTypeName(result, param);
-            }
-            result.Append(')');
-            return result.ToString();
+            return NameUtil.GetICallFullMethodName(methodDef);
         }
 
         private string GetBriefMethodName(MethodDef methodDef)

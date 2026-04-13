@@ -11,20 +11,6 @@ namespace LeanAOT.ToCpp
 
         }
 
-        protected string CreateMethodFunctionArgsWithCast()
-        {
-            var sb = new StringBuilder();
-            foreach (var param in _method.ParamsIncludeThis)
-            {
-                if (param.Index > 0)
-                {
-                    sb.Append(", ");
-                }
-                sb.Append($"{param.Name}");
-            }
-            return sb.ToString();
-        }
-
         protected override void WriteMethodBody()
         {
             var argsStr = CreateMethodFunctionArgsWithCast();
