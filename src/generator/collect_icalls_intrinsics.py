@@ -1,7 +1,11 @@
 #!/usr/bin/env python3
 """
 Scan LeanCLR runtime icalls/ and intrinsics/ C++ sources for registration tables
-and emit icalls.json / intrinsics.json:
+and emit:
+  - icalls.json
+  - intrinsics.json
+  - icalls_newobj.json
+  - intrinsics_newobj.json
 
   [ {
       "name": "<managed icall/intrinsic name>",
@@ -11,9 +15,6 @@ and emit icalls.json / intrinsics.json:
 
 Every entry must have a non-empty `func`. If an `InternalCallEntry` still uses
 `nullptr` for the function pointer, this script aborts with `RuntimeError`.
-
-Only InternalCallEntry (three-field) and IntrinsicEntry tables are collected;
-Newobj* tables are ignored (no function pointer field in the same shape).
 
 Default layout: this file lives in src/generator; repository root is three levels up.
 JSON files are written to src/leanaot/LeanAOT/ by default.
@@ -201,11 +202,27 @@ _INTRINSIC_ENTRY_RE = re.compile(
     re.DOTALL,
 )
 
+_ICALL_NEWOBJ_ENTRY_RE = re.compile(
+    rf"\{{\s*((?:{_CSTRING_LITERAL_CHUNK}\s*)+),\s*([A-Za-z_]\w*(?:::[A-Za-z_]\w*)*)\s*\}}",
+    re.DOTALL,
+)
+
+_INTRINSIC_NEWOBJ_ENTRY_RE = re.compile(
+    rf"\{{\s*((?:{_CSTRING_LITERAL_CHUNK}\s*)+),\s*([A-Za-z_]\w*(?:::[A-Za-z_]\w*)*)\s*\}}",
+    re.DOTALL,
+)
+
 
 def cpp_to_runtime_header_rel(cpp_path: Path, runtime_root: Path) -> str:
     """Path to sibling .h under src/runtime, posix, e.g. icalls/system_threading_volatile.h."""
     rel = cpp_path.resolve().relative_to(runtime_root.resolve())
     return rel.with_suffix(".h").as_posix()
+
+
+def invoker_to_newobj_func(invoker_name: str, source: Path) -> str:
+    if not invoker_name.endswith("_invoker"):
+        raise RuntimeError(f"{source}: newobj invoker must end with '_invoker', got {invoker_name!r}")
+    return invoker_name[: -len("_invoker")]
 
 
 def collect_intrinsics_from_file(cpp_path: Path, runtime_root: Path) -> list[tuple[str, str, str, str]]:
@@ -218,6 +235,21 @@ def collect_intrinsics_from_file(cpp_path: Path, runtime_root: Path) -> list[tup
     for m in _INTRINSIC_ENTRY_RE.finditer(cleaned):
         name = parse_concatenated_c_string_literals(m.group(1))
         rows.append((name, m.group(2), rel, header_rel))
+    return rows
+
+
+def collect_intrinsic_newobj_from_file(cpp_path: Path, runtime_root: Path) -> list[tuple[str, str, str, str]]:
+    text = cpp_path.read_text(encoding="utf-8", errors="replace")
+    cleaned = strip_cpp_comments(text)
+    rel = str(cpp_path).replace("\\", "/")
+    header_rel = cpp_to_runtime_header_rel(cpp_path, runtime_root)
+    rows: list[tuple[str, str, str, str]] = []
+    for m in _INTRINSIC_NEWOBJ_ENTRY_RE.finditer(cleaned):
+        name = parse_concatenated_c_string_literals(m.group(1))
+        invoker = m.group(2)
+        if ".ctor(" not in name:
+            continue
+        rows.append((name, invoker_to_newobj_func(invoker, cpp_path), rel, header_rel))
     return rows
 
 
@@ -243,6 +275,21 @@ def collect_icalls_from_file(cpp_path: Path, runtime_root: Path) -> list[tuple[s
     for m in _ICALL_FP_RE.finditer(cleaned):
         name = parse_concatenated_c_string_literals(m.group(1))
         rows.append((name, m.group(2), rel, header_rel))
+    return rows
+
+
+def collect_icall_newobj_from_file(cpp_path: Path, runtime_root: Path) -> list[tuple[str, str, str, str]]:
+    text = cpp_path.read_text(encoding="utf-8", errors="replace")
+    cleaned = strip_cpp_comments(text)
+    rel = str(cpp_path).replace("\\", "/")
+    header_rel = cpp_to_runtime_header_rel(cpp_path, runtime_root)
+    rows: list[tuple[str, str, str, str]] = []
+    for m in _ICALL_NEWOBJ_ENTRY_RE.finditer(cleaned):
+        name = parse_concatenated_c_string_literals(m.group(1))
+        invoker = m.group(2)
+        if ".ctor(" not in name:
+            continue
+        rows.append((name, invoker_to_newobj_func(invoker, cpp_path), rel, header_rel))
     return rows
 
 
@@ -331,15 +378,21 @@ def main() -> int:
     try:
         icall_rows: list[tuple[str, str, str, str]] = []
         intrinsic_rows: list[tuple[str, str, str, str]] = []
+        icall_newobj_rows: list[tuple[str, str, str, str]] = []
+        intrinsic_newobj_rows: list[tuple[str, str, str, str]] = []
 
         for cpp in sorted(icalls_dir.glob("*.cpp")):
             icall_rows.extend(collect_icalls_from_file(cpp, runtime_root))
+            icall_newobj_rows.extend(collect_icall_newobj_from_file(cpp, runtime_root))
 
         for cpp in sorted(intr_dir.glob("*.cpp")):
             intrinsic_rows.extend(collect_intrinsics_from_file(cpp, runtime_root))
+            intrinsic_newobj_rows.extend(collect_intrinsic_newobj_from_file(cpp, runtime_root))
 
         icalls_json = merge_entries("icall", icall_rows, runtime_root)
         intrinsics_json = merge_entries("intrinsic", intrinsic_rows, runtime_root)
+        icall_newobj_json = merge_entries("icall_newobj", icall_newobj_rows, runtime_root)
+        intrinsic_newobj_json = merge_entries("intrinsic_newobj", intrinsic_newobj_rows, runtime_root)
     except RuntimeError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1
@@ -353,10 +406,20 @@ def main() -> int:
         json.dumps(intrinsics_json, ensure_ascii=False, indent=2) + "\n",
         encoding="utf-8",
     )
+    (out_dir / "icalls_newobj.json").write_text(
+        json.dumps(icall_newobj_json, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
+    (out_dir / "intrinsics_newobj.json").write_text(
+        json.dumps(intrinsic_newobj_json, ensure_ascii=False, indent=2) + "\n",
+        encoding="utf-8",
+    )
 
     print(
         f"Wrote {len(icalls_json)} icalls -> {out_dir / 'icalls.json'}\n"
-        f"Wrote {len(intrinsics_json)} intrinsics -> {out_dir / 'intrinsics.json'}"
+        f"Wrote {len(intrinsics_json)} intrinsics -> {out_dir / 'intrinsics.json'}\n"
+        f"Wrote {len(icall_newobj_json)} icall newobj entries -> {out_dir / 'icalls_newobj.json'}\n"
+        f"Wrote {len(intrinsic_newobj_json)} intrinsic newobj entries -> {out_dir / 'intrinsics_newobj.json'}"
     )
     return 0
 
