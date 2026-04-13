@@ -3,7 +3,11 @@
 Scan LeanCLR runtime icalls/ and intrinsics/ C++ sources for registration tables
 and emit icalls.json / intrinsics.json:
 
-  [ { "name": "<managed icall/intrinsic name>", "func": "<C++ Class::method>" }, ... ]
+  [ {
+      "name": "<managed icall/intrinsic name>",
+      "func": "<C++ Class::method>",
+      "header": "<path relative to src/runtime, e.g. icalls/foo.h>"
+    }, ... ]
 
 Every entry must have a non-empty `func`. If an `InternalCallEntry` still uses
 `nullptr` for the function pointer, this script aborts with `RuntimeError`.
@@ -198,23 +202,30 @@ _INTRINSIC_ENTRY_RE = re.compile(
 )
 
 
-def collect_intrinsics_from_file(path: Path) -> list[tuple[str, str, str]]:
-    """Returns list of (name, func, source_relpath)."""
-    text = path.read_text(encoding="utf-8", errors="replace")
+def cpp_to_runtime_header_rel(cpp_path: Path, runtime_root: Path) -> str:
+    """Path to sibling .h under src/runtime, posix, e.g. icalls/system_threading_volatile.h."""
+    rel = cpp_path.resolve().relative_to(runtime_root.resolve())
+    return rel.with_suffix(".h").as_posix()
+
+
+def collect_intrinsics_from_file(cpp_path: Path, runtime_root: Path) -> list[tuple[str, str, str, str]]:
+    """Returns list of (name, func, source_relpath, header_rel_runtime)."""
+    text = cpp_path.read_text(encoding="utf-8", errors="replace")
     cleaned = strip_cpp_comments(text)
-    rel = str(path).replace("\\", "/")
-    rows: list[tuple[str, str, str]] = []
+    rel = str(cpp_path).replace("\\", "/")
+    header_rel = cpp_to_runtime_header_rel(cpp_path, runtime_root)
+    rows: list[tuple[str, str, str, str]] = []
     for m in _INTRINSIC_ENTRY_RE.finditer(cleaned):
         name = parse_concatenated_c_string_literals(m.group(1))
-        rows.append((name, m.group(2), rel))
+        rows.append((name, m.group(2), rel, header_rel))
     return rows
 
 
-def collect_icalls_from_file(path: Path) -> list[tuple[str, str, str]]:
-    """Returns list of (name, func, source_relpath)."""
-    text = path.read_text(encoding="utf-8", errors="replace")
+def collect_icalls_from_file(cpp_path: Path, runtime_root: Path) -> list[tuple[str, str, str, str]]:
+    """Returns list of (name, func, source_relpath, header_rel_runtime)."""
+    text = cpp_path.read_text(encoding="utf-8", errors="replace")
     cleaned = strip_cpp_comments(text)
-    rel = str(path).replace("\\", "/")
+    rel = str(cpp_path).replace("\\", "/")
 
     nullptr_names = [
         parse_concatenated_c_string_literals(m.group(1))
@@ -224,37 +235,48 @@ def collect_icalls_from_file(path: Path) -> list[tuple[str, str, str]]:
         preview = "; ".join(repr(n) for n in nullptr_names[:8])
         more = f" (+{len(nullptr_names) - 8} more)" if len(nullptr_names) > 8 else ""
         raise RuntimeError(
-            f"{path}: InternalCallEntry uses nullptr for func ({len(nullptr_names)}): {preview}{more}"
+            f"{cpp_path}: InternalCallEntry uses nullptr for func ({len(nullptr_names)}): {preview}{more}"
         )
 
-    rows: list[tuple[str, str, str]] = []
+    header_rel = cpp_to_runtime_header_rel(cpp_path, runtime_root)
+    rows: list[tuple[str, str, str, str]] = []
     for m in _ICALL_FP_RE.finditer(cleaned):
         name = parse_concatenated_c_string_literals(m.group(1))
-        rows.append((name, m.group(2), rel))
+        rows.append((name, m.group(2), rel, header_rel))
     return rows
 
 
 def merge_entries(
     label: str,
-    rows: list[tuple[str, str, str]],
+    rows: list[tuple[str, str, str, str]],
+    runtime_root: Path,
 ) -> list[dict[str, str]]:
-    """Deduplicate by name; warn on conflicting func."""
-    by_name: dict[str, tuple[str, str]] = {}
-    for name, func, src in rows:
+    """Deduplicate by name; warn on conflicting func or header."""
+    by_name: dict[str, tuple[str, str, str]] = {}
+    for name, func, src, header in rows:
         if not func or not func.strip():
             raise RuntimeError(f"{src}: empty func for {label} name {name!r}")
+        if not (runtime_root / header).is_file():
+            print(f"warning: header missing for {label} entry from {src}: {header}", file=sys.stderr)
+
         if name not in by_name:
-            by_name[name] = (func, src)
+            by_name[name] = (func, src, header)
             continue
-        old_func, old_src = by_name[name]
+        old_func, old_src, old_header = by_name[name]
         if old_func != func:
             print(
                 f"warning: duplicate {label} name {name!r} with different func: "
                 f"{old_func!r} ({old_src}) vs {func!r} ({src})",
                 file=sys.stderr,
             )
+        elif old_header != header:
+            print(
+                f"warning: duplicate {label} name {name!r} with different header: "
+                f"{old_header!r} ({old_src}) vs {header!r} ({src})",
+                file=sys.stderr,
+            )
     ordered = sorted(by_name.keys(), key=lambda s: s.lower())
-    return [{"name": n, "func": by_name[n][0]} for n in ordered]
+    return [{"name": n, "func": by_name[n][0], "header": by_name[n][2]} for n in ordered]
 
 
 def main() -> int:
@@ -297,18 +319,27 @@ def main() -> int:
         print(f"error: intrinsics directory not found: {intr_dir}", file=sys.stderr)
         return 1
 
+    runtime_root = icalls_dir.parent.resolve()
+    if intr_dir.parent.resolve() != runtime_root:
+        print(
+            f"error: icalls and intrinsics must be sibling folders under the same runtime root "
+            f"(expected intrinsics under {runtime_root}, got {intr_dir.parent.resolve()})",
+            file=sys.stderr,
+        )
+        return 1
+
     try:
-        icall_rows: list[tuple[str, str, str]] = []
-        intrinsic_rows: list[tuple[str, str, str]] = []
+        icall_rows: list[tuple[str, str, str, str]] = []
+        intrinsic_rows: list[tuple[str, str, str, str]] = []
 
         for cpp in sorted(icalls_dir.glob("*.cpp")):
-            icall_rows.extend(collect_icalls_from_file(cpp))
+            icall_rows.extend(collect_icalls_from_file(cpp, runtime_root))
 
         for cpp in sorted(intr_dir.glob("*.cpp")):
-            intrinsic_rows.extend(collect_intrinsics_from_file(cpp))
+            intrinsic_rows.extend(collect_intrinsics_from_file(cpp, runtime_root))
 
-        icalls_json = merge_entries("icall", icall_rows)
-        intrinsics_json = merge_entries("intrinsic", intrinsic_rows)
+        icalls_json = merge_entries("icall", icall_rows, runtime_root)
+        intrinsics_json = merge_entries("intrinsic", intrinsic_rows, runtime_root)
     except RuntimeError as exc:
         print(f"error: {exc}", file=sys.stderr)
         return 1

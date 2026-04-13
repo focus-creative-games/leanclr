@@ -1,1614 +1,2017 @@
 [
   {
     "name": "Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)",
-    "func": "Interop::double_to_string"
+    "func": "Interop::double_to_string",
+    "header": "icalls/interop.h"
   },
   {
     "name": "Mono.RuntimeClassHandle::GetTypeFromClass",
-    "func": "MonoRuntimeClassHandle::get_type_from_class"
+    "func": "MonoRuntimeClassHandle::get_type_from_class",
+    "header": "icalls/mono_runtimeclasshandle.h"
   },
   {
     "name": "Mono.RuntimeGPtrArrayHandle::GPtrArrayFree",
-    "func": "MonoRuntimeGPtrArrayHandle::gptr_array_free"
+    "func": "MonoRuntimeGPtrArrayHandle::gptr_array_free",
+    "header": "icalls/mono_runtimegptrarrayhandle.h"
   },
   {
     "name": "Mono.RuntimeMarshal::FreeAssemblyName(Mono.MonoAssemblyName&,System.Boolean)",
-    "func": "MonoRuntimeMarshal::free_assembly_name"
+    "func": "MonoRuntimeMarshal::free_assembly_name",
+    "header": "icalls/mono_runtimemarshal.h"
   },
   {
     "name": "Mono.SafeStringMarshal::GFree(System.IntPtr)",
-    "func": "MonoSafeStringMarshal::gfree"
+    "func": "MonoSafeStringMarshal::gfree",
+    "header": "icalls/mono_safestringmarshal.h"
   },
   {
     "name": "Mono.SafeStringMarshal::StringToUtf8_icall(System.String&)",
-    "func": "MonoSafeStringMarshal::string_to_utf8_bytes"
+    "func": "MonoSafeStringMarshal::string_to_utf8_bytes",
+    "header": "icalls/mono_safestringmarshal.h"
   },
   {
     "name": "System.AppDomain::createDomain(System.String,System.AppDomainSetup)",
-    "func": "SystemAppDomain::create_domain"
+    "func": "SystemAppDomain::create_domain",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::DoUnhandledException(System.Exception)",
-    "func": "SystemAppDomain::do_unhandled_exception"
+    "func": "SystemAppDomain::do_unhandled_exception",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::ExecuteAssembly(System.Reflection.Assembly,System.String[])",
-    "func": "SystemAppDomain::execute_assembly"
+    "func": "SystemAppDomain::execute_assembly",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::GetAssemblies(System.Boolean)",
-    "func": "SystemAppDomain::get_assemblies"
+    "func": "SystemAppDomain::get_assemblies",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::getCurDomain()",
-    "func": "SystemAppDomain::get_cur_domain"
+    "func": "SystemAppDomain::get_cur_domain",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::GetData(System.String)",
-    "func": "SystemAppDomain::get_data"
+    "func": "SystemAppDomain::get_data",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::getFriendlyName()",
-    "func": "SystemAppDomain::get_friendly_name"
+    "func": "SystemAppDomain::get_friendly_name",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::getRootDomain()",
-    "func": "SystemAppDomain::get_root_domain"
+    "func": "SystemAppDomain::get_root_domain",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::getSetup()",
-    "func": "SystemAppDomain::get_setup"
+    "func": "SystemAppDomain::get_setup",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalGetContext()",
-    "func": "SystemAppDomain::internal_get_context"
+    "func": "SystemAppDomain::internal_get_context",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalGetDefaultContext()",
-    "func": "SystemAppDomain::internal_get_default_context"
+    "func": "SystemAppDomain::internal_get_default_context",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalGetProcessGuid(System.String)",
-    "func": "SystemAppDomain::internal_get_process_guid"
+    "func": "SystemAppDomain::internal_get_process_guid",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalIsFinalizingForUnload(System.Int32)",
-    "func": "SystemAppDomain::internal_is_finalizing_for_unload"
+    "func": "SystemAppDomain::internal_is_finalizing_for_unload",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalPopDomainRef()",
-    "func": "SystemAppDomain::internal_pop_domain_ref"
+    "func": "SystemAppDomain::internal_pop_domain_ref",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalPushDomainRef(System.AppDomain)",
-    "func": "SystemAppDomain::internal_push_domain_ref"
+    "func": "SystemAppDomain::internal_push_domain_ref",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalPushDomainRefByID(System.Int32)",
-    "func": "SystemAppDomain::internal_push_domain_ref_by_id"
+    "func": "SystemAppDomain::internal_push_domain_ref_by_id",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalSetContext(System.Runtime.Remoting.Contexts.Context)",
-    "func": "SystemAppDomain::internal_set_context"
+    "func": "SystemAppDomain::internal_set_context",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalSetDomain(System.AppDomain)",
-    "func": "SystemAppDomain::internal_set_domain"
+    "func": "SystemAppDomain::internal_set_domain",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalSetDomainByID(System.Int32)",
-    "func": "SystemAppDomain::internal_set_domain_by_id"
+    "func": "SystemAppDomain::internal_set_domain_by_id",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::InternalUnload(System.Int32)",
-    "func": "SystemAppDomain::internal_unload"
+    "func": "SystemAppDomain::internal_unload",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::LoadAssembly(System.String,System.Security.Policy.Evidence,System.Boolean,System.Threading.StackCrawlMark&)",
-    "func": "SystemAppDomain::load_assembly"
+    "func": "SystemAppDomain::load_assembly",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::LoadAssemblyRaw(System.Byte[],System.Byte[],System.Security.Policy.Evidence,System.Boolean)",
-    "func": "SystemAppDomain::load_assembly_raw"
+    "func": "SystemAppDomain::load_assembly_raw",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.AppDomain::SetData(System.String,System.Object)",
-    "func": "SystemAppDomain::set_data"
+    "func": "SystemAppDomain::set_data",
+    "header": "icalls/system_appdomain.h"
   },
   {
     "name": "System.ArgIterator::IntGetNextArg(System.Void*)",
-    "func": "SystemArgIterator::int_get_next_arg"
+    "func": "SystemArgIterator::int_get_next_arg",
+    "header": "icalls/system_argiterator.h"
   },
   {
     "name": "System.ArgIterator::IntGetNextArgType()",
-    "func": "SystemArgIterator::int_get_next_arg_type"
+    "func": "SystemArgIterator::int_get_next_arg_type",
+    "header": "icalls/system_argiterator.h"
   },
   {
     "name": "System.ArgIterator::IntGetNextArgWithType(System.Void*,System.IntPtr)",
-    "func": "SystemArgIterator::int_get_next_arg_with_type"
+    "func": "SystemArgIterator::int_get_next_arg_with_type",
+    "header": "icalls/system_argiterator.h"
   },
   {
     "name": "System.ArgIterator::Setup(System.IntPtr,System.IntPtr)",
-    "func": "SystemArgIterator::setup"
+    "func": "SystemArgIterator::setup",
+    "header": "icalls/system_argiterator.h"
   },
   {
     "name": "System.Array::ClearInternal",
-    "func": "SystemArray::clear_internal"
+    "func": "SystemArray::clear_internal",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Array::CreateInstanceImpl",
-    "func": "SystemArray::create_instance_impl"
+    "func": "SystemArray::create_instance_impl",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Array::FastCopy",
-    "func": "SystemArray::fast_copy"
+    "func": "SystemArray::fast_copy",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Array::GetLength",
-    "func": "SystemArray::get_length"
+    "func": "SystemArray::get_length",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Array::GetLowerBound",
-    "func": "SystemArray::get_lower_bound"
+    "func": "SystemArray::get_lower_bound",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Array::GetRank",
-    "func": "SystemArray::get_rank"
+    "func": "SystemArray::get_rank",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Array::GetValue(System.Int32[])",
-    "func": "SystemArray::get_value"
+    "func": "SystemArray::get_value",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Array::GetValueImpl",
-    "func": "SystemArray::get_value_impl"
+    "func": "SystemArray::get_value_impl",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Array::SetValue(System.Object,System.Int32[])",
-    "func": "SystemArray::set_value"
+    "func": "SystemArray::set_value",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Array::SetValueImpl",
-    "func": "SystemArray::set_value_impl"
+    "func": "SystemArray::set_value_impl",
+    "header": "icalls/system_array.h"
   },
   {
     "name": "System.Buffer::_ByteLength(System.Array)",
-    "func": "SystemBuffer::byte_length"
+    "func": "SystemBuffer::byte_length",
+    "header": "icalls/system_buffer.h"
   },
   {
     "name": "System.Buffer::InternalBlockCopy(System.Array,System.Int32,System.Array,System.Int32,System.Int32)",
-    "func": "SystemBuffer::internal_block_copy"
+    "func": "SystemBuffer::internal_block_copy",
+    "header": "icalls/system_buffer.h"
   },
   {
     "name": "System.Buffer::InternalMemcpy(System.Byte*,System.Byte*,System.Int32)",
-    "func": "SystemBuffer::internal_memcpy"
+    "func": "SystemBuffer::internal_memcpy",
+    "header": "icalls/system_buffer.h"
   },
   {
     "name": "System.CurrentSystemTimeZone::GetTimeZoneData(System.Int32,System.Int64[]&,System.String[]&,System.Boolean&)",
-    "func": "SystemCurrentSystemTimeZone::get_time_zone_data"
+    "func": "SystemCurrentSystemTimeZone::get_time_zone_data",
+    "header": "icalls/system_currentsystemtimezone.h"
   },
   {
     "name": "System.DateTime::GetSystemTimeAsFileTime()",
-    "func": "SystemDateTime::get_system_time_as_file_time"
+    "func": "SystemDateTime::get_system_time_as_file_time",
+    "header": "icalls/system_datetime.h"
   },
   {
     "name": "System.Delegate::AllocDelegateLike_internal(System.Delegate)",
-    "func": "SystemDelegate::alloc_delegate_like_internal"
+    "func": "SystemDelegate::alloc_delegate_like_internal",
+    "header": "icalls/system_delegate.h"
   },
   {
     "name": "System.Delegate::CreateDelegate_internal(System.Type,System.Object,System.Reflection.MethodInfo,System.Boolean)",
-    "func": "SystemDelegate::create_delegate_internal"
+    "func": "SystemDelegate::create_delegate_internal",
+    "header": "icalls/system_delegate.h"
   },
   {
     "name": "System.Delegate::GetVirtualMethod_internal()",
-    "func": "SystemDelegate::get_virtual_method_internal"
+    "func": "SystemDelegate::get_virtual_method_internal",
+    "header": "icalls/system_delegate.h"
   },
   {
     "name": "System.Diagnostics.Debugger::IsAttached_internal()",
-    "func": "SystemDiagnosticsDebugger::is_attached_internal"
+    "func": "SystemDiagnosticsDebugger::is_attached_internal",
+    "header": "icalls/system_diagnostics_debugger.h"
   },
   {
     "name": "System.Diagnostics.Debugger::IsLogging()",
-    "func": "SystemDiagnosticsDebugger::is_logging"
+    "func": "SystemDiagnosticsDebugger::is_logging",
+    "header": "icalls/system_diagnostics_debugger.h"
   },
   {
     "name": "System.Diagnostics.Debugger::Log_icall(System.Int32,System.String&,System.String&)",
-    "func": "SystemDiagnosticsDebugger::log_icall"
+    "func": "SystemDiagnosticsDebugger::log_icall",
+    "header": "icalls/system_diagnostics_debugger.h"
   },
   {
     "name": "System.Diagnostics.StackFrame::get_frame_info(System.Int32,System.Boolean,System.Reflection.MethodBase&,System.Int32&,System.Int32&,System.String&,System.Int32&,System.Int32&)",
-    "func": "SystemDiagnosticsStackFrame::get_frame_info"
+    "func": "SystemDiagnosticsStackFrame::get_frame_info",
+    "header": "icalls/system_diagnostics_stackframe.h"
   },
   {
     "name": "System.Diagnostics.StackTrace::get_trace(System.Exception,System.Int32,System.Boolean)",
-    "func": "SystemDiagnosticsStackTrace::get_trace"
+    "func": "SystemDiagnosticsStackTrace::get_trace",
+    "header": "icalls/system_diagnostics_stacktrace.h"
   },
   {
     "name": "System.Enum::get_hashcode",
-    "func": "SystemEnum::get_hash_code"
+    "func": "SystemEnum::get_hash_code",
+    "header": "icalls/system_enum.h"
   },
   {
     "name": "System.Enum::get_value",
-    "func": "SystemEnum::get_value"
+    "func": "SystemEnum::get_value",
+    "header": "icalls/system_enum.h"
   },
   {
     "name": "System.Enum::GetEnumValuesAndNames",
-    "func": "SystemEnum::get_enum_values_and_names"
+    "func": "SystemEnum::get_enum_values_and_names",
+    "header": "icalls/system_enum.h"
   },
   {
     "name": "System.Enum::InternalBoxEnum",
-    "func": "SystemEnum::internal_box_enum"
+    "func": "SystemEnum::internal_box_enum",
+    "header": "icalls/system_enum.h"
   },
   {
     "name": "System.Enum::InternalCompareTo",
-    "func": "SystemEnum::internal_compare_to"
+    "func": "SystemEnum::internal_compare_to",
+    "header": "icalls/system_enum.h"
   },
   {
     "name": "System.Enum::InternalGetUnderlyingType",
-    "func": "SystemEnum::internal_get_underlying_type"
+    "func": "SystemEnum::internal_get_underlying_type",
+    "header": "icalls/system_enum.h"
   },
   {
     "name": "System.Enum::InternalHasFlag",
-    "func": "SystemEnum::internal_has_flag"
+    "func": "SystemEnum::internal_has_flag",
+    "header": "icalls/system_enum.h"
   },
   {
     "name": "System.Exception::ReportUnhandledException(System.Exception)",
-    "func": "SystemException::report_unhandled_exception"
+    "func": "SystemException::report_unhandled_exception",
+    "header": "icalls/system_exception.h"
   },
   {
     "name": "System.GC::_ReRegisterForFinalize(System.Object)",
-    "func": "SystemGC::reregister_for_finalize"
+    "func": "SystemGC::reregister_for_finalize",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::_SuppressFinalize(System.Object)",
-    "func": "SystemGC::suppress_finalize"
+    "func": "SystemGC::suppress_finalize",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::get_ephemeron_tombstone",
-    "func": "SystemGC::get_ephemeron_tombstone"
+    "func": "SystemGC::get_ephemeron_tombstone",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::GetAllocatedBytesForCurrentThread()",
-    "func": "SystemGC::get_allocated_bytes_for_current_thread"
+    "func": "SystemGC::get_allocated_bytes_for_current_thread",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::GetCollectionCount(System.Int32)",
-    "func": "SystemGC::get_collection_count"
+    "func": "SystemGC::get_collection_count",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::GetGeneration(System.Object)",
-    "func": "SystemGC::get_generation"
+    "func": "SystemGC::get_generation",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::GetMaxGeneration()",
-    "func": "SystemGC::get_max_generation"
+    "func": "SystemGC::get_max_generation",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::GetTotalMemory(System.Boolean)",
-    "func": "SystemGC::get_total_memory"
+    "func": "SystemGC::get_total_memory",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::InternalCollect(System.Int32)",
-    "func": "SystemGC::internal_collect"
+    "func": "SystemGC::internal_collect",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::RecordPressure(System.Int64)",
-    "func": "SystemGC::record_pressure"
+    "func": "SystemGC::record_pressure",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::register_ephemeron_array",
-    "func": "SystemGC::register_ephemeron_array"
+    "func": "SystemGC::register_ephemeron_array",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.GC::WaitForPendingFinalizers()",
-    "func": "SystemGC::wait_for_pending_finalizers"
+    "func": "SystemGC::wait_for_pending_finalizers",
+    "header": "icalls/system_gc.h"
   },
   {
     "name": "System.Globalization.CompareInfo::internal_compare_icall",
-    "func": "SystemGlobalizationCompareInfo::internal_compare_icall"
+    "func": "SystemGlobalizationCompareInfo::internal_compare_icall",
+    "header": "icalls/system_globalization_compareinfo.h"
   },
   {
     "name": "System.Globalization.CompareInfo::internal_index_icall(System.Char*,System.Int32,System.Int32,System.Char*,System.Int32,System.Boolean)",
-    "func": "SystemGlobalizationCompareInfo::internal_index_icall"
+    "func": "SystemGlobalizationCompareInfo::internal_index_icall",
+    "header": "icalls/system_globalization_compareinfo.h"
   },
   {
     "name": "System.Globalization.CultureInfo::construct_internal_locale_from_lcid(System.Int32)",
-    "func": "SystemGlobalizationCultureInfo::construct_internal_locale_from_lcid"
+    "func": "SystemGlobalizationCultureInfo::construct_internal_locale_from_lcid",
+    "header": "icalls/system_globalization_cultureinfo.h"
   },
   {
     "name": "System.Globalization.CultureInfo::construct_internal_locale_from_name(System.String)",
-    "func": "SystemGlobalizationCultureInfo::construct_internal_locale_from_name"
+    "func": "SystemGlobalizationCultureInfo::construct_internal_locale_from_name",
+    "header": "icalls/system_globalization_cultureinfo.h"
   },
   {
     "name": "System.Globalization.CultureInfo::get_current_locale_name",
-    "func": "SystemGlobalizationCultureInfo::get_current_locale_name"
+    "func": "SystemGlobalizationCultureInfo::get_current_locale_name",
+    "header": "icalls/system_globalization_cultureinfo.h"
   },
   {
     "name": "System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)",
-    "func": "SystemGlobalizationCultureInfo::internal_get_cultures"
+    "func": "SystemGlobalizationCultureInfo::internal_get_cultures",
+    "header": "icalls/system_globalization_cultureinfo.h"
   },
   {
     "name": "System.Math::Abs(System.Double)",
-    "func": "SystemMath::abs_f64"
+    "func": "SystemMath::abs_f64",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Abs(System.Single)",
-    "func": "SystemMath::abs_f32"
+    "func": "SystemMath::abs_f32",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Acos(System.Double)",
-    "func": "SystemMath::acos"
+    "func": "SystemMath::acos",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Acosh(System.Double)",
-    "func": "SystemMath::acosh"
+    "func": "SystemMath::acosh",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Asin(System.Double)",
-    "func": "SystemMath::asin"
+    "func": "SystemMath::asin",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Asinh(System.Double)",
-    "func": "SystemMath::asinh"
+    "func": "SystemMath::asinh",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Atan(System.Double)",
-    "func": "SystemMath::atan"
+    "func": "SystemMath::atan",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Atan2(System.Double,System.Double)",
-    "func": "SystemMath::atan2"
+    "func": "SystemMath::atan2",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Atanh(System.Double)",
-    "func": "SystemMath::atanh"
+    "func": "SystemMath::atanh",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Cbrt(System.Double)",
-    "func": "SystemMath::cbrt"
+    "func": "SystemMath::cbrt",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Ceil(System.Double)",
-    "func": "SystemMath::ceil"
+    "func": "SystemMath::ceil",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Cos(System.Double)",
-    "func": "SystemMath::cos"
+    "func": "SystemMath::cos",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Cosh(System.Double)",
-    "func": "SystemMath::cosh"
+    "func": "SystemMath::cosh",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Exp(System.Double)",
-    "func": "SystemMath::exp"
+    "func": "SystemMath::exp",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Floor(System.Double)",
-    "func": "SystemMath::floor"
+    "func": "SystemMath::floor",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::FMod(System.Double,System.Double)",
-    "func": "SystemMath::fmod"
+    "func": "SystemMath::fmod",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Log(System.Double)",
-    "func": "SystemMath::log"
+    "func": "SystemMath::log",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Log10(System.Double)",
-    "func": "SystemMath::log10"
+    "func": "SystemMath::log10",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::ModF(System.Double,System.Double*)",
-    "func": "SystemMath::modf"
+    "func": "SystemMath::modf",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Pow(System.Double,System.Double)",
-    "func": "SystemMath::pow"
+    "func": "SystemMath::pow",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Round(System.Double)",
-    "func": "SystemMath::round"
+    "func": "SystemMath::round",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Sin(System.Double)",
-    "func": "SystemMath::sin"
+    "func": "SystemMath::sin",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Sinh(System.Double)",
-    "func": "SystemMath::sinh"
+    "func": "SystemMath::sinh",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Sqrt(System.Double)",
-    "func": "SystemMath::sqrt"
+    "func": "SystemMath::sqrt",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Tan(System.Double)",
-    "func": "SystemMath::tan"
+    "func": "SystemMath::tan",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.Math::Tanh(System.Double)",
-    "func": "SystemMath::tanh"
+    "func": "SystemMath::tanh",
+    "header": "icalls/system_math.h"
   },
   {
     "name": "System.MathF::Acos(System.Single)",
-    "func": "SystemMathF::acos"
+    "func": "SystemMathF::acos",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Acosh(System.Single)",
-    "func": "SystemMathF::acosh"
+    "func": "SystemMathF::acosh",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Asin(System.Single)",
-    "func": "SystemMathF::asin"
+    "func": "SystemMathF::asin",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Asinh(System.Single)",
-    "func": "SystemMathF::asinh"
+    "func": "SystemMathF::asinh",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Atan(System.Single)",
-    "func": "SystemMathF::atan"
+    "func": "SystemMathF::atan",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Atan2(System.Single,System.Single)",
-    "func": "SystemMathF::atan2"
+    "func": "SystemMathF::atan2",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Atanh(System.Single)",
-    "func": "SystemMathF::atanh"
+    "func": "SystemMathF::atanh",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Cbrt(System.Single)",
-    "func": "SystemMathF::cbrt"
+    "func": "SystemMathF::cbrt",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Ceiling(System.Single)",
-    "func": "SystemMathF::ceiling"
+    "func": "SystemMathF::ceiling",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Cos(System.Single)",
-    "func": "SystemMathF::cos"
+    "func": "SystemMathF::cos",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Cosh(System.Single)",
-    "func": "SystemMathF::cosh"
+    "func": "SystemMathF::cosh",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Exp(System.Single)",
-    "func": "SystemMathF::exp"
+    "func": "SystemMathF::exp",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Floor(System.Single)",
-    "func": "SystemMathF::floor"
+    "func": "SystemMathF::floor",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::FMod(System.Single,System.Single)",
-    "func": "SystemMathF::fmod"
+    "func": "SystemMathF::fmod",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Log(System.Single)",
-    "func": "SystemMathF::log"
+    "func": "SystemMathF::log",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Log10(System.Single)",
-    "func": "SystemMathF::log10"
+    "func": "SystemMathF::log10",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::ModF(System.Single,System.Single*)",
-    "func": "SystemMathF::modf"
+    "func": "SystemMathF::modf",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Pow(System.Single,System.Single)",
-    "func": "SystemMathF::pow"
+    "func": "SystemMathF::pow",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Sin(System.Single)",
-    "func": "SystemMathF::sin"
+    "func": "SystemMathF::sin",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Sinh(System.Single)",
-    "func": "SystemMathF::sinh"
+    "func": "SystemMathF::sinh",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Sqrt(System.Single)",
-    "func": "SystemMathF::sqrt"
+    "func": "SystemMathF::sqrt",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Tan(System.Single)",
-    "func": "SystemMathF::tan"
+    "func": "SystemMathF::tan",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MathF::Tanh(System.Single)",
-    "func": "SystemMathF::tanh"
+    "func": "SystemMathF::tanh",
+    "header": "icalls/system_mathf.h"
   },
   {
     "name": "System.MonoCustomAttrs::GetCustomAttributesDataInternal(System.Reflection.ICustomAttributeProvider)",
-    "func": "SystemMonoCustomAttrs::get_custom_attributes_data_internal"
+    "func": "SystemMonoCustomAttrs::get_custom_attributes_data_internal",
+    "header": "icalls/system_monocustomattrs.h"
   },
   {
     "name": "System.MonoCustomAttrs::GetCustomAttributesInternal",
-    "func": "SystemMonoCustomAttrs::get_custom_attributes_internal"
+    "func": "SystemMonoCustomAttrs::get_custom_attributes_internal",
+    "header": "icalls/system_monocustomattrs.h"
   },
   {
     "name": "System.MonoCustomAttrs::IsDefinedInternal",
-    "func": "SystemMonoCustomAttrs::is_defined_internal"
+    "func": "SystemMonoCustomAttrs::is_defined_internal",
+    "header": "icalls/system_monocustomattrs.h"
   },
   {
     "name": "System.Object::GetType",
-    "func": "SystemObject::get_type"
+    "func": "SystemObject::get_type",
+    "header": "icalls/system_object.h"
   },
   {
     "name": "System.Object::InternalGetHashCode",
-    "func": "SystemObject::get_hash_code"
+    "func": "SystemObject::get_hash_code",
+    "header": "icalls/system_object.h"
   },
   {
     "name": "System.Object::MemberwiseClone",
-    "func": "SystemObject::memberwise_clone"
+    "func": "SystemObject::memberwise_clone",
+    "header": "icalls/system_object.h"
   },
   {
     "name": "System.Reflection.Assembly::GetCallingAssembly",
-    "func": "SystemReflectionAssembly::get_calling_assembly"
+    "func": "SystemReflectionAssembly::get_calling_assembly",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.Assembly::GetEntryAssembly",
-    "func": "SystemReflectionAssembly::get_entry_assembly"
+    "func": "SystemReflectionAssembly::get_entry_assembly",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.Assembly::GetExecutingAssembly",
-    "func": "SystemReflectionAssembly::get_executing_assembly"
+    "func": "SystemReflectionAssembly::get_executing_assembly",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.Assembly::GetTypes(System.Boolean)",
-    "func": "SystemReflectionAssembly::get_types"
+    "func": "SystemReflectionAssembly::get_types",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.Assembly::InternalGetAssemblyName(System.String,Mono.MonoAssemblyName&,System.String&)",
-    "func": "SystemReflectionAssembly::internal_get_assembly_name"
+    "func": "SystemReflectionAssembly::internal_get_assembly_name",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.Assembly::InternalGetReferencedAssemblies(System.Reflection.Assembly)",
-    "func": "SystemReflectionAssembly::internal_get_referenced_assemblies"
+    "func": "SystemReflectionAssembly::internal_get_referenced_assemblies",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.Assembly::InternalGetType",
-    "func": "SystemReflectionAssembly::internal_get_type"
+    "func": "SystemReflectionAssembly::internal_get_type",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.Assembly::load_with_partial_name(System.String,System.Security.Policy.Evidence)",
-    "func": "SystemReflectionAssembly::load_with_partial_name"
+    "func": "SystemReflectionAssembly::load_with_partial_name",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.Assembly::LoadFile_internal(System.String,System.Threading.StackCrawlMark&)",
-    "func": "SystemReflectionAssembly::load_file_internal"
+    "func": "SystemReflectionAssembly::load_file_internal",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.Assembly::LoadFrom(System.String,System.Boolean,System.Threading.StackCrawlMark&)",
-    "func": "SystemReflectionAssembly::load_from"
+    "func": "SystemReflectionAssembly::load_from",
+    "header": "icalls/system_reflection_assembly.h"
   },
   {
     "name": "System.Reflection.AssemblyName::get_public_token(System.Byte*,System.Byte*,System.Int32)",
-    "func": "SystemReflectionAssemblyName::get_public_token"
+    "func": "SystemReflectionAssemblyName::get_public_token",
+    "header": "icalls/system_reflection_assemblyname.h"
   },
   {
     "name": "System.Reflection.AssemblyName::GetNativeName(System.IntPtr)",
-    "func": "SystemReflectionAssemblyName::get_native_name"
+    "func": "SystemReflectionAssemblyName::get_native_name",
+    "header": "icalls/system_reflection_assemblyname.h"
   },
   {
     "name": "System.Reflection.AssemblyName::ParseAssemblyName(System.IntPtr,Mono.MonoAssemblyName&,System.Boolean&,System.Boolean&)",
-    "func": "SystemReflectionAssemblyName::parse_assembly_name"
+    "func": "SystemReflectionAssemblyName::parse_assembly_name",
+    "header": "icalls/system_reflection_assemblyname.h"
   },
   {
     "name": "System.Reflection.CustomAttributeData::ResolveArgumentsInternal(System.Reflection.ConstructorInfo,System.Reflection.Assembly,System.IntPtr,System.UInt32,System.Object[]&,System.Object[]&)",
-    "func": "SystemReflectionCustomAttributeData::resolve_arguments_internal"
+    "func": "SystemReflectionCustomAttributeData::resolve_arguments_internal",
+    "header": "icalls/system_reflection_customattributedata.h"
   },
   {
     "name": "System.Reflection.EventInfo::internal_from_handle_type",
-    "func": "SystemReflectionEventInfo::internal_from_handle_type"
+    "func": "SystemReflectionEventInfo::internal_from_handle_type",
+    "header": "icalls/system_reflection_eventinfo.h"
   },
   {
     "name": "System.Reflection.FieldInfo::get_marshal_info()",
-    "func": "SystemReflectionFieldInfo::get_marshal_info"
+    "func": "SystemReflectionFieldInfo::get_marshal_info",
+    "header": "icalls/system_reflection_fieldinfo.h"
   },
   {
     "name": "System.Reflection.FieldInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)",
-    "func": "SystemReflectionFieldInfo::internal_from_handle_type"
+    "func": "SystemReflectionFieldInfo::internal_from_handle_type",
+    "header": "icalls/system_reflection_fieldinfo.h"
   },
   {
     "name": "System.Reflection.MethodBase::GetCurrentMethod",
-    "func": "SystemReflectionMethodBase::get_current_method"
+    "func": "SystemReflectionMethodBase::get_current_method",
+    "header": "icalls/system_reflection_methodbase.h"
   },
   {
     "name": "System.Reflection.MonoMethodInfo::get_method_attributes",
-    "func": "SystemReflectionMonoMethodInfo::get_method_attributes"
+    "func": "SystemReflectionMonoMethodInfo::get_method_attributes",
+    "header": "icalls/system_reflection_monomethodinfo.h"
   },
   {
     "name": "System.Reflection.MonoMethodInfo::get_method_info",
-    "func": "SystemReflectionMonoMethodInfo::get_method_info"
+    "func": "SystemReflectionMonoMethodInfo::get_method_info",
+    "header": "icalls/system_reflection_monomethodinfo.h"
   },
   {
     "name": "System.Reflection.MonoMethodInfo::get_parameter_info",
-    "func": "SystemReflectionMonoMethodInfo::get_parameter_info"
+    "func": "SystemReflectionMonoMethodInfo::get_parameter_info",
+    "header": "icalls/system_reflection_monomethodinfo.h"
   },
   {
     "name": "System.Reflection.MonoMethodInfo::get_retval_marshal(System.IntPtr)",
-    "func": "SystemReflectionMonoMethodInfo::get_retval_marshal"
+    "func": "SystemReflectionMonoMethodInfo::get_retval_marshal",
+    "header": "icalls/system_reflection_monomethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::get_code_base(System.Reflection.Assembly,System.Boolean)",
-    "func": "SystemReflectionRuntimeAssembly::get_code_base"
+    "func": "SystemReflectionRuntimeAssembly::get_code_base",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::get_EntryPoint",
-    "func": "SystemReflectionRuntimeAssembly::get_entry_point"
+    "func": "SystemReflectionRuntimeAssembly::get_entry_point",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::get_fullname(System.Reflection.Assembly)",
-    "func": "SystemReflectionRuntimeAssembly::get_fullname"
+    "func": "SystemReflectionRuntimeAssembly::get_fullname",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::get_global_assembly_cache",
-    "func": "SystemReflectionRuntimeAssembly::get_global_assembly_cache"
+    "func": "SystemReflectionRuntimeAssembly::get_global_assembly_cache",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::get_location",
-    "func": "SystemReflectionRuntimeAssembly::get_location"
+    "func": "SystemReflectionRuntimeAssembly::get_location",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::get_ReflectionOnly",
-    "func": "SystemReflectionRuntimeAssembly::get_reflection_only"
+    "func": "SystemReflectionRuntimeAssembly::get_reflection_only",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::GetAotIdInternal(System.Byte[])",
-    "func": "SystemReflectionRuntimeAssembly::get_aot_id_internal"
+    "func": "SystemReflectionRuntimeAssembly::get_aot_id_internal",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::GetFilesInternal(System.String,System.Boolean)",
-    "func": "SystemReflectionRuntimeAssembly::get_files_internal"
+    "func": "SystemReflectionRuntimeAssembly::get_files_internal",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::GetManifestModuleInternal",
-    "func": "SystemReflectionRuntimeAssembly::get_manifest_module_internal"
+    "func": "SystemReflectionRuntimeAssembly::get_manifest_module_internal",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::GetManifestResourceInfoInternal(System.String,System.Reflection.ManifestResourceInfo)",
-    "func": "SystemReflectionRuntimeAssembly::get_manifest_resource_info_internal"
+    "func": "SystemReflectionRuntimeAssembly::get_manifest_resource_info_internal",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::GetManifestResourceInternal",
-    "func": "SystemReflectionRuntimeAssembly::get_manifest_resource_internal"
+    "func": "SystemReflectionRuntimeAssembly::get_manifest_resource_internal",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::GetManifestResourceNames",
-    "func": "SystemReflectionRuntimeAssembly::get_manifest_resource_names"
+    "func": "SystemReflectionRuntimeAssembly::get_manifest_resource_names",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::GetModulesInternal",
-    "func": "SystemReflectionRuntimeAssembly::get_modules_internal"
+    "func": "SystemReflectionRuntimeAssembly::get_modules_internal",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeAssembly::InternalImageRuntimeVersion(System.Reflection.Assembly)",
-    "func": "SystemReflectionRuntimeAssembly::internal_image_runtime_version"
+    "func": "SystemReflectionRuntimeAssembly::internal_image_runtime_version",
+    "header": "icalls/system_reflection_runtimeassembly.h"
   },
   {
     "name": "System.Reflection.RuntimeConstructorInfo::get_metadata_token",
-    "func": "SystemReflectionRuntimeConstructorInfo::get_metadata_token"
+    "func": "SystemReflectionRuntimeConstructorInfo::get_metadata_token",
+    "header": "icalls/system_reflection_runtimeconstructorinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeConstructorInfo::InternalInvoke(System.Object,System.Object[],System.Exception&)",
-    "func": "SystemReflectionRuntimeConstructorInfo::internal_invoke"
+    "func": "SystemReflectionRuntimeConstructorInfo::internal_invoke",
+    "header": "icalls/system_reflection_runtimeconstructorinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeEventInfo::get_event_info(System.Reflection.RuntimeEventInfo,System.Reflection.MonoEventInfo&)",
-    "func": "SystemReflectionRuntimeEventInfo::get_event_info"
+    "func": "SystemReflectionRuntimeEventInfo::get_event_info",
+    "header": "icalls/system_reflection_runtimeeventinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeEventInfo::get_metadata_token(System.Reflection.RuntimeEventInfo)",
-    "func": "SystemReflectionRuntimeEventInfo::get_metadata_token"
+    "func": "SystemReflectionRuntimeEventInfo::get_metadata_token",
+    "header": "icalls/system_reflection_runtimeeventinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeFieldInfo::get_metadata_token",
-    "func": "SystemReflectionRuntimeFieldInfo::get_metadata_token"
+    "func": "SystemReflectionRuntimeFieldInfo::get_metadata_token",
+    "header": "icalls/system_reflection_runtimefieldinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeFieldInfo::GetFieldOffset",
-    "func": "SystemReflectionRuntimeFieldInfo::get_field_offset"
+    "func": "SystemReflectionRuntimeFieldInfo::get_field_offset",
+    "header": "icalls/system_reflection_runtimefieldinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeFieldInfo::GetParentType",
-    "func": "SystemReflectionRuntimeFieldInfo::get_parent_type"
+    "func": "SystemReflectionRuntimeFieldInfo::get_parent_type",
+    "header": "icalls/system_reflection_runtimefieldinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeFieldInfo::GetRawConstantValue",
-    "func": "SystemReflectionRuntimeFieldInfo::get_raw_const_value"
+    "func": "SystemReflectionRuntimeFieldInfo::get_raw_const_value",
+    "header": "icalls/system_reflection_runtimefieldinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeFieldInfo::GetTypeModifiers(System.Boolean)",
-    "func": "SystemReflectionRuntimeFieldInfo::get_type_modifiers"
+    "func": "SystemReflectionRuntimeFieldInfo::get_type_modifiers",
+    "header": "icalls/system_reflection_runtimefieldinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeFieldInfo::GetValueInternal",
-    "func": "SystemReflectionRuntimeFieldInfo::get_value_internal"
+    "func": "SystemReflectionRuntimeFieldInfo::get_value_internal",
+    "header": "icalls/system_reflection_runtimefieldinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeFieldInfo::ResolveType",
-    "func": "SystemReflectionRuntimeFieldInfo::resolve_type"
+    "func": "SystemReflectionRuntimeFieldInfo::resolve_type",
+    "header": "icalls/system_reflection_runtimefieldinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeFieldInfo::SetValueInternal(System.Reflection.FieldInfo,System.Object,System.Object)",
-    "func": "SystemReflectionRuntimeFieldInfo::set_value_internal"
+    "func": "SystemReflectionRuntimeFieldInfo::set_value_internal",
+    "header": "icalls/system_reflection_runtimefieldinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeFieldInfo::UnsafeGetValue",
-    "func": "SystemReflectionRuntimeFieldInfo::unsafe_get_value"
+    "func": "SystemReflectionRuntimeFieldInfo::unsafe_get_value",
+    "header": "icalls/system_reflection_runtimefieldinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::get_base_method(System.Reflection.RuntimeMethodInfo,System.Boolean)",
-    "func": "SystemReflectionRuntimeMethodInfo::get_base_method"
+    "func": "SystemReflectionRuntimeMethodInfo::get_base_method",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::get_IsGenericMethod",
-    "func": "SystemReflectionRuntimeMethodInfo::get_is_generic_method"
+    "func": "SystemReflectionRuntimeMethodInfo::get_is_generic_method",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::get_IsGenericMethodDefinition",
-    "func": "SystemReflectionRuntimeMethodInfo::get_is_generic_method_definition"
+    "func": "SystemReflectionRuntimeMethodInfo::get_is_generic_method_definition",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::get_metadata_token(System.Reflection.RuntimeMethodInfo)",
-    "func": "SystemReflectionRuntimeMethodInfo::get_metadata_token"
+    "func": "SystemReflectionRuntimeMethodInfo::get_metadata_token",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::get_name",
-    "func": "SystemReflectionRuntimeMethodInfo::get_name"
+    "func": "SystemReflectionRuntimeMethodInfo::get_name",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::GetGenericArguments",
-    "func": "SystemReflectionRuntimeMethodInfo::get_generic_arguments"
+    "func": "SystemReflectionRuntimeMethodInfo::get_generic_arguments",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::GetGenericMethodDefinition_impl()",
-    "func": "SystemReflectionRuntimeMethodInfo::get_generic_method_definition_impl"
+    "func": "SystemReflectionRuntimeMethodInfo::get_generic_method_definition_impl",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::GetMethodBodyInternal(System.IntPtr)",
-    "func": "SystemReflectionRuntimeMethodInfo::get_method_body_internal"
+    "func": "SystemReflectionRuntimeMethodInfo::get_method_body_internal",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::GetMethodFromHandleInternalType_native",
-    "func": "SystemReflectionRuntimeMethodInfo::get_method_from_handle_internal_type_native"
+    "func": "SystemReflectionRuntimeMethodInfo::get_method_from_handle_internal_type_native",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::GetPInvoke(System.Reflection.PInvokeAttributes&,System.String&,System.String&)",
-    "func": "SystemReflectionRuntimeMethodInfo::get_pinvoke"
+    "func": "SystemReflectionRuntimeMethodInfo::get_pinvoke",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::InternalInvoke",
-    "func": "SystemReflectionRuntimeMethodInfo::internal_invoke"
+    "func": "SystemReflectionRuntimeMethodInfo::internal_invoke",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeMethodInfo::MakeGenericMethod_impl",
-    "func": "SystemReflectionRuntimeMethodInfo::make_generic_method_impl"
+    "func": "SystemReflectionRuntimeMethodInfo::make_generic_method_impl",
+    "header": "icalls/system_reflection_runtimemethodinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::get_MetadataToken(System.Reflection.Module)",
-    "func": "SystemReflectionRuntimeModule::get_metadata_token"
+    "func": "SystemReflectionRuntimeModule::get_metadata_token",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::GetGlobalType(System.IntPtr)",
-    "func": "SystemReflectionRuntimeModule::get_global_type"
+    "func": "SystemReflectionRuntimeModule::get_global_type",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::GetGuidInternal(System.IntPtr,System.Byte[])",
-    "func": "SystemReflectionRuntimeModule::get_guid_internal"
+    "func": "SystemReflectionRuntimeModule::get_guid_internal",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::GetHINSTANCE(System.IntPtr)",
-    "func": "SystemReflectionRuntimeModule::get_hinstance"
+    "func": "SystemReflectionRuntimeModule::get_hinstance",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::GetMDStreamVersion(System.IntPtr)",
-    "func": "SystemReflectionRuntimeModule::get_md_stream_version"
+    "func": "SystemReflectionRuntimeModule::get_md_stream_version",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::InternalGetTypes(System.IntPtr)",
-    "func": "SystemReflectionRuntimeModule::internal_get_types"
+    "func": "SystemReflectionRuntimeModule::internal_get_types",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::ResolveFieldToken(System.IntPtr,System.Int32,System.IntPtr[],System.IntPtr[],System.Reflection.ResolveTokenError&)",
-    "func": "SystemReflectionRuntimeModule::resolve_field_token"
+    "func": "SystemReflectionRuntimeModule::resolve_field_token",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::ResolveMemberToken(System.IntPtr,System.Int32,System.IntPtr[],System.IntPtr[],System.Reflection.ResolveTokenError&)",
-    "func": "SystemReflectionRuntimeModule::resolve_member_token"
+    "func": "SystemReflectionRuntimeModule::resolve_member_token",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::ResolveMethodToken(System.IntPtr,System.Int32,System.IntPtr[],System.IntPtr[],System.Reflection.ResolveTokenError&)",
-    "func": "SystemReflectionRuntimeModule::resolve_method_token"
+    "func": "SystemReflectionRuntimeModule::resolve_method_token",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::ResolveSignature(System.IntPtr,System.Int32,System.Reflection.ResolveTokenError&)",
-    "func": "SystemReflectionRuntimeModule::resolve_signature"
+    "func": "SystemReflectionRuntimeModule::resolve_signature",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::ResolveStringToken(System.IntPtr,System.Int32,System.Reflection.ResolveTokenError&)",
-    "func": "SystemReflectionRuntimeModule::resolve_string_token"
+    "func": "SystemReflectionRuntimeModule::resolve_string_token",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeModule::ResolveTypeToken(System.IntPtr,System.Int32,System.IntPtr[],System.IntPtr[],System.Reflection.ResolveTokenError&)",
-    "func": "SystemReflectionRuntimeModule::resolve_type_token"
+    "func": "SystemReflectionRuntimeModule::resolve_type_token",
+    "header": "icalls/system_reflection_runtimemodule.h"
   },
   {
     "name": "System.Reflection.RuntimeParameterInfo::GetMetadataToken()",
-    "func": "SystemReflectionRuntimeParameterInfo::get_metadata_token"
+    "func": "SystemReflectionRuntimeParameterInfo::get_metadata_token",
+    "header": "icalls/system_reflection_runtimeparameterinfo.h"
   },
   {
     "name": "System.Reflection.RuntimeParameterInfo::GetTypeModifiers(System.Type,System.Reflection.MemberInfo,System.Int32,System.Boolean)",
-    "func": "SystemReflectionRuntimeParameterInfo::get_type_modifiers"
+    "func": "SystemReflectionRuntimeParameterInfo::get_type_modifiers",
+    "header": "icalls/system_reflection_runtimeparameterinfo.h"
   },
   {
     "name": "System.Reflection.RuntimePropertyInfo::get_default_value(System.Reflection.RuntimePropertyInfo)",
-    "func": "SystemReflectionRuntimePropertyInfo::get_default_value"
+    "func": "SystemReflectionRuntimePropertyInfo::get_default_value",
+    "header": "icalls/system_reflection_runtimepropertyinfo.h"
   },
   {
     "name": "System.Reflection.RuntimePropertyInfo::get_metadata_token(System.Reflection.RuntimePropertyInfo)",
-    "func": "SystemReflectionRuntimePropertyInfo::get_metadata_token"
+    "func": "SystemReflectionRuntimePropertyInfo::get_metadata_token",
+    "header": "icalls/system_reflection_runtimepropertyinfo.h"
   },
   {
     "name": "System.Reflection.RuntimePropertyInfo::get_property_info",
-    "func": "SystemReflectionRuntimePropertyInfo::get_property_info"
+    "func": "SystemReflectionRuntimePropertyInfo::get_property_info",
+    "header": "icalls/system_reflection_runtimepropertyinfo.h"
   },
   {
     "name": "System.Reflection.RuntimePropertyInfo::GetTypeModifiers(System.Reflection.RuntimePropertyInfo,System.Boolean)",
-    "func": "SystemReflectionRuntimePropertyInfo::get_type_modifiers"
+    "func": "SystemReflectionRuntimePropertyInfo::get_type_modifiers",
+    "header": "icalls/system_reflection_runtimepropertyinfo.h"
   },
   {
     "name": "System.Reflection.RuntimePropertyInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)",
-    "func": "SystemReflectionRuntimePropertyInfo::internal_from_handle_type"
+    "func": "SystemReflectionRuntimePropertyInfo::internal_from_handle_type",
+    "header": "icalls/system_reflection_runtimepropertyinfo.h"
   },
   {
     "name": "System.Runtime.CompilerServices.RuntimeHelpers::get_OffsetToStringData",
-    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::get_offset_to_string_data"
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::get_offset_to_string_data",
+    "header": "icalls/system_runtime_compilerservices_runtimehelpers.h"
   },
   {
     "name": "System.Runtime.CompilerServices.RuntimeHelpers::GetObjectValue(System.Object)",
-    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::get_object_value"
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::get_object_value",
+    "header": "icalls/system_runtime_compilerservices_runtimehelpers.h"
   },
   {
     "name": "System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray",
-    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::initialize_array"
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::initialize_array",
+    "header": "icalls/system_runtime_compilerservices_runtimehelpers.h"
   },
   {
     "name": "System.Runtime.CompilerServices.RuntimeHelpers::RunClassConstructor(System.IntPtr)",
-    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::run_class_constructor"
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::run_class_constructor",
+    "header": "icalls/system_runtime_compilerservices_runtimehelpers.h"
   },
   {
     "name": "System.Runtime.CompilerServices.RuntimeHelpers::RunModuleConstructor(System.IntPtr)",
-    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::run_module_constructor"
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::run_module_constructor",
+    "header": "icalls/system_runtime_compilerservices_runtimehelpers.h"
   },
   {
     "name": "System.Runtime.CompilerServices.RuntimeHelpers::SufficientExecutionStack",
-    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::sufficient_execution_stack"
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::sufficient_execution_stack",
+    "header": "icalls/system_runtime_compilerservices_runtimehelpers.h"
   },
   {
     "name": "System.Runtime.InteropServices.GCHandle::CheckCurrentDomain(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesGCHandle::check_current_domain"
+    "func": "SystemRuntimeInteropServicesGCHandle::check_current_domain",
+    "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
   {
     "name": "System.Runtime.InteropServices.GCHandle::FreeHandle(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesGCHandle::free_handle"
+    "func": "SystemRuntimeInteropServicesGCHandle::free_handle",
+    "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
   {
     "name": "System.Runtime.InteropServices.GCHandle::GetAddrOfPinnedObject(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesGCHandle::get_addr_of_pinned_object"
+    "func": "SystemRuntimeInteropServicesGCHandle::get_addr_of_pinned_object",
+    "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
   {
     "name": "System.Runtime.InteropServices.GCHandle::GetTarget(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesGCHandle::get_target"
+    "func": "SystemRuntimeInteropServicesGCHandle::get_target",
+    "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
   {
     "name": "System.Runtime.InteropServices.GCHandle::GetTargetHandle(System.Object,System.IntPtr,System.Runtime.InteropServices.GCHandleType)",
-    "func": "SystemRuntimeInteropServicesGCHandle::get_target_handle"
+    "func": "SystemRuntimeInteropServicesGCHandle::get_target_handle",
+    "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::AddRefInternal(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::add_ref_internal"
+    "func": "SystemRuntimeInteropServicesMarshal::add_ref_internal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::AllocCoTaskMem(System.Int32)",
-    "func": "SystemRuntimeInteropServicesMarshal::alloc_co_task_mem"
+    "func": "SystemRuntimeInteropServicesMarshal::alloc_co_task_mem",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::AllocCoTaskMemSize(System.UIntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::alloc_co_task_mem_size"
+    "func": "SystemRuntimeInteropServicesMarshal::alloc_co_task_mem_size",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::AllocHGlobal(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::alloc_hglobal"
+    "func": "SystemRuntimeInteropServicesMarshal::alloc_hglobal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::BufferToBSTR(System.Char*,System.Int32)",
-    "func": "SystemRuntimeInteropServicesMarshal::buffer_to_bstr"
+    "func": "SystemRuntimeInteropServicesMarshal::buffer_to_bstr",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::copy_from_unmanaged_fixed(System.IntPtr,System.Int32,System.Array,System.Int32,System.Void*)",
-    "func": "SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed"
+    "func": "SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::copy_to_unmanaged_fixed(System.Array,System.Int32,System.IntPtr,System.Int32,System.Void*)",
-    "func": "SystemRuntimeInteropServicesMarshal::copy_to_unmanaged_fixed"
+    "func": "SystemRuntimeInteropServicesMarshal::copy_to_unmanaged_fixed",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::DestroyStructure(System.IntPtr,System.Type)",
-    "func": "SystemRuntimeInteropServicesMarshal::destroy_structure"
+    "func": "SystemRuntimeInteropServicesMarshal::destroy_structure",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::FreeBSTR(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::free_bstr"
+    "func": "SystemRuntimeInteropServicesMarshal::free_bstr",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::FreeCoTaskMem(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::free_co_task_mem"
+    "func": "SystemRuntimeInteropServicesMarshal::free_co_task_mem",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::FreeHGlobal(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::free_hglobal"
+    "func": "SystemRuntimeInteropServicesMarshal::free_hglobal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetCCW(System.Object,System.Type)",
-    "func": "SystemRuntimeInteropServicesMarshal::get_ccw"
+    "func": "SystemRuntimeInteropServicesMarshal::get_ccw",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetDelegateForFunctionPointerInternal(System.IntPtr,System.Type)",
-    "func": "SystemRuntimeInteropServicesMarshal::get_delegate_for_function_pointer_internal"
+    "func": "SystemRuntimeInteropServicesMarshal::get_delegate_for_function_pointer_internal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetFunctionPointerForDelegateInternal(System.Delegate)",
-    "func": "SystemRuntimeInteropServicesMarshal::get_function_pointer_for_delegate_internal"
+    "func": "SystemRuntimeInteropServicesMarshal::get_function_pointer_for_delegate_internal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetHRForException_WinRT(System.Exception)",
-    "func": "SystemRuntimeInteropServicesMarshal::get_hr_for_exception_winrt"
+    "func": "SystemRuntimeInteropServicesMarshal::get_hr_for_exception_winrt",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetIDispatchForObjectInternal(System.Object)",
-    "func": "SystemRuntimeInteropServicesMarshal::get_idispatch_for_object_internal"
+    "func": "SystemRuntimeInteropServicesMarshal::get_idispatch_for_object_internal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetIUnknownForObjectInternal(System.Object)",
-    "func": "SystemRuntimeInteropServicesMarshal::get_iunknown_for_object_internal"
+    "func": "SystemRuntimeInteropServicesMarshal::get_iunknown_for_object_internal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetLastWin32Error()",
-    "func": "SystemRuntimeInteropServicesMarshal::get_last_win32_error"
+    "func": "SystemRuntimeInteropServicesMarshal::get_last_win32_error",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetNativeActivationFactory(System.Type)",
-    "func": "SystemRuntimeInteropServicesMarshal::get_native_activation_factory"
+    "func": "SystemRuntimeInteropServicesMarshal::get_native_activation_factory",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetObjectForCCW(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::get_object_for_ccw"
+    "func": "SystemRuntimeInteropServicesMarshal::get_object_for_ccw",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::GetRawIUnknownForComObjectNoAddRef(System.Object)",
-    "func": "SystemRuntimeInteropServicesMarshal::get_raw_iunknown_for_com_object_no_add_ref"
+    "func": "SystemRuntimeInteropServicesMarshal::get_raw_iunknown_for_com_object_no_add_ref",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::OffsetOf(System.Type,System.String)",
-    "func": "SystemRuntimeInteropServicesMarshal::offset_of"
+    "func": "SystemRuntimeInteropServicesMarshal::offset_of",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::Prelink(System.Reflection.MethodInfo)",
-    "func": "SystemRuntimeInteropServicesMarshal::prelink"
+    "func": "SystemRuntimeInteropServicesMarshal::prelink",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::PrelinkAll(System.Type)",
-    "func": "SystemRuntimeInteropServicesMarshal::prelink_all"
+    "func": "SystemRuntimeInteropServicesMarshal::prelink_all",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::PtrToStringAnsi(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi"
+    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::PtrToStringAnsi(System.IntPtr,System.Int32)",
-    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi_len"
+    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi_len",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::PtrToStringBSTR(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_bstr"
+    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_bstr",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::PtrToStringUni(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_uni"
+    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_uni",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::PtrToStringUni(System.IntPtr,System.Int32)",
-    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_uni_len"
+    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_string_uni_len",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::PtrToStructure(System.IntPtr,System.Object)",
-    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_structure"
+    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_structure",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::PtrToStructure(System.IntPtr,System.Type)",
-    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_structure_type"
+    "func": "SystemRuntimeInteropServicesMarshal::ptr_to_structure_type",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::QueryInterfaceInternal(System.IntPtr,System.Guid&,System.IntPtr&)",
-    "func": "SystemRuntimeInteropServicesMarshal::query_interface_internal"
+    "func": "SystemRuntimeInteropServicesMarshal::query_interface_internal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::ReAllocCoTaskMem(System.IntPtr,System.Int32)",
-    "func": "SystemRuntimeInteropServicesMarshal::re_alloc_co_task_mem"
+    "func": "SystemRuntimeInteropServicesMarshal::re_alloc_co_task_mem",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::ReAllocHGlobal(System.IntPtr,System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::re_alloc_hglobal"
+    "func": "SystemRuntimeInteropServicesMarshal::re_alloc_hglobal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::ReleaseComObjectInternal(System.Object)",
-    "func": "SystemRuntimeInteropServicesMarshal::release_com_object_internal"
+    "func": "SystemRuntimeInteropServicesMarshal::release_com_object_internal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::ReleaseInternal(System.IntPtr)",
-    "func": "SystemRuntimeInteropServicesMarshal::release_internal"
+    "func": "SystemRuntimeInteropServicesMarshal::release_internal",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::SetLastWin32Error(System.Int32)",
-    "func": "SystemRuntimeInteropServicesMarshal::set_last_win32_error"
+    "func": "SystemRuntimeInteropServicesMarshal::set_last_win32_error",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::SizeOf(System.Type)",
-    "func": "SystemRuntimeInteropServicesMarshal::sizeof_type"
+    "func": "SystemRuntimeInteropServicesMarshal::sizeof_type",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::StringToHGlobalAnsi(System.Char*,System.Int32)",
-    "func": "SystemRuntimeInteropServicesMarshal::string_to_hglobal_ansi"
+    "func": "SystemRuntimeInteropServicesMarshal::string_to_hglobal_ansi",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::StringToHGlobalUni(System.Char*,System.Int32)",
-    "func": "SystemRuntimeInteropServicesMarshal::string_to_hglobal_uni"
+    "func": "SystemRuntimeInteropServicesMarshal::string_to_hglobal_uni",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::StructureToPtr(System.Object,System.IntPtr,System.Boolean)",
-    "func": "SystemRuntimeInteropServicesMarshal::structure_to_ptr"
+    "func": "SystemRuntimeInteropServicesMarshal::structure_to_ptr",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.Marshal::UnsafeAddrOfPinnedArrayElement(System.Array,System.Int32)",
-    "func": "SystemRuntimeInteropServicesMarshal::unsafe_addr_of_pinned_array_element"
+    "func": "SystemRuntimeInteropServicesMarshal::unsafe_addr_of_pinned_array_element",
+    "header": "icalls/system_runtime_interopservices_marshal.h"
   },
   {
     "name": "System.Runtime.InteropServices.RuntimeInformation::GetOSName",
-    "func": "SystemRuntimeInteropServicesRuntimeInformation::get_os_name"
+    "func": "SystemRuntimeInteropServicesRuntimeInformation::get_os_name",
+    "header": "icalls/system_runtime_interopservices_runtimeinformation.h"
   },
   {
     "name": "System.Runtime.InteropServices.RuntimeInformation::GetRuntimeArchitecture",
-    "func": "SystemRuntimeInteropServicesRuntimeInformation::get_runtime_architecture"
+    "func": "SystemRuntimeInteropServicesRuntimeInformation::get_runtime_architecture",
+    "header": "icalls/system_runtime_interopservices_runtimeinformation.h"
   },
   {
     "name": "System.Runtime.RuntimeImports::_ecvt_s",
-    "func": "SystemRuntimeRuntimeImports::ecvt_s"
+    "func": "SystemRuntimeRuntimeImports::ecvt_s",
+    "header": "icalls/system_runtime_runtimeimports.h"
   },
   {
     "name": "System.Runtime.RuntimeImports::Memmove",
-    "func": "SystemRuntimeRuntimeImports::memmove"
+    "func": "SystemRuntimeRuntimeImports::memmove",
+    "header": "icalls/system_runtime_runtimeimports.h"
   },
   {
     "name": "System.Runtime.RuntimeImports::Memmove_wbarrier",
-    "func": "SystemRuntimeRuntimeImports::memmove_wbarrier"
+    "func": "SystemRuntimeRuntimeImports::memmove_wbarrier",
+    "header": "icalls/system_runtime_runtimeimports.h"
   },
   {
     "name": "System.Runtime.RuntimeImports::ZeroMemory",
-    "func": "SystemRuntimeRuntimeImports::zero_memory"
+    "func": "SystemRuntimeRuntimeImports::zero_memory",
+    "header": "icalls/system_runtime_runtimeimports.h"
   },
   {
     "name": "System.RuntimeType::CreateInstanceInternal",
-    "func": "SystemRuntimeType::create_instance_internal"
+    "func": "SystemRuntimeType::create_instance_internal",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::get_DeclaringMethod",
-    "func": "SystemRuntimeType::get_declaring_method"
+    "func": "SystemRuntimeType::get_declaring_method",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::get_DeclaringType",
-    "func": "SystemRuntimeType::get_declaring_type"
+    "func": "SystemRuntimeType::get_declaring_type",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::get_Name",
-    "func": "SystemRuntimeType::get_name"
+    "func": "SystemRuntimeType::get_name",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::get_Namespace",
-    "func": "SystemRuntimeType::get_namespace"
+    "func": "SystemRuntimeType::get_namespace",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetConstructors_native",
-    "func": "SystemRuntimeType::get_constructors_native"
+    "func": "SystemRuntimeType::get_constructors_native",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetEvents_native",
-    "func": "SystemRuntimeType::get_events_native"
+    "func": "SystemRuntimeType::get_events_native",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetFields_native",
-    "func": "SystemRuntimeType::get_fields_native"
+    "func": "SystemRuntimeType::get_fields_native",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::getFullName",
-    "func": "SystemRuntimeType::get_full_name"
+    "func": "SystemRuntimeType::get_full_name",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetGenericArgumentsInternal",
-    "func": "SystemRuntimeType::get_generic_arguments_internal"
+    "func": "SystemRuntimeType::get_generic_arguments_internal",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetGenericParameterPosition",
-    "func": "SystemRuntimeType::get_generic_parameter_position"
+    "func": "SystemRuntimeType::get_generic_parameter_position",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetGUID",
-    "func": "SystemRuntimeType::get_guid"
+    "func": "SystemRuntimeType::get_guid",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetInterfaceMapData",
-    "func": "SystemRuntimeType::get_interface_map_data"
+    "func": "SystemRuntimeType::get_interface_map_data",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetInterfaces",
-    "func": "SystemRuntimeType::get_interfaces"
+    "func": "SystemRuntimeType::get_interfaces",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetMethodsByName_native",
-    "func": "SystemRuntimeType::get_methods_by_name_native"
+    "func": "SystemRuntimeType::get_methods_by_name_native",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetNestedTypes_native",
-    "func": "SystemRuntimeType::get_nested_types_native"
+    "func": "SystemRuntimeType::get_nested_types_native",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetPacking",
-    "func": "SystemRuntimeType::get_packing"
+    "func": "SystemRuntimeType::get_packing",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetPropertiesByName_native",
-    "func": "SystemRuntimeType::get_properties_by_name_native"
+    "func": "SystemRuntimeType::get_properties_by_name_native",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::GetTypeCodeImplInternal",
-    "func": "SystemRuntimeType::get_type_code_impl_internal"
+    "func": "SystemRuntimeType::get_type_code_impl_internal",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::make_array_type",
-    "func": "SystemRuntimeType::make_array_type"
+    "func": "SystemRuntimeType::make_array_type",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::make_byref_type",
-    "func": "SystemRuntimeType::make_byref_type"
+    "func": "SystemRuntimeType::make_byref_type",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::MakeGenericType",
-    "func": "SystemRuntimeType::make_generic_type"
+    "func": "SystemRuntimeType::make_generic_type",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.RuntimeType::MakePointerType",
-    "func": "SystemRuntimeType::make_pointer_type"
+    "func": "SystemRuntimeType::make_pointer_type",
+    "header": "icalls/system_runtimetype.h"
   },
   {
     "name": "System.Security.Cryptography.RNGCryptoServiceProvider::RngClose(System.IntPtr)",
-    "func": "SystemSecurityCryptographyRNGCryptoServiceProvider::rng_close"
+    "func": "SystemSecurityCryptographyRNGCryptoServiceProvider::rng_close",
+    "header": "icalls/system_security_cryptography_rngcryptoserviceprovider.h"
   },
   {
     "name": "System.Security.Cryptography.RNGCryptoServiceProvider::RngGetBytes(System.IntPtr,System.Byte*,System.IntPtr)",
-    "func": "SystemSecurityCryptographyRNGCryptoServiceProvider::rng_get_bytes"
+    "func": "SystemSecurityCryptographyRNGCryptoServiceProvider::rng_get_bytes",
+    "header": "icalls/system_security_cryptography_rngcryptoserviceprovider.h"
   },
   {
     "name": "System.Security.Cryptography.RNGCryptoServiceProvider::RngInitialize(System.Byte*,System.IntPtr)",
-    "func": "SystemSecurityCryptographyRNGCryptoServiceProvider::rng_initialize"
+    "func": "SystemSecurityCryptographyRNGCryptoServiceProvider::rng_initialize",
+    "header": "icalls/system_security_cryptography_rngcryptoserviceprovider.h"
   },
   {
     "name": "System.Security.Cryptography.RNGCryptoServiceProvider::RngOpen",
-    "func": "SystemSecurityCryptographyRNGCryptoServiceProvider::rng_open"
+    "func": "SystemSecurityCryptographyRNGCryptoServiceProvider::rng_open",
+    "header": "icalls/system_security_cryptography_rngcryptoserviceprovider.h"
   },
   {
     "name": "System.Security.SecurityManager::get_SecurityEnabled",
-    "func": "SystemSecuritySecurityManager::get_security_enabled"
+    "func": "SystemSecuritySecurityManager::get_security_enabled",
+    "header": "icalls/system_security_securitymanager.h"
   },
   {
     "name": "System.String::FastAllocateString",
-    "func": "SystemString::fast_allocate_string"
+    "func": "SystemString::fast_allocate_string",
+    "header": "icalls/system_string.h"
   },
   {
     "name": "System.String::InternalIntern",
-    "func": "SystemString::internal_intern"
+    "func": "SystemString::internal_intern",
+    "header": "icalls/system_string.h"
   },
   {
     "name": "System.String::InternalIsInterned",
-    "func": "SystemString::internal_is_interned"
+    "func": "SystemString::internal_is_interned",
+    "header": "icalls/system_string.h"
   },
   {
     "name": "System.Text.EncodingHelper::InternalCodePage(System.Int32&)",
-    "func": "SystemTextEncodingHelper::internal_code_page"
+    "func": "SystemTextEncodingHelper::internal_code_page",
+    "header": "icalls/system_text_encodinghelper.h"
   },
   {
     "name": "System.Threading.Interlocked::Add(System.Int32&,System.Int32)",
-    "func": "SystemThreadingInterlocked::add_i32"
+    "func": "SystemThreadingInterlocked::add_i32",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Add(System.Int64&,System.Int64)",
-    "func": "SystemThreadingInterlocked::add_i64"
+    "func": "SystemThreadingInterlocked::add_i64",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::CompareExchange(System.Double&,System.Double,System.Double)",
-    "func": "SystemThreadingInterlocked::compare_exchange_f64"
+    "func": "SystemThreadingInterlocked::compare_exchange_f64",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::CompareExchange(System.Int32&,System.Int32,System.Int32)",
-    "func": "SystemThreadingInterlocked::compare_exchange_i32"
+    "func": "SystemThreadingInterlocked::compare_exchange_i32",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::CompareExchange(System.Int32&,System.Int32,System.Int32,System.Boolean&)",
-    "func": "SystemThreadingInterlocked::compare_exchange2_i32"
+    "func": "SystemThreadingInterlocked::compare_exchange2_i32",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::CompareExchange(System.Int64&,System.Int64,System.Int64)",
-    "func": "SystemThreadingInterlocked::compare_exchange_i64"
+    "func": "SystemThreadingInterlocked::compare_exchange_i64",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::CompareExchange(System.IntPtr&,System.IntPtr,System.IntPtr)",
-    "func": "SystemThreadingInterlocked::compare_exchange_intptr"
+    "func": "SystemThreadingInterlocked::compare_exchange_intptr",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::CompareExchange(System.Object&,System.Object&,System.Object&,System.Object&)",
-    "func": "SystemThreadingInterlocked::compare_exchange_object2"
+    "func": "SystemThreadingInterlocked::compare_exchange_object2",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::CompareExchange(System.Object&,System.Object,System.Object)",
-    "func": "SystemThreadingInterlocked::compare_exchange_object"
+    "func": "SystemThreadingInterlocked::compare_exchange_object",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::CompareExchange(System.Single&,System.Single,System.Single)",
-    "func": "SystemThreadingInterlocked::compare_exchange_f32"
+    "func": "SystemThreadingInterlocked::compare_exchange_f32",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Decrement(System.Int32&)",
-    "func": "SystemThreadingInterlocked::decrement_i32"
+    "func": "SystemThreadingInterlocked::decrement_i32",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Decrement(System.Int64&)",
-    "func": "SystemThreadingInterlocked::decrement_i64"
+    "func": "SystemThreadingInterlocked::decrement_i64",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Exchange(System.Double&,System.Double)",
-    "func": "SystemThreadingInterlocked::exchange_f64"
+    "func": "SystemThreadingInterlocked::exchange_f64",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Exchange(System.Int32&,System.Int32)",
-    "func": "SystemThreadingInterlocked::exchange_i32"
+    "func": "SystemThreadingInterlocked::exchange_i32",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Exchange(System.Int64&,System.Int64)",
-    "func": "SystemThreadingInterlocked::exchange_i64"
+    "func": "SystemThreadingInterlocked::exchange_i64",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Exchange(System.IntPtr&,System.IntPtr)",
-    "func": "SystemThreadingInterlocked::exchange_intptr"
+    "func": "SystemThreadingInterlocked::exchange_intptr",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Exchange(System.Object&,System.Object&,System.Object&)",
-    "func": "SystemThreadingInterlocked::exchange_object"
+    "func": "SystemThreadingInterlocked::exchange_object",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Exchange(System.Single&,System.Single)",
-    "func": "SystemThreadingInterlocked::exchange_f32"
+    "func": "SystemThreadingInterlocked::exchange_f32",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Increment(System.Int32&)",
-    "func": "SystemThreadingInterlocked::increment_i32"
+    "func": "SystemThreadingInterlocked::increment_i32",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Increment(System.Int64&)",
-    "func": "SystemThreadingInterlocked::increment_i64"
+    "func": "SystemThreadingInterlocked::increment_i64",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::MemoryBarrierProcessWide()",
-    "func": "SystemThreadingInterlocked::memory_barrier_process_wide"
+    "func": "SystemThreadingInterlocked::memory_barrier_process_wide",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Read(System.Int64&)",
-    "func": "SystemThreadingInterlocked::read"
+    "func": "SystemThreadingInterlocked::read",
+    "header": "icalls/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.InternalThread::Thread_free_internal",
-    "func": "SystemThreadingInternalThread::thread_free_internal"
+    "func": "SystemThreadingInternalThread::thread_free_internal",
+    "header": "icalls/system_threading_internalthread.h"
   },
   {
     "name": "System.Threading.Monitor::Enter",
-    "func": "SystemThreadingMonitor::enter"
+    "func": "SystemThreadingMonitor::enter",
+    "header": "icalls/system_threading_monitor.h"
   },
   {
     "name": "System.Threading.Monitor::Exit",
-    "func": "SystemThreadingMonitor::exit"
+    "func": "SystemThreadingMonitor::exit",
+    "header": "icalls/system_threading_monitor.h"
   },
   {
     "name": "System.Threading.Monitor::Monitor_pulse",
-    "func": "SystemThreadingMonitor::monitor_pulse"
+    "func": "SystemThreadingMonitor::monitor_pulse",
+    "header": "icalls/system_threading_monitor.h"
   },
   {
     "name": "System.Threading.Monitor::Monitor_pulse_all",
-    "func": "SystemThreadingMonitor::monitor_pulse_all"
+    "func": "SystemThreadingMonitor::monitor_pulse_all",
+    "header": "icalls/system_threading_monitor.h"
   },
   {
     "name": "System.Threading.Monitor::Monitor_test_owner",
-    "func": "SystemThreadingMonitor::monitor_test_owner"
+    "func": "SystemThreadingMonitor::monitor_test_owner",
+    "header": "icalls/system_threading_monitor.h"
   },
   {
     "name": "System.Threading.Monitor::Monitor_test_synchronised",
-    "func": "SystemThreadingMonitor::monitor_test_synchronized"
+    "func": "SystemThreadingMonitor::monitor_test_synchronized",
+    "header": "icalls/system_threading_monitor.h"
   },
   {
     "name": "System.Threading.Monitor::Monitor_try_enter_with_atomic_var",
-    "func": "SystemThreadingMonitor::monitor_try_enter_with_atomic_var"
+    "func": "SystemThreadingMonitor::monitor_try_enter_with_atomic_var",
+    "header": "icalls/system_threading_monitor.h"
   },
   {
     "name": "System.Threading.Monitor::Monitor_wait",
-    "func": "SystemThreadingMonitor::monitor_wait"
+    "func": "SystemThreadingMonitor::monitor_wait",
+    "header": "icalls/system_threading_monitor.h"
   },
   {
     "name": "System.Threading.Thread::Abort_internal(System.Threading.InternalThread,System.Object)",
-    "func": "SystemThreadingThread::abort_internal"
+    "func": "SystemThreadingThread::abort_internal",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::ByteArrayToCurrentDomain(System.Byte[])",
-    "func": "SystemThreadingThread::byte_array_to_current_domain"
+    "func": "SystemThreadingThread::byte_array_to_current_domain",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::ByteArrayToRootDomain(System.Byte[])",
-    "func": "SystemThreadingThread::byte_array_to_root_domain"
+    "func": "SystemThreadingThread::byte_array_to_root_domain",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::ClrState(System.Threading.InternalThread,System.Threading.ThreadState)",
-    "func": "SystemThreadingThread::clr_state"
+    "func": "SystemThreadingThread::clr_state",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::ConstructInternalThread",
-    "func": "SystemThreadingThread::construct_internal_thread"
+    "func": "SystemThreadingThread::construct_internal_thread",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::GetAbortExceptionState",
-    "func": "SystemThreadingThread::get_abort_exception_state"
+    "func": "SystemThreadingThread::get_abort_exception_state",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::GetCurrentThread_icall",
-    "func": "SystemThreadingThread::get_current_thread_icall"
+    "func": "SystemThreadingThread::get_current_thread_icall",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::GetDomainID",
-    "func": "SystemThreadingThread::get_domain_id"
+    "func": "SystemThreadingThread::get_domain_id",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::GetName_internal(System.Threading.InternalThread)",
-    "func": "SystemThreadingThread::get_name_internal"
+    "func": "SystemThreadingThread::get_name_internal",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::GetPriorityNative",
-    "func": "SystemThreadingThread::get_priority_native"
+    "func": "SystemThreadingThread::get_priority_native",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::GetStackTraces(System.Threading.Thread[]&,System.Object[]&)",
-    "func": "SystemThreadingThread::get_stack_traces"
+    "func": "SystemThreadingThread::get_stack_traces",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::GetState(System.Threading.InternalThread)",
-    "func": "SystemThreadingThread::get_state"
+    "func": "SystemThreadingThread::get_state",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::InterruptInternal",
-    "func": "SystemThreadingThread::interrupt_internal"
+    "func": "SystemThreadingThread::interrupt_internal",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::JoinInternal(System.Int32)",
-    "func": "SystemThreadingThread::join_internal"
+    "func": "SystemThreadingThread::join_internal",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::MemoryBarrier",
-    "func": "SystemThreadingThread::memory_barrier"
+    "func": "SystemThreadingThread::memory_barrier",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::ResetAbortNative",
-    "func": "SystemThreadingThread::reset_abort_native"
+    "func": "SystemThreadingThread::reset_abort_native",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::ResumeInternal",
-    "func": "SystemThreadingThread::resume_internal"
+    "func": "SystemThreadingThread::resume_internal",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::SetName_icall(System.Threading.InternalThread,System.Char*,System.Int32)",
-    "func": "SystemThreadingThread::set_name_icall"
+    "func": "SystemThreadingThread::set_name_icall",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::SetPriorityNative(System.Int32)",
-    "func": "SystemThreadingThread::set_priority_native"
+    "func": "SystemThreadingThread::set_priority_native",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::SetState(System.Threading.InternalThread,System.Threading.ThreadState)",
-    "func": "SystemThreadingThread::set_state"
+    "func": "SystemThreadingThread::set_state",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::SleepInternal(System.Int32)",
-    "func": "SystemThreadingThread::sleep_internal"
+    "func": "SystemThreadingThread::sleep_internal",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::SpinWait_nop",
-    "func": "SystemThreadingThread::spin_wait_nop"
+    "func": "SystemThreadingThread::spin_wait_nop",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::SuspendInternal",
-    "func": "SystemThreadingThread::suspend_internal"
+    "func": "SystemThreadingThread::suspend_internal",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::SystemMaxStackStize",
-    "func": "SystemThreadingThread::system_max_stack_stize"
+    "func": "SystemThreadingThread::system_max_stack_stize",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::Thread_internal(System.MulticastDelegate)",
-    "func": "SystemThreadingThread::thread_internal"
+    "func": "SystemThreadingThread::thread_internal",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.Byte&)",
-    "func": "SystemThreadingThread::volatile_read_u8"
+    "func": "SystemThreadingThread::volatile_read_u8",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.Double&)",
-    "func": "SystemThreadingThread::volatile_read_f64"
+    "func": "SystemThreadingThread::volatile_read_f64",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.Int16&)",
-    "func": "SystemThreadingThread::volatile_read_i16"
+    "func": "SystemThreadingThread::volatile_read_i16",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.Int32&)",
-    "func": "SystemThreadingThread::volatile_read_i32"
+    "func": "SystemThreadingThread::volatile_read_i32",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.Int64&)",
-    "func": "SystemThreadingThread::volatile_read_i64"
+    "func": "SystemThreadingThread::volatile_read_i64",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.IntPtr&)",
-    "func": "SystemThreadingThread::volatile_read_intptr"
+    "func": "SystemThreadingThread::volatile_read_intptr",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.Object&)",
-    "func": "SystemThreadingThread::volatile_read_object"
+    "func": "SystemThreadingThread::volatile_read_object",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.SByte&)",
-    "func": "SystemThreadingThread::volatile_read_i8"
+    "func": "SystemThreadingThread::volatile_read_i8",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.Single&)",
-    "func": "SystemThreadingThread::volatile_read_f32"
+    "func": "SystemThreadingThread::volatile_read_f32",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.UInt16&)",
-    "func": "SystemThreadingThread::volatile_read_u16"
+    "func": "SystemThreadingThread::volatile_read_u16",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.UInt32&)",
-    "func": "SystemThreadingThread::volatile_read_u32"
+    "func": "SystemThreadingThread::volatile_read_u32",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.UInt64&)",
-    "func": "SystemThreadingThread::volatile_read_u64"
+    "func": "SystemThreadingThread::volatile_read_u64",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileRead(System.UIntPtr&)",
-    "func": "SystemThreadingThread::volatile_read_uintptr"
+    "func": "SystemThreadingThread::volatile_read_uintptr",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.Byte&,System.Byte)",
-    "func": "SystemThreadingThread::volatile_write_u8"
+    "func": "SystemThreadingThread::volatile_write_u8",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.Double&,System.Double)",
-    "func": "SystemThreadingThread::volatile_write_f64"
+    "func": "SystemThreadingThread::volatile_write_f64",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.Int16&,System.Int16)",
-    "func": "SystemThreadingThread::volatile_write_i16"
+    "func": "SystemThreadingThread::volatile_write_i16",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.Int32&,System.Int32)",
-    "func": "SystemThreadingThread::volatile_write_i32"
+    "func": "SystemThreadingThread::volatile_write_i32",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.Int64&,System.Int64)",
-    "func": "SystemThreadingThread::volatile_write_i64"
+    "func": "SystemThreadingThread::volatile_write_i64",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.IntPtr&,System.IntPtr)",
-    "func": "SystemThreadingThread::volatile_write_intptr"
+    "func": "SystemThreadingThread::volatile_write_intptr",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.Object&,System.Object)",
-    "func": "SystemThreadingThread::volatile_write_object"
+    "func": "SystemThreadingThread::volatile_write_object",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.SByte&,System.SByte)",
-    "func": "SystemThreadingThread::volatile_write_i8"
+    "func": "SystemThreadingThread::volatile_write_i8",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.Single&,System.Single)",
-    "func": "SystemThreadingThread::volatile_write_f32"
+    "func": "SystemThreadingThread::volatile_write_f32",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.UInt16&,System.UInt16)",
-    "func": "SystemThreadingThread::volatile_write_u16"
+    "func": "SystemThreadingThread::volatile_write_u16",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.UInt32&,System.UInt32)",
-    "func": "SystemThreadingThread::volatile_write_u32"
+    "func": "SystemThreadingThread::volatile_write_u32",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.UInt64&,System.UInt64)",
-    "func": "SystemThreadingThread::volatile_write_u64"
+    "func": "SystemThreadingThread::volatile_write_u64",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::VolatileWrite(System.UIntPtr&,System.UIntPtr)",
-    "func": "SystemThreadingThread::volatile_write_uintptr"
+    "func": "SystemThreadingThread::volatile_write_uintptr",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Thread::YieldInternal",
-    "func": "SystemThreadingThread::yield_internal"
+    "func": "SystemThreadingThread::yield_internal",
+    "header": "icalls/system_threading_thread.h"
   },
   {
     "name": "System.Threading.Timer::GetTimeMonotonic()",
-    "func": "SystemThreadingTimer::get_time_monotonic"
+    "func": "SystemThreadingTimer::get_time_monotonic",
+    "header": "icalls/system_threading_timer.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.Double&)",
-    "func": "SystemThreadingVolatile::read_f64"
+    "func": "SystemThreadingVolatile::read_f64",
+    "header": "icalls/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.Int64&)",
-    "func": "SystemThreadingVolatile::read_i64"
+    "func": "SystemThreadingVolatile::read_i64",
+    "header": "icalls/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.UInt64&)",
-    "func": "SystemThreadingVolatile::read_u64"
+    "func": "SystemThreadingVolatile::read_u64",
+    "header": "icalls/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.Double&,System.Double)",
-    "func": "SystemThreadingVolatile::write_f64"
+    "func": "SystemThreadingVolatile::write_f64",
+    "header": "icalls/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.Int64&,System.Int64)",
-    "func": "SystemThreadingVolatile::write_i64"
+    "func": "SystemThreadingVolatile::write_i64",
+    "header": "icalls/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.UInt64&,System.UInt64)",
-    "func": "SystemThreadingVolatile::write_u64"
+    "func": "SystemThreadingVolatile::write_u64",
+    "header": "icalls/system_threading_volatile.h"
   },
   {
     "name": "System.Type::internal_from_handle",
-    "func": "SystemType::internal_from_handle"
+    "func": "SystemType::internal_from_handle",
+    "header": "icalls/system_type.h"
   },
   {
     "name": "System.TypedReference::InternalMakeTypedReference",
-    "func": "SystemTypedReference::internal_make_typed_reference"
+    "func": "SystemTypedReference::internal_make_typed_reference",
+    "header": "icalls/system_typedreference.h"
   },
   {
     "name": "System.TypedReference::InternalToObject",
-    "func": "SystemTypedReference::internal_to_object"
+    "func": "SystemTypedReference::internal_to_object",
+    "header": "icalls/system_typedreference.h"
   },
   {
     "name": "System.ValueType::InternalEquals(System.Object,System.Object,System.Object[]&)",
-    "func": "SystemValueType::internal_equals"
+    "func": "SystemValueType::internal_equals",
+    "header": "icalls/system_valuetype.h"
   },
   {
     "name": "System.ValueType::InternalGetHashCode(System.Object,System.Object[]&)",
-    "func": "SystemValueType::internal_get_hash_code"
+    "func": "SystemValueType::internal_get_hash_code",
+    "header": "icalls/system_valuetype.h"
   }
 ]

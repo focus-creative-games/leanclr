@@ -1,178 +1,222 @@
 [
   {
     "name": "System.Array::get_Length",
-    "func": "SystemArray::get_length"
+    "func": "SystemArray::get_length",
+    "header": "intrinsics/system_array.h"
   },
   {
     "name": "System.Array::get_LongLength",
-    "func": "SystemArray::get_long_length"
+    "func": "SystemArray::get_long_length",
+    "header": "intrinsics/system_array.h"
   },
   {
     "name": "System.Array::GetGenericValueImpl<>",
-    "func": "SystemArray::get_generic_value_impl"
+    "func": "SystemArray::get_generic_value_impl",
+    "header": "intrinsics/system_array.h"
   },
   {
     "name": "System.Array::SetGenericValueImpl<>",
-    "func": "SystemArray::set_generic_value_impl"
+    "func": "SystemArray::set_generic_value_impl",
+    "header": "intrinsics/system_array.h"
   },
   {
     "name": "System.Numerics.Vector::get_IsHardwareAccelerated",
-    "func": "SystemNumericsVector::get_is_hardware_accelerated"
+    "func": "SystemNumericsVector::get_is_hardware_accelerated",
+    "header": "intrinsics/system_numerics_vector.h"
   },
   {
     "name": "System.Object::.ctor()",
-    "func": "SystemObject::ctor"
+    "func": "SystemObject::ctor",
+    "header": "intrinsics/system_object.h"
   },
   {
     "name": "System.ReadOnlySpan`1::get_Item",
-    "func": "SystemSpan::get_item"
+    "func": "SystemSpan::get_item",
+    "header": "intrinsics/system_span.h"
   },
   {
     "name": "System.Span`1::get_Item",
-    "func": "SystemSpan::get_item"
+    "func": "SystemSpan::get_item",
+    "header": "intrinsics/system_span.h"
   },
   {
     "name": "System.String::get_Chars",
-    "func": "SystemString::get_chars"
+    "func": "SystemString::get_chars",
+    "header": "intrinsics/system_string.h"
   },
   {
     "name": "System.String::get_Length",
-    "func": "SystemString::get_length"
+    "func": "SystemString::get_length",
+    "header": "intrinsics/system_string.h"
   },
   {
     "name": "System.String::GetHashCode",
-    "func": "SystemString::get_hash_code"
+    "func": "SystemString::get_hash_code",
+    "header": "intrinsics/system_string.h"
   },
   {
     "name": "System.String::GetLegacyNonRandomizedHashCode",
-    "func": "SystemString::get_hash_code"
+    "func": "SystemString::get_hash_code",
+    "header": "intrinsics/system_string.h"
   },
   {
     "name": "System.Threading.Interlocked::CompareExchange<>",
-    "func": "SystemThreadingInterlocked::compare_exchange"
+    "func": "SystemThreadingInterlocked::compare_exchange",
+    "header": "intrinsics/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Exchange(System.Object&,System.Object)",
-    "func": "SystemThreadingInterlocked::exchange_object"
+    "func": "SystemThreadingInterlocked::exchange_object",
+    "header": "intrinsics/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::Exchange<>",
-    "func": "SystemThreadingInterlocked::exchange"
+    "func": "SystemThreadingInterlocked::exchange",
+    "header": "intrinsics/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Interlocked::MemoryBarrier",
-    "func": "SystemThreadingInterlocked::memory_barrier"
+    "func": "SystemThreadingInterlocked::memory_barrier",
+    "header": "intrinsics/system_threading_interlocked.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.Boolean&)",
-    "func": "SystemThreadingVolatile::read_bool"
+    "func": "SystemThreadingVolatile::read_bool",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.Byte&)",
-    "func": "SystemThreadingVolatile::read_byte"
+    "func": "SystemThreadingVolatile::read_byte",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.Double&)",
-    "func": "SystemThreadingVolatile::read_f64"
+    "func": "SystemThreadingVolatile::read_f64",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.Int16&)",
-    "func": "SystemThreadingVolatile::read_i16"
+    "func": "SystemThreadingVolatile::read_i16",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.Int32&)",
-    "func": "SystemThreadingVolatile::read_i32"
+    "func": "SystemThreadingVolatile::read_i32",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.Int64&)",
-    "func": "SystemThreadingVolatile::read_i64"
+    "func": "SystemThreadingVolatile::read_i64",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.IntPtr&)",
-    "func": "SystemThreadingVolatile::read_intptr"
+    "func": "SystemThreadingVolatile::read_intptr",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.SByte&)",
-    "func": "SystemThreadingVolatile::read_sbyte"
+    "func": "SystemThreadingVolatile::read_sbyte",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.Single&)",
-    "func": "SystemThreadingVolatile::read_f32"
+    "func": "SystemThreadingVolatile::read_f32",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.UInt16&)",
-    "func": "SystemThreadingVolatile::read_u16"
+    "func": "SystemThreadingVolatile::read_u16",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.UInt32&)",
-    "func": "SystemThreadingVolatile::read_u32"
+    "func": "SystemThreadingVolatile::read_u32",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.UInt64&)",
-    "func": "SystemThreadingVolatile::read_u64"
+    "func": "SystemThreadingVolatile::read_u64",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read(System.UIntPtr&)",
-    "func": "SystemThreadingVolatile::read_uintptr"
+    "func": "SystemThreadingVolatile::read_uintptr",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Read<>",
-    "func": "SystemThreadingVolatile::read_ref"
+    "func": "SystemThreadingVolatile::read_ref",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.Boolean&,System.Boolean)",
-    "func": "SystemThreadingVolatile::write_bool"
+    "func": "SystemThreadingVolatile::write_bool",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.Byte&,System.Byte)",
-    "func": "SystemThreadingVolatile::write_byte"
+    "func": "SystemThreadingVolatile::write_byte",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.Double&,System.Double)",
-    "func": "SystemThreadingVolatile::write_f64"
+    "func": "SystemThreadingVolatile::write_f64",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.Int16&,System.Int16)",
-    "func": "SystemThreadingVolatile::write_i16"
+    "func": "SystemThreadingVolatile::write_i16",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.Int32&,System.Int32)",
-    "func": "SystemThreadingVolatile::write_i32"
+    "func": "SystemThreadingVolatile::write_i32",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.Int64&,System.Int64)",
-    "func": "SystemThreadingVolatile::write_i64"
+    "func": "SystemThreadingVolatile::write_i64",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.IntPtr&,System.IntPtr)",
-    "func": "SystemThreadingVolatile::write_intptr"
+    "func": "SystemThreadingVolatile::write_intptr",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.SByte&,System.SByte)",
-    "func": "SystemThreadingVolatile::write_sbyte"
+    "func": "SystemThreadingVolatile::write_sbyte",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.Single&,System.Single)",
-    "func": "SystemThreadingVolatile::write_f32"
+    "func": "SystemThreadingVolatile::write_f32",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.UInt16&,System.UInt16)",
-    "func": "SystemThreadingVolatile::write_u16"
+    "func": "SystemThreadingVolatile::write_u16",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.UInt32&,System.UInt32)",
-    "func": "SystemThreadingVolatile::write_u32"
+    "func": "SystemThreadingVolatile::write_u32",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.UInt64&,System.UInt64)",
-    "func": "SystemThreadingVolatile::write_u64"
+    "func": "SystemThreadingVolatile::write_u64",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write(System.UIntPtr&,System.UIntPtr)",
-    "func": "SystemThreadingVolatile::write_uintptr"
+    "func": "SystemThreadingVolatile::write_uintptr",
+    "header": "intrinsics/system_threading_volatile.h"
   },
   {
     "name": "System.Threading.Volatile::Write<>",
-    "func": "SystemThreadingVolatile::write_ref"
+    "func": "SystemThreadingVolatile::write_ref",
+    "header": "intrinsics/system_threading_volatile.h"
   }
 ]
