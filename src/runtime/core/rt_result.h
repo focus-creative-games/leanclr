@@ -171,6 +171,10 @@ class Result
     template <typename U>
     Result<U, E> cast()
     {
+        if constexpr (std::is_same<U, E>::value && std::is_same<T, E>::value)
+        {
+            return std::move(*this);
+        }
         if (is_ok())
             return Result<U, E>::Ok((U)(unwrap()));
         return Result<U, E>::Err(unwrap_err());
@@ -234,6 +238,17 @@ class ResultVoid
         assert(is_err() && "Result::unwrap_err() called on ok value");
         return _err;
     }
+};
+
+template<typename T>
+struct function_return;
+template<typename R, typename... Args>
+struct function_return<R(Args...)> {
+    typedef R type;
+};
+template<typename R, typename... Args>
+struct function_return<R(*)(Args...)> {
+    typedef R type;
 };
 
 } // namespace core
