@@ -15,20 +15,21 @@ using namespace leanclr::metadata;
 
 // ========== Implementation Functions ==========
 
-RtResult<const char*> MonoSafeStringMarshal::string_to_utf8_bytes(RtString* s)
+RtResult<intptr_t> MonoSafeStringMarshal::string_to_utf8_bytes(RtString** ptrs)
 {
+    RtString* s = *ptrs;
     if (s == nullptr)
     {
         RET_ERR(RtErr::NullReference);
     }
     utils::StringBuilder sb;
     utils::StringUtil::utf16_to_utf8(String::get_chars_ptr(s), String::get_length(s), sb);
-    RET_OK(sb.dup_to_zero_end_cstr());
+    RET_OK((intptr_t)sb.dup_to_zero_end_cstr());
 }
 
-RtResultVoid MonoSafeStringMarshal::gfree(void* ptr)
+RtResultVoid MonoSafeStringMarshal::gfree(intptr_t ptr)
 {
-    alloc::GeneralAllocation::free(ptr);
+    alloc::GeneralAllocation::free((void*)ptr);
     RET_VOID_OK();
 }
 
@@ -38,8 +39,7 @@ RtResultVoid MonoSafeStringMarshal::gfree(void* ptr)
 static RtResultVoid string_to_utf8_bytes_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret)
 {
     RtString** s_ptr = EvalStackOp::get_param<RtString**>(params, 0);
-    RtString* s = *s_ptr;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const char*, result, MonoSafeStringMarshal::string_to_utf8_bytes(s));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, result, MonoSafeStringMarshal::string_to_utf8_bytes(s_ptr));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }
@@ -47,7 +47,7 @@ static RtResultVoid string_to_utf8_bytes_invoker(RtManagedMethodPointer, const R
 /// @icall: Mono.SafeStringMarshal::GFree(System.IntPtr)
 static RtResultVoid gfree_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret)
 {
-    void* ptr = EvalStackOp::get_param<void*>(params, 0);
+    intptr_t ptr = EvalStackOp::get_param<intptr_t>(params, 0);
     return MonoSafeStringMarshal::gfree(ptr);
 }
 
