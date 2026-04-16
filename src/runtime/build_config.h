@@ -33,3 +33,5 @@ typedef double float64_t;
 #endif
 
 #define LEANCLR_NO_EXCEPTION noexcept
+
+#include "il2cpp/il2cpp_build_config.h"
