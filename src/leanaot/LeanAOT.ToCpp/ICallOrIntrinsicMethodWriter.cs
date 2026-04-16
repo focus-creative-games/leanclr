@@ -15,7 +15,17 @@ namespace LeanAOT.ToCpp
         {
             var argsStr = CreateMethodFunctionArgsWithCast();
             string namespaceStr = _entry.MethodKind == MethodKind.ICall || _entry.MethodKind == MethodKind.ICallNewObj ? "leanclr::icalls" : "leanclr::intrinsics";
-            _bodyWriter.AddLine($"return (({_method.CreateMethodFunctionTypeDefineWithoutName()}){namespaceStr}::{_entry.Func})({argsStr});");
+            string funcFullName = $"{namespaceStr}::{_entry.Func}";
+            if (_method.IsVoidReturn)
+            {
+                _bodyWriter.AddLine($"return (({_method.CreateMethodFunctionTypeDefineWithoutName()}){funcFullName})({argsStr});");
+            }
+            else
+            {
+                string relaxRetTypeName = MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(_method.RetType, TypeNameRelaxLevel.AbiRelaxed);
+                _bodyWriter.AddLine($"using __RetType = leanclr::core::function_return<decltype({funcFullName})>::type;");
+                _bodyWriter.AddLine($"return (({_method.CreateOverrideRetTypeRelaxMethodFunctionTypeDefine("", "__RetType")}){funcFullName})({argsStr}).cast<{relaxRetTypeName}>();");
+            }
         }
     }
 }
