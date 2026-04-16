@@ -9,7 +9,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<vm::RtReflectionType*> SystemType::internal_from_handle(size_t handle)
+RtResult<vm::RtReflectionType*> SystemType::internal_from_handle(intptr_t handle)
 {
     const metadata::RtTypeSig* type_sig = reinterpret_cast<const metadata::RtTypeSig*>(handle);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
@@ -21,7 +21,7 @@ RtResult<vm::RtReflectionType*> SystemType::internal_from_handle(size_t handle)
 static RtResultVoid internal_from_handle_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-    auto handle = EvalStackOp::get_param<size_t>(params, 0);
+    auto handle = EvalStackOp::get_param<intptr_t>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, type_obj, SystemType::internal_from_handle(handle));
     EvalStackOp::set_return(ret, type_obj);
     RET_VOID_OK();
