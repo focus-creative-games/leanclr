@@ -11,7 +11,7 @@ echo.
 
 if not exist "%DST_DIR%" mkdir "%DST_DIR%"
 
-robocopy "%SRC_DIR%" "%DST_DIR%" /E /XD "%SRC_DIR%\build"
+robocopy "%SRC_DIR%" "%DST_DIR%" /E /XD "%SRC_DIR%\build" /XD "%SRC_DIR%\build-ninja"
 set "RC=%ERRORLEVEL%"
 
 if %RC% GEQ 8 (
