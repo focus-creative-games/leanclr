@@ -36,6 +36,7 @@ int il2cpp_init(const char* domain_name)
     vm::Settings::set_file_loader(il2cpp::assembly_file_loader);
     vm::Settings::set_aot_modules_data(&g_aot_modules_data);
     auto ret = vm::Runtime::initialize();
+    printf("il2cpp_init: %s\n", ret.is_ok() ? "ok" : "error");
     return ret.is_ok();
 }
 
@@ -799,7 +800,7 @@ int il2cpp_field_get_flags(FieldInfo* field)
 }
 
 // since Unity 6000.x.y
-const FieldInfo* il2cpp_field_get_from_reflection(const Il2CppReflectionField * field)
+const FieldInfo* il2cpp_field_get_from_reflection(const Il2CppReflectionField* field)
 {
     return field->field;
 }
@@ -809,7 +810,7 @@ Il2CppClass* il2cpp_field_get_parent(FieldInfo* field)
     return field->parent;
 }
 
-Il2CppReflectionField* il2cpp_field_get_object(FieldInfo *field, Il2CppClass *refclass)
+Il2CppReflectionField* il2cpp_field_get_object(FieldInfo* field, Il2CppClass* refclass)
 {
     auto result = vm::Reflection::get_field_reflection_object(field, refclass);
     if (result.is_err())
@@ -1707,9 +1708,8 @@ void il2cpp_register_debugger_agent_transport(Il2CppDebuggerTransport* t)
     il2cpp::Debugger::register_debugger_agent_transport(t);
 }
 
-
 // add since Unity 6000.x.y
-void il2cpp_debug_foreach_method(void(*func)(const MethodInfo* method, Il2CppMethodDebugInfo* methodDebugInfo, void* userData), void* userData)
+void il2cpp_debug_foreach_method(void (*func)(const MethodInfo* method, Il2CppMethodDebugInfo* methodDebugInfo, void* userData), void* userData)
 {
     // TODO: Implement this
 }
