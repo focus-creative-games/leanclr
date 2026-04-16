@@ -4,6 +4,7 @@ using LeanAOT.ToCpp;
 using NLog;
 using System.Text;
 using CommandLine;
+using CommandLine.Text;
 
 namespace LeanAOT;
 
@@ -62,6 +63,12 @@ internal class Program
 
         [Option("compiler-flags", Required = false, HelpText = "IL2CPP: C++ compiler flags (e.g. -fno-exceptions). Repeatable; stored in config, LeanAOT does not compile C++.")]
         public IEnumerable<string> CompilerFlags { get; set; }
+
+        [Option("usymtool-path", Required = false, HelpText = "IL2CPP: usym tool path (reserved).")]
+        public string UsymToolPath {get; set;}
+
+        [Option("static-lib-il2-cpp", Required = false, HelpText = "IL2CPP: static lib il2cpp path (reserved).")]
+        public bool StaticLibIl2CppPath {get; set;}
     }
 
     private static Logger s_logger;
@@ -87,12 +94,20 @@ internal class Program
         var runtimeApiCatalog = LoadRuntimeApiCatalogFromCurrentDirectory();
 
         int exitCode = 0;
+        var helpWriter = new StringWriter();
         var parser = new Parser(settings =>
         {
             settings.AllowMultiInstance = true;
             settings.CaseInsensitiveEnumValues = true;
+            settings.HelpWriter = helpWriter;
         });
-        parser.ParseArguments<CliOptions>(args)
+        var parseResult = parser.ParseArguments<CliOptions>(args);
+        if (parseResult.Tag == ParserResultType.NotParsed)
+        {
+            Console.Error.WriteLine(helpWriter.ToString());
+            Environment.Exit(1);
+        }
+        parseResult
             .WithParsed(options =>
             {
                 if (options.PrintCommandLine)
@@ -108,8 +123,7 @@ internal class Program
                 }
 
                 Run(dllSearchPaths, aotAssemblyNames, outputCodeDir, options, runtimeApiCatalog);
-            })
-            .WithNotParsed(_ => exitCode = 1);
+            });
         Environment.ExitCode = exitCode;
     }
 
