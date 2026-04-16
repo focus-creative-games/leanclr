@@ -21,6 +21,7 @@ typedef vm::RtThread Il2CppThread;
 typedef metadata::RtTypeSig Il2CppType;
 typedef vm::RtReflectionType Il2CppReflectionType;
 typedef vm::RtReflectionMethod Il2CppReflectionMethod;
+typedef vm::RtReflectionField Il2CppReflectionField;
 typedef metadata::RtFieldInfo FieldInfo;
 typedef metadata::RtMethodInfo MethodInfo;
 typedef metadata::RtPropertyInfo PropertyInfo;
@@ -34,6 +35,11 @@ struct Il2CppMethodDebugInfo;
 struct Il2CppProfiler;
 struct Il2CppRuntimeStats;
 typedef interp::InterpFrame Il2CppStackFrameInfo;
+
+// <= Unity 2022.3.x
+typedef uint32_t Il2CppGCHandle;
+// >= Unity 6000.x.y
+// typedef void* Il2CppGCHandle;
 
 #if _MSC_VER
 typedef wchar_t Il2CppNativeChar;
