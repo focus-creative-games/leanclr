@@ -1119,12 +1119,14 @@ namespace LeanAOT.ToCpp
             string opType = isUnsigned ? GetUnsignedTypeName(retVar) : GetTypeName(retVar);
             string op1Expr = GetEvalVariableExprWithCast(op1, opType);
             string op2Expr = GetEvalVariableExprWithCast(op2, opType);
+            bool isInteger = false;
             switch (retVar.type)
             {
             case EvalDataType.Int32:
             case EvalDataType.Int64:
             case EvalDataType.I:
             {
+                isInteger = true;
                 _bodyWriter.AddLine($"if ({op2Expr} == 0)");
                 _bodyWriter.AddLine("{");
                 _bodyWriter.IncreaseIndent();
@@ -1153,7 +1155,7 @@ namespace LeanAOT.ToCpp
             }
             string retTypeName = GetTypeName(retVar);
             string retVarName = GetEvalVariableName(retVar);
-            if (string.IsNullOrEmpty(floatFuncName))
+            if (isInteger)
             {
                 _bodyWriter.AddLine($"{retTypeName} {retVarName} = {MayFoldCast(opType, retTypeName, $"{op1Expr} {opSymbol} {op2Expr}")};");
             }
