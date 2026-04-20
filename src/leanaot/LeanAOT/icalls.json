@@ -255,6 +255,16 @@
     "header": "icalls/system_buffer.h"
   },
   {
+    "name": "System.Console/WindowsConsole::GetConsoleCP",
+    "func": "Interop::windows_console_get_console_cp",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "System.Console/WindowsConsole::GetConsoleOutputCP",
+    "func": "Interop::windows_console_get_console_output_cp",
+    "header": "icalls/interop.h"
+  },
+  {
     "name": "System.CurrentSystemTimeZone::GetTimeZoneData(System.Int32,System.Int64[]&,System.String[]&,System.Boolean&)",
     "func": "SystemCurrentSystemTimeZone::get_time_zone_data",
     "header": "icalls/system_currentsystemtimezone.h"
