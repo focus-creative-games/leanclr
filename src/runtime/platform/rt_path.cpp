@@ -1,6 +1,7 @@
 #include "rt_path.h"
 
 #include "vm/rt_string.h"
+#include "vm/settings.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -90,6 +91,11 @@ Utf16Char Path::get_volume_separator_char()
 
 vm::RtString* Path::get_temp_path()
 {
+    const char* temp_dir = vm::Settings::get_temp_dir();
+    if (temp_dir && temp_dir[0])
+    {
+        return vm::String::create_string_from_utf8cstr(temp_dir);
+    }
 #ifdef LEANCLR_PLATFORM_WIN
     wchar_t buffer[MAX_PATH + 1];
     DWORD len = ::GetTempPathW(MAX_PATH + 1, buffer);
@@ -100,27 +106,23 @@ vm::RtString* Path::get_temp_path()
     }
     return vm::String::create_string_from_utf8cstr("C:\\Temp\\");
 #else
-    const char* tmp = std::getenv("TMPDIR");
-    if (!tmp || !tmp[0])
-        tmp = std::getenv("TMP");
-    if (!tmp || !tmp[0])
-        tmp = std::getenv("TEMP");
-    if (!tmp || !tmp[0])
-        tmp = "/tmp/";
-
-    size_t tmp_len = std::strlen(tmp);
-    if (tmp_len > 0 && tmp[tmp_len - 1] != '/')
+    for (const char* env_var : {"TMPDIR", "TMP", "TEMP"})
     {
-        // Ensure a trailing path separator.
-        char buffer[1024];
-        if (tmp_len + 2 > sizeof(buffer))
-            tmp_len = sizeof(buffer) - 2;
-        std::memcpy(buffer, tmp, tmp_len);
-        buffer[tmp_len] = '/';
-        buffer[tmp_len + 1] = 0;
-        return vm::String::create_string_from_utf8chars(buffer, static_cast<int32_t>(tmp_len + 1));
+        temp_dir = std::getenv(env_var);
+        if (temp_dir && temp_dir[0])
+        {
+            break;
+        }
     }
-    return vm::String::create_string_from_utf8cstr(tmp);
+    if (!temp_dir || !temp_dir[0])
+    {
+#if LEANCLR_PLATFORM_ANDROID
+        temp_dir = "/data/local/tmp";
+#else
+        temp_dir = "/tmp";
+#endif
+    }
+    return vm::String::create_string_from_utf8cstr(temp_dir);
 #endif
 }
 
