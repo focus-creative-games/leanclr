@@ -79,5 +79,15 @@ else()
     endif()
 endif()
 
+# Implicit narrowing conversions (truncation) may lose data.
+if(MSVC)
+    target_compile_options(leanclr PRIVATE
+        /w14244   # C4244: conversion; possible loss of data
+        /w14267   # C4267: conversion from size_t to smaller type
+    )
+else()
+    target_compile_options(leanclr PRIVATE -Wconversion)
+endif()
+
 # LEANCLR_PLATFORM_* macros are derived from compiler-predefined macros in
 # build_config.h so both CMake and non-CMake consumers see the same view.
