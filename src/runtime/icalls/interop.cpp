@@ -29,16 +29,18 @@ RtResultVoid double_to_string_invoker(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResultVoid Interop::sys_lchflags_can_set_hidden_flag()
+RtResult<int32_t> Interop::sys_lchflags_can_set_hidden_flag()
 {
-    RET_VOID_OK();
+    RET_OK(0);
 }
 
 /// @icall: Interop/Sys::LChflagsCanSetHiddenFlag
 RtResultVoid sys_lchflags_can_set_hidden_flag_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                       interp::RtStackObject* ret) noexcept
 {
-    return Interop::sys_lchflags_can_set_hidden_flag();
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_lchflags_can_set_hidden_flag());
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
 }
 
 RtResult<uint32_t> Interop::bcrypt_gen_random(intptr_t algo_handle, uint8_t* buffer, int32_t length, int32_t flags)
