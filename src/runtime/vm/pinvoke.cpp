@@ -78,29 +78,9 @@ RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata:
     RET_OK(nullptr);
 }
 
-static void nop_function()
-{
-}
-
-static RtResultVoid nop_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret) noexcept
-{
-    RET_VOID_OK();
-}
-
-static PInvokeEntry s_pinvoke_entries[] = {
-    // #if LEANCLR_ENABLE_TEST_PINVOKES
-    {"Interop/Sys::LChflagsCanSetHiddenFlag", (PInvokeFunction)&nop_function, nop_invoker},
-    // #endif
-};
-
 // Initialize internal calls system
 void PInvokes::initialize()
 {
-    for (PInvokeEntry& entry : s_pinvoke_entries)
-    {
-        register_pinvoke(entry.name, entry.func, entry.invoker);
-    }
 }
 
 } // namespace vm

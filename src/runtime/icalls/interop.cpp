@@ -1,5 +1,7 @@
 #include "interop.h"
 
+#include "platform/bcrypt.h"
+#include "platform/kernel32.h"
 namespace leanclr
 {
 namespace icalls
@@ -23,9 +25,80 @@ RtResultVoid double_to_string_invoker(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
+RtResultVoid Interop::sys_lchflags_can_set_hidden_flag()
+{
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::LChflagsCanSetHiddenFlag
+RtResultVoid sys_lchflags_can_set_hidden_flag_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                      interp::RtStackObject* ret) noexcept
+{
+    return Interop::sys_lchflags_can_set_hidden_flag();
+}
+
+RtResult<uint32_t> Interop::bcrypt_gen_random(intptr_t algo_handle, uint8_t* buffer, int32_t length, int32_t flags)
+{
+    platform::Bcrypt::gen_random(algo_handle, buffer, length, flags);
+    RET_OK(0);
+}
+
+/// @icall: Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)
+RtResultVoid bcrypt_gen_random_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                       interp::RtStackObject* ret) noexcept
+{
+    intptr_t algo_handle = interp::EvalStackOp::get_param<intptr_t>(params, 0);
+    uint8_t* buffer = interp::EvalStackOp::get_param<uint8_t*>(params, 1);
+    int32_t length = interp::EvalStackOp::get_param<int32_t>(params, 2);
+    int32_t flags = interp::EvalStackOp::get_param<int32_t>(params, 3);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, result, Interop::bcrypt_gen_random(algo_handle, buffer, length, flags));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+RtResult<bool> Interop::kernel32_set_thread_error_mode(uint32_t mode, uint32_t& old_mode)
+{
+    return platform::Kernel32::set_thread_error_mode(mode, old_mode);
+}
+/// @icall: Interop/Kernel32::SetThreadErrorMode(System.UInt32,System.UInt32&)
+RtResultVoid kernel32_set_thread_error_mode_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                    interp::RtStackObject* ret) noexcept
+{
+    uint32_t mode = interp::EvalStackOp::get_param<uint32_t>(params, 0);
+    uint32_t& old_mode = *interp::EvalStackOp::get_param<uint32_t*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, Interop::kernel32_set_thread_error_mode(mode, old_mode));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+RtResult<bool> Interop::kernel32_get_file_attributes_ex_private(vm::RtString* name, uint32_t file_info_level, void* file_info)
+{
+    return platform::Kernel32::get_file_attributes_ex_private(name, file_info_level, file_info);
+}
+
+/// @icall: Interop/Kernel32::GetFileAttributesExPrivate(System.String,Interop/Kernel32/GET_FILEEX_INFO_LEVELS, Interop/Kernel32/WIN32_FILE_ATTRIBUTE_DATA&)
+RtResultVoid kernel32_get_file_attributes_ex_private_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                      interp::RtStackObject* ret) noexcept
+{
+    vm::RtString* name = interp::EvalStackOp::get_param<vm::RtString*>(params, 0);
+    uint32_t file_info_level = interp::EvalStackOp::get_param<uint32_t>(params, 1);
+    void* file_info = interp::EvalStackOp::get_param<void*>(params, 2);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, Interop::kernel32_get_file_attributes_ex_private(name, file_info_level, file_info));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
 static vm::InternalCallEntry s_interop_internal_call_entries[] = {
     {"Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)", (vm::InternalCallFunction)&Interop::double_to_string,
      double_to_string_invoker},
+    {"Interop/Sys::LChflagsCanSetHiddenFlag", (vm::InternalCallFunction)&Interop::sys_lchflags_can_set_hidden_flag, sys_lchflags_can_set_hidden_flag_invoker},
+    {"Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)", (vm::InternalCallFunction)&Interop::bcrypt_gen_random,
+     bcrypt_gen_random_invoker},
+    {"Interop/Kernel32::SetThreadErrorMode(System.UInt32,System.UInt32&)", (vm::InternalCallFunction)&Interop::kernel32_set_thread_error_mode,
+     kernel32_set_thread_error_mode_invoker},
+    {"Interop/Kernel32::GetFileAttributesExPrivate(System.String,Interop/Kernel32/GET_FILEEX_INFO_LEVELS,Interop/Kernel32/WIN32_FILE_ATTRIBUTE_DATA&)",
+     (vm::InternalCallFunction)&Interop::kernel32_get_file_attributes_ex_private,
+     kernel32_get_file_attributes_ex_private_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> Interop::get_internal_call_entries()

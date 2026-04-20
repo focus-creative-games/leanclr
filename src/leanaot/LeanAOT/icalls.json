@@ -1,7 +1,27 @@
 [
   {
+    "name": "Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)",
+    "func": "Interop::bcrypt_gen_random",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::GetFileAttributesExPrivate(System.String,Interop/Kernel32/GET_FILEEX_INFO_LEVELS,Interop/Kernel32/WIN32_FILE_ATTRIBUTE_DATA&)",
+    "func": "Interop::kernel32_get_file_attributes_ex_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::SetThreadErrorMode(System.UInt32,System.UInt32&)",
+    "func": "Interop::kernel32_set_thread_error_mode",
+    "header": "icalls/interop.h"
+  },
+  {
     "name": "Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)",
     "func": "Interop::double_to_string",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::LChflagsCanSetHiddenFlag",
+    "func": "Interop::sys_lchflags_can_set_hidden_flag",
     "header": "icalls/interop.h"
   },
   {
