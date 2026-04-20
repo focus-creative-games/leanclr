@@ -525,6 +525,101 @@
     "header": "icalls/system_globalization_cultureinfo.h"
   },
   {
+    "name": "System.IO.MonoIO::Close(System.IntPtr,System.IO.MonoIOError&)",
+    "func": "SystemIOMonoIO::close",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::DumpHandles",
+    "func": "SystemIOMonoIO::dump_handles",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::FindCloseFile(System.IntPtr)",
+    "func": "SystemIOMonoIO::find_close_file",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::get_AltDirectorySeparatorChar",
+    "func": "SystemIOMonoIO::get_alt_directory_separator_char",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::get_ConsoleError",
+    "func": "SystemIOMonoIO::get_console_error",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::get_ConsoleInput",
+    "func": "SystemIOMonoIO::get_console_input",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::get_ConsoleOutput",
+    "func": "SystemIOMonoIO::get_console_output",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::get_DirectorySeparatorChar",
+    "func": "SystemIOMonoIO::get_directory_separator_char",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::get_PathSeparator",
+    "func": "SystemIOMonoIO::get_path_separator",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::get_VolumeSeparatorChar",
+    "func": "SystemIOMonoIO::get_volume_separator_char",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::GetCurrentDirectory(System.IO.MonoIOError&)",
+    "func": "SystemIOMonoIO::get_current_directory",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::GetFileType(System.IntPtr,System.IO.MonoIOError&)",
+    "func": "SystemIOMonoIO::get_file_type",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::GetLength(System.IntPtr,System.IO.MonoIOError&)",
+    "func": "SystemIOMonoIO::get_length",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::Open(System.Char*,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare,System.IO.FileOptions,System.IO.MonoIOError&)",
+    "func": "SystemIOMonoIO::open",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::Read(System.IntPtr,System.Byte[],System.Int32,System.Int32,System.IO.MonoIOError&)",
+    "func": "SystemIOMonoIO::read",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::RemapPath(System.String,System.String&)",
+    "func": "SystemIOMonoIO::remap_path",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::Seek(System.IntPtr,System.Int64,System.IO.SeekOrigin,System.IO.MonoIOError&)",
+    "func": "SystemIOMonoIO::seek",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.MonoIO::Write(System.IntPtr,System.Byte[],System.Int32,System.Int32,System.IO.MonoIOError&)",
+    "func": "SystemIOMonoIO::write",
+    "header": "icalls/system_io_monoio.h"
+  },
+  {
+    "name": "System.IO.Path::get_temp_path",
+    "func": "SystemIOPath::get_temp_path",
+    "header": "icalls/system_io_path.h"
+  },
+  {
     "name": "System.Math::Abs(System.Double)",
     "func": "SystemMath::abs_f64",
     "header": "icalls/system_math.h"
