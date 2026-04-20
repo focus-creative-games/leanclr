@@ -580,7 +580,7 @@ RtResultVoid Transformer::add_ret()
 
 RtResult<BasicBlock*> Transformer::get_branch_target_bb(size_t global_target_offset)
 {
-    auto it = _il_offset_to_basic_block.find(global_target_offset);
+    auto it = _il_offset_to_basic_block.find(static_cast<uint32_t>(global_target_offset));
     if (it == _il_offset_to_basic_block.end())
         RET_ERR(RtErr::ExecutionEngine);
     RET_OK(it->second);
@@ -2335,7 +2335,7 @@ RtResultVoid Transformer::setup_basic_blocks()
         const size_t split_offset = offsets_slice[i];
         BasicBlock* cur_bb = _basic_blocks + i;
         new (cur_bb) BasicBlock(_pool); // Placement new to call constructor
-        _il_offset_to_basic_block[last_split_offset] = cur_bb;
+        _il_offset_to_basic_block[static_cast<uint32_t>(last_split_offset)] = cur_bb;
 
         cur_bb->visited = false;
         cur_bb->inited_eval_stack = false;
@@ -2372,7 +2372,7 @@ RtResultVoid Transformer::transform_body()
         for (size_t il_offset_cur = bb->il_begin_offset, il_offset_end = bb->il_end_offset; il_offset_cur < il_offset_end;)
         {
             il::OpCodeValue opcode = *(const il::OpCodeValue*)(codes_begin + il_offset_cur);
-            _cur_il_offset = il_offset_cur;
+            _cur_il_offset = static_cast<int32_t>(il_offset_cur);
             if (!_not_retset_prefix_after_cur_il)
             {
                 clear_prefix();
@@ -2651,182 +2651,182 @@ RtResultVoid Transformer::transform_body()
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_br(il_offset_cur, target_byte));
+                RET_ERR_ON_FAIL(add_br(static_cast<uint32_t>(il_offset_cur), target_byte));
                 break;
             }
             case il::OpCodeValue::BrfalseS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_brtrue_or_false(il_offset_cur, target_byte, false));
+                RET_ERR_ON_FAIL(add_brtrue_or_false(static_cast<uint32_t>(il_offset_cur), target_byte, false));
                 break;
             }
             case il::OpCodeValue::BrtrueS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_brtrue_or_false(il_offset_cur, target_byte, true));
+                RET_ERR_ON_FAIL(add_brtrue_or_false(static_cast<uint32_t>(il_offset_cur), target_byte, true));
                 break;
             }
             case il::OpCodeValue::BeqS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::Beq));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::Beq));
                 break;
             }
             case il::OpCodeValue::BgeS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::Bge));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::Bge));
                 break;
             }
             case il::OpCodeValue::BgtS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::Bgt));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::Bgt));
                 break;
             }
             case il::OpCodeValue::BleS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::Ble));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::Ble));
                 break;
             }
             case il::OpCodeValue::BltS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::Blt));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::Blt));
                 break;
             }
             case il::OpCodeValue::BneUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::BneUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::BneUn));
                 break;
             }
             case il::OpCodeValue::BgeUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::BgeUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::BgeUn));
                 break;
             }
             case il::OpCodeValue::BgtUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::BgtUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::BgtUn));
                 break;
             }
             case il::OpCodeValue::BleUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::BleUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::BleUn));
                 break;
             }
             case il::OpCodeValue::BltUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target_byte, hl::OpCodeEnum::BltUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, hl::OpCodeEnum::BltUn));
                 break;
             }
             case il::OpCodeValue::Br:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_br(il_offset_cur, target));
+                RET_ERR_ON_FAIL(add_br(static_cast<uint32_t>(il_offset_cur), target));
                 break;
             }
             case il::OpCodeValue::Brfalse:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_brtrue_or_false(il_offset_cur, target, false));
+                RET_ERR_ON_FAIL(add_brtrue_or_false(static_cast<uint32_t>(il_offset_cur), target, false));
                 break;
             }
             case il::OpCodeValue::Brtrue:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_brtrue_or_false(il_offset_cur, target, true));
+                RET_ERR_ON_FAIL(add_brtrue_or_false(static_cast<uint32_t>(il_offset_cur), target, true));
                 break;
             }
             case il::OpCodeValue::Beq:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::Beq));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::Beq));
                 break;
             }
             case il::OpCodeValue::Bge:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::Bge));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::Bge));
                 break;
             }
             case il::OpCodeValue::Bgt:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::Bgt));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::Bgt));
                 break;
             }
             case il::OpCodeValue::Ble:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::Ble));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::Ble));
                 break;
             }
             case il::OpCodeValue::Blt:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::Blt));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::Blt));
                 break;
             }
             case il::OpCodeValue::BneUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::BneUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::BneUn));
                 break;
             }
             case il::OpCodeValue::BgeUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::BgeUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::BgeUn));
                 break;
             }
             case il::OpCodeValue::BgtUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::BgtUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::BgtUn));
                 break;
             }
             case il::OpCodeValue::BleUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::BleUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::BleUn));
                 break;
             }
             case il::OpCodeValue::BltUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(il_offset_cur, target, hl::OpCodeEnum::BltUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, hl::OpCodeEnum::BltUn));
                 break;
             }
             case il::OpCodeValue::Switch:
@@ -2837,7 +2837,7 @@ RtResultVoid Transformer::transform_body()
                 il_offset_cur += case_count * 4;
                 if (il_offset_cur > il_offset_end)
                     RET_ERR(RtErr::ExecutionEngine);
-                RET_ERR_ON_FAIL(add_switch(il_offset_cur, cases_begin, case_count));
+                RET_ERR_ON_FAIL(add_switch(static_cast<uint32_t>(il_offset_cur), cases_begin, case_count));
                 break;
             }
             case il::OpCodeValue::LdIndI1:

@@ -359,12 +359,12 @@ RtResultVoid Method::build_method_arg_descs(RtMethodInfo* method)
         RET_VOID_OK();
     }
     RtModuleDef* mod = method->parent->image;
-    uint32_t totalParamCountExcludeThis = get_param_count_exclude_this(method);
+    size_t totalParamCountExcludeThis = get_param_count_exclude_this(method);
     size_t totalStackObjectSize = is_instance(method);
     if (totalParamCountExcludeThis > 0)
     {
         metadata::RtMethodArgDesc* descs = mod->get_mem_pool().calloc_any<metadata::RtMethodArgDesc>(totalParamCountExcludeThis);
-        for (uint32_t i = 0; i < totalParamCountExcludeThis; ++i)
+        for (size_t i = 0; i < totalParamCountExcludeThis; ++i)
         {
             const metadata::RtTypeSig* paramTypeSig = method->parameters[i];
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(interp::ReduceTypeAndSize, reduceTypeAndSize,

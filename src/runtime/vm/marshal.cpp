@@ -135,7 +135,7 @@ RtResult<intptr_t> Marshal::offset_of(vm::RtReflectionType* ref_type, const char
     {
         RET_ERR(RtErr::FileNotFound);
     }
-    int32_t offset = Field::get_field_offset_excludes_object_header_for_all_type(field_info);
+    int32_t offset = static_cast<int32_t>(Field::get_field_offset_excludes_object_header_for_all_type(field_info));
     RET_OK(static_cast<intptr_t>(offset));
 }
 

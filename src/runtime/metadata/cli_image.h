@@ -146,7 +146,7 @@ class CliImage
     void set_sections(const CliSection* sections, uint32_t section_count)
     {
         this->sections = sections;
-        this->section_count = section_count;
+        this->section_count = static_cast<uint16_t>(section_count);
     }
 
     uint32_t get_section_count() const

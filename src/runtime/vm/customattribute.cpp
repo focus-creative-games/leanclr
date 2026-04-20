@@ -254,7 +254,7 @@ static RtResult<uint64_t> read_customattribute_elem_value(metadata::RtModuleDef*
         if (s)
         {
             auto& data = s.value();
-            RtString* str_obj = String::create_string_from_utf8chars(data.data(), data.size());
+            RtString* str_obj = String::create_string_from_utf8chars(data.data(), static_cast<int32_t>(data.size()));
             val = (uint64_t)str_obj;
         }
         else
@@ -391,7 +391,7 @@ static RtResult<uint64_t> read_customattribute_elem_value(metadata::RtModuleDef*
             if (s)
             {
                 auto& data = s.value();
-                obj = String::create_string_from_utf8chars(data.data(), data.size());
+                obj = String::create_string_from_utf8chars(data.data(), static_cast<int32_t>(data.size()));
             }
             else
             {
@@ -447,8 +447,8 @@ static RtResult<uint64_t> read_customattribute_elem_value(metadata::RtModuleDef*
                 metadata::RtTypeSig ele_type_sig{};
                 ele_type_sig.ele_type = ele_type;
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, ele_klass, Class::get_class_from_typesig(&ele_type_sig));
-                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, elem_arr, Array::new_szarray_from_ele_klass(ele_klass, (int32_t)num_elems));
-                uint32_t ele_size = Array::get_array_element_size(elem_arr);
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, elem_arr, Array::new_szarray_from_ele_klass(ele_klass, static_cast<int32_t>(num_elems)));
+                size_t ele_size = Array::get_array_element_size(elem_arr);
                 uint8_t* arr_data_ptr = Array::get_array_data_start_as<uint8_t>(elem_arr);
                 for (uint32_t i = 0; i < num_elems; ++i)
                 {
@@ -501,9 +501,9 @@ static RtResult<FixedArg> read_fixed_arg(metadata::RtModuleDef* mod, const metad
         {
             const metadata::RtTypeSig* ele_type_sig = param_type->data.element_type;
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, ele_klass, Class::get_class_from_typesig(ele_type_sig));
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, elem_arr, Array::new_szarray_from_ele_klass(ele_klass, (int32_t)num_elems));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, elem_arr, Array::new_szarray_from_ele_klass(ele_klass, static_cast<int32_t>(num_elems)));
 
-            uint32_t ele_size = Array::get_array_element_size(elem_arr);
+            size_t ele_size = Array::get_array_element_size(elem_arr);
             uint8_t* arr_data_ptr = Array::get_array_data_start_as<uint8_t>(elem_arr);
 
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtElementType, ele_ele_type, get_custom_attribute_elem_type_from_typesig(ele_type_sig));
@@ -795,7 +795,8 @@ RtResult<RtObject*> CustomAttribute::read_custom_attribute(metadata::RtModuleDef
 
             if (named_arg.is_field)
             {
-                const metadata::RtFieldInfo* field_info = Class::get_field_for_name(klass, named_arg.name.data(), named_arg.name.size(), true);
+                const metadata::RtFieldInfo* field_info =
+                    Class::get_field_for_name(klass, named_arg.name.data(), static_cast<uint32_t>(named_arg.name.size()), true);
                 if (!field_info)
                     RET_ERR(RtErr::MissingField);
 
@@ -809,7 +810,8 @@ RtResult<RtObject*> CustomAttribute::read_custom_attribute(metadata::RtModuleDef
             }
             else
             {
-                const metadata::RtPropertyInfo* property_info = Class::get_property_for_name(klass, named_arg.name.data(), named_arg.name.size(), true);
+                const metadata::RtPropertyInfo* property_info =
+                    Class::get_property_for_name(klass, named_arg.name.data(), static_cast<uint32_t>(named_arg.name.size()), true);
                 if (!property_info)
                     RET_ERR(RtErr::MissingMember);
 
@@ -921,7 +923,8 @@ RtResultVoid CustomAttribute::resolve_customattribute_data_arguments(utils::Bina
         RtObject* member_info_obj = nullptr;
         if (named_arg.is_field)
         {
-            const metadata::RtFieldInfo* field_info = Class::get_field_for_name(klass, named_arg.name.data(), named_arg.name.size(), true);
+            const metadata::RtFieldInfo* field_info =
+                Class::get_field_for_name(klass, named_arg.name.data(), static_cast<uint32_t>(named_arg.name.size()), true);
             if (!field_info)
                 RET_ERR(RtErr::MissingField);
 
@@ -936,7 +939,8 @@ RtResultVoid CustomAttribute::resolve_customattribute_data_arguments(utils::Bina
         }
         else
         {
-            const metadata::RtPropertyInfo* property_info = Class::get_property_for_name(klass, named_arg.name.data(), named_arg.name.size(), true);
+            const metadata::RtPropertyInfo* property_info =
+                Class::get_property_for_name(klass, named_arg.name.data(), static_cast<uint32_t>(named_arg.name.size()), true);
             if (!property_info)
                 RET_ERR(RtErr::MissingMember);
             const metadata::RtTypeSig* property_type_sig = property_info->property_sig.type_sig;

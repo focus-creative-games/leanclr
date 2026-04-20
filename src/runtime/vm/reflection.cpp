@@ -312,7 +312,7 @@ RtResult<RtReflectionField*> Reflection::get_field_reflection_object(const metad
     auto ref_obj = reinterpret_cast<RtReflectionField*>(ref_obj_raw);
     ref_obj->field = field;
     ref_obj->klass = reflection_at_klass;
-    ref_obj->name = String::create_string_from_utf8chars(field->name, std::strlen(field->name));
+    ref_obj->name = String::create_string_from_utf8chars(field->name, static_cast<int32_t>(std::strlen(field->name)));
     ref_obj->attrs = field->flags;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, type_obj, get_type_reflection_object(field->type_sig));
     ref_obj->type_ = type_obj;
@@ -411,9 +411,9 @@ RtResult<RtReflectionModule*> Reflection::get_module_reflection_object(metadata:
 
     auto name_no_ext = mod->get_name_no_ext();
     auto name = mod->get_name();
-    ref_obj->fqname = String::create_string_from_utf8chars(fqname_buf.as_cstr(), fqname_buf.length());
-    ref_obj->name = String::create_string_from_utf8chars(name, std::strlen(name));
-    ref_obj->scope_name = String::create_string_from_utf8chars(name_no_ext, std::strlen(name_no_ext));
+    ref_obj->fqname = String::create_string_from_utf8chars(fqname_buf.as_cstr(), static_cast<int32_t>(fqname_buf.length()));
+    ref_obj->name = String::create_string_from_utf8chars(name, static_cast<int32_t>(std::strlen(name)));
+    ref_obj->scope_name = String::create_string_from_utf8chars(name_no_ext, static_cast<int32_t>(std::strlen(name_no_ext)));
     ref_obj->token = mod->get_assembly_token();
     s_module_reflection_map.insert({mod, ref_obj});
     RET_OK(ref_obj);

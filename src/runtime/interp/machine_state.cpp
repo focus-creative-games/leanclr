@@ -17,7 +17,7 @@ void MachineState::initialize()
         size_t default_size = vm::Settings::get_default_eval_stack_object_count();
         ms._eval_stack_base = alloc::GeneralAllocation::calloc_any<RtStackObject>(default_size);
         assert(ms._eval_stack_base != nullptr);
-        ms._eval_stack_size = default_size;
+        ms._eval_stack_size = static_cast<uint32_t>(default_size);
     }
 
     if (ms._frame_stack_base == nullptr)
@@ -25,7 +25,7 @@ void MachineState::initialize()
         size_t default_frame_size = vm::Settings::get_default_frame_stack_size();
         ms._frame_stack_base = static_cast<InterpFrame*>(alloc::GeneralAllocation::malloc_zeroed(sizeof(InterpFrame) * default_frame_size));
         assert(ms._frame_stack_base != nullptr);
-        ms._frame_stack_size = default_frame_size;
+        ms._frame_stack_size = static_cast<uint32_t>(default_frame_size);
     }
 
     ms._eval_stack_top = 0;

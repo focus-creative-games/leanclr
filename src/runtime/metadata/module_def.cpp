@@ -1119,16 +1119,17 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
             }
             if (numSizes == 0 && numLoBounds == 0)
             {
-                UNWRAP_OR_RET_ERR_ON_FAIL(result.data.array_type, metadata::MetadataCache::get_pooled_array_type(elementTypeSig, rank));
+                UNWRAP_OR_RET_ERR_ON_FAIL(result.data.array_type,
+                                          metadata::MetadataCache::get_pooled_array_type(elementTypeSig, static_cast<uint8_t>(rank)));
             }
             else
             {
                 RtArrayType* newArrType = _pool.malloc_any_zeroed<RtArrayType>();
                 newArrType->ele_type = elementTypeSig;
-                newArrType->rank = rank;
-                newArrType->num_sizes = numSizes;
+                newArrType->rank = static_cast<uint8_t>(rank);
+                newArrType->num_sizes = static_cast<uint8_t>(numSizes);
                 newArrType->sizes = sizes;
-                newArrType->num_bounds = numLoBounds;
+                newArrType->num_bounds = static_cast<uint8_t>(numLoBounds);
                 newArrType->bounds = loBounds;
                 result.data.array_type = newArrType;
             }
@@ -1156,7 +1157,8 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
                 UNWRAP_OR_RET_ERR_ON_FAIL(tempGenericArgs[i], read_typesig(reader, gcc, gc));
             }
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtGenericInst*, gi,
-                                                    metadata::MetadataCache::get_pooled_generic_inst(tempGenericArgs, genericArgCount));
+                                                    metadata::MetadataCache::get_pooled_generic_inst(tempGenericArgs,
+                                                                                                     static_cast<uint8_t>(genericArgCount)));
             result.data.generic_class = metadata::MetadataCache::get_pooled_generic_class(baseTypeSig.data.type_def_gid, gi);
             RET_VOID_OK();
         }
@@ -1449,7 +1451,7 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig_skip_prologue(uint8_t sigType
         UNWRAP_OR_RET_ERR_ON_FAIL(methodSig.params[i], read_typesig(reader, gcc, gc));
     }
     methodSig.flags = sigType;
-    methodSig.generic_param_count = genericParamCount;
+    methodSig.generic_param_count = static_cast<uint8_t>(genericParamCount);
     methodSig.return_type = returnTypeSig;
     RET_OK(methodSig);
 }
@@ -1491,7 +1493,7 @@ RtResult<const RtGenericInst*> RtModuleDef::read_method_spec_generic_inst(utils:
     {
         UNWRAP_OR_RET_ERR_ON_FAIL(tempGenericArgs[i], read_typesig(reader, gcc, gc));
     }
-    return metadata::MetadataCache::get_pooled_generic_inst(tempGenericArgs, genericArgCount);
+    return metadata::MetadataCache::get_pooled_generic_inst(tempGenericArgs, static_cast<uint8_t>(genericArgCount));
 }
 
 RtResult<const RtTypeSig*> RtModuleDef::read_typesig_from_member_parent(const RtToken& token, const RtGenericContainerContext& gcc, const RtGenericContext* gc)
@@ -1752,7 +1754,7 @@ RtResult<const RtGenericContainer*> RtModuleDef::get_generic_container(EncodedTo
             uint32_t genericParamRid = RtMetadata::decode_rid_from_gid(gpInfo->gid);
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtGenericParamConstraint, constraintInfo, read_generic_param_constraints(genericParamRid, gcc));
             gpInfo->constraint_type_sigs = constraintInfo.constraints;
-            gpInfo->constraint_type_sig_count = constraintInfo.count;
+            gpInfo->constraint_type_sig_count = static_cast<uint8_t>(constraintInfo.count);
         }
         const_cast<RtGenericContainer*>(gc)->inited = true;
     }

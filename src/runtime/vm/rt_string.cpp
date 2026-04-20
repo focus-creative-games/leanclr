@@ -110,18 +110,18 @@ const metadata::RtMethodInfo* String::get_redirected_ctor_method()
     return g_redirectedCtorMethod;
 }
 
-RtString* String::create_string_from_utf16chars(const uint16_t* str, int32_t length)
+RtString* String::create_string_from_utf16chars(const Utf16Char* str, int32_t length)
 {
     RtString* newString = fast_allocate_string(length);
 
-    std::memcpy(&newString->first_char, str, length * sizeof(uint16_t));
+    std::memcpy(&newString->first_char, str, length * sizeof(Utf16Char));
     return newString;
 }
 
 RtString* String::create_string_from_utf8chars(const char* str, int32_t length)
 {
     // First, convert UTF-8 to UTF-16 and count characters
-    utils::Vector<uint16_t> utf16_buffer;
+    utils::Vector<Utf16Char> utf16_buffer;
     utf16_buffer.reserve(static_cast<size_t>(length)); // Reserve space (UTF-16 could be shorter or longer)
 
     const char* start = str;

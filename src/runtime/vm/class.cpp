@@ -982,7 +982,7 @@ RtResultVoid Class::setup_interfaces_typedef(metadata::RtClass* klass)
         RET_ERR_ON_FAIL(initialize_all(const_cast<metadata::RtClass*>(interfaces[i])));
     }
     klass->interfaces = interfaces;
-    klass->interface_count = interfaceCount;
+    klass->interface_count = static_cast<uint16_t>(interfaceCount);
     RET_VOID_OK();
 }
 
@@ -1220,7 +1220,8 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
     metadata::SizeAndAlignment instanceSizeAndAlignment;
     if (is_explicit_layout(klass))
     {
-        UNWRAP_OR_RET_ERR_ON_FAIL(instanceSizeAndAlignment, metadata::Layout::compute_explicit_layout(mod, instanceFields, packingSize));
+        UNWRAP_OR_RET_ERR_ON_FAIL(instanceSizeAndAlignment,
+                                  metadata::Layout::compute_explicit_layout(mod, instanceFields, static_cast<uint8_t>(packingSize)));
     }
     else
     {
@@ -1236,14 +1237,16 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
             parentSize = 0;
             parentAlignment = 1;
         }
-        UNWRAP_OR_RET_ERR_ON_FAIL(instanceSizeAndAlignment, metadata::Layout::compute_layout(instanceFields, parentSize, parentAlignment, packingSize));
+        UNWRAP_OR_RET_ERR_ON_FAIL(instanceSizeAndAlignment,
+                                  metadata::Layout::compute_layout(instanceFields, parentSize, static_cast<uint8_t>(parentAlignment),
+                                                                   static_cast<uint8_t>(packingSize)));
     }
     klass->instance_size_without_header = std::max(instanceSizeAndAlignment.size, classSize);
     if (Class::is_value_type(klass))
     {
         klass->instance_size_without_header = std::max(klass->instance_size_without_header, (uint32_t)1);
     }
-    klass->alignment = instanceSizeAndAlignment.alignment;
+    klass->alignment = static_cast<uint8_t>(instanceSizeAndAlignment.alignment);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::SizeAndAlignment, staticSizeAndAlignment, metadata::Layout::compute_layout(staticFields, 0, 1, 0));
     klass->static_size = staticSizeAndAlignment.size;
@@ -1345,7 +1348,7 @@ RtResultVoid Class::setup_methods_typedef(metadata::RtClass* klass)
         const metadata::RtMethodSig& methodSig = retMethodSig.unwrap();
         method->return_type = methodSig.return_type;
         size_t paramCount = methodSig.params.size();
-        method->parameter_count = paramCount;
+        method->parameter_count = static_cast<uint16_t>(paramCount);
         method->parameters = pool.calloc_any<const metadata::RtTypeSig*>(paramCount);
         std::memcpy(method->parameters, methodSig.params.data(), sizeof(metadata::RtTypeSig*) * paramCount);
 

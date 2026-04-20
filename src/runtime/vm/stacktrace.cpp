@@ -52,7 +52,7 @@ RtResultVoid StackTrace::setup_trace_ips(RtException* ex)
 
         const interp::InterpFrame* frame = trace_frames[i];
         UNWRAP_OR_RET_ERR_ON_FAIL(stackframe->method, Reflection::get_method_reflection_object(frame->method, frame->method->parent));
-        stackframe->method_index = Method::get_method_index_in_class(frame->method);
+        stackframe->method_index = static_cast<uint32_t>(Method::get_method_index_in_class(frame->method));
         metadata::PdbImage* pdb_image = frame->method->parent->image->get_pdb_image();
         if (pdb_image)
         {
@@ -69,7 +69,7 @@ RtResultVoid StackTrace::setup_trace_ips(RtException* ex)
             stackframe->column = 0;
         }
         stackframe->native_offset = -1;
-        Array::set_array_data_at<RtObject*>(trace_ips, frame_count - 1 - i, stackframe_obj);
+        Array::set_array_data_at<RtObject*>(trace_ips, static_cast<int32_t>(frame_count - 1 - i), stackframe_obj);
     }
     ex->trace_ips = trace_ips;
 

@@ -514,7 +514,7 @@ RtResult<RtString*> Type::get_full_name(const metadata::RtTypeSig* typeSig, bool
     utils::StringBuilder sb;
     TypeNameFormat format = full_name ? (assembly_qualified ? TypeNameFormat::AssemblyQualified : TypeNameFormat::FullName) : TypeNameFormat::Reflection;
     RET_ERR_ON_FAIL(append_type_full_name(sb, typeSig, format, false));
-    RtString* name = String::create_string_from_utf8chars(sb.as_cstr(), sb.length());
+    RtString* name = String::create_string_from_utf8chars(sb.as_cstr(), static_cast<int32_t>(sb.length()));
     RET_OK(name);
 }
 

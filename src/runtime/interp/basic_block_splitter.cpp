@@ -25,22 +25,22 @@ RtResultVoid BasicBlockSplitter::split()
     RET_VOID_OK();
 }
 
-const utils::HashSet<size_t>& BasicBlockSplitter::get_split_offsets() const
+const utils::HashSet<uint32_t>& BasicBlockSplitter::get_split_offsets() const
 {
     return _split_offsets;
 }
 
-void BasicBlockSplitter::mark_valid_il_offset(size_t offset)
+void BasicBlockSplitter::mark_valid_il_offset(uint32_t offset)
 {
-    const size_t index = offset >> 5;
+    const uint32_t index = offset >> 5;
     const uint32_t bit = 1u << (offset & 31);
     assert(index < _valid_il_offsets_count);
     _valid_il_offsets[index] |= bit;
 }
 
-bool BasicBlockSplitter::is_valid_il_offset(size_t offset) const
+bool BasicBlockSplitter::is_valid_il_offset(uint32_t offset) const
 {
-    const size_t index = offset >> 5;
+    const uint32_t index = offset >> 5;
     const uint32_t bit = 1u << (offset & 31);
     assert(index < _valid_il_offsets_count);
     return (_valid_il_offsets[index] & bit) != 0;
@@ -51,10 +51,10 @@ RtResultVoid BasicBlockSplitter::split_codes()
     assert(_method_body != nullptr);
     const auto& body = *_method_body;
     const uint8_t* codes = body.code;
-    const size_t code_size = static_cast<size_t>(body.code_size);
+    const uint32_t code_size = body.code_size;
     const uint8_t* codes_end = codes + code_size;
 
-    size_t offset = 0;
+    uint32_t offset = 0;
     while (offset < code_size)
     {
         mark_valid_il_offset(offset);
@@ -65,8 +65,8 @@ RtResultVoid BasicBlockSplitter::split_codes()
         {
             RET_ERR(RtErr::ExecutionEngine);
         }
-        const size_t opcode_size = il::OpCodes::get_opcode_size(pc, opcode_info);
-        const size_t next_offset = offset + opcode_size;
+        const uint32_t opcode_size = static_cast<uint32_t>(il::OpCodes::get_opcode_size(pc, opcode_info));
+        const uint32_t next_offset = offset + opcode_size;
         if (next_offset > code_size)
         {
             RET_ERR(RtErr::ExecutionEngine);
@@ -82,16 +82,16 @@ RtResultVoid BasicBlockSplitter::split_codes()
             break;
         case il::ArgType::BranchTarget:
         {
-            size_t target_offset = 0;
+            uint32_t target_offset = 0;
             if (opcode_info->inline_param == 1)
             {
-                target_offset = static_cast<size_t>(static_cast<int8_t>(*(pc + 1)));
+                target_offset = static_cast<uint32_t>(static_cast<int8_t>(*(pc + 1)));
             }
             else
             {
-                int32_t val = 0;
-                std::memcpy(&val, pc + 1, sizeof(int32_t));
-                target_offset = static_cast<size_t>(val);
+                uint32_t val = 0;
+                std::memcpy(&val, pc + 1, sizeof(uint32_t));
+                target_offset = static_cast<uint32_t>(val);
             }
             if (target_offset != 0 || opcode_info->code2 == static_cast<uint8_t>(il::OpCodeValue::LeaveS) ||
                 opcode_info->code2 == static_cast<uint8_t>(il::OpCodeValue::Leave))
@@ -109,9 +109,9 @@ RtResultVoid BasicBlockSplitter::split_codes()
             bool split_any = false;
             for (int32_t i = 0; i < case_count; ++i)
             {
-                int32_t case_offset_val = 0;
-                std::memcpy(&case_offset_val, case_start + i, sizeof(int32_t));
-                const size_t case_offset = static_cast<size_t>(case_offset_val);
+                uint32_t case_offset_val = 0;
+                std::memcpy(&case_offset_val, case_start + i, sizeof(uint32_t));
+                const uint32_t case_offset = case_offset_val;
                 if (case_offset != 0)
                 {
                     _split_offsets.insert(next_offset + case_offset);

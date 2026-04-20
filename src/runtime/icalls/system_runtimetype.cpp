@@ -47,8 +47,8 @@ static bool is_str_case_insensitive_equal_ascii(const char* s1, const char* s2)
 
     while (*s1 && *s2)
     {
-        char c1 = std::tolower(static_cast<unsigned char>(*s1));
-        char c2 = std::tolower(static_cast<unsigned char>(*s2));
+        char c1 = static_cast<char>(std::tolower(static_cast<unsigned char>(*s1)));
+        char c2 = static_cast<char>(std::tolower(static_cast<unsigned char>(*s2)));
         if (c1 != c2)
             return false;
         ++s1;
@@ -241,7 +241,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> SystemRuntimeType::get_m
     }
 
     // Create SafeGPtrArray with collected methods
-    auto result = utils::SafeGPtrArray<metadata::RtMethodInfo>::create_from_data(methods.data(), methods.size());
+    auto result = utils::SafeGPtrArray<metadata::RtMethodInfo>::create_from_data(methods.data(), static_cast<int32_t>(methods.size()));
     RET_OK(result);
 }
 
@@ -315,7 +315,7 @@ SystemRuntimeType::get_properties_by_name_native(vm::RtReflectionRuntimeType* ru
         current_klass = current_klass->parent;
     }
 
-    auto result = utils::SafeGPtrArray<metadata::RtPropertyInfo>::create_from_data(properties.data(), properties.size());
+    auto result = utils::SafeGPtrArray<metadata::RtPropertyInfo>::create_from_data(properties.data(), static_cast<int32_t>(properties.size()));
     RET_OK(result);
 }
 
@@ -367,7 +367,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> SystemRuntimeType::get_c
         constructors.push_back(method);
     }
 
-    auto result = utils::SafeGPtrArray<metadata::RtMethodInfo>::create_from_data(constructors.data(), constructors.size());
+    auto result = utils::SafeGPtrArray<metadata::RtMethodInfo>::create_from_data(constructors.data(), static_cast<int32_t>(constructors.size()));
     RET_OK(result);
 }
 
@@ -414,7 +414,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtEventInfo>*> SystemRuntimeType::get_ev
         current_klass = current_klass->parent;
     }
 
-    auto result = utils::SafeGPtrArray<metadata::RtEventInfo>::create_from_data(events.data(), events.size());
+    auto result = utils::SafeGPtrArray<metadata::RtEventInfo>::create_from_data(events.data(), static_cast<int32_t>(events.size()));
     RET_OK(result);
 }
 
@@ -493,7 +493,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtFieldInfo>*> SystemRuntimeType::get_fi
         current_klass = current_klass->parent;
     }
 
-    auto result = utils::SafeGPtrArray<metadata::RtFieldInfo>::create_from_data(fields.data(), fields.size());
+    auto result = utils::SafeGPtrArray<metadata::RtFieldInfo>::create_from_data(fields.data(), static_cast<int32_t>(fields.size()));
     RET_OK(result);
 }
 
@@ -855,7 +855,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtClass>*> SystemRuntimeType::get_nested
         nested_types.push_back(nested_klass);
     }
 
-    auto result = utils::SafeGPtrArray<metadata::RtClass>::create_from_data(nested_types.data(), nested_types.size());
+    auto result = utils::SafeGPtrArray<metadata::RtClass>::create_from_data(nested_types.data(), static_cast<int32_t>(nested_types.size()));
     RET_OK(result);
 }
 

@@ -2220,7 +2220,7 @@ RtResultVoid Transformer::build_codes(RtInterpMethodInfo* interp_method)
     size_t total_ir_count = 0;
     for (BasicBlock* cur_bb = _bb_head; cur_bb != nullptr; cur_bb = cur_bb->next_bb)
     {
-        cur_bb->ir_offset = total_ir_size;
+        cur_bb->ir_offset = static_cast<int32_t>(total_ir_size);
         total_ir_count += cur_bb->insts.size();
         for (const GeneralInst* inst : cur_bb->insts)
         {

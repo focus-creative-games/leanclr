@@ -12,7 +12,7 @@ class String
   public:
     static RtResultVoid initialize();
     static RtString* get_empty_string();
-    static RtString* create_string_from_utf16chars(const uint16_t* str, int32_t length);
+    static RtString* create_string_from_utf16chars(const Utf16Char* str, int32_t length);
     static RtString* create_string_from_utf8chars(const char* str, int32_t length);
     static RtString* create_string_from_utf8cstr(const char* str)
     {
