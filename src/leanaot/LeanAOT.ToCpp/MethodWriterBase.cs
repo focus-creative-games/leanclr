@@ -1874,7 +1874,16 @@ namespace LeanAOT.ToCpp
             }
             if (_manifestService.ShouldAOT(methodDetail.Method))
             {
-                EmitCallByMethodPointerDirectly(inst, methodDetail, methodVarName, args, retVar);
+                var argsStr = CreateMethodFunctionArgsWithCast(methodDetail, args);
+                if (!methodDetail.IsVoidReturn)
+                {
+                    EmitAssignOrThrow(inst, retVar, $"{methodDetail.UniqueName}({argsStr})");
+                }
+                else
+                {
+                    EmitThrowOnError(inst, $"{methodDetail.UniqueName}({argsStr})");
+                }
+                //EmitCallByMethodPointerDirectly(inst, methodDetail, methodVarName, args, retVar);
             }
             else
             {

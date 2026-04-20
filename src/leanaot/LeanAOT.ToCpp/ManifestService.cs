@@ -14,12 +14,7 @@ namespace LeanAOT.ToCpp
 
         public bool ShouldAOT(IMethod method)
         {
-            if (method is MethodDef methodDef)
-            {
-                return Manifest.AssemblyPlans.TryGetValue(methodDef.Module.Assembly.Name, out var assPlan) &&
-                    assPlan.ContainsMethod(methodDef);
-            }
-            return false;
+            return Manifest.ShouldAOT(method);
         }
     }
 }

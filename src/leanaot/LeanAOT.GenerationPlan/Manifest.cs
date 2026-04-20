@@ -70,10 +70,11 @@ namespace LeanAOT.GenerationPlan
 
         public bool ShouldAOT(IMethod method)
         {
-            if (method is MethodDef methodDef)
+            MethodDef methodDef = method.ResolveMethodDef();
+            if (methodDef != null)
             {
-                return _assemblyPlans.TryGetValue(methodDef.Module.Assembly.FullName, out var assPlan) &&
-                    assPlan.MethodPlans.Any(mp => mp.MethodDef == methodDef);
+                return AssemblyPlans.TryGetValue(methodDef.Module.Assembly.Name, out var assPlan) &&
+                    assPlan.ContainsMethod(method);
             }
             return false;
         }
