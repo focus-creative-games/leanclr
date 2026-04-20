@@ -59,6 +59,8 @@
 #include "system_datetime.h"
 #include "system_math.h"
 #include "system_mathf.h"
+#include "system_io_path.h"
+#include "system_io_monoio.h"
 #include "interop.h"
 
 namespace leanclr
@@ -133,6 +135,8 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemDateTime::get_internal_call_entries());
     Append(entries, SystemMath::get_internal_call_entries());
     Append(entries, SystemMathF::get_internal_call_entries());
+    Append(entries, SystemIOPath::get_internal_call_entries());
+    Append(entries, SystemIOMonoIO::get_internal_call_entries());
     Append(entries, SystemTextEncodingHelper::get_internal_call_entries());
     Append(entries, SystemSecurityCryptographyRNGCryptoServiceProvider::get_internal_call_entries());
     Append(entries, SystemSecuritySecurityManager::get_internal_call_entries());
