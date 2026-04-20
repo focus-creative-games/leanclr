@@ -225,21 +225,25 @@ RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* me
     case metadata::RtMethodImplAttribute::IlOrManaged:
     {
         // Try internal call first
+
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const InternalCallRegistry*, icall_entry, InternalCalls::get_internal_call_by_method(method));
+        if (icall_entry)
         {
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const InternalCallRegistry*, entry, InternalCalls::get_internal_call_by_method(method));
-            if (entry)
-            {
-                RET_OK(InvokeTypeAndMethod(RtInvokerType::InternalCall, entry->invoker));
-            }
+            RET_OK(InvokeTypeAndMethod(RtInvokerType::InternalCall, icall_entry->invoker));
         }
 
         // Try intrinsic
+
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const IntrinsicRegistry*, intrinsic_entry, Intrinsics::get_intrinsic_by_method(method));
+        if (intrinsic_entry)
         {
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const IntrinsicRegistry*, entry, Intrinsics::get_intrinsic_by_method(method));
-            if (entry)
-            {
-                RET_OK(InvokeTypeAndMethod(RtInvokerType::Intrinsic, entry->invoker));
-            }
+            RET_OK(InvokeTypeAndMethod(RtInvokerType::Intrinsic, intrinsic_entry->invoker));
+        }
+
+        std::optional<metadata::RtAotMethodImplData> aot_data = metadata::AotModule::find_aot_method_impl(method);
+        if (aot_data.has_value())
+        {
+            RET_OK(InvokeTypeAndMethod(RtInvokerType::Aot, aot_data->invoke_method_ptr, aot_data->virtual_invoke_method_ptr));
         }
 
         if (Method::is_internal_call(method))
@@ -264,12 +268,6 @@ RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* me
             {
                 RET_OK(InvokeTypeAndMethod(RtInvokerType::PInvoke, fn_not_implemented_pinvoke_invoker));
             }
-        }
-
-        std::optional<metadata::RtAotMethodImplData> aot_data = metadata::AotModule::find_aot_method_impl(method);
-        if (aot_data.has_value())
-        {
-            RET_OK(InvokeTypeAndMethod(RtInvokerType::Aot, aot_data->invoke_method_ptr, aot_data->virtual_invoke_method_ptr));
         }
 
         auto virtual_invoker =
