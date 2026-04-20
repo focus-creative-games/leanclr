@@ -109,8 +109,8 @@ RtResult<vm::RtObject*> Interop::kernel32_find_first_file_ex_private(vm::RtStrin
     intptr_t handle = platform::Kernel32::find_first_file_ex_private(lp_file_name, f_info_level_id, lp_find_file_data, f_search_op, lp_search_filter,
                                                           dw_additional_flags);
     const metadata::RtClass* safe_handle_klass = safe_find_handle_class->parent->parent;
-    assert(safe_handle_klass && std::strcmp(safe_handle_klass->name, "System.Runtime.InteropServices.SafeHandle") == 0);
-    assert(std::strcmp(safe_handle_klass->fields[0].name, "handle") == 0 && safe_handle_klass->fields[0].offset == vm::RT_OBJECT_HEADER_SIZE);
+    assert(safe_handle_klass && std::strcmp(safe_handle_klass->name, "SafeHandle") == 0);
+    assert(std::strcmp(safe_handle_klass->fields[0].name, "handle") == 0 && safe_handle_klass->fields[0].offset == 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, safe_handle, vm::Object::new_object(safe_handle_klass));
     reinterpret_cast<SafeFindHandle*>(safe_handle)->handle = handle;
     RET_OK(safe_handle);
