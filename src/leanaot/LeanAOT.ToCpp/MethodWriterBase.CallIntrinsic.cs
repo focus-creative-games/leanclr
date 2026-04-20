@@ -11,7 +11,7 @@ namespace LeanAOT.ToCpp
 {
     partial class MethodWriterBase
     {
-        private bool TryEmitCallInstrinsic(Instruction inst, MethodDetail methodDetail, string methodVarName, List<EvalVariable> args, EvalVariable retVar)
+        private bool TryEmitCallInstrinsic(Instruction inst, MethodDetail methodDetail, Func<string> methodVarNameProvider, List<EvalVariable> args, EvalVariable retVar)
         {
             MethodDef methodDef = methodDetail.MethodDef;
             if (methodDef == null)
@@ -25,17 +25,17 @@ namespace LeanAOT.ToCpp
                 {
                 case "Get":
                 {
-                    EmitCallMdArrayGetIntrinsic(inst, methodDetail, methodVarName, args, retVar);
+                    EmitCallMdArrayGetIntrinsic(inst, methodDetail, methodVarNameProvider(), args, retVar);
                     return true;
                 }
                 case "Set":
                 {
-                    EmitCallMdArraySetIntrinsic(inst, methodDetail, methodVarName, args, retVar);
+                    EmitCallMdArraySetIntrinsic(inst, methodDetail, methodVarNameProvider(), args, retVar);
                     return true;
                 }
                 case "Address":
                 {
-                    EmitCallMdArrayAddressIntrinsic(inst, methodDetail, methodVarName, args, retVar);
+                    EmitCallMdArrayAddressIntrinsic(inst, methodDetail, methodVarNameProvider(), args, retVar);
                     return true;
                 }
                 }
@@ -97,7 +97,7 @@ namespace LeanAOT.ToCpp
             return false;
         }
 
-        private bool TryEmitNewobjIntrinsic(Instruction inst, MethodDetail methodDetail, string methodVarName, List<EvalVariable> args, EvalVariable retVar)
+        private bool TryEmitNewobjIntrinsic(Instruction inst, MethodDetail methodDetail, Func<string> methodVarNameProvider, List<EvalVariable> args, EvalVariable retVar)
         {
             MethodDef methodDef = methodDetail.MethodDef;
             if (methodDef == null)
@@ -107,7 +107,7 @@ namespace LeanAOT.ToCpp
                 {
                 case ElementType.Array:
                 {
-                    EmitNewMdArrayIntrinsic(inst, methodDetail, methodVarName, args, retVar);
+                    EmitNewMdArrayIntrinsic(inst, methodDetail, methodVarNameProvider(), args, retVar);
                     return true;
                 }
                 default:
@@ -131,7 +131,7 @@ namespace LeanAOT.ToCpp
                 {
                 case VmFunctionNames.Ctor:
                 {
-                    EmitNewMulticastDelegateIntrinsic(inst, methodDetail, methodVarName, args, retVar);
+                    EmitNewMulticastDelegateIntrinsic(inst, methodDetail, methodVarNameProvider(), args, retVar);
                     return true;
                 }
                 }
@@ -227,7 +227,7 @@ namespace LeanAOT.ToCpp
             _bodyWriter.IncreaseIndent();
             DefineIndexVar(args.GetRange(1, args.Count - 1), rank);
             string globalIndexVarName = "__globalIndex";
-            _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {_curMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
             ITypeDefOrRef elementType = methodDetail.RetType.ToTypeDefOrRef();
             string elementTypeName = GetExactTypeName(elementType);
             string loadElementDataExpr = $"{VmFunctionNames.GetArrayElementDataAt}<{elementTypeName}>({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, {globalIndexVarName})";
@@ -254,7 +254,7 @@ namespace LeanAOT.ToCpp
             _bodyWriter.IncreaseIndent();
             DefineIndexVar(args.GetRange(1, args.Count - 2), rank);
             string globalIndexVarName = "__globalIndex";
-            _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {_curMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
             ITypeDefOrRef elementType = paramsIncludeThis.Last().Type.ToTypeDefOrRef();
             string elementTypeName = GetExactTypeName(elementType);
 
@@ -281,7 +281,7 @@ namespace LeanAOT.ToCpp
             _bodyWriter.IncreaseIndent();
             DefineIndexVar(args.GetRange(1, args.Count - 1), rank);
             string globalIndexVarName = "__globalIndex";
-            _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {_curMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
             ITypeDefOrRef elementType = methodDetail.RetType.Next.ToTypeDefOrRef();
             string elementTypeName = GetExactTypeName(elementType);
             string loadElementDataExpr = $"{VmFunctionNames.GetArrayElementAddress}<{elementTypeName}>({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, {globalIndexVarName})";
