@@ -1,4 +1,5 @@
 #include "rt_file.h"
+#include "rt_io_error_internal.h"
 
 #include <cstdint>
 
@@ -24,19 +25,26 @@ namespace os
 namespace
 {
 
-// MonoIOError values used when translating platform error codes.
-constexpr int32_t kErrorSuccess = 0;
-constexpr int32_t kErrorFileNotFound = 2;
-constexpr int32_t kErrorPathNotFound = 3;
-constexpr int32_t kErrorAccessDenied = 5;
-constexpr int32_t kErrorInvalidHandle = 6;
-constexpr int32_t kErrorHandleDiskFull = 39;
-constexpr int32_t kErrorFileExists = 80;
-constexpr int32_t kErrorInvalidParameter = 87;
-constexpr int32_t kErrorDirectory = 267;
-constexpr int32_t kErrorGenFailure = 31;
+// Pull shared error constants and helpers into the unnamed namespace so
+// existing call sites (set_error, kErrorXxx, ...) don't need any rewrites.
+using io_error_internal::kErrorAccessDenied;
+using io_error_internal::kErrorDirectory;
+using io_error_internal::kErrorFileExists;
+using io_error_internal::kErrorFileNotFound;
+using io_error_internal::kErrorGenFailure;
+using io_error_internal::kErrorHandleDiskFull;
+using io_error_internal::kErrorInvalidHandle;
+using io_error_internal::kErrorInvalidParameter;
+using io_error_internal::kErrorPathNotFound;
+using io_error_internal::kErrorSuccess;
+using io_error_internal::set_error;
+#ifdef LEANCLR_PLATFORM_WIN
+using io_error_internal::win32_error_to_monoio;
+#else
+using io_error_internal::errno_to_monoio;
+#endif
 
-// System.IO.FileMode
+// System.IO.FileMode (file-local; does not conflict with other platform files).
 constexpr int32_t kFileModeCreateNew = 1;
 constexpr int32_t kFileModeCreate = 2;
 constexpr int32_t kFileModeOpen = 3;
@@ -48,52 +56,6 @@ constexpr int32_t kFileModeAppend = 6;
 constexpr int32_t kFileAccessRead = 1;
 constexpr int32_t kFileAccessWrite = 2;
 constexpr int32_t kFileAccessReadWrite = 3;
-
-inline void set_error(int32_t* error, int32_t value)
-{
-    if (error)
-        *error = value;
-}
-
-#ifdef LEANCLR_PLATFORM_WIN
-
-inline int32_t win32_error_to_monoio(DWORD code)
-{
-    // The System.IO.MonoIOError enum mirrors Win32 error codes, so no extra mapping is required.
-    return static_cast<int32_t>(code);
-}
-
-#else
-
-inline int32_t errno_to_monoio(int err)
-{
-    switch (err)
-    {
-    case 0:
-        return kErrorSuccess;
-    case ENOENT:
-        return kErrorFileNotFound;
-    case ENOTDIR:
-        return kErrorPathNotFound;
-    case EACCES:
-    case EPERM:
-        return kErrorAccessDenied;
-    case EBADF:
-        return kErrorInvalidHandle;
-    case EEXIST:
-        return kErrorFileExists;
-    case EINVAL:
-        return kErrorInvalidParameter;
-    case ENOSPC:
-        return kErrorHandleDiskFull;
-    case EISDIR:
-        return kErrorDirectory;
-    default:
-        return kErrorGenFailure;
-    }
-}
-
-#endif
 
 } // namespace
 

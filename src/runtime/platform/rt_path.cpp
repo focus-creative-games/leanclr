@@ -1,4 +1,5 @@
 #include "rt_path.h"
+#include "rt_io_error_internal.h"
 
 #include "vm/rt_string.h"
 #include "vm/settings.h"
@@ -23,37 +24,17 @@ namespace os
 namespace
 {
 
-// MonoIOError values. Kept local because the platform layer intentionally
-// avoids leaking error-enum headers.
-constexpr int32_t kErrorSuccess = 0;
-constexpr int32_t kErrorGenFailure = 31;
-
+// Pull shared error constants and helpers into the unnamed namespace so
+// call sites stay unchanged. See rt_io_error_internal.h for why these live
+// in a shared header rather than per-file anonymous namespaces.
+using io_error_internal::kErrorAccessDenied;
+using io_error_internal::kErrorFileNotFound;
+using io_error_internal::kErrorGenFailure;
+using io_error_internal::kErrorSuccess;
+using io_error_internal::set_error;
 #ifndef LEANCLR_PLATFORM_WIN
-constexpr int32_t kErrorFileNotFound = 2;
-constexpr int32_t kErrorAccessDenied = 5;
-
-inline int32_t errno_to_monoio(int err)
-{
-    switch (err)
-    {
-    case 0:
-        return kErrorSuccess;
-    case ENOENT:
-        return kErrorFileNotFound;
-    case EACCES:
-    case EPERM:
-        return kErrorAccessDenied;
-    default:
-        return kErrorGenFailure;
-    }
-}
+using io_error_internal::errno_to_monoio;
 #endif
-
-inline void set_error(int32_t* error, int32_t value)
-{
-    if (error)
-        *error = value;
-}
 
 } // namespace
 
