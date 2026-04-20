@@ -11,7 +11,7 @@ void* il2cpp_api_lookup_symbol(const char* name)
     {
         return it->second;
     }
-    return NULL;
+    return nullptr;
 }
 
 static void RegisterAPIFunction(const char* name, void* symbol)
@@ -312,9 +312,6 @@ Il2CppClass* il2cpp_class_get_element_class(Il2CppClass* klass)
 {
     return const_cast<Il2CppClass*>(klass->element_class);
 }
-
-// Iterator pattern: *iter stores the next index as uintptr_t cast to void*.
-// NULL == 0 == index 0 (start). Caller passes &iter initialised to NULL.
 
 const EventInfo* il2cpp_class_get_events(Il2CppClass* klass, void** iter)
 {
