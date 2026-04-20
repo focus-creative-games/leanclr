@@ -1,5 +1,9 @@
 #include "interop.h"
 
+#include "vm/class.h"
+#include "vm/object.h"
+#include "vm/assembly.h"
+#include "metadata/module_def.h"
 #include "platform/bcrypt.h"
 #include "platform/kernel32.h"
 namespace leanclr
@@ -88,11 +92,28 @@ RtResultVoid kernel32_get_file_attributes_ex_private_invoker(metadata::RtManaged
     RET_VOID_OK();
 }
 
-RtResult<intptr_t> Interop::kernel32_find_first_file_ex_private(vm::RtString* lp_file_name, uint32_t f_info_level_id, void* lp_find_file_data,
+struct SafeFindHandle : public vm::RtObject
+{
+    intptr_t handle;
+};
+
+RtResult<vm::RtObject*> Interop::kernel32_find_first_file_ex_private(vm::RtString* lp_file_name, uint32_t f_info_level_id, void* lp_find_file_data,
                                                                  uint32_t f_search_op, intptr_t lp_search_filter, int32_t dw_additional_flags)
 {
-    RET_OK(platform::Kernel32::find_first_file_ex_private(lp_file_name, f_info_level_id, lp_find_file_data, f_search_op, lp_search_filter,
-                                                          dw_additional_flags));
+    static metadata::RtClass* safe_find_handle_class = nullptr;
+    if (!safe_find_handle_class)
+    {
+        metadata::RtModuleDef* mod = vm::Assembly::get_corlib()->mod;
+        UNWRAP_OR_RET_ERR_ON_FAIL(safe_find_handle_class, mod->get_class_by_name("Microsoft.Win32.SafeHandles.SafeFindHandle", false, true));
+    }
+    intptr_t handle = platform::Kernel32::find_first_file_ex_private(lp_file_name, f_info_level_id, lp_find_file_data, f_search_op, lp_search_filter,
+                                                          dw_additional_flags);
+    const metadata::RtClass* safe_handle_klass = safe_find_handle_class->parent->parent;
+    assert(safe_handle_klass && std::strcmp(safe_handle_klass->name, "System.Runtime.InteropServices.SafeHandle") == 0);
+    assert(std::strcmp(safe_handle_klass->fields[0].name, "handle") == 0 && safe_handle_klass->fields[0].offset == vm::RT_OBJECT_HEADER_SIZE);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, safe_handle, vm::Object::new_object(safe_handle_klass));
+    reinterpret_cast<SafeFindHandle*>(safe_handle)->handle = handle;
+    RET_OK(safe_handle);
 }
 
 /// @icall: Interop/Kernel32::FindFirstFileExPrivate(System.String,Interop/Kernel32/FINDEX_INFO_LEVELS,Interop/Kernel32/WIN32_FIND_DATA&,Interop/Kernel32/FINDEX_SEARCH_OPS,System.IntPtr,System.Int32)
@@ -105,7 +126,7 @@ RtResultVoid kernel32_find_first_file_ex_private_invoker(metadata::RtManagedMeth
     uint32_t f_search_op = interp::EvalStackOp::get_param<uint32_t>(params, 3);
     intptr_t lp_search_filter = interp::EvalStackOp::get_param<intptr_t>(params, 4);
     int32_t dw_additional_flags = interp::EvalStackOp::get_param<int32_t>(params, 5);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, result,
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result,
                                             Interop::kernel32_find_first_file_ex_private(lp_file_name, f_info_level_id, lp_find_file_data, f_search_op,
                                                                                          lp_search_filter, dw_additional_flags));
     EvalStackOp::set_return(ret, result);
