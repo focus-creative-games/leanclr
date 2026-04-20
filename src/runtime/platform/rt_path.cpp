@@ -1,0 +1,178 @@
+#include "rt_path.h"
+
+#include "vm/rt_string.h"
+
+#include <cstdlib>
+#include <cstring>
+
+#ifdef LEANCLR_PLATFORM_WIN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
+#include <direct.h>
+#else
+#include <errno.h>
+#include <unistd.h>
+#endif
+
+namespace leanclr
+{
+namespace os
+{
+
+namespace
+{
+
+// MonoIOError values. Kept local because the platform layer intentionally
+// avoids leaking error-enum headers.
+constexpr int32_t kErrorSuccess = 0;
+constexpr int32_t kErrorGenFailure = 31;
+
+#ifndef LEANCLR_PLATFORM_WIN
+constexpr int32_t kErrorFileNotFound = 2;
+constexpr int32_t kErrorAccessDenied = 5;
+
+inline int32_t errno_to_monoio(int err)
+{
+    switch (err)
+    {
+    case 0:
+        return kErrorSuccess;
+    case ENOENT:
+        return kErrorFileNotFound;
+    case EACCES:
+    case EPERM:
+        return kErrorAccessDenied;
+    default:
+        return kErrorGenFailure;
+    }
+}
+#endif
+
+inline void set_error(int32_t* error, int32_t value)
+{
+    if (error)
+        *error = value;
+}
+
+} // namespace
+
+Utf16Char Path::get_alt_directory_separator_char()
+{
+    return static_cast<Utf16Char>('/');
+}
+
+Utf16Char Path::get_directory_separator_char()
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<Utf16Char>('\\');
+#else
+    return static_cast<Utf16Char>('/');
+#endif
+}
+
+Utf16Char Path::get_path_separator()
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<Utf16Char>(';');
+#else
+    return static_cast<Utf16Char>(':');
+#endif
+}
+
+Utf16Char Path::get_volume_separator_char()
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<Utf16Char>(':');
+#else
+    return static_cast<Utf16Char>('/');
+#endif
+}
+
+vm::RtString* Path::get_temp_path()
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    wchar_t buffer[MAX_PATH + 1];
+    DWORD len = ::GetTempPathW(MAX_PATH + 1, buffer);
+    if (len > 0 && len <= MAX_PATH)
+    {
+        static_assert(sizeof(wchar_t) == sizeof(Utf16Char), "wchar_t must be 16-bit on Windows");
+        return vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(buffer), static_cast<int32_t>(len));
+    }
+    return vm::String::create_string_from_utf8cstr("C:\\Temp\\");
+#else
+    const char* tmp = std::getenv("TMPDIR");
+    if (!tmp || !tmp[0])
+        tmp = std::getenv("TMP");
+    if (!tmp || !tmp[0])
+        tmp = std::getenv("TEMP");
+    if (!tmp || !tmp[0])
+        tmp = "/tmp/";
+
+    size_t tmp_len = std::strlen(tmp);
+    if (tmp_len > 0 && tmp[tmp_len - 1] != '/')
+    {
+        // Ensure a trailing path separator.
+        char buffer[1024];
+        if (tmp_len + 2 > sizeof(buffer))
+            tmp_len = sizeof(buffer) - 2;
+        std::memcpy(buffer, tmp, tmp_len);
+        buffer[tmp_len] = '/';
+        buffer[tmp_len + 1] = 0;
+        return vm::String::create_string_from_utf8chars(buffer, static_cast<int32_t>(tmp_len + 1));
+    }
+    return vm::String::create_string_from_utf8cstr(tmp);
+#endif
+}
+
+vm::RtString* Path::get_current_directory(int32_t* error)
+{
+    set_error(error, kErrorSuccess);
+
+#ifdef LEANCLR_PLATFORM_WIN
+    DWORD needed = ::GetCurrentDirectoryW(0, nullptr);
+    if (needed == 0)
+    {
+        set_error(error, static_cast<int32_t>(::GetLastError()));
+        return vm::String::get_empty_string();
+    }
+    wchar_t stack_buf[MAX_PATH + 1];
+    wchar_t* buffer = stack_buf;
+    wchar_t* heap_buf = nullptr;
+    if (needed > sizeof(stack_buf) / sizeof(wchar_t))
+    {
+        heap_buf = static_cast<wchar_t*>(std::malloc(needed * sizeof(wchar_t)));
+        if (!heap_buf)
+        {
+            set_error(error, kErrorGenFailure);
+            return vm::String::get_empty_string();
+        }
+        buffer = heap_buf;
+    }
+    DWORD written = ::GetCurrentDirectoryW(needed, buffer);
+    vm::RtString* result;
+    if (written == 0)
+    {
+        set_error(error, static_cast<int32_t>(::GetLastError()));
+        result = vm::String::get_empty_string();
+    }
+    else
+    {
+        static_assert(sizeof(wchar_t) == sizeof(Utf16Char), "wchar_t must be 16-bit on Windows");
+        result = vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(buffer), static_cast<int32_t>(written));
+    }
+    if (heap_buf)
+        std::free(heap_buf);
+    return result;
+#else
+    char stack_buf[1024];
+    if (::getcwd(stack_buf, sizeof(stack_buf)) != nullptr)
+    {
+        return vm::String::create_string_from_utf8cstr(stack_buf);
+    }
+    set_error(error, errno_to_monoio(errno));
+    return vm::String::get_empty_string();
+#endif
+}
+
+} // namespace os
+} // namespace leanclr
