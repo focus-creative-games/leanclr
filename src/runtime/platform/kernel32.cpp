@@ -49,5 +49,28 @@ bool Kernel32::get_file_attributes_ex_private(vm::RtString* name, uint32_t file_
 #endif
 }
 
+intptr_t Kernel32::find_first_file_ex_private(vm::RtString* lp_file_name, uint32_t f_info_level_id, void* lp_find_file_data, uint32_t f_search_op,
+                                              intptr_t lp_search_filter, int32_t dw_additional_flags)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    // https://learn.microsoft.com/en-us/windows/win32/api/fileapi/nf-fileapi-findfirstfileexw
+    if (lp_file_name == nullptr || lp_find_file_data == nullptr)
+        return reinterpret_cast<intptr_t>(INVALID_HANDLE_VALUE);
+
+    LPVOID search_filter = (lp_search_filter != 0) ? reinterpret_cast<LPVOID>(lp_search_filter) : nullptr;
+    HANDLE h = ::FindFirstFileExW(reinterpret_cast<LPCWSTR>(vm::String::get_chars_ptr(lp_file_name)), static_cast<FINDEX_INFO_LEVELS>(f_info_level_id),
+                                    lp_find_file_data, static_cast<FINDEX_SEARCH_OPS>(f_search_op), search_filter, static_cast<DWORD>(dw_additional_flags));
+    return reinterpret_cast<intptr_t>(h);
+#else
+    (void)lp_file_name;
+    (void)f_info_level_id;
+    (void)lp_find_file_data;
+    (void)f_search_op;
+    (void)lp_search_filter;
+    (void)dw_additional_flags;
+    return static_cast<intptr_t>(-1);
+#endif
+}
+
 } // namespace platform
 } // namespace leanclr
