@@ -1155,7 +1155,7 @@ namespace LeanAOT.ToCpp
             }
             string retTypeName = GetTypeName(retVar);
             string retVarName = GetEvalVariableName(retVar);
-            if (isInteger)
+            if (isInteger || string.IsNullOrEmpty(floatFuncName))
             {
                 _bodyWriter.AddLine($"{retTypeName} {retVarName} = {MayFoldCast(opType, retTypeName, $"{op1Expr} {opSymbol} {op2Expr}")};");
             }
