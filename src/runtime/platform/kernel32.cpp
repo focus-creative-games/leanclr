@@ -42,7 +42,7 @@ bool Kernel32::set_thread_error_mode(uint32_t mode, uint32_t& old_mode)
     // https://learn.microsoft.com/en-us/windows/win32/api/errhandlingapi/nf-errhandlingapi-setthreaderrormode
     //
     // Use DWORD at the API boundary: Win32 typedefs DWORD as unsigned long;
-    // uint32_t is often unsigned int — passing &uint32_t where LPDWORD is
+    // uint32_t is often unsigned int - passing &uint32_t where LPDWORD is
     // expected can trigger MSVC C4312-style strictness issues.
     DWORD old = 0;
     const DWORD new_mode = static_cast<DWORD>(mode);
@@ -92,6 +92,24 @@ intptr_t Kernel32::find_first_file_ex_private(vm::RtString* lp_file_name, uint32
     (void)lp_search_filter;
     (void)dw_additional_flags;
     return static_cast<intptr_t>(-1);
+#endif
+}
+
+int32_t Kernel32::get_console_cp()
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::GetConsoleCP());
+#else
+    return 0;
+#endif
+}
+
+int32_t Kernel32::get_console_output_cp()
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::GetConsoleOutputCP());
+#else
+    return 0;
 #endif
 }
 
