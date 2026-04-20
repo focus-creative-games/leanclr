@@ -123,7 +123,7 @@ namespace LeanAOT.ToCpp
             _runtimeResolvedMetadatas = new RuntimeResolvedMetadatas(_method);
             InitMethodVariables();
             InitRawILReader();
-            _curMethodVar = _runtimeResolvedMetadatas.GetMethodVariable(method.Method);
+            _curMethodVar = _runtimeResolvedMetadatas.GetMethodVariable(method.MethodDef);
         }
 
         void InitMethodVariables()
