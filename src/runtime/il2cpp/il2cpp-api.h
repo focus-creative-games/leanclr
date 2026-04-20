@@ -41,8 +41,6 @@ IL2CPP_EXPORT void* il2cpp_api_lookup_symbol(const char* name);
 #define NORETURN
 #endif
 
-
-
 #include "il2cpp_api_types.h"
 
 #include "vm/runtime.h"

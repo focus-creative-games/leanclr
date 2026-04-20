@@ -646,14 +646,33 @@ struct RtThread : public RtObject
 };
 
 // Constants for managed types
-const uint32_t RT_OBJECT_HEADER_SIZE = sizeof(RtObject);
-const uint32_t RT_ARRAY_HEADER_SIZE = offsetof(RtArray, first_data);
-const uint32_t RT_ARRAY_FIRST_DATA_OFFSET = offsetof(RtArray, first_data);
-const uint32_t RT_ARRAY_LENGTH_OFFSET = offsetof(RtArray, length);
-const uint32_t RT_ARRAY_BOUNDS_OFFSET = offsetof(RtArray, bounds);
-const uint32_t RT_TYPED_REFERENCE_SIZE = sizeof(RtTypedReference);
-const size_t RT_PUBLIC_KEY_BYTES_LEN = 8;
-const size_t RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH = 17;
+constexpr uint32_t RT_OBJECT_HEADER_SIZE = sizeof(RtObject);
+
+// NOTE: RtArray is not a standard-layout type (both RtObject and RtArray have
+// non-static data members), so offsetof on it is "conditionally-supported" per
+// C++17. In practice the layout is stable on every toolchain we ship
+// (MSVC/GCC/Clang/Emscripten), so we suppress the resulting warning here.
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable : 4840)
+#else
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Winvalid-offsetof"
+#endif
+constexpr uint32_t RT_STRING_FIRST_CHAR_OFFSET = offsetof(RtString, first_char);
+constexpr uint32_t RT_ARRAY_HEADER_SIZE = offsetof(RtArray, first_data);
+constexpr uint32_t RT_ARRAY_FIRST_DATA_OFFSET = offsetof(RtArray, first_data);
+constexpr uint32_t RT_ARRAY_LENGTH_OFFSET = offsetof(RtArray, length);
+constexpr uint32_t RT_ARRAY_BOUNDS_OFFSET = offsetof(RtArray, bounds);
+#ifdef _MSC_VER
+#pragma warning(pop)
+#else
+#pragma GCC diagnostic pop
+#endif
+
+constexpr uint32_t RT_TYPED_REFERENCE_SIZE = sizeof(RtTypedReference);
+constexpr size_t RT_PUBLIC_KEY_BYTES_LEN = 8;
+constexpr size_t RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH = 17;
 
 } // namespace vm
 } // namespace leanclr

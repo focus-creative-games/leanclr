@@ -171,10 +171,24 @@ class Result
     template <typename U>
     Result<U, E> cast()
     {
-        if constexpr (std::is_same<U, E>::value && std::is_same<T, E>::value)
-        {
-            return std::move(*this);
-        }
+        // Use tag dispatch so only the well-formed branch is instantiated.
+        // `if constexpr` would be cleaner but requires C++17.
+        return cast_impl<U>(std::integral_constant<bool, std::is_same<U, E>::value && std::is_same<T, E>::value>{});
+    }
+
+  private:
+    // Fast path: when T == U == E the storage is already the desired Result<E, E>,
+    // so we can just move ourselves to avoid touching the payload.
+    template <typename U>
+    Result<U, E> cast_impl(std::true_type)
+    {
+        return std::move(*this);
+    }
+
+    // General path: rebuild a Result<U, E> from the current ok/err state.
+    template <typename U>
+    Result<U, E> cast_impl(std::false_type)
+    {
         if (is_ok())
             return Result<U, E>::Ok((U)(unwrap()));
         return Result<U, E>::Err(unwrap_err());

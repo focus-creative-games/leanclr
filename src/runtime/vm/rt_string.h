@@ -21,21 +21,7 @@ class String
     static const metadata::RtMethodInfo* get_redirected_ctor_method();
     static constexpr int32_t get_offset_to_string_data()
     {
-#ifdef _MSC_VER
-        // MSVC: suppress C4840 (unsupported offsetof usage)
-#pragma warning(push)
-#pragma warning(disable : 4840)
-#else
-        // GCC/Clang: suppress -Winvalid-offsetof
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Winvalid-offsetof"
-#endif
-        return static_cast<int32_t>(offsetof(RtString, first_char));
-#ifdef _MSC_VER
-#pragma warning(pop)
-#else
-#pragma GCC diagnostic pop
-#endif
+        return RT_STRING_FIRST_CHAR_OFFSET;
     }
 
     static const Utf16Char* get_chars_ptr(RtString* str)
