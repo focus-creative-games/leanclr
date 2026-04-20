@@ -214,6 +214,7 @@ class Class
     // Type signature resolution
     static RtResult<metadata::RtClass*> get_ptr_class_by_element_typesig(const metadata::RtTypeSig* ele_type_sig);
     static RtResult<metadata::RtClass*> get_generic_param_class_by_typesig(const metadata::RtGenericParam* generic_param);
+    static RtResult<metadata::RtClass*> get_fnptr_class_by_method_sig(const metadata::RtMethodSig* method_sig);
 
     // Nested class lookup
     // static RtResult<uint32_t> find_nested_class_gid_by_name(metadata::RtClass* enclosing_class, const char* nested_class_name);

@@ -134,10 +134,11 @@ RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject
 
         case metadata::RtElementType::Ptr:
         case metadata::RtElementType::FnPtr:
+        {
             if (!eq_any<void*>(field_data_ptr1, field_data_ptr2))
                 RET_OK(false);
             break;
-
+        }
         case metadata::RtElementType::String:
         {
             vm::RtString* str1 = *reinterpret_cast<vm::RtString**>(field_data_ptr1);

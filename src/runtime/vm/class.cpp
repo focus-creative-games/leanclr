@@ -18,6 +18,7 @@
 #include "method.h"
 #include "shim.h"
 #include "customattribute.h"
+#include "assembly.h"
 
 namespace leanclr
 {
@@ -2051,8 +2052,9 @@ RtResult<metadata::RtClass*> Class::get_class_from_typesig(const metadata::RtTyp
     case metadata::RtElementType::MVar:
         return get_generic_param_class_by_typesig(typeSig->data.generic_param);
     case metadata::RtElementType::FnPtr:
-        // TODO: Function pointer class
-        RET_ERR(RtErr::NotImplemented);
+    {
+        return get_fnptr_class_by_method_sig(typeSig->data.method_sig);
+    }
     default:
         RET_ERR(RtErr::BadImageFormat);
     }
@@ -2129,6 +2131,42 @@ RtResult<metadata::RtClass*> Class::get_generic_param_class_by_typesig(const met
 
     g_genericParamClassCache.insert({genericParam, genericParamClass});
     RET_OK(genericParamClass);
+}
+
+static utils::HashMap<const metadata::RtMethodSig*, metadata::RtClass*, metadata::MethodSigHash, metadata::MethodSigCompare> g_fnPtrClassCache;
+
+RtResult<metadata::RtClass*> Class::get_fnptr_class_by_method_sig(const metadata::RtMethodSig* method_sig)
+{
+    auto it = g_fnPtrClassCache.find(method_sig);
+    if (it != g_fnPtrClassCache.end())
+    {
+        RET_OK(it->second);
+    }
+    metadata::RtClass* new_klass = alloc::MetadataAllocation::malloc_any_zeroed<metadata::RtClass>();
+    new_klass->image = Assembly::get_corlib()->mod;
+    new_klass->token = 0;
+    new_klass->parent = nullptr;
+    new_klass->namespaze = "System";
+    new_klass->name = "FakeFnPtrClass";
+    new_klass->element_class = new_klass;
+    new_klass->cast_class = new_klass;
+    new_klass->flags = (uint32_t)metadata::RtTypeAttribute::Public;
+
+    metadata::RtMethodSig* new_method_sig = new (alloc::MetadataAllocation::malloc_any_zeroed<metadata::RtMethodSig>()) metadata::RtMethodSig(*method_sig);
+    metadata::RtTypeSig* by_val = alloc::MetadataAllocation::malloc_any_zeroed<metadata::RtTypeSig>();
+    by_val->ele_type = metadata::RtElementType::FnPtr;
+    by_val->data.method_sig = new_method_sig;
+
+    metadata::RtTypeSig* by_ref = alloc::MetadataAllocation::malloc_any_zeroed<metadata::RtTypeSig>();
+    by_ref->ele_type = metadata::RtElementType::FnPtr;
+    by_ref->data.method_sig = new_method_sig;
+    by_ref->by_ref = 1;
+
+    new_klass->by_val = by_val;
+    new_klass->by_ref = by_ref;
+
+    g_fnPtrClassCache.insert({method_sig, new_klass});
+    RET_OK(new_klass);
 }
 
 metadata::RtClass* Class::get_enclosing_class(const metadata::RtClass* nestedClass)

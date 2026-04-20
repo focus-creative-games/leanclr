@@ -83,6 +83,7 @@ struct RtClass;
 struct RtMethodInfo;
 struct RtPropertyInfo;
 struct RtEventInfo;
+struct RtMethodSig;
 
 // Type signature variant data union
 union RtTypeSigVariantData
@@ -93,6 +94,7 @@ union RtTypeSigVariantData
     const RtArrayType* array_type;       // Array -> RtArrayType*
     const RtGenericClass* generic_class; // GenericInst -> RtGenericClass*
     const RtGenericParam* generic_param; // GenericParam -> RtGenericParam*
+    const RtMethodSig* method_sig; // MethodSpec -> RtMethodSig*
 };
 
 static_assert(sizeof(RtTypeSigVariantData) == sizeof(void*), "RtTypeSigVariantData size must be pointer size");

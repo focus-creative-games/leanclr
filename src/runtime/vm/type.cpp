@@ -10,6 +10,7 @@
 #include "metadata/rt_metadata.h"
 #include "metadata/module_def.h"
 #include "metadata/metadata_cache.h"
+#include "metadata/metadata_name.h"
 #include "utils/string_builder.h"
 
 namespace leanclr
@@ -377,7 +378,23 @@ RtResultVoid Type::append_type_full_name(utils::StringBuilder& sb, const metadat
         break;
     }
     case metadata::RtElementType::FnPtr:
-        RET_ERR(RtErr::NotImplemented);
+    {
+        sb.append_cstr("delegate* unmanaged");
+        const metadata::RtMethodSig* method_sig = typeSig->data.method_sig;
+        assert(method_sig->generic_param_count == 0 && "Generic parameters are not supported for function pointers");
+        sb.append_char('[');
+        sb.append_cstr(metadata::MetadataName::get_call_convention_name((metadata::RtSigType)method_sig->flags));
+        sb.append_char(']');
+        sb.append_char('<');
+        for (size_t i = 0; i < method_sig->params.size(); ++i)
+        {
+            RET_ERR_ON_FAIL(append_type_full_name(sb, method_sig->params[i], format, false));
+            sb.append_char(',');
+        }
+        RET_ERR_ON_FAIL(append_type_full_name(sb, method_sig->return_type, format, false));
+        sb.append_char('>');
+        break;
+    }
     case metadata::RtElementType::Var:
     case metadata::RtElementType::MVar:
     {

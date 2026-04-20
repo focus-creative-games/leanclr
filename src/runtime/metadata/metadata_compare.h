@@ -12,6 +12,7 @@ class MetadataCompare
     static bool is_typesig_equal_ignore_attrs(const RtTypeSig* a, const RtTypeSig* b, bool compareGenericParamByIndex);
     static bool is_typesigs_equal_ignore_attrs(const RtTypeSig* const* sigs1, const RtTypeSig* const* sigs2, size_t count, bool compareGenericParamByIndex);
     static bool is_method_signature_equal(const RtMethodInfo* a, const RtMethodInfo* b, bool compareName, bool compareGenericParamByIndex);
+    static bool is_method_signature_equal(const RtMethodSig* a, const RtMethodSig* b);
 };
 
 struct TypeSigIgnoreAttrsEqual
@@ -50,5 +51,16 @@ struct GenericMethodCompare
                a->generic_context.method_inst == b->generic_context.method_inst;
     }
 };
+
+struct MethodSigCompare
+{
+    bool operator()(const RtMethodSig* a, const RtMethodSig* b) const
+    {
+        return a->flags == b->flags && a->generic_param_count == b->generic_param_count &&
+               MetadataCompare::is_typesig_equal_ignore_attrs(a->return_type, b->return_type, false) &&
+               MetadataCompare::is_typesigs_equal_ignore_attrs(a->params.data(), b->params.data(), a->params.size(), false);
+    }
+};
+
 } // namespace metadata
 } // namespace leanclr

@@ -93,5 +93,18 @@ bool MetadataCompare::is_method_signature_equal(const RtMethodInfo* a, const RtM
         return false;
     return true;
 }
+
+bool MetadataCompare::is_method_signature_equal(const RtMethodSig* a, const RtMethodSig* b)
+{
+    if (a->flags != b->flags)
+        return false;
+    if (a->generic_param_count != b->generic_param_count)
+        return false;
+    if (!is_typesig_equal_ignore_attrs(a->return_type, b->return_type, false))
+        return false;
+    if (!is_typesigs_equal_ignore_attrs(a->params.data(), b->params.data(), a->params.size(), false))
+        return false;
+    return true;
+}
 } // namespace metadata
 } // namespace leanclr

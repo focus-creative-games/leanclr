@@ -263,8 +263,8 @@ RtResultVoid RtModuleDef::setup_nested_classes()
         _nestedTypeDefRid2EnclosingTypeDefRidMap.insert({nestedTypeDefRid, enclosingTypeDefRid});
         ++_enclosingTypeDefRid2StartRidMap[enclosingTypeDefRid].count;
     }
-    for (utils::HashMap<uint32_t, EnclosingTypeInfo>::iterator it = _enclosingTypeDefRid2StartRidMap.begin();
-         it != _enclosingTypeDefRid2StartRidMap.end(); ++it)
+    for (utils::HashMap<uint32_t, EnclosingTypeInfo>::iterator it = _enclosingTypeDefRid2StartRidMap.begin(); it != _enclosingTypeDefRid2StartRidMap.end();
+         ++it)
     {
         EnclosingTypeInfo& value = it->second;
         value.nested_type_def_rids = _pool.calloc_any<uint32_t>(value.count);
@@ -1042,7 +1042,12 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
         }
 
         case RtElementType::FnPtr:
-            RET_ERR(RtErr::NotImplemented);
+        {
+            auto ret_result = read_method_sig(reader, gcc, gc);
+            RET_ERR_ON_FAIL(ret_result);
+            result.data.method_sig = new (_pool.malloc_any_zeroed<RtMethodSig>()) RtMethodSig{std::move(ret_result.unwrap())};
+            RET_VOID_OK();
+        }
         case RtElementType::ByRef:
             result.by_ref = 1;
             // Continue loop to read the referenced type

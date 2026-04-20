@@ -58,5 +58,20 @@ struct GenericMethodHash
     }
 };
 
+struct MethodSigHash
+{
+    std::size_t operator()(const RtMethodSig* key) const
+    {
+        size_t h = (size_t)key->flags;
+        h = utils::HashUtil::combine_hash(h, (size_t)key->generic_param_count);
+        h = utils::HashUtil::combine_hash(h, MetadataHash::hash_type_sig_ignore_attrs(key->return_type));
+        for (size_t i = 0; i < key->params.size(); ++i)
+        {
+            h = utils::HashUtil::combine_hash(h, MetadataHash::hash_type_sig_ignore_attrs(key->params[i]));
+        }
+        return h;
+    }
+};
+
 } // namespace metadata
 } // namespace leanclr

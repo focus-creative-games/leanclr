@@ -159,7 +159,11 @@ RtResultVoid MetadataName::append_type_sig_name(utils::StringBuilder& sb, const 
         sb.append_cstr("System.UIntPtr");
         break;
     case RtElementType::FnPtr:
-        RET_ERR(RtErr::NotImplemented);
+    {
+        const RtMethodSig* method_sig = type_sig->data.method_sig;
+        RET_ERR_ON_FAIL(append_method_sig_name(sb, method_sig));
+        break;
+    }
     case RtElementType::Object:
         sb.append_cstr("System.Object");
         break;
@@ -182,7 +186,43 @@ RtResultVoid MetadataName::append_type_sig_name(utils::StringBuilder& sb, const 
     {
         sb.append_cstr("&");
     }
+    RET_VOID_OK();
+}
 
+const char* MetadataName::get_call_convention_name(RtSigType call_conv)
+{
+    switch ((RtSigType)((uint8_t)call_conv & (uint8_t)RtSigType::TypeMask))
+    {
+    case RtSigType::C:
+        return "Cdecl";
+    case RtSigType::StdCall:
+        return "StdCall";
+    case RtSigType::ThisCall:
+        return "ThisCall";
+    case RtSigType::FastCall:
+        return "FastCall";
+    case RtSigType::VarArg:
+        return "VarArg";
+    default:
+        return "Default";
+    }
+}
+
+RtResultVoid MetadataName::append_method_sig_name(utils::StringBuilder& sb, const RtMethodSig* method_sig)
+{
+    sb.append_cstr("delegate* unmanaged");
+    assert(method_sig->generic_param_count == 0 && "Generic parameters are not supported for function pointers");
+    sb.append_char('[');
+    sb.append_cstr(get_call_convention_name((RtSigType)method_sig->flags));
+    sb.append_char(']');
+    sb.append_char('<');
+    for (size_t i = 0; i < method_sig->params.size(); ++i)
+    {
+        RET_ERR_ON_FAIL(append_type_sig_name(sb, method_sig->params[i]));
+        sb.append_char(',');
+    }
+    append_type_sig_name(sb, method_sig->return_type);
+    sb.append_char('>');
     RET_VOID_OK();
 }
 

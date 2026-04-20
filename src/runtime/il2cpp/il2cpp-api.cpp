@@ -298,7 +298,14 @@ Il2CppClass* il2cpp_class_from_il2cpp_type(const Il2CppType* type)
 Il2CppClass* il2cpp_class_from_name(const Il2CppImage* image, const char* namespaze, const char* name)
 {
     auto result = const_cast<Il2CppImage*>(image)->get_class_by_name2(namespaze, name, false, false);
-    return result.is_ok() ? result.unwrap() : nullptr;
+    if (result.is_ok())
+    {
+        Il2CppClass* klass = result.unwrap();
+        printf("get class by name success: [%s] %s.%s\n", image->get_name_no_ext(), namespaze, name);
+        return klass;
+    }
+    printf("get class by name failed: [%s] %s.%s\n", image->get_name_no_ext(), namespaze, name);
+    return nullptr;
 }
 
 Il2CppClass* il2cpp_class_get_element_class(Il2CppClass* klass)
@@ -512,6 +519,7 @@ const MethodInfo* il2cpp_class_get_method_from_name(Il2CppClass* klass, const ch
         if (m)
             return m;
     }
+    printf("il2cpp_class_get_method_from_name failed: [%s] %s.%s\n", klass->image->get_name_no_ext(), klass->namespaze, name);
     return nullptr;
 }
 
@@ -683,6 +691,7 @@ Il2CppDomain* il2cpp_domain_get()
 
 const Il2CppAssembly* il2cpp_domain_assembly_open(Il2CppDomain* domain, const char* name)
 {
+    printf("open assembly:%s\n", name);
     std::string dll_name(name);
     if (dll_name.length() > 4 && dll_name.substr(dll_name.length() - 4) == ".dll")
     {
