@@ -6,13 +6,12 @@
 #include "field.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
+#include "platform/kernel32.h"
 
 namespace leanclr
 {
 namespace vm
 {
-
-static int32_t s_last_win32_error = 0;
 
 void* leanclr::vm::Marshal::alloc_hglobal(size_t size)
 {
@@ -156,12 +155,12 @@ RtResult<void*> Marshal::get_function_pointer_for_delegate(RtDelegate* delegate)
 
 int32_t Marshal::get_last_win32_error()
 {
-    return s_last_win32_error;
+    return platform::Kernel32::get_last_win32_error();
 }
 
 void Marshal::set_last_win32_error(int32_t error)
 {
-    s_last_win32_error = error;
+    platform::Kernel32::set_last_win32_error(error);
 }
 
 } // namespace vm

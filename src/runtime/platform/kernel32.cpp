@@ -1,4 +1,5 @@
 #include "kernel32.h"
+#include "build_config.h"
 #include "vm/rt_string.h"
 
 #ifdef LEANCLR_PLATFORM_WIN
@@ -10,6 +11,28 @@ namespace leanclr
 {
 namespace platform
 {
+
+#ifndef LEANCLR_PLATFORM_WIN
+static int32_t s_last_win32_error = 0;
+#endif
+
+int32_t Kernel32::get_last_win32_error()
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::GetLastError());
+#else
+    return s_last_win32_error;
+#endif
+}
+
+void Kernel32::set_last_win32_error(int32_t error)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    ::SetLastError(static_cast<DWORD>(static_cast<uint32_t>(error)));
+#else
+    s_last_win32_error = error;
+#endif
+}
 
 bool Kernel32::set_thread_error_mode(uint32_t mode, uint32_t& old_mode)
 {

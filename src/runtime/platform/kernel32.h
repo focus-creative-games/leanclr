@@ -16,6 +16,10 @@ class Kernel32
     /// Wraps FindFirstFileExW. Returns a Win32 HANDLE as intptr_t (INVALID_HANDLE_VALUE on failure).
     static intptr_t find_first_file_ex_private(vm::RtString* lp_file_name, uint32_t f_info_level_id, void* lp_find_file_data,
                                                 uint32_t f_search_op, intptr_t lp_search_filter, int32_t dw_additional_flags);
+
+    /// GetLastError / non-Win fallback (see marshal.cpp).
+    static int32_t get_last_win32_error();
+    static void set_last_win32_error(int32_t error);
 };
 } // namespace platform
 } // namespace leanclr
