@@ -30,6 +30,8 @@ struct HandleInfo
 // Head of the freed handle list
 static HandleInfo* s_freed_handle_head = nullptr;
 static uint32_t s_last_handle_id = 0;
+
+// TODO: optimize this
 static utils::HashMap<uint32_t, HandleInfo*> s_handle_map;
 // Allocate a new handle or reuse a freed one
 static HandleInfo* alloc_handle()
@@ -75,6 +77,7 @@ static void free_handle_impl(HandleInfo* handle)
 
 // Public API implementations
 
+#if !LEANCLR_USE_VOID_PTR_GCHANDLE
 uint32_t GCHandle::get_handle_id(void* handle)
 {
     HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
@@ -90,6 +93,7 @@ void* GCHandle::get_handle_by_id(uint32_t id)
     }
     return nullptr;
 }
+#endif
 
 void* GCHandle::new_handle(RtObject* obj, bool pinned)
 {

@@ -973,26 +973,52 @@ void il2cpp_gc_free_fixed(void* address)
 
 // -- gchandle -------------------------------------------------------------
 
-uint32_t il2cpp_gchandle_new(Il2CppObject* obj, bool pinned)
+Il2CppGCHandle il2cpp_gchandle_new(Il2CppObject* obj, bool pinned)
 {
     void* handle = vm::GCHandle::new_handle(obj, pinned);
-    return vm::GCHandle::get_handle_id(handle);
+#if LEANCLR_USE_VOID_PTR_GCHANDLE
+    return reinterpret_cast<Il2CppGCHandle>(handle);
+#else
+    return static_cast<Il2CppGCHandle>(vm::GCHandle::get_handle_id(handle));
+#endif
 }
 
-uint32_t il2cpp_gchandle_new_weakref(Il2CppObject* obj, bool track_resurrection)
+Il2CppGCHandle il2cpp_gchandle_new_weakref(Il2CppObject* obj, bool track_resurrection)
 {
     void* handle = vm::GCHandle::new_weakref_handle(obj, track_resurrection);
-    return vm::GCHandle::get_handle_id(handle);
+#if LEANCLR_USE_VOID_PTR_GCHANDLE
+    return reinterpret_cast<Il2CppGCHandle>(handle);
+#else
+    return static_cast<Il2CppGCHandle>(vm::GCHandle::get_handle_id(handle));
+#endif
 }
 
-Il2CppObject* il2cpp_gchandle_get_target(uint32_t gchandle)
+Il2CppObject* il2cpp_gchandle_get_target(Il2CppGCHandle gchandle)
 {
-    void* handle = vm::GCHandle::get_handle_by_id(gchandle);
+#if LEANCLR_USE_VOID_PTR_GCHANDLE
+    void* handle = reinterpret_cast<void*>(gchandle);
+#else
+    void* handle = vm::GCHandle::get_handle_by_id(static_cast<uint32_t>(gchandle));
+#endif
     if (handle == nullptr)
     {
         return nullptr;
     }
     return vm::GCHandle::get_target(handle);
+}
+
+void il2cpp_gchandle_free(Il2CppGCHandle gchandle)
+{
+#if LEANCLR_USE_VOID_PTR_GCHANDLE
+    void* handle = reinterpret_cast<void*>(gchandle);
+#else
+    void* handle = vm::GCHandle::get_handle_by_id(static_cast<uint32_t>(gchandle));
+#endif
+    if (handle == nullptr)
+    {
+        return;
+    }
+    vm::GCHandle::free_handle(handle);
 }
 
 void il2cpp_gchandle_foreach_get_target(void (*func)(void*, void*), void* userData)
@@ -1019,16 +1045,6 @@ void il2cpp_gc_set_external_allocation_tracker(void (*func)(void*, size_t, int))
 void il2cpp_gc_set_external_wbarrier_tracker(void (*func)(void**))
 {
     vm::GC::set_external_wbarrier_tracker(func);
-}
-
-void il2cpp_gchandle_free(uint32_t gchandle)
-{
-    void* handle = vm::GCHandle::get_handle_by_id(gchandle);
-    if (handle == nullptr)
-    {
-        return;
-    }
-    vm::GCHandle::free_handle(handle);
 }
 
 // -- vm runtime info ------------------------------------------------------

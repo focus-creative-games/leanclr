@@ -25,7 +25,7 @@ struct InterpFrame
     }
 };
 
-class MachineStateSavePoint;
+struct MachineStateSavePoint;
 
 class MachineState
 {

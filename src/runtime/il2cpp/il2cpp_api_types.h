@@ -37,9 +37,14 @@ struct Il2CppRuntimeStats;
 typedef interp::InterpFrame Il2CppStackFrameInfo;
 
 // <= Unity 2022.3.x
+#if UNITY_VERSION < 60000000
 typedef uint32_t Il2CppGCHandle;
-// >= Unity 6000.x.y
-// typedef void* Il2CppGCHandle;
+#define LEANCLR_USE_VOID_PTR_GCHANDLE 0
+#else
+// >= Unity 6000.0.0
+typedef void* Il2CppGCHandle;
+#define LEANCLR_USE_VOID_PTR_GCHANDLE 1
+#endif
 
 #if _MSC_VER
 typedef wchar_t Il2CppNativeChar;
@@ -101,7 +106,7 @@ enum Il2CppMetadataTypeFlags
 
 struct Il2CppMetadataType
 {
-    Il2CppMetadataTypeFlags flags;  // If it's an array, rank is encoded in the upper 2 bytes
+    Il2CppMetadataTypeFlags flags; // If it's an array, rank is encoded in the upper 2 bytes
     Il2CppMetadataField* fields;
     uint32_t fieldCount;
     uint32_t staticsSize;

@@ -11,7 +11,7 @@ utils::HashMap<const char*, const RtAotModuleData*, utils::CStrHasher, utils::CS
 
 void AotModule::register_aot_modules(const RtAotModulesData* initData)
 {
-    for (int i = 0; i < initData->module_count; i++)
+    for (uint32_t i = 0; i < initData->module_count; i++)
     {
         const RtAotModuleData* moduleData = initData->modules[i];
         s_aotModuleMap.insert({moduleData->module_name, moduleData});
