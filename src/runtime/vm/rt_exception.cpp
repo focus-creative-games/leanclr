@@ -1,4 +1,5 @@
 #include "rt_exception.h"
+#include <cstdlib>
 #include "gc/garbage_collector.h"
 #include "assembly.h"
 #include "class.h"
@@ -178,7 +179,14 @@ RtException* Exception::raise_internal_runtime_exception(metadata::RtClass* ex_c
 
 void Exception::raise_as_cpp_exception(RtException* ex)
 {
-    throw AotExceptionWrapper{raise_aot_exception(ex, nullptr, -1)};
+    RtException* raised = raise_aot_exception(ex, nullptr, -1);
+#if (defined(__cpp_exceptions) && (__cpp_exceptions >= 199711L)) || (defined(_CPPUNWIND) && _CPPUNWIND)
+    throw AotExceptionWrapper{raised};
+#else
+    (void)raised;
+    (void)report_unhandled_exception(ex);
+    std::abort();
+#endif
 }
 
 RtResultVoid Exception::report_unhandled_exception(RtException* exception)
@@ -203,7 +211,7 @@ void Exception::format_exception(RtException* ex, utils::StringBuilder& sb)
     if (ex->message)
     {
         sb.append_cstr(": ");
-        sb.append_utf16_str(vm::String::get_chars_ptr(ex->message), vm::String::get_length(ex->message));
+        sb.append_utf16_str(vm::String::get_chars_ptr(ex->message), static_cast<size_t>(vm::String::get_length(ex->message)));
     }
     sb.sure_null_terminator_but_not_append();
 }

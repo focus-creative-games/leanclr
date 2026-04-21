@@ -773,7 +773,7 @@ void il2cpp_format_stack_trace(const Il2CppException* ex, char* output, int outp
     utils::StringBuilder sb;
     if (ex->stack_trace)
     {
-        sb.append_utf16_str(vm::String::get_chars_ptr(ex->stack_trace), vm::String::get_length(ex->stack_trace));
+        sb.append_utf16_str(vm::String::get_chars_ptr(ex->stack_trace), static_cast<size_t>(vm::String::get_length(ex->stack_trace)));
     }
     size_t copy_size = std::min(sb.length(), static_cast<size_t>(output_size) - 1);
     std::memcpy(output, sb.as_cstr(), copy_size);

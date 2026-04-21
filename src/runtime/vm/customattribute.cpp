@@ -777,7 +777,7 @@ RtResult<RtObject*> CustomAttribute::read_custom_attribute(metadata::RtModuleDef
             {
                 const metadata::RtTypeSig* param_type_sig = ctor_method->parameters[i];
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(FixedArg, fixed_arg, read_fixed_arg(mod, param_type_sig, &reader));
-                fixed_arg_buf[i] = fixed_arg.value;
+                fixed_arg_buf[i] = static_cast<int64_t>(fixed_arg.value);
 
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, is_val_type, Type::is_value_type(param_type_sig));
                 invoke_args[i] = is_val_type ? (const void*)&fixed_arg_buf[i] : (const void*)fixed_arg_buf[i];
@@ -905,7 +905,7 @@ RtResultVoid CustomAttribute::resolve_customattribute_data_arguments(utils::Bina
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, typed_arg_obj,
                                                 new_custom_attribute_typed_argument(typed_arg_ctor, param_type_sig, &fixed_arg.value));
         // gc::GarbageCollector::write_barrier((RtObject**)&typed_arg_obj, typed_arg_obj);
-        Array::set_array_data_at(typed_arg_arr, i, typed_arg_obj);
+        Array::set_array_data_at(typed_arg_arr, static_cast<int32_t>(i), typed_arg_obj);
     }
 
     uint16_t named_arg_count = 0;

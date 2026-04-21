@@ -110,7 +110,7 @@ void StringUtil::utf16_to_utf8(const Utf16Char* utf16_str, size_t utf16_len, Str
     *end = '\0';
 
     // Calculate actual size written
-    size_t actual_size = std::distance(out_utf8_str.get_mut_data(), end);
+    size_t actual_size = static_cast<size_t>(std::distance(out_utf8_str.get_mut_data(), end));
 
     // Assign to output string
     out_utf8_str.resize(actual_size);

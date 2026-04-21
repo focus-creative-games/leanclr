@@ -55,8 +55,8 @@ void PdbImage::get_debug_info_for_method(const RtMethodInfo* method_info, int32_
         *column_number = -1;
         return;
     }
-    *line_number = seqPoint->line;
-    *column_number = seqPoint->column;
+    *line_number = static_cast<int32_t>(seqPoint->line);
+    *column_number = static_cast<int32_t>(seqPoint->column);
     auto ret_doc_name = GetDocumentName(methodData->document);
     if (ret_doc_name.is_ok())
     {
@@ -135,7 +135,7 @@ RtResult<const PdbImage::SymbolDocumentData*> PdbImage::GetDocument(metadata::En
     {
         if (sep && !first)
         {
-            sourceFileNames.append_char((char)sep);
+            sourceFileNames.append_char(sep);
         }
         uint32_t sourceFileNameIndex;
         if (!reader.try_read_compressed_uint32(sourceFileNameIndex))
@@ -240,7 +240,8 @@ RtResult<const PdbImage::SymbolMethodDefData*> PdbImage::GetMethodDataFromCache(
                 }
             }
 
-            uint32_t ilOffset = sequencePoints.empty() ? deltaIlOffset : sequencePoints.back().ilOffset + deltaIlOffset;
+            const int32_t ilOffset = sequencePoints.empty() ? static_cast<int32_t>(deltaIlOffset)
+                                                              : sequencePoints.back().ilOffset + static_cast<int32_t>(deltaIlOffset);
 
             SymbolSequencePoint ssp = {};
             ssp.document = document;
@@ -285,10 +286,10 @@ RtResult<const PdbImage::SymbolMethodDefData*> PdbImage::GetMethodDataFromCache(
                     }
                     prevStartColumn += temp_delta_start_column;
                 }
-                ssp.line = prevStartLine;
-                ssp.endLine = prevStartLine + deltaLines;
-                ssp.column = prevStartColumn;
-                ssp.endColumn = prevStartColumn + deltaColumns;
+                ssp.line = static_cast<uint32_t>(prevStartLine);
+                ssp.endLine = static_cast<uint32_t>(prevStartLine) + deltaLines;
+                ssp.column = static_cast<uint32_t>(prevStartColumn);
+                ssp.endColumn = static_cast<uint32_t>(prevStartColumn) + deltaColumns;
             }
             sequencePoints.push_back(ssp);
         }

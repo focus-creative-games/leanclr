@@ -82,7 +82,7 @@ RtResultVoid Delegate::invoke_delegate_invoker(metadata::RtManagedMethodPointer 
     if (del->deles)
     {
         del_arr = Array::get_array_data_start_as<RtDelegate*>(del->deles);
-        del_count = Array::get_array_length(del->deles);
+        del_count = static_cast<size_t>(Array::get_array_length(del->deles));
     }
     else
     {

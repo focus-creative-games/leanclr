@@ -249,8 +249,11 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::copy_to_unmanaged_fixed(vm::Rt
     assert(arr);
     assert(length >= 0);
     assert(start_index >= 0);
-    size_t ele_size = vm::Array::get_array_element_size(arr);
-    std::memcpy(dest, vm::Array::get_array_element_address_with_size_as_ptr_void(arr, start_index, ele_size), static_cast<size_t>(length) * ele_size);
+    if (length > 0)
+    {
+        size_t ele_size = vm::Array::get_array_element_size(arr);
+        std::memcpy(dest, vm::Array::get_array_element_address_with_size_as_ptr_void(arr, start_index, ele_size), static_cast<size_t>(length) * ele_size);
+    }
 
     RET_VOID_OK();
 }
@@ -260,8 +263,11 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed(void
     assert(arr);
     assert(length >= 0);
     assert(start_index >= 0);
-    size_t ele_size = vm::Array::get_array_element_size(arr);
-    std::memcpy(vm::Array::get_array_element_address_with_size_as_ptr_void(arr, start_index, ele_size), src, static_cast<size_t>(length) * ele_size);
+    if (length > 0)
+    {
+        size_t ele_size = vm::Array::get_array_element_size(arr);
+        std::memcpy(vm::Array::get_array_element_address_with_size_as_ptr_void(arr, start_index, ele_size), src, static_cast<size_t>(length) * ele_size);
+    }
 
     RET_VOID_OK();
 }

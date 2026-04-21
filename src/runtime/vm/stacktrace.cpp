@@ -83,12 +83,13 @@ RtResult<bool> StackTrace::get_frame_info(int32_t skip, bool need_file_info, RtR
     auto frames = ms.get_active_frames();
     size_t frame_count = frames.size();
     skip -= 1; // Skip method from StackFrame
-    if (skip >= static_cast<int32_t>(frame_count))
+    if (skip < 0 || skip >= static_cast<int32_t>(frame_count))
     {
         RET_OK(false);
     }
 
-    const interp::InterpFrame* frame = &frames[frame_count - 1 - skip];
+    const size_t frame_index = frame_count - 1U - static_cast<size_t>(skip);
+    const interp::InterpFrame* frame = &frames[frame_index];
     UNWRAP_OR_RET_ERR_ON_FAIL(*method, Reflection::get_method_reflection_object(frame->method, frame->method->parent));
 
     int32_t ir_offset = static_cast<int32_t>(frame->ip - frame->method->interp_data->codes);

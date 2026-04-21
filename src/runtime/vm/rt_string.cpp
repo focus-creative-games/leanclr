@@ -25,7 +25,7 @@ struct RtStringHash
     size_t operator()(const RtString* s) const noexcept
     {
         const char* bytes = reinterpret_cast<const char*>(&s->first_char);
-        std::string_view v(bytes, static_cast<size_t>(s->length) * sizeof(uint16_t));
+        std::string_view v(bytes, static_cast<size_t>(s->length) * sizeof(Utf16Char));
         return std::hash<std::string_view>{}(v);
     }
 };
@@ -38,7 +38,7 @@ struct RtStringEqual
             return true;
         if (a->length != b->length)
             return false;
-        return std::memcmp(&a->first_char, &b->first_char, static_cast<size_t>(a->length) * sizeof(uint16_t)) == 0;
+        return std::memcmp(&a->first_char, &b->first_char, static_cast<size_t>(a->length) * sizeof(Utf16Char)) == 0;
     }
 };
 } // namespace
@@ -114,7 +114,7 @@ RtString* String::create_string_from_utf16chars(const Utf16Char* str, int32_t le
 {
     RtString* newString = fast_allocate_string(length);
 
-    std::memcpy(&newString->first_char, str, length * sizeof(Utf16Char));
+    std::memcpy(&newString->first_char, str, static_cast<size_t>(length) * sizeof(Utf16Char));
     return newString;
 }
 
@@ -155,7 +155,9 @@ int32_t String::get_hash_code(RtString* str)
 
 int32_t String::get_string_allocation_size(int32_t length)
 {
-    return sizeof(RtString) - OVER_SIZE_OF_STRING + sizeof(uint16_t) /* extra one character*/ + length * sizeof(uint16_t);
+    const size_t bytes = sizeof(RtString) - OVER_SIZE_OF_STRING + sizeof(Utf16Char) /* extra one character*/ +
+                         static_cast<size_t>(length) * sizeof(Utf16Char);
+    return static_cast<int32_t>(bytes);
 }
 
 RtString* String::fast_allocate_string(int32_t length)
@@ -164,7 +166,7 @@ RtString* String::fast_allocate_string(int32_t length)
     // TODO: can we optimize it out? we have redirected String::GetHashCode and String::GetLegacyNonRandomizedHashCode to
     // the intrinsic implementation which does not require zero-termination.
     RtString* newString = (RtString*)gc::GarbageCollector::allocate_object_not_contains_references(
-        g_stringClass, get_string_allocation_size(length));
+        g_stringClass, static_cast<size_t>(get_string_allocation_size(length)));
     newString->length = static_cast<int32_t>(length);
     return newString;
 }

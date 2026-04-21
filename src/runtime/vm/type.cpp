@@ -631,7 +631,8 @@ static RtResultVoid parse_assembly_version(const char* start, const char* end, m
     {
         if (*p >= '0' && *p <= '9')
         {
-            parts[part_idx] = parts[part_idx] * 10 + (*p - '0');
+            parts[part_idx] = static_cast<uint16_t>(static_cast<unsigned int>(parts[part_idx]) * 10u +
+                                                    static_cast<unsigned int>(*p - '0'));
             p++;
         }
         else if (*p == '.')
@@ -670,7 +671,7 @@ RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, meta
     // Extract assembly name
     const char* name_start = trim_spaces(p, comma);
     const char* name_end = trim_spaces_end(name_start, comma);
-    size_t name_len = name_end - name_start;
+    size_t name_len = static_cast<size_t>(name_end - name_start);
 
     if (name_len > 0)
     {
@@ -700,7 +701,7 @@ RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, meta
             next_comma++;
 
         const char* seg_end = trim_spaces_end(seg_start, next_comma);
-        size_t seg_len = seg_end - seg_start;
+        size_t seg_len = static_cast<size_t>(seg_end - seg_start);
 
         if (seg_len > 0)
         {
@@ -715,7 +716,7 @@ RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, meta
             {
                 const char* value_start = seg_start + 8; // strlen("Culture=")
                 value_start = trim_spaces(value_start, seg_end);
-                size_t value_len = seg_end - value_start;
+                size_t value_len = static_cast<size_t>(seg_end - value_start);
 
                 if (value_len == 7 && std::memcmp(value_start, "neutral", 7) == 0)
                 {
@@ -734,7 +735,7 @@ RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, meta
                 *is_token_defined = true;
                 const char* value_start = seg_start + 15; // strlen("PublicKeyToken=")
                 value_start = trim_spaces(value_start, seg_end);
-                size_t value_len = seg_end - value_start;
+                size_t value_len = static_cast<size_t>(seg_end - value_start);
 
                 if (value_len != RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH - 1)
                 {

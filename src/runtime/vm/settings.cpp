@@ -36,7 +36,7 @@ static void default_debugger_log_function(int32_t level, const uint16_t* categor
 {
     g_debugger_log_buffer.clear();
     g_debugger_log_buffer.append_char('[');
-    g_debugger_log_buffer.append_u32(level);
+    g_debugger_log_buffer.append_u32(static_cast<uint32_t>(level));
     g_debugger_log_buffer.append_cstr("] ");
     if (category && category_len > 0)
     {
@@ -183,7 +183,7 @@ void Settings::set_command_line_arguments_utf16(int32_t argc, const Utf16Char** 
     for (int32_t i = 0; i < argc; ++i)
     {
         sb.clear();
-        sb.append_utf16_str(argv[i], utils::StringUtil::get_utf16chars_length(argv[i]));
+        sb.append_utf16_str(argv[i], static_cast<size_t>(utils::StringUtil::get_utf16chars_length(argv[i])));
         g_commandline_arguments[i] = sb.dup_to_zero_end_cstr();
     }
 }

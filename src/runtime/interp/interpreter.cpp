@@ -7629,7 +7629,8 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::Overflow);
                         }
-                        set_stack_value_at<uint64_t>(eval_stack_base, ir->dst, cast_float_to_i64<float, uint64_t>(src));
+                        set_stack_value_at<uint64_t>(eval_stack_base, ir->dst,
+                                                   static_cast<uint64_t>(cast_float_to_i64<float, uint64_t>(src)));
                     }
                     LEANCLR_CASE_END3()
                     LEANCLR_CASE_BEGIN3(ConvOvfU8UnR8)
@@ -7639,7 +7640,8 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::Overflow);
                         }
-                        set_stack_value_at<uint64_t>(eval_stack_base, ir->dst, cast_float_to_i64<double, uint64_t>(src));
+                        set_stack_value_at<uint64_t>(eval_stack_base, ir->dst,
+                                                   static_cast<uint64_t>(cast_float_to_i64<double, uint64_t>(src)));
                     }
                     LEANCLR_CASE_END3()
                     LEANCLR_CASE_BEGIN3(InitObjI2Unaligned)

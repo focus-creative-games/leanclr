@@ -608,7 +608,7 @@ RtResult<RtClass*> RtModuleDef::get_class_by_name(const char* full_name, bool ig
     }
     else
     {
-        size_t ns_len = last_dot - full_name;
+        size_t ns_len = static_cast<size_t>(last_dot - full_name);
         size_t name_len = std::strlen(last_dot + 1);
 
         char* allocated_namespace = static_cast<char*>(alloca(ns_len + 1));

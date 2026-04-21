@@ -62,7 +62,7 @@ class Array
     {
         assert(array);
         assert(get_array_element_size(array) == sizeof(T));
-        return reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(const_cast<uint64_t*>(&array->first_data)) + index * sizeof(T));
+        return reinterpret_cast<T*>(&array->first_data) + static_cast<size_t>(index);
     }
     static void* get_array_element_address_as_ptr_void(RtArray* array, int32_t index);
     static void* get_array_element_address_with_size_as_ptr_void(RtArray* array, int32_t index, size_t ele_size);
@@ -72,7 +72,7 @@ class Array
     {
         assert(array);
         assert(get_array_element_size(array) == sizeof(T));
-        const T* data_ptr = reinterpret_cast<const T*>(&array->first_data) + index;
+        const T* data_ptr = reinterpret_cast<const T*>(&array->first_data) + static_cast<size_t>(index);
         return *data_ptr;
     }
 
@@ -81,7 +81,7 @@ class Array
     {
         assert(array);
         assert(get_array_element_size(array) == sizeof(T));
-        T* data_ptr = reinterpret_cast<T*>(reinterpret_cast<uint8_t*>(&array->first_data) + index * sizeof(T));
+        T* data_ptr = reinterpret_cast<T*>(&array->first_data) + static_cast<size_t>(index);
         *data_ptr = value;
     }
 

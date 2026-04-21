@@ -840,7 +840,7 @@ class RtEncodedRuntimeHandle
 
     const void* get_handle_without_type() const
     {
-        return (void*)(value & ~0x3);
+        return (void*)(value & ~static_cast<size_t>(3));
     }
 
     size_t get_encoded_value() const
@@ -863,7 +863,7 @@ class RtEncodedRuntimeHandle
     static RtRuntimeHandle decode(size_t encodedValue)
     {
         RtRuntimeHandleType type = static_cast<RtRuntimeHandleType>(encodedValue & 0x3);
-        void* value = (void*)(encodedValue & ~0x3);
+        void* value = (void*)(encodedValue & ~static_cast<size_t>(3));
         return RtRuntimeHandle{type, value};
     }
 };

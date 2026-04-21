@@ -137,10 +137,10 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(RtAppDomain* app_domain
     {
         RET_ERR(RtErr::ArgumentNull);
     }
-    utils::Span<byte> dll_span(Array::get_array_data_start_as<uint8_t>(dll_data), Array::get_array_length(dll_data));
+    utils::Span<byte> dll_span(Array::get_array_data_start_as<uint8_t>(dll_data), static_cast<size_t>(Array::get_array_length(dll_data)));
     if (symbol_data)
     {
-        utils::Span<byte> symbol_span(Array::get_array_data_start_as<uint8_t>(symbol_data), Array::get_array_length(symbol_data));
+        utils::Span<byte> symbol_span(Array::get_array_data_start_as<uint8_t>(symbol_data), static_cast<size_t>(Array::get_array_length(symbol_data)));
         return load_from_data(dll_span, &symbol_span);
     }
     else
