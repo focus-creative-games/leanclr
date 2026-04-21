@@ -254,11 +254,11 @@ bool File::close(intptr_t handle, int32_t* error)
 {
     set_error(error, kErrorSuccess);
 
-    if (handle == 0 || handle == kInvalidHandle)
-    {
-        set_error(error, kErrorInvalidHandle);
-        return false;
-    }
+    // if (handle == 0 || handle == kInvalidHandle)
+    // {
+    //     set_error(error, kErrorInvalidHandle);
+    //     return false;
+    // }
 
     // Do not close standard streams; treat the operation as a no-op success.
     if (is_standard_handle(handle))
@@ -285,11 +285,11 @@ int32_t File::read(intptr_t handle, uint8_t* buffer, int32_t count, int32_t* err
 {
     set_error(error, kErrorSuccess);
 
-    if (handle == 0 || handle == kInvalidHandle)
-    {
-        set_error(error, kErrorInvalidHandle);
-        return -1;
-    }
+    // if (handle == 0 || handle == kInvalidHandle)
+    // {
+    //     set_error(error, kErrorInvalidHandle);
+    //     return -1;
+    // }
     if (count < 0 || buffer == nullptr)
     {
         set_error(error, kErrorInvalidParameter);
@@ -328,11 +328,11 @@ int32_t File::write(intptr_t handle, const uint8_t* buffer, int32_t count, int32
 {
     set_error(error, kErrorSuccess);
 
-    if (handle == 0 || handle == kInvalidHandle)
-    {
-        set_error(error, kErrorInvalidHandle);
-        return -1;
-    }
+    // if (handle == 0 || handle == kInvalidHandle)
+    // {
+    //     set_error(error, kErrorInvalidHandle);
+    //     return -1;
+    // }
     if (count < 0 || buffer == nullptr)
     {
         set_error(error, kErrorInvalidParameter);
@@ -372,11 +372,11 @@ int64_t File::seek(intptr_t handle, int64_t offset, int32_t origin, int32_t* err
 {
     set_error(error, kErrorSuccess);
 
-    if (handle == 0 || handle == kInvalidHandle)
-    {
-        set_error(error, kErrorInvalidHandle);
-        return -1;
-    }
+    // if (handle == 0 || handle == kInvalidHandle)
+    // {
+    //     set_error(error, kErrorInvalidHandle);
+    //     return -1;
+    // }
 
 #ifdef LEANCLR_PLATFORM_WIN
     DWORD move_method;
@@ -435,11 +435,11 @@ int64_t File::get_length(intptr_t handle, int32_t* error)
 {
     set_error(error, kErrorSuccess);
 
-    if (handle == 0 || handle == kInvalidHandle)
-    {
-        set_error(error, kErrorInvalidHandle);
-        return 0;
-    }
+    // if (handle == 0 || handle == kInvalidHandle)
+    // {
+    //     set_error(error, kErrorInvalidHandle);
+    //     return 0;
+    // }
 
 #ifdef LEANCLR_PLATFORM_WIN
     LARGE_INTEGER size;
@@ -464,19 +464,19 @@ int32_t File::get_file_type(intptr_t handle, int32_t* error)
 {
     set_error(error, kErrorSuccess);
 
-    if (handle == 0 || handle == kInvalidHandle)
-    {
-        set_error(error, kErrorInvalidHandle);
-        return FileTypeUnknown;
-    }
+    // if (handle == 0 || handle == kInvalidHandle)
+    // {
+    //     set_error(error, kErrorInvalidHandle);
+    //     return FileTypeUnknown;
+    // }
 
 #ifdef LEANCLR_PLATFORM_WIN
     DWORD file_type = ::GetFileType(reinterpret_cast<HANDLE>(handle));
     if (file_type == FILE_TYPE_UNKNOWN)
     {
-        DWORD err = ::GetLastError();
-        if (err != NO_ERROR)
-            set_error(error, win32_error_to_monoio(err));
+        // DWORD err = ::GetLastError();
+        // if (err != NO_ERROR)
+        //     set_error(error, win32_error_to_monoio(err));
     }
     // Win32 FILE_TYPE_* values match MonoFileType enum values.
     return static_cast<int32_t>(file_type);

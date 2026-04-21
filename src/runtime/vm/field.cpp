@@ -108,6 +108,7 @@ size_t Field::get_field_offset_includes_object_header_for_reference_type(const m
 // Get field offset including object header for all types
 size_t Field::get_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field)
 {
+    assert(is_instance(field));
     return field->offset + vm::RT_OBJECT_HEADER_SIZE;
 }
 
