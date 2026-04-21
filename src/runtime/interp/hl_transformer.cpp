@@ -632,7 +632,7 @@ RtResultVoid Transformer::add_br(uint32_t next_offset, int32_t target_offset)
     // if (target_offset < 0 && !_cur_bb->eval_stack.is_empty())
     //     RET_ERR(RtErr::ExecutionEngine);
 
-    const size_t target_il_offset = next_offset + target_offset;
+    const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) + static_cast<ptrdiff_t>(target_offset));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(BasicBlock*, target_bb, get_branch_target_bb(target_il_offset));
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::Br);
@@ -647,7 +647,7 @@ RtResultVoid Transformer::add_brtrue_or_false(uint32_t next_offset, int32_t targ
     if (target_offset == 0)
         RET_VOID_OK();
 
-    const size_t target_il_offset = next_offset + target_offset;
+    const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) + static_cast<ptrdiff_t>(target_offset));
     auto target_bb_result = get_branch_target_bb(target_il_offset);
     RET_ERR_ON_FAIL(target_bb_result);
     BasicBlock* target_bb = target_bb_result.unwrap();
@@ -669,7 +669,7 @@ RtResultVoid Transformer::add_condition_branch(uint32_t next_offset, int32_t tar
     if (left_var->data_type != right_var->data_type)
         RET_ERR(RtErr::ExecutionEngine);
 
-    const size_t target_il_offset = next_offset + target_offset;
+    const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) + static_cast<ptrdiff_t>(target_offset));
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(BasicBlock*, target_bb, get_branch_target_bb(target_il_offset));
 
@@ -692,7 +692,7 @@ RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targ
     bool any_not_zero_branch = false;
     for (size_t i = 0; i < count; ++i)
     {
-        int32_t rel_offset = utils::MemOp::read_u32_may_unaligned(((const int32_t*)case_targets) + i);
+        int32_t rel_offset = static_cast<int32_t>(utils::MemOp::read_u32_may_unaligned(((const int32_t*)case_targets) + i));
         if (rel_offset != 0)
             any_not_zero_branch = true;
     }
@@ -706,7 +706,9 @@ RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targ
 
     for (size_t i = 0; i < count; ++i)
     {
-        const size_t target_il_offset = next_offset + utils::MemOp::read_u32_may_unaligned(((const int32_t*)case_targets) + i);
+        const size_t target_il_offset =
+            static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) +
+                                static_cast<ptrdiff_t>(utils::MemOp::read_u32_may_unaligned(((const int32_t*)case_targets) + i)));
         auto target_bb_result = get_branch_target_bb(target_il_offset);
         RET_ERR_ON_FAIL(target_bb_result);
         BasicBlock* target_bb = target_bb_result.unwrap();
@@ -2082,7 +2084,7 @@ RtResultVoid Transformer::add_endfilter()
 
 RtResultVoid Transformer::add_leave(size_t next_offset, ptrdiff_t target_offset)
 {
-    const size_t target_il_offset = next_offset + target_offset;
+    const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) + target_offset);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(BasicBlock*, target_bb, get_branch_target_bb(target_il_offset));
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::Leave);

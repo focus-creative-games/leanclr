@@ -228,7 +228,7 @@ RtResult<int32_t> SystemRuntimeInteropServicesMarshal::sizeof_type(vm::RtReflect
 RtResult<intptr_t> SystemRuntimeInteropServicesMarshal::offset_of(vm::RtReflectionType* ref_type, vm::RtString* field_name)
 {
     utils::StringBuilder utf8_field_name;
-    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(field_name), field_name->length, utf8_field_name);
+    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(field_name), static_cast<size_t>(field_name->length), utf8_field_name);
     return vm::Marshal::offset_of(ref_type, utf8_field_name.as_cstr());
 }
 
@@ -377,7 +377,7 @@ static RtResultVoid alloc_hglobal_invoker(metadata::RtManagedMethodPointer, cons
                                           interp::RtStackObject* ret) noexcept
 {
     intptr_t size = EvalStackOp::get_param<intptr_t>(params, 0);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(void*, ptr, SystemRuntimeInteropServicesMarshal::alloc_hglobal(size));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(void*, ptr, SystemRuntimeInteropServicesMarshal::alloc_hglobal(static_cast<size_t>(size)));
     EvalStackOp::set_return(ret, ptr);
     RET_VOID_OK();
 }
@@ -388,7 +388,7 @@ static RtResultVoid re_alloc_hglobal_invoker(metadata::RtManagedMethodPointer, c
 {
     void* ptr = EvalStackOp::get_param<void*>(params, 0);
     intptr_t size = EvalStackOp::get_param<intptr_t>(params, 1);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(void*, new_ptr, SystemRuntimeInteropServicesMarshal::re_alloc_hglobal(ptr, size));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(void*, new_ptr, SystemRuntimeInteropServicesMarshal::re_alloc_hglobal(ptr, static_cast<size_t>(size)));
     EvalStackOp::set_return(ret, new_ptr);
     RET_VOID_OK();
 }

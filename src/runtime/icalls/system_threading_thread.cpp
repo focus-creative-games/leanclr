@@ -122,7 +122,7 @@ RtResultVoid SystemThreadingThread::set_name_icall(vm::RtInternalThread* interna
         RET_ERR(RtErr::ArgumentOutOfRange);
     }
     // Duplicate the UTF-16 string without null terminator
-    internal_thread->name_chars = utils::StringUtil::strdup_utf16_without_null_terminator(name, len);
+    internal_thread->name_chars = utils::StringUtil::strdup_utf16_without_null_terminator(name, static_cast<size_t>(len));
     internal_thread->name_length = len;
     RET_VOID_OK();
 }

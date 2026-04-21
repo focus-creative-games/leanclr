@@ -43,7 +43,7 @@ int il2cpp_init(const char* domain_name)
 int il2cpp_init_utf16(const Il2CppChar* domain_name)
 {
     utils::StringBuilder sb;
-    sb.append_utf16_str(domain_name, utils::StringUtil::get_utf16chars_length(domain_name));
+    sb.append_utf16_str(domain_name, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(domain_name)));
     return il2cpp_init(sb.as_cstr());
 }
 
@@ -85,7 +85,7 @@ void il2cpp_set_memory_callbacks(Il2CppMemoryCallbacks* callbacks)
 void il2cpp_set_config_utf16(const Il2CppChar* executablePath)
 {
     utils::StringBuilder sb;
-    sb.append_utf16_str(executablePath, utils::StringUtil::get_utf16chars_length(executablePath));
+    sb.append_utf16_str(executablePath, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(executablePath)));
     vm::Settings::set_config(sb.as_cstr());
 }
 
@@ -571,7 +571,7 @@ int32_t il2cpp_class_value_size(Il2CppClass* klass, uint32_t* align)
     }
     if (align)
         *align = klass->alignment;
-    return vm::Class::get_instance_size_without_object_header(klass);
+    return static_cast<int32_t>(vm::Class::get_instance_size_without_object_header(klass));
 }
 
 int il2cpp_class_get_flags(const Il2CppClass* klass)
@@ -1063,7 +1063,7 @@ uint32_t il2cpp_allocation_granularity()
 void* il2cpp_unity_liveness_allocate_struct(Il2CppClass* filter, int max_object_count, il2cpp_register_object_callback callback, void* userdata,
                                             il2cpp_liveness_reallocate_callback reallocate)
 {
-    return leanclr::il2cpp::Liveness::allocate_struct(filter, max_object_count, callback, userdata, reallocate);
+    return leanclr::il2cpp::Liveness::allocate_struct(filter, static_cast<uint32_t>(max_object_count), callback, userdata, reallocate);
 }
 
 void il2cpp_unity_liveness_calculation_from_root(Il2CppObject* root, void* state)
@@ -1500,11 +1500,11 @@ bool il2cpp_current_thread_get_frame_at(int32_t offset, Il2CppStackFrameInfo* fr
 {
     auto& ms = interp::MachineState::get_global_machine_state();
     auto frames = ms.get_active_frames();
-    if (frames.size() == 0)
+    if (offset < 0 || frames.size() == 0 || static_cast<size_t>(offset) >= frames.size())
     {
         return false;
     }
-    *frame = frames[frames.size() - 1 - offset];
+    *frame = frames[frames.size() - 1U - static_cast<size_t>(offset)];
     return true;
 }
 

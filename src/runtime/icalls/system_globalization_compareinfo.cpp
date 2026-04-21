@@ -107,7 +107,7 @@ RtResult<int32_t> SystemGlobalizationCompareInfo::internal_index_icall(const cha
     {
         for (int32_t i = 0; i <= source_count - value_length; i++)
         {
-            if (std::memcmp(source + source_start_index + i, value, value_length * sizeof(char16_t)) == 0)
+            if (std::memcmp(source + source_start_index + i, value, static_cast<size_t>(value_length) * sizeof(char16_t)) == 0)
             {
                 RET_OK(source_start_index + i);
             }
@@ -117,7 +117,7 @@ RtResult<int32_t> SystemGlobalizationCompareInfo::internal_index_icall(const cha
     {
         for (int32_t i = source_count - value_length; i >= 0; i--)
         {
-            if (std::memcmp(source + source_start_index + i, value, value_length * sizeof(char16_t)) == 0)
+            if (std::memcmp(source + source_start_index + i, value, static_cast<size_t>(value_length) * sizeof(char16_t)) == 0)
             {
                 RET_OK(source_start_index + i);
             }

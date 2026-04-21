@@ -13,7 +13,7 @@ namespace icalls
 
 RtResult<int32_t> Interop::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size)
 {
-    return ::snprintf(buffer, buffer_size, format, value);
+    return ::snprintf(buffer, static_cast<size_t>(buffer_size), format, value);
 }
 
 /// @icall: Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)

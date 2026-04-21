@@ -76,7 +76,7 @@ static RtResultVoid load_global_metadata_bundle_once()
     }
     printf("global-metadata.dat found, data_path='%s'\n", dat_path.c_str());
 
-    const std::streamsize file_size = file.tellg();
+    const std::streamoff file_size = file.tellg();
     if (file_size < 8)
     {
         assert(false && "global-metadata.dat is too small");
@@ -85,7 +85,7 @@ static RtResultVoid load_global_metadata_bundle_once()
     file.seekg(0, std::ios::beg);
 
     s_cached_bundle_data.resize(static_cast<size_t>(file_size));
-    if (!file.read(reinterpret_cast<char*>(s_cached_bundle_data.data()), file_size))
+    if (!file.read(reinterpret_cast<char*>(s_cached_bundle_data.data()), static_cast<std::streamsize>(file_size)))
     {
         assert(false && "failed to read global-metadata.dat");
         return RtErr::FileNotFound;

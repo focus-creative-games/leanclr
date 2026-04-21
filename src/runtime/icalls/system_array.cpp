@@ -34,7 +34,7 @@ static RtResultVoid get_rank_invoker(metadata::RtManagedMethodPointer, const met
 /// @icall: System.Array::GetLength
 RtResult<int32_t> SystemArray::get_length(vm::RtArray* arr, int32_t dimension)
 {
-    return vm::Array::get_array_length_at_dimension(arr, dimension);
+    return vm::Array::get_array_length_at_dimension(arr, static_cast<size_t>(dimension));
 }
 
 static RtResultVoid get_length_invoker_icalls_system_array(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -50,7 +50,7 @@ static RtResultVoid get_length_invoker_icalls_system_array(metadata::RtManagedMe
 /// @icall: System.Array::GetLowerBound
 RtResult<int32_t> SystemArray::get_lower_bound(vm::RtArray* arr, int32_t dimension)
 {
-    return vm::Array::get_array_lower_bound_at_dimension(arr, dimension);
+    return vm::Array::get_array_lower_bound_at_dimension(arr, static_cast<size_t>(dimension));
 }
 
 static RtResultVoid get_lower_bound_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -109,7 +109,8 @@ RtResult<vm::RtObject*> SystemArray::get_value_impl(vm::RtArray* arr, int32_t gl
     {
         // Box value type
         size_t ele_size = vm::Array::get_array_element_size(arr);
-        const void* ele_ptr = static_cast<const uint8_t*>(vm::Array::get_array_data_start_as_ptr_void(arr)) + (global_index * ele_size);
+        const void* ele_ptr = static_cast<const uint8_t*>(vm::Array::get_array_data_start_as_ptr_void(arr)) +
+                              static_cast<size_t>(global_index) * ele_size;
         return vm::Object::box_object(ele_klass, ele_ptr);
     }
     else
@@ -168,8 +169,8 @@ static RtResultVoid set_value_impl_invoker(metadata::RtManagedMethodPointer, con
 /// @icall: System.Array::FastCopy
 RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::RtArray* dst, int32_t dst_index, int32_t length)
 {
-    uint32_t src_length = src->length;
-    uint32_t dst_length = dst->length;
+    uint32_t src_length = static_cast<uint32_t>(src->length);
+    uint32_t dst_length = static_cast<uint32_t>(dst->length);
 
     // Check bounds
     if (static_cast<uint32_t>(src_index) > src_length || static_cast<uint32_t>(dst_index) > dst_length ||
@@ -194,15 +195,17 @@ RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::R
             if (src_index != dst_index)
             {
                 // Overlapping copy
-                std::memmove(static_cast<uint8_t*>(dst_data_ptr) + dst_index * ele_size, static_cast<const uint8_t*>(src_data_ptr) + src_index * ele_size,
-                             length * ele_size);
+                std::memmove(static_cast<uint8_t*>(dst_data_ptr) + static_cast<size_t>(dst_index) * ele_size,
+                             static_cast<const uint8_t*>(src_data_ptr) + static_cast<size_t>(src_index) * ele_size,
+                             static_cast<size_t>(length) * ele_size);
             }
         }
         else
         {
             // Non-overlapping copy
-            std::memcpy(static_cast<uint8_t*>(dst_data_ptr) + dst_index * ele_size, static_cast<const uint8_t*>(src_data_ptr) + src_index * ele_size,
-                        length * ele_size);
+            std::memcpy(static_cast<uint8_t*>(dst_data_ptr) + static_cast<size_t>(dst_index) * ele_size,
+                        static_cast<const uint8_t*>(src_data_ptr) + static_cast<size_t>(src_index) * ele_size,
+                        static_cast<size_t>(length) * ele_size);
         }
         RET_OK(true);
     }
@@ -225,8 +228,9 @@ RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::R
         if (src_ele_klass != dst_ele_klass)
             RET_OK(false);
 
-        std::memcpy(static_cast<uint8_t*>(dst_data_ptr) + dst_index * src_ele_size, static_cast<const uint8_t*>(src_data_ptr) + src_index * src_ele_size,
-                    length * src_ele_size);
+        std::memcpy(static_cast<uint8_t*>(dst_data_ptr) + static_cast<size_t>(dst_index) * src_ele_size,
+                    static_cast<const uint8_t*>(src_data_ptr) + static_cast<size_t>(src_index) * src_ele_size,
+                    static_cast<size_t>(length) * src_ele_size);
     }
     else
     {
@@ -234,8 +238,9 @@ RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::R
         if (!vm::Class::is_assignable_from(src_ele_klass, dst_ele_klass))
             RET_OK(false);
 
-        std::memcpy(static_cast<vm::RtObject**>(dst_data_ptr) + dst_index, static_cast<vm::RtObject* const*>(src_data_ptr) + src_index,
-                    length * sizeof(vm::RtObject*));
+        std::memcpy(static_cast<vm::RtObject**>(dst_data_ptr) + static_cast<size_t>(dst_index),
+                    static_cast<vm::RtObject* const*>(src_data_ptr) + static_cast<size_t>(src_index),
+                    static_cast<size_t>(length) * sizeof(vm::RtObject*));
     }
 
     RET_OK(true);
@@ -264,12 +269,12 @@ RtResult<vm::RtArray*> SystemArray::create_instance_impl(vm::RtReflectionType* e
     {
         if (lower_bounds == nullptr)
             RET_ERR(RtErr::Argument);
-        dimension = lower_bounds->length;
+        dimension = static_cast<size_t>(lower_bounds->length);
     }
     else
     {
-        dimension = lengths->length;
-        if (lower_bounds != nullptr && lower_bounds->length != static_cast<int32_t>(dimension))
+        dimension = static_cast<size_t>(lengths->length);
+        if (lower_bounds != nullptr && static_cast<size_t>(lower_bounds->length) != dimension)
             RET_ERR(RtErr::Argument);
     }
 
@@ -305,7 +310,7 @@ static RtResultVoid create_instance_impl_invoker(metadata::RtManagedMethodPointe
 /// @icall: System.Array::ClearInternal
 RtResultVoid SystemArray::clear_internal(vm::RtArray* arr, int32_t index, int32_t length)
 {
-    uint32_t arr_length = arr->length;
+    uint32_t arr_length = static_cast<uint32_t>(arr->length);
     if (static_cast<uint32_t>(index) >= arr_length || static_cast<uint32_t>(length) > arr_length - static_cast<uint32_t>(index))
     {
         RET_ERR(RtErr::IndexOutOfRange);
@@ -317,11 +322,13 @@ RtResultVoid SystemArray::clear_internal(vm::RtArray* arr, int32_t index, int32_
     if (vm::Class::is_value_type(ele_klass))
     {
         size_t ele_size = vm::Array::get_array_element_size(arr);
-        std::memset(static_cast<uint8_t*>(arr_data_ptr) + index * ele_size, 0, length * ele_size);
+        std::memset(static_cast<uint8_t*>(arr_data_ptr) + static_cast<size_t>(index) * ele_size, 0,
+                    static_cast<size_t>(length) * ele_size);
     }
     else
     {
-        std::memset(static_cast<vm::RtObject**>(arr_data_ptr) + index, 0, length * sizeof(vm::RtObject*));
+        std::memset(static_cast<vm::RtObject**>(arr_data_ptr) + static_cast<size_t>(index), 0,
+                    static_cast<size_t>(length) * sizeof(vm::RtObject*));
     }
 
     RET_VOID_OK();

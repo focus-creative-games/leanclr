@@ -77,7 +77,7 @@ RtResultVoid SystemRuntimeRuntimeImports::ecvt_s(uint8_t* buffer, int32_t size, 
     std::strncpy(reinterpret_cast<char*>(buffer), str, size - 1);
     buffer[size - 1] = 0;
 #else
-    int written = snprintf(reinterpret_cast<char*>(buffer), size, "%.*e", digits, value);
+    int written = snprintf(reinterpret_cast<char*>(buffer), static_cast<size_t>(size), "%.*e", digits, value);
     if (written < 0 || written >= size)
     {
         RET_ERR(RtErr::Argument);

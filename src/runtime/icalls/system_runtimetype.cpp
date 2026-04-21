@@ -145,7 +145,8 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::make_generic_type(vm::RtRefle
     if (arg_count != gc->generic_param_count)
         RET_ERR(RtErr::Argument);
 
-    const metadata::RtTypeSig** generic_arg_type_sigs = (const metadata::RtTypeSig**)alloca(sizeof(metadata::RtTypeSig*) * arg_count);
+    const metadata::RtTypeSig** generic_arg_type_sigs =
+        (const metadata::RtTypeSig**)alloca(sizeof(metadata::RtTypeSig*) * static_cast<size_t>(arg_count));
     for (int32_t i = 0; i < arg_count; ++i)
     {
         vm::RtReflectionType* arg_type_ref = vm::Array::get_array_data_at<vm::RtReflectionType*>(generic_args, i);
@@ -759,7 +760,7 @@ RtResult<vm::RtArray*> SystemRuntimeType::get_generic_arguments_internal(vm::RtR
             metadata::RtTypeSig generic_param_type_sig = metadata::RtTypeSig::new_byval_with_data(metadata::RtElementType::Var, param);
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, generic_param_type_ref,
                                                     vm::Reflection::get_type_reflection_object(&generic_param_type_sig));
-            vm::Array::set_array_data_at<vm::RtReflectionType*>(new_array, i, generic_param_type_ref);
+            vm::Array::set_array_data_at<vm::RtReflectionType*>(new_array, static_cast<int32_t>(i), generic_param_type_ref);
         }
         RET_OK(new_array);
     }
@@ -888,7 +889,7 @@ RtResult<vm::RtArray*> SystemRuntimeType::get_interfaces(vm::RtReflectionRuntime
     {
         const metadata::RtClass* interface_klass = klass->interfaces[i];
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, interface_reflection, vm::Reflection::get_klass_reflection_object(interface_klass));
-        vm::Array::set_array_data_at<vm::RtReflectionType*>(interface_array, i, interface_reflection);
+        vm::Array::set_array_data_at<vm::RtReflectionType*>(interface_array, static_cast<int32_t>(i), interface_reflection);
     }
 
     RET_OK(interface_array);

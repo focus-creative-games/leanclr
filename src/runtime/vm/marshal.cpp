@@ -78,18 +78,18 @@ vm::RtString* Marshal::ptr_to_string_bstr(void* ptr)
 void* Marshal::string_to_hglobal_ansi(const Utf16Char* chars, int32_t len)
 {
     utils::StringBuilder utf8_str;
-    utils::StringUtil::utf16_to_utf8(chars, len, utf8_str);
+    utils::StringUtil::utf16_to_utf8(chars, static_cast<size_t>(len), utf8_str);
     return const_cast<char*>(utils::StringUtil::strdup(utf8_str.as_cstr()));
 }
 
 void* Marshal::string_to_hglobal_uni(const Utf16Char* chars, int32_t len)
 {
-    return (void*)utils::StringUtil::strdup_utf16_with_null_terminator(chars, len);
+    return (void*)utils::StringUtil::strdup_utf16_with_null_terminator(chars, static_cast<size_t>(len));
 }
 
 void* Marshal::buffer_to_bstr(const Utf16Char* chars, int32_t len)
 {
-    return (void*)utils::StringUtil::strdup_utf16_with_null_terminator(chars, len);
+    return (void*)utils::StringUtil::strdup_utf16_with_null_terminator(chars, static_cast<size_t>(len));
 }
 
 void Marshal::free_bstr(void* ptr)
@@ -121,7 +121,7 @@ RtResult<int32_t> Marshal::sizeof_type(vm::RtReflectionType* ref_type)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(ref_type->type_handle));
     RET_ERR_ON_FAIL(Class::initialize_fields(klass));
-    int32_t size = vm::Class::get_instance_size_without_object_header(klass);
+    int32_t size = static_cast<int32_t>(vm::Class::get_instance_size_without_object_header(klass));
     RET_OK(size);
 }
 

@@ -149,7 +149,8 @@ RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject
                     RET_OK(false);
                 if (vm::String::get_length(str1) != vm::String::get_length(str2))
                     RET_OK(false);
-                if (std::memcmp(vm::String::get_chars_ptr(str1), vm::String::get_chars_ptr(str2), vm::String::get_length(str1) * sizeof(Utf16Char)) != 0)
+                if (std::memcmp(vm::String::get_chars_ptr(str1), vm::String::get_chars_ptr(str2),
+                                static_cast<size_t>(vm::String::get_length(str1)) * sizeof(Utf16Char)) != 0)
                 {
                     RET_OK(false);
                 }

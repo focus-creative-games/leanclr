@@ -163,7 +163,7 @@ inline void expand_argument_to_eval_stack(const int32_t arg, interp::RtStackObje
 
 inline void expand_argument_to_eval_stack(const uint32_t arg, interp::RtStackObject* ret) noexcept
 {
-    *(int32_t*)ret = arg;
+    *(int32_t*)ret = static_cast<int32_t>(arg);
 }
 
 template <typename T>

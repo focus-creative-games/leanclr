@@ -254,7 +254,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeTypeHandle::internal_from_name(vm::
                                                                             bool throw_on_error, bool ignore_case, bool reflection_only)
 {
     utils::StringBuilder name_buf;
-    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(name), vm::String::get_length(name), name_buf);
+    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)), name_buf);
 
     auto mod = assembly->assembly->mod;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, resolved_type_sig_opt,

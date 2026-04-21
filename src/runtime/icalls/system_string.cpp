@@ -45,7 +45,9 @@ RtResult<vm::RtString*> SystemString::newobj_char_array_range(vm::RtArray* charA
     assert(eleClass->by_val->ele_type == metadata::RtElementType::Char);
 
     uint32_t arr_length = static_cast<uint32_t>(vm::Array::get_array_length(charArray));
-    if (length < 0 || static_cast<uint32_t>(startIndex) > arr_length || static_cast<uint32_t>(length) > arr_length - startIndex)
+    uint32_t start_index_u32 = static_cast<uint32_t>(startIndex);
+    uint32_t length_u32 = static_cast<uint32_t>(length);
+    if (length < 0 || start_index_u32 > arr_length || length_u32 > arr_length - start_index_u32)
         RET_ERR(RtErr::IndexOutOfRange);
 
     const uint16_t* chars_start = vm::Array::get_array_data_start_as<uint16_t>(charArray) + static_cast<size_t>(startIndex);
@@ -68,7 +70,7 @@ static RtResultVoid newobj_char_array_range_invoker(metadata::RtManagedMethodPoi
 RtResult<vm::RtString*> SystemString::newobj_utf16chars(const Utf16Char* chars)
 {
     // Determine length of null-terminated UTF-16 string
-    int32_t length = (int32_t)utils::StringUtil::get_utf16chars_length(chars);
+    int32_t length = static_cast<int32_t>(utils::StringUtil::get_utf16chars_length(chars));
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(chars), length);
     RET_OK(utf16_string);
 }
@@ -86,8 +88,10 @@ static RtResultVoid newobj_utf16chars_invoker(metadata::RtManagedMethodPointer m
 RtResult<vm::RtString*> SystemString::newobj_utf16chars_range(const Utf16Char* chars, int32_t startIndex, int32_t length)
 {
     // Compute total length of null-terminated UTF-16 buffer
-    uint32_t total_length = (uint32_t)utils::StringUtil::get_utf16chars_length(chars);
-    if (length < 0 || static_cast<uint32_t>(startIndex) >= total_length || static_cast<uint32_t>(startIndex + length) > total_length)
+    uint32_t total_length = static_cast<uint32_t>(utils::StringUtil::get_utf16chars_length(chars));
+    uint32_t start_index_u32 = static_cast<uint32_t>(startIndex);
+    uint32_t length_u32 = static_cast<uint32_t>(length);
+    if (length < 0 || start_index_u32 >= total_length || length_u32 > total_length - start_index_u32)
         RET_ERR(RtErr::IndexOutOfRange);
     const Utf16Char* chars_start = chars + static_cast<size_t>(startIndex);
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(chars_start), length);
@@ -108,7 +112,7 @@ static RtResultVoid newobj_utf16chars_range_invoker(metadata::RtManagedMethodPoi
 
 RtResult<vm::RtString*> SystemString::newobj_utf8chars(const char* chars)
 {
-    int32_t utf8_length = (int32_t)std::strlen(chars);
+    int32_t utf8_length = static_cast<int32_t>(std::strlen(chars));
     vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(chars, utf8_length);
     RET_OK(utf16_string);
 }
@@ -126,7 +130,9 @@ static RtResultVoid newobj_utf8chars_invoker(metadata::RtManagedMethodPointer me
 RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const char* chars, int32_t startIndex, int32_t length)
 {
     uint32_t total_length = static_cast<uint32_t>(std::strlen(chars));
-    if (length < 0 || static_cast<uint32_t>(startIndex) >= total_length || static_cast<uint32_t>(startIndex + length) > total_length)
+    uint32_t start_index_u32 = static_cast<uint32_t>(startIndex);
+    uint32_t length_u32 = static_cast<uint32_t>(length);
+    if (length < 0 || start_index_u32 >= total_length || length_u32 > total_length - start_index_u32)
         RET_ERR(RtErr::IndexOutOfRange);
     const char* chars_start = chars + static_cast<size_t>(startIndex);
     vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(chars_start, length);

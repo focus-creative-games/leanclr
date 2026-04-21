@@ -16,7 +16,7 @@ RtResult<const uint8_t*> SystemSpan::get_item(const vm::RtReadOnlySpan<uint8_t>&
     {
         RET_ERR(RtErr::IndexOutOfRange);
     }
-    RET_OK(span.pointer + (index * ele_size));
+    RET_OK(span.pointer + (static_cast<size_t>(index) * ele_size));
 }
 
 // ========== Invoker Functions ==========

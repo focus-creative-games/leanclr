@@ -23,7 +23,7 @@ RtResult<intptr_t> MonoSafeStringMarshal::string_to_utf8_bytes(RtString** ptrs)
         RET_ERR(RtErr::NullReference);
     }
     utils::StringBuilder sb;
-    utils::StringUtil::utf16_to_utf8(String::get_chars_ptr(s), String::get_length(s), sb);
+    utils::StringUtil::utf16_to_utf8(String::get_chars_ptr(s), static_cast<size_t>(String::get_length(s)), sb);
     RET_OK((intptr_t)sb.dup_to_zero_end_cstr());
 }
 

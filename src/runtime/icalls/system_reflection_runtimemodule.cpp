@@ -18,7 +18,7 @@ namespace icalls
 
 RtResult<int32_t> SystemReflectionRuntimeModule::get_metadata_token(vm::RtReflectionModule* module)
 {
-    RET_OK(module->assembly->assembly->mod->get_module_token());
+    RET_OK(static_cast<int32_t>(module->assembly->assembly->mod->get_module_token()));
 }
 
 /// @icall: System.Reflection.RuntimeModule::get_MetadataToken(System.Reflection.Module)
@@ -152,7 +152,7 @@ RtResult<const metadata::RtTypeSig*> SystemReflectionRuntimeModule::resolve_type
     }
     metadata::RtGenericContainerContext gcc{};
     metadata::RtGenericContext gc{class_inst, method_inst};
-    metadata::RtToken rt_token = metadata::RtToken::decode(token);
+    metadata::RtToken rt_token = metadata::RtToken::decode(static_cast<metadata::EncodedTokenId>(token));
     auto ret = module->get_typesig_by_type_def_ref_spec_token(rt_token, gcc, &gc);
     if (ret.is_err())
     {
@@ -208,7 +208,7 @@ RtResult<const metadata::RtMethodInfo*> SystemReflectionRuntimeModule::resolve_m
     }
     metadata::RtGenericContainerContext gcc{};
     metadata::RtGenericContext gc{class_inst, method_inst};
-    metadata::RtToken rt_token = metadata::RtToken::decode(token);
+    metadata::RtToken rt_token = metadata::RtToken::decode(static_cast<metadata::EncodedTokenId>(token));
     auto ret = module->get_method_by_token(rt_token, gcc, &gc);
     if (ret.is_err())
     {
@@ -264,7 +264,7 @@ RtResult<const metadata::RtFieldInfo*> SystemReflectionRuntimeModule::resolve_fi
     }
     metadata::RtGenericContainerContext gcc{};
     metadata::RtGenericContext gc{class_inst, method_inst};
-    metadata::RtToken rt_token = metadata::RtToken::decode(token);
+    metadata::RtToken rt_token = metadata::RtToken::decode(static_cast<metadata::EncodedTokenId>(token));
     auto ret = module->get_field_by_token(rt_token, gcc, &gc);
     if (ret.is_err())
     {
@@ -294,7 +294,7 @@ static RtResultVoid resolve_field_token_invoker(metadata::RtManagedMethodPointer
 
 RtResult<vm::RtString*> SystemReflectionRuntimeModule::resolve_string_token(metadata::RtModuleDef* module, int32_t token, int32_t* error)
 {
-    metadata::RtToken rt_token = metadata::RtToken::decode(token);
+    metadata::RtToken rt_token = metadata::RtToken::decode(static_cast<metadata::EncodedTokenId>(token));
     if ((int32_t)rt_token.table_type != metadata::USER_STRING_HEAP_FAKE_TABLE_TYPE)
     {
         *error = (int32_t)ResolveTokenError::BadTable;
@@ -352,7 +352,7 @@ RtResult<vm::RtObject*> SystemReflectionRuntimeModule::resolve_member_token(meta
     }
     metadata::RtGenericContainerContext gcc{};
     metadata::RtGenericContext gc{class_inst, method_inst};
-    metadata::RtToken rt_token = metadata::RtToken::decode(token);
+    metadata::RtToken rt_token = metadata::RtToken::decode(static_cast<metadata::EncodedTokenId>(token));
     vm::RtObject* ret = nullptr;
     switch (rt_token.table_type)
     {
@@ -426,7 +426,7 @@ RtResult<vm::RtObject*> SystemReflectionRuntimeModule::resolve_member_token(meta
 
 RtResult<vm::RtArray*> SystemReflectionRuntimeModule::resolve_signature(metadata::RtModuleDef* module, int32_t token, int32_t* error)
 {
-    metadata::RtToken rt_token = metadata::RtToken::decode(token);
+    metadata::RtToken rt_token = metadata::RtToken::decode(static_cast<metadata::EncodedTokenId>(token));
     const metadata::CliImage& cli_image = module->get_cli_image();
 
     uint32_t signature = 0;

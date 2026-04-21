@@ -289,7 +289,7 @@ RtResult<const PdbImage::SymbolMethodDefData*> PdbImage::GetMethodDataFromCache(
                 ssp.line = static_cast<uint32_t>(prevStartLine);
                 ssp.endLine = static_cast<uint32_t>(prevStartLine) + deltaLines;
                 ssp.column = static_cast<uint32_t>(prevStartColumn);
-                ssp.endColumn = static_cast<uint32_t>(prevStartColumn) + deltaColumns;
+                ssp.endColumn = static_cast<uint32_t>(static_cast<int64_t>(prevStartColumn) + static_cast<int64_t>(deltaColumns));
             }
             sequencePoints.push_back(ssp);
         }
