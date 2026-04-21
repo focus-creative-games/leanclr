@@ -541,7 +541,7 @@ RtResultVoid SystemRuntimeType::get_interface_map_data(vm::RtReflectionRuntimeTy
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemRuntimeType::get_guid(vm::RtReflectionRuntimeType* runtime_type, vm::RtArray* guid)
+RtResultVoid SystemRuntimeType::get_guid(vm::RtReflectionRuntimeType* runtime_type, vm::RtArray* guid)
 {
     // GUID extraction is rarely used and requires MarshalAs/CustomAttribute metadata
     RET_ERR(RtErr::NotImplemented);
@@ -1022,9 +1022,7 @@ static RtResultVoid get_guid_invoker(metadata::RtManagedMethodPointer, const met
 {
     auto runtime_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0);
     auto guid_data = EvalStackOp::get_param<vm::RtArray*>(params, 1);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemRuntimeType::get_guid(runtime_type, guid_data));
-    EvalStackOp::set_return(ret, result);
-    RET_VOID_OK();
+    return SystemRuntimeType::get_guid(runtime_type, guid_data);
 }
 
 /// @icall: System.RuntimeType::GetPacking

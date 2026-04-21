@@ -35,7 +35,7 @@ class SystemRuntimeType
     // Reflection helpers
     static RtResultVoid get_interface_map_data(vm::RtReflectionRuntimeType* runtime_type, vm::RtReflectionRuntimeType* interface_type, vm::RtArray** targets,
                                                vm::RtArray** methods);
-    static RtResult<vm::RtString*> get_guid(vm::RtReflectionRuntimeType* runtime_type, vm::RtArray* guid);
+    static RtResultVoid get_guid(vm::RtReflectionRuntimeType* runtime_type, vm::RtArray* guid);
     static RtResultVoid get_packing(vm::RtReflectionRuntimeType* runtime_type, int32_t* packing, int32_t* size);
     static RtResult<int32_t> get_type_code_impl_internal(vm::RtReflectionRuntimeType* runtime_type);
     static RtResult<vm::RtObject*> create_instance_internal(vm::RtReflectionRuntimeType* runtime_type);
