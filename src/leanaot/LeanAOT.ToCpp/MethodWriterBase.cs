@@ -281,10 +281,6 @@ namespace LeanAOT.ToCpp
                 _headWriter.DecreaseIndent();
                 _headWriter.AddLine("}");
             }
-            else
-            {
-                int a = 0;
-            }
         }
 
         private bool InitLocals => _method.MethodDef.Body.InitLocals;
