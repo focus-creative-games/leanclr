@@ -84,6 +84,10 @@ DO_API(int, il2cpp_class_get_rank, (const Il2CppClass * klass));
 DO_API(uint32_t, il2cpp_class_get_data_size, (const Il2CppClass * klass));
 DO_API(void*, il2cpp_class_get_static_field_data, (const Il2CppClass * klass));
 
+// testing only
+DO_API(size_t, il2cpp_class_get_bitmap_size, (const Il2CppClass* klass));
+DO_API(void, il2cpp_class_get_bitmap, (Il2CppClass* klass, size_t* bitmap));
+
 // stats
 DO_API(bool, il2cpp_stats_dump_to_file, (const char *path));
 DO_API(uint64_t, il2cpp_stats_get_value, (Il2CppStat stat));
