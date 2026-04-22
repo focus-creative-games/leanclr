@@ -22,6 +22,7 @@
 #include "metadata/module_def.h"
 #include "metadata/aot_module.h"
 #include "alloc/general_allocation.h"
+#include "alloc/metadata_allocation.h"
 #include "gc/garbage_collector.h"
 #include "interp/machine_state.h"
 #include "utils/rt_vector.h"
@@ -357,6 +358,7 @@ static RtResult<RtObject*> invoke_without_run_cctor(const metadata::RtMethodInfo
 RtResultVoid Runtime::initialize()
 {
     // Initialize subsystems
+    alloc::MetadataAllocation::init();
     Intrinsics::initialize();
     InternalCalls::initialize();
     PInvokes::initialize();
