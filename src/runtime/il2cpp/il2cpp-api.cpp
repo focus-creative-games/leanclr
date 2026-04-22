@@ -300,11 +300,8 @@ Il2CppClass* il2cpp_class_from_name(const Il2CppImage* image, const char* namesp
     auto result = const_cast<Il2CppImage*>(image)->get_class_by_name2(namespaze, name, false, false);
     if (result.is_ok())
     {
-        Il2CppClass* klass = result.unwrap();
-        printf("get class by name success: [%s] %s.%s\n", image->get_name_no_ext(), namespaze, name);
-        return klass;
+        return result.unwrap();
     }
-    printf("get class by name failed: [%s] %s.%s\n", image->get_name_no_ext(), namespaze, name);
     return nullptr;
 }
 
@@ -516,7 +513,6 @@ const MethodInfo* il2cpp_class_get_method_from_name(Il2CppClass* klass, const ch
         if (m)
             return m;
     }
-    printf("il2cpp_class_get_method_from_name failed: [%s] %s.%s\n", klass->image->get_name_no_ext(), klass->namespaze, name);
     return nullptr;
 }
 
