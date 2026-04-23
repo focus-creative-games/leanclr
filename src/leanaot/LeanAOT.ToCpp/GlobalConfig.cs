@@ -17,6 +17,10 @@ namespace LeanAOT.ToCpp
 
         public bool EmitMethodMap { get; set; }
 
+        public bool UseSlimMetaFileFormat { get; set; }
+
+        public string GenericsOption { get; set; }
+
         public string DotnetProfile { get; set; }
 
         public bool ProfilerReport { get; set; }

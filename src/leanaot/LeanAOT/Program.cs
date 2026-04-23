@@ -49,6 +49,15 @@ internal class Program
         [Option("emit-method-map", Required = false, HelpText = "IL2CPP compatibility flag (reserved).")]
         public bool EmitMethodMap { get; set; }
 
+        /// <summary>
+        /// tuanjie only.
+        /// </summary>
+        [Option("use-slim-meta-file-format", Required = false, HelpText = "IL2CPP compatibility flag (reserved).")]
+        public bool UseSlimMetaFileFormat { get; set; }
+
+        [Option("generics-option", Required = false, HelpText = "IL2CPP generics option (reserved), e.g. None,EnableFullSharing.")]
+        public string GenericsOption { get; set; }
+
         [Option("dotnetprofile", Required = false, HelpText = "IL2CPP: e.g. unityaot-linux (reserved).")]
         public string DotnetProfile { get; set; }
 
@@ -241,6 +250,8 @@ internal class Program
         config.EmitNullChecks = options.EmitNullChecks;
         config.EnableArrayBoundsCheck = options.EnableArrayBoundsCheck;
         config.EmitMethodMap = options.EmitMethodMap;
+        config.UseSlimMetaFileFormat = options.UseSlimMetaFileFormat;
+        config.GenericsOption = options.GenericsOption;
         config.DotnetProfile = options.DotnetProfile;
         config.ProfilerReport = options.ProfilerReport;
         config.ProfilerOutputFile = options.ProfilerOutputFile;
