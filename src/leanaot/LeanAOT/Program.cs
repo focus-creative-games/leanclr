@@ -219,6 +219,9 @@ internal class Program
             var name = Path.GetFileNameWithoutExtension(trimmed);
             if (!aotAssemblyNames.Contains(name, StringComparer.OrdinalIgnoreCase))
                 aotAssemblyNames.Add(name);
+            var dir = Path.GetDirectoryName(trimmed);
+            if (!string.IsNullOrEmpty(dir) && !dllSearchPaths.Contains(dir, StringComparer.OrdinalIgnoreCase))
+                dllSearchPaths.Add(dir);
         }
 
         if (dllSearchPaths.Count == 0)
