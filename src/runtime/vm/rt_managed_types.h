@@ -129,12 +129,18 @@ struct RtReflectionEventInfo
 // Reflection parameter
 struct RtReflectionParameter : public RtObject
 {
+#if UNITY_VERSION >= 20210000
     uint32_t attrs;
+#endif
     RtReflectionType* parent_type;
     RtObject* default_value;
     RtObject* member;
     RtString* name;
     int32_t index;
+
+#if UNITY_VERSION < 20210000
+    uint32_t attrs;
+#endif
     RtObject* marshaling_info;
 };
 
@@ -218,8 +224,11 @@ struct RtDelegate : public RtObject
     uintptr_t _delegate_trampoline;
     intptr_t extra_arg;
     uintptr_t method_code;
+#if UNITY_VERSION >= 20210000
+    // these two fields exist since unity 2021.
     uintptr_t _interp_method;
     metadata::RtManagedMethodPointer interp_invoke_impl;
+#endif
     const metadata::RtMethodInfo* method_info;
     const metadata::RtMethodInfo* original_method_info;
     RtDelegateData* data;
@@ -305,7 +314,10 @@ struct RtException : public RtObject
     RtObject* safe_serialization_manager;
     RtArray* captured_traces;
     RtArray* native_trace_ips;
+
+#if UNITY_VERSION >= 20210000
     int32_t caught_in_unmanaged;
+#endif
 };
 
 // Read-only span
@@ -409,6 +421,14 @@ struct RtDateTimeFormatInfo : public RtObject
     RtArray* optional_calendars;
     bool read_only;
     int32_t format_flags;
+#if UNITY_VERSION < 20210000
+    int32_t culture_id;
+    bool use_user_override;
+    bool use_calendar_info;
+    int data_item;
+    bool is_default_calendar;
+    RtString* date_words;
+#endif
     RtString* full_time_span_positive_pattern;
     RtString* full_time_span_negative_pattern;
     RtArray* dtfi_token_hash;

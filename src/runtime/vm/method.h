@@ -49,6 +49,7 @@ class Method
     static bool is_static(const metadata::RtMethodInfo* method);
     static bool is_void_return(const metadata::RtMethodInfo* method);
     static bool is_pinvoke(const metadata::RtMethodInfo* method);
+    static RtResult<bool> is_intrinsic(const metadata::RtMethodInfo* method);
     static bool is_internal_call(const metadata::RtMethodInfo* method);
     static bool is_runtime_implemented(const metadata::RtMethodInfo* method);
     static bool is_public(const metadata::RtMethodInfo* method);
@@ -66,7 +67,6 @@ class Method
     static bool contains_not_instantiated_generic_param(const metadata::RtMethodInfo* method);
     static size_t get_total_arg_stack_object_size(const metadata::RtMethodInfo* method);
     static size_t get_return_value_stack_object_size(const metadata::RtMethodInfo* method);
-    static RtResult<bool> is_intrinsic(const metadata::RtMethodInfo* method);
     static RtResultVoid build_method_arg_descs(metadata::RtMethodInfo* method);
     static size_t get_method_index_in_class(const metadata::RtMethodInfo* method);
 

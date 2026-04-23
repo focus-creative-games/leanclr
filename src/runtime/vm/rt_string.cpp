@@ -78,7 +78,12 @@ static RtResultVoid init_redirected_ctor_method(metadata::RtClass* stringClass)
     for (uint16_t i = 0; i < stringClass->method_count; ++i)
     {
         const metadata::RtMethodInfo* method = stringClass->methods[i];
-        if (std::strcmp(method->name, "Ctor") == 0 && method->parameter_count == 4)
+#if UNITY_VERSION >= 20210000
+        const char* redirected_ctor_method_name = "Ctor";
+#else
+        const char* redirected_ctor_method_name = "CreateString";
+#endif
+        if (std::strcmp(method->name, redirected_ctor_method_name) == 0 && method->parameter_count == 4)
         {
             g_redirectedCtorMethod = method;
             RET_VOID_OK();
