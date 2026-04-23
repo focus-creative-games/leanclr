@@ -49,6 +49,9 @@ internal class Program
         [Option("emit-method-map", Required = false, HelpText = "IL2CPP compatibility flag (reserved).")]
         public bool EmitMethodMap { get; set; }
 
+        [Option("emit-source-mapping", Required = false, HelpText = "IL2CPP compatibility: emit managed-to-generated-C++ source mapping (reserved for codegen).")]
+        public bool EmitSourceMapping { get; set; }
+
         /// <summary>
         /// tuanjie only.
         /// </summary>
@@ -250,6 +253,7 @@ internal class Program
         config.EmitNullChecks = options.EmitNullChecks;
         config.EnableArrayBoundsCheck = options.EnableArrayBoundsCheck;
         config.EmitMethodMap = options.EmitMethodMap;
+        config.EmitSourceMapping = options.EmitSourceMapping;
         config.UseSlimMetaFileFormat = options.UseSlimMetaFileFormat;
         config.GenericsOption = options.GenericsOption;
         config.DotnetProfile = options.DotnetProfile;
