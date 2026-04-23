@@ -429,3 +429,4 @@ ___*
 /src/samples/simple-aot/cpp*
 /.vscode
 /src/tools/leanaot
+/src/samples/simple-aot/ManagedStripped
