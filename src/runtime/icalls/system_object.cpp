@@ -18,7 +18,7 @@ RtResult<int32_t> SystemObject::get_hash_code(vm::RtObject* obj)
     RET_OK(hash);
 }
 
-static RtResultVoid get_hash_code_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+static RtResultVoid object_get_hash_code_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                           interp::RtStackObject* ret) noexcept
 {
     auto obj = EvalStackOp::get_this(params);
@@ -67,7 +67,7 @@ static RtResultVoid memberwise_clone_invoker(metadata::RtManagedMethodPointer, c
 
 // Internal call registry
 static vm::InternalCallEntry s_internal_call_entries_system_object[] = {
-    {"System.Object::InternalGetHashCode", (vm::InternalCallFunction)&SystemObject::get_hash_code, get_hash_code_invoker},
+    {"System.Object::InternalGetHashCode", (vm::InternalCallFunction)&SystemObject::get_hash_code, object_get_hash_code_invoker},
     {"System.Object::GetType", (vm::InternalCallFunction)&SystemObject::get_type, get_type_invoker},
     {"System.Object::MemberwiseClone", (vm::InternalCallFunction)&SystemObject::memberwise_clone, memberwise_clone_invoker},
 };

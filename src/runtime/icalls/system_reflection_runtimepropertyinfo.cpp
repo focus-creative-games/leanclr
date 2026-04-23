@@ -155,8 +155,8 @@ static RtResultVoid get_property_info_invoker(metadata::RtManagedMethodPointer, 
 }
 
 /// @icall: System.Reflection.RuntimePropertyInfo::GetTypeModifiers(System.Reflection.RuntimePropertyInfo,System.Boolean)
-static RtResultVoid get_type_modifiers_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret) noexcept
+static RtResultVoid runtimepropertyinfo_get_type_modifiers_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionProperty* property = EvalStackOp::get_param<vm::RtReflectionProperty*>(params, 0);
     bool optional = EvalStackOp::get_param<bool>(params, 1);
@@ -195,7 +195,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimepr
     {"System.Reflection.RuntimePropertyInfo::get_property_info", (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::get_property_info,
      get_property_info_invoker},
     {"System.Reflection.RuntimePropertyInfo::GetTypeModifiers(System.Reflection.RuntimePropertyInfo,System.Boolean)",
-     (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::get_type_modifiers, get_type_modifiers_invoker},
+     (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::get_type_modifiers, runtimepropertyinfo_get_type_modifiers_invoker},
     {"System.Reflection.RuntimePropertyInfo::get_default_value(System.Reflection.RuntimePropertyInfo)",
      (vm::InternalCallFunction)&SystemReflectionRuntimePropertyInfo::get_default_value, get_default_value_invoker},
     {"System.Reflection.RuntimePropertyInfo::get_metadata_token(System.Reflection.RuntimePropertyInfo)",
@@ -205,7 +205,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimepr
 
 utils::Span<vm::InternalCallEntry> SystemReflectionRuntimePropertyInfo::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo) / sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo[0]);
+    constexpr size_t entry_count =
+        sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo) / sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo[0]);
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimepropertyinfo, entry_count);
 }
 

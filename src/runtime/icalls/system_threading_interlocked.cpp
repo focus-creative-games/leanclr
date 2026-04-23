@@ -476,7 +476,7 @@ static RtResultVoid memory_barrier_process_wide_invoker(RtManagedMethodPointer, 
 }
 
 /// @icall: System.Threading.Interlocked::Read(System.Int64&)
-static RtResultVoid read_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret)
+static RtResultVoid interlocked_read_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret)
 {
     int64_t* location = EvalStackOp::get_param<int64_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int64_t, result, SystemThreadingInterlocked::read(location));
@@ -523,7 +523,7 @@ static InternalCallEntry s_internal_call_entries_system_threading_interlocked[] 
      exchange_object_invoker},
     {"System.Threading.Interlocked::MemoryBarrierProcessWide()", (InternalCallFunction)&SystemThreadingInterlocked::memory_barrier_process_wide,
      memory_barrier_process_wide_invoker},
-    {"System.Threading.Interlocked::Read(System.Int64&)", (InternalCallFunction)&SystemThreadingInterlocked::read, read_invoker},
+    {"System.Threading.Interlocked::Read(System.Int64&)", (InternalCallFunction)&SystemThreadingInterlocked::read, interlocked_read_invoker},
 };
 
 utils::Span<InternalCallEntry> SystemThreadingInterlocked::get_internal_call_entries()

@@ -203,8 +203,8 @@ static RtResultVoid internal_box_enum_invoker(metadata::RtManagedMethodPointer, 
 }
 
 /// @icall: System.Enum::get_value
-static RtResultVoid get_value_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret) noexcept
+static RtResultVoid enum_get_value_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                            interp::RtStackObject* ret) noexcept
 {
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, value, SystemEnum::get_value(obj));
@@ -224,7 +224,7 @@ static RtResultVoid internal_has_flag_invoker(metadata::RtManagedMethodPointer, 
 }
 
 /// @icall: System.Enum::get_hashcode
-static RtResultVoid get_hash_code_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+static RtResultVoid enum_get_hash_code_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                           interp::RtStackObject* ret) noexcept
 {
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
@@ -240,14 +240,15 @@ static vm::InternalCallEntry s_internal_call_entries_system_enum[] = {
     {"System.Enum::InternalGetUnderlyingType", (vm::InternalCallFunction)&SystemEnum::internal_get_underlying_type, internal_get_underlying_type_invoker},
     {"System.Enum::GetEnumValuesAndNames", (vm::InternalCallFunction)&SystemEnum::get_enum_values_and_names, get_enum_values_and_names_invoker},
     {"System.Enum::InternalBoxEnum", (vm::InternalCallFunction)&SystemEnum::internal_box_enum, internal_box_enum_invoker},
-    {"System.Enum::get_value", (vm::InternalCallFunction)&SystemEnum::get_value, get_value_invoker},
+    {"System.Enum::get_value", (vm::InternalCallFunction)&SystemEnum::get_value, enum_get_value_invoker},
     {"System.Enum::InternalHasFlag", (vm::InternalCallFunction)&SystemEnum::internal_has_flag, internal_has_flag_invoker},
-    {"System.Enum::get_hashcode", (vm::InternalCallFunction)&SystemEnum::get_hash_code, get_hash_code_invoker},
+    {"System.Enum::get_hashcode", (vm::InternalCallFunction)&SystemEnum::get_hash_code, enum_get_hash_code_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemEnum::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_enum, sizeof(s_internal_call_entries_system_enum) / sizeof(s_internal_call_entries_system_enum[0]));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_enum,
+                                              sizeof(s_internal_call_entries_system_enum) / sizeof(s_internal_call_entries_system_enum[0]));
 }
 
 } // namespace icalls

@@ -324,8 +324,8 @@ static RtResultVoid get_method_from_handle_internal_type_native_invoker(metadata
 }
 
 /// @icall: System.Reflection.RuntimeMethodInfo::get_name
-static RtResultVoid get_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret) noexcept
+static RtResultVoid runtimemethodinfo_get_name_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, name, SystemReflectionRuntimeMethodInfo::get_name(ref_method));
@@ -348,7 +348,7 @@ static RtResultVoid get_base_method_invoker(metadata::RtManagedMethodPointer met
 static RtResultVoid get_metadata_token_invoker_system_reflection_runtimemethodinfo(metadata::RtManagedMethodPointer methodPtr,
                                                                                     const metadata::RtMethodInfo* method,
                                                                                     const interp::RtStackObject* params,
-                                                                                    interp::RtStackObject* ret) noexcept
+                                                                                   interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, SystemReflectionRuntimeMethodInfo::get_metadata_token(ref_method));
@@ -442,7 +442,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimeme
     {"System.Reflection.RuntimeMethodInfo::GetMethodFromHandleInternalType_native",
      (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_method_from_handle_internal_type_native,
      get_method_from_handle_internal_type_native_invoker},
-    {"System.Reflection.RuntimeMethodInfo::get_name", (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_name, get_name_invoker},
+    {"System.Reflection.RuntimeMethodInfo::get_name", (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_name,
+     runtimemethodinfo_get_name_invoker},
     {"System.Reflection.RuntimeMethodInfo::get_base_method(System.Reflection.RuntimeMethodInfo,System.Boolean)",
      (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_base_method, get_base_method_invoker},
     {"System.Reflection.RuntimeMethodInfo::get_metadata_token(System.Reflection.RuntimeMethodInfo)",
@@ -465,7 +466,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimeme
 
 utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeMethodInfo::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimemethodinfo, sizeof(s_internal_call_entries_system_reflection_runtimemethodinfo) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimemethodinfo,
+                                              sizeof(s_internal_call_entries_system_reflection_runtimemethodinfo) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

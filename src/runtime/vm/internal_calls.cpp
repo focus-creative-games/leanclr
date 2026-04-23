@@ -14,7 +14,7 @@ namespace vm
 
 // Static maps for internal call functions
 static utils::HashMap<const char*, Il2CppMethodPointer, utils::CStrHasher, utils::CStrCompare> g_il2cppInternalCallMap;
-static utils::HashMap<const char*, InternalCallRegistry, utils::CStrHasher, utils::CStrCompare> g_pinvoke_map;
+static utils::HashMap<const char*, InternalCallRegistry, utils::CStrHasher, utils::CStrCompare> g_internalCallMap;
 static utils::HashMap<const char*, InternalCallInvoker, utils::CStrHasher, utils::CStrCompare> g_newobjInternalCallMap;
 static utils::Vector<InternalCallInvoker> g_internalCallInvokerIdList;
 static utils::HashMap<InternalCallInvoker, uint16_t> g_internalCallInvokerIdMap;
@@ -54,15 +54,15 @@ Il2CppMethodPointer InternalCalls::get_lite_internal_call(const char* name)
 // Register an internal call function by name
 void InternalCalls::register_internal_call(const char* name, InternalCallFunction func, InternalCallInvoker invoker)
 {
-    assert(g_pinvoke_map.find(name) == g_pinvoke_map.end() && "Internal call already registered");
-    g_pinvoke_map[name] = InternalCallRegistry{func, invoker};
+    assert(g_internalCallMap.find(name) == g_internalCallMap.end() && "Internal call already registered");
+    g_internalCallMap[name] = InternalCallRegistry{func, invoker};
 }
 
 // Get internal call by name
 const InternalCallRegistry* InternalCalls::get_internal_call(const char* name)
 {
-    auto it = g_pinvoke_map.find(name);
-    if (it != g_pinvoke_map.end())
+    auto it = g_internalCallMap.find(name);
+    if (it != g_internalCallMap.end())
         return &it->second;
     return nullptr;
 }
@@ -74,8 +74,8 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
     utils::StringBuilder sb;
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method));
-        auto it = g_pinvoke_map.find(sb.as_cstr());
-        if (it != g_pinvoke_map.end())
+        auto it = g_internalCallMap.find(sb.as_cstr());
+        if (it != g_internalCallMap.end())
             RET_OK(&it->second);
     }
 
@@ -83,8 +83,8 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
     {
         sb.clear();
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
-        auto it = g_pinvoke_map.find(sb.as_cstr());
-        if (it != g_pinvoke_map.end())
+        auto it = g_internalCallMap.find(sb.as_cstr());
+        if (it != g_internalCallMap.end())
             RET_OK(&it->second);
     }
 

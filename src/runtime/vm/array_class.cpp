@@ -56,7 +56,7 @@ static const char* make_array_name(const char* ele_class_name, uint8_t rank, boo
     return sb.dup_to_zero_end_cstr();
 }
 
-static void setup_cast_class(RtClass* klass)
+static void setup_array_cast_class(RtClass* klass)
 {
     if (Class::is_array_or_szarray(klass->element_class))
     {
@@ -78,7 +78,7 @@ static void setup_array_class_common(RtClass* array_class, const metadata::RtCla
     array_class->namespaze = ele_class->namespaze;
     array_class->element_class = ele_class;
     // Array classes don't need cast_class setup (it stays nullptr)
-    setup_cast_class(array_class);
+    setup_array_cast_class(array_class);
 
     array_class->flags = (uint32_t)RtTypeAttribute::Public | (uint32_t)RtTypeAttribute::Sealed | (uint32_t)RtTypeAttribute::Serializable;
     array_class->extra_flags = (uint32_t)RtClassExtraAttribute::ArrayOrSZArray | (uint32_t)RtClassExtraAttribute::ReferenceType;

@@ -338,7 +338,7 @@ static RtResultVoid modf_invoker(metadata::RtManagedMethodPointer, const metadat
     RET_VOID_OK();
 }
 
-static vm::InternalCallEntry s_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_mathf[] = {
     {"System.MathF::Acos(System.Single)", (vm::InternalCallFunction)&SystemMathF::acos, acos_invoker_mathf},
     {"System.MathF::Acosh(System.Single)", (vm::InternalCallFunction)&SystemMathF::acosh, acosh_invoker},
     {"System.MathF::Asin(System.Single)", (vm::InternalCallFunction)&SystemMathF::asin, asin_invoker},
@@ -366,7 +366,7 @@ static vm::InternalCallEntry s_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemMathF::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_mathf, sizeof(s_internal_call_entries_system_mathf) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

@@ -182,8 +182,8 @@ static RtResultVoid resolve_type_invoker(metadata::RtManagedMethodPointer, const
 }
 
 /// @icall: System.Reflection.RuntimeFieldInfo::GetTypeModifiers(System.Boolean)
-static RtResultVoid get_type_modifiers_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject* ret) noexcept
+static RtResultVoid runtimefieldinfo_get_type_modifiers_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     bool optional = EvalStackOp::get_param<bool>(params, 1);
@@ -211,12 +211,13 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimefi
      get_parent_type_invoker},
     {"System.Reflection.RuntimeFieldInfo::ResolveType", (vm::InternalCallFunction)&SystemReflectionRuntimeFieldInfo::resolve_type, resolve_type_invoker},
     {"System.Reflection.RuntimeFieldInfo::GetTypeModifiers(System.Boolean)", (vm::InternalCallFunction)&SystemReflectionRuntimeFieldInfo::get_type_modifiers,
-     get_type_modifiers_invoker},
+     runtimefieldinfo_get_type_modifiers_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeFieldInfo::get_internal_call_entries()
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_runtimefieldinfo) / sizeof(s_internal_call_entries_system_reflection_runtimefieldinfo[0]);
+    constexpr size_t entry_count =
+        sizeof(s_internal_call_entries_system_reflection_runtimefieldinfo) / sizeof(s_internal_call_entries_system_reflection_runtimefieldinfo[0]);
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimefieldinfo, entry_count);
 }
 

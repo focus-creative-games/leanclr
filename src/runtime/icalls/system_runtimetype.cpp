@@ -1124,8 +1124,8 @@ static RtResultVoid get_nested_types_native_invoker(metadata::RtManagedMethodPoi
 }
 
 /// @icall: System.RuntimeType::get_Name
-static RtResultVoid get_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                     interp::RtStackObject* ret) noexcept
+static RtResultVoid runtimetype_get_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                       interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemRuntimeType::get_name(runtime_type));
@@ -1180,14 +1180,15 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtimetype[] = {
      get_generic_parameter_position_invoker},
     {"System.RuntimeType::get_DeclaringType", (vm::InternalCallFunction)&SystemRuntimeType::get_declaring_type, get_declaring_type_invoker},
     {"System.RuntimeType::GetNestedTypes_native", (vm::InternalCallFunction)&SystemRuntimeType::get_nested_types_native, get_nested_types_native_invoker},
-    {"System.RuntimeType::get_Name", (vm::InternalCallFunction)&SystemRuntimeType::get_name, get_name_invoker},
+    {"System.RuntimeType::get_Name", (vm::InternalCallFunction)&SystemRuntimeType::get_name, runtimetype_get_name_invoker},
     {"System.RuntimeType::get_Namespace", (vm::InternalCallFunction)&SystemRuntimeType::get_namespace, get_namespace_invoker},
     {"System.RuntimeType::GetInterfaces", (vm::InternalCallFunction)&SystemRuntimeType::get_interfaces, get_interfaces_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeType::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetype, sizeof(s_internal_call_entries_system_runtimetype) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetype,
+                                              sizeof(s_internal_call_entries_system_runtimetype) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

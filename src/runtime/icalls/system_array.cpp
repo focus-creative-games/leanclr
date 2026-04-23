@@ -38,7 +38,7 @@ RtResult<int32_t> SystemArray::get_length(vm::RtArray* arr, int32_t dimension)
 }
 
 static RtResultVoid get_length_invoker_icalls_system_array(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret) noexcept
+                                                           interp::RtStackObject* ret) noexcept
 {
     auto arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     int32_t dimension = EvalStackOp::get_param<int32_t>(params, 1);
@@ -70,8 +70,8 @@ RtResult<vm::RtObject*> SystemArray::get_value(vm::RtArray* arr, vm::RtArray* in
     return get_value_impl(arr, index);
 }
 
-static RtResultVoid get_value_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret) noexcept
+static RtResultVoid get_array_value_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                            interp::RtStackObject* ret) noexcept
 {
     auto arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     auto indices = EvalStackOp::get_param<vm::RtArray*>(params, 1);
@@ -109,8 +109,7 @@ RtResult<vm::RtObject*> SystemArray::get_value_impl(vm::RtArray* arr, int32_t gl
     {
         // Box value type
         size_t ele_size = vm::Array::get_array_element_size(arr);
-        const void* ele_ptr = static_cast<const uint8_t*>(vm::Array::get_array_data_start_as_ptr_void(arr)) +
-                              static_cast<size_t>(global_index) * ele_size;
+        const void* ele_ptr = static_cast<const uint8_t*>(vm::Array::get_array_data_start_as_ptr_void(arr)) + static_cast<size_t>(global_index) * ele_size;
         return vm::Object::box_object(ele_klass, ele_ptr);
     }
     else
@@ -196,16 +195,14 @@ RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::R
             {
                 // Overlapping copy
                 std::memmove(static_cast<uint8_t*>(dst_data_ptr) + static_cast<size_t>(dst_index) * ele_size,
-                             static_cast<const uint8_t*>(src_data_ptr) + static_cast<size_t>(src_index) * ele_size,
-                             static_cast<size_t>(length) * ele_size);
+                             static_cast<const uint8_t*>(src_data_ptr) + static_cast<size_t>(src_index) * ele_size, static_cast<size_t>(length) * ele_size);
             }
         }
         else
         {
             // Non-overlapping copy
             std::memcpy(static_cast<uint8_t*>(dst_data_ptr) + static_cast<size_t>(dst_index) * ele_size,
-                        static_cast<const uint8_t*>(src_data_ptr) + static_cast<size_t>(src_index) * ele_size,
-                        static_cast<size_t>(length) * ele_size);
+                        static_cast<const uint8_t*>(src_data_ptr) + static_cast<size_t>(src_index) * ele_size, static_cast<size_t>(length) * ele_size);
         }
         RET_OK(true);
     }
@@ -229,8 +226,7 @@ RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::R
             RET_OK(false);
 
         std::memcpy(static_cast<uint8_t*>(dst_data_ptr) + static_cast<size_t>(dst_index) * src_ele_size,
-                    static_cast<const uint8_t*>(src_data_ptr) + static_cast<size_t>(src_index) * src_ele_size,
-                    static_cast<size_t>(length) * src_ele_size);
+                    static_cast<const uint8_t*>(src_data_ptr) + static_cast<size_t>(src_index) * src_ele_size, static_cast<size_t>(length) * src_ele_size);
     }
     else
     {
@@ -239,8 +235,7 @@ RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::R
             RET_OK(false);
 
         std::memcpy(static_cast<vm::RtObject**>(dst_data_ptr) + static_cast<size_t>(dst_index),
-                    static_cast<vm::RtObject* const*>(src_data_ptr) + static_cast<size_t>(src_index),
-                    static_cast<size_t>(length) * sizeof(vm::RtObject*));
+                    static_cast<vm::RtObject* const*>(src_data_ptr) + static_cast<size_t>(src_index), static_cast<size_t>(length) * sizeof(vm::RtObject*));
     }
 
     RET_OK(true);
@@ -322,13 +317,11 @@ RtResultVoid SystemArray::clear_internal(vm::RtArray* arr, int32_t index, int32_
     if (vm::Class::is_value_type(ele_klass))
     {
         size_t ele_size = vm::Array::get_array_element_size(arr);
-        std::memset(static_cast<uint8_t*>(arr_data_ptr) + static_cast<size_t>(index) * ele_size, 0,
-                    static_cast<size_t>(length) * ele_size);
+        std::memset(static_cast<uint8_t*>(arr_data_ptr) + static_cast<size_t>(index) * ele_size, 0, static_cast<size_t>(length) * ele_size);
     }
     else
     {
-        std::memset(static_cast<vm::RtObject**>(arr_data_ptr) + static_cast<size_t>(index), 0,
-                    static_cast<size_t>(length) * sizeof(vm::RtObject*));
+        std::memset(static_cast<vm::RtObject**>(arr_data_ptr) + static_cast<size_t>(index), 0, static_cast<size_t>(length) * sizeof(vm::RtObject*));
     }
 
     RET_VOID_OK();
@@ -349,7 +342,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_array[] = {
     {"System.Array::GetRank", (vm::InternalCallFunction)&SystemArray::get_rank, get_rank_invoker},
     {"System.Array::GetLength", (vm::InternalCallFunction)&SystemArray::get_length, get_length_invoker_icalls_system_array},
     {"System.Array::GetLowerBound", (vm::InternalCallFunction)&SystemArray::get_lower_bound, get_lower_bound_invoker},
-    {"System.Array::GetValue(System.Int32[])", (vm::InternalCallFunction)&SystemArray::get_value, get_value_invoker},
+    {"System.Array::GetValue(System.Int32[])", (vm::InternalCallFunction)&SystemArray::get_value, get_array_value_invoker},
     {"System.Array::SetValue(System.Object,System.Int32[])", (vm::InternalCallFunction)&SystemArray::set_value, set_value_invoker},
     {"System.Array::GetValueImpl", (vm::InternalCallFunction)&SystemArray::get_value_impl, get_value_impl_invoker},
     {"System.Array::SetValueImpl", (vm::InternalCallFunction)&SystemArray::set_value_impl, set_value_impl_invoker},
@@ -360,7 +353,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_array[] = {
 
 utils::Span<vm::InternalCallEntry> SystemArray::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_array, sizeof(s_internal_call_entries_system_array) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_array,
+                                              sizeof(s_internal_call_entries_system_array) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

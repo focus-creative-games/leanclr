@@ -25,14 +25,14 @@ static RtResultVoid thread_free_internal_invoker(metadata::RtManagedMethodPointe
 }
 
 // Internal call entries
-static vm::InternalCallEntry s_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_threading_internalthread[] = {
     {"System.Threading.InternalThread::Thread_free_internal", (vm::InternalCallFunction)&SystemThreadingInternalThread::thread_free_internal,
      thread_free_internal_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemThreadingInternalThread::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_internalthread, sizeof(s_internal_call_entries_system_threading_internalthread) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

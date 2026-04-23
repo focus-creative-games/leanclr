@@ -93,7 +93,7 @@ static RtResultVoid invoker_internal_to_object(metadata::RtManagedMethodPointer 
 }
 
 // Internal call entries
-static vm::InternalCallEntry s_entries[] = {
+static vm::InternalCallEntry s_internal_call_entries_system_typedreference[] = {
     {"System.TypedReference::InternalMakeTypedReference", (vm::InternalCallFunction)&SystemTypedReference::internal_make_typed_reference,
      invoker_internal_make_typed_reference},
     {"System.TypedReference::InternalToObject", (vm::InternalCallFunction)&SystemTypedReference::internal_to_object, invoker_internal_to_object},
@@ -101,7 +101,7 @@ static vm::InternalCallEntry s_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemTypedReference::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_typedreference, sizeof(s_internal_call_entries_system_typedreference) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

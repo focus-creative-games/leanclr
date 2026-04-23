@@ -245,7 +245,7 @@ RtResult<int32_t> SystemIOMonoIO::read(intptr_t handle, vm::RtArray* dest, int32
     RET_OK(os::File::read(handle, buffer, count, error));
 }
 
-static RtResultVoid read_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+static RtResultVoid monoio_read_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* ret) noexcept
 {
     intptr_t handle = EvalStackOp::get_param<intptr_t>(params, 0);
@@ -350,7 +350,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_io_monoio[] = {
     {"System.IO.MonoIO::Open(System.Char*,System.IO.FileMode,System.IO.FileAccess,System.IO.FileShare,System.IO.FileOptions,System.IO.MonoIOError&)",
      (vm::InternalCallFunction)&SystemIOMonoIO::open, open_invoker},
     {"System.IO.MonoIO::Read(System.IntPtr,System.Byte[],System.Int32,System.Int32,System.IO.MonoIOError&)", (vm::InternalCallFunction)&SystemIOMonoIO::read,
-     read_invoker},
+     monoio_read_invoker},
     {"System.IO.MonoIO::RemapPath(System.String,System.String&)", (vm::InternalCallFunction)&SystemIOMonoIO::remap_path, remap_path_invoker},
     {"System.IO.MonoIO::Seek(System.IntPtr,System.Int64,System.IO.SeekOrigin,System.IO.MonoIOError&)", (vm::InternalCallFunction)&SystemIOMonoIO::seek,
      seek_invoker},
