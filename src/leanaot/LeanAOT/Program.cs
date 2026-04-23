@@ -80,10 +80,10 @@ internal class Program
         public IEnumerable<string> CompilerFlags { get; set; }
 
         [Option("usymtool-path", Required = false, HelpText = "IL2CPP: usym tool path (reserved).")]
-        public string UsymToolPath {get; set;}
+        public string UsymToolPath { get; set; }
 
         [Option("static-lib-il2-cpp", Required = false, HelpText = "IL2CPP: static lib il2cpp path (reserved).")]
-        public bool StaticLibIl2CppPath {get; set;}
+        public bool StaticLibIl2CppPath { get; set; }
 
         [Option("map-file-parser", Required = false, HelpText = "IL2CPP: map file parser executable path (reserved).")]
         public string MapFileParser { get; set; }
@@ -216,26 +216,9 @@ internal class Program
             if (string.IsNullOrWhiteSpace(raw))
                 continue;
             var trimmed = raw.Trim();
-            if (LooksLikeAssemblyPath(trimmed))
-            {
-                var full = Path.GetFullPath(trimmed);
-                if (!File.Exists(full))
-                {
-                    errorMessage = $"Assembly file not found: {full}";
-                    return false;
-                }
-                var dir = Path.GetDirectoryName(full);
-                if (!string.IsNullOrEmpty(dir))
-                    AddUniquePath(dllSearchPaths, dir);
-                if (!aotAssemblyNames.Contains(Path.GetFileNameWithoutExtension(full), StringComparer.OrdinalIgnoreCase))
-                    aotAssemblyNames.Add(Path.GetFileNameWithoutExtension(full));
-            }
-            else
-            {
-                var name = Path.GetFileNameWithoutExtension(trimmed);
-                if (!aotAssemblyNames.Contains(name, StringComparer.OrdinalIgnoreCase))
-                    aotAssemblyNames.Add(name);
-            }
+            var name = Path.GetFileNameWithoutExtension(trimmed);
+            if (!aotAssemblyNames.Contains(name, StringComparer.OrdinalIgnoreCase))
+                aotAssemblyNames.Add(name);
         }
 
         if (dllSearchPaths.Count == 0)
@@ -255,19 +238,6 @@ internal class Program
         }
 
         return true;
-    }
-
-    private static bool LooksLikeAssemblyPath(string s)
-    {
-        if (string.IsNullOrEmpty(s))
-            return false;
-        if (Path.IsPathRooted(s))
-            return true;
-        if (s.IndexOf(Path.DirectorySeparatorChar) >= 0 || s.IndexOf(Path.AltDirectorySeparatorChar) >= 0)
-            return true;
-        if (s.EndsWith(".dll", StringComparison.OrdinalIgnoreCase) || s.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
-            return true;
-        return false;
     }
 
     /// <summary>
@@ -314,7 +284,8 @@ internal class Program
         config.ProfilerOutputFile = options.ProfilerOutputFile;
         config.PrintCommandLine = options.PrintCommandLine;
         config.SymbolsFolder = options.SymbolsFolder;
-        config.DataFolder = options.DataFolder;
+        // in unity 2019 and 2021, the data folder is under generated cpp dir.
+        config.DataFolder = options.DataFolder ?? (!string.IsNullOrWhiteSpace(options.Directory) ? Path.Combine(options.GeneratedCppDir, "Data") : null);
         config.MapFileParser = options.MapFileParser;
         config.BaseLibDirectory = options.BaseLibDirectory;
         config.AvoidDynamicLibraryCopy = options.AvoidDynamicLibraryCopy;
