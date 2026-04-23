@@ -180,6 +180,8 @@ struct Il2CppManagedMemorySnapshot
 };
 
 typedef void (*il2cpp_register_object_callback)(Il2CppObject** arr, int size, void* userdata);
+// only used in unity 2019 and 2020.
+typedef void (*il2cpp_WorldChangedCallback)();
 typedef void* (*il2cpp_liveness_reallocate_callback)(void* ptr, size_t size, void* userdata);
 typedef void (*Il2CppFrameWalkFunc)(const Il2CppStackFrameInfo* info, void* user_data);
 typedef void (*Il2CppProfileFunc)(Il2CppProfiler* prof);
