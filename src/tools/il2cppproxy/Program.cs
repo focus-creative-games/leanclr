@@ -90,13 +90,6 @@ namespace il2cppproxy
 
         private static void RunConvertToCpp(string baseDir, string[] args)
         {
-            string? oldDataFolderArg = args.FirstOrDefault(arg => arg.StartsWith("--data-folder="));
-            if (string.IsNullOrEmpty(oldDataFolderArg))
-            {
-                AppendLog("Invalid data folder argument");
-                Environment.Exit(1);
-            }
-
             int ret = RunProcessWithOutputRedirection(Path.Combine(baseDir, "leanaot", GetExeNameByPlatform("LeanAOT")), args);
             if (ret != 0)
             {
