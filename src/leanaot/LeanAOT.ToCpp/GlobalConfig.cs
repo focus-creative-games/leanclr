@@ -25,6 +25,8 @@ namespace LeanAOT.ToCpp
 
         public string DotnetProfile { get; set; }
 
+        public int? IncrementalGCTimeSlice { get; set; }
+
         public bool ProfilerReport { get; set; }
 
         public string ProfilerOutputFile { get; set; }
@@ -34,6 +36,14 @@ namespace LeanAOT.ToCpp
         public string SymbolsFolder { get; set; }
 
         public string DataFolder { get; set; }
+
+        public string MapFileParser { get; set; }
+
+        public string BaseLibDirectory { get; set; }
+
+        public bool AvoidDynamicLibraryCopy { get; set; }
+
+        public string StatsOutputDir { get; set; }
 
         public string CompilerFlags { get; set; }
     }

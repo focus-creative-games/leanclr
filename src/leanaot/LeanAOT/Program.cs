@@ -64,6 +64,9 @@ internal class Program
         [Option("dotnetprofile", Required = false, HelpText = "IL2CPP: e.g. unityaot-linux (reserved).")]
         public string DotnetProfile { get; set; }
 
+        [Option("incremental-g-c-time-slice", Required = false, HelpText = "IL2CPP: incremental GC time slice (reserved).")]
+        public int? IncrementalGCTimeSlice { get; set; }
+
         [Option("profiler-report", Required = false, HelpText = "IL2CPP compatibility flag (reserved).")]
         public bool ProfilerReport { get; set; }
 
@@ -81,6 +84,21 @@ internal class Program
 
         [Option("static-lib-il2-cpp", Required = false, HelpText = "IL2CPP: static lib il2cpp path (reserved).")]
         public bool StaticLibIl2CppPath {get; set;}
+
+        [Option("map-file-parser", Required = false, HelpText = "IL2CPP: map file parser executable path (reserved).")]
+        public string MapFileParser { get; set; }
+
+        [Option("directory", Required = false, HelpText = "IL2CPP: managed assemblies directory. Used to auto-discover assemblies when --assembly is omitted.")]
+        public string Directory { get; set; }
+
+        [Option("baselib-directory", Required = false, HelpText = "IL2CPP: baselib directory path (reserved).")]
+        public string BaseLibDirectory { get; set; }
+
+        [Option("avoid-dynamic-library-copy", Required = false, HelpText = "IL2CPP compatibility flag (reserved).")]
+        public bool AvoidDynamicLibraryCopy { get; set; }
+
+        [Option("stats-output-dir", Required = false, HelpText = "IL2CPP: stats output directory (reserved).")]
+        public string StatsOutputDir { get; set; }
     }
 
     private static Logger s_logger;
@@ -113,7 +131,8 @@ internal class Program
             settings.CaseInsensitiveEnumValues = true;
             settings.HelpWriter = helpWriter;
         });
-        var parseResult = parser.ParseArguments<CliOptions>(args);
+        var normalizedArgs = NormalizeSingleDashLongOptions(args);
+        var parseResult = parser.ParseArguments<CliOptions>(normalizedArgs);
         if (parseResult.Tag == ParserResultType.NotParsed)
         {
             Console.Error.WriteLine(helpWriter.ToString());
@@ -166,9 +185,22 @@ internal class Program
         errorMessage = null;
 
         var rawAssemblies = options.Assemblies?.ToList() ?? new List<string>();
+        if (rawAssemblies.Count == 0 && !string.IsNullOrWhiteSpace(options.Directory))
+        {
+            var managedDir = Path.GetFullPath(options.Directory.Trim());
+            if (!System.IO.Directory.Exists(managedDir))
+            {
+                errorMessage = $"Managed directory not found: {managedDir}";
+                return false;
+            }
+
+            AddUniquePath(dllSearchPaths, managedDir);
+            rawAssemblies.AddRange(System.IO.Directory.EnumerateFiles(managedDir, "*.dll", SearchOption.TopDirectoryOnly)
+                .Select(Path.GetFileName));
+        }
         if (rawAssemblies.Count == 0)
         {
-            errorMessage = "Missing required input: specify at least one assembly (-a / --assembly).";
+            errorMessage = "Missing required input: specify at least one assembly (-a / --assembly), or use --directory to auto-discover DLLs.";
             return false;
         }
 
@@ -238,6 +270,26 @@ internal class Program
         return false;
     }
 
+    /// <summary>
+    /// IL2CPP 工具链有时会传入 <c>-convert-to-cpp</c> 这类单横线长参数，这里统一转为双横线格式。
+    /// </summary>
+    private static string[] NormalizeSingleDashLongOptions(IEnumerable<string> args)
+    {
+        return args.Select(a =>
+        {
+            if (string.IsNullOrEmpty(a) || !a.StartsWith("-") || a.StartsWith("--"))
+                return a;
+            if (a.Length <= 2)
+                return a; // 保留短参数，如 -d / -a / -o
+
+            var eqIndex = a.IndexOf('=');
+            var optionName = eqIndex >= 0 ? a.Substring(1, eqIndex - 1) : a.Substring(1);
+            if (optionName.Length > 1 && optionName.Contains('-'))
+                return "--" + a.Substring(1);
+            return a;
+        }).ToArray();
+    }
+
     private static void AddUniquePath(List<string> list, string path)
     {
         if (string.IsNullOrEmpty(path))
@@ -257,11 +309,16 @@ internal class Program
         config.UseSlimMetaFileFormat = options.UseSlimMetaFileFormat;
         config.GenericsOption = options.GenericsOption;
         config.DotnetProfile = options.DotnetProfile;
+        config.IncrementalGCTimeSlice = options.IncrementalGCTimeSlice;
         config.ProfilerReport = options.ProfilerReport;
         config.ProfilerOutputFile = options.ProfilerOutputFile;
         config.PrintCommandLine = options.PrintCommandLine;
         config.SymbolsFolder = options.SymbolsFolder;
         config.DataFolder = options.DataFolder;
+        config.MapFileParser = options.MapFileParser;
+        config.BaseLibDirectory = options.BaseLibDirectory;
+        config.AvoidDynamicLibraryCopy = options.AvoidDynamicLibraryCopy;
+        config.StatsOutputDir = options.StatsOutputDir;
         config.CompilerFlags = NormalizeCompilerFlags(options.CompilerFlags);
     }
 
