@@ -251,11 +251,11 @@ RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* me
             RET_OK(InvokeTypeAndMethod(RtInvokerType::InternalCall, fn_not_implemented_internal_call_invoker));
         }
 
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(bool, is_intrinsic_method, Method::is_intrinsic(method));
-        if (is_intrinsic_method)
-        {
-            RET_OK(InvokeTypeAndMethod(RtInvokerType::Intrinsic, fn_not_implemented_intrinsic_invoker));
-        }
+        // DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(bool, is_intrinsic_method, Method::is_intrinsic(method));
+        // if (is_intrinsic_method)
+        // {
+        //     RET_OK(InvokeTypeAndMethod(RtInvokerType::Intrinsic, fn_not_implemented_intrinsic_invoker));
+        // }
 
         if (Method::is_pinvoke(method))
         {
