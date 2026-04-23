@@ -2783,10 +2783,6 @@ namespace LeanAOT.ToCpp
         {
             _bodyWriter.SetIndent(1);
             MethodDef methodDef = _method.MethodDef;
-            if (methodDef.Name == "get_providerType")
-            {
-                int a = 0;
-            }
             var body = methodDef.Body;
             var insts = body.Instructions;
 
