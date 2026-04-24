@@ -102,6 +102,13 @@ namespace Tests.Instruments.Funcs
             Assert.Equal(1, GetValueHashCode(a));
         }
 
+        [UnitTest]
+        public void struct_contraint_tostring()
+        {
+            var a = new ForInherenGenericAotValue() { x = 1 };
+            Assert.Equal(a.ToString(), "1");
+        }
+
         private static Vector2 color;
 
         [UnitTest]
