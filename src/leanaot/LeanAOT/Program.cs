@@ -1,8 +1,8 @@
 using System.Linq;
+using System.Text;
 using LeanAOT.GenerationPlan;
 using LeanAOT.ToCpp;
 using NLog;
-using System.Text;
 using CommandLine;
 using CommandLine.Text;
 
@@ -131,7 +131,19 @@ internal class Program
             settings.CaseInsensitiveEnumValues = true;
             settings.HelpWriter = helpWriter;
         });
-        var normalizedArgs = NormalizeSingleDashLongOptions(args);
+        string[] effectiveArgs;
+        try
+        {
+            effectiveArgs = GetEffectiveCommandLineArgs(args ?? Array.Empty<string>());
+        }
+        catch (Exception ex)
+        {
+            Console.Error.WriteLine(ex.Message);
+            Environment.Exit(1);
+            return;
+        }
+
+        var normalizedArgs = NormalizeSingleDashLongOptions(effectiveArgs);
         var parseResult = parser.ParseArguments<CliOptions>(normalizedArgs);
         if (parseResult.Tag == ParserResultType.NotParsed)
         {
@@ -143,7 +155,7 @@ internal class Program
             {
                 if (options.PrintCommandLine)
                 {
-                    Console.WriteLine(string.Join(" ", args.Select(a => a.Contains(' ') ? $"\"{a}\"" : a)));
+                    Console.WriteLine(string.Join(" ", effectiveArgs.Select(a => a.Contains(' ') ? $"\"{a}\"" : a)));
                 }
 
                 if (!TryNormalizeCli(options, out var dllSearchPaths, out var aotAssemblyNames, out var outputCodeDir, out var errorMessage))
@@ -241,6 +253,143 @@ internal class Program
         }
 
         return true;
+    }
+
+    /// <summary>
+    /// Unity/Bee：命令行过长时只会传入一个实参 <c>@xxx.rsp</c>（可带外层引号），从 rsp 的单行内容中拆出全部参数。
+    /// 非 rsp 模式则沿用进程传入的各实参（跳过空项、去掉外层成对引号）。
+    /// </summary>
+    private static string[] GetEffectiveCommandLineArgs(string[] args)
+    {
+        var list = new List<string>();
+        foreach (var a in args)
+        {
+            if (string.IsNullOrWhiteSpace(a))
+                continue;
+            list.Add(UnwrapOuterQuotes(a.Trim()));
+        }
+
+        if (list.Count == 1 && list[0].Length > 0 && list[0][0] == '@')
+        {
+            var rspPath = UnwrapOuterQuotes(list[0].Substring(1).Trim());
+            if (string.IsNullOrEmpty(rspPath))
+                return list.ToArray();
+
+            var fullPath = Path.GetFullPath(rspPath);
+            if (!File.Exists(fullPath))
+                throw new FileNotFoundException($"Response file not found: {fullPath}");
+
+            return ReadUnityRspFile(fullPath);
+        }
+
+        return list.ToArray();
+    }
+
+    /// <summary>
+    /// 去掉最外层一对 ASCII 双引号（命令行或路径上常见）。
+    /// </summary>
+    private static string UnwrapOuterQuotes(string token)
+    {
+        if (string.IsNullOrEmpty(token))
+            return token;
+        var t = token.Trim();
+        if (t.Length >= 2 && t[0] == '"' && t[^1] == '"')
+            return t[1..^1].Trim();
+        return t;
+    }
+
+    /// <summary>
+    /// Unity 生成的 rsp：整份文件即一行命令（参数之间空白分隔）；若存在换行仅当作空格合并后再分词。
+    /// 双引号可包住含空格的片段；形如 <c>--assembly="path"</c> 的值两侧双引号在分词后去掉。
+    /// </summary>
+    private static string[] ReadUnityRspFile(string fullPath)
+    {
+        var raw = File.ReadAllText(fullPath).Trim();
+        if (raw.Length == 0)
+            return Array.Empty<string>();
+
+        // 逻辑单行：换行视为空格（Unity 语义上只有一行）
+        var line = raw.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ").Trim();
+        if (line.Length == 0)
+            return Array.Empty<string>();
+        if (line[0] == '#')
+            return Array.Empty<string>();
+
+        return TokenizeUnityRspSingleLine(line).Select(NormalizeUnityRspArgument).ToArray();
+    }
+
+    /// <summary>
+    /// 在一行上按空白分词；引号内空白不拆分；<c>""</c> 表示字面双引号。
+    /// </summary>
+    private static List<string> TokenizeUnityRspSingleLine(string line)
+    {
+        var tokens = new List<string>();
+        var i = 0;
+        while (i < line.Length)
+        {
+            while (i < line.Length && char.IsWhiteSpace(line[i]))
+                i++;
+            if (i >= line.Length)
+                break;
+
+            if (line[i] == '"')
+            {
+                i++;
+                var sb = new StringBuilder();
+                while (i < line.Length)
+                {
+                    if (line[i] == '"')
+                    {
+                        if (i + 1 < line.Length && line[i + 1] == '"')
+                        {
+                            sb.Append('"');
+                            i += 2;
+                            continue;
+                        }
+
+                        i++;
+                        break;
+                    }
+
+                    sb.Append(line[i]);
+                    i++;
+                }
+
+                tokens.Add(sb.ToString());
+            }
+            else
+            {
+                var start = i;
+                while (i < line.Length && !char.IsWhiteSpace(line[i]))
+                    i++;
+                tokens.Add(line.Substring(start, i - start));
+            }
+        }
+
+        return tokens;
+    }
+
+    /// <summary>
+    /// 将单个参数 <c>--name="value"</c> 规范为 <c>--name=value</c>（仅去掉值段首尾多余引号；无 <c>=</c> 的开关原样返回）。
+    /// </summary>
+    private static string NormalizeUnityRspArgument(string token)
+    {
+        var eq = token.IndexOf('=');
+        if (eq < 0)
+            return token;
+
+        var prefix = token.Substring(0, eq + 1);
+        var valueStr = token.Substring(eq + 1).Trim();
+        valueStr = StripUnityQuotedValue(valueStr);
+        return prefix + valueStr;
+    }
+
+    private static string StripUnityQuotedValue(string value)
+    {
+        var v = value.Trim();
+        if (v.Length >= 2 && v[0] == '"' && v[^1] == '"')
+            return v[1..^1];
+        return v;
     }
 
     /// <summary>

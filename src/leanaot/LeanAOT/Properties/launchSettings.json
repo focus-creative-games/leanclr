@@ -44,6 +44,11 @@
       "commandName": "Project",
       "commandLineArgs": "--convert-to-cpp --emit-null-checks --enable-array-bounds-check --dotnetprofile=unityaot --incremental-g-c-time-slice=3 --profiler-report --map-file-parser=D:/UnityHubs/2019.4.40f1/Editor/Data/Tools/MapFileParser/MapFileParser.exe --directory=D:/workspace/wasmclr/TestWeb-2019/Temp/StagingArea/Data/Managed --generatedcppdir=D:/workspace/wasmclr/TestWeb-2019/Temp/StagingArea/Data/il2cppOutput",
       "workingDirectory": "D:\\workspace\\wasmclr\\TestWeb-2019"
+    },
+    "il2cpp-rsp": {
+      "commandName": "Project",
+      "commandLineArgs": "\"@Library/Bee/artifacts/rsp/9072590423598006834.rsp\"",
+      "workingDirectory": "D:\\workspace\\wasmclr\\bugs\\buildfailed"
     }
   }
 }
