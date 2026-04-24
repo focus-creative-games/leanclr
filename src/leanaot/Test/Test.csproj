@@ -73,6 +73,7 @@
     <Compile Include="TC_div_un.cs" />
     <Compile Include="TC_rem.cs" />
     <Compile Include="TC_rem_un.cs" />
+    <Compile Include="TC_String.cs" />
     <Compile Include="TestLdelem.cs" />
     <Compile Include="TestLdelemAny.cs" />
     <Compile Include="TestBrTrueFalse.cs" />

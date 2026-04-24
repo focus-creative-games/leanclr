@@ -16,8 +16,8 @@ class SystemString
     static RtResult<vm::RtString*> newobj_char_array_range(vm::RtArray* charArray, int32_t startIndex, int32_t length);
     static RtResult<vm::RtString*> newobj_utf16chars(const Utf16Char* chars);
     static RtResult<vm::RtString*> newobj_utf16chars_range(const Utf16Char* chars, int32_t startIndex, int32_t length);
-    static RtResult<vm::RtString*> newobj_utf8chars(const char* chars);
-    static RtResult<vm::RtString*> newobj_utf8chars_range(const char* chars, int32_t startIndex, int32_t length);
+    static RtResult<vm::RtString*> newobj_utf8chars(const int8_t* chars);
+    static RtResult<vm::RtString*> newobj_utf8chars_range(const int8_t* chars, int32_t startIndex, int32_t length);
     static RtResult<vm::RtString*> newobj_char_count(Utf16Char c, int32_t charCount);
     static RtResult<vm::RtString*> newobj_readonlyspan(const vm::RtReadOnlySpan<Utf16Char> span);
 

@@ -97,6 +97,52 @@ namespace LeanAOT.ToCpp
             return false;
         }
 
+
+        private MethodDef GetRedirectedCtorMethod(TypeDef stringTypeDef, MethodDef ctorMethodDef)
+        {
+            foreach (var redirectedMethod in stringTypeDef.Methods)
+            {
+                if ((redirectedMethod.Name == "CreateString" || redirectedMethod.Name == "Ctor") && redirectedMethod.ParamDefs.Count == ctorMethodDef.ParamDefs.Count)
+                {
+                    for (int i = 0; i < redirectedMethod.ParamDefs.Count; i++)
+                    {
+                        TypeSig redirectedMethodParamType = redirectedMethod.GetParam(i);
+                        TypeSig ctorMethodParamType = ctorMethodDef.GetParam(i + 1); // the first parameter is the this pointer
+                        if (!TypeEqualityComparer.Instance.Equals(redirectedMethodParamType, ctorMethodParamType))
+                        {
+                            break;
+                        }
+                    }
+                    return redirectedMethod;
+                }
+            }
+            throw new Exception($"impossible: the redirected ctor method of System.String not found. ctor:{ctorMethodDef.FullName}");
+        }
+
+
+        private bool TryRedirectNewObjIntrinsic(Instruction inst, MethodDetail methodDetail, out MethodDef redirectedMethod)
+        {
+            redirectedMethod = null;
+            MethodDef methodDef = methodDetail.MethodDef;
+            if (methodDef == null)
+            {
+                return false;
+            }
+            if (methodDef.Module.IsCoreLibraryModule != true)
+            {
+                return false;
+            }
+            switch (methodDef.FullName)
+            {
+            case "System.Void System.String::.ctor(System.SByte*,System.Int32,System.Int32,System.Text.Encoding)":
+            {
+                redirectedMethod = GetRedirectedCtorMethod(methodDef.DeclaringType, methodDef);
+                return true;
+            }
+            }
+            return false;
+        }
+
         private bool TryEmitNewobjIntrinsic(Instruction inst, MethodDetail methodDetail, Func<string> methodVarNameProvider, List<EvalVariable> args, EvalVariable retVar)
         {
             MethodDef methodDef = methodDetail.MethodDef;
@@ -137,26 +183,65 @@ namespace LeanAOT.ToCpp
                 }
                 return false;
             }
+
+            string icallsHeader = "icalls/system_string.h";
+            string icallsFuncName;
+            var argsStr = CreateMethodFunctionArgsExcludedThisWithCast(methodDetail, args);
             switch (methodDef.FullName)
             {
-            case "System.String::.ctor(System.Char[])":
-            case "System.String::.ctor(System.Char[],System.Int32,System.Int32)":
-            case "System.String::.ctor(System.Char*)":
-            case "System.String::.ctor(System.Char*,System.Int32,System.Int32)":
-            case "System.String::.ctor(System.SByte*)":
-            case "System.String::.ctor(System.SByte*,System.Int32,System.Int32)":
-            case "System.String::.ctor(System.Char,System.Int32)":
-            case "System.String::.ctor(System.ReadOnlySpan`1<System.Char>)":
-            case "System.String::.ctor(System.SByte*,System.Int32,System.Int32,System.Text.Encoding)":
-            case "System.String::FastAllocateString":
-            case "System.String::InternalIntern":
-            case "System.String::InternalIsInterned":
+            case "System.Void System.String::.ctor(System.Char[])":
             {
-                throw new NotImplementedException();
+                icallsFuncName = "SystemString::newobj_char_array";
+                break;
+            }
+            case "System.Void System.String::.ctor(System.Char[],System.Int32,System.Int32)":
+            {
+                icallsFuncName = "SystemString::newobj_char_array_range";
+                break;
+            }
+            case "System.Void System.String::.ctor(System.Char*)":
+            {
+                icallsFuncName = "SystemString::newobj_utf16chars";
+                break;
+            }
+            case "System.Void System.String::.ctor(System.Char*,System.Int32,System.Int32)":
+            {
+                icallsFuncName = "SystemString::newobj_utf16chars_range";
+                break;
+            }
+            case "System.Void System.String::.ctor(System.SByte*)":
+            {
+                icallsFuncName = "SystemString::newobj_utf8chars";
+                break;
+            }
+            case "System.Void System.String::.ctor(System.SByte*,System.Int32,System.Int32)":
+            {
+                icallsFuncName = "SystemString::newobj_utf8chars_range";
+                break;
+            }
+            case "System.Void System.String::.ctor(System.Char,System.Int32)":
+            {
+                icallsFuncName = "SystemString::newobj_char_count";
+                break;
+            }
+            case "System.Void System.String::.ctor(System.ReadOnlySpan`1<System.Char>)":
+            {
+                icallsFuncName = "SystemString::newobj_readonlyspan";
+                argsStr = $"*(leanclr::vm::RtReadOnlySpan<leanclr::Utf16Char>*)&{argsStr}";
+                break;
+            }
+            //case "System.Void System.String::.ctor(System.SByte*,System.Int32,System.Int32,System.Text.Encoding)":
+            //{
+            //    return false;
+            //}
+            default:
+            {
+                return false;
             }
             }
-
-            return false;
+            _forwardDeclaration.AddInclude(icallsHeader);
+            EmitDeclaringAssignOrThrow(inst, retVar, $"leanclr::icalls::{icallsFuncName}({argsStr})");
+            return true;
         }
 
 

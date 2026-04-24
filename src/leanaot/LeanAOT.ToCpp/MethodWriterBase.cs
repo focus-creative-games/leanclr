@@ -1728,6 +1728,24 @@ namespace LeanAOT.ToCpp
             return sb.ToString();
         }
 
+        private string CreateMethodFunctionArgsExcludedThisWithCast(MethodDetail methodDetail, List<EvalVariable> args)
+        {
+            var sb = new StringBuilder();
+            var paramsIncludeThis = methodDetail.ParamsIncludeThis;
+            int paramIndexOffset = methodDetail.IsStatic ? 0 : 1;
+            for(int i = 0; i < args.Count ; i++)
+            {
+                if (i > 0)
+                {
+                    sb.Append(", ");
+                }
+                var param = paramsIncludeThis[i + paramIndexOffset];
+                Debug.Assert(param.Index == i + paramIndexOffset);
+                sb.Append($"{GetVariableMayCast(args[i], param.Type)}");
+            }
+            return sb.ToString();
+        }
+
         private string CreateMethodFunctionArgsWithCast(MethodSig methodSig, List<EvalVariable> args)
         {
             var sb = new StringBuilder();
@@ -2206,6 +2224,11 @@ namespace LeanAOT.ToCpp
         {
             MethodDetail methodDetail = _metadataService.GetMethodDetail(method);
             _forwardDeclaration.AddMethodForwardDeclaration(method);
+            if (TryRedirectNewObjIntrinsic(inst, methodDetail, out MethodDef redirectedMethod))
+            {
+                EmitCall(inst, redirectedMethod, 0);
+                return;
+            }
 
             int paramCount = methodDetail.ParamCountIncludeThis - 1;
             bool hasReturnValue = !methodDetail.IsVoidReturn;

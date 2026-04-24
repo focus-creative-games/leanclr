@@ -110,10 +110,10 @@ static RtResultVoid newobj_utf16chars_range_invoker(metadata::RtManagedMethodPoi
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::newobj_utf8chars(const char* chars)
+RtResult<vm::RtString*> SystemString::newobj_utf8chars(const int8_t* chars)
 {
-    int32_t utf8_length = static_cast<int32_t>(std::strlen(chars));
-    vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(chars, utf8_length);
+    int32_t utf8_length = static_cast<int32_t>(std::strlen(reinterpret_cast<const char*>(chars)));
+    vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(reinterpret_cast<const char*>(chars), utf8_length);
     RET_OK(utf16_string);
 }
 
@@ -121,20 +121,20 @@ RtResult<vm::RtString*> SystemString::newobj_utf8chars(const char* chars)
 static RtResultVoid newobj_utf8chars_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-    auto chars = EvalStackOp::get_param<const char*>(params, 0);
+    auto chars = EvalStackOp::get_param<const int8_t*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, SystemString::newobj_utf8chars(chars));
     EvalStackOp::set_return(ret, str);
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const char* chars, int32_t startIndex, int32_t length)
+RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const int8_t* chars, int32_t startIndex, int32_t length)
 {
-    uint32_t total_length = static_cast<uint32_t>(std::strlen(chars));
+    uint32_t total_length = static_cast<uint32_t>(std::strlen(reinterpret_cast<const char*>(chars)));
     uint32_t start_index_u32 = static_cast<uint32_t>(startIndex);
     uint32_t length_u32 = static_cast<uint32_t>(length);
     if (length < 0 || start_index_u32 >= total_length || length_u32 > total_length - start_index_u32)
         RET_ERR(RtErr::IndexOutOfRange);
-    const char* chars_start = chars + static_cast<size_t>(startIndex);
+    const char* chars_start = reinterpret_cast<const char*>(chars) + static_cast<size_t>(startIndex);
     vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(chars_start, length);
     RET_OK(utf16_string);
 }
@@ -143,7 +143,7 @@ RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const char* chars, 
 static RtResultVoid newobj_utf8chars_range_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
                                                    const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-    auto chars = EvalStackOp::get_param<const char*>(params, 0);
+    auto chars = EvalStackOp::get_param<const int8_t*>(params, 0);
     auto startIndex = EvalStackOp::get_param<int32_t>(params, 1);
     auto length = EvalStackOp::get_param<int32_t>(params, 2);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, SystemString::newobj_utf8chars_range(chars, startIndex, length));
