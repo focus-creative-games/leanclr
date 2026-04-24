@@ -1942,6 +1942,86 @@ namespace LeanAOT.ToCpp
             return false;
         }
 
+
+        private static bool IsMethodSignatureMatch(MethodDetail m1, MethodDetail m2)
+        {
+            if (m1.MethodDef.Name != m2.MethodDef.Name)
+            {
+                return false;
+            }
+            if (m1.MethodDef.GenericParameters.Count != m2.MethodDef.GenericParameters.Count)
+            {
+                return false;
+            }
+            if (m1.IsStatic != m2.IsStatic)
+            {
+                return false;
+            }
+            for (int i =  m1.MethodDef.IsStatic ? 0 : 1 , n = m1.ParamCountIncludeThis; i < n; i++)
+            {
+                TypeSig paramType1 = m1.ParamsIncludeThis[i].Type;
+                TypeSig paramType2 = m2.ParamsIncludeThis[i].Type;
+                if (!TypeEqualityComparer.Instance.Equals(paramType1, paramType2))
+                {
+                    return false;
+                }
+            }
+            return true;
+        }
+
+        private IMethod FindVirtualMethodImplOnKlass(TypeDetail type, MethodDetail method)
+        {
+            foreach(var methodDef in type.TypeDef.Methods)
+            {
+                if (methodDef.IsVirtual)
+                {
+                    continue;
+                }
+                if (methodDef.IsNewSlot)
+                {
+                    // if method is interface method, it should be implemented in the type implements the interface
+                    if (!method.DeclaringTypeDef.IsInterface)
+                    {
+                        continue;
+                    }
+                }
+                GenericArgumentContext gac = type.GAC;
+                IMethod inflatedMethod = gac.ContainsGenericArguments ? new MemberRefUser(methodDef.Module, methodDef.Name, methodDef.MethodSig, type.Type) : methodDef;
+                MethodDetail inflatedMethodDetail = _metadataService.GetMethodDetail(inflatedMethod);
+                if (IsMethodSignatureMatch(method, inflatedMethodDetail))
+                {
+                    return inflatedMethod;
+                }
+            }
+            return null;
+        }
+
+        private bool IsTypeImplementConstraintedMethod(ITypeDefOrRef type, MethodDetail method)
+        {
+            var typeDetail = _metadataService.GetTypeDetail(type);
+            if (typeDetail.TypeDef == null)
+            {
+                return false;
+            }
+            Debug.Assert(typeDetail.IsValueType);
+            IMethod implMethod = FindVirtualMethodImplOnKlass(typeDetail, method);
+            if (method.DeclaringTypeDef.IsInterface)
+            {
+                // if a interface method is not implemented in its declaring type, it should be implemented in the type implements the interface
+                if (!method.MethodDef.HasBody)
+                {
+                    Debug.Assert(implMethod != null);
+                    return true;
+                }
+                return implMethod != null;
+            }
+            else
+            {
+                Debug.Assert(method.DeclaringType.ToTypeSig().ElementType == ElementType.Object);
+                return implMethod != null;
+            }
+        }
+
         private void EmitCallVirt(Instruction inst, IMethod method, uint token)
         {
             var methodDetail = _metadataService.GetMethodDetail(method);
@@ -1953,15 +2033,33 @@ namespace LeanAOT.ToCpp
 
             if (_curPrefixs.HasFlag(PrefixFlags.Constrained))
             {
-                if (MetaUtil.IsValueType(declaringType.ToTypeSig()))
+                EvalVariable originalThisVar = args[0];
+                ConstraintedData constrainedData = (ConstraintedData)_prefixData;
+                ITypeDefOrRef constaintedType = constrainedData.ConstrainedType;
+                if (MetaUtil.IsValueType(constaintedType.ToTypeSig()))
                 {
-                    // for constrained callvirt on value type, we can treat it as direct call since the this pointer is already a pointer to the value type and no null check is needed
-                    EmitCall(inst, method, token);
-                    return;
+                    if (IsTypeImplementConstraintedMethod(constaintedType, methodDetail))
+                    {
+                        // for constrained callvirt on value type, we can treat it as direct call since the this pointer is already a pointer to the value type and no null check is needed
+                        EmitCall(inst, method, token);
+                        return;
+                    }
+                    else
+                    {
+                        // box the original this pointer to the constrained type
+                        var actualThisVar = PushStack(_corlibTypes.Object);
+                        RuntimeResolvedVariable constrainedTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(constaintedType);
+                        EmitDeclaringAssignOrThrow(inst, actualThisVar, $"{VmFunctionNames.Box}({constrainedTypeVar.GetFullReferenceVariableName()}, {GetEvalVariableExprWithCast(originalThisVar, "void*")})");
+                        args[0] = actualThisVar;
+                    }
                 }
-                var actualThisVar = PushStack(_corlibTypes.Object);
-                _bodyWriter.AddLine($"{GetTypeName(actualThisVar)} {GetEvalVariableName(actualThisVar)} = *({ConstStrings.ObjectPtrTypeName}*){GetEvalVariableName(args[0])};");
-                args[0] = actualThisVar;
+                else
+                {
+                    var actualThisVar = PushStack(_corlibTypes.Object);
+                    _bodyWriter.AddLine($"{GetTypeName(actualThisVar)} {GetEvalVariableName(actualThisVar)} = *({ConstStrings.ObjectPtrTypeName}*){GetEvalVariableName(args[0])};");
+                    args[0] = actualThisVar;
+                }
+
                 Pop();
             }
 
@@ -2818,7 +2916,7 @@ namespace LeanAOT.ToCpp
                 {
                     if (_dontCleanPrefixInBeforeNextInstruction)
                     {
-                        _dontCleanPrefixInBeforeNextInstruction = true;
+                        _dontCleanPrefixInBeforeNextInstruction = false;
                     }
                     else
                     {

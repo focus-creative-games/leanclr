@@ -65,6 +65,11 @@ public class TestCallVir
         {
             return a + x;
         }
+
+        public override string ToString()
+        {
+            return x.ToString();
+        }
     }
 
     [UnitTest]
@@ -129,6 +134,13 @@ public class TestCallVir
     {
         IFoo foo = new StructFoo() { x = 10 };
         Assert.Equal(13, foo.Sum(1, 2));
+    }
+
+    [UnitTest]
+    public void struct_contraint_tostring()
+    {
+        var a = new StructFoo() { x = 1 };
+        Assert.Equal("1", a.ToString());
     }
 }
 

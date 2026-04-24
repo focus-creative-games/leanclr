@@ -12,6 +12,7 @@ namespace LeanAOT.ToCpp
         private readonly TypeSig _classBaseTypeSig;
         private readonly TypeSig _typeSig;
         private readonly TypeDef _typeDef;
+        private readonly GenericArgumentContext _gac;
 
 
         private readonly List<FieldDetail> _instanceFieldsExcludeParent;
@@ -43,6 +44,8 @@ namespace LeanAOT.ToCpp
 
         public bool IsValueType => _typeDef.IsValueType;
 
+        public GenericArgumentContext GAC => _gac;
+
         public static bool IsComposableType(TypeSig type)
         {
             switch (type.ElementType)
@@ -64,8 +67,8 @@ namespace LeanAOT.ToCpp
             //    throw new ArgumentException($"Unsupported type: {_typeSig}");
             //}
             _typeDef = type.ResolveTypeDefThrow();
-            var gac = MetaUtil.GetTypeGenericArgumentContext(type);
-            _classBaseTypeSig = _typeDef.IsValueType || _typeDef.BaseType == null ? null : MetaUtil.Inflate(_typeDef.BaseType.ToTypeSig(), gac);
+            _gac = MetaUtil.GetTypeGenericArgumentContext(type);
+            _classBaseTypeSig = _typeDef.IsValueType || _typeDef.BaseType == null ? null : MetaUtil.Inflate(_typeDef.BaseType.ToTypeSig(), _gac);
 
             var parentInstanceFieldsIncludeParent = _classBaseTypeSig != null && _classBaseTypeSig.ElementType != ElementType.Object ? typeDetailResover(_classBaseTypeSig.ToTypeDefOrRef())._instanceFieldsIncludeParent : new List<FieldDetail>();
             (_instanceFieldsExcludeParent, _instanceFieldsIncludeParent, _staticFields, _literalOrRvaFields) = BuildInstanceAndStaticFields(_typeSig, parentInstanceFieldsIncludeParent);

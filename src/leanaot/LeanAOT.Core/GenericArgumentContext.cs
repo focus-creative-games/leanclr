@@ -36,6 +36,8 @@ namespace LeanAOT.Core
             this.methodArgsStack = methodArgsStack?.ToList();
         }
 
+        public bool ContainsGenericArguments => (typeArgsStack != null && typeArgsStack.Count > 0) || (methodArgsStack != null && methodArgsStack.Count > 0);
+
         public TypeSig Resolve(TypeSig typeSig)
         {
             if (!typeSig.ContainsGenericParameter)
