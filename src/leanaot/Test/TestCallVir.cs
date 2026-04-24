@@ -1,4 +1,6 @@
 ﻿
+using System;
+
 public class TestCallVir
 {
     interface IFoo
@@ -141,6 +143,26 @@ public class TestCallVir
     {
         var a = new StructFoo() { x = 1 };
         Assert.Equal("1", a.ToString());
+    }
+
+
+    struct StructFoo2 : IDisposable
+    {
+        public int x;
+        void IDisposable.Dispose()
+        {
+            x += 1;
+        }
+    }
+
+    [UnitTest]
+    public void struct_contraint_dispose()
+    {
+        var a = new StructFoo2() { x = 1 };
+        IDisposable b = a;
+        b.Dispose();
+        var c = (StructFoo2)b;
+        Assert.Equal(2, c.x);
     }
 }
 

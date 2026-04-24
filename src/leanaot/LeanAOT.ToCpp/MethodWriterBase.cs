@@ -1945,10 +1945,6 @@ namespace LeanAOT.ToCpp
 
         private static bool IsMethodSignatureMatch(MethodDetail m1, MethodDetail m2)
         {
-            if (m1.MethodDef.Name != m2.MethodDef.Name)
-            {
-                return false;
-            }
             if (m1.MethodDef.GenericParameters.Count != m2.MethodDef.GenericParameters.Count)
             {
                 return false;
@@ -1957,7 +1953,11 @@ namespace LeanAOT.ToCpp
             {
                 return false;
             }
-            for (int i =  m1.MethodDef.IsStatic ? 0 : 1 , n = m1.ParamCountIncludeThis; i < n; i++)
+            if (m1.ParamCountIncludeThis != m2.ParamCountIncludeThis)
+            {
+                return false;
+            }
+            for (int i = m1.MethodDef.IsStatic ? 0 : 1, n = m1.ParamCountIncludeThis; i < n; i++)
             {
                 TypeSig paramType1 = m1.ParamsIncludeThis[i].Type;
                 TypeSig paramType2 = m2.ParamsIncludeThis[i].Type;
@@ -1971,9 +1971,9 @@ namespace LeanAOT.ToCpp
 
         private IMethod FindVirtualMethodImplOnKlass(TypeDetail type, MethodDetail method)
         {
-            foreach(var methodDef in type.TypeDef.Methods)
+            foreach (var methodDef in type.TypeDef.Methods)
             {
-                if (methodDef.IsVirtual)
+                if (!methodDef.IsVirtual)
                 {
                     continue;
                 }
@@ -1988,23 +1988,38 @@ namespace LeanAOT.ToCpp
                 GenericArgumentContext gac = type.GAC;
                 IMethod inflatedMethod = gac.ContainsGenericArguments ? new MemberRefUser(methodDef.Module, methodDef.Name, methodDef.MethodSig, type.Type) : methodDef;
                 MethodDetail inflatedMethodDetail = _metadataService.GetMethodDetail(inflatedMethod);
-                if (IsMethodSignatureMatch(method, inflatedMethodDetail))
+                if (!IsMethodSignatureMatch(method, inflatedMethodDetail))
+                {
+                    continue;
+                }
+                if (method.MethodDef.Name == methodDef.Name)
                 {
                     return inflatedMethod;
                 }
+                // find in TypeDef explicit method overrides
+                foreach (var methodOverride in methodDef.Overrides)
+                {
+                    if (MethodEqualityComparer.CompareDeclaringTypes.Equals(methodOverride.MethodDeclaration, method.Method))
+                    {
+                        return inflatedMethod;
+                    }
+                }
             }
+
+            // find in TypeDef explicit method o
             return null;
         }
 
-        private bool IsTypeImplementConstraintedMethod(ITypeDefOrRef type, MethodDetail method)
+        private bool IsTypeImplementConstraintedMethod(ITypeDefOrRef type, MethodDetail method, out IMethod implMethod)
         {
             var typeDetail = _metadataService.GetTypeDetail(type);
             if (typeDetail.TypeDef == null)
             {
+                implMethod = null;
                 return false;
             }
             Debug.Assert(typeDetail.IsValueType);
-            IMethod implMethod = FindVirtualMethodImplOnKlass(typeDetail, method);
+            implMethod = FindVirtualMethodImplOnKlass(typeDetail, method);
             if (method.DeclaringTypeDef.IsInterface)
             {
                 // if a interface method is not implemented in its declaring type, it should be implemented in the type implements the interface
@@ -2038,10 +2053,11 @@ namespace LeanAOT.ToCpp
                 ITypeDefOrRef constaintedType = constrainedData.ConstrainedType;
                 if (MetaUtil.IsValueType(constaintedType.ToTypeSig()))
                 {
-                    if (IsTypeImplementConstraintedMethod(constaintedType, methodDetail))
+                    // FIXME: we should emitcall for generic method here
+                    if (IsTypeImplementConstraintedMethod(constaintedType, methodDetail, out IMethod implMethod) && implMethod.IsMethodDef)
                     {
                         // for constrained callvirt on value type, we can treat it as direct call since the this pointer is already a pointer to the value type and no null check is needed
-                        EmitCall(inst, method, token);
+                        EmitCall(inst, implMethod, token);
                         return;
                     }
                     else
