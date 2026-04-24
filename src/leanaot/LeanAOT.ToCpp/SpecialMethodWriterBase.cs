@@ -69,9 +69,9 @@ namespace LeanAOT.ToCpp
         {
             foreach (var param in _method.ParamsIncludeThis)
             {
-                _forwardDeclaration.AddTypeForwardDeclaration(param.Type);
+                _forwardDeclaration.AddTypeForwardDefine(param.Type);
             }
-            _forwardDeclaration.AddTypeForwardDeclaration(_method.RetType);
+            _forwardDeclaration.AddTypeForwardDefine(_method.RetType);
         }
 
         void WriteMethodHeader()

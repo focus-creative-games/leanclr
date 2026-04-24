@@ -206,12 +206,12 @@ namespace LeanAOT.ToCpp
         {
             foreach (var param in _parameterVariables)
             {
-                _forwardDeclaration.AddTypeForwardDeclaration(param.Type);
+                _forwardDeclaration.AddTypeForwardDefine(param.Type);
             }
-            _forwardDeclaration.AddTypeForwardDeclaration(_method.RetType);
+            _forwardDeclaration.AddTypeForwardDefine(_method.RetType);
             foreach (var local in _localVariables)
             {
-                _forwardDeclaration.AddTypeForwardDeclaration(local.Type);
+                _forwardDeclaration.AddTypeForwardDefine(local.Type);
             }
         }
 
@@ -240,7 +240,7 @@ namespace LeanAOT.ToCpp
             _localsWriter.AddLine("// Local Variables");
             foreach (var local in _localVariables)
             {
-                _forwardDeclaration.AddTypeForwardDeclaration(local.Type);
+                _forwardDeclaration.AddTypeForwardDefine(local.Type);
                 _localsWriter.AddLine($"{GetExactTypeName(local.Type)} {GetLocalName(local)}{(initLocals ? " = {}" : "")};");
             }
         }
@@ -2861,7 +2861,7 @@ namespace LeanAOT.ToCpp
                         var type = _method.InflateType((ITypeDefOrRef)inst.Operand);
                         inflatedType = type;
                         inlineToken = type.MDToken.ToUInt32();
-                        _forwardDeclaration.AddTypeForwardDeclaration(type);
+                        _forwardDeclaration.AddTypeForwardDefine(type);
                         break;
                     }
                     case OperandType.InlineTok:
@@ -2885,7 +2885,7 @@ namespace LeanAOT.ToCpp
                             var type = _method.InflateType(typeOp);
                             inflatedTokenOperand = type;
                             inlineToken = type.MDToken.ToUInt32();
-                            _forwardDeclaration.AddTypeForwardDeclaration(type);
+                            _forwardDeclaration.AddTypeForwardDefine(type);
                         }
                         else
                         {
