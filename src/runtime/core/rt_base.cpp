@@ -2,8 +2,6 @@
 
 namespace leanclr
 {
-namespace core
-{
 #if LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR
 RtErr fatal_on_not_implemented_error()
 {
@@ -14,5 +12,4 @@ RtErr fatal_on_not_implemented_error()
     return RtErr::NotImplemented;
 }
 #endif
-} // namespace core
 } // namespace leanclr

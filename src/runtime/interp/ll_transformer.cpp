@@ -363,7 +363,7 @@ RtResultVoid Transformer::transform_conv(GeneralInst* ll_inst, const hl::General
         opcode = utils::Platform::select_arch(opcode_i4, opcode_i8);
         break;
     default:
-        RET_ERR(core::RtErr::NotImplemented);
+        RETURN_NOT_IMPLEMENTED_ERROR();
     }
 
     ll_inst->set_opcode(opcode);
@@ -1645,7 +1645,7 @@ RtResultVoid Transformer::transform_instructions()
                     op = use_large_addressing ? OpCodeEnum::LdfldAnyLarge : OpCodeEnum::LdfldAny;
                     break;
                 default:
-                    RET_ERR(core::RtErr::NotImplemented);
+                    RETURN_NOT_IMPLEMENTED_ERROR();
                 }
                 ll_inst->set_opcode(op);
                 break;
@@ -1723,7 +1723,7 @@ RtResultVoid Transformer::transform_instructions()
                     op = use_large_addressing ? OpCodeEnum::LdvfldAnyLarge : OpCodeEnum::LdvfldAny;
                     break;
                 default:
-                    RET_ERR(core::RtErr::NotImplemented);
+                    RETURN_NOT_IMPLEMENTED_ERROR();
                 }
 
                 if (ll_inst->get_field_offset() == 0 && ll_inst->get_var_src_eval_stack_idx() == ll_inst->get_var_dst_eval_stack_idx())
@@ -1824,7 +1824,7 @@ RtResultVoid Transformer::transform_instructions()
                     op = use_large_addressing ? OpCodeEnum::StfldAnyLarge : OpCodeEnum::StfldAny;
                     break;
                 default:
-                    RET_ERR(core::RtErr::NotImplemented);
+                    RETURN_NOT_IMPLEMENTED_ERROR();
                 }
                 ll_inst->set_opcode(op);
                 break;
@@ -1864,7 +1864,7 @@ RtResultVoid Transformer::transform_instructions()
                     op = OpCodeEnum::LdsfldAny;
                     break;
                 default:
-                    RET_ERR(core::RtErr::NotImplemented);
+                    RETURN_NOT_IMPLEMENTED_ERROR();
                 }
                 ll_inst->set_opcode(op);
                 setup_inst_resolved_data(ll_inst, field);
@@ -1917,7 +1917,7 @@ RtResultVoid Transformer::transform_instructions()
                     op = OpCodeEnum::StsfldAny;
                     break;
                 default:
-                    RET_ERR(core::RtErr::NotImplemented);
+                    RETURN_NOT_IMPLEMENTED_ERROR();
                 }
                 ll_inst->set_opcode(op);
                 setup_inst_resolved_data(ll_inst, field);
@@ -2114,7 +2114,7 @@ RtResultVoid Transformer::transform_instructions()
                 break;
             }
             default:
-                RET_ERR(core::RtErr::NotImplemented);
+                RETURN_NOT_IMPLEMENTED_ERROR();
             }
 
             if (add && ll_inst->get_opcode() != OpCodeEnum::Nop)

@@ -97,6 +97,12 @@
         return leanclr::RtErr::ManagedException;                                                    \
     } while (0)
 
+#if LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR
+#define LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR() LEANCLR_CODEGEN_RETURN(leanclr::fatal_on_not_implemented_error())
+#else
+#define LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR() LEANCLR_CODEGEN_RETURN(leanclr::RtErr::NotImplemented)
+#endif
+
 namespace leanclr
 {
 namespace codegen

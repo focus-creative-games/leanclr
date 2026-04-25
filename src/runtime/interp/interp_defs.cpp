@@ -170,7 +170,7 @@ RtResult<ReduceTypeAndSize> InterpDefs::get_reduce_type_and_size_by_typesig(cons
     }
     default:
         assert(false && "Not implemented type sig ele type");
-        RET_ERR(core::RtErr::NotImplemented);
+        RETURN_NOT_IMPLEMENTED_ERROR();
     }
     RET_OK(result);
 }

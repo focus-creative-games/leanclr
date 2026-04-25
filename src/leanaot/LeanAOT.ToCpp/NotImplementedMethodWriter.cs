@@ -9,8 +9,8 @@ namespace LeanAOT.ToCpp
 
         protected override void WriteMethodBody()
         {
-            _bodyWriter.AddLine("assert(false);");
-            _bodyWriter.AddLine($"return leanclr::RtErr::NotImplemented;");
+            _bodyWriter.AddLine($"printf(\"{_method.FullName} is not implemented\\n\");");
+            _bodyWriter.AddLine($"LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR();");
         }
     }
 }

@@ -57,7 +57,7 @@ RtResultVoid fn_not_implemented_internal_call_invoker(metadata::RtManagedMethodP
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
     printf("Internal call invoker not implemented for method: %s token:0x%0x\n", sb.as_cstr(), method->token);
 #endif
-    RET_ERR(core::RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Not implemented intrinsic invoker
@@ -69,7 +69,7 @@ RtResultVoid fn_not_implemented_intrinsic_invoker(metadata::RtManagedMethodPoint
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
     printf("Intrinsic invoker not implemented for method: %s token:0x%0x\n", sb.as_cstr(), method->token);
 #endif
-    RET_ERR(core::RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // PInvoke invoker (not implemented)
@@ -81,7 +81,7 @@ RtResultVoid fn_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer,
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
     printf("P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.as_cstr(), method->token);
 #endif
-    RET_ERR(core::RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Not implemented PInvoke invoker
@@ -93,7 +93,7 @@ RtResultVoid fn_not_implemented_pinvoke_invoker(metadata::RtManagedMethodPointer
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
     printf("P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.as_cstr(), method->token);
 #endif
-    RET_ERR(core::RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Not implemented runtime impl invoker
@@ -106,7 +106,7 @@ RtResultVoid fn_not_implemented_runtime_impl_invoker(metadata::RtManagedMethodPo
     printf("Runtime impl invoker not implemented for method: %s token:0x%0x\n", sb.as_cstr(), method->token);
 #endif
     // Placeholder implementation
-    RET_ERR(core::RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Not implemented generic invoker
@@ -119,7 +119,7 @@ RtResultVoid fn_not_implemented_invoker(metadata::RtManagedMethodPointer method_
     printf("Not implemented invoker not implemented for method: %s token:0x%0x\n", sb.as_cstr(), method->token);
 #endif
     // Placeholder implementation
-    RET_ERR(core::RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Method pointer placeholder

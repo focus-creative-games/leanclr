@@ -1762,22 +1762,6 @@ namespace LeanAOT.ToCpp
             return sb.ToString();
         }
 
-
-        private string CreateNewobjFunctionArgsWithCast(MethodDetail methodDetail, List<EvalVariable> args)
-        {
-            var sb = new StringBuilder();
-            for (int index = 1; index < methodDetail.ParamsIncludeThis.Length; index++)
-            {
-                if (index > 1)
-                {
-                    sb.Append(", ");
-                }
-                var param = methodDetail.ParamsIncludeThis[index];
-                sb.Append($"{GetVariableMayCast(args[param.Index], param.Type)} ");
-            }
-            return sb.ToString();
-        }
-
         public string GetMethodPointerFromFullReferenceMethodVariable(string methodVarName)
         {
             return $"{methodVarName}->{ConstStrings.MethodPointerFieldName}";
