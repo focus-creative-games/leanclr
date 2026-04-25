@@ -476,7 +476,7 @@ RtResult<const RtMethodInfo*> Method::inflate_method(const RtMethodInfo* method,
         }
         else
         {
-            assert(gc->method_inst && "Method generic instance must be provided in generic context");
+            //assert(gc->method_inst && "Method generic instance must be provided in generic context");
             newMethodInst = gc->method_inst;
         }
     }

@@ -4,6 +4,7 @@
 #include "generic_class.h"
 #include "class.h"
 #include "generic_method.h"
+#include "method.h"
 #include "metadata/generic_metadata.h"
 #include "metadata/metadata_cache.h"
 #include "metadata/module_def.h"
@@ -355,14 +356,13 @@ RtResultVoid GenericClass::setup_vtables(RtClass* klass)
         for (size_t i = 0; i < vtable_count; ++i)
         {
             const RtVirtualInvokeData* base_invoke_data = base_generic_class->vtable + i;
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, inflated_method,
-                                                    GenericMethod::get_method(base_invoke_data->method, generic_class->class_inst, nullptr));
+            RtGenericContext gc = {generic_class->class_inst, nullptr};
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, inflated_method, Method::inflate(base_invoke_data->method, &gc));
 
             const RtMethodInfo* inflated_method_impl = nullptr;
             if (base_invoke_data->method_impl)
             {
-                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, impl,
-                                                        GenericMethod::get_method(base_invoke_data->method_impl, generic_class->class_inst, nullptr));
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, impl, Method::inflate(base_invoke_data->method_impl, &gc));
                 inflated_method_impl = impl;
             }
 
