@@ -175,7 +175,7 @@ RtResultVoid MetadataName::append_type_sig_name(utils::StringBuilder& sb, const 
         break;
     }
     case RtElementType::Sentinel:
-        RET_ERR(RtErr::NotImplemented);
+        RETURN_NOT_IMPLEMENTED_ERROR();
     default:
         // Unreachable
         break;

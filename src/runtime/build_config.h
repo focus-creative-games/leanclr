@@ -69,4 +69,6 @@ typedef double float64_t;
 
 #define LEANCLR_NO_EXCEPTION noexcept
 
+#define LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR 1
+
 #include "il2cpp/unityversion.h"

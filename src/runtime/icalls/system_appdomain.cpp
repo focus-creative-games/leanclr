@@ -81,7 +81,7 @@ RtResult<int32_t> SystemAppDomain::execute_assembly(vm::RtObject* assembly, vm::
 {
     (void)assembly;
     (void)args;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::ExecuteAssembly(System.Reflection.Assembly,System.String[])
@@ -204,7 +204,7 @@ static RtResultVoid load_assembly_raw_invoker(metadata::RtManagedMethodPointer, 
 RtResult<vm::RtObject*> SystemAppDomain::internal_set_domain_by_id(int32_t id)
 {
     (void)id;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::InternalSetDomainByID(System.Int32)
@@ -220,7 +220,7 @@ static RtResultVoid internal_set_domain_by_id_invoker(metadata::RtManagedMethodP
 RtResult<vm::RtObject*> SystemAppDomain::internal_set_domain(vm::RtObject* domain)
 {
     (void)domain;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::InternalSetDomain(System.AppDomain)
@@ -236,7 +236,7 @@ static RtResultVoid internal_set_domain_invoker(metadata::RtManagedMethodPointer
 RtResultVoid SystemAppDomain::internal_push_domain_ref(vm::RtObject* domain)
 {
     (void)domain;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::InternalPushDomainRef(System.AppDomain)
@@ -252,7 +252,7 @@ static RtResultVoid internal_push_domain_ref_invoker(metadata::RtManagedMethodPo
 RtResultVoid SystemAppDomain::internal_push_domain_ref_by_id(int32_t id)
 {
     (void)id;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::InternalPushDomainRefByID(System.Int32)
@@ -267,7 +267,7 @@ static RtResultVoid internal_push_domain_ref_by_id_invoker(metadata::RtManagedMe
 
 RtResultVoid SystemAppDomain::internal_pop_domain_ref()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::InternalPopDomainRef()
@@ -283,7 +283,7 @@ static RtResultVoid internal_pop_domain_ref_invoker(metadata::RtManagedMethodPoi
 RtResult<vm::RtObject*> SystemAppDomain::internal_set_context(vm::RtObject* ctx)
 {
     (void)ctx;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::InternalSetContext(System.Runtime.Remoting.Contexts.Context)
@@ -329,7 +329,7 @@ static RtResultVoid internal_get_default_context_invoker(metadata::RtManagedMeth
 RtResult<vm::RtString*> SystemAppDomain::internal_get_process_guid(vm::RtObject* new_guid)
 {
     (void)new_guid;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::InternalGetProcessGuid(System.String)
@@ -346,7 +346,7 @@ RtResult<vm::RtObject*> SystemAppDomain::create_domain(vm::RtObject* friendly_na
 {
     (void)friendly_name;
     (void)setup;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::createDomain(System.String,System.AppDomainSetup)
@@ -379,7 +379,7 @@ static RtResultVoid internal_is_finalizing_for_unload_invoker(metadata::RtManage
 RtResultVoid SystemAppDomain::internal_unload(int32_t id)
 {
     (void)id;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::InternalUnload(System.Int32)
@@ -395,7 +395,7 @@ static RtResultVoid internal_unload_invoker(metadata::RtManagedMethodPointer, co
 RtResultVoid SystemAppDomain::do_unhandled_exception(vm::RtObject* ex)
 {
     (void)ex;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.AppDomain::DoUnhandledException(System.Exception)

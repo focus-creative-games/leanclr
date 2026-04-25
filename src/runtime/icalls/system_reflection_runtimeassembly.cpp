@@ -186,7 +186,7 @@ RtResult<bool> SystemReflectionRuntimeAssembly::get_manifest_resource_info_inter
     (void)ref_ass;
     (void)name;
     (void)info;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.Reflection.RuntimeAssembly::GetManifestResourceInfoInternal(System.String,System.Reflection.ManifestResourceInfo)
@@ -304,7 +304,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimeas
 
 utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeAssembly::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimeassembly, sizeof(s_internal_call_entries_system_reflection_runtimeassembly) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimeassembly,
+                                              sizeof(s_internal_call_entries_system_reflection_runtimeassembly) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

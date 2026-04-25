@@ -87,7 +87,7 @@ RtResult<SizeAndAlignment> Layout::get_field_size_and_alignment(RtTypeSig* typeS
         result = {vm::RT_TYPED_REFERENCE_SIZE, static_cast<uint32_t>(PTR_ALIGN)};
         break;
     default:
-        RET_ERR(RtErr::NotImplemented);
+        RETURN_NOT_IMPLEMENTED_ERROR();
     }
 
     RET_OK(result);

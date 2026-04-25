@@ -99,22 +99,22 @@ void Marshal::free_bstr(void* ptr)
 
 RtResultVoid Marshal::ptr_to_structure(void* ptr, vm::RtObject* obj)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<vm::RtObject*> Marshal::ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResultVoid Marshal::structure_to_ptr(vm::RtObject* obj, void* ptr, int32_t delete_old)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResultVoid Marshal::destroy_structure(void* ptr, vm::RtReflectionType* ref_type)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<int32_t> Marshal::sizeof_type(vm::RtReflectionType* ref_type)
@@ -140,17 +140,17 @@ RtResult<intptr_t> Marshal::offset_of(vm::RtReflectionType* ref_type, const char
 
 RtResult<void*> Marshal::unsafe_addr_of_pinned_array_element(vm::RtArray* arr, int32_t index)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<RtDelegate*> Marshal::marshal_function_pointer_to_delegate(void* ptr, metadata::RtClass* delegate_class)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<void*> Marshal::get_function_pointer_for_delegate(RtDelegate* delegate)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 int32_t Marshal::get_last_win32_error()

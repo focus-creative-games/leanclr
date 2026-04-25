@@ -42,7 +42,7 @@ RtResultVoid SystemReflectionAssemblyName::get_public_token(const uint8_t* publi
     (void)public_token;
     (void)len;
     // TODO: implement public key token generation
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.Reflection.AssemblyName::get_public_token(System.Byte*,System.Byte*,System.Int32)

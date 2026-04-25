@@ -10,7 +10,7 @@ namespace icalls
 
 RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_lcid(vm::RtCultureInfo* _this, int32_t /*culture_lcid*/)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.Globalization.CultureInfo::construct_internal_locale_from_lcid(System.Int32)
@@ -26,7 +26,7 @@ static RtResultVoid construct_internal_locale_from_lcid_invoker(metadata::RtMana
 
 RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_name(vm::RtCultureInfo* _this, vm::RtString* /*name*/)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.Globalization.CultureInfo::construct_internal_locale_from_name(System.String)
@@ -56,7 +56,7 @@ static RtResultVoid get_current_locale_name_invoker(metadata::RtManagedMethodPoi
 
 RtResult<vm::RtArray*> SystemGlobalizationCultureInfo::internal_get_cultures(bool /*neutral*/, bool /*specific*/, bool /*installed*/)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 /// @icall: System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)
@@ -84,7 +84,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultur
 
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_cultureinfo, sizeof(s_internal_call_entries_system_globalization_cultureinfo) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_cultureinfo,
+                                              sizeof(s_internal_call_entries_system_globalization_cultureinfo) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

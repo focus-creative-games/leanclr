@@ -765,7 +765,7 @@ RtResult<RtClass*> RtModuleDef::get_exported_class_by_token(const RtToken& token
     {
     case TableType::File:
     {
-        RET_ERR(RtErr::NotImplemented);
+        RETURN_NOT_IMPLEMENTED_ERROR();
     }
     case TableType::AssemblyRef:
     {
@@ -806,7 +806,7 @@ RtResult<uint32_t> RtModuleDef::get_exported_type_def_gid_by_token(const RtToken
     {
     case TableType::File:
     {
-        RET_ERR(RtErr::NotImplemented);
+        RETURN_NOT_IMPLEMENTED_ERROR();
     }
     case TableType::AssemblyRef:
     {
@@ -877,7 +877,7 @@ RtResult<uint32_t> RtModuleDef::get_type_def_gid_by_type_ref_rid(uint32_t rid)
     }
     case TableType::ModuleRef:
     {
-        RET_ERR(RtErr::NotImplemented);
+        RETURN_NOT_IMPLEMENTED_ERROR();
     }
     case TableType::AssemblyRef:
     {
@@ -1119,8 +1119,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
             }
             if (numSizes == 0 && numLoBounds == 0)
             {
-                UNWRAP_OR_RET_ERR_ON_FAIL(result.data.array_type,
-                                          metadata::MetadataCache::get_pooled_array_type(elementTypeSig, static_cast<uint8_t>(rank)));
+                UNWRAP_OR_RET_ERR_ON_FAIL(result.data.array_type, metadata::MetadataCache::get_pooled_array_type(elementTypeSig, static_cast<uint8_t>(rank)));
             }
             else
             {
@@ -1157,8 +1156,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
                 UNWRAP_OR_RET_ERR_ON_FAIL(tempGenericArgs[i], read_typesig(reader, gcc, gc));
             }
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtGenericInst*, gi,
-                                                    metadata::MetadataCache::get_pooled_generic_inst(tempGenericArgs,
-                                                                                                     static_cast<uint8_t>(genericArgCount)));
+                                                    metadata::MetadataCache::get_pooled_generic_inst(tempGenericArgs, static_cast<uint8_t>(genericArgCount)));
             result.data.generic_class = metadata::MetadataCache::get_pooled_generic_class(baseTypeSig.data.type_def_gid, gi);
             RET_VOID_OK();
         }
@@ -1645,7 +1643,7 @@ RtResult<RtMethodBody> RtModuleDef::read_method_body_from_rva(uint32_t rva)
                 }
                 if ((sectKind & (uint8_t)RtILSection::EHTable) == 0)
                 {
-                    RET_ERR(RtErr::NotImplemented);
+                    RETURN_NOT_IMPLEMENTED_ERROR();
                 }
                 if ((sectKind & (uint8_t)RtILSection::FatFormat) == 0)
                 {

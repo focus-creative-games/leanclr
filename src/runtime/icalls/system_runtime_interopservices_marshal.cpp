@@ -302,57 +302,57 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::set_last_win32_error(int32_t e
 
 RtResult<int32_t> SystemRuntimeInteropServicesMarshal::query_interface_internal(void* ptr, void* guid_ref, void* out_ptr_ref)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<int32_t> SystemRuntimeInteropServicesMarshal::release_internal(void* ptr)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<int32_t> SystemRuntimeInteropServicesMarshal::release_com_object_internal(vm::RtObject* obj)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<void*> SystemRuntimeInteropServicesMarshal::get_raw_iunknown_for_com_object_no_add_ref(vm::RtObject* obj)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<int32_t> SystemRuntimeInteropServicesMarshal::get_hr_for_exception_winrt(vm::RtObject* exception)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::get_native_activation_factory(vm::RtObject* type_obj)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<int32_t> SystemRuntimeInteropServicesMarshal::add_ref_internal(void* ptr)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<void*> SystemRuntimeInteropServicesMarshal::get_iunknown_for_object_internal(vm::RtObject* obj)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<void*> SystemRuntimeInteropServicesMarshal::get_idispatch_for_object_internal(vm::RtObject* obj)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<void*> SystemRuntimeInteropServicesMarshal::get_ccw(vm::RtObject* obj, vm::RtObject* type_obj)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::get_object_for_ccw(void* ptr)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // ========== Prelink stubs ==========
@@ -916,7 +916,9 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtime_interopservi
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesMarshal::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_interopservices_marshal, sizeof(s_internal_call_entries_system_runtime_interopservices_marshal) / sizeof(s_internal_call_entries_system_runtime_interopservices_marshal[0]));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_interopservices_marshal,
+                                              sizeof(s_internal_call_entries_system_runtime_interopservices_marshal) /
+                                                  sizeof(s_internal_call_entries_system_runtime_interopservices_marshal[0]));
 }
 
 } // namespace icalls

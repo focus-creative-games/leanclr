@@ -171,27 +171,27 @@ RtResult<RtArray*> Environment::get_environment_variable_names()
 
 RtResult<vm::RtString*> Environment::get_windows_folder_path(int32_t)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<vm::RtArray*> Environment::get_logical_drives()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<vm::RtString*> Environment::get_machine_config_path()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<vm::RtString*> Environment::get_home()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<vm::RtString*> Environment::get_bundled_machine_config()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 void Environment::fail_fast()

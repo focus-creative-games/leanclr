@@ -3,7 +3,7 @@
 #include <cstring>
 #include <string>
 
-#include "rt_base.h"
+#include "core/rt_base.h"
 #include "hash_util.h"
 
 namespace leanclr
@@ -11,9 +11,9 @@ namespace leanclr
 namespace utils
 {
 
-#define DUP_STR_TO_LOCAL_TEMP_ZERO_END_STR(local_temp_str, str, str_len) \
+#define DUP_STR_TO_LOCAL_TEMP_ZERO_END_STR(local_temp_str, str, str_len)    \
     char* local_temp_str = (char*)alloca(static_cast<size_t>(str_len) + 1); \
-    std::memcpy(local_temp_str, str, static_cast<size_t>(str_len));        \
+    std::memcpy(local_temp_str, str, static_cast<size_t>(str_len));         \
     local_temp_str[static_cast<size_t>(str_len)] = '\0';
 
 class StringBuilder;

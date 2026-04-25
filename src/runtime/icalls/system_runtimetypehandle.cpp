@@ -164,7 +164,7 @@ RtResult<bool> SystemRuntimeTypeHandle::is_subclass_of(const metadata::RtTypeSig
     if (child_ele_type == metadata::RtElementType::Var || child_ele_type == metadata::RtElementType::MVar)
     {
         // TODO: handle generic parameter constraints
-        RET_ERR(RtErr::NotImplemented);
+        RETURN_NOT_IMPLEMENTED_ERROR();
     }
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, child_class, vm::Class::get_class_from_typesig(child_type));

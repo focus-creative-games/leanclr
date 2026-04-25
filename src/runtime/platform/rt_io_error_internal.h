@@ -19,7 +19,7 @@
 
 #include <cstdint>
 
-#include "rt_base.h"
+#include "core/rt_base.h"
 
 #ifndef LEANCLR_PLATFORM_WIN
 #include <errno.h>

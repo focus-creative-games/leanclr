@@ -33,14 +33,14 @@ RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle
 RtResult<vm::RtCustomAttribute*> SystemReflectionFieldInfo::get_marshal_info(vm::RtReflectionField* field)
 {
     (void)field;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // ========== Invoker Functions ==========
 
 /// @icall: System.Reflection.FieldInfo::internal_from_handle_type(System.IntPtr,System.IntPtr)
-static RtResultVoid internal_from_handle_type_invoker_fieldinfo(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* ret) noexcept
+static RtResultVoid internal_from_handle_type_invoker_fieldinfo(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     metadata::RtFieldInfo* field = EvalStackOp::get_param<metadata::RtFieldInfo*>(params, 0);
     const metadata::RtTypeSig* type_sig = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 1);

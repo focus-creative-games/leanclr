@@ -1,6 +1,6 @@
 #pragma once
 
-#include "rt_base.h"
+#include "core/rt_base.h"
 #include "vm/rt_managed_types.h"
 
 namespace leanclr

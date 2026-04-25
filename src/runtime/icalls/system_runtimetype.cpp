@@ -145,8 +145,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::make_generic_type(vm::RtRefle
     if (arg_count != gc->generic_param_count)
         RET_ERR(RtErr::Argument);
 
-    const metadata::RtTypeSig** generic_arg_type_sigs =
-        (const metadata::RtTypeSig**)alloca(sizeof(metadata::RtTypeSig*) * static_cast<size_t>(arg_count));
+    const metadata::RtTypeSig** generic_arg_type_sigs = (const metadata::RtTypeSig**)alloca(sizeof(metadata::RtTypeSig*) * static_cast<size_t>(arg_count));
     for (int32_t i = 0; i < arg_count; ++i)
     {
         vm::RtReflectionType* arg_type_ref = vm::Array::get_array_data_at<vm::RtReflectionType*>(generic_args, i);
@@ -545,7 +544,7 @@ RtResultVoid SystemRuntimeType::get_interface_map_data(vm::RtReflectionRuntimeTy
 RtResultVoid SystemRuntimeType::get_guid(vm::RtReflectionRuntimeType* runtime_type, vm::RtArray* guid)
 {
     // GUID extraction is rarely used and requires MarshalAs/CustomAttribute metadata
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResultVoid SystemRuntimeType::get_packing(vm::RtReflectionRuntimeType* runtime_type, int32_t* packing, int32_t* size)
@@ -1125,7 +1124,7 @@ static RtResultVoid get_nested_types_native_invoker(metadata::RtManagedMethodPoi
 
 /// @icall: System.RuntimeType::get_Name
 static RtResultVoid runtimetype_get_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                       interp::RtStackObject* ret) noexcept
+                                                 interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, result, SystemRuntimeType::get_name(runtime_type));

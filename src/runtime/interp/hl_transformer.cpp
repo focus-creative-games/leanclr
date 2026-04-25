@@ -706,9 +706,8 @@ RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targ
 
     for (size_t i = 0; i < count; ++i)
     {
-        const size_t target_il_offset =
-            static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) +
-                                static_cast<ptrdiff_t>(utils::MemOp::read_u32_may_unaligned(((const int32_t*)case_targets) + i)));
+        const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) +
+                                                            static_cast<ptrdiff_t>(utils::MemOp::read_u32_may_unaligned(((const int32_t*)case_targets) + i)));
         auto target_bb_result = get_branch_target_bb(target_il_offset);
         RET_ERR_ON_FAIL(target_bb_result);
         BasicBlock* target_bb = target_bb_result.unwrap();
@@ -3924,7 +3923,7 @@ RtResultVoid Transformer::transform_body()
             default:
             {
                 // TODO: Additional opcodes to be implemented
-                RET_ERR(RtErr::NotImplemented);
+                RETURN_NOT_IMPLEMENTED_ERROR();
             }
             }
         }

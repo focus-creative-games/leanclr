@@ -90,7 +90,7 @@ RtResultVoid SystemReflectionAssembly::internal_get_assembly_name(vm::RtString* 
     (void)path;
     (void)aname;
     (void)codebase_out;
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_from(vm::RtString* path, bool ref_only, int32_t* mark)

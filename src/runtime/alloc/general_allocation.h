@@ -3,7 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 
-#include "rt_base.h"
+#include "core/rt_base.h"
 
 namespace leanclr
 {
@@ -30,7 +30,7 @@ class GeneralAllocation
     {
         s_memory_callbacks = callbacks;
     }
-    
+
     static void* malloc(size_t size)
     {
         return s_memory_callbacks.malloc(size);

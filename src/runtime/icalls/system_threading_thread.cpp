@@ -99,7 +99,7 @@ RtResult<int32_t> SystemThreadingThread::get_domain_id()
 // Thread initialization
 RtResult<bool> SystemThreadingThread::thread_internal(vm::RtThread* this_thread, vm::RtObject* start)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Thread name operations
@@ -130,12 +130,12 @@ RtResultVoid SystemThreadingThread::set_name_icall(vm::RtInternalThread* interna
 // Thread abort
 RtResultVoid SystemThreadingThread::abort_internal(vm::RtObject* internal_thread, vm::RtObject* state)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 RtResult<vm::RtObject*> SystemThreadingThread::get_abort_exception_state()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Spin wait
@@ -316,7 +316,7 @@ RtResult<int32_t> SystemThreadingThread::system_max_stack_stize()
 // Stack traces
 RtResultVoid SystemThreadingThread::get_stack_traces(vm::RtArray** threads, vm::RtArray** stack_frames)
 {
-    RET_ERR(RtErr::NotImplemented);
+    RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Invoker functions
@@ -917,7 +917,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_threading_thread[] =
 
 utils::Span<vm::InternalCallEntry> SystemThreadingThread::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_thread, sizeof(s_internal_call_entries_system_threading_thread) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_thread,
+                                              sizeof(s_internal_call_entries_system_threading_thread) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls
