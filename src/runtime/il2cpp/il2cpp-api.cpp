@@ -1073,7 +1073,8 @@ uint32_t il2cpp_allocation_granularity()
 // -- liveness -------------------------------------------------------------
 
 // only used in unity 2019 and 2020.
-void* il2cpp_unity_liveness_calculation_begin(Il2CppClass* filter, int max_object_count, il2cpp_register_object_callback callback, void* userdata, il2cpp_WorldChangedCallback onWorldStarted, il2cpp_WorldChangedCallback onWorldStopped)
+void* il2cpp_unity_liveness_calculation_begin(Il2CppClass* filter, int max_object_count, il2cpp_register_object_callback callback, void* userdata,
+                                              il2cpp_WorldChangedCallback onWorldStarted, il2cpp_WorldChangedCallback onWorldStopped)
 {
     il2cpp_liveness_reallocate_callback reallocate = nullptr;
     return leanclr::il2cpp::Liveness::allocate_struct(filter, static_cast<uint32_t>(max_object_count), callback, userdata, reallocate);

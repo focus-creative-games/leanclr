@@ -81,7 +81,7 @@ RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject
             continue;
 
         metadata::RtElementType field_ele_type = field->type_sig->ele_type;
-        size_t offset = vm::Field::get_field_offset_includes_object_header_for_all_type(field);
+        size_t offset = vm::Field::get_instance_field_offset_includes_object_header_for_all_type(field);
 
         uint8_t* field_data_ptr1 = reinterpret_cast<uint8_t*>(obj1) + offset;
         uint8_t* field_data_ptr2 = reinterpret_cast<uint8_t*>(obj2) + offset;
@@ -289,7 +289,7 @@ RtResult<int32_t> SystemValueType::internal_get_hash_code(vm::RtObject* obj, vm:
             continue;
 
         metadata::RtElementType field_ele_type = field->type_sig->ele_type;
-        size_t offset = vm::Field::get_field_offset_includes_object_header_for_all_type(field);
+        size_t offset = vm::Field::get_instance_field_offset_includes_object_header_for_all_type(field);
         uint8_t* field_data_ptr = reinterpret_cast<uint8_t*>(obj) + offset;
 
         int32_t field_hash = 0;
@@ -474,7 +474,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_valuetype[] = {
 
 utils::Span<vm::InternalCallEntry> SystemValueType::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_valuetype, sizeof(s_internal_call_entries_system_valuetype) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_valuetype,
+                                              sizeof(s_internal_call_entries_system_valuetype) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

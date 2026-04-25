@@ -31,7 +31,7 @@ RtResultVoid SystemTypedReference::internal_make_typed_reference(vm::RtTypedRefe
 
         if (i == 0)
         {
-            value = reinterpret_cast<uint8_t*>(target) + vm::Field::get_field_offset_includes_object_header_for_all_type(field_info);
+            value = reinterpret_cast<uint8_t*>(target) + vm::Field::get_instance_field_offset_includes_object_header_for_all_type(field_info);
         }
         else
         {
@@ -101,7 +101,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_typedreference[] = {
 
 utils::Span<vm::InternalCallEntry> SystemTypedReference::get_internal_call_entries()
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_typedreference, sizeof(s_internal_call_entries_system_typedreference) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_typedreference,
+                                              sizeof(s_internal_call_entries_system_typedreference) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

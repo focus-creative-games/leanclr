@@ -92,6 +92,18 @@ RtResult<const metadata::RtFieldInfo*> Field::inflate_field(const metadata::RtFi
     RET_OK(&inflatedClass->fields[fieldIndex]);
 }
 
+size_t Field::get_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field)
+{
+    if (is_instance(field))
+    {
+        return field->offset + vm::RT_OBJECT_HEADER_SIZE;
+    }
+    else
+    {
+        return field->offset;
+    }
+}
+
 // Get field offset including object header for reference types
 size_t Field::get_field_offset_includes_object_header_for_reference_type(const metadata::RtFieldInfo* field)
 {
@@ -106,7 +118,7 @@ size_t Field::get_field_offset_includes_object_header_for_reference_type(const m
 }
 
 // Get field offset including object header for all types
-size_t Field::get_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field)
+size_t Field::get_instance_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field)
 {
     assert(is_instance(field));
     return field->offset + vm::RT_OBJECT_HEADER_SIZE;
