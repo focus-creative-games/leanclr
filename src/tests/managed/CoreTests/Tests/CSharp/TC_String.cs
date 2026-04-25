@@ -1,4 +1,7 @@
-﻿namespace Tests.CSharp
+﻿using System;
+using System.Text;
+
+namespace Tests.CSharp
 {
     class TC_String : GeneralTestCaseBase
     {
