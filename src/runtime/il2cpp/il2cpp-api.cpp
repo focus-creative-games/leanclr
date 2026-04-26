@@ -323,6 +323,10 @@ const EventInfo* il2cpp_class_get_events(Il2CppClass* klass, void** iter)
         {
             return nullptr;
         }
+        if (klass->event_count == 0)
+        {
+            return nullptr;
+        }
         *iter = (void*)(klass->events);
         return klass->events;
     }
@@ -345,6 +349,10 @@ FieldInfo* il2cpp_class_get_fields(Il2CppClass* klass, void** iter)
     {
         auto ret = vm::Class::initialize_fields(klass);
         if (ret.is_err())
+        {
+            return nullptr;
+        }
+        if (klass->field_count == 0)
         {
             return nullptr;
         }
