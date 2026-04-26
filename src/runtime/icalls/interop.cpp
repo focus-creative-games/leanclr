@@ -15,11 +15,7 @@ namespace icalls
 #if defined(LEANCLR_PLATFORM_POSIX)
 RtResult<int32_t> Interop::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size)
 {
-    (void)value;
-    (void)format;
-    (void)buffer;
-    (void)buffer_size;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::double_to_string(value, format, buffer, buffer_size));
 }
 
 /// @icall: Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)
@@ -96,12 +92,12 @@ RtResult<int32_t> Interop::sys_f_stat(vm::RtObject* fd, void* output)
 
 RtResult<uint32_t> Interop::sys_get_e_gid()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::get_e_gid());
 }
 
 RtResult<uint32_t> Interop::sys_get_e_uid()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::get_e_uid());
 }
 
 RtResultVoid Interop::sys_get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length)
@@ -125,9 +121,7 @@ RtResult<int32_t> Interop::sys_lchflags(vm::RtString* path, uint32_t flags)
 
 RtResult<int32_t> Interop::sys_link(vm::RtString* source, vm::RtString* target)
 {
-    (void)source;
-    (void)target;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::link(source, target));
 }
 
 RtResult<int32_t> Interop::sys_lstat_byte(uint8_t* path, void* output)
@@ -190,9 +184,7 @@ RtResult<uint8_t*> Interop::sys_str_error_r(int32_t error, uint8_t* buffer, int3
 
 RtResult<int32_t> Interop::sys_symlink(vm::RtString* target, vm::RtString* link_path)
 {
-    (void)target;
-    (void)link_path;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::symlink(target, link_path));
 }
 
 RtResult<int32_t> Interop::sys_unlink(vm::RtString* path)

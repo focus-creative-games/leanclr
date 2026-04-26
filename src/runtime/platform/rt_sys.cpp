@@ -8,6 +8,8 @@
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
 
+#include <cstdio>
+
 #ifdef LEANCLR_PLATFORM_POSIX
 #include <dirent.h>
 #include <errno.h>
@@ -131,6 +133,24 @@ static intptr_t extract_safe_handle_raw_handle(vm::RtObject* safe_handle_obj)
 }
 #endif
 } // namespace
+
+int32_t RtSys::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    if (format == nullptr || buffer == nullptr || buffer_size <= 0)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    return std::snprintf(buffer, static_cast<size_t>(buffer_size), format, value);
+#else
+    (void)value;
+    (void)format;
+    (void)buffer;
+    (void)buffer_size;
+    return -1;
+#endif
+}
 
 int32_t RtSys::ch_mod(vm::RtString* path, int32_t mode)
 {
@@ -378,6 +398,57 @@ int32_t RtSys::read_link(vm::RtString* path, vm::RtArray* buffer, int32_t buffer
     (void)buffer;
     (void)buffer_size;
     return -1;
+#endif
+}
+
+int32_t RtSys::link(vm::RtString* source, vm::RtString* target)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    utils::StringBuilder source_utf8;
+    utils::StringBuilder target_utf8;
+    rt_string_to_utf8_path(source, source_utf8);
+    rt_string_to_utf8_path(target, target_utf8);
+    int32_t result = 0;
+    while ((result = ::link(source_utf8.as_cstr(), target_utf8.as_cstr())) < 0 && errno == EINTR)
+        ;
+    return result;
+#else
+    (void)source;
+    (void)target;
+    return -1;
+#endif
+}
+
+int32_t RtSys::symlink(vm::RtString* target, vm::RtString* link_path)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    utils::StringBuilder target_utf8;
+    utils::StringBuilder link_path_utf8;
+    rt_string_to_utf8_path(target, target_utf8);
+    rt_string_to_utf8_path(link_path, link_path_utf8);
+    return ::symlink(target_utf8.as_cstr(), link_path_utf8.as_cstr());
+#else
+    (void)target;
+    (void)link_path;
+    return -1;
+#endif
+}
+
+uint32_t RtSys::get_e_uid()
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    return static_cast<uint32_t>(::geteuid());
+#else
+    return 0;
+#endif
+}
+
+uint32_t RtSys::get_e_gid()
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    return static_cast<uint32_t>(::getegid());
+#else
+    return 0;
 #endif
 }
 
