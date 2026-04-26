@@ -1790,7 +1790,7 @@ RtResult<RtCustomAttributeRawData> RtModuleDef::get_custom_attribute_raw_data(ui
 
 RtResult<RtModuleDef::RtGenericParamConstraint> RtModuleDef::read_generic_param_constraints(uint32_t genericParamRid, const RtGenericContainerContext& gcc)
 {
-    auto opt_range = _cliImage.find_row_range_of_owner_at_sorted_table(TableType::GenericParamConstraint, 1, genericParamRid);
+    auto opt_range = _cliImage.find_row_range_of_owner_at_sorted_table(TableType::GenericParamConstraint, 0, genericParamRid);
     if (!opt_range)
     {
         RET_OK(RtGenericParamConstraint{});
