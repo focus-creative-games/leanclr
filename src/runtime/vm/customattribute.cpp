@@ -1297,7 +1297,7 @@ RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::R
     metadata::RtMarshalNativeType native_intrinsic_type = static_cast<metadata::RtMarshalNativeType>(native_type);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, marshal_as_obj, Object::new_object(corlib_types.cls_marshal_as));
-    const void* ctor_args[1] = {(const void*)(intptr_t)native_intrinsic_type};
+    const void* ctor_args[1] = { &native_intrinsic_type};
     RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(s_marshal_as_ctor, marshal_as_obj, ctor_args));
 
     metadata::RtMarshalNativeType ele_type = metadata::RtMarshalNativeType::Max;
