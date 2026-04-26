@@ -32,6 +32,7 @@ typedef double float64_t;
 #define LEANCLR_PLATFORM_POSIX 1
 #elif defined(__EMSCRIPTEN__)
 #define LEANCLR_PLATFORM_WASM 1
+#define LEANCLR_PLATFORM_POSIX 1
 #elif defined(__linux__)
 #define LEANCLR_PLATFORM_LINUX 1
 #define LEANCLR_PLATFORM_POSIX 1

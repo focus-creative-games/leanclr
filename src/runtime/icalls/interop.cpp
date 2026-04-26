@@ -6,6 +6,7 @@
 #include "metadata/module_def.h"
 #include "platform/bcrypt.h"
 #include "platform/kernel32.h"
+#include "platform/rt_sys.h"
 namespace leanclr
 {
 namespace icalls
@@ -61,9 +62,7 @@ RtResult<int32_t> Interop::globalization_get_time_zone_display_name(vm::RtString
 
 RtResult<int32_t> Interop::sys_ch_mod(vm::RtString* path, int32_t mode)
 {
-    (void)path;
-    (void)mode;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::ch_mod(path, mode));
 }
 
 RtResult<int32_t> Interop::sys_close_dir(intptr_t dir)
@@ -150,9 +149,7 @@ RtResult<int32_t> Interop::sys_lstat_string(vm::RtString* path, void* output)
 
 RtResult<int32_t> Interop::sys_mkdir(vm::RtString* path, int32_t mode)
 {
-    (void)path;
-    (void)mode;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::mk_dir(path, mode));
 }
 
 RtResult<intptr_t> Interop::sys_open_dir(vm::RtString* path)
@@ -180,15 +177,12 @@ RtResult<int32_t> Interop::sys_read_link(vm::RtString* path, vm::RtArray* buffer
 
 RtResult<int32_t> Interop::sys_rename(vm::RtString* old_path, vm::RtString* new_path)
 {
-    (void)old_path;
-    (void)new_path;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::rename(old_path, new_path));
 }
 
 RtResult<int32_t> Interop::sys_rmdir(vm::RtString* path)
 {
-    (void)path;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::rm_dir(path));
 }
 
 RtResult<int32_t> Interop::sys_stat_byte(uint8_t* path, void* output)
@@ -222,8 +216,7 @@ RtResult<int32_t> Interop::sys_symlink(vm::RtString* target, vm::RtString* link_
 
 RtResult<int32_t> Interop::sys_unlink(vm::RtString* path)
 {
-    (void)path;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::unlink(path));
 }
 
 RtResult<int32_t> Interop::sys_utime(vm::RtString* path, void* time_buffer)
