@@ -1,6 +1,8 @@
 #include "rt_sys.h"
 
 #include "build_config.h"
+#include "vm/class.h"
+#include "vm/field.h"
 #include "vm/rt_array.h"
 #include "vm/rt_string.h"
 #include "utils/string_builder.h"
@@ -35,6 +37,26 @@ struct PosixDirWrapper
     size_t num_entries;
 };
 
+struct ManagedFileStatus
+{
+    int32_t Flags;
+    int32_t Mode;
+    uint32_t Uid;
+    uint32_t Gid;
+    int64_t Size;
+    int64_t ATime;
+    int64_t ATimeNsec;
+    int64_t MTime;
+    int64_t MTimeNsec;
+    int64_t CTime;
+    int64_t CTimeNsec;
+    int64_t BirthTime;
+    int64_t BirthTimeNsec;
+    int64_t Dev;
+    int64_t Ino;
+    uint32_t UserFlags;
+};
+
 static int compare_directory_entry_by_name(const void* a, const void* b)
 {
     const ManagedDirectoryEntry* e1 = static_cast<const ManagedDirectoryEntry*>(a);
@@ -55,6 +77,57 @@ static void rt_string_to_utf8_path(vm::RtString* str, utils::StringBuilder& sb)
         utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)), sb);
     }
     sb.sure_null_terminator_but_not_append();
+}
+
+static void convert_stat_to_managed_file_status(const struct stat& src, ManagedFileStatus* dst)
+{
+    dst->Flags = 0;
+    dst->Mode = static_cast<int32_t>(src.st_mode);
+    dst->Uid = static_cast<uint32_t>(src.st_uid);
+    dst->Gid = static_cast<uint32_t>(src.st_gid);
+    dst->Size = static_cast<int64_t>(src.st_size);
+    dst->ATime = static_cast<int64_t>(src.st_atime);
+    dst->MTime = static_cast<int64_t>(src.st_mtime);
+    dst->CTime = static_cast<int64_t>(src.st_ctime);
+#if defined(__APPLE__)
+    dst->ATimeNsec = static_cast<int64_t>(src.st_atimespec.tv_nsec);
+    dst->MTimeNsec = static_cast<int64_t>(src.st_mtimespec.tv_nsec);
+    dst->CTimeNsec = static_cast<int64_t>(src.st_ctimespec.tv_nsec);
+    dst->BirthTime = static_cast<int64_t>(src.st_birthtimespec.tv_sec);
+    dst->BirthTimeNsec = static_cast<int64_t>(src.st_birthtimespec.tv_nsec);
+    dst->Flags = 1; // FILESTATUS_FLAGS_HAS_BIRTHTIME
+#elif defined(__linux__) || defined(__ANDROID__)
+    dst->ATimeNsec = static_cast<int64_t>(src.st_atim.tv_nsec);
+    dst->MTimeNsec = static_cast<int64_t>(src.st_mtim.tv_nsec);
+    dst->CTimeNsec = static_cast<int64_t>(src.st_ctim.tv_nsec);
+    dst->BirthTime = 0;
+    dst->BirthTimeNsec = 0;
+#else
+    dst->ATimeNsec = 0;
+    dst->MTimeNsec = 0;
+    dst->CTimeNsec = 0;
+    dst->BirthTime = 0;
+    dst->BirthTimeNsec = 0;
+#endif
+    dst->Dev = static_cast<int64_t>(src.st_dev);
+    dst->Ino = static_cast<int64_t>(src.st_ino);
+    dst->UserFlags = 0;
+}
+
+static intptr_t extract_safe_handle_raw_handle(vm::RtObject* safe_handle_obj)
+{
+    if (safe_handle_obj == nullptr)
+        return static_cast<intptr_t>(-1);
+
+    const metadata::RtClass* safe_handle_klass = safe_handle_obj->klass;
+    const metadata::RtFieldInfo* handle_field =
+        vm::Class::get_field_for_name(safe_handle_klass, "handle", static_cast<uint32_t>(std::strlen("handle")), true);
+    if (handle_field == nullptr)
+        return static_cast<intptr_t>(-1);
+
+    intptr_t handle_value = static_cast<intptr_t>(-1);
+    vm::Field::get_instance_value(handle_field, safe_handle_obj, &handle_value);
+    return handle_value;
 }
 #endif
 } // namespace
@@ -304,6 +377,122 @@ int32_t RtSys::read_link(vm::RtString* path, vm::RtArray* buffer, int32_t buffer
     (void)path;
     (void)buffer;
     (void)buffer_size;
+    return -1;
+#endif
+}
+
+int32_t RtSys::f_stat(vm::RtObject* fd, void* output)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    if (output == nullptr)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    intptr_t handle = extract_safe_handle_raw_handle(fd);
+    if (handle == static_cast<intptr_t>(-1))
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    struct stat st{};
+    int32_t ret = 0;
+    while ((ret = ::fstat(static_cast<int>(handle), &st)) < 0 && errno == EINTR)
+        ;
+    if (ret == 0)
+        convert_stat_to_managed_file_status(st, static_cast<ManagedFileStatus*>(output));
+    return ret;
+#else
+    (void)fd;
+    (void)output;
+    return -1;
+#endif
+}
+
+int32_t RtSys::stat_string(vm::RtString* path, void* output)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    if (output == nullptr)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    utils::StringBuilder path_utf8;
+    rt_string_to_utf8_path(path, path_utf8);
+    struct stat st{};
+    int32_t ret = 0;
+    while ((ret = ::stat(path_utf8.as_cstr(), &st)) < 0 && errno == EINTR)
+        ;
+    if (ret == 0)
+        convert_stat_to_managed_file_status(st, static_cast<ManagedFileStatus*>(output));
+    return ret;
+#else
+    (void)path;
+    (void)output;
+    return -1;
+#endif
+}
+
+int32_t RtSys::stat_byte(uint8_t* path, void* output)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    if (path == nullptr || output == nullptr)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    struct stat st{};
+    int32_t ret = 0;
+    while ((ret = ::stat(reinterpret_cast<const char*>(path), &st)) < 0 && errno == EINTR)
+        ;
+    if (ret == 0)
+        convert_stat_to_managed_file_status(st, static_cast<ManagedFileStatus*>(output));
+    return ret;
+#else
+    (void)path;
+    (void)output;
+    return -1;
+#endif
+}
+
+int32_t RtSys::lstat_string(vm::RtString* path, void* output)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    if (output == nullptr)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    utils::StringBuilder path_utf8;
+    rt_string_to_utf8_path(path, path_utf8);
+    struct stat st{};
+    int32_t ret = ::lstat(path_utf8.as_cstr(), &st);
+    if (ret == 0)
+        convert_stat_to_managed_file_status(st, static_cast<ManagedFileStatus*>(output));
+    return ret;
+#else
+    (void)path;
+    (void)output;
+    return -1;
+#endif
+}
+
+int32_t RtSys::lstat_byte(uint8_t* path, void* output)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    if (path == nullptr || output == nullptr)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    struct stat st{};
+    int32_t ret = ::lstat(reinterpret_cast<const char*>(path), &st);
+    if (ret == 0)
+        convert_stat_to_managed_file_status(st, static_cast<ManagedFileStatus*>(output));
+    return ret;
+#else
+    (void)path;
+    (void)output;
     return -1;
 #endif
 }

@@ -91,9 +91,7 @@ RtResult<int32_t> Interop::sys_copy_file(vm::RtObject* source, vm::RtObject* des
 
 RtResult<int32_t> Interop::sys_f_stat(vm::RtObject* fd, void* output)
 {
-    (void)fd;
-    (void)output;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::f_stat(fd, output));
 }
 
 RtResult<uint32_t> Interop::sys_get_e_gid()
@@ -134,16 +132,12 @@ RtResult<int32_t> Interop::sys_link(vm::RtString* source, vm::RtString* target)
 
 RtResult<int32_t> Interop::sys_lstat_byte(uint8_t* path, void* output)
 {
-    (void)path;
-    (void)output;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::lstat_byte(path, output));
 }
 
 RtResult<int32_t> Interop::sys_lstat_string(vm::RtString* path, void* output)
 {
-    (void)path;
-    (void)output;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::lstat_string(path, output));
 }
 
 RtResult<int32_t> Interop::sys_mkdir(vm::RtString* path, int32_t mode)
@@ -178,16 +172,12 @@ RtResult<int32_t> Interop::sys_rmdir(vm::RtString* path)
 
 RtResult<int32_t> Interop::sys_stat_byte(uint8_t* path, void* output)
 {
-    (void)path;
-    (void)output;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::stat_byte(path, output));
 }
 
 RtResult<int32_t> Interop::sys_stat_string(vm::RtString* path, void* output)
 {
-    (void)path;
-    (void)output;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::stat_string(path, output));
 }
 
 RtResult<uint8_t*> Interop::sys_str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size)

@@ -20,6 +20,11 @@ class RtSys
     static int32_t get_read_dir_r_buffer_size();
     static int32_t read_dir_r(intptr_t dir, uint8_t* buffer, int32_t buffer_size, void* output_entry);
     static int32_t read_link(vm::RtString* path, vm::RtArray* buffer, int32_t buffer_size);
+    static int32_t f_stat(vm::RtObject* fd, void* output);
+    static int32_t stat_string(vm::RtString* path, void* output);
+    static int32_t stat_byte(uint8_t* path, void* output);
+    static int32_t lstat_string(vm::RtString* path, void* output);
+    static int32_t lstat_byte(uint8_t* path, void* output);
 };
 } // namespace platform
 } // namespace leanclr
