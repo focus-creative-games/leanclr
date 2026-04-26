@@ -37,6 +37,8 @@ class Field
     // Check if field is private
     static bool is_private(const metadata::RtFieldInfo* field);
 
+    static bool has_field_marshal(const metadata::RtFieldInfo* field);
+
     // Inflate field with generic context
     static RtResult<const metadata::RtFieldInfo*> inflate_field(const metadata::RtFieldInfo* field, const metadata::RtGenericContext* generic_context);
 

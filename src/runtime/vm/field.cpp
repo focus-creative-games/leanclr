@@ -76,6 +76,11 @@ bool Field::is_private(const metadata::RtFieldInfo* field)
     return visibility == static_cast<uint32_t>(metadata::RtFieldAttribute::Private);
 }
 
+bool Field::has_field_marshal(const metadata::RtFieldInfo* field)
+{
+    return (field->flags & static_cast<uint32_t>(metadata::RtFieldAttribute::HasFieldMarshal)) != 0;
+}
+
 // Inflate field with generic context
 RtResult<const metadata::RtFieldInfo*> Field::inflate_field(const metadata::RtFieldInfo* field, const metadata::RtGenericContext* generic_context)
 {

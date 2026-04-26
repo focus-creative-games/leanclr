@@ -961,7 +961,8 @@ RtResultVoid CustomAttribute::resolve_customattribute_data_arguments(utils::Bina
     RET_VOID_OK();
 }
 
-RtResult<bool> CustomAttribute::has_customattribute_on_target(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token, const metadata::RtClass* attr_klass)
+RtResult<bool> CustomAttribute::has_customattribute_on_target(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token,
+                                                              const metadata::RtClass* attr_klass)
 {
     if (target_token == 0)
         RET_OK(false);
@@ -1120,7 +1121,8 @@ RtResult<bool> CustomAttribute::has_attribute(RtObject* obj, const metadata::RtC
     return has_customattribute_on_target(provider.mod, provider.token, attr_klass);
 }
 
-RtResult<RtArray*> CustomAttribute::get_customattributes_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token, const metadata::RtClass* attr_klass)
+RtResult<RtArray*> CustomAttribute::get_customattributes_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token,
+                                                                         const metadata::RtClass* attr_klass)
 {
     const CorLibTypes& types = Class::get_corlib_types();
 
@@ -1234,6 +1236,106 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(me
         Array::set_array_data_at<RtObject*>(ca_data_arr, (int32_t)i, ca_data_obj);
     }
     RET_OK(ca_data_arr);
+}
+
+static const metadata::RtMethodInfo* s_marshal_as_ctor = nullptr;
+static const metadata::RtFieldInfo* s_marshal_as_size_const_field = nullptr;
+static const metadata::RtFieldInfo* s_marshal_as_array_sub_type_field = nullptr;
+static const metadata::RtFieldInfo* s_marshal_as_size_param_index_field = nullptr;
+
+static void init_marshal_as_fields()
+{
+    if (s_marshal_as_ctor)
+    {
+        return;
+    }
+    const CorLibTypes& corlib_types = Class::get_corlib_types();
+    const metadata::RtClass* marshal_as_klass = corlib_types.cls_marshal_as;
+    const metadata::RtTypeSig* param_type_sigs[] = {
+        corlib_types.cls_int16->by_val,
+    };
+    s_marshal_as_ctor = Method::find_matched_method_in_class_by_name_and_signature(marshal_as_klass, STR_CTOR, param_type_sigs, 1);
+    assert(s_marshal_as_ctor);
+    s_marshal_as_size_const_field = Class::get_field_for_name(marshal_as_klass, "SizeConst", false);
+    assert(s_marshal_as_size_const_field);
+    s_marshal_as_array_sub_type_field = Class::get_field_for_name(marshal_as_klass, "ArraySubType", false);
+    assert(s_marshal_as_array_sub_type_field);
+    s_marshal_as_size_param_index_field = Class::get_field_for_name(marshal_as_klass, "SizeParamIndex", false);
+    assert(s_marshal_as_size_param_index_field);
+}
+
+RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::RtFieldInfo* field)
+{
+    if (!vm::Field::has_field_marshal(field))
+    {
+        RET_OK(nullptr);
+    }
+
+    metadata::RtModuleDef* mod = field->parent->image;
+    const metadata::CliImage& cli_image = mod->get_cli_image();
+    uint32_t field_rid = metadata::RtToken::decode_rid(field->token);
+    uint32_t fieldmarshal_parent = metadata::RtMetadata::encode_has_field_marshal_coded_index(metadata::TableType::Field, field_rid);
+    std::optional<uint32_t> marshal_rid = cli_image.find_row_of_owner(metadata::TableType::FieldMarshal, 0, fieldmarshal_parent);
+    if (!marshal_rid)
+    {
+        // impossible for valid dll file.
+        RET_ERR(RtErr::BadImageFormat);
+    }
+
+    std::optional<metadata::RowFieldMarshal> marshal_row = cli_image.read_field_marshal(marshal_rid.value());
+    assert(marshal_row.has_value());
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(utils::BinaryReader, reader, mod->get_decoded_blob_reader(marshal_row->native_type));
+    uint8_t native_type = 0;
+    if (!reader.try_read_byte(native_type))
+        RET_ERR(RtErr::BadImageFormat);
+
+    init_marshal_as_fields();
+    const CorLibTypes& corlib_types = Class::get_corlib_types();
+
+    assert(sizeof(metadata::RtMarshalNativeType) == sizeof(int32_t));
+    metadata::RtMarshalNativeType native_intrinsic_type = static_cast<metadata::RtMarshalNativeType>(native_type);
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, marshal_as_obj, Object::new_object(corlib_types.cls_marshal_as));
+    const void* ctor_args[1] = {(const void*)(intptr_t)native_intrinsic_type};
+    RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(s_marshal_as_ctor, marshal_as_obj, ctor_args));
+
+    metadata::RtMarshalNativeType ele_type = metadata::RtMarshalNativeType::Max;
+    uint32_t param_num = 0;
+    uint32_t num_elems = 0;
+    switch (native_intrinsic_type)
+    {
+    case metadata::RtMarshalNativeType::Array:
+    {
+        uint8_t ele_type_byte = 0;
+        if (!reader.try_read_byte(ele_type_byte))
+            RET_ERR(RtErr::BadImageFormat);
+        ele_type = static_cast<metadata::RtMarshalNativeType>(ele_type_byte);
+        vm::Field::set_instance_value(s_marshal_as_array_sub_type_field, marshal_as_obj, &ele_type);
+        if (reader.not_empty())
+        {
+            if (!reader.try_read_compressed_uint32(param_num))
+            {
+                RET_ERR(RtErr::BadImageFormat);
+            }
+            vm::Field::set_instance_value(s_marshal_as_size_param_index_field, marshal_as_obj, &param_num);
+        }
+        if (reader.not_empty())
+        {
+            if (!reader.try_read_compressed_uint32(num_elems))
+            {
+                RET_ERR(RtErr::BadImageFormat);
+            }
+            vm::Field::set_instance_value(s_marshal_as_size_const_field, marshal_as_obj, &num_elems);
+        }
+        break;
+    }
+    }
+    if (reader.not_empty())
+    {
+        RET_ERR(RtErr::BadImageFormat);
+    }
+    RET_OK((RtCustomAttribute*)marshal_as_obj);
 }
 
 } // namespace vm

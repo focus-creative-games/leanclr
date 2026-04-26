@@ -2,6 +2,8 @@
 #include "icall_base.h"
 #include "vm/class.h"
 #include "vm/reflection.h"
+#include "vm/customattribute.h"
+#include "vm/rt_array.h"
 
 namespace leanclr
 {
@@ -32,8 +34,7 @@ RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle
 
 RtResult<vm::RtCustomAttribute*> SystemReflectionFieldInfo::get_marshal_info(vm::RtReflectionField* field)
 {
-    (void)field;
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    return vm::CustomAttribute::get_marshal_info(field->field);
 }
 
 // ========== Invoker Functions ==========
