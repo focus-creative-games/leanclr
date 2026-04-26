@@ -33,7 +33,7 @@ RtResultVoid double_to_string_invoker(metadata::RtManagedMethodPointer, const me
 
 RtResult<int32_t> Interop::sys_lchflags_can_set_hidden_flag()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::lchflags_can_set_hidden_flag());
 }
 
 /// @icall: Interop/Sys::LChflagsCanSetHiddenFlag
@@ -48,12 +48,7 @@ RtResultVoid sys_lchflags_can_set_hidden_flag_invoker(metadata::RtManagedMethodP
 RtResult<int32_t> Interop::globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type,
                                                                      vm::RtObject* result, int32_t result_length)
 {
-    (void)locale_name;
-    (void)time_zone_id;
-    (void)type;
-    (void)result;
-    (void)result_length;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::globalization_get_time_zone_display_name(locale_name, time_zone_id, type, result, result_length));
 }
 
 RtResult<int32_t> Interop::sys_ch_mod(vm::RtString* path, int32_t mode)
@@ -109,9 +104,7 @@ RtResult<int32_t> Interop::sys_get_read_dir_r_buffer_size()
 
 RtResult<int32_t> Interop::sys_lchflags(vm::RtString* path, uint32_t flags)
 {
-    (void)path;
-    (void)flags;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::lchflags(path, flags));
 }
 
 RtResult<int32_t> Interop::sys_link(vm::RtString* source, vm::RtString* target)
@@ -186,16 +179,12 @@ RtResult<int32_t> Interop::sys_unlink(vm::RtString* path)
 
 RtResult<int32_t> Interop::sys_utime(vm::RtString* path, void* time_buffer)
 {
-    (void)path;
-    (void)time_buffer;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::utime(path, time_buffer));
 }
 
 RtResult<int32_t> Interop::sys_utimes(vm::RtString* path, void* time_value_pair)
 {
-    (void)path;
-    (void)time_value_pair;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::utimes(path, time_value_pair));
 }
 
 /// @icall: Interop/Globalization::GetTimeZoneDisplayName(System.String,System.String,Interop/Globalization/TimeZoneDisplayNameType,System.Text.StringBuilder,System.Int32)

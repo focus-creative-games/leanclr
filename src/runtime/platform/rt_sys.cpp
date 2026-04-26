@@ -18,7 +18,9 @@
 #include <dirent.h>
 #include <errno.h>
 #include <sys/stat.h>
+#include <sys/time.h>
 #include <unistd.h>
+#include <utime.h>
 #endif
 
 namespace leanclr
@@ -711,6 +713,93 @@ cleanup:
 #else
     (void)source;
     (void)destination;
+    return -1;
+#endif
+}
+
+int32_t RtSys::lchflags(vm::RtString* path, uint32_t flags)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    (void)path;
+    (void)flags;
+#if defined(__APPLE__)
+    utils::StringBuilder path_utf8;
+    rt_string_to_utf8_path(path, path_utf8);
+    int32_t result = 0;
+    while ((result = ::lchflags(path_utf8.as_cstr(), flags)) < 0 && errno == EINTR)
+        ;
+    return result;
+#else
+    errno = ENOTSUP;
+    return -1;
+#endif
+#else
+    (void)path;
+    (void)flags;
+    return -1;
+#endif
+}
+
+int32_t RtSys::lchflags_can_set_hidden_flag()
+{
+#if defined(LEANCLR_PLATFORM_POSIX) && defined(__APPLE__)
+    return 1;
+#else
+    return 0;
+#endif
+}
+
+int32_t RtSys::utime(vm::RtString* path, void* time_buffer)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    (void)time_buffer;
+    // IL2CPP PAL currently treats this as unsupported path.
+    utils::StringBuilder path_utf8;
+    rt_string_to_utf8_path(path, path_utf8);
+    (void)path_utf8;
+    errno = ENOTSUP;
+    return -1;
+#else
+    (void)path;
+    (void)time_buffer;
+    return -1;
+#endif
+}
+
+int32_t RtSys::utimes(vm::RtString* path, void* time_value_pair)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    if (time_value_pair == nullptr)
+    {
+        errno = EINVAL;
+        return -1;
+    }
+    utils::StringBuilder path_utf8;
+    rt_string_to_utf8_path(path, path_utf8);
+    timeval* times = reinterpret_cast<timeval*>(time_value_pair);
+    int32_t result = 0;
+    while ((result = ::utimes(path_utf8.as_cstr(), times)) < 0 && errno == EINTR)
+        ;
+    return result;
+#else
+    (void)path;
+    (void)time_value_pair;
+    return -1;
+#endif
+}
+
+int32_t RtSys::globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type, vm::RtObject* result,
+                                                         int32_t result_length)
+{
+    (void)locale_name;
+    (void)time_zone_id;
+    (void)type;
+    (void)result;
+    (void)result_length;
+#ifdef LEANCLR_PLATFORM_POSIX
+    // Keep parity with IL2CPP PAL fallback (pal_unused.cpp): unsupported.
+    return -1;
+#else
     return -1;
 #endif
 }

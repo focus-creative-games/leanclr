@@ -30,6 +30,12 @@ class RtSys
     static uint8_t* str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size);
     static void get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length);
     static int32_t copy_file(vm::RtObject* source, vm::RtObject* destination);
+    static int32_t lchflags(vm::RtString* path, uint32_t flags);
+    static int32_t lchflags_can_set_hidden_flag();
+    static int32_t utime(vm::RtString* path, void* time_buffer);
+    static int32_t utimes(vm::RtString* path, void* time_value_pair);
+    static int32_t globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type, vm::RtObject* result,
+                                                            int32_t result_length);
     static int32_t f_stat(vm::RtObject* fd, void* output);
     static int32_t stat_string(vm::RtString* path, void* output);
     static int32_t stat_byte(uint8_t* path, void* output);

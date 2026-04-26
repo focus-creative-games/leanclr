@@ -14,10 +14,22 @@ namespace icalls
 RtResult<bool> SystemCurrentSystemTimeZone::get_time_zone_data(int32_t year, vm::RtArray** data, vm::RtArray** names, bool* daylight)
 {
     (void)year;
-    (void)data;
-    (void)names;
-    (void)daylight;
-    RET_ERR(RtErr::NotImplemented);
+    auto corlib_types = vm::Class::get_corlib_types();
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, date_arr, vm::Array::new_szarray_from_ele_klass(corlib_types.cls_int64, 4));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, names_arr, vm::Array::new_szarray_from_ele_klass(corlib_types.cls_string, 2));
+
+    vm::RtString* utc = vm::String::create_string_from_utf8cstr("UTC");
+    vm::Array::set_array_data_at<vm::RtString*>(names_arr, 0, utc);
+    vm::Array::set_array_data_at<vm::RtString*>(names_arr, 1, utc);
+    vm::Array::set_array_data_at<int64_t>(date_arr, 0, 0);
+    vm::Array::set_array_data_at<int64_t>(date_arr, 1, 0);
+    vm::Array::set_array_data_at<int64_t>(date_arr, 2, 0);
+    vm::Array::set_array_data_at<int64_t>(date_arr, 3, 0);
+
+    *data = date_arr;
+    *names = names_arr;
+    *daylight = false;
+    RET_OK(true);
 }
 
 /// @icall: System.CurrentSystemTimeZone::GetTimeZoneData(System.Int32,System.Int64[]&,System.String[]&,System.Boolean&)
