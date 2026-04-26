@@ -781,7 +781,7 @@ const metadata::RtFieldInfo* Class::get_field_for_name(const metadata::RtClass* 
     return nullptr;
 }
 
-const metadata::RtMethodInfo* Class::get_method_for_name(const metadata::RtClass* klass, const char* name, bool search_parent)
+const metadata::RtMethodInfo* Class::get_method_for_name(const metadata::RtClass* klass, const char* name, int32_t argument_count, bool search_parent)
 {
     assert(Class::has_initialized_part(klass, metadata::RtClassInitPart::Method));
     const metadata::RtClass* cur = klass;
@@ -791,7 +791,7 @@ const metadata::RtMethodInfo* Class::get_method_for_name(const metadata::RtClass
         for (size_t i = 0; i < cur->method_count; ++i)
         {
             const metadata::RtMethodInfo* method = methods[i];
-            if (std::strcmp(method->name, name) == 0)
+            if (std::strcmp(method->name, name) == 0 && (argument_count < 0 || method->parameter_count == argument_count))
             {
                 return method;
             }

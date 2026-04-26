@@ -200,7 +200,7 @@ class Class
     // Reflection/search functions
     static const metadata::RtFieldInfo* get_field_for_name(const metadata::RtClass* klass, const char* name, bool search_parent);
     static const metadata::RtFieldInfo* get_field_for_name(const metadata::RtClass* klass, const char* name, uint32_t name_len, bool search_parent);
-    static const metadata::RtMethodInfo* get_method_for_name(const metadata::RtClass* klass, const char* name, bool search_parent);
+    static const metadata::RtMethodInfo* get_method_for_name(const metadata::RtClass* klass, const char* name, int32_t argument_count, bool search_parent);
     static const metadata::RtPropertyInfo* get_property_for_name(const metadata::RtClass* klass, const char* name, bool search_parent);
     static const metadata::RtPropertyInfo* get_property_for_name(const metadata::RtClass* klass, const char* name, uint32_t name_len, bool search_parent);
     static const metadata::RtEventInfo* get_event_for_name(const metadata::RtClass* klass, const char* name, bool search_parent);

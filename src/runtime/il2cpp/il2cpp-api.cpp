@@ -1384,20 +1384,25 @@ void il2cpp_runtime_class_init(Il2CppClass* klass)
     auto ret = vm::Runtime::run_class_static_constructor(klass);
     if (ret.is_err())
     {
-        // FIXME: should throw exception
+        il2cpp_raise_exception(vm::Exception::raise_error_as_exception(ret.unwrap_err(), nullptr, nullptr));
     }
 }
 
 void il2cpp_runtime_object_init(Il2CppObject* obj)
 {
-    const MethodInfo* ctor = vm::Method::find_matched_method_in_class_by_name_and_param_count(obj->klass, ".ctor", 0);
-    if (ctor)
-        vm::Runtime::invoke_with_run_cctor(ctor, obj, nullptr);
+    const MethodInfo* ctor = vm::Class::get_method_for_name(obj->klass, ".ctor", 0, true);
+    assert(ctor);
+    auto ret = vm::Runtime::invoke_with_run_cctor(ctor, obj, nullptr);
+    if (ret.is_err())
+    {
+        il2cpp_raise_exception(vm::Exception::raise_error_as_exception(ret.unwrap_err(), nullptr, nullptr));
+    }
 }
 
 void il2cpp_runtime_object_init_exception(Il2CppObject* obj, Il2CppException** exc)
 {
-    const MethodInfo* ctor = vm::Method::find_matched_method_in_class_by_name_and_param_count(obj->klass, ".ctor", 0);
+    const MethodInfo* ctor = vm::Class::get_method_for_name(obj->klass, ".ctor", 0, true);
+    assert(ctor);
     if (!ctor)
     {
         Il2CppException* ex = vm::Exception::raise_error_as_exception(RtErr::MissingMethod, nullptr, nullptr);

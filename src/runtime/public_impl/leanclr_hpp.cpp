@@ -188,7 +188,7 @@ RtResultVoid RuntimeApi::get_class_methods(const metadata::RtClass* klass, const
 RtResult<const metadata::RtMethodInfo*> RuntimeApi::get_class_method_by_name(const metadata::RtClass* klass, const char* method_name)
 {
     RET_ERR_ON_FAIL(vm::Class::initialize_methods(const_cast<metadata::RtClass*>(klass)));
-    RET_OK(vm::Class::get_method_for_name(klass, method_name, false));
+    RET_OK(vm::Class::get_method_for_name(klass, method_name, -1, false));
 }
 
 RtResultVoid RuntimeApi::get_class_field(const metadata::RtClass* klass, const metadata::RtFieldInfo*& fields, size_t& count)
