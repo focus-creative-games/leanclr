@@ -5,6 +5,11 @@
     "header": "icalls/interop.h"
   },
   {
+    "name": "Interop/Globalization::GetTimeZoneDisplayName(System.String,System.String,Interop/Globalization/TimeZoneDisplayNameType,System.Text.StringBuilder,System.Int32)",
+    "func": "Interop::globalization_get_time_zone_display_name",
+    "header": "icalls/interop.h"
+  },
+  {
     "name": "Interop/Kernel32::FindFirstFileExPrivate(System.String,Interop/Kernel32/FINDEX_INFO_LEVELS,Interop/Kernel32/WIN32_FIND_DATA&,Interop/Kernel32/FINDEX_SEARCH_OPS,System.IntPtr,System.Int32)",
     "func": "Interop::kernel32_find_first_file_ex_private",
     "header": "icalls/interop.h"
@@ -20,13 +25,148 @@
     "header": "icalls/interop.h"
   },
   {
+    "name": "Interop/Sys::ChMod(System.String,System.Int32)",
+    "func": "Interop::sys_ch_mod",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::CloseDir(System.IntPtr)",
+    "func": "Interop::sys_close_dir",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::ConvertErrorPalToPlatform(Interop/Error)",
+    "func": "Interop::sys_convert_error_pal_to_platform",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::ConvertErrorPlatformToPal(System.Int32)",
+    "func": "Interop::sys_convert_error_platform_to_pal",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::CopyFile(Microsoft.Win32.SafeHandles.SafeFileHandle,Microsoft.Win32.SafeHandles.SafeFileHandle)",
+    "func": "Interop::sys_copy_file",
+    "header": "icalls/interop.h"
+  },
+  {
     "name": "Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)",
     "func": "Interop::double_to_string",
     "header": "icalls/interop.h"
   },
   {
+    "name": "Interop/Sys::FStat(Microsoft.Win32.SafeHandles.SafeFileHandle,Interop/Sys/FileStatus&)",
+    "func": "Interop::sys_f_stat",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::GetEGid()",
+    "func": "Interop::sys_get_e_gid",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::GetEUid()",
+    "func": "Interop::sys_get_e_uid",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::GetNonCryptographicallySecureRandomBytes(System.Byte*,System.Int32)",
+    "func": "Interop::sys_get_non_cryptographically_secure_random_bytes",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::GetReadDirRBufferSize()",
+    "func": "Interop::sys_get_read_dir_r_buffer_size",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::LChflags(System.String,System.UInt32)",
+    "func": "Interop::sys_lchflags",
+    "header": "icalls/interop.h"
+  },
+  {
     "name": "Interop/Sys::LChflagsCanSetHiddenFlag",
     "func": "Interop::sys_lchflags_can_set_hidden_flag",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::Link(System.String,System.String)",
+    "func": "Interop::sys_link",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::LStat(System.Byte&,Interop/Sys/FileStatus&)",
+    "func": "Interop::sys_lstat_byte",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::LStat(System.String,Interop/Sys/FileStatus&)",
+    "func": "Interop::sys_lstat_string",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::MkDir(System.String,System.Int32)",
+    "func": "Interop::sys_mkdir",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::OpenDir(System.String)",
+    "func": "Interop::sys_open_dir",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::ReadDirR(System.IntPtr,System.Byte*,System.Int32,Interop/Sys/DirectoryEntry&)",
+    "func": "Interop::sys_read_dir_r",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::ReadLink(System.String,System.Byte[],System.Int32)",
+    "func": "Interop::sys_read_link",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::Rename(System.String,System.String)",
+    "func": "Interop::sys_rename",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::RmDir(System.String)",
+    "func": "Interop::sys_rmdir",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::Stat(System.Byte&,Interop/Sys/FileStatus&)",
+    "func": "Interop::sys_stat_byte",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::Stat(System.String,Interop/Sys/FileStatus&)",
+    "func": "Interop::sys_stat_string",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::StrErrorR(System.Int32,System.Byte*,System.Int32)",
+    "func": "Interop::sys_str_error_r",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::Symlink(System.String,System.String)",
+    "func": "Interop::sys_symlink",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::Unlink(System.String)",
+    "func": "Interop::sys_unlink",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::UTime(System.String,Interop/Sys/UTimBuf&)",
+    "func": "Interop::sys_utime",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Sys::UTimes(System.String,Interop/Sys/TimeValPair&)",
+    "func": "Interop::sys_utimes",
     "header": "icalls/interop.h"
   },
   {
