@@ -10,7 +10,7 @@ namespace leanclr
 namespace icalls
 {
 
-#if defined(LEANCLR_PLATFORM_POSIX)
+#if LEANCLR_PLATFORM_POSIX
 RtResult<bool> SystemCurrentSystemTimeZone::get_time_zone_data(int32_t year, vm::RtArray** data, vm::RtArray** names, bool* daylight)
 {
     (void)year;

@@ -128,8 +128,7 @@ static intptr_t extract_safe_handle_raw_handle(vm::RtObject* safe_handle_obj)
         return static_cast<intptr_t>(-1);
 
     const metadata::RtClass* safe_handle_klass = safe_handle_obj->klass;
-    const metadata::RtFieldInfo* handle_field =
-        vm::Class::get_field_for_name(safe_handle_klass, "handle", static_cast<uint32_t>(std::strlen("handle")), true);
+    const metadata::RtFieldInfo* handle_field = vm::Class::get_field_for_name(safe_handle_klass, "handle", static_cast<uint32_t>(std::strlen("handle")), true);
     if (handle_field == nullptr)
         return static_cast<intptr_t>(-1);
 
@@ -742,7 +741,7 @@ int32_t RtSys::lchflags(vm::RtString* path, uint32_t flags)
 
 int32_t RtSys::lchflags_can_set_hidden_flag()
 {
-#if defined(LEANCLR_PLATFORM_POSIX) && defined(__APPLE__)
+#if LEANCLR_PLATFORM_POSIX && defined(__APPLE__)
     return 1;
 #else
     return 0;
@@ -789,7 +788,7 @@ int32_t RtSys::utimes(vm::RtString* path, void* time_value_pair)
 }
 
 int32_t RtSys::globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type, vm::RtObject* result,
-                                                         int32_t result_length)
+                                                        int32_t result_length)
 {
     (void)locale_name;
     (void)time_zone_id;

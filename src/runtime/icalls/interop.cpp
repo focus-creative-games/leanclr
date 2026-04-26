@@ -12,7 +12,7 @@ namespace leanclr
 namespace icalls
 {
 
-#if defined(LEANCLR_PLATFORM_POSIX)
+#if LEANCLR_PLATFORM_POSIX
 RtResult<int32_t> Interop::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size)
 {
     RET_OK(platform::RtSys::double_to_string(value, format, buffer, buffer_size));
@@ -45,8 +45,8 @@ RtResultVoid sys_lchflags_can_set_hidden_flag_invoker(metadata::RtManagedMethodP
     RET_VOID_OK();
 }
 
-RtResult<int32_t> Interop::globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type,
-                                                                     vm::RtObject* result, int32_t result_length)
+RtResult<int32_t> Interop::globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type, vm::RtObject* result,
+                                                                    int32_t result_length)
 {
     RET_OK(platform::RtSys::globalization_get_time_zone_display_name(locale_name, time_zone_id, type, result, result_length));
 }
@@ -187,7 +187,8 @@ RtResult<int32_t> Interop::sys_utimes(vm::RtString* path, void* time_value_pair)
     RET_OK(platform::RtSys::utimes(path, time_value_pair));
 }
 
-/// @icall: Interop/Globalization::GetTimeZoneDisplayName(System.String,System.String,Interop/Globalization/TimeZoneDisplayNameType,System.Text.StringBuilder,System.Int32)
+/// @icall:
+/// Interop/Globalization::GetTimeZoneDisplayName(System.String,System.String,Interop/Globalization/TimeZoneDisplayNameType,System.Text.StringBuilder,System.Int32)
 RtResultVoid globalization_get_time_zone_display_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
@@ -225,7 +226,7 @@ RtResultVoid sys_close_dir_invoker(metadata::RtManagedMethodPointer, const metad
 
 /// @icall: Interop/Sys::ConvertErrorPalToPlatform(Interop/Error)
 RtResultVoid sys_convert_error_pal_to_platform_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                        interp::RtStackObject* ret) noexcept
+                                                       interp::RtStackObject* ret) noexcept
 {
     auto error = EvalStackOp::get_param<int32_t>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_convert_error_pal_to_platform(error));
@@ -235,7 +236,7 @@ RtResultVoid sys_convert_error_pal_to_platform_invoker(metadata::RtManagedMethod
 
 /// @icall: Interop/Sys::ConvertErrorPlatformToPal(System.Int32)
 RtResultVoid sys_convert_error_platform_to_pal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                        interp::RtStackObject* ret) noexcept
+                                                       interp::RtStackObject* ret) noexcept
 {
     auto error = EvalStackOp::get_param<int32_t>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_convert_error_platform_to_pal(error));
@@ -285,7 +286,7 @@ RtResultVoid sys_get_e_uid_invoker(metadata::RtManagedMethodPointer, const metad
 
 /// @icall: Interop/Sys::GetNonCryptographicallySecureRandomBytes(System.Byte*,System.Int32)
 RtResultVoid sys_get_non_cryptographically_secure_random_bytes_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
-                                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+                                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto buffer = EvalStackOp::get_param<uint8_t*>(params, 0);
     auto length = EvalStackOp::get_param<int32_t>(params, 1);
@@ -296,7 +297,7 @@ RtResultVoid sys_get_non_cryptographically_secure_random_bytes_invoker(metadata:
 
 /// @icall: Interop/Sys::GetReadDirRBufferSize()
 RtResultVoid sys_get_read_dir_r_buffer_size_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
-                                                     interp::RtStackObject* ret) noexcept
+                                                    interp::RtStackObject* ret) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_get_read_dir_r_buffer_size());
     EvalStackOp::set_return(ret, result);
@@ -532,8 +533,8 @@ RtResult<bool> Interop::kernel32_get_file_attributes_ex_private(vm::RtString* na
 }
 
 /// @icall: Interop/Kernel32::GetFileAttributesExPrivate(System.String,Interop/Kernel32/GET_FILEEX_INFO_LEVELS, Interop/Kernel32/WIN32_FILE_ATTRIBUTE_DATA&)
-RtResultVoid kernel32_get_file_attributes_ex_private_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* ret) noexcept
+RtResultVoid kernel32_get_file_attributes_ex_private_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     vm::RtString* name = interp::EvalStackOp::get_param<vm::RtString*>(params, 0);
     uint32_t file_info_level = interp::EvalStackOp::get_param<uint32_t>(params, 1);
@@ -549,7 +550,7 @@ struct SafeFindHandle : public vm::RtObject
 };
 
 RtResult<vm::RtObject*> Interop::kernel32_find_first_file_ex_private(vm::RtString* lp_file_name, uint32_t f_info_level_id, void* lp_find_file_data,
-                                                                 uint32_t f_search_op, intptr_t lp_search_filter, int32_t dw_additional_flags)
+                                                                     uint32_t f_search_op, intptr_t lp_search_filter, int32_t dw_additional_flags)
 {
     static metadata::RtClass* safe_find_handle_class = nullptr;
     if (!safe_find_handle_class)
@@ -557,8 +558,8 @@ RtResult<vm::RtObject*> Interop::kernel32_find_first_file_ex_private(vm::RtStrin
         metadata::RtModuleDef* mod = vm::Assembly::get_corlib()->mod;
         UNWRAP_OR_RET_ERR_ON_FAIL(safe_find_handle_class, mod->get_class_by_name("Microsoft.Win32.SafeHandles.SafeFindHandle", false, true));
     }
-    intptr_t handle = platform::Kernel32::find_first_file_ex_private(lp_file_name, f_info_level_id, lp_find_file_data, f_search_op, lp_search_filter,
-                                                          dw_additional_flags);
+    intptr_t handle =
+        platform::Kernel32::find_first_file_ex_private(lp_file_name, f_info_level_id, lp_find_file_data, f_search_op, lp_search_filter, dw_additional_flags);
     const metadata::RtClass* safe_handle_klass = safe_find_handle_class->parent->parent;
     assert(safe_handle_klass && std::strcmp(safe_handle_klass->name, "SafeHandle") == 0);
     assert(std::strcmp(safe_handle_klass->fields[0].name, "handle") == 0 && safe_handle_klass->fields[0].offset == 0);
@@ -567,7 +568,8 @@ RtResult<vm::RtObject*> Interop::kernel32_find_first_file_ex_private(vm::RtStrin
     RET_OK(safe_handle);
 }
 
-/// @icall: Interop/Kernel32::FindFirstFileExPrivate(System.String,Interop/Kernel32/FINDEX_INFO_LEVELS,Interop/Kernel32/WIN32_FIND_DATA&,Interop/Kernel32/FINDEX_SEARCH_OPS,System.IntPtr,System.Int32)
+/// @icall:
+/// Interop/Kernel32::FindFirstFileExPrivate(System.String,Interop/Kernel32/FINDEX_INFO_LEVELS,Interop/Kernel32/WIN32_FIND_DATA&,Interop/Kernel32/FINDEX_SEARCH_OPS,System.IntPtr,System.Int32)
 RtResultVoid kernel32_find_first_file_ex_private_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                          interp::RtStackObject* ret) noexcept
 {
@@ -577,9 +579,9 @@ RtResultVoid kernel32_find_first_file_ex_private_invoker(metadata::RtManagedMeth
     uint32_t f_search_op = interp::EvalStackOp::get_param<uint32_t>(params, 3);
     intptr_t lp_search_filter = interp::EvalStackOp::get_param<intptr_t>(params, 4);
     int32_t dw_additional_flags = interp::EvalStackOp::get_param<int32_t>(params, 5);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result,
-                                            Interop::kernel32_find_first_file_ex_private(lp_file_name, f_info_level_id, lp_find_file_data, f_search_op,
-                                                                                         lp_search_filter, dw_additional_flags));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        vm::RtObject*, result,
+        Interop::kernel32_find_first_file_ex_private(lp_file_name, f_info_level_id, lp_find_file_data, f_search_op, lp_search_filter, dw_additional_flags));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }
@@ -613,11 +615,12 @@ RtResultVoid windows_console_get_console_output_cp_invoker(metadata::RtManagedMe
 }
 
 static vm::InternalCallEntry s_interop_internal_call_entries[] = {
-#if defined(LEANCLR_PLATFORM_POSIX)
+#if LEANCLR_PLATFORM_POSIX
     {"Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)", (vm::InternalCallFunction)&Interop::double_to_string,
      double_to_string_invoker},
     {"Interop/Sys::LChflagsCanSetHiddenFlag", (vm::InternalCallFunction)&Interop::sys_lchflags_can_set_hidden_flag, sys_lchflags_can_set_hidden_flag_invoker},
-    {"Interop/Globalization::GetTimeZoneDisplayName(System.String,System.String,Interop/Globalization/TimeZoneDisplayNameType,System.Text.StringBuilder,System.Int32)",
+    {"Interop/Globalization::GetTimeZoneDisplayName(System.String,System.String,Interop/Globalization/"
+     "TimeZoneDisplayNameType,System.Text.StringBuilder,System.Int32)",
      (vm::InternalCallFunction)&Interop::globalization_get_time_zone_display_name, globalization_get_time_zone_display_name_invoker},
     {"Interop/Sys::ChMod(System.String,System.Int32)", (vm::InternalCallFunction)&Interop::sys_ch_mod, sys_ch_mod_invoker},
     {"Interop/Sys::CloseDir(System.IntPtr)", (vm::InternalCallFunction)&Interop::sys_close_dir, sys_close_dir_invoker},
@@ -658,13 +661,11 @@ static vm::InternalCallEntry s_interop_internal_call_entries[] = {
     {"Interop/Kernel32::SetThreadErrorMode(System.UInt32,System.UInt32&)", (vm::InternalCallFunction)&Interop::kernel32_set_thread_error_mode,
      kernel32_set_thread_error_mode_invoker},
     {"Interop/Kernel32::GetFileAttributesExPrivate(System.String,Interop/Kernel32/GET_FILEEX_INFO_LEVELS,Interop/Kernel32/WIN32_FILE_ATTRIBUTE_DATA&)",
-     (vm::InternalCallFunction)&Interop::kernel32_get_file_attributes_ex_private,
-     kernel32_get_file_attributes_ex_private_invoker},
+     (vm::InternalCallFunction)&Interop::kernel32_get_file_attributes_ex_private, kernel32_get_file_attributes_ex_private_invoker},
     {"Interop/Kernel32::FindFirstFileExPrivate(System.String,Interop/Kernel32/FINDEX_INFO_LEVELS,Interop/Kernel32/WIN32_FIND_DATA&,Interop/Kernel32/"
      "FINDEX_SEARCH_OPS,System.IntPtr,System.Int32)",
      (vm::InternalCallFunction)&Interop::kernel32_find_first_file_ex_private, kernel32_find_first_file_ex_private_invoker},
-    {"System.Console/WindowsConsole::GetConsoleCP", (vm::InternalCallFunction)&Interop::windows_console_get_console_cp,
-     windows_console_get_console_cp_invoker},
+    {"System.Console/WindowsConsole::GetConsoleCP", (vm::InternalCallFunction)&Interop::windows_console_get_console_cp, windows_console_get_console_cp_invoker},
     {"System.Console/WindowsConsole::GetConsoleOutputCP", (vm::InternalCallFunction)&Interop::windows_console_get_console_output_cp,
      windows_console_get_console_output_cp_invoker},
 };

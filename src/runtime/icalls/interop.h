@@ -12,11 +12,11 @@ class Interop
   public:
     static utils::Span<vm::InternalCallEntry> get_internal_call_entries();
 
-#if defined(LEANCLR_PLATFORM_POSIX)
+#if LEANCLR_PLATFORM_POSIX
     static RtResult<int32_t> double_to_string(double value, const char* format, char* buffer, int32_t buffer_size);
     static RtResult<int32_t> sys_lchflags_can_set_hidden_flag();
-    static RtResult<int32_t> globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type,
-                                                                       vm::RtObject* result, int32_t result_length);
+    static RtResult<int32_t> globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type, vm::RtObject* result,
+                                                                      int32_t result_length);
     static RtResult<int32_t> sys_ch_mod(vm::RtString* path, int32_t mode);
     static RtResult<int32_t> sys_close_dir(intptr_t dir);
     static RtResult<int32_t> sys_convert_error_pal_to_platform(int32_t error);
@@ -50,7 +50,7 @@ class Interop
     static RtResult<bool> kernel32_set_thread_error_mode(uint32_t mode, uint32_t& old_mode);
     static RtResult<bool> kernel32_get_file_attributes_ex_private(vm::RtString* name, uint32_t file_info_level, void* file_info);
     static RtResult<vm::RtObject*> kernel32_find_first_file_ex_private(vm::RtString* lp_file_name, uint32_t f_info_level_id, void* lp_find_file_data,
-                                                                        uint32_t f_search_op, intptr_t lp_search_filter, int32_t dw_additional_flags);
+                                                                       uint32_t f_search_op, intptr_t lp_search_filter, int32_t dw_additional_flags);
 
     // System.Console/WindowsConsole
     static RtResult<int32_t> windows_console_get_console_cp();
