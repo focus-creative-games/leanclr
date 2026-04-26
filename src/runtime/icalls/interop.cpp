@@ -67,8 +67,7 @@ RtResult<int32_t> Interop::sys_ch_mod(vm::RtString* path, int32_t mode)
 
 RtResult<int32_t> Interop::sys_close_dir(intptr_t dir)
 {
-    (void)dir;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::close_dir(dir));
 }
 
 RtResult<int32_t> Interop::sys_convert_error_pal_to_platform(int32_t error)
@@ -116,7 +115,7 @@ RtResultVoid Interop::sys_get_non_cryptographically_secure_random_bytes(uint8_t*
 
 RtResult<int32_t> Interop::sys_get_read_dir_r_buffer_size()
 {
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::get_read_dir_r_buffer_size());
 }
 
 RtResult<int32_t> Interop::sys_lchflags(vm::RtString* path, uint32_t flags)
@@ -154,25 +153,17 @@ RtResult<int32_t> Interop::sys_mkdir(vm::RtString* path, int32_t mode)
 
 RtResult<intptr_t> Interop::sys_open_dir(vm::RtString* path)
 {
-    (void)path;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::open_dir(path));
 }
 
 RtResult<int32_t> Interop::sys_read_dir_r(intptr_t dir, uint8_t* buffer, int32_t buffer_size, void* output_entry)
 {
-    (void)dir;
-    (void)buffer;
-    (void)buffer_size;
-    (void)output_entry;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::read_dir_r(dir, buffer, buffer_size, output_entry));
 }
 
 RtResult<int32_t> Interop::sys_read_link(vm::RtString* path, vm::RtArray* buffer, int32_t buffer_size)
 {
-    (void)path;
-    (void)buffer;
-    (void)buffer_size;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::read_link(path, buffer, buffer_size));
 }
 
 RtResult<int32_t> Interop::sys_rename(vm::RtString* old_path, vm::RtString* new_path)
