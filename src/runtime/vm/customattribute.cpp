@@ -1330,6 +1330,8 @@ RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::R
         }
         break;
     }
+    default:
+        break;
     }
     if (reader.not_empty())
     {

@@ -11,9 +11,14 @@ namespace leanclr
 namespace icalls
 {
 
+#if defined(LEANCLR_PLATFORM_POSIX)
 RtResult<int32_t> Interop::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size)
 {
-    return ::snprintf(buffer, static_cast<size_t>(buffer_size), format, value);
+    (void)value;
+    (void)format;
+    (void)buffer;
+    (void)buffer_size;
+    RET_ERR(RtErr::NotImplemented);
 }
 
 /// @icall: Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)
@@ -31,7 +36,7 @@ RtResultVoid double_to_string_invoker(metadata::RtManagedMethodPointer, const me
 
 RtResult<int32_t> Interop::sys_lchflags_can_set_hidden_flag()
 {
-    RET_OK(0);
+    RET_ERR(RtErr::NotImplemented);
 }
 
 /// @icall: Interop/Sys::LChflagsCanSetHiddenFlag
@@ -42,6 +47,503 @@ RtResultVoid sys_lchflags_can_set_hidden_flag_invoker(metadata::RtManagedMethodP
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }
+
+RtResult<int32_t> Interop::globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type,
+                                                                     vm::RtObject* result, int32_t result_length)
+{
+    (void)locale_name;
+    (void)time_zone_id;
+    (void)type;
+    (void)result;
+    (void)result_length;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_ch_mod(vm::RtString* path, int32_t mode)
+{
+    (void)path;
+    (void)mode;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_close_dir(intptr_t dir)
+{
+    (void)dir;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_convert_error_pal_to_platform(int32_t error)
+{
+    (void)error;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_convert_error_platform_to_pal(int32_t error)
+{
+    (void)error;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_copy_file(vm::RtObject* source, vm::RtObject* destination)
+{
+    (void)source;
+    (void)destination;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_f_stat(vm::RtObject* fd, void* output)
+{
+    (void)fd;
+    (void)output;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<uint32_t> Interop::sys_get_e_gid()
+{
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<uint32_t> Interop::sys_get_e_uid()
+{
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResultVoid Interop::sys_get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length)
+{
+    (void)buffer;
+    (void)length;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_get_read_dir_r_buffer_size()
+{
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_lchflags(vm::RtString* path, uint32_t flags)
+{
+    (void)path;
+    (void)flags;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_link(vm::RtString* source, vm::RtString* target)
+{
+    (void)source;
+    (void)target;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_lstat_byte(uint8_t* path, void* output)
+{
+    (void)path;
+    (void)output;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_lstat_string(vm::RtString* path, void* output)
+{
+    (void)path;
+    (void)output;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_mkdir(vm::RtString* path, int32_t mode)
+{
+    (void)path;
+    (void)mode;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<intptr_t> Interop::sys_open_dir(vm::RtString* path)
+{
+    (void)path;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_read_dir_r(intptr_t dir, uint8_t* buffer, int32_t buffer_size, void* output_entry)
+{
+    (void)dir;
+    (void)buffer;
+    (void)buffer_size;
+    (void)output_entry;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_read_link(vm::RtString* path, vm::RtArray* buffer, int32_t buffer_size)
+{
+    (void)path;
+    (void)buffer;
+    (void)buffer_size;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_rename(vm::RtString* old_path, vm::RtString* new_path)
+{
+    (void)old_path;
+    (void)new_path;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_rmdir(vm::RtString* path)
+{
+    (void)path;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_stat_byte(uint8_t* path, void* output)
+{
+    (void)path;
+    (void)output;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_stat_string(vm::RtString* path, void* output)
+{
+    (void)path;
+    (void)output;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<uint8_t*> Interop::sys_str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size)
+{
+    (void)error;
+    (void)buffer;
+    (void)buffer_size;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_symlink(vm::RtString* target, vm::RtString* link_path)
+{
+    (void)target;
+    (void)link_path;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_unlink(vm::RtString* path)
+{
+    (void)path;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_utime(vm::RtString* path, void* time_buffer)
+{
+    (void)path;
+    (void)time_buffer;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+RtResult<int32_t> Interop::sys_utimes(vm::RtString* path, void* time_value_pair)
+{
+    (void)path;
+    (void)time_value_pair;
+    RET_ERR(RtErr::NotImplemented);
+}
+
+/// @icall: Interop/Globalization::GetTimeZoneDisplayName(System.String,System.String,Interop/Globalization/TimeZoneDisplayNameType,System.Text.StringBuilder,System.Int32)
+RtResultVoid globalization_get_time_zone_display_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    auto locale_name = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto time_zone_id = EvalStackOp::get_param<vm::RtString*>(params, 1);
+    auto type = EvalStackOp::get_param<int32_t>(params, 2);
+    auto result = EvalStackOp::get_param<vm::RtObject*>(params, 3);
+    auto result_length = EvalStackOp::get_param<int32_t>(params, 4);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, rc,
+                                            Interop::globalization_get_time_zone_display_name(locale_name, time_zone_id, type, result, result_length));
+    EvalStackOp::set_return(ret, rc);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::ChMod(System.String,System.Int32)
+RtResultVoid sys_ch_mod_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto mode = EvalStackOp::get_param<int32_t>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_ch_mod(path, mode));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::CloseDir(System.IntPtr)
+RtResultVoid sys_close_dir_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                   interp::RtStackObject* ret) noexcept
+{
+    auto dir = EvalStackOp::get_param<intptr_t>(params, 0);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_close_dir(dir));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::ConvertErrorPalToPlatform(Interop/Error)
+RtResultVoid sys_convert_error_pal_to_platform_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                        interp::RtStackObject* ret) noexcept
+{
+    auto error = EvalStackOp::get_param<int32_t>(params, 0);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_convert_error_pal_to_platform(error));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::ConvertErrorPlatformToPal(System.Int32)
+RtResultVoid sys_convert_error_platform_to_pal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                        interp::RtStackObject* ret) noexcept
+{
+    auto error = EvalStackOp::get_param<int32_t>(params, 0);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_convert_error_platform_to_pal(error));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::CopyFile(Microsoft.Win32.SafeHandles.SafeFileHandle,Microsoft.Win32.SafeHandles.SafeFileHandle)
+RtResultVoid sys_copy_file_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                   interp::RtStackObject* ret) noexcept
+{
+    auto source = EvalStackOp::get_param<vm::RtObject*>(params, 0);
+    auto destination = EvalStackOp::get_param<vm::RtObject*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_copy_file(source, destination));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::FStat(Microsoft.Win32.SafeHandles.SafeFileHandle,Interop/Sys/FileStatus&)
+RtResultVoid sys_f_stat_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                interp::RtStackObject* ret) noexcept
+{
+    auto fd = EvalStackOp::get_param<vm::RtObject*>(params, 0);
+    auto output = EvalStackOp::get_param<void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_f_stat(fd, output));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::GetEGid()
+RtResultVoid sys_get_e_gid_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
+                                   interp::RtStackObject* ret) noexcept
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, result, Interop::sys_get_e_gid());
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::GetEUid()
+RtResultVoid sys_get_e_uid_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
+                                   interp::RtStackObject* ret) noexcept
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, result, Interop::sys_get_e_uid());
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::GetNonCryptographicallySecureRandomBytes(System.Byte*,System.Int32)
+RtResultVoid sys_get_non_cryptographically_secure_random_bytes_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    auto buffer = EvalStackOp::get_param<uint8_t*>(params, 0);
+    auto length = EvalStackOp::get_param<int32_t>(params, 1);
+    (void)ret;
+    RET_ERR_ON_FAIL(Interop::sys_get_non_cryptographically_secure_random_bytes(buffer, length));
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::GetReadDirRBufferSize()
+RtResultVoid sys_get_read_dir_r_buffer_size_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
+                                                     interp::RtStackObject* ret) noexcept
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_get_read_dir_r_buffer_size());
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::LChflags(System.String,System.UInt32)
+RtResultVoid sys_lchflags_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                  interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto flags = EvalStackOp::get_param<uint32_t>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_lchflags(path, flags));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::Link(System.String,System.String)
+RtResultVoid sys_link_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                              interp::RtStackObject* ret) noexcept
+{
+    auto source = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto target = EvalStackOp::get_param<vm::RtString*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_link(source, target));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::LStat(System.Byte&,Interop/Sys/FileStatus&)
+RtResultVoid sys_lstat_byte_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                    interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<uint8_t*>(params, 0);
+    auto output = EvalStackOp::get_param<void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_lstat_byte(path, output));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::LStat(System.String,Interop/Sys/FileStatus&)
+RtResultVoid sys_lstat_string_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                      interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto output = EvalStackOp::get_param<void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_lstat_string(path, output));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::MkDir(System.String,System.Int32)
+RtResultVoid sys_mkdir_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                               interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto mode = EvalStackOp::get_param<int32_t>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_mkdir(path, mode));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::OpenDir(System.String)
+RtResultVoid sys_open_dir_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                  interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, result, Interop::sys_open_dir(path));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::ReadDirR(System.IntPtr,System.Byte*,System.Int32,Interop/Sys/DirectoryEntry&)
+RtResultVoid sys_read_dir_r_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                    interp::RtStackObject* ret) noexcept
+{
+    auto dir = EvalStackOp::get_param<intptr_t>(params, 0);
+    auto buffer = EvalStackOp::get_param<uint8_t*>(params, 1);
+    auto buffer_size = EvalStackOp::get_param<int32_t>(params, 2);
+    auto output_entry = EvalStackOp::get_param<void*>(params, 3);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_read_dir_r(dir, buffer, buffer_size, output_entry));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::ReadLink(System.String,System.Byte[],System.Int32)
+RtResultVoid sys_read_link_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                   interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto buffer = EvalStackOp::get_param<vm::RtArray*>(params, 1);
+    auto buffer_size = EvalStackOp::get_param<int32_t>(params, 2);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_read_link(path, buffer, buffer_size));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::Rename(System.String,System.String)
+RtResultVoid sys_rename_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                interp::RtStackObject* ret) noexcept
+{
+    auto old_path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto new_path = EvalStackOp::get_param<vm::RtString*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_rename(old_path, new_path));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::RmDir(System.String)
+RtResultVoid sys_rmdir_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                               interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_rmdir(path));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::Stat(System.Byte&,Interop/Sys/FileStatus&)
+RtResultVoid sys_stat_byte_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                   interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<uint8_t*>(params, 0);
+    auto output = EvalStackOp::get_param<void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_stat_byte(path, output));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::Stat(System.String,Interop/Sys/FileStatus&)
+RtResultVoid sys_stat_string_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                     interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto output = EvalStackOp::get_param<void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_stat_string(path, output));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::StrErrorR(System.Int32,System.Byte*,System.Int32)
+RtResultVoid sys_str_error_r_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                     interp::RtStackObject* ret) noexcept
+{
+    auto error = EvalStackOp::get_param<int32_t>(params, 0);
+    auto buffer = EvalStackOp::get_param<uint8_t*>(params, 1);
+    auto buffer_size = EvalStackOp::get_param<int32_t>(params, 2);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint8_t*, result, Interop::sys_str_error_r(error, buffer, buffer_size));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::Symlink(System.String,System.String)
+RtResultVoid sys_symlink_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                 interp::RtStackObject* ret) noexcept
+{
+    auto target = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto link_path = EvalStackOp::get_param<vm::RtString*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_symlink(target, link_path));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::Unlink(System.String)
+RtResultVoid sys_unlink_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_unlink(path));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::UTime(System.String,Interop/Sys/UTimBuf&)
+RtResultVoid sys_utime_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                               interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto time_buffer = EvalStackOp::get_param<void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_utime(path, time_buffer));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+
+/// @icall: Interop/Sys::UTimes(System.String,Interop/Sys/TimeValPair&)
+RtResultVoid sys_utimes_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                interp::RtStackObject* ret) noexcept
+{
+    auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
+    auto time_value_pair = EvalStackOp::get_param<void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::sys_utimes(path, time_value_pair));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+#endif
 
 RtResult<uint32_t> Interop::bcrypt_gen_random(intptr_t algo_handle, uint8_t* buffer, int32_t length, int32_t flags)
 {
@@ -164,9 +666,46 @@ RtResultVoid windows_console_get_console_output_cp_invoker(metadata::RtManagedMe
 }
 
 static vm::InternalCallEntry s_interop_internal_call_entries[] = {
+#if defined(LEANCLR_PLATFORM_POSIX)
     {"Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)", (vm::InternalCallFunction)&Interop::double_to_string,
      double_to_string_invoker},
     {"Interop/Sys::LChflagsCanSetHiddenFlag", (vm::InternalCallFunction)&Interop::sys_lchflags_can_set_hidden_flag, sys_lchflags_can_set_hidden_flag_invoker},
+    {"Interop/Globalization::GetTimeZoneDisplayName(System.String,System.String,Interop/Globalization/TimeZoneDisplayNameType,System.Text.StringBuilder,System.Int32)",
+     (vm::InternalCallFunction)&Interop::globalization_get_time_zone_display_name, globalization_get_time_zone_display_name_invoker},
+    {"Interop/Sys::ChMod(System.String,System.Int32)", (vm::InternalCallFunction)&Interop::sys_ch_mod, sys_ch_mod_invoker},
+    {"Interop/Sys::CloseDir(System.IntPtr)", (vm::InternalCallFunction)&Interop::sys_close_dir, sys_close_dir_invoker},
+    {"Interop/Sys::ConvertErrorPalToPlatform(Interop/Error)", (vm::InternalCallFunction)&Interop::sys_convert_error_pal_to_platform,
+     sys_convert_error_pal_to_platform_invoker},
+    {"Interop/Sys::ConvertErrorPlatformToPal(System.Int32)", (vm::InternalCallFunction)&Interop::sys_convert_error_platform_to_pal,
+     sys_convert_error_platform_to_pal_invoker},
+    {"Interop/Sys::CopyFile(Microsoft.Win32.SafeHandles.SafeFileHandle,Microsoft.Win32.SafeHandles.SafeFileHandle)",
+     (vm::InternalCallFunction)&Interop::sys_copy_file, sys_copy_file_invoker},
+    {"Interop/Sys::FStat(Microsoft.Win32.SafeHandles.SafeFileHandle,Interop/Sys/FileStatus&)", (vm::InternalCallFunction)&Interop::sys_f_stat,
+     sys_f_stat_invoker},
+    {"Interop/Sys::GetEGid()", (vm::InternalCallFunction)&Interop::sys_get_e_gid, sys_get_e_gid_invoker},
+    {"Interop/Sys::GetEUid()", (vm::InternalCallFunction)&Interop::sys_get_e_uid, sys_get_e_uid_invoker},
+    {"Interop/Sys::GetNonCryptographicallySecureRandomBytes(System.Byte*,System.Int32)",
+     (vm::InternalCallFunction)&Interop::sys_get_non_cryptographically_secure_random_bytes, sys_get_non_cryptographically_secure_random_bytes_invoker},
+    {"Interop/Sys::GetReadDirRBufferSize()", (vm::InternalCallFunction)&Interop::sys_get_read_dir_r_buffer_size, sys_get_read_dir_r_buffer_size_invoker},
+    {"Interop/Sys::LChflags(System.String,System.UInt32)", (vm::InternalCallFunction)&Interop::sys_lchflags, sys_lchflags_invoker},
+    {"Interop/Sys::Link(System.String,System.String)", (vm::InternalCallFunction)&Interop::sys_link, sys_link_invoker},
+    {"Interop/Sys::LStat(System.Byte&,Interop/Sys/FileStatus&)", (vm::InternalCallFunction)&Interop::sys_lstat_byte, sys_lstat_byte_invoker},
+    {"Interop/Sys::LStat(System.String,Interop/Sys/FileStatus&)", (vm::InternalCallFunction)&Interop::sys_lstat_string, sys_lstat_string_invoker},
+    {"Interop/Sys::MkDir(System.String,System.Int32)", (vm::InternalCallFunction)&Interop::sys_mkdir, sys_mkdir_invoker},
+    {"Interop/Sys::OpenDir(System.String)", (vm::InternalCallFunction)&Interop::sys_open_dir, sys_open_dir_invoker},
+    {"Interop/Sys::ReadDirR(System.IntPtr,System.Byte*,System.Int32,Interop/Sys/DirectoryEntry&)", (vm::InternalCallFunction)&Interop::sys_read_dir_r,
+     sys_read_dir_r_invoker},
+    {"Interop/Sys::ReadLink(System.String,System.Byte[],System.Int32)", (vm::InternalCallFunction)&Interop::sys_read_link, sys_read_link_invoker},
+    {"Interop/Sys::Rename(System.String,System.String)", (vm::InternalCallFunction)&Interop::sys_rename, sys_rename_invoker},
+    {"Interop/Sys::RmDir(System.String)", (vm::InternalCallFunction)&Interop::sys_rmdir, sys_rmdir_invoker},
+    {"Interop/Sys::Stat(System.Byte&,Interop/Sys/FileStatus&)", (vm::InternalCallFunction)&Interop::sys_stat_byte, sys_stat_byte_invoker},
+    {"Interop/Sys::Stat(System.String,Interop/Sys/FileStatus&)", (vm::InternalCallFunction)&Interop::sys_stat_string, sys_stat_string_invoker},
+    {"Interop/Sys::StrErrorR(System.Int32,System.Byte*,System.Int32)", (vm::InternalCallFunction)&Interop::sys_str_error_r, sys_str_error_r_invoker},
+    {"Interop/Sys::Symlink(System.String,System.String)", (vm::InternalCallFunction)&Interop::sys_symlink, sys_symlink_invoker},
+    {"Interop/Sys::Unlink(System.String)", (vm::InternalCallFunction)&Interop::sys_unlink, sys_unlink_invoker},
+    {"Interop/Sys::UTime(System.String,Interop/Sys/UTimBuf&)", (vm::InternalCallFunction)&Interop::sys_utime, sys_utime_invoker},
+    {"Interop/Sys::UTimes(System.String,Interop/Sys/TimeValPair&)", (vm::InternalCallFunction)&Interop::sys_utimes, sys_utimes_invoker},
+#endif
     {"Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)", (vm::InternalCallFunction)&Interop::bcrypt_gen_random,
      bcrypt_gen_random_invoker},
     {"Interop/Kernel32::SetThreadErrorMode(System.UInt32,System.UInt32&)", (vm::InternalCallFunction)&Interop::kernel32_set_thread_error_mode,
