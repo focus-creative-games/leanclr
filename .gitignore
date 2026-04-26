@@ -430,3 +430,4 @@ ___*
 /.vscode
 /src/tools/leanaot
 /src/samples/simple-aot/ManagedStripped
+/src/tools/exportextern/libraries
