@@ -68,21 +68,17 @@ RtResult<int32_t> Interop::sys_close_dir(intptr_t dir)
 
 RtResult<int32_t> Interop::sys_convert_error_pal_to_platform(int32_t error)
 {
-    (void)error;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::convert_error_pal_to_platform(error));
 }
 
 RtResult<int32_t> Interop::sys_convert_error_platform_to_pal(int32_t error)
 {
-    (void)error;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::convert_error_platform_to_pal(error));
 }
 
 RtResult<int32_t> Interop::sys_copy_file(vm::RtObject* source, vm::RtObject* destination)
 {
-    (void)source;
-    (void)destination;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::copy_file(source, destination));
 }
 
 RtResult<int32_t> Interop::sys_f_stat(vm::RtObject* fd, void* output)
@@ -102,9 +98,8 @@ RtResult<uint32_t> Interop::sys_get_e_uid()
 
 RtResultVoid Interop::sys_get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length)
 {
-    (void)buffer;
-    (void)length;
-    RET_ERR(RtErr::NotImplemented);
+    platform::RtSys::get_non_cryptographically_secure_random_bytes(buffer, length);
+    RET_VOID_OK();
 }
 
 RtResult<int32_t> Interop::sys_get_read_dir_r_buffer_size()
@@ -176,10 +171,7 @@ RtResult<int32_t> Interop::sys_stat_string(vm::RtString* path, void* output)
 
 RtResult<uint8_t*> Interop::sys_str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size)
 {
-    (void)error;
-    (void)buffer;
-    (void)buffer_size;
-    RET_ERR(RtErr::NotImplemented);
+    RET_OK(platform::RtSys::str_error_r(error, buffer, buffer_size));
 }
 
 RtResult<int32_t> Interop::sys_symlink(vm::RtString* target, vm::RtString* link_path)

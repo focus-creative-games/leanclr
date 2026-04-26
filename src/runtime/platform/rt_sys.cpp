@@ -5,10 +5,14 @@
 #include "vm/field.h"
 #include "vm/rt_array.h"
 #include "vm/rt_string.h"
+#include "platform/bcrypt.h"
+#include "platform/rt_io_error_internal.h"
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
 
 #include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 #ifdef LEANCLR_PLATFORM_POSIX
 #include <dirent.h>
@@ -564,6 +568,149 @@ int32_t RtSys::lstat_byte(uint8_t* path, void* output)
 #else
     (void)path;
     (void)output;
+    return -1;
+#endif
+}
+
+int32_t RtSys::convert_error_pal_to_platform(int32_t error)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    using namespace os::io_error_internal;
+    switch (error)
+    {
+    case kErrorSuccess:
+        return 0;
+    case kErrorFileNotFound:
+        return ENOENT;
+    case kErrorPathNotFound:
+        return ENOTDIR;
+    case kErrorAccessDenied:
+        return EACCES;
+    case kErrorInvalidHandle:
+        return EBADF;
+    case kErrorFileExists:
+        return EEXIST;
+    case kErrorInvalidParameter:
+        return EINVAL;
+    case kErrorHandleDiskFull:
+        return ENOSPC;
+    case kErrorDirectory:
+        return EISDIR;
+    default:
+        return EIO;
+    }
+#else
+    (void)error;
+    return 0;
+#endif
+}
+
+int32_t RtSys::convert_error_platform_to_pal(int32_t error)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    return os::io_error_internal::errno_to_monoio(error);
+#else
+    return error;
+#endif
+}
+
+uint8_t* RtSys::str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    if (buffer == nullptr || buffer_size <= 0)
+        return nullptr;
+
+    char* out = reinterpret_cast<char*>(buffer);
+#if defined(__GLIBC__) && !defined(_GNU_SOURCE)
+    int rc = ::strerror_r(error, out, static_cast<size_t>(buffer_size));
+    if (rc != 0)
+        return nullptr;
+    return buffer;
+#elif defined(__GLIBC__)
+    char* msg = ::strerror_r(error, out, static_cast<size_t>(buffer_size));
+    if (msg == nullptr)
+        return nullptr;
+    if (msg != out)
+    {
+        std::snprintf(out, static_cast<size_t>(buffer_size), "%s", msg);
+    }
+    return buffer;
+#else
+    int rc = ::strerror_r(error, out, static_cast<size_t>(buffer_size));
+    if (rc != 0)
+        return nullptr;
+    return buffer;
+#endif
+#else
+    (void)error;
+    (void)buffer;
+    (void)buffer_size;
+    return nullptr;
+#endif
+}
+
+void RtSys::get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length)
+{
+    platform::Bcrypt::gen_random(0, buffer, length, 0);
+}
+
+int32_t RtSys::copy_file(vm::RtObject* source, vm::RtObject* destination)
+{
+#ifdef LEANCLR_PLATFORM_POSIX
+    intptr_t source_handle = extract_safe_handle_raw_handle(source);
+    intptr_t destination_handle = extract_safe_handle_raw_handle(destination);
+    if (source_handle == static_cast<intptr_t>(-1) || destination_handle == static_cast<intptr_t>(-1))
+    {
+        errno = EINVAL;
+        return -1;
+    }
+
+    constexpr size_t kBufferLen = 80 * 1024;
+    char* buf = static_cast<char*>(std::malloc(kBufferLen));
+    if (buf == nullptr)
+    {
+        errno = ENOMEM;
+        return -1;
+    }
+
+    int in_fd = static_cast<int>(source_handle);
+    int out_fd = static_cast<int>(destination_handle);
+    int32_t ret = 0;
+    while (true)
+    {
+        ssize_t bytes_read = 0;
+        while ((bytes_read = ::read(in_fd, buf, kBufferLen)) < 0 && errno == EINTR)
+            ;
+        if (bytes_read < 0)
+        {
+            ret = -1;
+            break;
+        }
+        if (bytes_read == 0)
+            break;
+
+        ssize_t offset = 0;
+        while (bytes_read > 0)
+        {
+            ssize_t bytes_written = 0;
+            while ((bytes_written = ::write(out_fd, buf + offset, static_cast<size_t>(bytes_read))) < 0 && errno == EINTR)
+                ;
+            if (bytes_written < 0)
+            {
+                ret = -1;
+                goto cleanup;
+            }
+            offset += bytes_written;
+            bytes_read -= bytes_written;
+        }
+    }
+
+cleanup:
+    std::free(buf);
+    return ret;
+#else
+    (void)source;
+    (void)destination;
     return -1;
 #endif
 }

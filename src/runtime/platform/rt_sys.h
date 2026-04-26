@@ -25,6 +25,11 @@ class RtSys
     static int32_t symlink(vm::RtString* target, vm::RtString* link_path);
     static uint32_t get_e_uid();
     static uint32_t get_e_gid();
+    static int32_t convert_error_pal_to_platform(int32_t error);
+    static int32_t convert_error_platform_to_pal(int32_t error);
+    static uint8_t* str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size);
+    static void get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length);
+    static int32_t copy_file(vm::RtObject* source, vm::RtObject* destination);
     static int32_t f_stat(vm::RtObject* fd, void* output);
     static int32_t stat_string(vm::RtString* path, void* output);
     static int32_t stat_byte(uint8_t* path, void* output);
