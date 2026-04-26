@@ -7,6 +7,7 @@
 #include "generic_class.h"
 #include "rt_string.h"
 #include "method.h"
+#include "assembly.h"
 #include "metadata/rt_metadata.h"
 #include "metadata/module_def.h"
 #include "metadata/metadata_cache.h"
@@ -751,6 +752,47 @@ RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, meta
     }
 
     RET_VOID_OK();
+}
+
+RtResult<const metadata::RtTypeSig*> Type::parse_assembly_qualified_type(metadata::RtModuleDef* default_mod, const char* assembly_qualified_type_name,
+    size_t name_len, bool ignore_case)
+{
+    AssemblyQualifiedNames qn(assembly_qualified_type_name, name_len);
+    qn.parse();
+
+    assert(default_mod);
+    metadata::RtModuleDef* search_ass_list[2];
+    if (!qn.assembly_name.empty())
+    {
+        metadata::RtAssembly* ass = Assembly::find_by_name(qn.assembly_name.c_str());
+        if (!ass)
+        {
+            RET_ERR(RtErr::TypeLoad);
+        }
+        search_ass_list[0] = ass->mod;
+        search_ass_list[1] = nullptr;
+    }
+    else
+    {
+        search_ass_list[0] = default_mod;
+        metadata::RtModuleDef* corlib = Assembly::get_corlib()->mod;
+        search_ass_list[1] = default_mod != corlib ? corlib : nullptr;
+    }
+    for (metadata::RtModuleDef* mod : search_ass_list)
+    {
+        if (!mod)
+        {
+            break;
+        }
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig,
+            Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), false));
+        if (!typeSig)
+        {
+            continue;
+        }
+        return typeSig;
+    }
+    RET_ERR(RtErr::TypeLoad);
 }
 } // namespace vm
 } // namespace leanclr

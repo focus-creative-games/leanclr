@@ -617,40 +617,8 @@ static RtResult<NamedArgWithoutValue> read_named_arg(metadata::RtModuleDef* mod,
 RtResult<RtReflectionType*> CustomAttribute::parse_assembly_qualified_type(metadata::RtModuleDef* default_mod, const char* assembly_qualified_type_name,
                                                                            size_t name_len, bool ignore_case)
 {
-    AssemblyQualifiedNames qn(assembly_qualified_type_name, name_len);
-    qn.parse();
-    metadata::RtModuleDef* search_ass_list[2];
-    if (!qn.assembly_name.empty())
-    {
-        metadata::RtAssembly* ass = Assembly::find_by_name(qn.assembly_name.c_str());
-        if (!ass)
-        {
-            RET_ERR(RtErr::TypeLoad);
-        }
-        search_ass_list[0] = ass->mod;
-        search_ass_list[1] = nullptr;
-    }
-    else
-    {
-        search_ass_list[0] = default_mod;
-        metadata::RtModuleDef* corlib = Assembly::get_corlib()->mod;
-        search_ass_list[1] = default_mod != corlib ? corlib : nullptr;
-    };
-    for (metadata::RtModuleDef* mod : search_ass_list)
-    {
-        if (!mod)
-        {
-            break;
-        }
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig,
-                                                Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), false));
-        if (!typeSig)
-        {
-            continue;
-        }
-        return Reflection::get_type_reflection_object(typeSig);
-    }
-    RET_ERR(RtErr::TypeLoad);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig, vm::Type::parse_assembly_qualified_type(default_mod, assembly_qualified_type_name, name_len, ignore_case));
+    return Reflection::get_type_reflection_object(typeSig);
 }
 
 static RtResult<bool> is_type_match_for_custom_attribute_elem(metadata::RtElementType ca_ele_type, const metadata::RtTypeSig* field_or_property_typesig)

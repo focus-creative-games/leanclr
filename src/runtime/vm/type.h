@@ -55,6 +55,8 @@ class Type
     static RtResult<const metadata::RtMethodInfo*> get_declaring_method_of_mvar(const metadata::RtTypeSig* typeSig);
     static RtResultVoid parse_assembly_name(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info, bool* is_version_defined,
                                             bool* is_token_defined);
+    static RtResult<const metadata::RtTypeSig*> Type::parse_assembly_qualified_type(metadata::RtModuleDef* default_mod, const char* assembly_qualified_type_name,
+        size_t name_len, bool ignore_case);
 };
 } // namespace vm
 } // namespace leanclr

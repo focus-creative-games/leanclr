@@ -6,9 +6,11 @@
 #include "vm/reflection.h"
 #include "vm/rt_string.h"
 #include "vm/type.h"
+#include "vm/assembly.h"
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
 #include "interp/interp_defs.h"
+#include "interp/machine_state.h"
 #include "metadata/module_def.h"
 
 namespace leanclr
@@ -251,16 +253,29 @@ RtResult<vm::RtReflectionModule*> SystemRuntimeTypeHandle::get_module(const vm::
 }
 
 RtResult<vm::RtReflectionType*> SystemRuntimeTypeHandle::internal_from_name(vm::RtString* name, int32_t* stack_crawl_mark, vm::RtReflectionAssembly* assembly,
-                                                                            bool throw_on_error, bool ignore_case, bool reflection_only)
+    bool throw_on_error, bool ignore_case, bool reflection_only)
 {
     utils::StringBuilder name_buf;
     utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)), name_buf);
-
-    auto mod = assembly->assembly->mod;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, resolved_type_sig_opt,
-                                            vm::Type::resolve_assembly_qualified_name(mod, name_buf.as_cstr(), name_buf.length(), ignore_case));
-
-    if (resolved_type_sig_opt == nullptr)
+    metadata::RtModuleDef* default_mod = nullptr;
+    if (assembly)
+    {
+        default_mod = assembly->assembly->mod;
+    }
+    else
+    {
+        interp::InterpFrame* execuing_frame = interp::MachineState::get_global_machine_state().get_executing_frame_stack();
+        if (execuing_frame != nullptr)
+        {
+            default_mod = execuing_frame->method->parent->image;
+        }
+        else
+        {
+            default_mod = vm::Assembly::get_corlib()->mod;
+        }
+    }
+    auto ret_typesig = vm::Type::parse_assembly_qualified_type(default_mod, name_buf.as_cstr(), name_buf.length(), ignore_case);
+    if (ret_typesig.is_err())
     {
         if (throw_on_error)
         {
@@ -272,7 +287,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeTypeHandle::internal_from_name(vm::
         }
     }
 
-    return vm::Reflection::get_type_reflection_object(resolved_type_sig_opt);
+    return vm::Reflection::get_type_reflection_object(ret_typesig.unwrap());
 }
 
 // Invoker functions
