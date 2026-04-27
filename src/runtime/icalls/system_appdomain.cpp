@@ -95,9 +95,9 @@ static RtResultVoid execute_assembly_invoker(metadata::RtManagedMethodPointer, c
     RET_VOID_OK();
 }
 
-RtResult<vm::RtArray*> SystemAppDomain::get_assemblies(bool ref_only)
+RtResult<vm::RtArray*> SystemAppDomain::get_assemblies(vm::RtAppDomain* this_domain, bool ref_only)
 {
-    utils::Span<metadata::RtModuleDef*> mods = vm::AppDomain::get_modules();
+    utils::Span<metadata::RtModuleDef*> mods = vm::AppDomain::get_modules(this_domain);
     metadata::RtClass* cls_assembly = vm::Class::get_corlib_types().cls_reflection_assembly;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, ass_arr, vm::Array::new_szarray_from_ele_klass(cls_assembly, static_cast<int32_t>(mods.size())));
     for (size_t i = 0; i < mods.size(); ++i)
@@ -113,8 +113,9 @@ RtResult<vm::RtArray*> SystemAppDomain::get_assemblies(bool ref_only)
 static RtResultVoid get_assemblies_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                            interp::RtStackObject* ret) noexcept
 {
-    auto ref_only = EvalStackOp::get_param<bool>(params, 0);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, result, SystemAppDomain::get_assemblies(ref_only));
+    auto this_domain = EvalStackOp::get_param<vm::RtAppDomain*>(params, 0);
+    auto ref_only = EvalStackOp::get_param<bool>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, result, SystemAppDomain::get_assemblies(this_domain, ref_only));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }

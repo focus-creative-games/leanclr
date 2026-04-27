@@ -28,7 +28,7 @@ class SystemAppDomain
     static RtResult<int32_t> execute_assembly(vm::RtObject* assembly, vm::RtObject* args);
 
     // Get assemblies
-    static RtResult<vm::RtArray*> get_assemblies(bool ref_only);
+    static RtResult<vm::RtArray*> get_assemblies(vm::RtAppDomain* this_domain, bool ref_only);
 
     // Get data
     static RtResult<vm::RtObject*> get_data(vm::RtAppDomain* this_domain, vm::RtString* name);

@@ -26,7 +26,7 @@ class AppDomain
 
     static int32_t get_appdomain_id();
 
-    static utils::Span<metadata::RtModuleDef*> get_modules();
+    static utils::Span<metadata::RtModuleDef*> get_modules(RtAppDomain* this_domain);
 };
 } // namespace vm
 } // namespace leanclr
