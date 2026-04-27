@@ -177,7 +177,7 @@ RtResultVoid Field::get_instance_value(const metadata::RtFieldInfo* field, void*
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(size_t, size, get_field_size(field));
 
-    uint8_t* target = static_cast<uint8_t*>(obj) + field->offset;
+    uint8_t* target = static_cast<uint8_t*>(obj) + get_instance_field_offset_includes_object_header_for_all_type(field);
     std::memcpy(value, target, size);
 
     RET_VOID_OK();
@@ -190,7 +190,7 @@ RtResultVoid Field::set_instance_value(const metadata::RtFieldInfo* field, void*
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(size_t, size, get_field_size(field));
 
-    uint8_t* target = static_cast<uint8_t*>(obj) + field->offset;
+    uint8_t* target = static_cast<uint8_t*>(obj) + get_instance_field_offset_includes_object_header_for_all_type(field);
     std::memcpy(target, value, size);
 
     RET_VOID_OK();
