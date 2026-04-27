@@ -44,13 +44,7 @@ static RtResultVoid get_virtual_method_internal_invoker(metadata::RtManagedMetho
 RtResult<vm::RtMulticastDelegate*> SystemDelegate::create_delegate_internal(vm::RtReflectionType* delegate_type, vm::RtObject* target,
                                                                             vm::RtReflectionMethod* method, bool throw_on_bind)
 {
-    // FIXME: how to deal with throw_on_bind?
-    (void)throw_on_bind;
-    // Get the delegate class from the reflection type
-    const metadata::RtTypeSig* type_sig = delegate_type->type_handle;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, delegate_klass, vm::Class::get_class_from_typesig(type_sig));
-
-    return vm::Delegate::new_delegate(delegate_klass, target, method->method);
+    return vm::Delegate::create_delegate_from_reflection(delegate_type, target, method->method, throw_on_bind);
 }
 
 /// @icall: System.Delegate::CreateDelegate_internal(System.Type,System.Object,System.Reflection.MethodInfo,System.Boolean)

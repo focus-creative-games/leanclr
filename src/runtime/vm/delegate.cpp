@@ -15,11 +15,16 @@ RtResultVoid Delegate::initialize()
     RET_VOID_OK();
 }
 
-RtResultVoid Delegate::constructor_delegate(RtMulticastDelegate* del, RtObject* target, const metadata::RtMethodInfo* method) noexcept
+RtResult<RtMulticastDelegate*> Delegate::create_delegate_from_reflection(RtReflectionType* delegate_type, RtObject* target,
+                                                                         const metadata::RtMethodInfo* method, bool throw_on_bind) noexcept
 {
-    auto& sub_del = del->dele;
+    const metadata::RtTypeSig* type_sig = delegate_type->type_handle;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, delegate_klass, vm::Class::get_class_from_typesig(type_sig));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, del_obj, Object::new_object(delegate_klass));
+    RtDelegate& sub_del = reinterpret_cast<RtMulticastDelegate*>(del_obj)->dele;
+
     sub_del.target = target;
-    bool is_vir_method = Method::is_virtual(method);
+    bool is_vir_method = !Method::is_devirtualed(method);
     if (is_vir_method && target)
     {
         UNWRAP_OR_RET_ERR_ON_FAIL(sub_del.method, Method::get_virtual_method_impl(target, method));
@@ -30,6 +35,17 @@ RtResultVoid Delegate::constructor_delegate(RtMulticastDelegate* del, RtObject* 
         sub_del.method = method;
         sub_del.method_is_virtual = is_vir_method;
     }
+
+    RET_OK(reinterpret_cast<RtMulticastDelegate*>(del_obj));
+}
+
+RtResultVoid Delegate::constructor_delegate(RtMulticastDelegate* del, RtObject* target, const metadata::RtMethodInfo* method) noexcept
+{
+    assert(!del->deles);
+    auto& sub_del = del->dele;
+    sub_del.target = target;
+    sub_del.method = method;
+    sub_del.method_is_virtual = false;
     RET_VOID_OK();
 }
 
