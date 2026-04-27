@@ -547,6 +547,8 @@ static RtResult<metadata::RtElementType> read_field_or_prop_type(metadata::RtMod
     case metadata::RtElementType::R4:
     case metadata::RtElementType::R8:
     case metadata::RtElementType::String:
+    case metadata::RtElementType::CASystemType:
+    case metadata::RtElementType::CAObject:
         result = ele_type;
         break;
 
