@@ -1853,7 +1853,7 @@ Il2CppObject* il2cpp_custom_attrs_get_attr(Il2CppCustomAttrInfo* ainfo, Il2CppCl
     {
         return nullptr;
     }
-    auto result = vm::CustomAttribute::get_customattributes_on_target_token(image, token, nullptr);
+    auto result = vm::CustomAttribute::get_customattributes_on_target_token(image, token, attr_klass);
     if (result.is_err())
     {
         return nullptr;
