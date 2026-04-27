@@ -221,7 +221,7 @@ RtResultVoid MetadataName::append_method_sig_name(utils::StringBuilder& sb, cons
         RET_ERR_ON_FAIL(append_type_sig_name(sb, method_sig->params[i]));
         sb.append_char(',');
     }
-    append_type_sig_name(sb, method_sig->return_type);
+    RET_ERR_ON_FAIL(append_type_sig_name(sb, method_sig->return_type));
     sb.append_char('>');
     RET_VOID_OK();
 }
