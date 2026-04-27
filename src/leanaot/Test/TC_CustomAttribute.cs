@@ -1,5 +1,4 @@
 ﻿
-using test;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -7,7 +6,6 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using AOTDefs;
 using System.Diagnostics;
 
 
@@ -163,7 +161,7 @@ namespace Tests.CSharp.CustomeAttrites
     }
 
     [FT_ushort(1234)]
-    internal class TC_CustomAttribute : GeneralTestCaseBase
+    internal class TC_CustomAttribute
     {
         [UnitTest]
         [FT_ushort(1122)]
@@ -322,14 +320,14 @@ namespace Tests.CSharp.CustomeAttrites
         }
 
         [UnitTest]
-        [AOTDefs.EnumField(AOT_Enum_int.A)]
+        [EnumField(AOT_Enum_int.A)]
         public void AOTEnumAttriteField()
         {
             var method = GetType().GetMethod(nameof(AOTEnumAttriteField));
-            var attrs = method.GetCustomAttributes(typeof(AOTDefs.EnumFieldAttribute), false);
+            var attrs = method.GetCustomAttributes(typeof(EnumFieldAttribute), false);
             Assert.NotNull(attrs);
             Assert.Equal(1, attrs.Length);
-            var attr = (AOTDefs.EnumFieldAttribute)attrs[0];
+            var attr = (EnumFieldAttribute)attrs[0];
             Assert.Equal(AOT_Enum_int.A, attr.X);
         }
 
@@ -347,12 +345,17 @@ namespace Tests.CSharp.CustomeAttrites
         [FT_Type(Type = typeof(Vector3), Value = typeof(FT_ushortAttribute))]
         public void NamedArgSystemType()
         {
+            Debugger.Log(0, "", $"enter {nameof(NamedArgSystemType)}");
             var method = GetType().GetMethod(nameof(NamedArgSystemType));
             Assert.NotNull(method);
+            Debugger.Log(0, "", $"stage 2");
             var attrs = method.GetCustomAttributes(typeof(FT_TypeAttribute), false);
+            Debugger.Log(0, "", $"stage 3");
+            Debugger.Log(0, "", $"attrs length: {attrs.Length}");
             Assert.NotNull(attrs);
             Assert.Equal(1, attrs.Length);
             var attr = (FT_TypeAttribute)attrs[0];
+            Debugger.Log(0, "", $"attr.Type: {attr.Type}, attr.Value: {attr.Value}");
             Assert.Equal(typeof(Vector3), attr.Type);
             Assert.Equal(typeof(FT_ushortAttribute), attr.Value);
         }

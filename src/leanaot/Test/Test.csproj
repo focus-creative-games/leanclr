@@ -46,7 +46,9 @@
   <ItemGroup>
     <Compile Include="App.cs" />
     <Compile Include="Assert.cs" />
+    <Compile Include="CallDelegateFuncs.cs" />
     <Compile Include="CommonTypes.cs" />
+    <Compile Include="CustomAttributes.cs" />
     <Compile Include="TC_ckfinite.cs" />
     <Compile Include="TC_conv_i.cs" />
     <Compile Include="TC_conv_i1.cs" />
@@ -69,6 +71,10 @@
     <Compile Include="TC_conv_u2.cs" />
     <Compile Include="TC_conv_u4.cs" />
     <Compile Include="TC_conv_u8.cs" />
+    <Compile Include="TC_CustomAttribute.cs" />
+    <Compile Include="TC_Delegate_BeginEndInvoke.cs" />
+    <Compile Include="TC_Delegate_DynamicInvoke.cs" />
+    <Compile Include="TC_Delegate_OpenClose.cs" />
     <Compile Include="TC_div.cs" />
     <Compile Include="TC_div_un.cs" />
     <Compile Include="TC_rem.cs" />

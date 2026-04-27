@@ -26,7 +26,6 @@ namespace CoreTests.Tests.Bugs
         private static void OnA(CustomDelegate arg)
         {
             var attr = arg.GetType().GetCustomAttribute<TestAttribute>();
-            Debugger.Log(0, "info", $"{attr.Name}-{attr.Value}");
         }
 
         public delegate void D(CustomDelegate arg);

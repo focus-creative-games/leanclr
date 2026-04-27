@@ -1,11 +1,8 @@
-﻿
-using test;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AOTDefs;
 
 
 namespace Tests.CSharp.Delegates
@@ -115,7 +112,7 @@ namespace Tests.CSharp.Delegates
         }
     }
 
-    internal class TC_Delegate_OpenClose : GeneralTestCaseBase
+    internal class TC_Delegate_OpenClose
     {
         // CallDelegate_void
 

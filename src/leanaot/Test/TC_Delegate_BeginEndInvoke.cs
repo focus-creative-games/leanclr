@@ -9,7 +9,7 @@
 //namespace Tests.CSharp.Delegates
 //{
 
-//    delegate int InterpDele(int a, float b, string c, Vector3 d);
+//    delegate int InterpDele(int a, float b, string c, UnityEngine.Vector3 d);
 
 //    class TC_Delegate_BeginEndInvoke : GeneralTestCaseBase
 //    {
@@ -34,11 +34,11 @@
 //        public void interp_begin_invoke()
 //        {
 //#if !UNITY_WEBGL
-//            InterpDele del = (int a, float b, string c, Vector3 d) =>
+//            InterpDele del = (int a, float b, string c, UnityEngine.Vector3 d) =>
 //            {
 //                return a + (int)b + c.Length + (int)d.x;
 //            };
-//            var result = del.BeginInvoke(1, 10f, "aaa", new Vector3(100f, 200f, 300f), (IAsyncResult ar) =>
+//            var result = del.BeginInvoke(1, 10f, "aaa", new UnityEngine.Vector3(100f,200f,300f), (IAsyncResult ar) =>
 //            {
 
 //            }, null);

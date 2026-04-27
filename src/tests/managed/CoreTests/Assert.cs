@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Diagnostics;
 
 [AttributeUsage(AttributeTargets.Method)]
 public class UnitTestAttribute : Attribute
@@ -10,23 +11,34 @@ public abstract class GeneralTestCaseBase
 
 }
 
+
+
+public class AssertException : Exception
+{
+    public AssertException(string message) : base(message)
+    {
+    }
+}
+
 public class Assert
 {
     public static void Fail()
     {
+        Debugger.Log(0, "Assert", $"Assert.Fail:");
         throw new Exception($"Assert.Fail:");
     }
 
     public static void Fail(string message)
     {
-        throw new Exception($"Assert.Fail:");
-        //throw new Exception($"Assert.Fail: {message}");
+        Debugger.Log(0, "Assert", $"Assert.Fail: {message}");
+        throw new Exception($"Assert.Fail: {message}");
     }
 
     public static void IsTrue(bool condition)
     {
         if (!condition)
         {
+            Debugger.Log(0, "Assert", $"Assert.IsTrue failed");
             throw new Exception($"Assert.IsTrue failed");
             //throw new Exception($"Assert.IsTrue failed");
         }
@@ -36,6 +48,7 @@ public class Assert
     {
         if (condition)
         {
+            Debugger.Log(0, "Assert", $"Assert.IsFalse failed");
             throw new Exception($"Assert.IsFalse failed");
         }
     }
@@ -44,6 +57,7 @@ public class Assert
     {
         if (!condition)
         {
+            Debugger.Log(0, "Assert", $"Assert.IsTrue failed");
             throw new Exception($"Assert.IsTrue failed");
         }
     }
@@ -52,6 +66,7 @@ public class Assert
     {
         if (condition)
         {
+            Debugger.Log(0, "Assert", $"Assert.IsFalse failed");
             throw new Exception($"Assert.IsFalse failed");
         }
     }
@@ -60,6 +75,7 @@ public class Assert
     {
         if (obj != null)
         {
+            Debugger.Log(0, "Assert", $"Assert.NNull failed: object is not null");
             throw new Exception($"Assert.NNull failed: object is not null");
         }
     }
@@ -68,6 +84,7 @@ public class Assert
     {
         if (obj == null)
         {
+            Debugger.Log(0, "Assert", $"Assert.NotNull failed: object is null");
             throw new Exception($"Assert.NotNull failed: object is null");
         }
     }
@@ -76,8 +93,8 @@ public class Assert
     {
         if (a != b)
         {
-            throw new Exception($"Assert.Equal failed:");
-            //throw new Exception($"Assert.Equal failed: {a} != {b}");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {a} != {b}");
+            throw new Exception($"Assert.Equal failed: {a} != {b}");
         }
     }
 
@@ -85,7 +102,8 @@ public class Assert
     {
         if (a != b)
         {
-            throw new Exception($"Assert.Equal failed:");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {a} != {b}");
+            throw new Exception($"Assert.Equal failed: {a} != {b}");
             //throw new Exception($"Assert.Equal failed: {a} != {b}");
         }
     }
@@ -94,7 +112,8 @@ public class Assert
     {
         if (a != b)
         {
-            throw new Exception($"Assert.Equal failed:");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {a} != {b}");
+            throw new Exception($"Assert.Equal failed: {a} != {b}");
             //throw new Exception($"Assert.Equal failed: {a} != {b}");
         }
     }
@@ -107,8 +126,8 @@ public class Assert
         }
         if (a != b)
         {
-            throw new Exception($"Assert.Equal failed:");
-            //throw new Exception($"Assert.Equal failed: {a} != {b}");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {a} != {b}");
+            throw new Exception($"Assert.Equal failed: {a} != {b}");
         }
     }
 
@@ -120,7 +139,8 @@ public class Assert
         }
         if (a != b)
         {
-            throw new Exception($"Assert.Equal failed:");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {a} != {b}");
+            throw new Exception($"Assert.Equal failed: {a} != {b}");
             //throw new Exception($"Assert.Equal failed: {a} != {b}");
         }
     }
@@ -129,7 +149,8 @@ public class Assert
     {
         if (a != b)
         {
-            throw new Exception($"Assert.Equal failed:");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {a} != {b}");
+            throw new Exception($"Assert.Equal failed: {a} != {b}");
             //throw new Exception($"Assert.Equal failed: {a} != {b}");
         }
     }
@@ -138,7 +159,8 @@ public class Assert
     {
         if (a != b)
         {
-            throw new Exception($"Assert.Equal failed:");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {a} != {b}");
+            throw new Exception($"Assert.Equal failed: {a} != {b}");
             //throw new Exception($"Assert.Equal failed: {a} != {b}");
         }
     }
@@ -147,7 +169,8 @@ public class Assert
     {
         if (a != b)
         {
-            throw new Exception($"Assert.Equal failed: ");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {(long)a} != {(long)b}");
+            throw new Exception($"Assert.Equal failed: {(long)a} != {(long)b}");
             //throw new Exception($"Assert.Equal failed: {(long)a} != {(long)b}");
         }
     }
@@ -165,7 +188,8 @@ public class Assert
     {
         if (a != b)
         {
-            throw new Exception($"Assert.Equal failed:");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {a} != {b}");
+            throw new Exception($"Assert.Equal failed: {a} != {b}");
             //throw new Exception($"Assert.Equal failed: {a} != {b}");
         }
     }
@@ -174,7 +198,8 @@ public class Assert
     {
         if (!Object.Equals(a, b))
         {
-            throw new Exception($"Assert.Equal failed:");
+            Debugger.Log(0, "Assert", $"Assert.Equal failed: {a} != {b}");
+            throw new Exception($"Assert.Equal failed: {a} != {b}");
             //throw new Exception($"Assert.Equal failed: {a} != {b}");
         }
     }
@@ -183,7 +208,8 @@ public class Assert
     {
         if (a == b)
         {
-            throw new Exception($"Assert.NotEqual failed:");
+            Debugger.Log(0, "Assert", $"Assert.NotEqual failed: {a} == {b}");
+            throw new Exception($"Assert.NotEqual failed: {a} == {b}");
             //throw new Exception($"Assert.NotEqual failed: {a} == {b}");
         }
     }
@@ -192,8 +218,33 @@ public class Assert
     {
         if (!Object.Equals(a, b))
         {
-            throw new Exception($"Assert.NotEqual failed:");
+            Debugger.Log(0, "Assert", $"Assert.NotEqual failed: {a} == {b}");
+            throw new Exception($"Assert.NotEqual failed: {a} == {b}");
             //throw new Exception($"Assert.NotEqual failed: {a} == {b}");
         }
+    }
+
+
+
+    public static void ExpectException<T>(Action action)
+    {
+        try
+        {
+            action();
+        }
+        catch (Exception ex)
+        {
+            if (ex is T)
+            {
+                return;
+            }
+            else
+            {
+                Debugger.Log(0, "Assert", $"Assert.ExpectException failed: expected exception of type {typeof(T)}, but got {ex.GetType()}");
+                throw new AssertException($"Assert.ExpectException failed: expected exception of type {typeof(T)}, but got {ex.GetType()}");
+            }
+        }
+        Debugger.Log(0, "Assert", $"Assert.ExpectException failed: expected exception of type {typeof(T)}, but no exception was thrown");
+        throw new AssertException($"Assert.ExpectException failed: expected exception of type {typeof(T)}, but no exception was thrown");
     }
 }

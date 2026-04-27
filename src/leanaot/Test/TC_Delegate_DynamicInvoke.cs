@@ -1,14 +1,88 @@
 ﻿
-using test;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using AOTDefs;
+using System.Runtime.InteropServices;
 
 namespace Tests.CSharp.Delegates
 {
+    public struct FT_AOT_ValueType
+    {
+        public int x;
+        public float y;
+        public string z;
+
+        public void Run(int a)
+        {
+            x += a;
+        }
+
+        public int Show(int b)
+        {
+            return this.x + b;
+        }
+
+        public sbyte Foo(int b)
+        {
+            return (sbyte)(x + b);
+        }
+    }
+
+    public delegate void DelAOTRun(ref FT_AOT_ValueType a, int b);
+    public delegate int DelAOTShow(ref FT_AOT_ValueType a, int b);
+    public delegate sbyte DelAOTFoo(ref FT_AOT_ValueType a, int b);
+
+
+
+    public delegate void DelAOTRun2(int b);
+    public delegate int DelAOTShow2(int b);
+    public delegate sbyte DelAOTFoo2(int b);
+
+    [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+    public delegate IntPtr CppBattleEngineReadFileEvent(IntPtr fileName);
+
+
+    public class FT_AOT_Class
+    {
+        public int x;
+        public float y;
+        public string z;
+
+        public void Run(int a)
+        {
+            x += a;
+        }
+
+        public int Show(int b)
+        {
+            return this.x + b;
+        }
+
+        public sbyte Foo(int b)
+        {
+            return (sbyte)(x + b);
+        }
+
+        public static void Run2(FT_AOT_Class s, int b)
+        {
+            s.x += b;
+        }
+
+        public static void Run3(FT_AOT_Class s, int b)
+        {
+
+        }
+
+        public static int Show2(FT_AOT_Class s, int b)
+        {
+            return s.x + b;
+        }
+
+        public static sbyte Foo2(FT_AOT_Class s, int b)
+        {
+            return (sbyte)(s.x + b);
+        }
+    }
 
     public delegate void ClassRun1(int b);
     public delegate int ClassShow1(int b);
@@ -29,7 +103,7 @@ namespace Tests.CSharp.Delegates
     public delegate int AOTClassShow2(FT_AOT_Class a, int b);
     public delegate sbyte AOTClassFoo2(FT_AOT_Class a, int b);
 
-    public class TC_Delegate_DynamicInvoke : GeneralTestCaseBase
+    public class TC_Delegate_DynamicInvoke
     {
 
         /// <summary>
@@ -104,6 +178,7 @@ namespace Tests.CSharp.Delegates
             {
                 invoke.Invoke(del2, new object[] { 1 });
             });
+            invoke.Invoke(del2, new object[] { 1 });
         }
 
         [UnitTest]
@@ -125,6 +200,7 @@ namespace Tests.CSharp.Delegates
             {
                 invoke.Invoke(del, new object[] { null, 1 });
             });
+            invoke.Invoke(del, new object[] { null, 1 });
         }
 
         [UnitTest]
@@ -147,6 +223,7 @@ namespace Tests.CSharp.Delegates
             {
                 invoke.Invoke(del2, new object[] { 4 });
             });
+            invoke.Invoke(del2, new object[] { 4 });
         }
 
         [UnitTest]
@@ -208,6 +285,7 @@ namespace Tests.CSharp.Delegates
             {
                 invoke.Invoke(del2, new object[] { 4 });
             });
+            invoke.Invoke(del2, new object[] { 4 });
         }
 
 

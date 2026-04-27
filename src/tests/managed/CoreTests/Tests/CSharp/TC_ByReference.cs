@@ -12,7 +12,6 @@ namespace Tests.CSharp
         [UnitTest]
         public void SpanValue()
         {
-#if UNITY_2021_1_OR_NEWER
             var array = new MyStruct[] { new MyStruct(1), new MyStruct(2), new MyStruct(3) };
             var sum = 0;
             foreach (ref readonly var s in array.AsSpan())
@@ -20,7 +19,6 @@ namespace Tests.CSharp
                 sum += s.Value;
             }
             Assert.Equal(6, sum);
-#endif
         }
 
         private struct MyStruct

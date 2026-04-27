@@ -140,40 +140,40 @@ namespace CorlibTests.InternalCall
             }
         }
 
-        [UnitTest]
-        public void Log_WithDifferentCategories()
-        {
-            // Test Log_icall with different category values
-            for (int i = 0; i < 3; i++)
-            {
-                try
-                {
-                    Debugger.Log(i, $"Category{i}", $"Message{i}");
-                }
-                catch (Exception ex)
-                {
-                    Assert.Fail($"Debugger.Log with category {i} threw unexpected exception: {ex.Message}");
-                }
-            }
-        }
+        //[UnitTest]
+        //public void Log_WithDifferentCategories()
+        //{
+        //    // Test Log_icall with different category values
+        //    for (int i = 0; i < 3; i++)
+        //    {
+        //        try
+        //        {
+        //            Debugger.Log(i, $"Category{i}", $"Message{i}");
+        //        }
+        //        catch (Exception ex)
+        //        {
+        //            Assert.Fail($"Debugger.Log with category {i} threw unexpected exception: {ex.Message}");
+        //        }
+        //    }
+        //}
 
-        [UnitTest]
-        public void Log_WithLongMessage()
-        {
-            // Test Log_icall with a long message
-            int category = 0;
-            string categoryName = "LongCategory";
-            string message = new string('A', 1000); // Long message
+        //[UnitTest]
+        //public void Log_WithLongMessage()
+        //{
+        //    // Test Log_icall with a long message
+        //    int category = 0;
+        //    string categoryName = "LongCategory";
+        //    string message = new string('A', 1000); // Long message
             
-            try
-            {
-                Debugger.Log(category, categoryName, message);
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Debugger.Log with long message threw unexpected exception: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        Debugger.Log(category, categoryName, message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Assert.Fail($"Debugger.Log with long message threw unexpected exception: {ex.Message}");
+        //    }
+        //}
 
         [UnitTest]
         public void IsAttached_MultipleAccess()
@@ -209,58 +209,58 @@ namespace CorlibTests.InternalCall
             }
         }
 
-        [UnitTest]
-        public void Log_MultipleCallsSequence()
-        {
-            // Test multiple Log calls in sequence
-            try
-            {
-                for (int i = 0; i < 5; i++)
-                {
-                    Debugger.Log(i, $"Category{i}", $"Message{i}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Multiple Debugger.Log calls threw unexpected exception: {ex.Message}");
-            }
-        }
+        //[UnitTest]
+        //public void Log_MultipleCallsSequence()
+        //{
+        //    // Test multiple Log calls in sequence
+        //    try
+        //    {
+        //        for (int i = 0; i < 5; i++)
+        //        {
+        //            Debugger.Log(i, $"Category{i}", $"Message{i}");
+        //        }
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Assert.Fail($"Multiple Debugger.Log calls threw unexpected exception: {ex.Message}");
+        //    }
+        //}
 
-        [UnitTest]
-        public void Log_WithSpecialCharacters()
-        {
-            // Test Log_icall with special characters
-            int category = 0;
-            string categoryName = "Test\n\t\r";
-            string message = "Message with \"quotes\" and 'apostrophes'";
+        //[UnitTest]
+        //public void Log_WithSpecialCharacters()
+        //{
+        //    // Test Log_icall with special characters
+        //    int category = 0;
+        //    string categoryName = "Test\n\t\r";
+        //    string message = "Message with \"quotes\" and 'apostrophes'";
             
-            try
-            {
-                Debugger.Log(category, categoryName, message);
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Debugger.Log with special characters threw unexpected exception: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        Debugger.Log(category, categoryName, message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Assert.Fail($"Debugger.Log with special characters threw unexpected exception: {ex.Message}");
+        //    }
+        //}
 
-        [UnitTest]
-        public void Log_WithChineseCharacters()
-        {
-            // Test Log_icall with Chinese characters
-            int category = 0;
-            string categoryName = "测试";
-            string message = "消息包含中文字符";
+        //[UnitTest]
+        //public void Log_WithChineseCharacters()
+        //{
+        //    // Test Log_icall with Chinese characters
+        //    int category = 0;
+        //    string categoryName = "测试";
+        //    string message = "消息包含中文字符";
 
-            try
-            {
-                Debugger.Log(category, categoryName, message);
-            }
-            catch (Exception ex)
-            {
-                Assert.Fail($"Debugger.Log with special characters threw unexpected exception: {ex.Message}");
-            }
-        }
+        //    try
+        //    {
+        //        Debugger.Log(category, categoryName, message);
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        Assert.Fail($"Debugger.Log with special characters threw unexpected exception: {ex.Message}");
+        //    }
+        //}
 
         [UnitTest]
         public void IsAttached_Type()

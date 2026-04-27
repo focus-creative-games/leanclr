@@ -195,7 +195,6 @@ namespace Tests.CSharp
         public void GetNotCtorCCtorMethods()
         {
             var m = typeof(A).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
-            Debugger.Log(0, "a", m.Length.ToString());
             Assert.Equal(1, m.Length);
         }
     }
