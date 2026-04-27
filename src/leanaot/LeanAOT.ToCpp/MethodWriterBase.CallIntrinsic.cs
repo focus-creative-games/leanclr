@@ -162,10 +162,6 @@ namespace LeanAOT.ToCpp
                 }
                 }
             }
-            if (methodDef.Module.IsCoreLibraryModule != true)
-            {
-                return false;
-            }
 
             UTF8String methodName = methodDef.Name;
             TypeDef declaringType = methodDef.DeclaringType;
@@ -181,6 +177,10 @@ namespace LeanAOT.ToCpp
                     return true;
                 }
                 }
+                return false;
+            }
+            if (methodDef.Module.IsCoreLibraryModule != true)
+            {
                 return false;
             }
 

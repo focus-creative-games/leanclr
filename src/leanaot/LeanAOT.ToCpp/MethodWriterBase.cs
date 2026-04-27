@@ -1839,14 +1839,13 @@ namespace LeanAOT.ToCpp
             }
             else
             {
-                ParamDetail prevParam = null;
-                foreach (var param in methodDetail.ParamsIncludeThis)
+                _bodyWriter.AddLine("constexpr size_t ARG0_OFFSET = 0;");
+                for (int paramIndex = 0, last = paramCount - 1; paramIndex < last; paramIndex++)
                 {
-                    int paramIndex = param.Index;
-                    _bodyWriter.AddLine($"constexpr size_t ARG{paramIndex}_OFFSET = {(paramIndex > 0 ? $"ARG{paramIndex - 1}_OFFSET + {ConstStrings.CodegenNamespace}::get_stack_object_size_for_type<{MethodGenerationUtil.GetExactTypeName(prevParam.Type)}>()" : "0")};");
-                    prevParam = param;
+                    ParamDetail param = methodDetail.ParamsIncludeThis[paramIndex];
+                    _bodyWriter.AddLine($"constexpr size_t ARG{paramIndex + 1}_OFFSET = ARG{paramIndex}_OFFSET + {ConstStrings.CodegenNamespace}::get_stack_object_size_for_type<{MethodGenerationUtil.GetExactTypeName(param.Type)}>();");
                 }
-                _bodyWriter.AddLine($"constexpr size_t ARGS_SIZE = ARG{paramCount - 1}_OFFSET + {ConstStrings.CodegenNamespace}::get_stack_object_size_for_type<{MethodGenerationUtil.GetExactTypeName(prevParam.Type)}>();");
+                _bodyWriter.AddLine($"constexpr size_t ARGS_SIZE = ARG{paramCount - 1}_OFFSET + {ConstStrings.CodegenNamespace}::get_stack_object_size_for_type<{MethodGenerationUtil.GetExactTypeName(methodDetail.ParamsIncludeThis.Last().Type)}>();");
                 argsStr = "__argsBuf";
                 _bodyWriter.AddLine($"{ConstStrings.StackObjectTypeName} {argsStr}[ARGS_SIZE];");
                 foreach (var param in methodDetail.ParamsIncludeThis)
