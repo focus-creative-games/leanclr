@@ -178,7 +178,6 @@ namespace Tests.CSharp.Delegates
             {
                 invoke.Invoke(del2, new object[] { 1 });
             });
-            invoke.Invoke(del2, new object[] { 1 });
         }
 
         [UnitTest]
@@ -200,7 +199,6 @@ namespace Tests.CSharp.Delegates
             {
                 invoke.Invoke(del, new object[] { null, 1 });
             });
-            invoke.Invoke(del, new object[] { null, 1 });
         }
 
         [UnitTest]
@@ -223,7 +221,6 @@ namespace Tests.CSharp.Delegates
             {
                 invoke.Invoke(del2, new object[] { 4 });
             });
-            invoke.Invoke(del2, new object[] { 4 });
         }
 
         [UnitTest]
@@ -285,7 +282,6 @@ namespace Tests.CSharp.Delegates
             {
                 invoke.Invoke(del2, new object[] { 4 });
             });
-            invoke.Invoke(del2, new object[] { 4 });
         }
 
 
