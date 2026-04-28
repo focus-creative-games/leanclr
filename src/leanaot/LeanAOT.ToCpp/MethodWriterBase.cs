@@ -2806,26 +2806,6 @@ namespace LeanAOT.ToCpp
 
         private void EmitRefanyval(Instruction inst, ITypeDefOrRef inflatedType, uint inlineToken)
         {
-            EvalVariable addrVar = Pop();
-            var retVar = PushStack(_corlibTypes.TypedReference);
-            RuntimeResolvedVariable typeVar = _runtimeResolvedMetadatas.GetTypeVariable(inflatedType);
-            string retVarName = GetEvalVariableName(retVar);
-            _bodyWriter.AddLine($"{ConstStrings.TypedByRefTypeName} {retVarName};");
-            _bodyWriter.AddLine($"{retVarName}.type_handle = {typeVar.GetFullReferenceVariableName()}->by_val;");
-            _bodyWriter.AddLine($"{retVarName}.klass = {typeVar.GetFullReferenceVariableName()};");
-            _bodyWriter.AddLine($"{retVarName}.value = {GetEvalVariableExprWithCast(addrVar, "void*")};");
-        }
-
-        private void EmitRefanytype(Instruction inst)
-        {
-            EvalVariable typedRefVar = Pop();
-            var retVar = PushStack(_corlibTypes.IntPtr);
-            string retTypeName = GetTypeName(retVar);
-            _bodyWriter.AddLine($"{retTypeName} {GetEvalVariableName(retVar)} = ({retTypeName})({GetEvalVariableName(typedRefVar)}.type_handle);");
-        }
-
-        private void EmitMkrefany(Instruction inst, ITypeDefOrRef inflatedType, uint inlineToken)
-        {
             EvalVariable typedRefVar = Pop();
             var retVar = PushStack(EvalDataType.I);
             string typeRefVarName = GetEvalVariableName(typedRefVar);
@@ -2845,6 +2825,26 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine("}");
             string retTypeName = GetTypeName(retVar);
             _bodyWriter.AddLine($"{retTypeName} {GetEvalVariableName(retVar)} = ({retTypeName}){typeRefVarName}.value;");
+        }
+
+        private void EmitRefanytype(Instruction inst)
+        {
+            EvalVariable typedRefVar = Pop();
+            var retVar = PushStack(_corlibTypes.IntPtr);
+            string retTypeName = GetTypeName(retVar);
+            _bodyWriter.AddLine($"{retTypeName} {GetEvalVariableName(retVar)} = ({retTypeName})({GetEvalVariableName(typedRefVar)}.type_handle);");
+        }
+
+        private void EmitMkrefany(Instruction inst, ITypeDefOrRef inflatedType, uint inlineToken)
+        {
+            EvalVariable addrVar = Pop();
+            var retVar = PushStack(_corlibTypes.TypedReference);
+            RuntimeResolvedVariable typeVar = _runtimeResolvedMetadatas.GetTypeVariable(inflatedType);
+            string retVarName = GetEvalVariableName(retVar);
+            _bodyWriter.AddLine($"{ConstStrings.TypedByRefTypeName} {retVarName};");
+            _bodyWriter.AddLine($"{retVarName}.type_handle = {typeVar.GetFullReferenceVariableName()}->by_val;");
+            _bodyWriter.AddLine($"{retVarName}.klass = {typeVar.GetFullReferenceVariableName()};");
+            _bodyWriter.AddLine($"{retVarName}.value = {GetEvalVariableExprWithCast(addrVar, "void*")};");
         }
 
         [Flags]
