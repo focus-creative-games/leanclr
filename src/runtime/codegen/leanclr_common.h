@@ -10,6 +10,7 @@
 #include "vm/runtime.h"
 #include "vm/rt_array.h"
 #include "vm/delegate.h"
+#include "vm/reflection.h"
 #include "vm/internal_calls.h"
 #include "metadata/module_def.h"
 #include "interp/interp_defs.h"
@@ -342,6 +343,16 @@ inline RtResult<vm::RtMulticastDelegate*> new_delegate(const metadata::RtClass* 
 inline RtResult<const uint8_t*> get_field_rva_data(const metadata::RtFieldInfo* field)
 {
     return vm::Field::get_field_rva_data(field);
+}
+
+inline RtResult<vm::RtReflectionAssembly*> get_assembly_reflection_object(const metadata::RtModuleDef* mod)
+{
+    return vm::Reflection::get_assembly_reflection_object(mod->get_assembly());
+}
+
+inline RtResult<vm::RtReflectionMethod*> get_method_reflection_object(const metadata::RtMethodInfo* method)
+{
+    return vm::Reflection::get_method_reflection_object(method, method->parent);
 }
 
 template <typename Src, typename Dst>
