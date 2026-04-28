@@ -1226,6 +1226,10 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
         classSize = 0;
         packingSize = 0;
     }
+    if (has_references)
+    {
+        packingSize = PTR_ALIGN;
+    }
 
     metadata::SizeAndAlignment instanceSizeAndAlignment;
     if (is_explicit_layout(klass))
@@ -1675,13 +1679,14 @@ static void collect_virtual_methods(const metadata::RtClass* klass, utils::Vecto
     }
 }
 
-static RtResultVoid setup_methodimpl_vtable(metadata::RtClass* klass, const metadata::RtClass* method_impl_declaring_klass, utils::HashSet<size_t>& initialized_vtable_index_set, utils::Vector<metadata::RtVirtualInvokeData>& new_vtable)
+static RtResultVoid setup_methodimpl_vtable(metadata::RtClass* klass, const metadata::RtClass* method_impl_declaring_klass,
+                                            utils::HashSet<size_t>& initialized_vtable_index_set, utils::Vector<metadata::RtVirtualInvokeData>& new_vtable)
 {
     const metadata::CliImage& cli_image = method_impl_declaring_klass->image->get_cli_image();
     metadata::RtGenericContainerContext gcc = Class::get_generic_container_context(method_impl_declaring_klass);
 
-    auto opt_method_impl_range =
-        cli_image.find_row_range_of_owner_at_sorted_table(metadata::TableType::MethodImpl, 0, metadata::RtToken::decode_rid(method_impl_declaring_klass->token));
+    auto opt_method_impl_range = cli_image.find_row_range_of_owner_at_sorted_table(metadata::TableType::MethodImpl, 0,
+                                                                                   metadata::RtToken::decode_rid(method_impl_declaring_klass->token));
     if (opt_method_impl_range)
     {
         metadata::RidRange& range = opt_method_impl_range.value();
@@ -1695,9 +1700,10 @@ static RtResultVoid setup_methodimpl_vtable(metadata::RtClass* klass, const meta
             metadata::RtToken body_token = metadata::RtMetadata::decode_method_def_or_ref_coded_index(row.method_body);
             metadata::RtToken decl_token = metadata::RtMetadata::decode_method_def_or_ref_coded_index(row.method_declaration);
 
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, body_method, method_impl_declaring_klass->image->get_method_by_token(body_token, gcc, nullptr));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, body_method,
+                                                    method_impl_declaring_klass->image->get_method_by_token(body_token, gcc, nullptr));
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, declaration_method,
-                method_impl_declaring_klass->image->get_method_by_token(decl_token, gcc, nullptr));
+                                                    method_impl_declaring_klass->image->get_method_by_token(decl_token, gcc, nullptr));
 
             if (!Method::is_virtual(declaration_method) || !Method::is_virtual(body_method))
                 RET_ASSERT_ERR(RtErr::BadImageFormat);
@@ -1714,7 +1720,7 @@ static RtResultVoid setup_methodimpl_vtable(metadata::RtClass* klass, const meta
                 bool is_declaration_klass_generic_inst = Class::is_generic_inst(declaration_klass);
                 if (is_method_impl_declaring_klass_generic_inst)
                 {
-                    metadata::RtGenericContext gc = { method_impl_declaring_klass->by_val->data.generic_class->class_inst };
+                    metadata::RtGenericContext gc = {method_impl_declaring_klass->by_val->data.generic_class->class_inst};
                     UNWRAP_OR_RET_ERR_ON_FAIL(body_method, Method::inflate(body_method, &gc));
                     if (is_declaration_klass_generic_inst)
                     {
@@ -1723,7 +1729,7 @@ static RtResultVoid setup_methodimpl_vtable(metadata::RtClass* klass, const meta
                 }
                 if (is_declaration_klass_generic_inst)
                 {
-                    metadata::RtGenericContext gc = { declaration_klass->by_val->data.generic_class->class_inst };
+                    metadata::RtGenericContext gc = {declaration_klass->by_val->data.generic_class->class_inst};
                     UNWRAP_OR_RET_ERR_ON_FAIL(declaration_method, Method::inflate(declaration_method, &gc));
                 }
             }
@@ -1903,8 +1909,8 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
     // Track initialized entries
     utils::HashSet<size_t> initialized_vtable_index_set;
 
-    //const metadata::CliImage& cli_image = klass->image->get_cli_image();
-    //metadata::RtGenericContainerContext gcc = Class::get_generic_container_context(klass);
+    // const metadata::CliImage& cli_image = klass->image->get_cli_image();
+    // metadata::RtGenericContainerContext gcc = Class::get_generic_container_context(klass);
 
     RET_ERR_ON_FAIL(setup_methodimpl_vtable(klass, klass, initialized_vtable_index_set, new_vtable));
     for (uint16_t i = klass->interface_count; i > 0; i--)
@@ -2442,10 +2448,11 @@ bool Class::is_assignable_from_generic_parameter_convariant0(const metadata::RtC
     return true;
 }
 
-bool Class::is_assignable_from_generic_parameter_convariant(const metadata::RtClass* from_class, const metadata::RtClass* to_class, const metadata::RtClass* implement_class)
+bool Class::is_assignable_from_generic_parameter_convariant(const metadata::RtClass* from_class, const metadata::RtClass* to_class,
+                                                            const metadata::RtClass* implement_class)
 {
     bool implemented_in_array = is_array_or_szarray(implement_class) || implement_class->declaring_class == get_corlib_types().cls_array;
-    auto cachePair = ClassPair{ from_class, to_class, implemented_in_array, false };
+    auto cachePair = ClassPair{from_class, to_class, implemented_in_array, false};
     auto it = g_genericParameterCovariantCheckCache.find(cachePair);
     if (it != g_genericParameterCovariantCheckCache.end())
     {
