@@ -102,5 +102,23 @@ namespace Tests.Instruments.Arrays
             ITest[] arr2 = arr;
             Assert.Equal(1, CallArrayMemberFunction(arr2));
         }
+
+        //[UnitTest]
+        //public void UncheckedForStructArray1()
+        //{
+        //    int[] arr = new int[1] { 1 };
+        //    uint[] arr2 = System.Runtime.com<int[], uint[]>(ref arr);
+        //    ref int x = ref arr[0];
+        //    Assert.Equal(1, x);
+        //}
+
+        //[UnitTest]
+        //public void UncheckedForStructArray2()
+        //{
+        //    TestStruct2[] arr = new TestStruct2[1] { new TestStruct2 { x = 1 } };
+        //    TestStruct[] arr2 = UnsafeUtility.As<TestStruct2[], TestStruct[]>(ref arr);
+        //    ref TestStruct x = ref arr2[0];
+        //    Assert.Equal(1, x.x);
+        //}
     }
 }

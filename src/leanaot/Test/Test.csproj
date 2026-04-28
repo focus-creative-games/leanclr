@@ -78,6 +78,7 @@
     <Compile Include="TC_Delegate_OpenClose.cs" />
     <Compile Include="TC_div.cs" />
     <Compile Include="TC_div_un.cs" />
+    <Compile Include="TC_Reflection.cs" />
     <Compile Include="TC_rem.cs" />
     <Compile Include="TC_rem_un.cs" />
     <Compile Include="TC_String.cs" />
