@@ -62,22 +62,26 @@ namespace Tests.Instruments.Boxs
             Assert.Equal(1, b);
         }
 
-        //[UnitTest]
-        //public void int_2()
-        //{
-        //    var o = (object)1;
-        //    Assert.ExpectException<InvalidCastException>();
-        //    long b = (long)o;
-        //}
+        [UnitTest]
+        public void int_2()
+        {
+            var o = (object)1;
+            Assert.ExpectException<InvalidCastException>(() =>
+            {
+                long b = (long)o;
+            });
+        }
 
-        //[UnitTest]
-        //public void null_1()
-        //{
-        //    Assert.ExpectException<NullReferenceException>();
-        //    object o = null;
-        //    int b = (int)o;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void null_1()
+        {
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+                object o = null;
+                int b = (int)o;
+                Assert.Fail();
+            });
+        }
 
         [UnitTest]
         public void null_2()
@@ -96,14 +100,15 @@ namespace Tests.Instruments.Boxs
             Assert.Equal(1, x.Value);
         }
 
-        //[UnitTest]
-        //public void int_4()
-        //{
-        //    object o = 1;
-        //    Assert.ExpectException<InvalidCastException>();
-        //    long? x = (long?)o;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void int_4()
+        {
+            object o = 1;
+            Assert.ExpectException<InvalidCastException>(() =>
+            {
+                long? x = (long?)o;
+            });
+        }
 
         [UnitTest]
         public void enum_sbyte_1()
@@ -126,19 +131,20 @@ namespace Tests.Instruments.Boxs
         [UnitTest]
         public void valuetype_1()
         {
-            var x = new ValueTypeSize1() { x1 = 1};
+            var x = new ValueTypeSize1() { x1 = 1 };
             var o = (object)x;
             var y = (ValueTypeSize1)o;
             Assert.Equal(1, y.x1);
         }
 
-        //[UnitTest]
-        //public void object_1()
-        //{
-        //    var x = new BoxAny<List<int>>();
-        //    Assert.ExpectException<InvalidCastException>();
-        //    var y = x.Value;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void object_1()
+        {
+            var x = new BoxAny<List<int>>();
+            Assert.ExpectException<InvalidCastException>(() =>
+            {
+                var y = x.Value;
+            });
+        }
     }
 }
