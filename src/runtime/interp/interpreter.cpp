@@ -2725,12 +2725,12 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(array);
-                const metadata::RtClass* check_klass = get_resolved_data<metadata::RtClass>(imi, ir->ele_klass_idx);
-                if (!vm::Class::is_pointer_element_compatible_with(ele_klass, check_klass))
-                {
-                    RAISE_RUNTIME_ERROR(RtErr::ArrayTypeMismatch);
-                }
+                // const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(array);
+                // const metadata::RtClass* check_klass = get_resolved_data<metadata::RtClass>(imi, ir->ele_klass_idx);
+                // if (!vm::Class::is_pointer_element_compatible_with(ele_klass, check_klass))
+                // {
+                //     RAISE_RUNTIME_ERROR(RtErr::ArrayTypeMismatch);
+                // }
                 assert(ir->ele_size == vm::Array::get_array_element_size(array));
                 const void* src_addr = vm::Array::get_array_element_address_with_size_as_ptr_void(array, index, ir->ele_size);
                 RtStackObject* dst = eval_stack_base + ir->dst;
@@ -5517,12 +5517,12 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(array);
-                        const metadata::RtClass* check_klass = get_resolved_data<metadata::RtClass>(imi, ir->ele_klass_idx);
-                        if (!vm::Class::is_pointer_element_compatible_with(ele_klass, check_klass))
-                        {
-                            RAISE_RUNTIME_ERROR(RtErr::ArrayTypeMismatch);
-                        }
+                        // const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(array);
+                        // const metadata::RtClass* check_klass = get_resolved_data<metadata::RtClass>(imi, ir->ele_klass_idx);
+                        // if (!vm::Class::is_pointer_element_compatible_with(ele_klass, check_klass))
+                        // {
+                        //     RAISE_RUNTIME_ERROR(RtErr::ArrayTypeMismatch);
+                        // }
                         assert(ir->ele_size == vm::Array::get_array_element_size(array));
                         const void* src_addr = vm::Array::get_array_element_address_with_size_as_ptr_void(array, index, ir->ele_size);
                         RtStackObject* dst = eval_stack_base + ir->dst;
