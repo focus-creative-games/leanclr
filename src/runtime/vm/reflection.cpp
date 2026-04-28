@@ -16,6 +16,7 @@
 #include "type.h"
 #include "rt_string.h"
 #include "rt_exception.h"
+#include "parameter.h"
 #include "alloc/general_allocation.h"
 #include "metadata/metadata_cache.h"
 #include "metadata/metadata_compare.h"
@@ -286,13 +287,18 @@ RtResult<RtArray*> Reflection::get_param_objects(const metadata::RtMethodInfo* m
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<uint32_t>, param_token_opt, Method::get_parameter_token(method, static_cast<int32_t>(i)));
         if (param_token_opt.has_value())
         {
-            auto opt_param = ass->get_cli_image().read_param(metadata::RtToken::decode_rid(param_token_opt.value()));
+            metadata::EncodedTokenId param_token = param_token_opt.value();
+            auto opt_param = ass->get_cli_image().read_param(metadata::RtToken::decode_rid(param_token));
             param_info_obj->attrs = opt_param->flags;
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtString*, param_name, Method::get_parameter_name_by_token(ass, param_token_opt.value()));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtString*, param_name, Method::get_parameter_name_by_token(ass, param_token));
             param_info_obj->name = param_name;
+            if (Parameter::has_parameter_attr_optional(param_info_obj->attrs))
+            {
+                UNWRAP_OR_RET_ERR_ON_FAIL(param_info_obj->default_value, Parameter::get_parameter_default_value_object(ass, param_token, param_type_sig));
+            }
         }
         param_info_obj->index = static_cast<int32_t>(i);
-        //param_info_obj->attrs = static_cast<uint32_t>(param_type_sig->flags);
+        // param_info_obj->attrs = static_cast<uint32_t>(param_type_sig->flags);
         Array::set_array_data_at<RtReflectionParameter*>(param_info_array_obj, static_cast<int32_t>(i), param_info_obj);
     }
     s_method_params_map.emplace(key, param_info_array_obj);
