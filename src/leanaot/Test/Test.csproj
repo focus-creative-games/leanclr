@@ -49,6 +49,7 @@
     <Compile Include="CallDelegateFuncs.cs" />
     <Compile Include="CommonTypes.cs" />
     <Compile Include="CustomAttributes.cs" />
+    <Compile Include="TC_call_aot.cs" />
     <Compile Include="TC_ckfinite.cs" />
     <Compile Include="TC_conv_i.cs" />
     <Compile Include="TC_conv_i1.cs" />

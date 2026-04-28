@@ -19,7 +19,7 @@ namespace Tests.Bugs
     }
     public class YYY : XXX, IXXX
     {
-        public int Activate()
+        public new int Activate()
         {
             return 3;
         }
