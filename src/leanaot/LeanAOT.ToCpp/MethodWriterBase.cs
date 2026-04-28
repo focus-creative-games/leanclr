@@ -1733,7 +1733,7 @@ namespace LeanAOT.ToCpp
             var sb = new StringBuilder();
             var paramsIncludeThis = methodDetail.ParamsIncludeThis;
             int paramIndexOffset = methodDetail.IsStatic ? 0 : 1;
-            for(int i = 0; i < args.Count ; i++)
+            for (int i = 0; i < args.Count; i++)
             {
                 if (i > 0)
                 {
@@ -2577,18 +2577,22 @@ namespace LeanAOT.ToCpp
             EmitCheckArrayIndexOutOfRange(inst, arrayVar, indexVar);
             string retTypeName = GetTypeName(retVar);
             string elementTypeName = GetExactTypeName(elementType);
-            switch (GetEvalDataType(elementType.ToTypeSig()))
+            EvalDataType evalDataType = GetEvalDataType(elementType.ToTypeSig());
+            switch (evalDataType)
             {
             case EvalDataType.Ref:
             case EvalDataType.ValueType:
             {
-                RuntimeResolvedVariable elementKlassVar = _runtimeResolvedMetadatas.GetTypeVariable(elementType);
-                _bodyWriter.AddLine($"if (!{VmFunctionNames.IsPointerElementCompatibleWith}({VmFunctionNames.GetArrayElementKlass}({GetEvalVariableExprWithCast(arrayVar, ConstStrings.ArrayPtrTypeName)}), {elementKlassVar.GetFullReferenceVariableName()}))");
-                _bodyWriter.AddLine("{");
-                _bodyWriter.IncreaseIndent();
-                EmitThrowRuntimeError(inst, "ArrayTypeMismatch");
-                _bodyWriter.DecreaseIndent();
-                _bodyWriter.AddLine("}");
+                if (evalDataType == EvalDataType.Ref)
+                {
+                    RuntimeResolvedVariable elementKlassVar = _runtimeResolvedMetadatas.GetTypeVariable(elementType);
+                    _bodyWriter.AddLine($"if (!{VmFunctionNames.IsPointerElementCompatibleWith}({VmFunctionNames.GetArrayElementKlass}({GetEvalVariableExprWithCast(arrayVar, ConstStrings.ArrayPtrTypeName)}), {elementKlassVar.GetFullReferenceVariableName()}))");
+                    _bodyWriter.AddLine("{");
+                    _bodyWriter.IncreaseIndent();
+                    EmitThrowRuntimeError(inst, "ArrayTypeMismatch");
+                    _bodyWriter.DecreaseIndent();
+                    _bodyWriter.AddLine("}");
+                }
                 string getElementAddressExpr = $"{VmFunctionNames.GetArrayElementAddress}<{elementTypeName}>({GetVariableMayCast(arrayVar, ConstStrings.ArrayPtrTypeName)}, {GetVariableMayCast(indexVar, "int32_t")})";
                 _bodyWriter.AddLine($"{retTypeName} {GetEvalVariableName(retVar)} = {MayFoldCast($"{elementTypeName}*", retTypeName, getElementAddressExpr)};");
                 break;
