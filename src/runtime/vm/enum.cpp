@@ -176,7 +176,8 @@ RtResult<int32_t> Enum::get_hash_code(RtObject* obj)
         result = static_cast<int32_t>(*static_cast<const uint8_t*>(data_ptr));
         break;
     case metadata::RtElementType::I2:
-        result = static_cast<int32_t>(*static_cast<const int16_t*>(data_ptr));
+        // it's unnecessary to cast to uint16_t, we just make implementation same to il2cpp.
+        result = static_cast<int32_t>(*static_cast<const uint16_t*>(data_ptr));
         break;
     case metadata::RtElementType::U2:
         result = static_cast<int32_t>(*static_cast<const uint16_t*>(data_ptr));
