@@ -322,6 +322,11 @@ bool Method::has_method_body(const RtMethodInfo* method)
     return optMethod.has_value() && optMethod->rva != 0;
 }
 
+bool Method::has_this(const metadata::RtMethodSig* method_sig)
+{
+    return method_sig->flags & static_cast<uint16_t>(metadata::RtSigType::HasThis);
+}
+
 size_t Method::get_param_count_include_this(const RtMethodInfo* method)
 {
     return static_cast<size_t>(method->parameter_count) + (is_instance(method) ? 1 : 0);

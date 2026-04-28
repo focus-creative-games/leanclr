@@ -1393,7 +1393,7 @@ RtResultVoid Transformer::add_calli(const metadata::RtMethodSig& method_sig)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, func_ptr, pop_eval_stack());
 
     // Pop parameters in reverse order
-    size_t param_count = method_sig.params.size();
+    size_t param_count = method_sig.params.size() + vm::Method::has_this(&method_sig);
     const Variable** params = nullptr;
     if (param_count > 0)
     {
@@ -1715,7 +1715,7 @@ RtResultVoid Transformer::add_unbox_any(metadata::RtClass* klass)
 {
     if (!vm::Class::is_value_type(klass))
     {
-        return add_isinst(klass);
+        return add_castclass(klass);
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, pop_eval_stack());
     if (obj->is_not_reference())

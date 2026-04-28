@@ -59,6 +59,7 @@ class Method
     static bool is_ctor(const metadata::RtMethodInfo* method);
     static metadata::RtMethodImplAttribute get_code_type(const metadata::RtMethodInfo* method);
     static bool has_method_body(const metadata::RtMethodInfo* method);
+    static bool has_this(const metadata::RtMethodSig* method_sig);
 
     // Parameter helpers
     static size_t get_param_count_include_this(const metadata::RtMethodInfo* method);
