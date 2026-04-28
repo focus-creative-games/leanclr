@@ -407,6 +407,11 @@ struct GeneralInst
         return arg2.value;
     }
 
+    void set_frame_base(size_t frame_base_idx)
+    {
+        arg2.value = frame_base_idx;
+    }
+
     size_t get_invoker_idx() const
     {
         return arg3.value;

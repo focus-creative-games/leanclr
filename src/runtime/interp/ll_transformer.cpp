@@ -1976,9 +1976,13 @@ RtResultVoid Transformer::transform_instructions()
                 break;
             }
             case hl::OpCodeEnum::Calli:
+            {
                 ll_inst->set_opcode(OpCodeEnum::CalliInterp);
-                setup_inst_method(ll_inst, hl_inst);
+                setup_inst_resolved_data(ll_inst, hl_inst->get_method_sig());
+                //ll_inst->set_frame_base(hl_inst->get_frame_base());
+                // method_idx stores in arg3, it has been setup on start.
                 break;
+            }
             case hl::OpCodeEnum::NewObj:
             {
                 const metadata::RtMethodInfo* method = hl_inst->get_method();

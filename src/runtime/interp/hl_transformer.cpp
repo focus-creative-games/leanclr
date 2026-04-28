@@ -1407,7 +1407,7 @@ RtResultVoid Transformer::add_calli(const metadata::RtMethodSig& method_sig)
     GeneralInst* ir = create_add_inst(OpCodeEnum::Calli);
     ir->set_prefix(_prefix);
     const metadata::RtMethodSig* sig_copy = new (get_module()->get_mem_pool().malloc_any_zeroed<metadata::RtMethodSig>()) metadata::RtMethodSig(method_sig);
-    ir->set_method_sig_and_params(sig_copy, get_cur_eval_stack_top(), func_ptr->eval_stack_offset, params);
+    ir->set_method_sig_and_params(sig_copy, get_cur_eval_stack_top(), func_ptr, params);
     if (!method_sig.return_type->is_void())
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, ret_var, push_typesig_to_eval_stack(method_sig.return_type));
