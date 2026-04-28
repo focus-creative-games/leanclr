@@ -58,7 +58,13 @@ namespace Tests.Instruments.Funcs
         public void class_generic_interface_covariant()
         {
             IBar<object> x = new ForBarClass2();
+            // mono and il2cpp return 1
+#if UNITY_EDITOR
             Assert.Equal(1, x.Sum(0));
+#else
+            // leanclr and coreclr return 2
+            Assert.Equal("2", x.Sum(0));
+#endif
         }
 
         /// TODO BUG OF il2cpp
@@ -66,7 +72,11 @@ namespace Tests.Instruments.Funcs
         public void class_generic_interface_contravariant()
         {
             IRun<string> x = new ForBarClass2();
+#if UNITY_EDITOR
             Assert.Equal(1, x.Comput(""));
+#else
+            Assert.Equal(2, x.Comput(""));
+#endif
         }
 
         [UnitTest]
