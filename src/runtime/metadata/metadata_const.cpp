@@ -42,6 +42,10 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
         RET_OK(vm::String::create_string_from_utf16chars(reinterpret_cast<const Utf16Char*>(dataPtr),
                                                          static_cast<int32_t>(reader.length() / 2)));
     }
+    case RtElementType::Class:
+    {
+        return nullptr;
+    }
     default:
     {
         RET_ASSERT_ERR(RtErr::BadImageFormat);
