@@ -1125,18 +1125,18 @@ RtResult<utils::BinaryReader> CliImage::get_decoded_blob_reader(uint32_t index) 
     auto& heap = blob_heap;
     if (index >= heap.size)
     {
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     auto data = heap.data + index;
     uint32_t blob_size = 0;
     size_t size_length = 0;
     if (!utils::BinaryReader::try_decode_compressed_uint32(data, heap.size - index, blob_size, size_length))
     {
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     if (index + size_length + blob_size > heap.size)
     {
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RET_OK(utils::BinaryReader(data + size_length, blob_size));
 }

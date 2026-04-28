@@ -26,7 +26,7 @@ static RtResult<RtClass*> get_class_from_not_pooled_generic_class(const RtGeneri
     RtModuleDef* module = RtModuleDef::get_module_by_id(module_id);
     if (!module)
     {
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, result, GenericClass::get_class(genericClass->base_type_def_gid, genericClass->class_inst));
     RET_OK(result);
@@ -47,6 +47,7 @@ static RtResult<RtClass*> get_class_from_pooled_generic_class(const RtGenericCla
     uint32_t base_type_def_gid = genericClass->base_type_def_gid;
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, base_generic_class, Class::get_class_by_type_def_gid(base_type_def_gid));
+    const_cast<RtGenericClass*>(genericClass)->cache_base_klass = base_generic_class;
     RtModuleDef* ass = base_generic_class->image;
 
     RtClass* parent_class = nullptr;

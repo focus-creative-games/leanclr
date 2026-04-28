@@ -181,7 +181,7 @@ RtResult<const metadata::RtMethodInfo*> Transformer::get_method_from_token(uint3
     {
         RET_OK(handle.method);
     }
-    RET_ERR(RtErr::BadImageFormat);
+    RET_ASSERT_ERR(RtErr::BadImageFormat);
 }
 
 RtResult<metadata::RtMethodSig> Transformer::get_standalone_method_sig_from_token(uint32_t token)
@@ -205,7 +205,7 @@ RtResult<const metadata::RtTypeSig*> Transformer::get_type_from_token(uint32_t r
     {
         RET_OK(handle.typeSig);
     }
-    RET_ERR(RtErr::BadImageFormat);
+    RET_ASSERT_ERR(RtErr::BadImageFormat);
 }
 
 RtResult<metadata::RtClass*> Transformer::get_class_from_token(uint32_t raw_token)
@@ -215,7 +215,7 @@ RtResult<metadata::RtClass*> Transformer::get_class_from_token(uint32_t raw_toke
     {
         return vm::Class::get_class_from_typesig(handle.typeSig);
     }
-    RET_ERR(RtErr::BadImageFormat);
+    RET_ASSERT_ERR(RtErr::BadImageFormat);
 }
 
 RtResult<const metadata::RtFieldInfo*> Transformer::get_field_from_token(uint32_t raw_token)
@@ -225,7 +225,7 @@ RtResult<const metadata::RtFieldInfo*> Transformer::get_field_from_token(uint32_
     {
         RET_OK(handle.field);
     }
-    RET_ERR(RtErr::BadImageFormat);
+    RET_ASSERT_ERR(RtErr::BadImageFormat);
 }
 
 RtResult<metadata::RtRuntimeHandle> Transformer::get_raw_runtime_handle_from_token(uint32_t raw_token)

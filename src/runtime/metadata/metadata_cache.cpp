@@ -337,7 +337,7 @@ RtResult<const RtTypeSig*> MetadataCache::get_pooled_typesig(const RtTypeSig& ty
         const RtGenericParam* gp = typesig.data.generic_param;
         uint32_t idx = gp->index;
         if (idx >= RT_MAX_GENERIC_PARAM_COUNT)
-            RET_ERR(RtErr::BadImageFormat);
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         uint32_t gid = gp->gid;
         uint32_t modId = RtMetadata::decode_module_id_from_gid(gid);
         uint32_t rid = RtMetadata::decode_rid_from_gid(gid);
@@ -353,7 +353,7 @@ RtResult<const RtTypeSig*> MetadataCache::get_pooled_typesig(const RtTypeSig& ty
         {
             return mod->get_generic_param_typesig_by_rid(rid, byRef);
         }
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
 
     case RtElementType::FnPtr:
@@ -364,7 +364,7 @@ RtResult<const RtTypeSig*> MetadataCache::get_pooled_typesig(const RtTypeSig& ty
     default:
     {
         assert(false && "Unhandled element type in get_pooled_typesig");
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
         // RtTypeSig* dup = alloc::MetadataAllocation::malloc_any_zeroed<RtTypeSig>();
         // *dup = typesig;
         // RET_OK(dup);
@@ -375,7 +375,7 @@ RtResult<const RtTypeSig*> MetadataCache::get_pooled_typesig(const RtTypeSig& ty
 RtResult<const RtGenericInst*> MetadataCache::get_pooled_generic_inst(const RtTypeSig* const* genericArgs, uint8_t genericArgCount)
 {
     if (!genericArgs || genericArgCount == 0)
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     RtGenericInst key{genericArgs, genericArgCount};
 

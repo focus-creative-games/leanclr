@@ -44,7 +44,7 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
     }
     default:
     {
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     }
 }

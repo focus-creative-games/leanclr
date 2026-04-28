@@ -18,6 +18,7 @@ class ArrayClass
     static RtResult<metadata::RtClass*> get_array_class_from_element_klass(const metadata::RtClass* ele_klass, uint8_t rank);
     static RtResult<metadata::RtClass*> get_szarray_class_from_element_typesig(const metadata::RtTypeSig* ele_type);
     static RtResult<metadata::RtClass*> get_szarray_class_from_element_class(const metadata::RtClass* ele_class);
+    static const metadata::RtClass* get_array_variance_reduce_type(const metadata::RtClass* klass);
 
     // Setup functions
     static RtResultVoid setup_interfaces(metadata::RtClass* klass);

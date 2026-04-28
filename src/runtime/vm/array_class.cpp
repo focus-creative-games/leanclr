@@ -284,6 +284,15 @@ RtResult<RtClass*> ArrayClass::get_szarray_class_from_element_class(const metada
     RET_OK(array_class);
 }
 
+const metadata::RtClass* ArrayClass::get_array_variance_reduce_type(const metadata::RtClass* klass)
+{
+    if (Class::is_array_or_szarray(klass))
+    {
+        return klass;
+    }
+    return klass->cast_class;
+}
+
 RtResultVoid ArrayClass::setup_interfaces(RtClass* klass)
 {
     // Only SZArray implement collection interfaces
@@ -318,7 +327,7 @@ RtResultVoid ArrayClass::setup_methods(RtClass* klass)
 {
     uint8_t rank = Class::get_rank(klass);
     if (rank == 0)
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     uint16_t method_count = 3 + (rank == 1 ? 1 : 2);
 
@@ -458,10 +467,10 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
         else if (std::strcmp(iface_name, iface_ireadonlylist) == 0)
             method_list = &g_ireadonlyListGenericMethods;
         else
-            RET_ERR(RtErr::BadImageFormat);
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
 
         if (iface->vtable_count != method_list->size())
-            RET_ERR(RtErr::BadImageFormat);
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
 
         for (size_t j = 0; j < iface->vtable_count; ++j)
         {
@@ -480,7 +489,7 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
                 }
             }
             if (!found)
-                RET_ERR(RtErr::BadImageFormat);
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
         current_slot += iface->vtable_count;
     }

@@ -284,7 +284,7 @@ RtResultVoid SystemReflectionRuntimeMethodInfo::get_pinvoke(vm::RtReflectionMeth
         auto module_ref = mod->get_cli_image().read_module_ref(pinvoke_info->import_scope);
         if (!module_ref.has_value())
         {
-            RET_ERR(RtErr::BadImageFormat);
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const char*, dll_name_utf8, mod->get_string(module_ref->name));
         *dll_name = vm::String::create_string_from_utf8cstr(dll_name_utf8);

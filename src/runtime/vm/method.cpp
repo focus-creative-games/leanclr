@@ -50,7 +50,7 @@ RtResult<const RtMethodInfo*> Method::get_method_by_method_def_gid(uint32_t meth
     RtModuleDef* module = RtModuleDef::get_module_by_id(module_id);
     if (!module)
     {
-        RET_ERR(RtErr::BadImageFormat);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, method, module->get_method_by_rid(method_rid));
@@ -82,11 +82,41 @@ const RtMethodInfo* Method::get_vtable_method(const RtClass* klass, size_t metho
 RtResult<const RtVirtualInvokeData*> Method::get_interface_method_invoke_data(const RtClass* klass, const RtClass* interface_klass, size_t slot)
 {
     const RtInterfaceOffset* offsets = klass->interface_vtable_offsets;
-    for (size_t i = 0; i < klass->interface_vtable_offset_count; ++i)
+    if (!Class::is_generic_inst(interface_klass))
     {
-        const RtInterfaceOffset& off = offsets[i];
-        if (off.interface == interface_klass)
+        for (size_t i = 0; i < klass->interface_vtable_offset_count; ++i)
         {
+            const RtInterfaceOffset& off = offsets[i];
+            if (off.interface == interface_klass)
+            {
+                size_t vtable_index = static_cast<size_t>(off.offset) + slot;
+                RET_OK(klass->vtable + vtable_index);
+            }
+        }
+    }
+    else
+    {
+        // FIXME: same to il2cpp, but it seems that il2cpp doesn't consider the case where the same generic interface is implemented multiple times with different generic arguments,
+        // which is legal in C#. We may need to add more checks here to find the correct interface vtable offset.
+        for (int32_t i = klass->interface_vtable_offset_count; i > 0; --i)
+        {
+            const RtInterfaceOffset& off = offsets[i - 1];
+            const RtClass* implemented_interface = off.interface;
+            if (implemented_interface != interface_klass)
+            {
+                if (!Class::is_generic_inst(implemented_interface))
+                {
+                    continue;
+                }
+                if (implemented_interface->by_val->data.generic_class->base_type_def_gid != interface_klass->by_val->data.generic_class->base_type_def_gid)
+                {
+                    continue;
+                }
+                if (!Class::is_assignable_from_generic_parameter_convariant(implemented_interface, interface_klass, klass))
+                {
+                    continue;
+                }
+            }
             size_t vtable_index = static_cast<size_t>(off.offset) + slot;
             RET_OK(klass->vtable + vtable_index);
         }

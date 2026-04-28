@@ -222,12 +222,14 @@ class Class
     static RtResult<metadata::RtClass*> find_nested_class_by_name(const metadata::RtClass* enclosingClass, const char* nestedClassName, bool ignore_case);
 
     // Type assignability checking functions
-    static bool is_assignable_from_class(const metadata::RtClass* fromClass, const metadata::RtClass* toClass);
-    static bool is_assignable_from_interface(const metadata::RtClass* fromClass, const metadata::RtClass* toClass);
-    static bool is_assignable_from(const metadata::RtClass* fromClass, const metadata::RtClass* toClass);
+    static bool is_assignable_from_class(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
+    static bool is_assignable_from_generic_parameter_convariant(const metadata::RtClass* from_class, const metadata::RtClass* to_class, const metadata::RtClass* implement_class);
+    static bool is_assignable_from_generic_interface(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
+    static bool is_assignable_from_interface(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
+    static bool is_assignable_from(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
     static bool is_exception_sub_class(const metadata::RtClass* klass);
-    static bool is_subclass_of_initialized(const metadata::RtClass* fromClass, const metadata::RtClass* toClass, bool checkInterfaces);
-    static bool is_pointer_element_compatible_with(const metadata::RtClass* fromClass, const metadata::RtClass* toClass);
+    static bool is_subclass_of_initialized(const metadata::RtClass* from_class, const metadata::RtClass* to_class, bool check_interfaces);
+    static bool is_pointer_element_compatible_with(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
 
     static size_t get_gc_bitmap_size(const metadata::RtClass* klass);
     static void get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size);
@@ -244,6 +246,7 @@ class Class
     static RtResultVoid setup_properties_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_events_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_vtable_typedef(metadata::RtClass* klass);
+    static bool is_assignable_from_generic_parameter_convariant0(const metadata::RtClass* from_class, const metadata::RtClass* to_class, bool implemented_in_array);
 };
 } // namespace vm
 } // namespace leanclr

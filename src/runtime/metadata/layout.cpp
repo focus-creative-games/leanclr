@@ -135,7 +135,7 @@ RtResult<SizeAndAlignment> Layout::compute_explicit_layout(RtModuleDef* mod, uti
         auto field_offset_opt = mod->get_field_offset(field->token);
         if (!field_offset_opt.has_value())
         {
-            RET_ERR(RtErr::BadImageFormat);
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
 
         uint32_t offset = field_offset_opt.value();
