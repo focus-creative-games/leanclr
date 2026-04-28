@@ -1903,7 +1903,7 @@ namespace LeanAOT.ToCpp
             }
         }
 
-        private void EmitCall(Instruction inst, IMethod method, uint token)
+        private void EmitCall(Instruction inst, IMethod method, uint token, bool emitCheckNullForInstanceMethod)
         {
             MethodDetail methodDetail = _metadataService.GetMethodDetail(method);
             _forwardDeclaration.AddMethodForwardDeclaration(method);
@@ -1911,6 +1911,10 @@ namespace LeanAOT.ToCpp
             int paramCount = methodDetail.ParamCountIncludeThis;
             bool hasReturnValue = !methodDetail.IsVoidReturn;
             var args = new List<EvalVariable>(_curState.runStackDatas.GetRange(_curState.runStackDatas.Count - paramCount, paramCount));
+            if (emitCheckNullForInstanceMethod && !methodDetail.IsStatic)
+            {
+                EmitCheckNotNull(inst, args[0]);
+            }
             Pop(paramCount);
 
             EvalVariable retVar = null;
@@ -2041,7 +2045,6 @@ namespace LeanAOT.ToCpp
         private void EmitCallVirt(Instruction inst, IMethod method, uint token)
         {
             var methodDetail = _metadataService.GetMethodDetail(method);
-            ITypeDefOrRef declaringType = method.DeclaringType;
 
             int paramCount = methodDetail.ParamCountIncludeThis;
             bool hasReturnValue = !methodDetail.IsVoidReturn;
@@ -2058,7 +2061,7 @@ namespace LeanAOT.ToCpp
                     if (IsTypeImplementConstraintedMethod(constaintedType, methodDetail, out IMethod implMethod) && implMethod.IsMethodDef)
                     {
                         // for constrained callvirt on value type, we can treat it as direct call since the this pointer is already a pointer to the value type and no null check is needed
-                        EmitCall(inst, implMethod, token);
+                        EmitCall(inst, implMethod, token, true);
                         return;
                     }
                     else
@@ -2083,7 +2086,7 @@ namespace LeanAOT.ToCpp
             if (methodDetail.IsNotVirtualOrSealed)
             {
                 // callvirt can be used to call non-virtual method, in this case we can just treat it as call
-                EmitCall(inst, method, token);
+                EmitCall(inst, method, token, true);
                 return;
             }
             _forwardDeclaration.AddMethodForwardDeclaration(method);
@@ -2209,7 +2212,7 @@ namespace LeanAOT.ToCpp
             _forwardDeclaration.AddMethodForwardDeclaration(method);
             if (TryRedirectNewObjIntrinsic(inst, methodDetail, out MethodDef redirectedMethod))
             {
-                EmitCall(inst, redirectedMethod, 0);
+                EmitCall(inst, redirectedMethod, 0, false);
                 return;
             }
 
@@ -3120,7 +3123,7 @@ namespace LeanAOT.ToCpp
                     }
                     case Code.Call:
                     {
-                        EmitCall(inst, inflatedMethod, inlineToken);
+                        EmitCall(inst, inflatedMethod, inlineToken, false);
                         break;
                     }
                     case Code.Callvirt:
