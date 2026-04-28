@@ -63,7 +63,7 @@ static RtResultVoid init_static_empty_string(metadata::RtClass* stringClass)
     if (!emptyField)
     {
         assert(false && "String.Empty field not found");
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     assert(*g_emptyString_ptr);
     assert((*g_emptyString_ptr)->length == 0);
@@ -90,7 +90,7 @@ static RtResultVoid init_redirected_ctor_method(metadata::RtClass* stringClass)
         }
     }
     assert(false && "String directcted ctor method not found");
-    RET_ERR(RtErr::ExecutionEngine);
+    RET_ASSERT_ERR(RtErr::ExecutionEngine);
 }
 
 RtResultVoid String::initialize()

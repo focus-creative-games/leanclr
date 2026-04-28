@@ -213,7 +213,7 @@ struct ScopeBufferGuard
                 break;
             }
             default:
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
         }
 

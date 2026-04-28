@@ -157,7 +157,7 @@ RtResultVoid Delegate::invoke_delegate_invoker(metadata::RtManagedMethodPointer 
             break;
         }
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         RET_ERR_ON_FAIL((target_method->invoke_method_ptr)(target_method->method_ptr, target_method, final_args, s_tempReturnValueBuffer));
     }

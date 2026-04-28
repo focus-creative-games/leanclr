@@ -61,7 +61,7 @@ RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject
             equal = eq_any<uint64_t>(data_ptr1, data_ptr2);
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
 
         RET_OK(equal);
@@ -205,7 +205,7 @@ RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject
                         enum_equal = eq_any<uint64_t>(field_data_ptr1, field_data_ptr2);
                         break;
                     default:
-                        RET_ERR(RtErr::ExecutionEngine);
+                        RET_ASSERT_ERR(RtErr::ExecutionEngine);
                     }
 
                     if (!enum_equal)
@@ -404,7 +404,7 @@ RtResult<int32_t> SystemValueType::internal_get_hash_code(vm::RtObject* obj, vm:
                         break;
                     }
                     default:
-                        RET_ERR(RtErr::ExecutionEngine);
+                        RET_ASSERT_ERR(RtErr::ExecutionEngine);
                     }
                 }
                 else

@@ -62,7 +62,7 @@ RtResult<std::tuple<bool, RtArray*, RtArray*>> Enum::get_enum_values_and_names(m
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const void*, rva_data, Field::get_field_const_data(field));
         if (rva_data == nullptr)
         {
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
 
         uint64_t value = 0;
@@ -95,7 +95,7 @@ RtResult<std::tuple<bool, RtArray*, RtArray*>> Enum::get_enum_values_and_names(m
             value = *static_cast<const uint64_t*>(rva_data);
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
 
         if (index > 0)
@@ -146,7 +146,7 @@ RtResult<uint64_t> Enum::get_boxed_enum_data_as_unsigned_and_extended_to_u64(RtO
         value = *static_cast<const uint64_t*>(data_ptr);
         break;
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     RET_OK(value);
@@ -195,7 +195,7 @@ RtResult<int32_t> Enum::get_hash_code(RtObject* obj)
         break;
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     RET_OK(result);

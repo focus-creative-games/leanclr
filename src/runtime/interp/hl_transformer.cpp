@@ -266,7 +266,7 @@ RtResult<metadata::RtRuntimeHandle> Transformer::get_raw_runtime_handle_from_tok
         RET_OK(metadata::RtRuntimeHandle(field));
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 }
 
@@ -380,7 +380,7 @@ RtResult<const Variable*> Transformer::get_top_var() const
 {
     size_t stack_len = _cur_bb->eval_stack.size();
     if (stack_len == 0)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     const Variable* top_var = _cur_bb->eval_stack.get(stack_len - 1);
     RET_OK(top_var);
 }
@@ -389,7 +389,7 @@ RtResult<const Variable*> Transformer::pop_eval_stack()
 {
     size_t stack_len = _cur_bb->eval_stack.size();
     if (stack_len == 0)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     const Variable* top_var = _cur_bb->eval_stack.get(stack_len - 1);
 
     _cur_bb->eval_stack_top -= top_var->stack_object_size;
@@ -437,7 +437,7 @@ RtResultVoid Transformer::add_init_locals()
 RtResultVoid Transformer::add_ldarg(size_t arg_idx)
 {
     if (arg_idx >= _arg_vars_count)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* arg_var = _arg_vars[arg_idx];
     GeneralInst* ir = create_add_inst(OpCodeEnum::LdArg);
@@ -449,7 +449,7 @@ RtResultVoid Transformer::add_ldarg(size_t arg_idx)
 RtResultVoid Transformer::add_starg(size_t arg_idx)
 {
     if (arg_idx >= _arg_vars_count)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* arg_var = _arg_vars[arg_idx];
     RtResult<const Variable*> src_result = pop_eval_stack();
@@ -464,7 +464,7 @@ RtResultVoid Transformer::add_starg(size_t arg_idx)
 RtResultVoid Transformer::add_ldarga(size_t arg_idx)
 {
     if (arg_idx >= _arg_vars_count)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* arg_var = _arg_vars[arg_idx];
     GeneralInst* ir = create_add_inst(OpCodeEnum::LdArga);
@@ -476,7 +476,7 @@ RtResultVoid Transformer::add_ldarga(size_t arg_idx)
 RtResultVoid Transformer::add_ldloc(size_t local_idx)
 {
     if (local_idx >= _local_vars_count)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* local_var = _local_vars[local_idx];
     GeneralInst* ir = create_add_inst(OpCodeEnum::LdLoc);
@@ -488,7 +488,7 @@ RtResultVoid Transformer::add_ldloc(size_t local_idx)
 RtResultVoid Transformer::add_stloc(size_t local_idx)
 {
     if (local_idx >= _local_vars_count)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* local_var = _local_vars[local_idx];
     RtResult<const Variable*> src_result = pop_eval_stack();
@@ -503,7 +503,7 @@ RtResultVoid Transformer::add_stloc(size_t local_idx)
 RtResultVoid Transformer::add_ldloca(size_t local_idx)
 {
     if (local_idx >= _local_vars_count)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* local_var = _local_vars[local_idx];
     GeneralInst* ir = create_add_inst(OpCodeEnum::LdLoca);
@@ -582,7 +582,7 @@ RtResult<BasicBlock*> Transformer::get_branch_target_bb(size_t global_target_off
 {
     auto it = _il_offset_to_basic_block.find(static_cast<uint32_t>(global_target_offset));
     if (it == _il_offset_to_basic_block.end())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     RET_OK(it->second);
 }
 
@@ -592,14 +592,14 @@ RtResultVoid Transformer::setup_target_branch_eval_stack(BasicBlock* target)
     if (target->inited_eval_stack)
     {
         if (target->in_eval_stack_top != _cur_bb->eval_stack_top || target->in_eval_stack.size() != cur_eval_stack_size)
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
         for (size_t i = 0; i < cur_eval_stack_size; ++i)
         {
             const Variable* target_var = target->in_eval_stack[i];
             const Variable* cur_var = _cur_bb->eval_stack[i];
             if (target_var->data_type != cur_var->data_type || target_var->eval_stack_offset != cur_var->eval_stack_offset)
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
     }
     else
@@ -630,7 +630,7 @@ RtResultVoid Transformer::add_br(uint32_t next_offset, int32_t target_offset)
     // according to ECMA-335, the eval stack of branch target before current instruction should be empty.
     // but coreclr relaxes this rule, so we also relax it here.
     // if (target_offset < 0 && !_cur_bb->eval_stack.is_empty())
-    //     RET_ERR(RtErr::ExecutionEngine);
+    //     RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) + static_cast<ptrdiff_t>(target_offset));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(BasicBlock*, target_bb, get_branch_target_bb(target_il_offset));
@@ -667,7 +667,7 @@ RtResultVoid Transformer::add_condition_branch(uint32_t next_offset, int32_t tar
         RET_VOID_OK();
 
     if (left_var->data_type != right_var->data_type)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) + static_cast<ptrdiff_t>(target_offset));
 
@@ -686,7 +686,7 @@ RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targ
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, key_var, pop_eval_stack());
 
     if (key_var->data_type != RtEvalStackDataType::I4)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const BasicBlock** targets = _pool->calloc_any<const BasicBlock*>(count);
     bool any_not_zero_branch = false;
@@ -768,7 +768,7 @@ RtResult<RtEvalStackDataType> Transformer::calc_bin_arith_result_type(RtEvalStac
             ret_type = RtEvalStackDataType::RefOrPtr;
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         break;
     case RtEvalStackDataType::I8:
@@ -780,7 +780,7 @@ RtResult<RtEvalStackDataType> Transformer::calc_bin_arith_result_type(RtEvalStac
             ret_type = RtEvalStackDataType::I8;
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         break;
     case RtEvalStackDataType::R4:
@@ -793,7 +793,7 @@ RtResult<RtEvalStackDataType> Transformer::calc_bin_arith_result_type(RtEvalStac
             ret_type = RtEvalStackDataType::R8;
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         break;
     case RtEvalStackDataType::R8:
@@ -804,7 +804,7 @@ RtResult<RtEvalStackDataType> Transformer::calc_bin_arith_result_type(RtEvalStac
             ret_type = RtEvalStackDataType::R8;
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         break;
     case RtEvalStackDataType::RefOrPtr:
@@ -818,11 +818,11 @@ RtResult<RtEvalStackDataType> Transformer::calc_bin_arith_result_type(RtEvalStac
             ret_type = RtEvalStackDataType::I8;
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         break;
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     RET_OK(ret_type);
 }
@@ -838,7 +838,7 @@ RtResult<size_t> Transformer::calc_arith_op_eval_data_size_by_data_type(RtEvalSt
     case RtEvalStackDataType::RefOrPtr:
         RET_OK(2);
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 }
 
@@ -857,7 +857,7 @@ RtResultVoid Transformer::insert_conv_from_to(const Variable* from_var, const Va
         opcode = OpCodeEnum::ConvI;
         break;
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     GeneralInst* ir = create_add_inst(opcode);
@@ -925,7 +925,7 @@ RtResult<RtEvalStackDataType> Transformer::calc_bitop_result_type(RtEvalStackDat
             ret_type = RtEvalStackDataType::RefOrPtr;
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         break;
     case RtEvalStackDataType::I8:
@@ -937,7 +937,7 @@ RtResult<RtEvalStackDataType> Transformer::calc_bitop_result_type(RtEvalStackDat
             ret_type = RtEvalStackDataType::I8;
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         break;
     case RtEvalStackDataType::RefOrPtr:
@@ -951,11 +951,11 @@ RtResult<RtEvalStackDataType> Transformer::calc_bitop_result_type(RtEvalStackDat
             ret_type = RtEvalStackDataType::I8;
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         break;
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     RET_OK(ret_type);
 }
@@ -981,10 +981,10 @@ RtResultVoid Transformer::add_bit_shift_op(OpCodeEnum opcode)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, value, pop_eval_stack());
 
     if (value->is_not_i32_and_i64_and_native_int())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     if (shift_amount->is_not_i32_and_native_int())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(opcode);
 
@@ -998,7 +998,7 @@ RtResultVoid Transformer::add_neg()
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, src, pop_eval_stack());
     if (!src->is_primitive())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::Neg);
     ir->set_var_src(src);
@@ -1010,7 +1010,7 @@ RtResultVoid Transformer::add_not()
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, src, pop_eval_stack());
     if (src->is_not_i32_and_i64_and_native_int())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::Not);
 
@@ -1025,10 +1025,10 @@ RtResultVoid Transformer::add_bin_compare_op(OpCodeEnum opcode)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, left, pop_eval_stack());
 
     if (left->data_type != right->data_type)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     if (!left->is_primitive())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(opcode);
 
@@ -1049,7 +1049,7 @@ RtResultVoid Transformer::add_conv(OpCodeEnum opcode, RtEvalStackDataType data_t
         RET_VOID_OK();
     }
     if (!src->is_primitive())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(opcode);
 
@@ -1063,7 +1063,7 @@ RtResultVoid Transformer::add_ckfinite()
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, val, get_top_var());
 
     if (!val->is_f32_or_f64())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     // Check if the value is a finite number (not NaN or Inf)
     GeneralInst* ir = create_add_inst(OpCodeEnum::Ckfinite);
@@ -1149,7 +1149,7 @@ RtResultVoid Transformer::add_call_common(const metadata::RtMethodInfo* method, 
         opcode = OpCodeEnum::CallIntrinsic;
         break;
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     GeneralInst* ir = create_add_inst(opcode);
@@ -1308,7 +1308,7 @@ RtResultVoid Transformer::add_enum_hash_code_call(metadata::RtClass* enum_klass)
         RET_VOID_OK();
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     return add_ldind(opcode, type_and_size.reduce_type);
 }
@@ -1338,11 +1338,11 @@ RtResultVoid Transformer::add_callvirt(const metadata::RtMethodInfo* method)
 {
     // FIXME: coreclr supports callvir on static methods, we currently don't support that.
     if (!vm::Method::is_instance(method))
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     size_t param_count = vm::Method::get_param_count_include_this(method);
     if (_cur_bb->eval_stack.size() < param_count)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     if (((uint32_t)_prefix & (uint32_t)il::OpCodePrefix::Constrained) != 0)
     {
@@ -1353,7 +1353,7 @@ RtResultVoid Transformer::add_callvirt(const metadata::RtMethodInfo* method)
         RET_ERR_ON_FAIL(vm::Class::initialize_all(cons_klass));
         if (!vm::Method::is_virtual(method) && !vm::Class::is_object_class(method->parent))
         {
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         if (vm::Class::is_value_type(cons_klass))
         {
@@ -1428,7 +1428,7 @@ RtResultVoid Transformer::add_ldvirtftn(const metadata::RtMethodInfo* method)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj_result, pop_eval_stack());
     if (obj_result->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     if (vm::Method::is_devirtualed(method))
     {
@@ -1445,7 +1445,7 @@ RtResultVoid Transformer::add_initobj(metadata::RtClass* klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, addr_result, pop_eval_stack());
     if (addr_result->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ReduceTypeAndSize, type_and_size, InterpDefs::get_reduce_type_and_size_by_typesig(klass->by_val));
 
@@ -1479,7 +1479,7 @@ RtResultVoid Transformer::add_initobj(metadata::RtClass* klass)
         break;
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     ir->set_var_src(addr_result);
     RET_VOID_OK();
@@ -1490,7 +1490,7 @@ RtResultVoid Transformer::add_cpobj(metadata::RtClass* klass)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, src, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, dst, pop_eval_stack());
     if (src->is_not_reference() || dst->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ReduceTypeAndSize, type_and_size, InterpDefs::get_reduce_type_and_size_by_typesig(klass->by_val));
     GeneralInst* ir;
@@ -1523,7 +1523,7 @@ RtResultVoid Transformer::add_cpobj(metadata::RtClass* klass)
         break;
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     ir->set_var_src(src);
     ir->set_var_dst(dst);
@@ -1534,7 +1534,7 @@ RtResultVoid Transformer::add_ldobj(metadata::RtClass* klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, addr, pop_eval_stack());
     if (addr->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ReduceTypeAndSize, type_and_size, InterpDefs::get_reduce_type_and_size_by_typesig(klass->by_val));
     GeneralInst* ir;
@@ -1571,7 +1571,7 @@ RtResultVoid Transformer::add_ldobj(metadata::RtClass* klass)
         break;
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     ir->set_prefix(_prefix);
     ir->set_var_src(addr);
@@ -1585,7 +1585,7 @@ RtResultVoid Transformer::add_stobj(metadata::RtClass* klass)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, val, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, addr, pop_eval_stack());
     if (addr->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ReduceTypeAndSize, type_and_size, InterpDefs::get_reduce_type_and_size_by_typesig(klass->by_val));
     GeneralInst* ir;
@@ -1618,7 +1618,7 @@ RtResultVoid Transformer::add_stobj(metadata::RtClass* klass)
         break;
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     ir->set_prefix(_prefix);
     ir->set_var_src(val);
@@ -1664,7 +1664,7 @@ RtResultVoid Transformer::add_isinst(metadata::RtClass* klass)
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, get_top_var());
     if (obj->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::IsInst);
 
@@ -1702,7 +1702,7 @@ RtResultVoid Transformer::add_unbox(metadata::RtClass* klass)
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, pop_eval_stack());
     if (!vm::Class::is_value_type(klass))
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     GeneralInst* ir = create_add_inst(OpCodeEnum::Unbox);
 
     ir->set_class(klass);
@@ -1719,7 +1719,7 @@ RtResultVoid Transformer::add_unbox_any(metadata::RtClass* klass)
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, pop_eval_stack());
     if (obj->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::UnboxAny);
 
@@ -1743,7 +1743,7 @@ RtResultVoid Transformer::add_ldfld(const metadata::RtFieldInfo* field)
         opcode = OpCodeEnum::Ldvfld;
         break;
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     GeneralInst* ir = create_add_inst(opcode);
@@ -1760,7 +1760,7 @@ RtResultVoid Transformer::add_ldflda(const metadata::RtFieldInfo* field)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, pop_eval_stack());
     if (obj->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     GeneralInst* ir = create_add_inst(OpCodeEnum::Ldflda);
 
     ir->set_field(field);
@@ -1774,7 +1774,7 @@ RtResultVoid Transformer::add_stfld(const metadata::RtFieldInfo* field)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, value, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, pop_eval_stack());
     if (obj->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::Stfld);
 
@@ -1817,7 +1817,7 @@ RtResultVoid Transformer::add_newarr(metadata::RtClass* ele_klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, count, pop_eval_stack());
     if (!count->is_i32_or_native_int())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::NewArr);
 
@@ -1844,9 +1844,9 @@ RtResultVoid Transformer::add_ldelema(metadata::RtClass* ele_klass)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, idx, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, arr, pop_eval_stack());
     if (!idx->is_i32_or_native_int())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     if (arr->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::Ldelema);
 
@@ -1863,9 +1863,9 @@ RtResultVoid Transformer::add_ldelem(OpCodeEnum opcode, RtEvalStackDataType data
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, idx, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, arr, pop_eval_stack());
     if (!idx->is_i32_or_native_int())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     if (arr->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(opcode);
 
@@ -1903,9 +1903,9 @@ RtResultVoid Transformer::add_ldelem_any(metadata::RtClass* ele_klass)
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, index, pop_eval_stack());
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, arr, pop_eval_stack());
         if (!index->is_i32_or_native_int())
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         if (arr->is_not_reference())
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         GeneralInst* ir = create_add_inst(OpCodeEnum::LdelemAny);
         ir->set_class(ele_klass);
         ir->set_var_arg1(arr);
@@ -1916,7 +1916,7 @@ RtResultVoid Transformer::add_ldelem_any(metadata::RtClass* ele_klass)
         RET_VOID_OK();
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 }
 
@@ -1926,11 +1926,11 @@ RtResultVoid Transformer::add_stelem(OpCodeEnum opcode, RtEvalStackDataType data
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, idx, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, arr, pop_eval_stack());
     if (!idx->is_i32_or_native_int())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     if (arr->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     if (val->data_type != data_type)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(opcode);
 
@@ -1969,11 +1969,11 @@ RtResultVoid Transformer::add_stelem_any(metadata::RtClass* ele_klass)
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, idx, pop_eval_stack());
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, arr, pop_eval_stack());
         if (!idx->is_i32_or_native_int())
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         if (arr->is_not_reference())
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         if (val->data_type != RtEvalStackDataType::Other)
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         GeneralInst* ir = create_add_inst(OpCodeEnum::StelemAny);
 
         ir->set_class(ele_klass);
@@ -1985,7 +1985,7 @@ RtResultVoid Transformer::add_stelem_any(metadata::RtClass* ele_klass)
         break;
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 }
 
@@ -1993,7 +1993,7 @@ RtResultVoid Transformer::add_mkrefany(metadata::RtClass* klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, addr, pop_eval_stack());
     if (addr->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     // Create mkrefany instruction - this creates a TypedRef from address and type
     GeneralInst* ir = create_add_inst(OpCodeEnum::MkRefAny);
@@ -2009,7 +2009,7 @@ RtResultVoid Transformer::add_refanytype()
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, typedref_var, pop_eval_stack());
     if (!typedref_var->is_typedbyref())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     // Create refanytype instruction - extracts type from TypedRef
     GeneralInst* ir = create_add_inst(OpCodeEnum::RefAnyType);
@@ -2023,7 +2023,7 @@ RtResultVoid Transformer::add_refanyval(metadata::RtClass* klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, typedref_var, pop_eval_stack());
     if (!typedref_var->is_typedbyref())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     // Create refanyval instruction - extracts address from TypedRef
     GeneralInst* ir = create_add_inst(OpCodeEnum::RefAnyVal);
@@ -2073,7 +2073,7 @@ RtResultVoid Transformer::add_endfinally()
 RtResultVoid Transformer::add_endfilter()
 {
     if (_cur_bb->eval_stack.size() != 1)
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::EndFilter);
     ir->set_var_src(_cur_bb->eval_stack[0]);
@@ -2104,7 +2104,7 @@ RtResultVoid Transformer::add_localloc()
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, size, pop_eval_stack());
     if (!size->is_i32_or_native_int())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     GeneralInst* ir = create_add_inst(OpCodeEnum::LocAlloc);
     ir->set_var_src(size);
     ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
@@ -2118,7 +2118,7 @@ RtResultVoid Transformer::add_cpblk()
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, dst_addr, pop_eval_stack());
 
     if (size->is_not_i32_and_native_int() || src_addr->is_not_reference() || dst_addr->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::CpBlk);
     ir->set_var_arg1(dst_addr);
@@ -2133,7 +2133,7 @@ RtResultVoid Transformer::add_initblk()
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, value, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, dst_addr, pop_eval_stack());
     if (size->is_not_i32_and_native_int() || value->is_not_i32_and_native_int() || dst_addr->is_not_reference())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     GeneralInst* ir = create_add_inst(OpCodeEnum::InitBlk);
     ir->set_var_arg1(dst_addr);
@@ -2260,12 +2260,12 @@ RtResultVoid Transformer::setup_exception_clauses()
 
         // try block must start at a known basic block
         if (_il_offset_to_basic_block.find(src.try_offset) == _il_offset_to_basic_block.end())
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
         // handler block must exist and start exactly at handler_offset
         auto handler_it = _il_offset_to_basic_block.find(src.handler_offset);
         if (handler_it == _il_offset_to_basic_block.end() || handler_it->second->il_begin_offset != src.handler_offset)
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
         BasicBlock* handler_bb = handler_it->second;
         if (src.flags == metadata::RtILExceptionClauseType::Exception || src.flags == metadata::RtILExceptionClauseType::Filter)
@@ -2279,14 +2279,14 @@ RtResultVoid Transformer::setup_exception_clauses()
             const uint32_t filter_begin_offset = src.class_token_or_filter_offset;
             auto filter_it = _il_offset_to_basic_block.find(filter_begin_offset);
             if (filter_it == _il_offset_to_basic_block.end() || filter_it->second->il_begin_offset != filter_begin_offset)
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
             BasicBlock* filter_bb = filter_it->second;
             const Variable* exc_var = alloc_exception_variable(filter_bb->in_eval_stack_top);
             filter_bb->push_in_val_stack(exc_var);
 
             if (!(filter_begin_offset >= src.try_offset + src.try_length && filter_begin_offset < src.handler_offset))
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
 
         if (i > 0)
@@ -2296,13 +2296,13 @@ RtResultVoid Transformer::setup_exception_clauses()
                   (src.try_offset <= last.try_offset && src.try_offset + src.try_length >= last.try_offset + last.try_length) ||
                   (src.handler_offset <= last.try_offset && src.handler_offset + src.handler_length >= last.try_offset + last.try_length)))
             {
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
 
             if (!(src.handler_offset >= last.handler_offset + last.handler_length ||
                   (src.handler_offset <= last.handler_offset && src.handler_offset + src.handler_length >= last.handler_offset + last.handler_length)))
             {
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
         }
     }
@@ -2317,7 +2317,7 @@ RtResultVoid Transformer::setup_basic_blocks()
 
     const auto& split_offsets = splitter.get_split_offsets();
     if (split_offsets.empty())
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     utils::NotFreeList<uint32_t> offsets_vec(_pool);
     offsets_vec.push_range(split_offsets.begin(), split_offsets.end());
@@ -2607,7 +2607,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Unused99:
             {
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
             case il::OpCodeValue::Dup:
             {
@@ -2837,7 +2837,7 @@ RtResultVoid Transformer::transform_body()
                 const int8_t* cases_begin = (const int8_t*)(codes_begin + il_offset_cur);
                 il_offset_cur += case_count * 4;
                 if (il_offset_cur > il_offset_end)
-                    RET_ERR(RtErr::ExecutionEngine);
+                    RET_ASSERT_ERR(RtErr::ExecutionEngine);
                 RET_ERR_ON_FAIL(add_switch(static_cast<uint32_t>(il_offset_cur), cases_begin, case_count));
                 break;
             }
@@ -3161,7 +3161,7 @@ RtResultVoid Transformer::transform_body()
             case il::OpCodeValue::Unused58:
             case il::OpCodeValue::Unused1:
             {
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
             case il::OpCodeValue::Throw:
             {
@@ -3467,7 +3467,7 @@ RtResultVoid Transformer::transform_body()
             case il::OpCodeValue::Unused16:
             case il::OpCodeValue::Unused17:
             {
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
             case il::OpCodeValue::ConvOvfI1:
             {
@@ -3525,7 +3525,7 @@ RtResultVoid Transformer::transform_body()
             case il::OpCodeValue::Unused22:
             case il::OpCodeValue::Unused23:
             {
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
             case il::OpCodeValue::Refanyval:
             {
@@ -3544,7 +3544,7 @@ RtResultVoid Transformer::transform_body()
             case il::OpCodeValue::Unused24:
             case il::OpCodeValue::Unused25:
             {
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
             case il::OpCodeValue::Mkrefany:
             {
@@ -3564,7 +3564,7 @@ RtResultVoid Transformer::transform_body()
             case il::OpCodeValue::Unused66:
             case il::OpCodeValue::Unused67:
             {
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
             case il::OpCodeValue::Ldtoken:
             {
@@ -3696,7 +3696,7 @@ RtResultVoid Transformer::transform_body()
             case il::OpCodeValue::Unused47:
             case il::OpCodeValue::Unused48:
             {
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
             case il::OpCodeValue::Prefix7:
             case il::OpCodeValue::Prefix6:
@@ -3765,7 +3765,7 @@ RtResultVoid Transformer::transform_body()
                 }
                 case il::OpCodeValueExt::Unused56:
                 {
-                    RET_ERR(RtErr::ExecutionEngine);
+                    RET_ASSERT_ERR(RtErr::ExecutionEngine);
                 }
                 case il::OpCodeValueExt::Ldarg:
                 {
@@ -3817,7 +3817,7 @@ RtResultVoid Transformer::transform_body()
                 }
                 case il::OpCodeValueExt::Unused57:
                 {
-                    RET_ERR(RtErr::ExecutionEngine);
+                    RET_ASSERT_ERR(RtErr::ExecutionEngine);
                 }
                 case il::OpCodeValueExt::Endfilter:
                 {
@@ -3830,7 +3830,7 @@ RtResultVoid Transformer::transform_body()
                     uint8_t alignment = *(codes_begin + il_offset_cur + 1);
                     if (alignment != 1 && alignment != 2 && alignment != 4)
                     {
-                        RET_ERR(RtErr::ExecutionEngine);
+                        RET_ASSERT_ERR(RtErr::ExecutionEngine);
                     }
                     add_prefix(il::OpCodePrefix::Unaligned);
                     il_offset_cur += 2;
@@ -3881,7 +3881,7 @@ RtResultVoid Transformer::transform_body()
                     uint8_t check_type = *(codes_begin + il_offset_cur + 1);
                     if ((check_type & 0xF8) != 0)
                     {
-                        RET_ERR(RtErr::ExecutionEngine);
+                        RET_ASSERT_ERR(RtErr::ExecutionEngine);
                     }
                     add_prefix(il::OpCodePrefix::No);
                     il_offset_cur += 2;
@@ -3915,7 +3915,7 @@ RtResultVoid Transformer::transform_body()
                 }
                 default:
                 {
-                    RET_ERR(RtErr::ExecutionEngine);
+                    RET_ASSERT_ERR(RtErr::ExecutionEngine);
                 }
                 }
                 break;

@@ -1974,11 +1974,13 @@ RtResult<RtRuntimeHandle> RtModuleDef::get_member_ref_by_rid(uint32_t memberRefR
     }
     }
 
+    RtGenericContainerContext declaring_gcc = vm::Class::get_generic_container_context(baseClass);
+
     if (sigType == RtSigType::Field)
     {
         // Find field in baseClass by name
         RET_ERR_ON_FAIL(vm::Class::initialize_fields(baseClass));
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, fieldTypeSig, read_typesig(reader, gcc, nullptr));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, fieldTypeSig, read_typesig(reader, declaring_gcc, nullptr));
         for (uint32_t i = 0; i < baseClass->field_count; ++i)
         {
             const RtFieldInfo* field = baseClass->fields + i;
@@ -2006,7 +2008,7 @@ RtResult<RtRuntimeHandle> RtModuleDef::get_member_ref_by_rid(uint32_t memberRefR
     else if (sigType < RtSigType::Field)
     {
         // Find method in baseClass by name
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtMethodSig, methodSig, read_method_sig_skip_prologue(byteType, reader, gcc, nullptr));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtMethodSig, methodSig, read_method_sig_skip_prologue(byteType, reader, declaring_gcc, nullptr));
         RET_ERR_ON_FAIL(vm::Class::initialize_methods(baseClass));
         for (uint32_t i = 0; i < baseClass->method_count; ++i)
         {

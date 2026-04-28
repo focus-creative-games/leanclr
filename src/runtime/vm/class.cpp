@@ -7,6 +7,7 @@
 #include "metadata/metadata_compare.h"
 #include "metadata/metadata_hash.h"
 #include "metadata/metadata_cache.h"
+#include "metadata/generic_metadata.h"
 #include "alloc/metadata_allocation.h"
 #include "utils/hashmap.h"
 #include "utils/hashset.h"
@@ -1707,6 +1708,29 @@ static RtResultVoid setup_methodimpl_vtable(metadata::RtClass* klass, const meta
                 RET_ASSERT_ERR(RtErr::BadImageFormat);
 
             size_t slot = 0;
+            if (Class::is_interface(method_impl_declaring_klass))
+            {
+                bool is_method_impl_declaring_klass_generic_inst = Class::is_generic_inst(method_impl_declaring_klass);
+                bool is_declaration_klass_generic_inst = Class::is_generic_inst(declaration_klass);
+                if (is_method_impl_declaring_klass_generic_inst)
+                {
+                    metadata::RtGenericContext gc = { method_impl_declaring_klass->by_val->data.generic_class->class_inst };
+                    UNWRAP_OR_RET_ERR_ON_FAIL(body_method, Method::inflate(body_method, &gc));
+                    if (is_declaration_klass_generic_inst)
+                    {
+                        UNWRAP_OR_RET_ERR_ON_FAIL(declaration_klass, metadata::GenericMetadata::inflate_class(declaration_klass, &gc));
+                    }
+                }
+                if (is_declaration_klass_generic_inst)
+                {
+                    metadata::RtGenericContext gc = { declaration_klass->by_val->data.generic_class->class_inst };
+                    UNWRAP_OR_RET_ERR_ON_FAIL(declaration_method, Method::inflate(declaration_method, &gc));
+                }
+            }
+            else
+            {
+                assert(!Class::is_generic_inst(method_impl_declaring_klass));
+            }
             if (Class::is_interface(declaration_klass))
             {
                 uint16_t interface_offset = 0;
@@ -1742,16 +1766,16 @@ static RtResultVoid setup_methodimpl_vtable(metadata::RtClass* klass, const meta
             // maybe multi methodimpl for the same slot, we keep the first one and ignore the rest.
             if (!initialized_vtable_index_set.insert(slot).second)
             {
-                RET_VOID_OK();
+                continue;
             }
 
             metadata::RtVirtualInvokeData& entry = new_vtable[slot];
             if (entry.method != declaration_method)
                 RET_ASSERT_ERR(RtErr::BadImageFormat);
             entry.method_impl = body_method;
-            RET_VOID_OK();
         }
     }
+    RET_VOID_OK();
 }
 
 RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
@@ -1782,7 +1806,7 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
     // No parent: only build vtable for interfaces or corlib Object
     if (!klass->parent)
     {
-        if (Class::is_interface(klass) || klass->by_val->ele_type == metadata::RtElementType::Object)
+        if (is_interface(klass) || is_object_class(klass))
         {
             metadata::RtVirtualInvokeData* new_vtable = pool.calloc_any<metadata::RtVirtualInvokeData>(self_new_slot_virtual_methods.size());
             uint16_t slot = 0;
@@ -1879,73 +1903,13 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
     // Track initialized entries
     utils::HashSet<size_t> initialized_vtable_index_set;
 
-    const metadata::CliImage& cli_image = klass->image->get_cli_image();
-    metadata::RtGenericContainerContext gcc = Class::get_generic_container_context(klass);
+    //const metadata::CliImage& cli_image = klass->image->get_cli_image();
+    //metadata::RtGenericContainerContext gcc = Class::get_generic_container_context(klass);
 
-    auto opt_method_impl_range =
-        cli_image.find_row_range_of_owner_at_sorted_table(metadata::TableType::MethodImpl, 0, metadata::RtToken::decode_rid(klass->token));
-    if (opt_method_impl_range)
+    RET_ERR_ON_FAIL(setup_methodimpl_vtable(klass, klass, initialized_vtable_index_set, new_vtable));
+    for (uint16_t i = klass->interface_count; i > 0; i--)
     {
-        metadata::RidRange& range = opt_method_impl_range.value();
-        for (uint32_t method_impl_rid = range.ridBegin; method_impl_rid < range.ridEnd; ++method_impl_rid)
-        {
-            auto opt_row = cli_image.read_method_impl(method_impl_rid);
-            if (!opt_row)
-                RET_ERR(RtErr::BadImageFormat);
-            metadata::RowMethodImpl row = opt_row.value();
-
-            metadata::RtToken body_token = metadata::RtMetadata::decode_method_def_or_ref_coded_index(row.method_body);
-            metadata::RtToken decl_token = metadata::RtMetadata::decode_method_def_or_ref_coded_index(row.method_declaration);
-
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, body_method, klass->image->get_method_by_token(body_token, gcc, nullptr));
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, declaration_method,
-                                                    klass->image->get_method_by_token(decl_token, gcc, nullptr));
-
-            if (!Method::is_virtual(declaration_method) || !Method::is_virtual(body_method))
-                RET_ERR(RtErr::BadImageFormat);
-
-            const metadata::RtClass* declaration_klass = declaration_method->parent;
-            uint16_t declaration_slot = declaration_method->slot;
-            if (declaration_slot == metadata::RT_INVALID_METHOD_SLOT)
-                RET_ERR(RtErr::BadImageFormat);
-
-            size_t slot = 0;
-            if (Class::is_interface(declaration_klass))
-            {
-                uint16_t interface_offset = 0;
-                bool found = false;
-                for (uint16_t i = 0; i < klass->interface_vtable_offset_count; ++i)
-                {
-                    const metadata::RtInterfaceOffset& off = klass->interface_vtable_offsets[i];
-                    if (off.interface == declaration_klass)
-    {
-                        interface_offset = off.offset;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                    RET_ERR(RtErr::BadImageFormat);
-
-                size_t vtable_index = static_cast<size_t>(interface_offset) + declaration_slot;
-                if (vtable_index >= new_vtable.size())
-                    RET_ERR(RtErr::BadImageFormat);
-                if (!initialized_vtable_index_set.insert(vtable_index).second)
-                    RET_ERR(RtErr::BadImageFormat);
-                slot = vtable_index;
-            }
-            else
-            {
-                if (!Class::has_class_parent_fast(klass, declaration_klass))
-                    RET_ERR(RtErr::BadImageFormat);
-                slot = declaration_slot;
-            }
-
-            metadata::RtVirtualInvokeData& entry = new_vtable[slot];
-            if (entry.method != declaration_method)
-                RET_ERR(RtErr::BadImageFormat);
-            entry.method_impl = body_method;
-        }
+        RET_ERR_ON_FAIL(setup_methodimpl_vtable(klass, klass->interfaces[i - 1], initialized_vtable_index_set, new_vtable));
     }
 
     // Handle override virtual methods
@@ -1981,7 +1945,7 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
             }
         }
         if (!find_impl)
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     // Initialize interface implementations for new slot virtuals
@@ -2027,7 +1991,7 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
             }
         }
         if (!find_impl)
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     if (!Class::is_abstract(klass))
@@ -2036,7 +2000,7 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
         {
             const metadata::RtVirtualInvokeData& entry = new_vtable[i];
             if (!entry.method_impl && i != 1)
-                RET_ERR(RtErr::ExecutionEngine);
+                RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
     }
 
@@ -2125,7 +2089,7 @@ RtResult<metadata::RtClass*> Class::get_class_from_typesig(const metadata::RtTyp
     case metadata::RtElementType::Ptr:
         return get_ptr_class_by_element_typesig(typeSig->data.element_type);
     case metadata::RtElementType::ByRef:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     case metadata::RtElementType::SZArray:
         return ArrayClass::get_szarray_class_from_element_typesig(typeSig->data.element_type);
     case metadata::RtElementType::Array:
@@ -2201,7 +2165,7 @@ RtResult<metadata::RtClass*> Class::get_generic_param_class_by_typesig(const met
     metadata::RtModuleDef* mod = metadata::RtModuleDef::get_module_by_id(moduleId);
     if (!mod)
     {
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, byValTypeSig, mod->get_generic_param_typesig_by_rid(rid, false));

@@ -15,7 +15,7 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionMethodBase::get_current_method
     interp::InterpFrame* executing_frame = interp::MachineState::get_global_machine_state().get_executing_frame_stack();
     if (executing_frame == nullptr)
     {
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     const metadata::RtMethodInfo* method = executing_frame->method;
     return vm::Reflection::get_method_reflection_object(method, method->parent);

@@ -25,7 +25,7 @@ RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::initialize_array(vm::R
 
     if (rva_data == nullptr)
     {
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     size_t array_byte_length = vm::Array::get_array_byte_length(arr);

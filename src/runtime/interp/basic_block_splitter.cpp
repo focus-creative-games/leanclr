@@ -20,7 +20,7 @@ RtResultVoid BasicBlockSplitter::split()
     split_exception_clauses();
     if (!validate_offsets())
     {
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     RET_VOID_OK();
 }
@@ -63,13 +63,13 @@ RtResultVoid BasicBlockSplitter::split_codes()
         const il::OpCodeInfo* opcode_info = nullptr;
         if (!il::OpCodes::try_decode_opcode_info(pc, codes_end, opcode_info))
         {
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
         const uint32_t opcode_size = static_cast<uint32_t>(il::OpCodes::get_opcode_size(pc, opcode_info));
         const uint32_t next_offset = offset + opcode_size;
         if (next_offset > code_size)
         {
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
 
         switch (opcode_info->inline_type)
@@ -131,7 +131,7 @@ RtResultVoid BasicBlockSplitter::split_codes()
 
     if (offset != code_size)
     {
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     mark_valid_il_offset(code_size);

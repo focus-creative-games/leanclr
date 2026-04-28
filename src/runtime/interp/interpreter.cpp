@@ -32,7 +32,7 @@ static RtResult<const RtInterpMethodInfo*> transform(const metadata::RtMethodInf
     auto& optMethodBody = retMethodBody.unwrap();
     if (!optMethodBody)
     {
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
     metadata::RtMethodBody& methodBody = optMethodBody.value();

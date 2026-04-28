@@ -683,7 +683,7 @@ RtResult<TypeCode> get_type_code(const metadata::RtTypeSig* type_sig)
         RET_OK(TypeCode::Object);
     }
     default:
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 }
 

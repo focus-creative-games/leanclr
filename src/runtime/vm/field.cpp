@@ -144,7 +144,7 @@ RtResult<const uint8_t*> Field::get_field_rva_data(const metadata::RtFieldInfo* 
     }
     else
     {
-        RET_ERR(RtErr::ExecutionEngine);
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 }
 
@@ -155,7 +155,7 @@ RtResult<utils::BinaryReader> Field::get_field_const_reader(const metadata::RtFi
     {
         return field->parent->image->get_const_or_default_value(field->token);
     }
-    RET_ERR(RtErr::ExecutionEngine);
+    RET_ASSERT_ERR(RtErr::ExecutionEngine);
 }
 
 RtResult<const void*> Field::get_field_const_data(const metadata::RtFieldInfo* field)

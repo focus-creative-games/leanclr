@@ -22,6 +22,10 @@ static RtResult<RtObject*> box_object_internal(const metadata::RtClass* klass, c
 // Create new instance of a class
 RtResult<RtObject*> Object::new_object(const metadata::RtClass* klass)
 {
+    if (strcmp(klass->name, "ExecutionEngineException") == 0)
+    {
+        int a = 0;
+    }
     RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
     RET_ERR_ON_FAIL(Runtime::run_class_static_constructor(klass));
 

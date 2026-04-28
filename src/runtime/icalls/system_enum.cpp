@@ -89,7 +89,7 @@ RtResult<int32_t> SystemEnum::internal_compare_to(vm::RtObject* obj1, vm::RtObje
             result = cmp_any<uint64_t>(data1, data2);
             break;
         default:
-            RET_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
     }
 
