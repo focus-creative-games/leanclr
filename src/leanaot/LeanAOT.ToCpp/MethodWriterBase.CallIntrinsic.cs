@@ -2,6 +2,7 @@
 using dnlib.DotNet.Emit;
 using LeanAOT.Core;
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -41,7 +42,9 @@ namespace LeanAOT.ToCpp
                 }
                 return false;
             }
-            if (methodDef.Module.IsCoreLibraryModule == true)
+
+
+            if (methodDef.Module.IsCoreLibraryModule != true)
             {
                 return false;
             }
@@ -61,31 +64,50 @@ namespace LeanAOT.ToCpp
             }
             case "String":
             {
-                throw new NotImplementedException("We haven't implemented intrinsic for System.String yet, and we also haven't encountered any call to System.String's instance method in our test cases, so we will just throw an exception here to make sure we won't miss it when we encounter it in the future.");
+                break;
+            }
+            case "Assembly":
+            {
+                if (methodName == "GetExecutingAssembly")
+                {
+                    EmitAssignOrThrow(inst, retVar, $"{ConstStrings.CodegenNamespace}::get_assembly_reflection_object({CurMethodVar.GetFullReferenceVariableName()}->parent->image)");
+                    return true;
+                }
+                break;
+            }
+            case "MethodBase":
+            {
+                if (methodName == "GetCurrentMethod")
+                {
+                    EmitAssignOrThrow(inst, retVar, $"{ConstStrings.CodegenNamespace}::get_method_reflection_object({CurMethodVar.GetFullReferenceVariableName()})");
+                    return true;
+                }
+                break;
             }
             default:
                 break;
             }
+            
 
-            ITypeDefOrRef parentType = declaringType.BaseType;
-            TypeDef parentTypeDef = parentType.ResolveTypeDef();
-            if (parentTypeDef != null)
-            {
-                switch (parentTypeDef.Name.ToString())
-                {
-                case "MulticastDelegate":
-                {
-                    if (methodName == VmFunctionNames.Ctor)
-                    {
-                        // If the method is an override of System.Object's .ctor, we can also ignore the call to it.
-                        return true;
-                    }
-                    break;
-                }
-                default:
-                    break;
-                }
-            }
+            // ITypeDefOrRef parentType = declaringType.BaseType;
+            // TypeDef parentTypeDef = parentType.ResolveTypeDef();
+            // if (parentTypeDef != null)
+            // {
+            //     switch (parentTypeDef.Name.ToString())
+            //     {
+            //     case "MulticastDelegate":
+            //     {
+            //         if (methodName == VmFunctionNames.Ctor)
+            //         {
+            //             // If the method is an override of System.Object's .ctor, we can also ignore the call to it.
+            //             return true;
+            //         }
+            //         break;
+            //     }
+            //     default:
+            //         break;
+            //     }
+            // }
 
             return false;
         }
