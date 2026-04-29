@@ -455,6 +455,11 @@
     "header": "icalls/system_diagnostics_stacktrace.h"
   },
   {
+    "name": "System.Diagnostics.Stopwatch::GetTimestamp()",
+    "func": "SystemDiagnosticsStopwatch::get_timestamp",
+    "header": "icalls/system_diagnostics_stopwatch.h"
+  },
+  {
     "name": "System.Enum::get_hashcode",
     "func": "SystemEnum::get_hash_code",
     "header": "icalls/system_enum.h"
