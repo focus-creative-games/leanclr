@@ -94,11 +94,12 @@ RtResult<SizeAndAlignment> Layout::get_field_size_and_alignment(RtTypeSig* typeS
 }
 
 // Compute layout for fields with sequential layout
-RtResult<SizeAndAlignment> Layout::compute_layout(utils::Vector<const RtFieldInfo*>& fields, uint32_t parentSize, uint8_t parentAlignment, uint8_t packing)
+RtResult<SizeAndAlignment> Layout::compute_layout(utils::Vector<const RtFieldInfo*>& fields, int32_t first_field_index_of_cur_klass, uint8_t packing)
 {
-    uint32_t offset = parentSize;
-    uint8_t max_alignment = parentAlignment;
+    uint32_t offset = 0;
+    uint8_t max_alignment = 1;
 
+    int32_t field_index = 0;
     for (const RtFieldInfo* field : fields)
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(SizeAndAlignment, field_info, get_field_size_and_alignment(const_cast<RtTypeSig*>(field->type_sig)));
@@ -107,10 +108,19 @@ RtResult<SizeAndAlignment> Layout::compute_layout(utils::Vector<const RtFieldInf
             (packing != 0) ? std::min(static_cast<uint8_t>(field_info.alignment), packing) : static_cast<uint8_t>(field_info.alignment);
 
         offset = static_cast<uint32_t>(MemOp::align_up(offset, effective_alignment));
-        const_cast<RtFieldInfo*>(field)->offset = offset;
+
+        if (field_index >= first_field_index_of_cur_klass)
+        {
+            const_cast<RtFieldInfo*>(field)->offset = offset;
+        }
+        else
+        {
+            assert(field->offset == offset && "Field offset mismatch for inherited field with sequential layout");
+        }
 
         offset += field_info.size;
         max_alignment = std::max(max_alignment, effective_alignment);
+        ++field_index;
     }
 
     offset = static_cast<uint32_t>(MemOp::align_up(offset, max_alignment));

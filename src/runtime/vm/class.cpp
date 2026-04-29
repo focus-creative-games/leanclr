@@ -1183,23 +1183,48 @@ RtResultVoid Class::setup_fields_typedef(metadata::RtClass* klass)
     RET_VOID_OK();
 }
 
-RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
+static void collect_inherit_instance_fields(const metadata::RtClass* klass, utils::Vector<const metadata::RtFieldInfo*>& instanceFields)
 {
-    assert(has_initialized_part(klass, metadata::RtClassInitPart::Field));
-    utils::Vector<const metadata::RtFieldInfo*> instanceFields;
-    utils::Vector<const metadata::RtFieldInfo*> staticFields;
-
-    bool has_references = klass->parent ? get_has_references(klass->parent) : false;
+    if (klass->parent)
+    {
+        collect_inherit_instance_fields(klass->parent, instanceFields);
+    }
     for (uint16_t i = 0; i < klass->field_count; ++i)
     {
         const metadata::RtFieldInfo* field = klass->fields + i;
         if (Field::is_instance(field))
         {
             instanceFields.push_back(field);
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, isRefType, is_reference_type_or_contains_reference_type_in_typesig(field->type_sig));
-            if (isRefType)
+        }
+    }
+}
+
+RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
+{
+    assert(has_initialized_part(klass, metadata::RtClassInitPart::Field));
+    utils::Vector<const metadata::RtFieldInfo*> instanceFields;
+    utils::Vector<const metadata::RtFieldInfo*> staticFields;
+
+    bool has_references = false;
+    if (klass->parent)
+    {
+        has_references = get_has_references(klass->parent);
+        collect_inherit_instance_fields(klass->parent, instanceFields);
+    }
+    int32_t first_field_index_of_current_class = (int32_t)instanceFields.size();
+    for (uint16_t i = 0; i < klass->field_count; ++i)
+    {
+        const metadata::RtFieldInfo* field = klass->fields + i;
+        if (Field::is_instance(field))
+        {
+            instanceFields.push_back(field);
+            if (!has_references)
             {
-                has_references = true;
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, isRefType, is_reference_type_or_contains_reference_type_in_typesig(field->type_sig));
+                if (isRefType)
+                {
+                    has_references = true;
+                }
             }
         }
         else if (Field::is_static_excluded_literal_and_rva(field))
@@ -1211,6 +1236,7 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
     {
         set_has_references(klass);
     }
+    bool is_ref_type = is_reference_type(klass);
 
     metadata::RtModuleDef* mod = klass->image;
     auto optLayout = mod->get_class_layout_data(klass->token);
@@ -1222,6 +1248,12 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
         packingSize = optLayout->packing;
     }
     else
+    {
+        classSize = 0;
+        packingSize = 0;
+    }
+    // ignore class size and packing for reference types, as they don't have instance fields and their static fields are laid out by the runtime
+    if (is_ref_type)
     {
         classSize = 0;
         packingSize = 0;
@@ -1250,17 +1282,17 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
             parentSize = 0;
             parentAlignment = 1;
         }
-        UNWRAP_OR_RET_ERR_ON_FAIL(instanceSizeAndAlignment, metadata::Layout::compute_layout(instanceFields, parentSize, static_cast<uint8_t>(parentAlignment),
-                                                                                             static_cast<uint8_t>(packingSize)));
+        UNWRAP_OR_RET_ERR_ON_FAIL(instanceSizeAndAlignment,
+                                  metadata::Layout::compute_layout(instanceFields, first_field_index_of_current_class, static_cast<uint8_t>(packingSize)));
     }
     klass->instance_size_without_header = std::max(instanceSizeAndAlignment.size, classSize);
-    if (Class::is_value_type(klass))
+    if (!is_ref_type)
     {
         klass->instance_size_without_header = std::max(klass->instance_size_without_header, (uint32_t)1);
     }
     klass->alignment = static_cast<uint8_t>(instanceSizeAndAlignment.alignment);
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::SizeAndAlignment, staticSizeAndAlignment, metadata::Layout::compute_layout(staticFields, 0, 1, 0));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::SizeAndAlignment, staticSizeAndAlignment, metadata::Layout::compute_layout(staticFields, 0, 0));
     klass->static_size = staticSizeAndAlignment.size;
     RET_VOID_OK();
 }
