@@ -435,6 +435,10 @@ namespace LeanAOT.ToCpp
             {
                 return;
             }
+            if (methodDef.Name == VmFunctionNames.Ctor)
+            {
+                AddTypeForwardDefine(methodDetail.DeclaringType);
+            }
 
             if (!_manifestService.ShouldAOT(method))
             {
