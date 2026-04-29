@@ -8,6 +8,7 @@
 #include "system_object.h"
 #include "system_reflection_runtimemethodinfo.h"
 #include "system_runtime_compilerservices_runtimehelpers.h"
+#include "system_diagnostics_stopwatch.h"
 #include "system_runtimetype.h"
 #include "system_runtimetypehandle.h"
 #include "icalls/system_string.h"
@@ -86,6 +87,7 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemObject::get_internal_call_entries());
     Append(entries, SystemReflectionRuntimeMethodInfo::get_internal_call_entries());
     Append(entries, SystemRuntimeCompilerServicesRuntimeHelpers::get_internal_call_entries());
+    Append(entries, SystemDiagnosticsStopwatch::get_internal_call_entries());
     Append(entries, SystemRuntimeType::get_internal_call_entries());
     Append(entries, SystemRuntimeTypeHandle::get_internal_call_entries());
     Append(entries, SystemString::get_internal_call_entries());
