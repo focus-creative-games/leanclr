@@ -46,5 +46,7 @@ namespace LeanAOT.ToCpp
         public string StatsOutputDir { get; set; }
 
         public string CompilerFlags { get; set; }
+
+        public bool EnableLayoutValidation { get; set; }
     }
 }

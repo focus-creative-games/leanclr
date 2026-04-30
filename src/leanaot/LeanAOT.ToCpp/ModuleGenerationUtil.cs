@@ -65,6 +65,11 @@ namespace LeanAOT.ToCpp
             return $"initialize_module_{GetStandardizedModuleNameWithoutExt(mod)}";
         }
 
+        public static string GetModuleDeferredInitializeMethodName(ModuleDef mod)
+        {
+            return $"deferred_initialize_module_{GetStandardizedModuleNameWithoutExt(mod)}";
+        }
+
         public static string GetModuleInitializeMethodDeclaration(ModuleDef mod)
         {
             return $"void {GetModuleInitializeMethodName(mod)}({ConstStrings.ModulePtrTypeName} mod){ConstStrings.CppFunctionNoexcept};";

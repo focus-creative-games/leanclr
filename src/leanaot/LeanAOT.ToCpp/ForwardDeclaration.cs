@@ -100,6 +100,12 @@ namespace LeanAOT.ToCpp
             AddTypeDeclaration(type);
             uint packingSize = typeDef.ClassLayout != null ? typeDef.PackingSize : 0u;
             uint classSize = typeDef.ClassLayout != null ? typeDef.ClassSize : 0;
+            // ignore class size and packing for reference types, as they don't have instance fields and their static fields are laid out by the runtime
+            if (!MetaUtil.IsValueType(type.TypeSig))
+            {
+                classSize = 0;
+                packingSize = 0;
+            }
             if (typeDef.IsValueType && typeDef.IsExplicitLayout)
             {
                 typeDefinesWriter.AddLine($"struct {type.InstanceTypeName}");

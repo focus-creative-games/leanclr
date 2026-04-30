@@ -99,6 +99,9 @@ internal class Program
 
         [Option("stats-output-dir", Required = false, HelpText = "IL2CPP: stats output directory (reserved).")]
         public string StatsOutputDir { get; set; }
+
+        [Option("enable-layout-validation", Required = false, HelpText = "IL2CPP: enable layout validation.")]
+        public bool EnableLayoutValidation { get; set; }
     }
 
     private static Logger s_logger;
@@ -443,6 +446,10 @@ internal class Program
         config.AvoidDynamicLibraryCopy = options.AvoidDynamicLibraryCopy;
         config.StatsOutputDir = options.StatsOutputDir;
         config.CompilerFlags = NormalizeCompilerFlags(options.CompilerFlags);
+        // default to validate class size and field offset.
+        //config.EnableLayoutValidation = options.EnableLayoutValidation;
+        // force enable for test.
+        config.EnableLayoutValidation = true;
     }
 
     /// <summary>
