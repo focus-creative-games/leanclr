@@ -394,6 +394,14 @@ RtResultVoid Runtime::initialize()
     const char** argv;
     Settings::get_command_line_arguments(argc, argv);
     RET_ERR_ON_FAIL(Environment::init_cmdline_args(argv, argc));
+
+    metadata::RtModuleDef* corlib_mod = Assembly::get_corlib()->mod;
+    auto corlib_aot_module_data = corlib_mod->get_aot_module_data();
+    if (corlib_aot_module_data != nullptr && corlib_aot_module_data->deferred_initializer)
+    {
+        corlib_aot_module_data->deferred_initializer(corlib_mod);
+    }
+
     RET_VOID_OK();
 }
 
