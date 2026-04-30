@@ -195,8 +195,8 @@ typedef void (*Il2CppProfileThreadFunc)(Il2CppProfiler* prof, unsigned long tid)
 typedef const Il2CppNativeChar* (*Il2CppSetFindPlugInCallback)(const Il2CppNativeChar*);
 typedef void (*Il2CppLogCallback)(const char*);
 
-typedef void (*Il2CppMethodPointer)();
-typedef size_t (*Il2CppBacktraceFunc)(Il2CppMethodPointer* buffer, size_t maxSize);
+typedef leanclr::metadata::RtManagedMethodPointer Il2CppMethodPointer;
+typedef size_t (*Il2CppBacktraceFunc)(void* buffer, size_t maxSize);
 
 typedef uintptr_t il2cpp_array_size_t;
 #define ARRAY_LENGTH_AS_INT32(a) ((int32_t)(a))
