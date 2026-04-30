@@ -64,6 +64,9 @@ elseif(EMSCRIPTEN)
         -fno-rtti
         -O2
     )
+    target_compile_options(leanclr PUBLIC
+        -Wno-c++17-compat-mangling
+    )
 
     target_link_options(leanclr PRIVATE
         "SHELL: -s WASM=1"
