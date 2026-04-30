@@ -2,12 +2,12 @@
 setlocal enabledelayedexpansion
 
 echo ====================================
-echo Formatting all C++ files in src/
+echo Formatting all C++ files in src/runtime
 echo ====================================
 echo.
 
 set CLANG_FORMAT="..\tools\clang-format\clang-format.exe"
-set SRC_DIR=%~dp0..\src
+set SRC_DIR=%~dp0..\src\runtime
 
 if not exist %CLANG_FORMAT% (
     echo Error: clang-format.exe not found at %CLANG_FORMAT%
