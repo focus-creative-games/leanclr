@@ -17,6 +17,7 @@ namespace LeanAOT.ToCpp
 
         public const string MethodInfoParameterName = "___methodInfo";
         public const string ManagedMethodPointerTypeName = "leanclr::metadata::RtManagedMethodPointer";
+        public const string InvokeMethodPointerTypeName = "leanclr::metadata::RtInvokeMethodPointer";
         public const string MethodPointerFieldName = "method_ptr";
         public const string InvokerMethodPointerFieldName = "invoker_method_ptr";
         public const string VirtualInvokerMethodPointerFieldName = "virtual_invoker_method_ptr";

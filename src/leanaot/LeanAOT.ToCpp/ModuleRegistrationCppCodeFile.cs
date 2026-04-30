@@ -112,7 +112,7 @@ namespace LeanAOT.ToCpp
                     MethodInvokerInfo virtualInvoker = invokerService.GetVirtualInvoker(method);
                     _forwardDeclaration.AddInvokerForwardDeclaration(virtualInvoker);
                     MethodDetail md = GlobalServices.Inst.MetadataService.GetMethodDetail(method);
-                    _implWriter.AddLine($"{{ 0x{method.MDToken.ToInt32():X8}, ({ConstStrings.ManagedMethodPointerTypeName}){md.UniqueName}, {notVirtualInvoker.name}, {virtualInvoker.name} }},");
+                    _implWriter.AddLine($"{{ 0x{method.MDToken.ToInt32():X8}, ({ConstStrings.ManagedMethodPointerTypeName}){md.UniqueName}, ({ConstStrings.InvokeMethodPointerTypeName}){notVirtualInvoker.name}, ({ConstStrings.InvokeMethodPointerTypeName}){virtualInvoker.name} }},");
                 }
             }
             else
