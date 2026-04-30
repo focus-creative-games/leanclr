@@ -12,10 +12,12 @@ if not exist "%RUNNER%" (
 )
 
 %RUNNER%
+set "RUNNER_EXIT_CODE=%ERRORLEVEL%"
 
-if errorlevel 1 (
+if not "%RUNNER_EXIT_CODE%"=="0" (
     echo Some tests failed.
-    endlocal & exit /b %ERRORLEVEL%
+    endlocal & exit /b %RUNNER_EXIT_CODE%
 ) else (
     echo All tests passed.
+    endlocal & exit /b 0
 )
