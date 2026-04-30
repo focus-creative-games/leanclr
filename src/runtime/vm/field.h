@@ -42,15 +42,15 @@ class Field
     // Inflate field with generic context
     static RtResult<const metadata::RtFieldInfo*> inflate_field(const metadata::RtFieldInfo* field, const metadata::RtGenericContext* generic_context);
 
-    static size_t get_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field);
+    static uint32_t get_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field);
     // Get field offset including object header for reference types
-    static size_t get_field_offset_includes_object_header_for_reference_type(const metadata::RtFieldInfo* field);
+    static uint32_t get_field_offset_includes_object_header_for_reference_type(const metadata::RtFieldInfo* field);
 
     // Get field offset including object header for all types
-    static size_t get_instance_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field);
+    static uint32_t get_instance_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field);
 
     // Get field offset excluding object header
-    static size_t get_field_offset_excludes_object_header_for_all_type(const metadata::RtFieldInfo* field);
+    static uint32_t get_field_offset_excludes_object_header_for_all_type(const metadata::RtFieldInfo* field);
 
     // Get field RVA data
     static RtResult<const uint8_t*> get_field_rva_data(const metadata::RtFieldInfo* field);
