@@ -13,8 +13,6 @@ namespace vm
 {
 
 // Constants
-const int32_t MAX_ARRAY_INDEX = INT32_MAX;
-const int32_t MAX_ARRAY_RANK = 32;
 
 // Helper: Calculate total byte size for array including elements
 size_t Array::get_array_allocation_size(const metadata::RtClass* klass, int32_t length)
@@ -90,7 +88,7 @@ RtResult<RtArray*> Array::new_mdarray_from_array_klass(const metadata::RtClass* 
     {
         int32_t dimension_length = lengths[i];
         // Check for overflow
-        if (static_cast<uint32_t>(dimension_length) > static_cast<uint32_t>(MAX_ARRAY_INDEX) / static_cast<uint32_t>(total_length))
+        if (static_cast<uint32_t>(dimension_length) > static_cast<uint32_t>(RT_MAX_ARRAY_INDEX) / static_cast<uint32_t>(total_length))
         {
             RET_ERR(RtErr::Overflow);
         }
@@ -101,7 +99,7 @@ RtResult<RtArray*> Array::new_mdarray_from_array_klass(const metadata::RtClass* 
     const metadata::RtClass* ele_klass = arr_klass->element_class;
     int32_t ele_size = static_cast<int32_t>(Class::get_stack_location_size(ele_klass));
 
-    if (ele_size > MAX_ARRAY_INDEX / total_length)
+    if (ele_size > RT_MAX_ARRAY_INDEX / total_length)
     {
         RET_ERR(RtErr::Overflow);
     }
@@ -132,7 +130,7 @@ RtResult<RtArray*> Array::new_mdarray_from_array_klass(const metadata::RtClass* 
 RtResult<RtArray*> Array::new_mdarray_from_ele_klass(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds)
 {
     assert(ele_klass && lengths);
-    if (rank < 1 || rank > MAX_ARRAY_RANK)
+    if (rank < 1 || rank > RT_MAX_ARRAY_RANK)
     {
         RET_ERR(RtErr::Overflow);
     }

@@ -46,11 +46,10 @@ RtResult<vm::RtString*> SystemString::newobj_char_array_range(vm::RtArray* charA
 
     uint32_t arr_length = static_cast<uint32_t>(vm::Array::get_array_length(charArray));
     uint32_t start_index_u32 = static_cast<uint32_t>(startIndex);
-    uint32_t length_u32 = static_cast<uint32_t>(length);
-    if (length < 0 || start_index_u32 > arr_length || length_u32 > arr_length - start_index_u32)
+    if (start_index_u32 > arr_length || static_cast<uint32_t>(length) > arr_length - start_index_u32)
         RET_ERR(RtErr::ArgumentOutOfRange);
 
-    const uint16_t* chars_start = vm::Array::get_array_data_start_as<uint16_t>(charArray) + static_cast<size_t>(startIndex);
+    const uint16_t* chars_start = vm::Array::get_array_data_start_as<uint16_t>(charArray) + startIndex;
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(chars_start, length);
     RET_OK(utf16_string);
 }
@@ -88,10 +87,7 @@ static RtResultVoid newobj_utf16chars_invoker(metadata::RtManagedMethodPointer m
 RtResult<vm::RtString*> SystemString::newobj_utf16chars_range(const Utf16Char* chars, int32_t startIndex, int32_t length)
 {
     // Compute total length of null-terminated UTF-16 buffer
-    uint32_t total_length = static_cast<uint32_t>(utils::StringUtil::get_utf16chars_length(chars));
-    uint32_t start_index_u32 = static_cast<uint32_t>(startIndex);
-    uint32_t length_u32 = static_cast<uint32_t>(length);
-    if (length < 0 || start_index_u32 >= total_length || length_u32 > total_length - start_index_u32)
+    if (startIndex < 0 || length < 0 || startIndex > vm::RT_MAX_ARRAY_INDEX - length)
         RET_ERR(RtErr::ArgumentOutOfRange);
     const Utf16Char* chars_start = chars + static_cast<size_t>(startIndex);
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(chars_start), length);
@@ -129,10 +125,7 @@ static RtResultVoid newobj_utf8chars_invoker(metadata::RtManagedMethodPointer me
 
 RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const int8_t* chars, int32_t start_index, int32_t length)
 {
-    // uint32_t total_length = static_cast<uint32_t>(std::strlen(reinterpret_cast<const char*>(chars)));
-    // uint32_t start_index_u32 = static_cast<uint32_t>(startIndex);
-    // uint32_t length_u32 = static_cast<uint32_t>(length);
-    if (start_index < 0 || length < 0)
+    if (start_index < 0 || length < 0 || start_index > vm::RT_MAX_ARRAY_INDEX - length)
         RET_ERR(RtErr::ArgumentOutOfRange);
     const char* chars_start = reinterpret_cast<const char*>(chars) + static_cast<size_t>(start_index);
     vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(chars_start, length);
