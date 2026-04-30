@@ -17,9 +17,6 @@ namespace leanclr
 namespace metadata
 {
 
-// Note: MSVC C2279 disallows noexcept on function-pointer aliases; implementations are still noexcept.
-using RtFnPtr = void (*)();
-
 // Element type enumeration
 enum class RtElementType : uint8_t
 {
@@ -94,7 +91,7 @@ union RtTypeSigVariantData
     const RtArrayType* array_type;       // Array -> RtArrayType*
     const RtGenericClass* generic_class; // GenericInst -> RtGenericClass*
     const RtGenericParam* generic_param; // GenericParam -> RtGenericParam*
-    const RtMethodSig* method_sig; // MethodSpec -> RtMethodSig*
+    const RtMethodSig* method_sig;       // MethodSpec -> RtMethodSig*
 };
 
 static_assert(sizeof(RtTypeSigVariantData) == sizeof(void*), "RtTypeSigVariantData size must be pointer size");
@@ -410,7 +407,6 @@ struct RtArrayType
 
 struct RtGenericContainer;
 
-
 enum class RtGenericParamAttribute : uint16_t
 {
     None = 0x0,
@@ -510,13 +506,13 @@ struct RtMethodArgDesc
 };
 
 // Managed method pointer type (noexcept not on alias - MSVC C2279; all invokers implement noexcept)
-using RtManagedMethodPointer = void (*)();
+using RtManagedMethodPointer = add_noexcept<void()>::type;
 
-using RtInvokeMethodPointer = RtResultVoid (*)(RtManagedMethodPointer method_ptr, const RtMethodInfo* method, const interp::RtStackObject* args,
-                                               interp::RtStackObject* ret);
+using RtInvokeMethodPointer =
+    add_noexcept<RtResultVoid(RtManagedMethodPointer, const RtMethodInfo*, const interp::RtStackObject*, interp::RtStackObject*)>::type;
 
-using RtCInvokeMethodPointer = void (*)(RtManagedMethodPointer method_ptr, const RtMethodInfo* method, const interp::RtStackObject* args,
-                                        interp::RtStackObject* ret, RtErr* out_err);
+using RtCInvokeMethodPointer =
+    add_noexcept<void(RtManagedMethodPointer, const RtMethodInfo*, const interp::RtStackObject*, interp::RtStackObject*, RtErr* out_err)>::type;
 
 // Interface offset structure
 struct RtInterfaceOffset
