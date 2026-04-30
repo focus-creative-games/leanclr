@@ -431,3 +431,5 @@ ___*
 /src/tools/leanaot
 /src/samples/simple-aot/ManagedStripped
 /src/tools/exportextern/libraries
+launchSettings.json
+.vscode/
