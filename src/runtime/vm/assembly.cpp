@@ -123,6 +123,11 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const utils::Span<byte>
         {
             aotModuleData->initializer(mod);
         }
+        // corlib should call deferred_initializer after Class::initialize
+        if (!mod->is_corlib() && aotModuleData->deferred_initializer)
+        {
+            aotModuleData->deferred_initializer(mod);
+        }
     }
 
     // don't free mem pool if succ

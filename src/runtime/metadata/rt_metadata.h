@@ -929,6 +929,7 @@ struct RtAotModuleData
 {
     const char* module_name;
     RtAotModuleInitializer initializer;
+    RtAotModuleInitializer deferred_initializer;
     const RtAotMethodDefData* method_def_entries;
     uint32_t method_def_entry_count;
 };
