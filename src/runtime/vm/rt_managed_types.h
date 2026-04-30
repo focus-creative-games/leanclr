@@ -690,6 +690,9 @@ constexpr uint32_t RT_ARRAY_BOUNDS_OFFSET = offsetof(RtArray, bounds);
 #pragma GCC diagnostic pop
 #endif
 
+const int32_t RT_MAX_ARRAY_INDEX = INT32_MAX;
+const int32_t RT_MAX_ARRAY_RANK = 32;
+
 constexpr uint32_t RT_TYPED_REFERENCE_SIZE = sizeof(RtTypedReference);
 constexpr size_t RT_PUBLIC_KEY_BYTES_LEN = 8;
 constexpr size_t RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH = 17;
