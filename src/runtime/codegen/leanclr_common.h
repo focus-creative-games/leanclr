@@ -16,6 +16,8 @@
 #include "interp/interp_defs.h"
 #include "interp/execution_helper.h"
 
+#define LEANCLR_CODEGEN_DEBUG LEANCLR_DEBUG
+
 #define LEANCLR_CODEGEN_THROW_ON_ERROR(retExpr, methodInfo, ip)                                          \
     do                                                                                                   \
     {                                                                                                    \
@@ -118,6 +120,8 @@ static T select_arch(T v32, T v64)
     return v32;
 #endif
 }
+
+using vm::RT_OBJECT_HEADER_SIZE;
 
 inline metadata::RtModuleDef* get_module(const char* module_name)
 {
@@ -343,6 +347,36 @@ inline RtResult<vm::RtMulticastDelegate*> new_delegate(const metadata::RtClass* 
 inline RtResult<const uint8_t*> get_field_rva_data(const metadata::RtFieldInfo* field)
 {
     return vm::Field::get_field_rva_data(field);
+}
+
+inline uint32_t get_field_offset_includes_object_header(const metadata::RtFieldInfo* field)
+{
+    return vm::Field::get_field_offset_includes_object_header_for_all_type(field);
+}
+
+inline uint32_t get_field_offset_includes_object_header_for_reference_type(const metadata::RtFieldInfo* field)
+{
+    return vm::Field::get_field_offset_includes_object_header_for_reference_type(field);
+}
+
+inline uint32_t get_class_instance_size_with_object_header(const metadata::RtClass* klass)
+{
+    return vm::Class::get_instance_size_with_object_header(klass);
+}
+
+inline uint32_t get_class_instance_size_without_object_header(const metadata::RtClass* klass)
+{
+    return vm::Class::get_instance_size_without_object_header(klass);
+}
+
+inline uint32_t get_class_field_count(const metadata::RtClass* klass)
+{
+    return klass->field_count;
+}
+
+inline uint32_t get_class_static_size(const metadata::RtClass* klass)
+{
+    return klass->static_size;
 }
 
 inline RtResult<vm::RtReflectionAssembly*> get_assembly_reflection_object(const metadata::RtModuleDef* mod)

@@ -13,10 +13,10 @@ namespace log
 #define LOG_LEVEL_NONE 5
 
 #ifndef LEANCLR_LOG_LEVEL
-#ifdef NDEBUG
-#define LEANCLR_LOG_LEVEL LOG_LEVEL_INFO
-#else
+#if LEANCLR_DEBUG
 #define LEANCLR_LOG_LEVEL LOG_LEVEL_DEBUG
+#else
+#define LEANCLR_LOG_LEVEL LOG_LEVEL_INFO
 #endif
 #endif
 

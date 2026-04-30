@@ -16,12 +16,12 @@ struct Unit
 template <typename T, typename E>
 class Result
 {
-    typedef typename std::aligned_storage<(sizeof(T) > sizeof(E) ? sizeof(T) : sizeof(E)),
-                                          (alignof(T) > alignof(E) ? alignof(T) : alignof(E))>::type StorageType;
+    typedef
+        typename std::aligned_storage<(sizeof(T) > sizeof(E) ? sizeof(T) : sizeof(E)), (alignof(T) > alignof(E) ? alignof(T) : alignof(E))>::type StorageType;
 
     StorageType _data;
     bool _is_ok;
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
     mutable bool _checked = false;
 #endif
 
@@ -83,10 +83,10 @@ class Result
         else
             new (&_data) E(std::move(*other.err_ptr()));
 
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
         _checked = other._checked;
         other._checked = true;
-#endif // !NDEBUG
+#endif
     }
 
     static Result<T, E> Ok(const T& value)
@@ -99,7 +99,7 @@ class Result
         return Result<T, E>(error);
     }
 
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
     ~Result()
     {
         assert(_checked && "Result value was not checked before destruction");
@@ -114,7 +114,7 @@ class Result
 
     bool is_ok() const
     {
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
         _checked = true;
 #endif
         return _is_ok;
@@ -122,7 +122,7 @@ class Result
 
     bool is_err() const
     {
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
         _checked = true;
 #endif
         return !_is_ok;
@@ -173,7 +173,7 @@ class Result
     {
         // Use tag dispatch so only the well-formed branch is instantiated.
         // `if constexpr` would be cleaner but requires C++17.
-        return cast_impl<U>(std::integral_constant<bool, std::is_same<U, E>::value && std::is_same<T, E>::value>{});
+        return cast_impl<U>(std::integral_constant < bool, std::is_same<U, E>::value&& std::is_same<T, E>::value > {});
     }
 
   private:
@@ -200,7 +200,7 @@ class ResultVoid
 {
     E _err;
     bool _is_ok;
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
     mutable bool _checked = false;
 #endif
 
@@ -218,13 +218,13 @@ class ResultVoid
 
     ResultVoid(ResultVoid<E>&& other) noexcept : _err(other._err), _is_ok(other._is_ok)
     {
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
         _checked = other._checked;
         other._checked = true;
-#endif // !NDEBUG
+#endif
     }
 
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
     ~ResultVoid()
     {
         assert(_checked && "Result value was not checked before destruction");
@@ -233,7 +233,7 @@ class ResultVoid
 
     bool is_ok() const
     {
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
         _checked = true;
 #endif
         return _is_ok;
@@ -241,7 +241,7 @@ class ResultVoid
 
     bool is_err() const
     {
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
         _checked = true;
 #endif
         return !_is_ok;
@@ -254,14 +254,16 @@ class ResultVoid
     }
 };
 
-template<typename T>
+template <typename T>
 struct function_return;
-template<typename R, typename... Args>
-struct function_return<R(Args...)> {
+template <typename R, typename... Args>
+struct function_return<R(Args...)>
+{
     typedef R type;
 };
-template<typename R, typename... Args>
-struct function_return<R(*)(Args...)> {
+template <typename R, typename... Args>
+struct function_return<R (*)(Args...)>
+{
     typedef R type;
 };
 
@@ -318,11 +320,11 @@ struct function_return<R(*)(Args...)> {
         return err;  \
     } while (0)
 
-#define RET_ASSERT_ERR(err) \
-    do               \
-    {                \
+#define RET_ASSERT_ERR(err)    \
+    do                         \
+    {                          \
         assert(false && #err); \
-        return err;  \
+        return err;            \
     } while (0)
 
 #define RET_ERR_ON_FALSE(expr, err) \

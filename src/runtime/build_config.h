@@ -40,6 +40,12 @@ typedef double float64_t;
 #define LEANCLR_PLATFORM_UNKNOWN 1
 #endif
 
+#if defined(DEBUG) || defined(_DEBUG)
+#define LEANCLR_DEBUG 1
+#else
+#define LEANCLR_DEBUG 0
+#endif
+
 #define LEANCLR_SUPPORT_UNALIGNED_ACCESS 1
 
 #if UINTPTR_MAX == 0xFFFFFFFF
@@ -54,7 +60,7 @@ typedef double float64_t;
 #define LEANCLR_USE_COMPUTED_GOTO_DISPATCHER 0
 #endif
 
-#if !NDEBUG
+#if LEANCLR_DEBUG
 #define LEANCLR_ENABLE_TEST_PINVOKES 1
 #define LEANCLR_ENABLE_TEST_INTRINSICS 1
 #define LEANCLR_ENABLE_TEST_INTERNAL_CALLS 1
@@ -62,7 +68,7 @@ typedef double float64_t;
 
 #define LEANCLR_ENABLE_FRAME_TRACE 0
 
-#if !NDEBUG
+#if LEANCLR_DEBUG
 #ifndef LEANCLR_ENABLE_FRAME_TRACE
 #define LEANCLR_ENABLE_FRAME_TRACE 0
 #endif

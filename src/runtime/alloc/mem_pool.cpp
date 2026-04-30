@@ -92,11 +92,11 @@ MemPool::~MemPool()
     while (reg)
     {
         Region* next = reg->next;
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
         std::memset(reg->data, 0xDD, reg->size);
 #endif
         alloc::GeneralAllocation::free(reg->data);
-#ifndef NDEBUG
+#if LEANCLR_DEBUG
         std::memset(reg, 0xDD, sizeof(Region));
 #endif
         alloc::GeneralAllocation::free(reg);
