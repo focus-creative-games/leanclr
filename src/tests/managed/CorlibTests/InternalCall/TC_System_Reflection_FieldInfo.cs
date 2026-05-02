@@ -34,6 +34,12 @@ namespace CorlibTests.InternalCall
         {
             [MarshalAs(UnmanagedType.I4)]
             public int value;
+
+
+            public MarshalA()
+            {
+                value = 1;
+            }
         }
 
         [UnitTest]

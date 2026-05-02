@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Dynamic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using test;
 
-namespace test
+namespace CoreTests
 {
 
     public class A
@@ -23,7 +25,7 @@ namespace test
         public static int c;
     }
 
-    public abstract class  C
+    public abstract class C
     {
         public virtual int GetValue()
         {
@@ -43,10 +45,7 @@ namespace test
     {
         public static void Main()
         {
-            Debugger.Log(0, "info", "Hello, World!");
-            Debugger.Log(1, "中文", "你好，世界！");
-            PrintStackTrace();
-            Throw1();
+
         }
 
         public static void CallCustomPInvoke()
@@ -79,9 +78,9 @@ namespace test
             int a = 0;
             goto xx;
             return 1;
-            yy: a = 2;
+        yy: a = 2;
             return 2;
-            xx:
+        xx:
             a = 1;
             goto yy;
 
@@ -114,12 +113,12 @@ namespace test
         {
             switch (a)
             {
-            case 1:
-                return 1;
-            case 2:
-                return 2;
-            default:
-                return 3;
+                case 1:
+                    return 1;
+                case 2:
+                    return 2;
+                default:
+                    return 3;
             }
         }
 
@@ -272,7 +271,7 @@ namespace test
             return a;
         }
 
-        
+
         //public int Test71()
         //{
         //    return Test70();
@@ -302,7 +301,7 @@ namespace test
             return a;
         }
 
-        
+
         //public int Test73()
         //{
         //    return Test72();
@@ -337,7 +336,7 @@ namespace test
             return a;
         }
 
-        
+
         //public void finally_catch()
         //{
         //    Assert.Equal(1131, FinallyCatchException_Return1131());
@@ -375,7 +374,7 @@ namespace test
             return a;
         }
 
-        
+
         //public void finally_notcatch()
         //{
         //    Assert.Equal(10111, FinallyThrowNotCatch_Return10111());
@@ -410,7 +409,7 @@ namespace test
         }
 
 
-        
+
         //public void catch_finally()
         //{
         //    Assert.Equal(1111, CatchFinally_Return1111());
@@ -450,7 +449,7 @@ namespace test
         }
 
 
-        
+
         //public void catch_throw_catch()
         //{
         //    Assert.Equal(11111, CatchThrowCatch_Return11111());
@@ -485,7 +484,7 @@ namespace test
         }
 
 
-        
+
         //public void throw_finally_call()
         //{
         //    Assert.Equal(1111, ThrowFinallyCallClauseCatchFinally_Return1111());
@@ -531,7 +530,7 @@ namespace test
         }
 
 
-        
+
         //public void ex_2()
         //{
         //    Assert.Equal(2, ThrowExceptionAtFinallySubStatementIncludeLeave_Return2());
@@ -576,7 +575,7 @@ namespace test
             return a;
         }
 
-        
+
         //public void ex_3()
         //{
         //    Assert.Equal(2, LeaveFinallySubLeave_Return2());
@@ -631,7 +630,7 @@ namespace test
             return a;
         }
 
-        
+
         //public void ex_4()
         //{
         //    Assert.Equal(3, Rethrow_Return3());

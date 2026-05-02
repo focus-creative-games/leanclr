@@ -7,7 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CoreTests", "CoreTests\Core
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CorlibTests", "CorlibTests\CorlibTests.csproj", "{B3C8B19B-F8AE-400E-946C-DE7AF2216FC0}"
 EndProject
-
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunTests", "RunTests\RunTests.csproj", "{33253D9C-D0FD-4450-9C10-F885DF016AEA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -22,10 +23,10 @@ Global
 		{B3C8B19B-F8AE-400E-946C-DE7AF2216FC0}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B3C8B19B-F8AE-400E-946C-DE7AF2216FC0}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{B3C8B19B-F8AE-400E-946C-DE7AF2216FC0}.Release|Any CPU.Build.0 = Debug|Any CPU
-		{8BF44FE7-FAD8-4796-DFA8-45CB512CA4CD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BF44FE7-FAD8-4796-DFA8-45CB512CA4CD}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8BF44FE7-FAD8-4796-DFA8-45CB512CA4CD}.Release|Any CPU.ActiveCfg = Debug|Any CPU
-		{8BF44FE7-FAD8-4796-DFA8-45CB512CA4CD}.Release|Any CPU.Build.0 = Debug|Any CPU
+		{33253D9C-D0FD-4450-9C10-F885DF016AEA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33253D9C-D0FD-4450-9C10-F885DF016AEA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33253D9C-D0FD-4450-9C10-F885DF016AEA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33253D9C-D0FD-4450-9C10-F885DF016AEA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
