@@ -1,5 +1,7 @@
 #include "il2cpp-api.h"
 
+#include <clocale>
+
 #if IL2CPP_API_DYNAMIC_NO_DLSYM
 typedef utils::HashMap<const char*, void*, utils::CStrHasher, utils::CStrCompare> SymbolTable;
 static SymbolTable s_SymbolTable;

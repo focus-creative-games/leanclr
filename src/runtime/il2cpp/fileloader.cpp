@@ -4,6 +4,14 @@
 #include <cctype>
 #include <cstdint>
 #include <cstring>
+#ifdef _MSC_VER
+#pragma warning(push)
+#pragma warning(disable: 4530)
+#endif
+#include <fstream>
+#ifdef _MSC_VER
+#pragma warning(pop)
+#endif
 
 namespace leanclr
 {

@@ -2,7 +2,6 @@
 
 #include <vector>
 #include <string>
-#include <fstream>
 #include "alloc/general_allocation.h"
 #include "vm/rt_exception.h"
 #include "vm/settings.h"
