@@ -29,26 +29,15 @@ namespace LeanAOT.ToCpp
 
         public string GetVariableTypeName()
         {
-            if (value is IMethod method)
+            if (value is IMethod method && method.IsMethod)
             {
-                if (method.IsMethod)
-                {
-                    return "const leanclr::metadata::RtMethodInfo*";
-                }
-                else if (method.IsField)
-                {
-                    return "const leanclr::metadata::RtFieldInfo*";
-                }
-                else
-                {
-                    throw new Exception($"Unsupported IMethod type for runtime resolved variable: {method.FullName}");
-                }
+                return "const leanclr::metadata::RtMethodInfo*";
             }
-            else if (value is IField)
+            else if (value is IField field && field.IsField)
             {
                 return "leanclr::metadata::RtFieldInfo*";
             }
-            else if (value is ITypeDefOrRef)
+            else if (value is ITypeDefOrRef type && type.IsType)
             {
                 return "leanclr::metadata::RtClass*";
             }

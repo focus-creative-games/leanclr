@@ -2993,21 +2993,21 @@ namespace LeanAOT.ToCpp
                     }
                     case OperandType.InlineTok:
                     {
-                        if (inst.Operand is IField fieldOp)
+                        if (inst.Operand is IField fieldOp && fieldOp.IsField)
                         {
                             var field = _method.InflateField(fieldOp);
                             inflatedTokenOperand = field;
                             inlineToken = field.MDToken.ToUInt32();
                             _forwardDeclaration.AddFieldForwardDeclaration(field);
                         }
-                        else if (inst.Operand is IMethod methodOp)
+                        else if (inst.Operand is IMethod methodOp && methodOp.IsMethod)
                         {
                             var method = _method.InflateMethod(methodOp);
                             inflatedTokenOperand = method;
                             inlineToken = method.MDToken.ToUInt32();
                             _forwardDeclaration.AddMethodForwardDeclaration(method);
                         }
-                        else if (inst.Operand is ITypeDefOrRef typeOp)
+                        else if (inst.Operand is ITypeDefOrRef typeOp && typeOp.IsType)
                         {
                             var type = _method.InflateType(typeOp);
                             inflatedTokenOperand = type;
