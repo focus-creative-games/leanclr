@@ -792,6 +792,19 @@ RtResult<const metadata::RtTypeSig*> Type::parse_assembly_qualified_type(metadat
         }
         return typeSig;
     }
+    // search all assemblies
+    auto modules_span = metadata::RtModuleDef::get_registered_modules();
+    utils::Vector<metadata::RtModuleDef*> registered_modules = utils::Vector<metadata::RtModuleDef*>(modules_span.begin(), modules_span.end());
+    for (metadata::RtModuleDef* mod : registered_modules)
+    {
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig,
+            Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), false));
+        if (!typeSig)
+        {
+            continue;
+        }
+        return typeSig;
+    }
     RET_ERR(RtErr::TypeLoad);
 }
 } // namespace vm

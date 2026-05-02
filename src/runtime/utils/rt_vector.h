@@ -57,13 +57,9 @@ class Vector
         resize(size);
     }
 
-    ~Vector()
+    explicit Vector(const_iterator begin, const_iterator end, const Allocator& alloc = Allocator()) : allocator_(alloc), data_(nullptr), size_(0), capacity_(0)
     {
-        clear();
-        if (data_)
-        {
-            allocator_.deallocate(data_, capacity_);
-        }
+        push_range(begin, end - begin);
     }
 
     Vector(const Vector& other) : allocator_(other.allocator_), data_(nullptr), size_(0), capacity_(0)
@@ -114,6 +110,15 @@ class Vector
             other.capacity_ = 0;
         }
         return *this;
+    }
+
+    ~Vector()
+    {
+        clear();
+        if (data_)
+        {
+            allocator_.deallocate(data_, capacity_);
+        }
     }
 
     void push_back(const T& value)
