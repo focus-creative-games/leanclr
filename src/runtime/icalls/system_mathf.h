@@ -12,6 +12,7 @@ class SystemMathF
   public:
     static utils::Span<vm::InternalCallEntry> get_internal_call_entries();
 
+    static RtResult<float> round(float value);
     static RtResult<float> acos(float value);
     static RtResult<float> acosh(float value);
     static RtResult<float> asin(float value);

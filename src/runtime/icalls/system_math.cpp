@@ -171,16 +171,16 @@ static RtResultVoid cbrt_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::ceil(double value)
+RtResult<double> SystemMath::ceiling(double value)
 {
     RET_OK(std::ceil(value));
 }
-/// @icall: System.Math::Ceil(System.Double)
-static RtResultVoid ceil_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+/// @icall: System.Math::Ceiling(System.Double)
+static RtResultVoid ceiling_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                       interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::ceil(value));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::ceiling(value));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }
@@ -401,7 +401,7 @@ static vm::InternalCallEntry s_entries_system_math[] = {
     {"System.Math::Atan2(System.Double,System.Double)", (vm::InternalCallFunction)&SystemMath::atan2, atan2_invoker_math},
     {"System.Math::Atanh(System.Double)", (vm::InternalCallFunction)&SystemMath::atanh, atanh_invoker_math},
     {"System.Math::Cbrt(System.Double)", (vm::InternalCallFunction)&SystemMath::cbrt, cbrt_invoker_math},
-    {"System.Math::Ceil(System.Double)", (vm::InternalCallFunction)&SystemMath::ceil, ceil_invoker_math},
+    {"System.Math::Ceiling(System.Double)", (vm::InternalCallFunction)&SystemMath::ceiling, ceiling_invoker_math},
     {"System.Math::Cos(System.Double)", (vm::InternalCallFunction)&SystemMath::cos, cos_invoker_math},
     {"System.Math::Cosh(System.Double)", (vm::InternalCallFunction)&SystemMath::cosh, cosh_invoker_math},
     {"System.Math::Exp(System.Double)", (vm::InternalCallFunction)&SystemMath::exp, exp_invoker_math},

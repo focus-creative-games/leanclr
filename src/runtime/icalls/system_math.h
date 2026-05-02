@@ -23,7 +23,7 @@ class SystemMath
     static RtResult<double> atan2(double y, double x);
     static RtResult<double> atanh(double value);
     static RtResult<double> cbrt(double value);
-    static RtResult<double> ceil(double value);
+    static RtResult<double> ceiling(double value);
     static RtResult<double> cos(double value);
     static RtResult<double> cosh(double value);
     static RtResult<double> exp(double value);
