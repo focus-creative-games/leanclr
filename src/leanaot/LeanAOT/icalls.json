@@ -850,8 +850,8 @@
     "header": "icalls/system_math.h"
   },
   {
-    "name": "System.Math::Ceil(System.Double)",
-    "func": "SystemMath::ceil",
+    "name": "System.Math::Ceiling(System.Double)",
+    "func": "SystemMath::ceiling",
     "header": "icalls/system_math.h"
   },
   {
@@ -1017,6 +1017,11 @@
   {
     "name": "System.MathF::Pow(System.Single,System.Single)",
     "func": "SystemMathF::pow",
+    "header": "icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Round(System.Single)",
+    "func": "SystemMathF::round",
     "header": "icalls/system_mathf.h"
   },
   {
