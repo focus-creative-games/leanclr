@@ -506,13 +506,12 @@ struct RtMethodArgDesc
 };
 
 // Managed method pointer type (noexcept not on alias - MSVC C2279; all invokers implement noexcept)
-using RtManagedMethodPointer = add_noexcept<void()>::type;
+using RtManagedMethodPointer = void (*)();
+using RtInvokeMethodPointer = RtResultVoid (*)(RtManagedMethodPointer, const RtMethodInfo*, const interp::RtStackObject*, interp::RtStackObject*);
 
-using RtInvokeMethodPointer =
-    add_noexcept<RtResultVoid(RtManagedMethodPointer, const RtMethodInfo*, const interp::RtStackObject*, interp::RtStackObject*)>::type;
+#define CAST_AS_NOEXCEP_MANAGED_METHOD_POINTER(p) (void (*)() noexcept)(p)
+#define CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(p) (RtInvokeVoid (*)(RtManagedMethodPointer, const RtMethodInfo*, const interp::RtStackObject*, interp::RtStackObject*) noexcept)(p)
 
-using RtCInvokeMethodPointer =
-    add_noexcept<void(RtManagedMethodPointer, const RtMethodInfo*, const interp::RtStackObject*, interp::RtStackObject*, RtErr* out_err)>::type;
 
 // Interface offset structure
 struct RtInterfaceOffset

@@ -34,10 +34,4 @@ RtErr fatal_on_not_implemented_error();
 #define RETURN_NOT_IMPLEMENTED_ERROR() RET_ERR(RtErr::NotImplemented)
 #endif
 
-template<typename T> struct add_noexcept;
-template<typename R, typename... Args>
-struct add_noexcept<R(Args...)> {
-    using type = decltype(static_cast<R(*)(Args...) LEANCLR_NO_EXCEPTION>(nullptr));
-};
-
 } // namespace leanclr
