@@ -433,3 +433,5 @@ ___*
 /src/tools/exportextern/libraries
 launchSettings.json
 .vscode/
+/src/leanaot/sync.bat
+/src/runtime/*.bat
