@@ -509,8 +509,8 @@ struct RtMethodArgDesc
 using RtManagedMethodPointer = void (*)();
 using RtInvokeMethodPointer = RtResultVoid (*)(RtManagedMethodPointer, const RtMethodInfo*, const interp::RtStackObject*, interp::RtStackObject*);
 
-#define CAST_AS_NOEXCEP_MANAGED_METHOD_POINTER(p) (void (*)() noexcept)(p)
-#define CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(p) (RtInvokeVoid (*)(RtManagedMethodPointer, const RtMethodInfo*, const interp::RtStackObject*, interp::RtStackObject*) noexcept)(p)
+#define CAST_AS_NOEXCEP_MANAGED_METHOD_POINTER(p) ((void (*)() noexcept)(p))
+#define CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(p) ((::leanclr::RtResultVoid (*)(::leanclr::metadata::RtManagedMethodPointer, const ::leanclr::metadata::RtMethodInfo*, const ::leanclr::interp::RtStackObject*, ::leanclr::interp::RtStackObject*) noexcept)(p))
 
 
 // Interface offset structure

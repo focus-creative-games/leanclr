@@ -345,9 +345,9 @@ static RtResult<RtObject*> invoke_without_run_cctor(const metadata::RtMethodInfo
 
     interp::RtStackObject* arg_buffer = buffers.args_buffer;
     interp::RtStackObject* ret_buffer = buffers.ret_buffer;
-
+    
     // Invoke the method
-    auto invoke_ptr = reinterpret_cast<metadata::RtInvokeMethodPointer>(method->invoke_method_ptr);
+    auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr); 
     RET_ERR_ON_FAIL(invoke_ptr(method->method_ptr, method, arg_buffer, ret_buffer));
 
     return convert_return_value(method->return_type, ret_buffer);
@@ -509,7 +509,7 @@ RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const met
     interp::RtStackObject* ret_buffer = buffers.ret_buffer;
 
     // Invoke the method
-    auto invoke_ptr = reinterpret_cast<metadata::RtInvokeMethodPointer>(actual_method->invoke_method_ptr);
+    auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->invoke_method_ptr);
     RET_ERR_ON_FAIL(invoke_ptr(actual_method->method_ptr, actual_method, arg_buffer, ret_buffer));
 
     if (return_instance)
@@ -566,7 +566,7 @@ RtResultVoid Runtime::invoke_stackobject_arguments_without_run_cctor(const metad
 {
     assert(method);
 
-    auto invoke_ptr = reinterpret_cast<metadata::RtInvokeMethodPointer>(method->invoke_method_ptr);
+    auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
     return invoke_ptr(method->method_ptr, method, params, ret);
 }
 
@@ -575,7 +575,7 @@ RtResultVoid Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(con
 {
     assert(method);
 
-    auto invoke_ptr = reinterpret_cast<metadata::RtInvokeMethodPointer>(method->virtual_invoke_method_ptr);
+    auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->virtual_invoke_method_ptr);
     return invoke_ptr(method->method_ptr, method, params, ret);
 }
 

@@ -3344,7 +3344,7 @@ method_start:
                 {
                     ip = reinterpret_cast<const uint8_t*>(ir + 1);
                     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                    HANDLE_RAISE_RUNTIME_ERROR_VOID(actual_method->virtual_invoke_method_ptr(actual_method->method_ptr, actual_method, frame_base, frame_base));
+                    HANDLE_RAISE_RUNTIME_ERROR_VOID( CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->virtual_invoke_method_ptr)(actual_method->method_ptr, actual_method, frame_base, frame_base));
                 }
             }
             LEANCLR_CASE_END_LITE0()
@@ -3497,7 +3497,7 @@ method_start:
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                 std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                 frame_base->obj = obj;
-                metadata::AotInvoker invoker = ctor->invoke_method_ptr;
+                auto invoker = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(ctor->invoke_method_ptr);
                 HANDLE_RAISE_RUNTIME_ERROR_VOID(invoker(ctor->method_ptr, ctor, frame_base, frame_base));
             }
             LEANCLR_CASE_END0()
@@ -3511,7 +3511,7 @@ method_start:
                 std::memmove(final_frame_base + 1, original_frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                 final_frame_base->ptr = original_frame_base;
                 std::memset(original_frame_base, 0, value_stack_objects * sizeof(RtStackObject));
-                metadata::AotInvoker invoker = ctor->invoke_method_ptr;
+                auto invoker = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(ctor->invoke_method_ptr);
                 HANDLE_RAISE_RUNTIME_ERROR_VOID(invoker(ctor->method_ptr, ctor, final_frame_base, final_frame_base));
             }
             LEANCLR_CASE_END0()
@@ -6198,7 +6198,7 @@ method_start:
                             ip = reinterpret_cast<const uint8_t*>(ir + 1);
                             RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                             HANDLE_RAISE_RUNTIME_ERROR_VOID(
-                                actual_method->virtual_invoke_method_ptr(actual_method->method_ptr, actual_method, frame_base, frame_base));
+                                CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->virtual_invoke_method_ptr)(actual_method->method_ptr, actual_method, frame_base, frame_base));
                         }
                     }
                     LEANCLR_CASE_END_LITE1()
@@ -6353,7 +6353,7 @@ method_start:
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                         std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                         frame_base->obj = obj;
-                        metadata::AotInvoker invoker = ctor->invoke_method_ptr;
+                        auto invoker = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(ctor->invoke_method_ptr);
                         HANDLE_RAISE_RUNTIME_ERROR_VOID(invoker(ctor->method_ptr, ctor, frame_base, frame_base));
                     }
                     LEANCLR_CASE_END1()
@@ -6368,7 +6368,7 @@ method_start:
                                      static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                         final_frame_base->ptr = original_frame_base;
                         std::memset(original_frame_base, 0, value_stack_objects * sizeof(RtStackObject));
-                        metadata::AotInvoker invoker = ctor->invoke_method_ptr;
+                        auto invoker = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(ctor->invoke_method_ptr);
                         HANDLE_RAISE_RUNTIME_ERROR_VOID(invoker(ctor->method_ptr, ctor, final_frame_base, final_frame_base));
                     }
                     LEANCLR_CASE_END1()

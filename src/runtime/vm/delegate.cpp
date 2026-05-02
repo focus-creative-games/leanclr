@@ -159,7 +159,7 @@ RtResultVoid Delegate::invoke_delegate_invoker(metadata::RtManagedMethodPointer 
         default:
             RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
-        RET_ERR_ON_FAIL((target_method->invoke_method_ptr)(target_method->method_ptr, target_method, final_args, s_tempReturnValueBuffer));
+        RET_ERR_ON_FAIL(CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(target_method->invoke_method_ptr)(target_method->method_ptr, target_method, final_args, s_tempReturnValueBuffer));
     }
     // If there is a return value, set it to the ret buffer
     if (method->ret_stack_object_size > 0)
