@@ -10,7 +10,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<int32_t> SystemReflectionRuntimeParameterInfo::get_metadata_token(const vm::RtReflectionParameter* param)
+RtResult<int32_t> SystemReflectionRuntimeParameterInfo::get_metadata_token(const vm::RtReflectionParameter* param) noexcept
 {
     vm::RtReflectionMethod* ref_method = reinterpret_cast<vm::RtReflectionMethod*>(param->member);
     const metadata::RtMethodInfo* method = ref_method->method;
@@ -20,7 +20,7 @@ RtResult<int32_t> SystemReflectionRuntimeParameterInfo::get_metadata_token(const
 }
 
 RtResult<vm::RtArray*> SystemReflectionRuntimeParameterInfo::get_type_modifiers(vm::RtReflectionType* parameter_type, vm::RtObject* member, int32_t index,
-                                                                                bool optional)
+                                                                                bool optional) noexcept
 {
     (void)parameter_type;
 
@@ -90,7 +90,7 @@ static RtResultVoid runtimeparameterinfo_get_type_modifiers_invoker(metadata::Rt
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeParameterInfo::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeParameterInfo::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Reflection.RuntimeParameterInfo::GetMetadataToken()", (vm::InternalCallFunction)&SystemReflectionRuntimeParameterInfo::get_metadata_token,

@@ -40,7 +40,7 @@ static EnumComparisonResult cmp_any(const void* p1, const void* p2)
 
 // ========== Impl functions ==========
 
-RtResult<int32_t> SystemEnum::internal_compare_to(vm::RtObject* obj1, vm::RtObject* obj2)
+RtResult<int32_t> SystemEnum::internal_compare_to(vm::RtObject* obj1, vm::RtObject* obj2) noexcept
 {
     const metadata::RtClass* klass1 = obj1->klass;
     const metadata::RtClass* klass2 = obj2->klass;
@@ -96,7 +96,7 @@ RtResult<int32_t> SystemEnum::internal_compare_to(vm::RtObject* obj1, vm::RtObje
     RET_OK(static_cast<int32_t>(result));
 }
 
-RtResult<vm::RtReflectionRuntimeType*> SystemEnum::internal_get_underlying_type(vm::RtReflectionRuntimeType* enum_klass)
+RtResult<vm::RtReflectionRuntimeType*> SystemEnum::internal_get_underlying_type(vm::RtReflectionRuntimeType* enum_klass) noexcept
 {
     const metadata::RtTypeSig* type_sig = enum_klass->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
@@ -104,7 +104,7 @@ RtResult<vm::RtReflectionRuntimeType*> SystemEnum::internal_get_underlying_type(
     RET_OK(reinterpret_cast<vm::RtReflectionRuntimeType*>(reflection_type));
 }
 
-RtResult<bool> SystemEnum::get_enum_values_and_names(vm::RtReflectionRuntimeType* enum_klass, vm::RtArray** values, vm::RtArray** names)
+RtResult<bool> SystemEnum::get_enum_values_and_names(vm::RtReflectionRuntimeType* enum_klass, vm::RtArray** values, vm::RtArray** names) noexcept
 {
     const metadata::RtTypeSig* type_sig = enum_klass->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
@@ -118,7 +118,7 @@ RtResult<bool> SystemEnum::get_enum_values_and_names(vm::RtReflectionRuntimeType
     RET_OK(sorted);
 }
 
-RtResult<vm::RtObject*> SystemEnum::internal_box_enum(vm::RtReflectionRuntimeType* runtime_type, uint64_t value)
+RtResult<vm::RtObject*> SystemEnum::internal_box_enum(vm::RtReflectionRuntimeType* runtime_type, uint64_t value) noexcept
 {
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
@@ -126,7 +126,7 @@ RtResult<vm::RtObject*> SystemEnum::internal_box_enum(vm::RtReflectionRuntimeTyp
     return vm::Object::box_object(klass, &value);
 }
 
-RtResult<vm::RtObject*> SystemEnum::get_value(vm::RtObject* obj)
+RtResult<vm::RtObject*> SystemEnum::get_value(vm::RtObject* obj) noexcept
 {
     if (obj == nullptr)
     {
@@ -138,7 +138,7 @@ RtResult<vm::RtObject*> SystemEnum::get_value(vm::RtObject* obj)
     return vm::Object::box_object(element_class, data_ptr);
 }
 
-RtResult<bool> SystemEnum::internal_has_flag(vm::RtObject* obj, vm::RtObject* flag)
+RtResult<bool> SystemEnum::internal_has_flag(vm::RtObject* obj, vm::RtObject* flag) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint64_t, value1, vm::Enum::get_boxed_enum_data_as_unsigned_and_extended_to_u64(obj));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint64_t, value2, vm::Enum::get_boxed_enum_data_as_unsigned_and_extended_to_u64(flag));
@@ -146,7 +146,7 @@ RtResult<bool> SystemEnum::internal_has_flag(vm::RtObject* obj, vm::RtObject* fl
     RET_OK(result);
 }
 
-RtResult<int32_t> SystemEnum::get_hash_code(vm::RtObject* obj)
+RtResult<int32_t> SystemEnum::get_hash_code(vm::RtObject* obj) noexcept
 {
     return vm::Enum::get_hash_code(obj);
 }
@@ -245,7 +245,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_enum[] = {
     {"System.Enum::get_hashcode", (vm::InternalCallFunction)&SystemEnum::get_hash_code, enum_get_hash_code_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemEnum::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemEnum::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_enum,
                                               sizeof(s_internal_call_entries_system_enum) / sizeof(s_internal_call_entries_system_enum[0]));

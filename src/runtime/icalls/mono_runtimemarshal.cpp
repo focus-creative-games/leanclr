@@ -8,7 +8,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResultVoid MonoRuntimeMarshal::free_assembly_name(metadata::RtMonoAssemblyName* aname, bool free_struct)
+RtResultVoid MonoRuntimeMarshal::free_assembly_name(metadata::RtMonoAssemblyName* aname, bool free_struct) noexcept
 {
     alloc::GeneralAllocation::free(const_cast<char*>(aname->name));
     alloc::GeneralAllocation::free(const_cast<char*>(aname->culture));
@@ -32,7 +32,7 @@ static RtResultVoid free_assembly_name_invoker(metadata::RtManagedMethodPointer 
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> MonoRuntimeMarshal::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> MonoRuntimeMarshal::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"Mono.RuntimeMarshal::FreeAssemblyName(Mono.MonoAssemblyName&,System.Boolean)", (vm::InternalCallFunction)&MonoRuntimeMarshal::free_assembly_name,

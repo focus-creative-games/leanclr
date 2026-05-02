@@ -12,7 +12,7 @@ namespace icalls
 {
 
 /// @icall: System.Array::GetRank
-RtResult<int32_t> SystemArray::get_rank(vm::RtArray* arr)
+RtResult<int32_t> SystemArray::get_rank(vm::RtArray* arr) noexcept
 {
     if (arr == nullptr)
         RET_ERR(RtErr::NullReference);
@@ -32,7 +32,7 @@ static RtResultVoid get_rank_invoker(metadata::RtManagedMethodPointer, const met
 }
 
 /// @icall: System.Array::GetLength
-RtResult<int32_t> SystemArray::get_length(vm::RtArray* arr, int32_t dimension)
+RtResult<int32_t> SystemArray::get_length(vm::RtArray* arr, int32_t dimension) noexcept
 {
     return vm::Array::get_array_length_at_dimension(arr, static_cast<size_t>(dimension));
 }
@@ -48,7 +48,7 @@ static RtResultVoid get_length_invoker_icalls_system_array(metadata::RtManagedMe
 }
 
 /// @icall: System.Array::GetLowerBound
-RtResult<int32_t> SystemArray::get_lower_bound(vm::RtArray* arr, int32_t dimension)
+RtResult<int32_t> SystemArray::get_lower_bound(vm::RtArray* arr, int32_t dimension) noexcept
 {
     return vm::Array::get_array_lower_bound_at_dimension(arr, static_cast<size_t>(dimension));
 }
@@ -64,7 +64,7 @@ static RtResultVoid get_lower_bound_invoker(metadata::RtManagedMethodPointer, co
 }
 
 /// @icall: System.Array::GetValue(System.Int32[])
-RtResult<vm::RtObject*> SystemArray::get_value(vm::RtArray* arr, vm::RtArray* indices)
+RtResult<vm::RtObject*> SystemArray::get_value(vm::RtArray* arr, vm::RtArray* indices) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, index, vm::Array::get_global_index_from_indices(arr, indices));
     return get_value_impl(arr, index);
@@ -81,14 +81,14 @@ static RtResultVoid get_array_value_invoker(metadata::RtManagedMethodPointer, co
 }
 
 /// @icall: System.Array::SetValue(System.Object,System.Int32[])
-RtResultVoid SystemArray::set_value(vm::RtArray* arr, vm::RtObject* value, vm::RtArray* indices)
+RtResultVoid SystemArray::set_value(vm::RtArray* arr, vm::RtObject* value, vm::RtArray* indices) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, index, vm::Array::get_global_index_from_indices(arr, indices));
     return set_value_impl(arr, value, index);
 }
 
 static RtResultVoid set_value_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject*)
+                                      interp::RtStackObject*) noexcept
 {
     auto arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     auto value = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -98,7 +98,7 @@ static RtResultVoid set_value_invoker(metadata::RtManagedMethodPointer, const me
 }
 
 /// @icall: System.Array::GetValueImpl
-RtResult<vm::RtObject*> SystemArray::get_value_impl(vm::RtArray* arr, int32_t global_index)
+RtResult<vm::RtObject*> SystemArray::get_value_impl(vm::RtArray* arr, int32_t global_index) noexcept
 {
     if (static_cast<uint32_t>(global_index) >= static_cast<uint32_t>(arr->length))
         RET_ERR(RtErr::IndexOutOfRange);
@@ -131,7 +131,7 @@ static RtResultVoid get_value_impl_invoker(metadata::RtManagedMethodPointer, con
 }
 
 /// @icall: System.Array::SetValueImpl
-RtResultVoid SystemArray::set_value_impl(vm::RtArray* arr, vm::RtObject* value, int32_t global_index)
+RtResultVoid SystemArray::set_value_impl(vm::RtArray* arr, vm::RtObject* value, int32_t global_index) noexcept
 {
     if (static_cast<uint32_t>(global_index) >= static_cast<uint32_t>(arr->length))
         RET_ERR(RtErr::IndexOutOfRange);
@@ -156,7 +156,7 @@ RtResultVoid SystemArray::set_value_impl(vm::RtArray* arr, vm::RtObject* value, 
 }
 
 static RtResultVoid set_value_impl_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                           interp::RtStackObject*)
+                                           interp::RtStackObject*) noexcept
 {
     auto arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     auto value = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -166,7 +166,7 @@ static RtResultVoid set_value_impl_invoker(metadata::RtManagedMethodPointer, con
 }
 
 /// @icall: System.Array::FastCopy
-RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::RtArray* dst, int32_t dst_index, int32_t length)
+RtResult<bool> SystemArray::fast_copy(vm::RtArray* src, int32_t src_index, vm::RtArray* dst, int32_t dst_index, int32_t length) noexcept
 {
     uint32_t src_length = static_cast<uint32_t>(src->length);
     uint32_t dst_length = static_cast<uint32_t>(dst->length);
@@ -255,7 +255,7 @@ static RtResultVoid fast_copy_invoker(metadata::RtManagedMethodPointer, const me
 }
 
 /// @icall: System.Array::CreateInstanceImpl
-RtResult<vm::RtArray*> SystemArray::create_instance_impl(vm::RtReflectionType* ele_ref_type, vm::RtArray* lengths, vm::RtArray* lower_bounds)
+RtResult<vm::RtArray*> SystemArray::create_instance_impl(vm::RtReflectionType* ele_ref_type, vm::RtArray* lengths, vm::RtArray* lower_bounds) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, ele_klass, vm::Class::get_class_from_typesig(ele_ref_type->type_handle));
 
@@ -303,7 +303,7 @@ static RtResultVoid create_instance_impl_invoker(metadata::RtManagedMethodPointe
 }
 
 /// @icall: System.Array::ClearInternal
-RtResultVoid SystemArray::clear_internal(vm::RtArray* arr, int32_t index, int32_t length)
+RtResultVoid SystemArray::clear_internal(vm::RtArray* arr, int32_t index, int32_t length) noexcept
 {
     uint32_t arr_length = static_cast<uint32_t>(arr->length);
     if (static_cast<uint32_t>(index) >= arr_length || static_cast<uint32_t>(length) > arr_length - static_cast<uint32_t>(index))
@@ -328,7 +328,7 @@ RtResultVoid SystemArray::clear_internal(vm::RtArray* arr, int32_t index, int32_
 }
 
 static RtResultVoid clear_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                           interp::RtStackObject*)
+                                           interp::RtStackObject*) noexcept
 {
     auto arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     int32_t index = EvalStackOp::get_param<int32_t>(params, 1);
@@ -351,7 +351,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_array[] = {
     {"System.Array::ClearInternal", (vm::InternalCallFunction)&SystemArray::clear_internal, clear_internal_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemArray::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemArray::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_array,
                                               sizeof(s_internal_call_entries_system_array) / sizeof(vm::InternalCallEntry));

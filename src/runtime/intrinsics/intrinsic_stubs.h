@@ -11,8 +11,8 @@ namespace intrinsics
 class IntrinsicStubs
 {
   public:
-    static void get_intrinsic_entries(utils::Vector<vm::IntrinsicEntry>& entries);
-    static void get_newobj_intrinsic_entries(utils::Vector<vm::NewobjIntrinsicEntry>& entries);
+    static void get_intrinsic_entries(utils::Vector<vm::IntrinsicEntry>& entries) noexcept;
+    static void get_newobj_intrinsic_entries(utils::Vector<vm::NewobjIntrinsicEntry>& entries) noexcept;
 };
 } // namespace intrinsics
 } // namespace leanclr

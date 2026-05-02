@@ -13,7 +13,7 @@ namespace icalls
 {
 
 #if LEANCLR_PLATFORM_POSIX
-RtResult<int32_t> Interop::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size)
+RtResult<int32_t> Interop::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size) noexcept
 {
     RET_OK(platform::RtSys::double_to_string(value, format, buffer, buffer_size));
 }
@@ -31,7 +31,7 @@ RtResultVoid double_to_string_invoker(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<int32_t> Interop::sys_lchflags_can_set_hidden_flag()
+RtResult<int32_t> Interop::sys_lchflags_can_set_hidden_flag() noexcept
 {
     RET_OK(platform::RtSys::lchflags_can_set_hidden_flag());
 }
@@ -46,143 +46,143 @@ RtResultVoid sys_lchflags_can_set_hidden_flag_invoker(metadata::RtManagedMethodP
 }
 
 RtResult<int32_t> Interop::globalization_get_time_zone_display_name(vm::RtString* locale_name, vm::RtString* time_zone_id, int32_t type, vm::RtObject* result,
-                                                                    int32_t result_length)
+                                                                    int32_t result_length) noexcept
 {
     RET_OK(platform::RtSys::globalization_get_time_zone_display_name(locale_name, time_zone_id, type, result, result_length));
 }
 
-RtResult<int32_t> Interop::sys_ch_mod(vm::RtString* path, int32_t mode)
+RtResult<int32_t> Interop::sys_ch_mod(vm::RtString* path, int32_t mode) noexcept
 {
     RET_OK(platform::RtSys::ch_mod(path, mode));
 }
 
-RtResult<int32_t> Interop::sys_close_dir(intptr_t dir)
+RtResult<int32_t> Interop::sys_close_dir(intptr_t dir) noexcept
 {
     RET_OK(platform::RtSys::close_dir(dir));
 }
 
-RtResult<int32_t> Interop::sys_convert_error_pal_to_platform(int32_t error)
+RtResult<int32_t> Interop::sys_convert_error_pal_to_platform(int32_t error) noexcept
 {
     RET_OK(platform::RtSys::convert_error_pal_to_platform(error));
 }
 
-RtResult<int32_t> Interop::sys_convert_error_platform_to_pal(int32_t error)
+RtResult<int32_t> Interop::sys_convert_error_platform_to_pal(int32_t error) noexcept
 {
     RET_OK(platform::RtSys::convert_error_platform_to_pal(error));
 }
 
-RtResult<int32_t> Interop::sys_copy_file(vm::RtObject* source, vm::RtObject* destination)
+RtResult<int32_t> Interop::sys_copy_file(vm::RtObject* source, vm::RtObject* destination) noexcept
 {
     RET_OK(platform::RtSys::copy_file(source, destination));
 }
 
-RtResult<int32_t> Interop::sys_f_stat(vm::RtObject* fd, void* output)
+RtResult<int32_t> Interop::sys_f_stat(vm::RtObject* fd, void* output) noexcept
 {
     RET_OK(platform::RtSys::f_stat(fd, output));
 }
 
-RtResult<uint32_t> Interop::sys_get_e_gid()
+RtResult<uint32_t> Interop::sys_get_e_gid() noexcept
 {
     RET_OK(platform::RtSys::get_e_gid());
 }
 
-RtResult<uint32_t> Interop::sys_get_e_uid()
+RtResult<uint32_t> Interop::sys_get_e_uid() noexcept
 {
     RET_OK(platform::RtSys::get_e_uid());
 }
 
-RtResultVoid Interop::sys_get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length)
+RtResultVoid Interop::sys_get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length) noexcept
 {
     platform::RtSys::get_non_cryptographically_secure_random_bytes(buffer, length);
     RET_VOID_OK();
 }
 
-RtResult<int32_t> Interop::sys_get_read_dir_r_buffer_size()
+RtResult<int32_t> Interop::sys_get_read_dir_r_buffer_size() noexcept
 {
     RET_OK(platform::RtSys::get_read_dir_r_buffer_size());
 }
 
-RtResult<int32_t> Interop::sys_lchflags(vm::RtString* path, uint32_t flags)
+RtResult<int32_t> Interop::sys_lchflags(vm::RtString* path, uint32_t flags) noexcept
 {
     RET_OK(platform::RtSys::lchflags(path, flags));
 }
 
-RtResult<int32_t> Interop::sys_link(vm::RtString* source, vm::RtString* target)
+RtResult<int32_t> Interop::sys_link(vm::RtString* source, vm::RtString* target) noexcept
 {
     RET_OK(platform::RtSys::link(source, target));
 }
 
-RtResult<int32_t> Interop::sys_lstat_byte(uint8_t* path, void* output)
+RtResult<int32_t> Interop::sys_lstat_byte(uint8_t* path, void* output) noexcept
 {
     RET_OK(platform::RtSys::lstat_byte(path, output));
 }
 
-RtResult<int32_t> Interop::sys_lstat_string(vm::RtString* path, void* output)
+RtResult<int32_t> Interop::sys_lstat_string(vm::RtString* path, void* output) noexcept
 {
     RET_OK(platform::RtSys::lstat_string(path, output));
 }
 
-RtResult<int32_t> Interop::sys_mkdir(vm::RtString* path, int32_t mode)
+RtResult<int32_t> Interop::sys_mkdir(vm::RtString* path, int32_t mode) noexcept
 {
     RET_OK(platform::RtSys::mk_dir(path, mode));
 }
 
-RtResult<intptr_t> Interop::sys_open_dir(vm::RtString* path)
+RtResult<intptr_t> Interop::sys_open_dir(vm::RtString* path) noexcept
 {
     RET_OK(platform::RtSys::open_dir(path));
 }
 
-RtResult<int32_t> Interop::sys_read_dir_r(intptr_t dir, uint8_t* buffer, int32_t buffer_size, void* output_entry)
+RtResult<int32_t> Interop::sys_read_dir_r(intptr_t dir, uint8_t* buffer, int32_t buffer_size, void* output_entry) noexcept
 {
     RET_OK(platform::RtSys::read_dir_r(dir, buffer, buffer_size, output_entry));
 }
 
-RtResult<int32_t> Interop::sys_read_link(vm::RtString* path, vm::RtArray* buffer, int32_t buffer_size)
+RtResult<int32_t> Interop::sys_read_link(vm::RtString* path, vm::RtArray* buffer, int32_t buffer_size) noexcept
 {
     RET_OK(platform::RtSys::read_link(path, buffer, buffer_size));
 }
 
-RtResult<int32_t> Interop::sys_rename(vm::RtString* old_path, vm::RtString* new_path)
+RtResult<int32_t> Interop::sys_rename(vm::RtString* old_path, vm::RtString* new_path) noexcept
 {
     RET_OK(platform::RtSys::rename(old_path, new_path));
 }
 
-RtResult<int32_t> Interop::sys_rmdir(vm::RtString* path)
+RtResult<int32_t> Interop::sys_rmdir(vm::RtString* path) noexcept
 {
     RET_OK(platform::RtSys::rm_dir(path));
 }
 
-RtResult<int32_t> Interop::sys_stat_byte(uint8_t* path, void* output)
+RtResult<int32_t> Interop::sys_stat_byte(uint8_t* path, void* output) noexcept
 {
     RET_OK(platform::RtSys::stat_byte(path, output));
 }
 
-RtResult<int32_t> Interop::sys_stat_string(vm::RtString* path, void* output)
+RtResult<int32_t> Interop::sys_stat_string(vm::RtString* path, void* output) noexcept
 {
     RET_OK(platform::RtSys::stat_string(path, output));
 }
 
-RtResult<uint8_t*> Interop::sys_str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size)
+RtResult<uint8_t*> Interop::sys_str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size) noexcept
 {
     RET_OK(platform::RtSys::str_error_r(error, buffer, buffer_size));
 }
 
-RtResult<int32_t> Interop::sys_symlink(vm::RtString* target, vm::RtString* link_path)
+RtResult<int32_t> Interop::sys_symlink(vm::RtString* target, vm::RtString* link_path) noexcept
 {
     RET_OK(platform::RtSys::symlink(target, link_path));
 }
 
-RtResult<int32_t> Interop::sys_unlink(vm::RtString* path)
+RtResult<int32_t> Interop::sys_unlink(vm::RtString* path) noexcept
 {
     RET_OK(platform::RtSys::unlink(path));
 }
 
-RtResult<int32_t> Interop::sys_utime(vm::RtString* path, void* time_buffer)
+RtResult<int32_t> Interop::sys_utime(vm::RtString* path, void* time_buffer) noexcept
 {
     RET_OK(platform::RtSys::utime(path, time_buffer));
 }
 
-RtResult<int32_t> Interop::sys_utimes(vm::RtString* path, void* time_value_pair)
+RtResult<int32_t> Interop::sys_utimes(vm::RtString* path, void* time_value_pair) noexcept
 {
     RET_OK(platform::RtSys::utimes(path, time_value_pair));
 }
@@ -493,7 +493,7 @@ RtResultVoid sys_utimes_invoker(metadata::RtManagedMethodPointer, const metadata
 }
 #endif
 
-RtResult<uint32_t> Interop::bcrypt_gen_random(intptr_t algo_handle, uint8_t* buffer, int32_t length, int32_t flags)
+RtResult<uint32_t> Interop::bcrypt_gen_random(intptr_t algo_handle, uint8_t* buffer, int32_t length, int32_t flags) noexcept
 {
     platform::Bcrypt::gen_random(algo_handle, buffer, length, flags);
     RET_OK(0);
@@ -512,7 +512,7 @@ RtResultVoid bcrypt_gen_random_invoker(metadata::RtManagedMethodPointer, const m
     RET_VOID_OK();
 }
 
-RtResult<bool> Interop::kernel32_set_thread_error_mode(uint32_t mode, uint32_t& old_mode)
+RtResult<bool> Interop::kernel32_set_thread_error_mode(uint32_t mode, uint32_t& old_mode) noexcept
 {
     return platform::Kernel32::set_thread_error_mode(mode, old_mode);
 }
@@ -527,7 +527,7 @@ RtResultVoid kernel32_set_thread_error_mode_invoker(metadata::RtManagedMethodPoi
     RET_VOID_OK();
 }
 
-RtResult<bool> Interop::kernel32_get_file_attributes_ex_private(vm::RtString* name, uint32_t file_info_level, void* file_info)
+RtResult<bool> Interop::kernel32_get_file_attributes_ex_private(vm::RtString* name, uint32_t file_info_level, void* file_info) noexcept
 {
     return platform::Kernel32::get_file_attributes_ex_private(name, file_info_level, file_info);
 }
@@ -550,7 +550,7 @@ struct SafeFindHandle : public vm::RtObject
 };
 
 RtResult<vm::RtObject*> Interop::kernel32_find_first_file_ex_private(vm::RtString* lp_file_name, uint32_t f_info_level_id, void* lp_find_file_data,
-                                                                     uint32_t f_search_op, intptr_t lp_search_filter, int32_t dw_additional_flags)
+                                                                     uint32_t f_search_op, intptr_t lp_search_filter, int32_t dw_additional_flags) noexcept
 {
     static metadata::RtClass* safe_find_handle_class = nullptr;
     if (!safe_find_handle_class)
@@ -586,7 +586,7 @@ RtResultVoid kernel32_find_first_file_ex_private_invoker(metadata::RtManagedMeth
     RET_VOID_OK();
 }
 
-RtResult<int32_t> Interop::windows_console_get_console_cp()
+RtResult<int32_t> Interop::windows_console_get_console_cp() noexcept
 {
     RET_OK(platform::Kernel32::get_console_cp());
 }
@@ -600,7 +600,7 @@ RtResultVoid windows_console_get_console_cp_invoker(metadata::RtManagedMethodPoi
     RET_VOID_OK();
 }
 
-RtResult<int32_t> Interop::windows_console_get_console_output_cp()
+RtResult<int32_t> Interop::windows_console_get_console_output_cp() noexcept
 {
     RET_OK(platform::Kernel32::get_console_output_cp());
 }
@@ -670,7 +670,7 @@ static vm::InternalCallEntry s_interop_internal_call_entries[] = {
      windows_console_get_console_output_cp_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> Interop::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> Interop::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_interop_internal_call_entries, sizeof(s_interop_internal_call_entries) / sizeof(vm::InternalCallEntry));
 }

@@ -10,10 +10,10 @@ namespace icalls
 class SystemReflectionMethodBase
 {
   public:
-    static utils::Span<vm::InternalCallEntry> get_internal_call_entries();
+    static utils::Span<vm::InternalCallEntry> get_internal_call_entries() noexcept;
 
     // Get the currently executing method
-    static RtResult<vm::RtReflectionMethod*> get_current_method();
+    static RtResult<vm::RtReflectionMethod*> get_current_method() noexcept;
 };
 
 } // namespace icalls

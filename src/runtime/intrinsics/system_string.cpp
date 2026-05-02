@@ -8,12 +8,12 @@ namespace leanclr
 namespace intrinsics
 {
 
-RtResult<uint16_t> SystemString::get_chars(vm::RtString* s, int32_t index)
+RtResult<uint16_t> SystemString::get_chars(vm::RtString* s, int32_t index) noexcept
 {
     return vm::String::get_chars(s, index);
 }
 
-RtResult<int32_t> SystemString::get_length(vm::RtString* s)
+RtResult<int32_t> SystemString::get_length(vm::RtString* s) noexcept
 {
     if (s == nullptr)
     {
@@ -22,7 +22,7 @@ RtResult<int32_t> SystemString::get_length(vm::RtString* s)
     RET_OK(vm::String::get_length(s));
 }
 
-RtResult<int32_t> SystemString::get_hash_code(vm::RtString* str)
+RtResult<int32_t> SystemString::get_hash_code(vm::RtString* str) noexcept
 {
     int32_t hash = str ? vm::String::get_hash_code(str) : 0;
     RET_OK(hash);
@@ -70,7 +70,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_string[] = {
     {"System.String::GetLegacyNonRandomizedHashCode", (vm::IntrinsicFunction)&SystemString::get_hash_code, get_hash_code_invoker},
 };
 
-utils::Span<vm::IntrinsicEntry> SystemString::get_intrinsic_entries()
+utils::Span<vm::IntrinsicEntry> SystemString::get_intrinsic_entries() noexcept
 {
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_string, sizeof(s_intrinsic_entries_system_string) / sizeof(vm::IntrinsicEntry));
 }

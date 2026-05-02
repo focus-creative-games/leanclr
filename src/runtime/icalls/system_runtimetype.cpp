@@ -69,7 +69,7 @@ static bool matches_member_name(const char* member_name, const char* search_name
         return std::strcmp(member_name, search_name) == 0;
 }
 
-RtResult<vm::RtReflectionType*> SystemRuntimeType::make_array_type(vm::RtReflectionRuntimeType* runtime_type, int32_t rank)
+RtResult<vm::RtReflectionType*> SystemRuntimeType::make_array_type(vm::RtReflectionRuntimeType* runtime_type, int32_t rank) noexcept
 {
     if (rank < 0 || rank > static_cast<int32_t>(metadata::RT_MAX_ARRAY_RANK))
         RET_ERR(RtErr::TypeLoad);
@@ -98,7 +98,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::make_array_type(vm::RtReflect
     return vm::Reflection::get_klass_reflection_object(arr_class);
 }
 
-RtResult<vm::RtReflectionType*> SystemRuntimeType::make_byref_type(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtReflectionType*> SystemRuntimeType::make_byref_type(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     const metadata::RtTypeSig* ele_type_sig = runtime_type->reflection_type.type_handle;
 
@@ -108,7 +108,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::make_byref_type(vm::RtReflect
     return vm::Reflection::get_type_reflection_object(byref_type_sig);
 }
 
-RtResult<vm::RtReflectionType*> SystemRuntimeType::make_pointer_type(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtReflectionType*> SystemRuntimeType::make_pointer_type(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     const metadata::RtTypeSig* ele_type_sig = runtime_type->reflection_type.type_handle;
 
@@ -128,7 +128,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::make_pointer_type(vm::RtRefle
     return vm::Reflection::get_klass_reflection_object(ptr_class);
 }
 
-RtResult<vm::RtReflectionType*> SystemRuntimeType::make_generic_type(vm::RtReflectionRuntimeType* generic_base_type, vm::RtArray* generic_args)
+RtResult<vm::RtReflectionType*> SystemRuntimeType::make_generic_type(vm::RtReflectionRuntimeType* generic_base_type, vm::RtArray* generic_args) noexcept
 {
     const metadata::RtTypeSig* type_sig = generic_base_type->reflection_type.type_handle;
 
@@ -161,7 +161,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::make_generic_type(vm::RtRefle
 }
 
 RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> SystemRuntimeType::get_methods_by_name_native(vm::RtReflectionRuntimeType* runtime_type,
-                                                                                                      const char* name, int32_t bind_flags, int32_t list_type)
+                                                                                                      const char* name, int32_t bind_flags, int32_t list_type) noexcept
 {
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
 
@@ -246,7 +246,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> SystemRuntimeType::get_m
 }
 
 RtResult<utils::SafeGPtrArray<metadata::RtPropertyInfo>*>
-SystemRuntimeType::get_properties_by_name_native(vm::RtReflectionRuntimeType* runtime_type, const char* name, int32_t bind_flags, int32_t list_type)
+SystemRuntimeType::get_properties_by_name_native(vm::RtReflectionRuntimeType* runtime_type, const char* name, int32_t bind_flags, int32_t list_type) noexcept
 {
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
 
@@ -320,7 +320,7 @@ SystemRuntimeType::get_properties_by_name_native(vm::RtReflectionRuntimeType* ru
 }
 
 RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> SystemRuntimeType::get_constructors_native(vm::RtReflectionRuntimeType* runtime_type,
-                                                                                                   int32_t bind_flags)
+                                                                                                   int32_t bind_flags) noexcept
 {
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
 
@@ -372,7 +372,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> SystemRuntimeType::get_c
 }
 
 RtResult<utils::SafeGPtrArray<metadata::RtEventInfo>*> SystemRuntimeType::get_events_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
-                                                                                            int32_t list_type)
+                                                                                            int32_t list_type) noexcept
 {
     if (runtime_type == nullptr)
         RET_ERR(RtErr::ArgumentNull);
@@ -419,7 +419,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtEventInfo>*> SystemRuntimeType::get_ev
 }
 
 RtResult<utils::SafeGPtrArray<metadata::RtFieldInfo>*> SystemRuntimeType::get_fields_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
-                                                                                            int32_t bind_flags, int32_t list_type)
+                                                                                            int32_t bind_flags, int32_t list_type) noexcept
 {
     if (runtime_type == nullptr)
         RET_ERR(RtErr::ArgumentNull);
@@ -498,7 +498,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtFieldInfo>*> SystemRuntimeType::get_fi
 }
 
 RtResultVoid SystemRuntimeType::get_interface_map_data(vm::RtReflectionRuntimeType* runtime_type, vm::RtReflectionRuntimeType* interface_type,
-                                                       vm::RtArray** targets, vm::RtArray** methods)
+                                                       vm::RtArray** targets, vm::RtArray** methods) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(runtime_type->reflection_type.type_handle));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, interface_klass,
@@ -541,13 +541,13 @@ RtResultVoid SystemRuntimeType::get_interface_map_data(vm::RtReflectionRuntimeTy
     RET_VOID_OK();
 }
 
-RtResultVoid SystemRuntimeType::get_guid(vm::RtReflectionRuntimeType* runtime_type, vm::RtArray* guid)
+RtResultVoid SystemRuntimeType::get_guid(vm::RtReflectionRuntimeType* runtime_type, vm::RtArray* guid) noexcept
 {
     // GUID extraction is rarely used and requires MarshalAs/CustomAttribute metadata
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResultVoid SystemRuntimeType::get_packing(vm::RtReflectionRuntimeType* runtime_type, int32_t* packing, int32_t* size)
+RtResultVoid SystemRuntimeType::get_packing(vm::RtReflectionRuntimeType* runtime_type, int32_t* packing, int32_t* size) noexcept
 {
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
 
@@ -596,7 +596,7 @@ enum class TypeCode : int32_t
     String = 18,
 };
 
-RtResult<TypeCode> get_type_code(const metadata::RtTypeSig* type_sig)
+RtResult<TypeCode> get_type_code(const metadata::RtTypeSig* type_sig) noexcept
 {
     if (type_sig->by_ref)
     {
@@ -687,13 +687,13 @@ RtResult<TypeCode> get_type_code(const metadata::RtTypeSig* type_sig)
     }
 }
 
-RtResult<int32_t> SystemRuntimeType::get_type_code_impl_internal(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<int32_t> SystemRuntimeType::get_type_code_impl_internal(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(TypeCode, type_code, get_type_code(runtime_type->reflection_type.type_handle));
     RET_OK((int32_t)type_code);
 }
 
-RtResult<vm::RtObject*> SystemRuntimeType::create_instance_internal(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtObject*> SystemRuntimeType::create_instance_internal(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     if (runtime_type == nullptr)
         RET_OK(nullptr);
@@ -714,7 +714,7 @@ RtResult<vm::RtObject*> SystemRuntimeType::create_instance_internal(vm::RtReflec
     return vm::Object::new_object(klass);
 }
 
-RtResult<vm::RtReflectionMethod*> SystemRuntimeType::get_declaring_method(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtReflectionMethod*> SystemRuntimeType::get_declaring_method(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     if (runtime_type == nullptr)
         RET_OK(nullptr);
@@ -728,12 +728,12 @@ RtResult<vm::RtReflectionMethod*> SystemRuntimeType::get_declaring_method(vm::Rt
     RET_OK(nullptr);
 }
 
-RtResult<vm::RtString*> SystemRuntimeType::get_full_name(vm::RtReflectionRuntimeType* runtime_type, bool full_name, bool assembly_qualified)
+RtResult<vm::RtString*> SystemRuntimeType::get_full_name(vm::RtReflectionRuntimeType* runtime_type, bool full_name, bool assembly_qualified) noexcept
 {
     return vm::Type::get_full_name(runtime_type->reflection_type.type_handle, full_name, assembly_qualified);
 }
 
-RtResult<vm::RtArray*> SystemRuntimeType::get_generic_arguments_internal(vm::RtReflectionRuntimeType* runtime_type, bool runtime_array)
+RtResult<vm::RtArray*> SystemRuntimeType::get_generic_arguments_internal(vm::RtReflectionRuntimeType* runtime_type, bool runtime_array) noexcept
 {
     if (runtime_type == nullptr)
         RET_ERR(RtErr::ArgumentNull);
@@ -786,7 +786,7 @@ RtResult<vm::RtArray*> SystemRuntimeType::get_generic_arguments_internal(vm::RtR
     }
 }
 
-RtResult<int32_t> SystemRuntimeType::get_generic_parameter_position(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<int32_t> SystemRuntimeType::get_generic_parameter_position(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
 
@@ -795,7 +795,7 @@ RtResult<int32_t> SystemRuntimeType::get_generic_parameter_position(vm::RtReflec
     RET_OK(pos);
 }
 
-RtResult<vm::RtReflectionType*> SystemRuntimeType::get_declaring_type(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtReflectionType*> SystemRuntimeType::get_declaring_type(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
     // Get the enclosing/declaring class
@@ -808,7 +808,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::get_declaring_type(vm::RtRefl
 }
 
 RtResult<utils::SafeGPtrArray<metadata::RtClass>*> SystemRuntimeType::get_nested_types_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
-                                                                                              int32_t bind_flags)
+                                                                                              int32_t bind_flags) noexcept
 {
     if (runtime_type == nullptr)
         RET_ERR(RtErr::ArgumentNull);
@@ -859,19 +859,19 @@ RtResult<utils::SafeGPtrArray<metadata::RtClass>*> SystemRuntimeType::get_nested
     RET_OK(result);
 }
 
-RtResult<vm::RtString*> SystemRuntimeType::get_name(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtString*> SystemRuntimeType::get_name(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(runtime_type->reflection_type.type_handle));
     return vm::String::create_string_from_utf8cstr(klass->name);
 }
 
-RtResult<vm::RtString*> SystemRuntimeType::get_namespace(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtString*> SystemRuntimeType::get_namespace(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(runtime_type->reflection_type.type_handle));
     return vm::String::create_string_from_utf8cstr(klass->namespaze);
 }
 
-RtResult<vm::RtArray*> SystemRuntimeType::get_interfaces(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtArray*> SystemRuntimeType::get_interfaces(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
 
@@ -1184,7 +1184,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtimetype[] = {
     {"System.RuntimeType::GetInterfaces", (vm::InternalCallFunction)&SystemRuntimeType::get_interfaces, get_interfaces_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemRuntimeType::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemRuntimeType::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetype,
                                               sizeof(s_internal_call_entries_system_runtimetype) / sizeof(vm::InternalCallEntry));

@@ -16,7 +16,7 @@ namespace
 constexpr int32_t kErrorSuccess = 0;
 constexpr int32_t kErrorInvalidParameter = 87;
 
-inline void set_error(int32_t* error, int32_t value)
+inline void set_error(int32_t* error, int32_t value) noexcept
 {
     if (error)
         *error = value;
@@ -25,7 +25,7 @@ inline void set_error(int32_t* error, int32_t value)
 } // namespace
 
 /// @icall: System.IO.MonoIO::get_AltDirectorySeparatorChar
-RtResult<Utf16Char> SystemIOMonoIO::get_alt_directory_separator_char()
+RtResult<Utf16Char> SystemIOMonoIO::get_alt_directory_separator_char() noexcept
 {
     RET_OK(os::Path::get_alt_directory_separator_char());
 }
@@ -38,7 +38,7 @@ static RtResultVoid get_alt_directory_separator_char_invoker(metadata::RtManaged
 }
 
 /// @icall: System.IO.MonoIO::get_DirectorySeparatorChar
-RtResult<Utf16Char> SystemIOMonoIO::get_directory_separator_char()
+RtResult<Utf16Char> SystemIOMonoIO::get_directory_separator_char() noexcept
 {
     RET_OK(os::Path::get_directory_separator_char());
 }
@@ -51,7 +51,7 @@ static RtResultVoid get_directory_separator_char_invoker(metadata::RtManagedMeth
 }
 
 /// @icall: System.IO.MonoIO::get_PathSeparator
-RtResult<Utf16Char> SystemIOMonoIO::get_path_separator()
+RtResult<Utf16Char> SystemIOMonoIO::get_path_separator() noexcept
 {
     RET_OK(os::Path::get_path_separator());
 }
@@ -64,7 +64,7 @@ static RtResultVoid get_path_separator_invoker(metadata::RtManagedMethodPointer,
 }
 
 /// @icall: System.IO.MonoIO::get_VolumeSeparatorChar
-RtResult<Utf16Char> SystemIOMonoIO::get_volume_separator_char()
+RtResult<Utf16Char> SystemIOMonoIO::get_volume_separator_char() noexcept
 {
     RET_OK(os::Path::get_volume_separator_char());
 }
@@ -77,7 +77,7 @@ static RtResultVoid get_volume_separator_char_invoker(metadata::RtManagedMethodP
 }
 
 /// @icall: System.IO.MonoIO::get_ConsoleError
-RtResult<intptr_t> SystemIOMonoIO::get_console_error()
+RtResult<intptr_t> SystemIOMonoIO::get_console_error() noexcept
 {
     RET_OK(os::File::get_stderr());
 }
@@ -90,7 +90,7 @@ static RtResultVoid get_console_error_invoker(metadata::RtManagedMethodPointer, 
 }
 
 /// @icall: System.IO.MonoIO::get_ConsoleInput
-RtResult<intptr_t> SystemIOMonoIO::get_console_input()
+RtResult<intptr_t> SystemIOMonoIO::get_console_input() noexcept
 {
     RET_OK(os::File::get_stdin());
 }
@@ -103,7 +103,7 @@ static RtResultVoid get_console_input_invoker(metadata::RtManagedMethodPointer, 
 }
 
 /// @icall: System.IO.MonoIO::get_ConsoleOutput
-RtResult<intptr_t> SystemIOMonoIO::get_console_output()
+RtResult<intptr_t> SystemIOMonoIO::get_console_output() noexcept
 {
     RET_OK(os::File::get_stdout());
 }
@@ -116,7 +116,7 @@ static RtResultVoid get_console_output_invoker(metadata::RtManagedMethodPointer,
 }
 
 /// @icall: System.IO.MonoIO::Close
-RtResult<bool> SystemIOMonoIO::close(intptr_t handle, int32_t* error)
+RtResult<bool> SystemIOMonoIO::close(intptr_t handle, int32_t* error) noexcept
 {
     RET_OK(os::File::close(handle, error));
 }
@@ -131,21 +131,21 @@ static RtResultVoid close_invoker(metadata::RtManagedMethodPointer, const metada
 }
 
 /// @icall: System.IO.MonoIO::DumpHandles
-RtResultVoid SystemIOMonoIO::dump_handles()
+RtResultVoid SystemIOMonoIO::dump_handles() noexcept
 {
     // No-op: handle tracking is not implemented.
     RET_VOID_OK();
 }
 
 static RtResultVoid dump_handles_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                         interp::RtStackObject* /*ret*/)
+                                         interp::RtStackObject* /*ret*/) noexcept
 {
     RET_ERR_ON_FAIL(SystemIOMonoIO::dump_handles());
     RET_VOID_OK();
 }
 
 /// @icall: System.IO.MonoIO::FindCloseFile
-RtResult<bool> SystemIOMonoIO::find_close_file(intptr_t /*handle*/)
+RtResult<bool> SystemIOMonoIO::find_close_file(intptr_t /*handle*/) noexcept
 {
     // FindFirstFile / FindNextFile aren't implemented; return success to satisfy callers.
     RET_OK(true);
@@ -159,7 +159,7 @@ static RtResultVoid find_close_file_invoker(metadata::RtManagedMethodPointer, co
 }
 
 /// @icall: System.IO.MonoIO::GetCurrentDirectory
-RtResult<vm::RtString*> SystemIOMonoIO::get_current_directory(int32_t* error)
+RtResult<vm::RtString*> SystemIOMonoIO::get_current_directory(int32_t* error) noexcept
 {
     RET_OK(os::Path::get_current_directory(error));
 }
@@ -173,7 +173,7 @@ static RtResultVoid get_current_directory_invoker(metadata::RtManagedMethodPoint
 }
 
 /// @icall: System.IO.MonoIO::GetFileType
-RtResult<int32_t> SystemIOMonoIO::get_file_type(intptr_t handle, int32_t* error)
+RtResult<int32_t> SystemIOMonoIO::get_file_type(intptr_t handle, int32_t* error) noexcept
 {
     RET_OK(os::File::get_file_type(handle, error));
 }
@@ -188,7 +188,7 @@ static RtResultVoid get_file_type_invoker(metadata::RtManagedMethodPointer, cons
 }
 
 /// @icall: System.IO.MonoIO::GetLength
-RtResult<int64_t> SystemIOMonoIO::get_length(intptr_t handle, int32_t* error)
+RtResult<int64_t> SystemIOMonoIO::get_length(intptr_t handle, int32_t* error) noexcept
 {
     RET_OK(os::File::get_length(handle, error));
 }
@@ -203,7 +203,7 @@ static RtResultVoid get_length_invoker(metadata::RtManagedMethodPointer, const m
 }
 
 /// @icall: System.IO.MonoIO::Open
-RtResult<intptr_t> SystemIOMonoIO::open(const Utf16Char* filename, int32_t mode, int32_t access, int32_t share, int32_t options, int32_t* error)
+RtResult<intptr_t> SystemIOMonoIO::open(const Utf16Char* filename, int32_t mode, int32_t access, int32_t share, int32_t options, int32_t* error) noexcept
 {
     RET_OK(os::File::open(filename, mode, access, share, options, error));
 }
@@ -222,7 +222,7 @@ static RtResultVoid open_invoker(metadata::RtManagedMethodPointer, const metadat
 }
 
 /// @icall: System.IO.MonoIO::Read
-RtResult<int32_t> SystemIOMonoIO::read(intptr_t handle, vm::RtArray* dest, int32_t dest_offset, int32_t count, int32_t* error)
+RtResult<int32_t> SystemIOMonoIO::read(intptr_t handle, vm::RtArray* dest, int32_t dest_offset, int32_t count, int32_t* error) noexcept
 {
     set_error(error, kErrorSuccess);
 
@@ -259,7 +259,7 @@ static RtResultVoid monoio_read_invoker(metadata::RtManagedMethodPointer, const 
 }
 
 /// @icall: System.IO.MonoIO::RemapPath
-RtResult<bool> SystemIOMonoIO::remap_path(vm::RtString* /*path*/, vm::RtString** new_path)
+RtResult<bool> SystemIOMonoIO::remap_path(vm::RtString* /*path*/, vm::RtString** new_path) noexcept
 {
     if (new_path)
         *new_path = nullptr;
@@ -277,7 +277,7 @@ static RtResultVoid remap_path_invoker(metadata::RtManagedMethodPointer, const m
 }
 
 /// @icall: System.IO.MonoIO::Seek
-RtResult<int64_t> SystemIOMonoIO::seek(intptr_t handle, int64_t offset, int32_t origin, int32_t* error)
+RtResult<int64_t> SystemIOMonoIO::seek(intptr_t handle, int64_t offset, int32_t origin, int32_t* error) noexcept
 {
     RET_OK(os::File::seek(handle, offset, origin, error));
 }
@@ -294,7 +294,7 @@ static RtResultVoid seek_invoker(metadata::RtManagedMethodPointer, const metadat
 }
 
 /// @icall: System.IO.MonoIO::Write
-RtResult<int32_t> SystemIOMonoIO::write(intptr_t handle, vm::RtArray* src, int32_t src_offset, int32_t count, int32_t* error)
+RtResult<int32_t> SystemIOMonoIO::write(intptr_t handle, vm::RtArray* src, int32_t src_offset, int32_t count, int32_t* error) noexcept
 {
     set_error(error, kErrorSuccess);
 
@@ -358,7 +358,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_io_monoio[] = {
      write_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemIOMonoIO::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemIOMonoIO::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_io_monoio,
                                               sizeof(s_internal_call_entries_system_io_monoio) / sizeof(vm::InternalCallEntry));

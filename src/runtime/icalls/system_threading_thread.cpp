@@ -15,95 +15,95 @@ namespace icalls
 {
 
 // Basic thread operations
-RtResultVoid SystemThreadingThread::get_current_thread_icall(vm::RtThread** thread)
+RtResultVoid SystemThreadingThread::get_current_thread_icall(vm::RtThread** thread) noexcept
 {
     *thread = vm::Thread::get_current_thread();
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::reset_abort_native(vm::RtThread* this_thread)
+RtResultVoid SystemThreadingThread::reset_abort_native(vm::RtThread* this_thread) noexcept
 {
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::suspend_internal(vm::RtThread* this_thread)
+RtResultVoid SystemThreadingThread::suspend_internal(vm::RtThread* this_thread) noexcept
 {
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::resume_internal(vm::RtThread* this_thread)
+RtResultVoid SystemThreadingThread::resume_internal(vm::RtThread* this_thread) noexcept
 {
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::interrupt_internal(vm::RtThread* this_thread)
+RtResultVoid SystemThreadingThread::interrupt_internal(vm::RtThread* this_thread) noexcept
 {
     RET_VOID_OK();
 }
 
-RtResult<int32_t> SystemThreadingThread::get_priority_native(vm::RtThread* this_thread)
+RtResult<int32_t> SystemThreadingThread::get_priority_native(vm::RtThread* this_thread) noexcept
 {
     RET_OK(vm::Thread::get_priority_native(this_thread));
 }
 
-RtResultVoid SystemThreadingThread::set_priority_native(vm::RtThread* this_thread, int32_t priority)
+RtResultVoid SystemThreadingThread::set_priority_native(vm::RtThread* this_thread, int32_t priority) noexcept
 {
     vm::Thread::set_priority_native(this_thread, priority);
     RET_VOID_OK();
 }
 
-RtResult<bool> SystemThreadingThread::join_internal(vm::RtThread* this_thread, int32_t milliseconds)
+RtResult<bool> SystemThreadingThread::join_internal(vm::RtThread* this_thread, int32_t milliseconds) noexcept
 {
     RET_OK(true);
 }
 
-RtResultVoid SystemThreadingThread::sleep_internal(int32_t milliseconds)
+RtResultVoid SystemThreadingThread::sleep_internal(int32_t milliseconds) noexcept
 {
     vm::Thread::sleep(milliseconds);
     RET_VOID_OK();
 }
 
-RtResult<bool> SystemThreadingThread::yield_internal()
+RtResult<bool> SystemThreadingThread::yield_internal() noexcept
 {
     RET_OK(vm::Thread::yield_internal());
 }
 
-RtResultVoid SystemThreadingThread::memory_barrier()
+RtResultVoid SystemThreadingThread::memory_barrier() noexcept
 {
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::construct_internal_thread(vm::RtThread* this_thread)
+RtResultVoid SystemThreadingThread::construct_internal_thread(vm::RtThread* this_thread) noexcept
 {
     vm::Thread::construct_internal_thread(this_thread);
     RET_VOID_OK();
 }
 
 // Array domain conversions
-RtResult<vm::RtArray*> SystemThreadingThread::byte_array_to_root_domain(vm::RtArray* arr)
+RtResult<vm::RtArray*> SystemThreadingThread::byte_array_to_root_domain(vm::RtArray* arr) noexcept
 {
     RET_OK(arr);
 }
 
-RtResult<vm::RtArray*> SystemThreadingThread::byte_array_to_current_domain(vm::RtArray* arr)
+RtResult<vm::RtArray*> SystemThreadingThread::byte_array_to_current_domain(vm::RtArray* arr) noexcept
 {
     RET_OK(arr);
 }
 
 // AppDomain access
-RtResult<int32_t> SystemThreadingThread::get_domain_id()
+RtResult<int32_t> SystemThreadingThread::get_domain_id() noexcept
 {
     RET_OK(vm::AppDomain::get_appdomain_id());
 }
 
 // Thread initialization
-RtResult<bool> SystemThreadingThread::thread_internal(vm::RtThread* this_thread, vm::RtObject* start)
+RtResult<bool> SystemThreadingThread::thread_internal(vm::RtThread* this_thread, vm::RtObject* start) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Thread name operations
-RtResult<vm::RtString*> SystemThreadingThread::get_name_internal(vm::RtInternalThread* internal_thread)
+RtResult<vm::RtString*> SystemThreadingThread::get_name_internal(vm::RtInternalThread* internal_thread) noexcept
 {
     const Utf16Char* name = internal_thread->name_chars;
     int32_t name_length = internal_thread->name_length;
@@ -111,7 +111,7 @@ RtResult<vm::RtString*> SystemThreadingThread::get_name_internal(vm::RtInternalT
     RET_OK(name_str);
 }
 
-RtResultVoid SystemThreadingThread::set_name_icall(vm::RtInternalThread* internal_thread, const Utf16Char* name, int32_t len)
+RtResultVoid SystemThreadingThread::set_name_icall(vm::RtInternalThread* internal_thread, const Utf16Char* name, int32_t len) noexcept
 {
     if (internal_thread->name_chars != nullptr)
     {
@@ -128,193 +128,193 @@ RtResultVoid SystemThreadingThread::set_name_icall(vm::RtInternalThread* interna
 }
 
 // Thread abort
-RtResultVoid SystemThreadingThread::abort_internal(vm::RtObject* internal_thread, vm::RtObject* state)
+RtResultVoid SystemThreadingThread::abort_internal(vm::RtObject* internal_thread, vm::RtObject* state) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<vm::RtObject*> SystemThreadingThread::get_abort_exception_state()
+RtResult<vm::RtObject*> SystemThreadingThread::get_abort_exception_state() noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // Spin wait
-RtResultVoid SystemThreadingThread::spin_wait_nop()
+RtResultVoid SystemThreadingThread::spin_wait_nop() noexcept
 {
     RET_VOID_OK();
 }
 
 // Thread state management
-RtResultVoid SystemThreadingThread::set_state(vm::RtInternalThread* internal_thread, int32_t state)
+RtResultVoid SystemThreadingThread::set_state(vm::RtInternalThread* internal_thread, int32_t state) noexcept
 {
     vm::Thread::set_state(internal_thread, static_cast<vm::RtThreadState>(state));
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::clr_state(vm::RtInternalThread* internal_thread, int32_t state)
+RtResultVoid SystemThreadingThread::clr_state(vm::RtInternalThread* internal_thread, int32_t state) noexcept
 {
     vm::Thread::clear_state(internal_thread, static_cast<vm::RtThreadState>(state));
     RET_VOID_OK();
 }
 
-RtResult<int32_t> SystemThreadingThread::get_state(vm::RtInternalThread* internal_thread)
+RtResult<int32_t> SystemThreadingThread::get_state(vm::RtInternalThread* internal_thread) noexcept
 {
     RET_OK(static_cast<int32_t>(vm::Thread::get_state(internal_thread)));
 }
 
 // Volatile read operations
-RtResult<uint8_t> SystemThreadingThread::volatile_read_u8(uint8_t* loc)
+RtResult<uint8_t> SystemThreadingThread::volatile_read_u8(uint8_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<int8_t> SystemThreadingThread::volatile_read_i8(int8_t* loc)
+RtResult<int8_t> SystemThreadingThread::volatile_read_i8(int8_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<uint16_t> SystemThreadingThread::volatile_read_u16(uint16_t* loc)
+RtResult<uint16_t> SystemThreadingThread::volatile_read_u16(uint16_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<int16_t> SystemThreadingThread::volatile_read_i16(int16_t* loc)
+RtResult<int16_t> SystemThreadingThread::volatile_read_i16(int16_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<uint32_t> SystemThreadingThread::volatile_read_u32(uint32_t* loc)
+RtResult<uint32_t> SystemThreadingThread::volatile_read_u32(uint32_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<int32_t> SystemThreadingThread::volatile_read_i32(int32_t* loc)
+RtResult<int32_t> SystemThreadingThread::volatile_read_i32(int32_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<uint64_t> SystemThreadingThread::volatile_read_u64(uint64_t* loc)
+RtResult<uint64_t> SystemThreadingThread::volatile_read_u64(uint64_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<int64_t> SystemThreadingThread::volatile_read_i64(int64_t* loc)
+RtResult<int64_t> SystemThreadingThread::volatile_read_i64(int64_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<float> SystemThreadingThread::volatile_read_f32(float* loc)
+RtResult<float> SystemThreadingThread::volatile_read_f32(float* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<double> SystemThreadingThread::volatile_read_f64(double* loc)
+RtResult<double> SystemThreadingThread::volatile_read_f64(double* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<intptr_t> SystemThreadingThread::volatile_read_intptr(intptr_t* loc)
+RtResult<intptr_t> SystemThreadingThread::volatile_read_intptr(intptr_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<uintptr_t> SystemThreadingThread::volatile_read_uintptr(uintptr_t* loc)
+RtResult<uintptr_t> SystemThreadingThread::volatile_read_uintptr(uintptr_t* loc) noexcept
 {
     RET_OK(*loc);
 }
 
-RtResult<vm::RtObject*> SystemThreadingThread::volatile_read_object(vm::RtObject** loc)
+RtResult<vm::RtObject*> SystemThreadingThread::volatile_read_object(vm::RtObject** loc) noexcept
 {
     RET_OK(*loc);
 }
 
 // Volatile write operations
-RtResultVoid SystemThreadingThread::volatile_write_u8(uint8_t* loc, uint8_t val)
+RtResultVoid SystemThreadingThread::volatile_write_u8(uint8_t* loc, uint8_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_i8(int8_t* loc, int8_t val)
+RtResultVoid SystemThreadingThread::volatile_write_i8(int8_t* loc, int8_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_u16(uint16_t* loc, uint16_t val)
+RtResultVoid SystemThreadingThread::volatile_write_u16(uint16_t* loc, uint16_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_i16(int16_t* loc, int16_t val)
+RtResultVoid SystemThreadingThread::volatile_write_i16(int16_t* loc, int16_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_u32(uint32_t* loc, uint32_t val)
+RtResultVoid SystemThreadingThread::volatile_write_u32(uint32_t* loc, uint32_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_i32(int32_t* loc, int32_t val)
+RtResultVoid SystemThreadingThread::volatile_write_i32(int32_t* loc, int32_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_u64(uint64_t* loc, uint64_t val)
+RtResultVoid SystemThreadingThread::volatile_write_u64(uint64_t* loc, uint64_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_i64(int64_t* loc, int64_t val)
+RtResultVoid SystemThreadingThread::volatile_write_i64(int64_t* loc, int64_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_f32(float* loc, float val)
+RtResultVoid SystemThreadingThread::volatile_write_f32(float* loc, float val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_f64(double* loc, double val)
+RtResultVoid SystemThreadingThread::volatile_write_f64(double* loc, double val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_intptr(intptr_t* loc, intptr_t val)
+RtResultVoid SystemThreadingThread::volatile_write_intptr(intptr_t* loc, intptr_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_uintptr(uintptr_t* loc, uintptr_t val)
+RtResultVoid SystemThreadingThread::volatile_write_uintptr(uintptr_t* loc, uintptr_t val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingThread::volatile_write_object(vm::RtObject** loc, vm::RtObject* val)
+RtResultVoid SystemThreadingThread::volatile_write_object(vm::RtObject** loc, vm::RtObject* val) noexcept
 {
     *loc = val;
     RET_VOID_OK();
 }
 
 // Stack size
-RtResult<int32_t> SystemThreadingThread::system_max_stack_stize()
+RtResult<int32_t> SystemThreadingThread::system_max_stack_stize() noexcept
 {
     RET_OK(vm::Thread::get_system_max_stack_size());
 }
 
 // Stack traces
-RtResultVoid SystemThreadingThread::get_stack_traces(vm::RtArray** threads, vm::RtArray** stack_frames)
+RtResultVoid SystemThreadingThread::get_stack_traces(vm::RtArray** threads, vm::RtArray** stack_frames) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
@@ -915,7 +915,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_threading_thread[] =
      get_stack_traces_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemThreadingThread::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemThreadingThread::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_thread,
                                               sizeof(s_internal_call_entries_system_threading_thread) / sizeof(vm::InternalCallEntry));

@@ -19,7 +19,7 @@ namespace icalls
 
 // ========== Implementation Functions ==========
 
-RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_executing_assembly()
+RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_executing_assembly() noexcept
 {
     interp::InterpFrame* executing_frame = interp::MachineState::get_global_machine_state().get_executing_frame_stack();
     if (executing_frame == nullptr)
@@ -31,7 +31,7 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_executing_asse
     return vm::Reflection::get_assembly_reflection_object(mod->get_assembly());
 }
 
-RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_calling_assembly()
+RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_calling_assembly() noexcept
 {
     interp::InterpFrame* calling_frame = interp::MachineState::get_global_machine_state().get_calling_frame_stack();
     if (calling_frame == nullptr)
@@ -44,7 +44,7 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_calling_assemb
 }
 
 RtResult<vm::RtReflectionType*> SystemReflectionAssembly::internal_get_type(vm::RtReflectionAssembly* assembly, vm::RtReflectionModule* module,
-                                                                            vm::RtString* name, bool throw_on_error, bool ignore_case)
+                                                                            vm::RtString* name, bool throw_on_error, bool ignore_case) noexcept
 {
     (void)module; // unused
     utils::StringBuilder name_buf;
@@ -65,13 +65,13 @@ RtResult<vm::RtReflectionType*> SystemReflectionAssembly::internal_get_type(vm::
     return vm::Reflection::get_type_reflection_object(resolved_type_sig);
 }
 
-RtResult<vm::RtArray*> SystemReflectionAssembly::get_types(vm::RtReflectionAssembly* ref_assembly, bool exported_only)
+RtResult<vm::RtArray*> SystemReflectionAssembly::get_types(vm::RtReflectionAssembly* ref_assembly, bool exported_only) noexcept
 {
     metadata::RtAssembly* ass = ref_assembly->assembly;
     return vm::Assembly::get_types(ass, exported_only);
 }
 
-RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_entry_assembly()
+RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_entry_assembly() noexcept
 {
     // Find assembly with entrypoint
     for (metadata::RtModuleDef* mod : metadata::RtModuleDef::get_registered_modules())
@@ -85,7 +85,7 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_entry_assembly
     RET_OK(nullptr);
 }
 
-RtResultVoid SystemReflectionAssembly::internal_get_assembly_name(vm::RtString* path, metadata::RtMonoAssemblyName* aname, vm::RtString** codebase_out)
+RtResultVoid SystemReflectionAssembly::internal_get_assembly_name(vm::RtString* path, metadata::RtMonoAssemblyName* aname, vm::RtString** codebase_out) noexcept
 {
     (void)path;
     (void)aname;
@@ -93,7 +93,7 @@ RtResultVoid SystemReflectionAssembly::internal_get_assembly_name(vm::RtString* 
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_from(vm::RtString* path, bool ref_only, int32_t* mark)
+RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_from(vm::RtString* path, bool ref_only, int32_t* mark) noexcept
 {
     utils::StringBuilder name_buf;
     utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(path), static_cast<size_t>(vm::String::get_length(path)), name_buf);
@@ -103,7 +103,7 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_from(vm::RtSt
     return vm::Reflection::get_assembly_reflection_object(loaded_ass);
 }
 
-RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_file_internal(vm::RtString* path, int32_t* mark)
+RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_file_internal(vm::RtString* path, int32_t* mark) noexcept
 {
     (void)mark;
     utils::StringBuilder name_buf;
@@ -113,7 +113,7 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_file_internal
     return vm::Reflection::get_assembly_reflection_object(loaded_ass);
 }
 
-RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_with_partial_name(vm::RtString* name, vm::RtObject* evidence)
+RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_with_partial_name(vm::RtString* name, vm::RtObject* evidence) noexcept
 {
     (void)evidence;
     utils::StringBuilder name_buf;
@@ -124,7 +124,7 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_with_partial_
     return vm::Reflection::get_assembly_reflection_object(loaded_ass);
 }
 
-RtResult<intptr_t> SystemReflectionAssembly::internal_get_referenced_assemblies(vm::RtReflectionAssembly* ref_ass)
+RtResult<intptr_t> SystemReflectionAssembly::internal_get_referenced_assemblies(vm::RtReflectionAssembly* ref_ass) noexcept
 {
     metadata::RtModuleDef* mod = ref_ass->assembly->mod;
     utils::Vector<metadata::RtAssembly*> ref_asses;
@@ -297,7 +297,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_assembly[
      (vm::InternalCallFunction)&SystemReflectionAssembly::internal_get_referenced_assemblies, internal_get_referenced_assemblies_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemReflectionAssembly::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemReflectionAssembly::get_internal_call_entries() noexcept
 {
     constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_assembly) / sizeof(s_internal_call_entries_system_reflection_assembly[0]);
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_assembly, entry_count);

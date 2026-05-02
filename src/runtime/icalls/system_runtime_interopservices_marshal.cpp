@@ -17,19 +17,19 @@ namespace icalls
 
 // ========== Memory allocation ==========
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::alloc_hglobal(size_t size)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::alloc_hglobal(size_t size) noexcept
 {
     void* ptr = vm::Marshal::alloc_hglobal(size);
     RET_OK(ptr);
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::re_alloc_hglobal(void* ptr, size_t size)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::re_alloc_hglobal(void* ptr, size_t size) noexcept
 {
     void* new_ptr = vm::Marshal::re_alloc_hglobal(ptr, size);
     RET_OK(new_ptr);
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::free_hglobal(void* ptr)
+RtResultVoid SystemRuntimeInteropServicesMarshal::free_hglobal(void* ptr) noexcept
 {
     if (ptr != 0)
     {
@@ -38,7 +38,7 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::free_hglobal(void* ptr)
     RET_VOID_OK();
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::alloc_co_task_mem(int32_t size)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::alloc_co_task_mem(int32_t size) noexcept
 {
     if (size < 0)
     {
@@ -49,7 +49,7 @@ RtResult<void*> SystemRuntimeInteropServicesMarshal::alloc_co_task_mem(int32_t s
     RET_OK(ptr);
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::re_alloc_co_task_mem(void* ptr, int32_t size)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::re_alloc_co_task_mem(void* ptr, int32_t size) noexcept
 {
     if (size < 0)
     {
@@ -60,7 +60,7 @@ RtResult<void*> SystemRuntimeInteropServicesMarshal::re_alloc_co_task_mem(void* 
     RET_OK(new_ptr);
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::free_co_task_mem(void* ptr)
+RtResultVoid SystemRuntimeInteropServicesMarshal::free_co_task_mem(void* ptr) noexcept
 {
     if (ptr != 0)
     {
@@ -69,7 +69,7 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::free_co_task_mem(void* ptr)
     RET_VOID_OK();
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::alloc_co_task_mem_size(size_t size)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::alloc_co_task_mem_size(size_t size) noexcept
 {
     void* ptr = vm::Marshal::alloc_co_task_mem_size(size);
     RET_OK(ptr);
@@ -77,7 +77,7 @@ RtResult<void*> SystemRuntimeInteropServicesMarshal::alloc_co_task_mem_size(size
 
 // ========== String conversion ==========
 
-RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi(void* ptr)
+RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi(void* ptr) noexcept
 {
     if (ptr == 0)
     {
@@ -88,7 +88,7 @@ RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi(
     RET_OK(result);
 }
 
-RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi_len(void* ptr, int32_t len)
+RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi_len(void* ptr, int32_t len) noexcept
 {
     if (ptr == 0)
     {
@@ -104,7 +104,7 @@ RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_ansi_
     RET_OK(result);
 }
 
-RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_uni(void* ptr)
+RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_uni(void* ptr) noexcept
 {
     if (ptr == 0)
     {
@@ -115,7 +115,7 @@ RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_uni(v
     RET_OK(result);
 }
 
-RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_uni_len(void* ptr, int32_t len)
+RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_uni_len(void* ptr, int32_t len) noexcept
 {
     if (ptr == 0)
     {
@@ -130,7 +130,7 @@ RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_uni_l
     RET_OK(result);
 }
 
-RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_bstr(void* ptr)
+RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_bstr(void* ptr) noexcept
 {
     if (ptr == 0)
     {
@@ -140,7 +140,7 @@ RtResult<vm::RtString*> SystemRuntimeInteropServicesMarshal::ptr_to_string_bstr(
     RET_OK(result);
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::string_to_hglobal_ansi(const Utf16Char* chars, int32_t len)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::string_to_hglobal_ansi(const Utf16Char* chars, int32_t len) noexcept
 {
     if (!chars)
     {
@@ -150,7 +150,7 @@ RtResult<void*> SystemRuntimeInteropServicesMarshal::string_to_hglobal_ansi(cons
     RET_OK(buffer);
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::string_to_hglobal_uni(const Utf16Char* chars, int32_t len)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::string_to_hglobal_uni(const Utf16Char* chars, int32_t len) noexcept
 {
     if (!chars)
     {
@@ -161,7 +161,7 @@ RtResult<void*> SystemRuntimeInteropServicesMarshal::string_to_hglobal_uni(const
     RET_OK(buffer);
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::buffer_to_bstr(const Utf16Char* chars, int32_t len)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::buffer_to_bstr(const Utf16Char* chars, int32_t len) noexcept
 {
     if (!chars)
     {
@@ -171,7 +171,7 @@ RtResult<void*> SystemRuntimeInteropServicesMarshal::buffer_to_bstr(const Utf16C
     RET_OK(bstr);
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::free_bstr(void* ptr)
+RtResultVoid SystemRuntimeInteropServicesMarshal::free_bstr(void* ptr) noexcept
 {
     if (ptr)
     {
@@ -182,7 +182,7 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::free_bstr(void* ptr)
 
 // ========== Structure marshaling ==========
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::ptr_to_structure(void* ptr, vm::RtObject* obj)
+RtResultVoid SystemRuntimeInteropServicesMarshal::ptr_to_structure(void* ptr, vm::RtObject* obj) noexcept
 {
     if (!ptr || !obj)
     {
@@ -191,7 +191,7 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::ptr_to_structure(void* ptr, vm
     return vm::Marshal::ptr_to_structure(ptr, obj);
 }
 
-RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type)
+RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type) noexcept
 {
     if (!ptr || !ref_type)
     {
@@ -200,7 +200,7 @@ RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::ptr_to_structure_ty
     return vm::Marshal::ptr_to_structure_type(ptr, ref_type);
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::structure_to_ptr(vm::RtObject* obj, void* ptr, int32_t delete_old)
+RtResultVoid SystemRuntimeInteropServicesMarshal::structure_to_ptr(vm::RtObject* obj, void* ptr, int32_t delete_old) noexcept
 {
     if (!obj || !ptr)
     {
@@ -209,7 +209,7 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::structure_to_ptr(vm::RtObject*
     return vm::Marshal::structure_to_ptr(obj, ptr, delete_old);
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::destroy_structure(void* ptr, vm::RtReflectionType* ref_type)
+RtResultVoid SystemRuntimeInteropServicesMarshal::destroy_structure(void* ptr, vm::RtReflectionType* ref_type) noexcept
 {
     if (!ptr || !ref_type)
     {
@@ -220,12 +220,12 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::destroy_structure(void* ptr, v
 
 // ========== Type operations ==========
 
-RtResult<int32_t> SystemRuntimeInteropServicesMarshal::sizeof_type(vm::RtReflectionType* ref_type)
+RtResult<int32_t> SystemRuntimeInteropServicesMarshal::sizeof_type(vm::RtReflectionType* ref_type) noexcept
 {
     return vm::Marshal::sizeof_type(ref_type);
 }
 
-RtResult<intptr_t> SystemRuntimeInteropServicesMarshal::offset_of(vm::RtReflectionType* ref_type, vm::RtString* field_name)
+RtResult<intptr_t> SystemRuntimeInteropServicesMarshal::offset_of(vm::RtReflectionType* ref_type, vm::RtString* field_name) noexcept
 {
     utils::StringBuilder utf8_field_name;
     utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(field_name), static_cast<size_t>(field_name->length), utf8_field_name);
@@ -234,7 +234,7 @@ RtResult<intptr_t> SystemRuntimeInteropServicesMarshal::offset_of(vm::RtReflecti
 
 // ========== Array operations ==========
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::unsafe_addr_of_pinned_array_element(vm::RtArray* arr, int32_t index)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::unsafe_addr_of_pinned_array_element(vm::RtArray* arr, int32_t index) noexcept
 {
     if (!arr)
     {
@@ -244,7 +244,7 @@ RtResult<void*> SystemRuntimeInteropServicesMarshal::unsafe_addr_of_pinned_array
     RET_OK(addr);
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::copy_to_unmanaged_fixed(vm::RtArray* arr, int32_t start_index, void* dest, int32_t length, void* etype)
+RtResultVoid SystemRuntimeInteropServicesMarshal::copy_to_unmanaged_fixed(vm::RtArray* arr, int32_t start_index, void* dest, int32_t length, void* etype) noexcept
 {
     assert(arr);
     assert(length >= 0);
@@ -258,7 +258,7 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::copy_to_unmanaged_fixed(vm::Rt
     RET_VOID_OK();
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed(void* src, int32_t start_index, vm::RtArray* arr, int32_t length, void* etype)
+RtResultVoid SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed(void* src, int32_t start_index, vm::RtArray* arr, int32_t length, void* etype) noexcept
 {
     assert(arr);
     assert(length >= 0);
@@ -274,25 +274,25 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed(void
 
 // ========== Delegate marshaling ==========
 
-RtResult<vm::RtDelegate*> SystemRuntimeInteropServicesMarshal::get_delegate_for_function_pointer_internal(void* ptr, vm::RtReflectionType* ref_type)
+RtResult<vm::RtDelegate*> SystemRuntimeInteropServicesMarshal::get_delegate_for_function_pointer_internal(void* ptr, vm::RtReflectionType* ref_type) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(ref_type->type_handle));
     return vm::Marshal::marshal_function_pointer_to_delegate(ptr, klass);
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::get_function_pointer_for_delegate_internal(vm::RtDelegate* delegate)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::get_function_pointer_for_delegate_internal(vm::RtDelegate* delegate) noexcept
 {
     return vm::Marshal::get_function_pointer_for_delegate(delegate);
 }
 
 // ========== Win32 error ==========
 
-RtResult<int32_t> SystemRuntimeInteropServicesMarshal::get_last_win32_error()
+RtResult<int32_t> SystemRuntimeInteropServicesMarshal::get_last_win32_error() noexcept
 {
     RET_OK(vm::Marshal::get_last_win32_error());
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::set_last_win32_error(int32_t error)
+RtResultVoid SystemRuntimeInteropServicesMarshal::set_last_win32_error(int32_t error) noexcept
 {
     vm::Marshal::set_last_win32_error(error);
     RET_VOID_OK();
@@ -300,70 +300,70 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::set_last_win32_error(int32_t e
 
 // ========== COM/WinRT stubs ==========
 
-RtResult<int32_t> SystemRuntimeInteropServicesMarshal::query_interface_internal(void* ptr, void* guid_ref, void* out_ptr_ref)
+RtResult<int32_t> SystemRuntimeInteropServicesMarshal::query_interface_internal(void* ptr, void* guid_ref, void* out_ptr_ref) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<int32_t> SystemRuntimeInteropServicesMarshal::release_internal(void* ptr)
+RtResult<int32_t> SystemRuntimeInteropServicesMarshal::release_internal(void* ptr) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<int32_t> SystemRuntimeInteropServicesMarshal::release_com_object_internal(vm::RtObject* obj)
+RtResult<int32_t> SystemRuntimeInteropServicesMarshal::release_com_object_internal(vm::RtObject* obj) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::get_raw_iunknown_for_com_object_no_add_ref(vm::RtObject* obj)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::get_raw_iunknown_for_com_object_no_add_ref(vm::RtObject* obj) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<int32_t> SystemRuntimeInteropServicesMarshal::get_hr_for_exception_winrt(vm::RtObject* exception)
+RtResult<int32_t> SystemRuntimeInteropServicesMarshal::get_hr_for_exception_winrt(vm::RtObject* exception) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::get_native_activation_factory(vm::RtObject* type_obj)
+RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::get_native_activation_factory(vm::RtObject* type_obj) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<int32_t> SystemRuntimeInteropServicesMarshal::add_ref_internal(void* ptr)
+RtResult<int32_t> SystemRuntimeInteropServicesMarshal::add_ref_internal(void* ptr) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::get_iunknown_for_object_internal(vm::RtObject* obj)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::get_iunknown_for_object_internal(vm::RtObject* obj) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::get_idispatch_for_object_internal(vm::RtObject* obj)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::get_idispatch_for_object_internal(vm::RtObject* obj) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<void*> SystemRuntimeInteropServicesMarshal::get_ccw(vm::RtObject* obj, vm::RtObject* type_obj)
+RtResult<void*> SystemRuntimeInteropServicesMarshal::get_ccw(vm::RtObject* obj, vm::RtObject* type_obj) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::get_object_for_ccw(void* ptr)
+RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::get_object_for_ccw(void* ptr) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
 // ========== Prelink stubs ==========
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::prelink_all(vm::RtReflectionType* ref_type)
+RtResultVoid SystemRuntimeInteropServicesMarshal::prelink_all(vm::RtReflectionType* ref_type) noexcept
 {
     // Stub: no-op
     RET_VOID_OK();
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::prelink(vm::RtObject* method_info)
+RtResultVoid SystemRuntimeInteropServicesMarshal::prelink(vm::RtObject* method_info) noexcept
 {
     // Stub: no-op
     RET_VOID_OK();
@@ -395,7 +395,7 @@ static RtResultVoid re_alloc_hglobal_invoker(metadata::RtManagedMethodPointer, c
 
 /// @icall: System.Runtime.InteropServices.Marshal::FreeHGlobal(System.IntPtr)
 static RtResultVoid free_hglobal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                         interp::RtStackObject* /*ret*/)
+                                         interp::RtStackObject* /*ret*/) noexcept
 {
     void* ptr = EvalStackOp::get_param<void*>(params, 0);
     return SystemRuntimeInteropServicesMarshal::free_hglobal(ptr);
@@ -424,7 +424,7 @@ static RtResultVoid re_alloc_co_task_mem_invoker(metadata::RtManagedMethodPointe
 
 /// @icall: System.Runtime.InteropServices.Marshal::FreeCoTaskMem(System.IntPtr)
 static RtResultVoid free_co_task_mem_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                             interp::RtStackObject* /*ret*/)
+                                             interp::RtStackObject* /*ret*/) noexcept
 {
     void* ptr = EvalStackOp::get_param<void*>(params, 0);
     return SystemRuntimeInteropServicesMarshal::free_co_task_mem(ptr);
@@ -528,7 +528,7 @@ static RtResultVoid buffer_to_bstr_invoker(metadata::RtManagedMethodPointer, con
 
 /// @icall: System.Runtime.InteropServices.Marshal::FreeBSTR(System.IntPtr)
 static RtResultVoid free_bstr_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* /*ret*/)
+                                      interp::RtStackObject* /*ret*/) noexcept
 {
     void* ptr = EvalStackOp::get_param<void*>(params, 0);
     return SystemRuntimeInteropServicesMarshal::free_bstr(ptr);
@@ -537,7 +537,7 @@ static RtResultVoid free_bstr_invoker(metadata::RtManagedMethodPointer, const me
 // Structure marshaling invokers
 /// @icall: System.Runtime.InteropServices.Marshal::PtrToStructure(System.IntPtr,System.Object)
 static RtResultVoid ptr_to_structure_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                             interp::RtStackObject* /*ret*/)
+                                             interp::RtStackObject* /*ret*/) noexcept
 {
     void* ptr = EvalStackOp::get_param<void*>(params, 0);
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -558,7 +558,7 @@ static RtResultVoid ptr_to_structure_type_invoker(metadata::RtManagedMethodPoint
 
 /// @icall: System.Runtime.InteropServices.Marshal::StructureToPtr(System.Object,System.IntPtr,System.Boolean)
 static RtResultVoid structure_to_ptr_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                             interp::RtStackObject* /*ret*/)
+                                             interp::RtStackObject* /*ret*/) noexcept
 {
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     void* ptr = EvalStackOp::get_param<void*>(params, 1);
@@ -568,7 +568,7 @@ static RtResultVoid structure_to_ptr_invoker(metadata::RtManagedMethodPointer, c
 
 /// @icall: System.Runtime.InteropServices.Marshal::DestroyStructure(System.IntPtr,System.Type)
 static RtResultVoid destroy_structure_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                              interp::RtStackObject* /*ret*/)
+                                              interp::RtStackObject* /*ret*/) noexcept
 {
     void* ptr = EvalStackOp::get_param<void*>(params, 0);
     vm::RtReflectionType* ref_type = EvalStackOp::get_param<vm::RtReflectionType*>(params, 1);
@@ -611,7 +611,7 @@ static RtResultVoid unsafe_addr_of_pinned_array_element_invoker(metadata::RtMana
 
 /// @icall: System.Runtime.InteropServices.Marshal::copy_to_unmanaged_fixed(System.Array,System.Int32,System.IntPtr,System.Int32,System.Void*)
 static RtResultVoid copy_to_unmanaged_fixed_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                    interp::RtStackObject* /*ret*/)
+                                                    interp::RtStackObject* /*ret*/) noexcept
 {
     vm::RtArray* arr = EvalStackOp::get_param<vm::RtArray*>(params, 0);
     int32_t start_index = EvalStackOp::get_param<int32_t>(params, 1);
@@ -623,7 +623,7 @@ static RtResultVoid copy_to_unmanaged_fixed_invoker(metadata::RtManagedMethodPoi
 
 /// @icall: System.Runtime.InteropServices.Marshal::copy_from_unmanaged_fixed(System.IntPtr,System.Int32,System.Array,System.Int32,System.Void*)
 static RtResultVoid copy_from_unmanaged_fixed_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                      interp::RtStackObject* /*ret*/)
+                                                      interp::RtStackObject* /*ret*/) noexcept
 {
     void* src = EvalStackOp::get_param<void*>(params, 0);
     int32_t start_index = EvalStackOp::get_param<int32_t>(params, 1);
@@ -668,7 +668,7 @@ static RtResultVoid get_last_win32_error_invoker(metadata::RtManagedMethodPointe
 
 /// @icall: System.Runtime.InteropServices.Marshal::SetLastWin32Error(System.Int32)
 static RtResultVoid set_last_win32_error_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                                 interp::RtStackObject* /*ret*/)
+                                                 interp::RtStackObject* /*ret*/) noexcept
 {
     int32_t error = EvalStackOp::get_param<int32_t>(params, 0);
     return SystemRuntimeInteropServicesMarshal::set_last_win32_error(error);
@@ -791,7 +791,7 @@ static RtResultVoid get_object_for_ccw_invoker(metadata::RtManagedMethodPointer,
 // Prelink stub invokers
 /// @icall: System.Runtime.InteropServices.Marshal::PrelinkAll(System.Type)
 static RtResultVoid prelink_all_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                        interp::RtStackObject* /*ret*/)
+                                        interp::RtStackObject* /*ret*/) noexcept
 {
     vm::RtReflectionType* ref_type = EvalStackOp::get_param<vm::RtReflectionType*>(params, 0);
     return SystemRuntimeInteropServicesMarshal::prelink_all(ref_type);
@@ -799,7 +799,7 @@ static RtResultVoid prelink_all_invoker(metadata::RtManagedMethodPointer, const 
 
 /// @icall: System.Runtime.InteropServices.Marshal::Prelink(System.Reflection.MethodInfo)
 static RtResultVoid prelink_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                    interp::RtStackObject* /*ret*/)
+                                    interp::RtStackObject* /*ret*/) noexcept
 {
     vm::RtObject* method_info = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     return SystemRuntimeInteropServicesMarshal::prelink(method_info);
@@ -914,7 +914,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtime_interopservi
      prelink_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesMarshal::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesMarshal::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_interopservices_marshal,
                                               sizeof(s_internal_call_entries_system_runtime_interopservices_marshal) /

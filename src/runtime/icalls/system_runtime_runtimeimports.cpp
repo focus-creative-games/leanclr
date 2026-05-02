@@ -10,7 +10,7 @@ using namespace interp;
 using namespace metadata;
 
 // @icall: System.Runtime.RuntimeImports::ZeroMemory
-RtResultVoid SystemRuntimeRuntimeImports::zero_memory(uint8_t* ptr, uintptr_t size)
+RtResultVoid SystemRuntimeRuntimeImports::zero_memory(uint8_t* ptr, uintptr_t size) noexcept
 {
     std::memset(ptr, 0, size);
     RET_VOID_OK();
@@ -25,7 +25,7 @@ static RtResultVoid zero_memory_invoker(RtManagedMethodPointer method_pointer, c
 }
 
 // @icall: System.Runtime.RuntimeImports::Memmove
-RtResultVoid SystemRuntimeRuntimeImports::memmove(uint8_t* dest, const uint8_t* src, uintptr_t size)
+RtResultVoid SystemRuntimeRuntimeImports::memmove(uint8_t* dest, const uint8_t* src, uintptr_t size) noexcept
 {
     std::memmove(dest, src, size);
     RET_VOID_OK();
@@ -41,7 +41,7 @@ static RtResultVoid memmove_invoker(RtManagedMethodPointer method_pointer, const
 }
 
 // @icall: System.Runtime.RuntimeImports::Memmove_wbarrier
-RtResultVoid SystemRuntimeRuntimeImports::memmove_wbarrier(uint8_t* dest, const uint8_t* src, uintptr_t size)
+RtResultVoid SystemRuntimeRuntimeImports::memmove_wbarrier(uint8_t* dest, const uint8_t* src, uintptr_t size) noexcept
 {
     // FIXME: implement write barrier
     std::memmove(dest, src, size);
@@ -58,7 +58,7 @@ static RtResultVoid memmove_wbarrier_invoker(RtManagedMethodPointer method_point
 }
 
 // @icall: System.Runtime.RuntimeImports::_ecvt_s
-RtResultVoid SystemRuntimeRuntimeImports::ecvt_s(uint8_t* buffer, int32_t size, double value, int32_t digits, int32_t* decpt, int32_t* sign)
+RtResultVoid SystemRuntimeRuntimeImports::ecvt_s(uint8_t* buffer, int32_t size, double value, int32_t digits, int32_t* decpt, int32_t* sign) noexcept
 {
 #ifdef LEANCLR_PLATFORM_WIN
     // Windows/MSVC: _ecvt_s
@@ -113,7 +113,7 @@ static RtResultVoid ecvt_s_invoker(RtManagedMethodPointer method_pointer, const 
     return SystemRuntimeRuntimeImports::ecvt_s(buffer, size, value, digits, decpt, sign);
 }
 
-utils::Span<vm::InternalCallEntry> SystemRuntimeRuntimeImports::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemRuntimeRuntimeImports::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Runtime.RuntimeImports::ZeroMemory", (vm::InternalCallFunction)&SystemRuntimeRuntimeImports::zero_memory, zero_memory_invoker},

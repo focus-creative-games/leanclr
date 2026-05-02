@@ -8,7 +8,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_handle_type(metadata::RtEventInfo* event, const metadata::RtTypeSig* type_sig)
+RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_handle_type(metadata::RtEventInfo* event, const metadata::RtTypeSig* type_sig) noexcept
 {
     const metadata::RtClass* klass;
     if (!type_sig)
@@ -41,7 +41,7 @@ static RtResultVoid internal_from_handle_type_invoker_eventinfo(metadata::RtMana
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemReflectionEventInfo::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemReflectionEventInfo::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Reflection.EventInfo::internal_from_handle_type", (vm::InternalCallFunction)&SystemReflectionEventInfo::internal_from_handle_type,

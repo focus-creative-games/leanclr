@@ -15,14 +15,14 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<vm::RtReflectionMethodBody*> SystemReflectionRuntimeMethodInfo::get_method_body_internal(const metadata::RtMethodInfo* method)
+RtResult<vm::RtReflectionMethodBody*> SystemReflectionRuntimeMethodInfo::get_method_body_internal(const metadata::RtMethodInfo* method) noexcept
 {
     return vm::Method::create_reflection_method_body(method);
 }
 
 RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_method_from_handle_internal_type_native(const metadata::RtMethodInfo* method,
                                                                                                                  const metadata::RtTypeSig* type_sig,
-                                                                                                                 bool check_same_generic_base)
+                                                                                                                 bool check_same_generic_base) noexcept
 {
     const metadata::RtClass* klass = nullptr;
     const metadata::RtMethodInfo* target_method = method;
@@ -59,14 +59,14 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_method_
     return vm::Reflection::get_method_reflection_object(target_method, klass);
 }
 
-RtResult<vm::RtString*> SystemReflectionRuntimeMethodInfo::get_name(vm::RtReflectionMethod* method)
+RtResult<vm::RtString*> SystemReflectionRuntimeMethodInfo::get_name(vm::RtReflectionMethod* method) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     vm::RtString* name = vm::String::create_string_from_utf8cstr(m->name);
     RET_OK(name);
 }
 
-static RtResult<std::pair<const metadata::RtMethodInfo*, const metadata::RtClass*>> get_base_method_impl(const metadata::RtMethodInfo* method, bool definition)
+static RtResult<std::pair<const metadata::RtMethodInfo*, const metadata::RtClass*>> get_base_method_impl(const metadata::RtMethodInfo* method, bool definition) noexcept
 {
     const metadata::RtClass* klass = method->parent;
     if (!vm::Method::is_virtual(method) || vm::Method::is_new_slot(method) || vm::Class::is_interface(klass))
@@ -123,7 +123,7 @@ static RtResult<std::pair<const metadata::RtMethodInfo*, const metadata::RtClass
     RET_OK(std::make_pair(base_method, cur_klass));
 }
 
-RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_base_method(vm::RtReflectionMethod* method, bool definition)
+RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_base_method(vm::RtReflectionMethod* method, bool definition) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     std::pair<const metadata::RtMethodInfo*, const metadata::RtClass*> pair_result;
@@ -133,19 +133,19 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_base_me
     RET_OK(ref_method);
 }
 
-RtResult<int32_t> SystemReflectionRuntimeMethodInfo::get_metadata_token(vm::RtReflectionMethod* method)
+RtResult<int32_t> SystemReflectionRuntimeMethodInfo::get_metadata_token(vm::RtReflectionMethod* method) noexcept
 {
     RET_OK(static_cast<int32_t>(method->method->token));
 }
 
-RtResult<bool> SystemReflectionRuntimeMethodInfo::get_is_generic_method_definition(vm::RtReflectionMethod* method)
+RtResult<bool> SystemReflectionRuntimeMethodInfo::get_is_generic_method_definition(vm::RtReflectionMethod* method) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     const metadata::RtClass* klass = m->parent;
     RET_OK(vm::Class::is_generic(klass) || m->generic_container != nullptr);
 }
 
-RtResult<vm::RtArray*> SystemReflectionRuntimeMethodInfo::get_generic_arguments(vm::RtReflectionMethod* method)
+RtResult<vm::RtArray*> SystemReflectionRuntimeMethodInfo::get_generic_arguments(vm::RtReflectionMethod* method) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     const auto& corlib = vm::Class::get_corlib_types();
@@ -185,7 +185,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeMethodInfo::get_generic_arguments(
     RET_OK(empty);
 }
 
-RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_generic_method_definition_impl(vm::RtReflectionMethod* method)
+RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_generic_method_definition_impl(vm::RtReflectionMethod* method) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     const metadata::RtClass* klass = m->parent;
@@ -206,7 +206,7 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_generic
     RET_OK(ref_method);
 }
 
-RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::make_generic_method_impl(vm::RtReflectionMethod* method, vm::RtArray* generic_args)
+RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::make_generic_method_impl(vm::RtReflectionMethod* method, vm::RtArray* generic_args) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     if (m->generic_container == nullptr)
@@ -248,7 +248,7 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::make_generi
     RET_OK(ref_method);
 }
 
-RtResult<bool> SystemReflectionRuntimeMethodInfo::get_is_generic_method(vm::RtReflectionMethod* method)
+RtResult<bool> SystemReflectionRuntimeMethodInfo::get_is_generic_method(vm::RtReflectionMethod* method) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     if (m->generic_container != nullptr)
@@ -262,13 +262,13 @@ RtResult<bool> SystemReflectionRuntimeMethodInfo::get_is_generic_method(vm::RtRe
 }
 
 RtResult<vm::RtObject*> SystemReflectionRuntimeMethodInfo::internal_invoke(vm::RtReflectionMethod* ref_method, vm::RtObject* obj, vm::RtArray* parameters,
-                                                                           vm::RtObject** exc)
+                                                                           vm::RtObject** exc) noexcept
 {
     const metadata::RtMethodInfo* method = ref_method->method;
     return vm::Reflection::invoke_method(method, obj, parameters, exc);
 }
 
-RtResultVoid SystemReflectionRuntimeMethodInfo::get_pinvoke(vm::RtReflectionMethod* method, int32_t* flags, vm::RtString** entry_name, vm::RtString** dll_name)
+RtResultVoid SystemReflectionRuntimeMethodInfo::get_pinvoke(vm::RtReflectionMethod* method, int32_t* flags, vm::RtString** entry_name, vm::RtString** dll_name) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<metadata::RowImplMap>, pinvoke_info, vm::Method::get_imp_map_info(m));
@@ -464,7 +464,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimeme
      (vm::InternalCallFunction)&SystemReflectionRuntimeMethodInfo::get_pinvoke, get_pinvoke_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeMethodInfo::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeMethodInfo::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimemethodinfo,
                                               sizeof(s_internal_call_entries_system_reflection_runtimemethodinfo) / sizeof(vm::InternalCallEntry));

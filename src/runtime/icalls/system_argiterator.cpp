@@ -8,7 +8,7 @@ namespace icalls
 {
 
 /// @icall: System.ArgIterator::Setup(System.IntPtr,System.IntPtr)
-RtResultVoid SystemArgIterator::setup(intptr_t sig, intptr_t first_arg)
+RtResultVoid SystemArgIterator::setup(intptr_t sig, intptr_t first_arg) noexcept
 {
     (void)sig;
     (void)first_arg;
@@ -26,7 +26,7 @@ static RtResultVoid setup_invoker(metadata::RtManagedMethodPointer methodPtr, co
 }
 
 /// @icall: System.ArgIterator::IntGetNextArg(System.Void*)
-RtResultVoid SystemArgIterator::int_get_next_arg(void* value)
+RtResultVoid SystemArgIterator::int_get_next_arg(void* value) noexcept
 {
     (void)value;
     RETURN_NOT_IMPLEMENTED_ERROR();
@@ -42,7 +42,7 @@ static RtResultVoid int_get_next_arg_invoker(metadata::RtManagedMethodPointer me
 }
 
 /// @icall: System.ArgIterator::IntGetNextArgWithType(System.Void*,System.IntPtr)
-RtResultVoid SystemArgIterator::int_get_next_arg_with_type(void* value, intptr_t rth_handle)
+RtResultVoid SystemArgIterator::int_get_next_arg_with_type(void* value, intptr_t rth_handle) noexcept
 {
     (void)value;
     (void)rth_handle;
@@ -60,7 +60,7 @@ static RtResultVoid int_get_next_arg_with_type_invoker(metadata::RtManagedMethod
 }
 
 /// @icall: System.ArgIterator::IntGetNextArgType()
-RtResult<intptr_t> SystemArgIterator::int_get_next_arg_type()
+RtResult<intptr_t> SystemArgIterator::int_get_next_arg_type() noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
@@ -73,7 +73,7 @@ static RtResultVoid int_get_next_arg_type_invoker(metadata::RtManagedMethodPoint
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemArgIterator::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemArgIterator::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.ArgIterator::Setup(System.IntPtr,System.IntPtr)", (vm::InternalCallFunction)&SystemArgIterator::setup, setup_invoker},

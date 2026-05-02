@@ -15,7 +15,7 @@ using namespace leanclr::interp;
 // Exchange Object Implementation
 // ============================================
 
-RtResult<vm::RtObject*> SystemThreadingInterlocked::exchange_object(vm::RtObject** location, vm::RtObject* value)
+RtResult<vm::RtObject*> SystemThreadingInterlocked::exchange_object(vm::RtObject** location, vm::RtObject* value) noexcept
 {
     if (location == nullptr)
     {
@@ -30,7 +30,7 @@ RtResult<vm::RtObject*> SystemThreadingInterlocked::exchange_object(vm::RtObject
 /// @CUSTOM
 /// @intrinsic: System.Threading.Interlocked::Exchange(System.Object&,System.Object)
 static RtResultVoid exchange_object_invoker(RtManagedMethodPointer _method_pointer, const RtMethodInfo* _method, const RtStackObject* params,
-                                            RtStackObject* ret)
+                                            RtStackObject* ret) noexcept
 {
     vm::RtObject** location = EvalStackOp::get_param<vm::RtObject**>(params, 0);
     vm::RtObject* value = EvalStackOp::get_param<vm::RtObject*>(params, 1);
@@ -44,7 +44,7 @@ static RtResultVoid exchange_object_invoker(RtManagedMethodPointer _method_point
 // Exchange Generic Implementation
 // ============================================
 
-RtResult<void*> SystemThreadingInterlocked::exchange(void** location, void* value)
+RtResult<void*> SystemThreadingInterlocked::exchange(void** location, void* value) noexcept
 {
     if (location == nullptr)
     {
@@ -57,7 +57,7 @@ RtResult<void*> SystemThreadingInterlocked::exchange(void** location, void* valu
 }
 
 /// @intrinsic: System.Threading.Interlocked::Exchange<>
-static RtResultVoid exchange_invoker(RtManagedMethodPointer _method_pointer, const RtMethodInfo* _method, const RtStackObject* params, RtStackObject* ret)
+static RtResultVoid exchange_invoker(RtManagedMethodPointer _method_pointer, const RtMethodInfo* _method, const RtStackObject* params, RtStackObject* ret) noexcept
 {
     void** location = EvalStackOp::get_param<void**>(params, 0);
     void* value = EvalStackOp::get_param<void*>(params, 1);
@@ -71,7 +71,7 @@ static RtResultVoid exchange_invoker(RtManagedMethodPointer _method_pointer, con
 // CompareExchange Implementation
 // ============================================
 
-RtResult<void*> SystemThreadingInterlocked::compare_exchange(void** location, void* value, void* comparand)
+RtResult<void*> SystemThreadingInterlocked::compare_exchange(void** location, void* value, void* comparand) noexcept
 {
     if (location == nullptr)
     {
@@ -88,7 +88,7 @@ RtResult<void*> SystemThreadingInterlocked::compare_exchange(void** location, vo
 
 /// @intrinsic: System.Threading.Interlocked::CompareExchange<>
 static RtResultVoid compare_exchange_invoker(RtManagedMethodPointer _method_pointer, const RtMethodInfo* _method, const RtStackObject* params,
-                                             RtStackObject* ret)
+                                             RtStackObject* ret) noexcept
 {
     void** location = EvalStackOp::get_param<void**>(params, 0);
     void* value = EvalStackOp::get_param<void*>(params, 1);
@@ -103,7 +103,7 @@ static RtResultVoid compare_exchange_invoker(RtManagedMethodPointer _method_poin
 // MemoryBarrier Implementation
 // ============================================
 
-RtResultVoid SystemThreadingInterlocked::memory_barrier()
+RtResultVoid SystemThreadingInterlocked::memory_barrier() noexcept
 {
     // Memory barrier implementation - typically a no-op or compiler fence
     // The actual memory ordering is handled by the compiler/runtime
@@ -112,7 +112,7 @@ RtResultVoid SystemThreadingInterlocked::memory_barrier()
 
 /// @intrinsic: System.Threading.Interlocked::MemoryBarrier
 static RtResultVoid memory_barrier_invoker(RtManagedMethodPointer _method_pointer, const RtMethodInfo* _method, const RtStackObject* _params,
-                                           RtStackObject* _ret)
+                                           RtStackObject* _ret) noexcept
 {
     return SystemThreadingInterlocked::memory_barrier();
 }
@@ -129,7 +129,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_threading_interlocked[] = {
     {"System.Threading.Interlocked::MemoryBarrier", (vm::IntrinsicFunction)&SystemThreadingInterlocked::memory_barrier, memory_barrier_invoker},
 };
 
-utils::Span<vm::IntrinsicEntry> SystemThreadingInterlocked::get_intrinsic_entries()
+utils::Span<vm::IntrinsicEntry> SystemThreadingInterlocked::get_intrinsic_entries() noexcept
 {
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_threading_interlocked, sizeof(s_intrinsic_entries_system_threading_interlocked) / sizeof(vm::IntrinsicEntry));
 }

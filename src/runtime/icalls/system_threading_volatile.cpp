@@ -5,34 +5,34 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<int64_t> SystemThreadingVolatile::read_i64(const int64_t* location)
+RtResult<int64_t> SystemThreadingVolatile::read_i64(const int64_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<uint64_t> SystemThreadingVolatile::read_u64(const uint64_t* location)
+RtResult<uint64_t> SystemThreadingVolatile::read_u64(const uint64_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<double> SystemThreadingVolatile::read_f64(const double* location)
+RtResult<double> SystemThreadingVolatile::read_f64(const double* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResultVoid SystemThreadingVolatile::write_i64(int64_t* location, int64_t value)
+RtResultVoid SystemThreadingVolatile::write_i64(int64_t* location, int64_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_u64(uint64_t* location, uint64_t value)
+RtResultVoid SystemThreadingVolatile::write_u64(uint64_t* location, uint64_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_f64(double* location, double value)
+RtResultVoid SystemThreadingVolatile::write_f64(double* location, double value) noexcept
 {
     *location = value;
     RET_VOID_OK();
@@ -113,7 +113,7 @@ static RtResultVoid write_f64_icall_invoker(metadata::RtManagedMethodPointer met
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemThreadingVolatile::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemThreadingVolatile::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Threading.Volatile::Read(System.Int64&)", (vm::InternalCallFunction)&SystemThreadingVolatile::read_i64, read_i64_icall_invoker},

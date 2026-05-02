@@ -10,7 +10,7 @@ namespace icalls
 using namespace metadata;
 
 // @icall: System.Text.EncodingHelper::InternalCodePage(System.Int32&)
-RtResult<vm::RtString*> SystemTextEncodingHelper::internal_code_page(int32_t* code_page)
+RtResult<vm::RtString*> SystemTextEncodingHelper::internal_code_page(int32_t* code_page) noexcept
 {
     // Match platform default: UTF-8 code page id 3 and name "utf_8"
     *code_page = 3;
@@ -31,7 +31,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_text_encodinghelper[
      internal_code_page_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemTextEncodingHelper::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemTextEncodingHelper::get_internal_call_entries() noexcept
 {
 
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_text_encodinghelper, sizeof(s_internal_call_entries_system_text_encodinghelper) / sizeof(vm::InternalCallEntry));

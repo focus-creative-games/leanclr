@@ -8,7 +8,7 @@ namespace leanclr
 namespace intrinsics
 {
 
-RtResultVoid SystemObject::ctor(vm::RtObject* obj)
+RtResultVoid SystemObject::ctor(vm::RtObject* obj) noexcept
 {
     RET_VOID_OK();
 }
@@ -20,7 +20,7 @@ RtResultVoid ctor_invoker(metadata::RtManagedMethodPointer methodPtr, const meta
     RET_VOID_OK();
 }
 
-RtResult<vm::RtObject*> SystemObject::newobj_ctor()
+RtResult<vm::RtObject*> SystemObject::newobj_ctor() noexcept
 {
     return vm::Object::new_object(vm::Class::get_corlib_types().cls_object);
 }
@@ -44,12 +44,12 @@ static vm::NewobjIntrinsicEntry s_newobj_intrinsic_entries_system_object[] = {
     {"System.Object::.ctor()", newobj_ctor_invoker},
 };
 
-utils::Span<vm::IntrinsicEntry> SystemObject::get_intrinsic_entries()
+utils::Span<vm::IntrinsicEntry> SystemObject::get_intrinsic_entries() noexcept
 {
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_object, sizeof(s_intrinsic_entries_system_object) / sizeof(vm::IntrinsicEntry));
 }
 
-utils::Span<vm::NewobjIntrinsicEntry> SystemObject::get_newobj_intrinsic_entries()
+utils::Span<vm::NewobjIntrinsicEntry> SystemObject::get_newobj_intrinsic_entries() noexcept
 {
     return utils::Span<vm::NewobjIntrinsicEntry>(s_newobj_intrinsic_entries_system_object, sizeof(s_newobj_intrinsic_entries_system_object) / sizeof(vm::NewobjIntrinsicEntry));
 }

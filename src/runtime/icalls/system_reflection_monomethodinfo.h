@@ -20,19 +20,19 @@ enum class CallingConventions : uint32_t
 class SystemReflectionMonoMethodInfo
 {
   public:
-    static utils::Span<vm::InternalCallEntry> get_internal_call_entries();
+    static utils::Span<vm::InternalCallEntry> get_internal_call_entries() noexcept;
 
     // Get parameter info array for a method
-    static RtResult<vm::RtArray*> get_parameter_info(const metadata::RtMethodInfo* method, vm::RtReflectionMethod* member);
+    static RtResult<vm::RtArray*> get_parameter_info(const metadata::RtMethodInfo* method, vm::RtReflectionMethod* member) noexcept;
 
     // Get method attributes
-    static RtResult<int32_t> get_method_attributes(const metadata::RtMethodInfo* method);
+    static RtResult<int32_t> get_method_attributes(const metadata::RtMethodInfo* method) noexcept;
 
     // Get method info structure
-    static RtResultVoid get_method_info(const metadata::RtMethodInfo* method, vm::RtMonoMethodInfo* result);
+    static RtResultVoid get_method_info(const metadata::RtMethodInfo* method, vm::RtMonoMethodInfo* result) noexcept;
 
     // Get return value marshal attribute
-    static RtResult<vm::RtObject*> get_retval_marshal(const metadata::RtMethodInfo* method);
+    static RtResult<vm::RtObject*> get_retval_marshal(const metadata::RtMethodInfo* method) noexcept;
 };
 
 } // namespace icalls

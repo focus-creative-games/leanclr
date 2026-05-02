@@ -8,7 +8,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_lcid(vm::RtCultureInfo* _this, int32_t /*culture_lcid*/)
+RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_lcid(vm::RtCultureInfo* _this, int32_t /*culture_lcid*/) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
@@ -24,7 +24,7 @@ static RtResultVoid construct_internal_locale_from_lcid_invoker(metadata::RtMana
     RET_VOID_OK();
 }
 
-RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_name(vm::RtCultureInfo* _this, vm::RtString* /*name*/)
+RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_name(vm::RtCultureInfo* _this, vm::RtString* /*name*/) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
@@ -40,7 +40,7 @@ static RtResultVoid construct_internal_locale_from_name_invoker(metadata::RtMana
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemGlobalizationCultureInfo::get_current_locale_name()
+RtResult<vm::RtString*> SystemGlobalizationCultureInfo::get_current_locale_name() noexcept
 {
     RET_OK(vm::String::get_empty_string());
 }
@@ -54,7 +54,7 @@ static RtResultVoid get_current_locale_name_invoker(metadata::RtManagedMethodPoi
     RET_VOID_OK();
 }
 
-RtResult<vm::RtArray*> SystemGlobalizationCultureInfo::internal_get_cultures(bool /*neutral*/, bool /*specific*/, bool /*installed*/)
+RtResult<vm::RtArray*> SystemGlobalizationCultureInfo::internal_get_cultures(bool /*neutral*/, bool /*specific*/, bool /*installed*/) noexcept
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
@@ -82,7 +82,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultur
      (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::internal_get_cultures, internal_get_cultures_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_cultureinfo,
                                               sizeof(s_internal_call_entries_system_globalization_cultureinfo) / sizeof(vm::InternalCallEntry));

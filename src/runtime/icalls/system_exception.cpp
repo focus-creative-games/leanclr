@@ -8,7 +8,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResultVoid SystemException::report_unhandled_exception(vm::RtException* exception)
+RtResultVoid SystemException::report_unhandled_exception(vm::RtException* exception) noexcept
 {
     return vm::Exception::report_unhandled_exception(exception);
 }
@@ -22,7 +22,7 @@ static RtResultVoid report_unhandled_exception_invoker(metadata::RtManagedMethod
     return SystemException::report_unhandled_exception(exception);
 }
 
-utils::Span<vm::InternalCallEntry> SystemException::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemException::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Exception::ReportUnhandledException(System.Exception)", (vm::InternalCallFunction)&SystemException::report_unhandled_exception,

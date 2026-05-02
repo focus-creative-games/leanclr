@@ -11,7 +11,7 @@ using namespace interp;
 using namespace metadata;
 
 // @icall: System.Security.Cryptography.RNGCryptoServiceProvider::RngOpen
-RtResult<bool> SystemSecurityCryptographyRNGCryptoServiceProvider::rng_open()
+RtResult<bool> SystemSecurityCryptographyRNGCryptoServiceProvider::rng_open() noexcept
 {
     RET_OK(misc::RngCryptoServiceProvider::open());
 }
@@ -25,7 +25,7 @@ static RtResultVoid rng_open_invoker(RtManagedMethodPointer /*method_pointer*/, 
 }
 
 // @icall: System.Security.Cryptography.RNGCryptoServiceProvider::RngInitialize(System.Byte*,System.IntPtr)
-RtResult<intptr_t> SystemSecurityCryptographyRNGCryptoServiceProvider::rng_initialize(const uint8_t* seed, intptr_t seed_len)
+RtResult<intptr_t> SystemSecurityCryptographyRNGCryptoServiceProvider::rng_initialize(const uint8_t* seed, intptr_t seed_len) noexcept
 {
     RET_OK(misc::RngCryptoServiceProvider::initialize(seed, seed_len));
 }
@@ -41,7 +41,7 @@ static RtResultVoid rng_initialize_invoker(RtManagedMethodPointer /*method_point
 }
 
 // @icall: System.Security.Cryptography.RNGCryptoServiceProvider::RngGetBytes(System.IntPtr,System.Byte*,System.IntPtr)
-RtResult<intptr_t> SystemSecurityCryptographyRNGCryptoServiceProvider::rng_get_bytes(intptr_t handle, uint8_t* buffer, intptr_t length)
+RtResult<intptr_t> SystemSecurityCryptographyRNGCryptoServiceProvider::rng_get_bytes(intptr_t handle, uint8_t* buffer, intptr_t length) noexcept
 {
     RET_OK(misc::RngCryptoServiceProvider::get_bytes(handle, buffer, length));
 }
@@ -58,20 +58,20 @@ static RtResultVoid rng_get_bytes_invoker(RtManagedMethodPointer /*method_pointe
 }
 
 // @icall: System.Security.Cryptography.RNGCryptoServiceProvider::RngClose(System.IntPtr)
-RtResultVoid SystemSecurityCryptographyRNGCryptoServiceProvider::rng_close(intptr_t handle)
+RtResultVoid SystemSecurityCryptographyRNGCryptoServiceProvider::rng_close(intptr_t handle) noexcept
 {
     misc::RngCryptoServiceProvider::close(handle);
     RET_VOID_OK();
 }
 
 static RtResultVoid rng_close_invoker(RtManagedMethodPointer /*method_pointer*/, const RtMethodInfo* /*method*/, const interp::RtStackObject* params,
-                                      interp::RtStackObject* /*ret*/)
+                                      interp::RtStackObject* /*ret*/) noexcept
 {
     intptr_t handle = EvalStackOp::get_param<intptr_t>(params, 0);
     return SystemSecurityCryptographyRNGCryptoServiceProvider::rng_close(handle);
 }
 
-utils::Span<vm::InternalCallEntry> SystemSecurityCryptographyRNGCryptoServiceProvider::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemSecurityCryptographyRNGCryptoServiceProvider::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Security.Cryptography.RNGCryptoServiceProvider::RngOpen",

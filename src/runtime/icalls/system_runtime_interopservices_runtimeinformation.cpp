@@ -7,12 +7,12 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<vm::RtString*> SystemRuntimeInteropServicesRuntimeInformation::get_runtime_architecture()
+RtResult<vm::RtString*> SystemRuntimeInteropServicesRuntimeInformation::get_runtime_architecture() noexcept
 {
     RET_OK(os::Architecture::get_architecture_name());
 }
 
-RtResult<vm::RtString*> SystemRuntimeInteropServicesRuntimeInformation::get_os_name()
+RtResult<vm::RtString*> SystemRuntimeInteropServicesRuntimeInformation::get_os_name() noexcept
 {
     RET_OK(os::Architecture::get_os_name());
 }
@@ -41,7 +41,7 @@ static RtResultVoid get_os_name_invoker(metadata::RtManagedMethodPointer methodP
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesRuntimeInformation::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesRuntimeInformation::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Runtime.InteropServices.RuntimeInformation::GetRuntimeArchitecture",

@@ -10,7 +10,7 @@ namespace icalls
 {
 
 // Thread cleanup
-RtResultVoid SystemThreadingInternalThread::thread_free_internal(vm::RtInternalThread* this_thread)
+RtResultVoid SystemThreadingInternalThread::thread_free_internal(vm::RtInternalThread* this_thread) noexcept
 {
     return vm::Thread::free_internal_thread(this_thread);
 }
@@ -30,7 +30,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_threading_internalth
      thread_free_internal_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemThreadingInternalThread::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemThreadingInternalThread::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_internalthread, sizeof(s_internal_call_entries_system_threading_internalthread) / sizeof(vm::InternalCallEntry));
 }

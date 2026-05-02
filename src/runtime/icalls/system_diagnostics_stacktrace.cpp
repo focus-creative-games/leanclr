@@ -8,7 +8,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<vm::RtArray*> SystemDiagnosticsStackTrace::get_trace(vm::RtException* ex, int32_t skip_frames, bool need_file_info)
+RtResult<vm::RtArray*> SystemDiagnosticsStackTrace::get_trace(vm::RtException* ex, int32_t skip_frames, bool need_file_info) noexcept
 {
     return vm::StackTrace::get_stack_trace(ex, skip_frames, need_file_info);
 }
@@ -25,7 +25,7 @@ static RtResultVoid get_trace_invoker(metadata::RtManagedMethodPointer methodPtr
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemDiagnosticsStackTrace::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemDiagnosticsStackTrace::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Diagnostics.StackTrace::get_trace(System.Exception,System.Int32,System.Boolean)",

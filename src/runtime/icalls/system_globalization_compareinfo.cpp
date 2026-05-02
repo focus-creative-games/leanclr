@@ -52,7 +52,7 @@ static int32_t compare_char(char16_t c1, char16_t c2, int32_t options)
 }
 
 RtResult<int32_t> SystemGlobalizationCompareInfo::internal_compare_icall(const char16_t* str1, int32_t length1, const char16_t* str2, int32_t length2,
-                                                                         int32_t options)
+                                                                         int32_t options) noexcept
 {
     assert(length1 >= 0 && length2 >= 0);
     int32_t min_len = std::min(length1, length2);
@@ -96,7 +96,7 @@ static RtResultVoid internal_compare_icall_invoker(metadata::RtManagedMethodPoin
 }
 
 RtResult<int32_t> SystemGlobalizationCompareInfo::internal_index_icall(const char16_t* source, int32_t source_start_index, int32_t source_count,
-                                                                       const char16_t* value, int32_t value_length, bool first)
+                                                                       const char16_t* value, int32_t value_length, bool first) noexcept
 {
     if (source_count < value_length)
     {
@@ -149,7 +149,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_compar
      (vm::InternalCallFunction)&SystemGlobalizationCompareInfo::internal_index_icall, internal_index_icall_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemGlobalizationCompareInfo::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemGlobalizationCompareInfo::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_compareinfo, sizeof(s_internal_call_entries_system_globalization_compareinfo) / sizeof(vm::InternalCallEntry));
 }

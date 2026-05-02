@@ -7,7 +7,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<int64_t> SystemDiagnosticsStopwatch::get_timestamp()
+RtResult<int64_t> SystemDiagnosticsStopwatch::get_timestamp() noexcept
 {
     RET_OK(os::Time::get_ticks_100nanos());
 }
@@ -24,7 +24,7 @@ static RtResultVoid get_timestamp_invoker(metadata::RtManagedMethodPointer metho
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemDiagnosticsStopwatch::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemDiagnosticsStopwatch::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Diagnostics.Stopwatch::GetTimestamp()", (vm::InternalCallFunction)&SystemDiagnosticsStopwatch::get_timestamp, get_timestamp_invoker},

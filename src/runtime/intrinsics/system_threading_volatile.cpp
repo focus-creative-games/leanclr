@@ -8,157 +8,157 @@ namespace intrinsics
 
 // ========== Read Implementation Functions ==========
 
-RtResult<bool> SystemThreadingVolatile::read_bool(const bool* location)
+RtResult<bool> SystemThreadingVolatile::read_bool(const bool* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<uint8_t> SystemThreadingVolatile::read_byte(const uint8_t* location)
+RtResult<uint8_t> SystemThreadingVolatile::read_byte(const uint8_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<int8_t> SystemThreadingVolatile::read_sbyte(const int8_t* location)
+RtResult<int8_t> SystemThreadingVolatile::read_sbyte(const int8_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<int16_t> SystemThreadingVolatile::read_i16(const int16_t* location)
+RtResult<int16_t> SystemThreadingVolatile::read_i16(const int16_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<uint16_t> SystemThreadingVolatile::read_u16(const uint16_t* location)
+RtResult<uint16_t> SystemThreadingVolatile::read_u16(const uint16_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<int32_t> SystemThreadingVolatile::read_i32(const int32_t* location)
+RtResult<int32_t> SystemThreadingVolatile::read_i32(const int32_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<uint32_t> SystemThreadingVolatile::read_u32(const uint32_t* location)
+RtResult<uint32_t> SystemThreadingVolatile::read_u32(const uint32_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<int64_t> SystemThreadingVolatile::read_i64(const int64_t* location)
+RtResult<int64_t> SystemThreadingVolatile::read_i64(const int64_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<uint64_t> SystemThreadingVolatile::read_u64(const uint64_t* location)
+RtResult<uint64_t> SystemThreadingVolatile::read_u64(const uint64_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<intptr_t> SystemThreadingVolatile::read_intptr(const intptr_t* location)
+RtResult<intptr_t> SystemThreadingVolatile::read_intptr(const intptr_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<uintptr_t> SystemThreadingVolatile::read_uintptr(const uintptr_t* location)
+RtResult<uintptr_t> SystemThreadingVolatile::read_uintptr(const uintptr_t* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<float> SystemThreadingVolatile::read_f32(const float* location)
+RtResult<float> SystemThreadingVolatile::read_f32(const float* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<double> SystemThreadingVolatile::read_f64(const double* location)
+RtResult<double> SystemThreadingVolatile::read_f64(const double* location) noexcept
 {
     RET_OK(*location);
 }
 
-RtResult<vm::RtObject*> SystemThreadingVolatile::read_ref(vm::RtObject* const* location)
+RtResult<vm::RtObject*> SystemThreadingVolatile::read_ref(vm::RtObject* const* location) noexcept
 {
     RET_OK(*location);
 }
 
 // ========== Write Implementation Functions ==========
 
-RtResultVoid SystemThreadingVolatile::write_bool(bool* location, bool value)
+RtResultVoid SystemThreadingVolatile::write_bool(bool* location, bool value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_byte(uint8_t* location, uint8_t value)
+RtResultVoid SystemThreadingVolatile::write_byte(uint8_t* location, uint8_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_sbyte(int8_t* location, int8_t value)
+RtResultVoid SystemThreadingVolatile::write_sbyte(int8_t* location, int8_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_i16(int16_t* location, int16_t value)
+RtResultVoid SystemThreadingVolatile::write_i16(int16_t* location, int16_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_u16(uint16_t* location, uint16_t value)
+RtResultVoid SystemThreadingVolatile::write_u16(uint16_t* location, uint16_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_i32(int32_t* location, int32_t value)
+RtResultVoid SystemThreadingVolatile::write_i32(int32_t* location, int32_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_u32(uint32_t* location, uint32_t value)
+RtResultVoid SystemThreadingVolatile::write_u32(uint32_t* location, uint32_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_i64(int64_t* location, int64_t value)
+RtResultVoid SystemThreadingVolatile::write_i64(int64_t* location, int64_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_u64(uint64_t* location, uint64_t value)
+RtResultVoid SystemThreadingVolatile::write_u64(uint64_t* location, uint64_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_intptr(intptr_t* location, intptr_t value)
+RtResultVoid SystemThreadingVolatile::write_intptr(intptr_t* location, intptr_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_uintptr(uintptr_t* location, uintptr_t value)
+RtResultVoid SystemThreadingVolatile::write_uintptr(uintptr_t* location, uintptr_t value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_f32(float* location, float value)
+RtResultVoid SystemThreadingVolatile::write_f32(float* location, float value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_f64(double* location, double value)
+RtResultVoid SystemThreadingVolatile::write_f64(double* location, double value) noexcept
 {
     *location = value;
     RET_VOID_OK();
 }
 
-RtResultVoid SystemThreadingVolatile::write_ref(vm::RtObject** location, vm::RtObject* value)
+RtResultVoid SystemThreadingVolatile::write_ref(vm::RtObject** location, vm::RtObject* value) noexcept
 {
     *location = value;
     RET_VOID_OK();
@@ -539,7 +539,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_threading_volatile[] = {
     {"System.Threading.Volatile::Write<>", (vm::IntrinsicFunction)&SystemThreadingVolatile::write_ref, write_ref_invoker},
 };
 
-utils::Span<vm::IntrinsicEntry> SystemThreadingVolatile::get_intrinsic_entries()
+utils::Span<vm::IntrinsicEntry> SystemThreadingVolatile::get_intrinsic_entries() noexcept
 {
     constexpr size_t entry_count = sizeof(s_intrinsic_entries_system_threading_volatile) / sizeof(s_intrinsic_entries_system_threading_volatile[0]);
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_threading_volatile, entry_count);

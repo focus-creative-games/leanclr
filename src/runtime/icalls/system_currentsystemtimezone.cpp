@@ -11,7 +11,7 @@ namespace icalls
 {
 
 #if LEANCLR_PLATFORM_POSIX
-RtResult<bool> SystemCurrentSystemTimeZone::get_time_zone_data(int32_t year, vm::RtArray** data, vm::RtArray** names, bool* daylight)
+RtResult<bool> SystemCurrentSystemTimeZone::get_time_zone_data(int32_t year, vm::RtArray** data, vm::RtArray** names, bool* daylight) noexcept
 {
     (void)year;
     auto corlib_types = vm::Class::get_corlib_types();
@@ -47,7 +47,7 @@ static RtResultVoid get_time_zone_data_invoker(metadata::RtManagedMethodPointer 
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.CurrentSystemTimeZone::GetTimeZoneData(System.Int32,System.Int64[]&,System.String[]&,System.Boolean&)",
@@ -56,7 +56,7 @@ utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_cal
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 #else
-utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>();
 }

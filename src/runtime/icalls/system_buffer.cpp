@@ -14,7 +14,7 @@ namespace icalls
 
 // Implementation functions
 
-RtResult<int32_t> SystemBuffer::byte_length(RtArray* arr)
+RtResult<int32_t> SystemBuffer::byte_length(RtArray* arr) noexcept
 {
     const metadata::RtClass* klass = arr->klass;
     int32_t length = Array::get_array_length(arr);
@@ -59,13 +59,13 @@ RtResult<int32_t> SystemBuffer::byte_length(RtArray* arr)
     RET_OK(byte_length);
 }
 
-RtResultVoid SystemBuffer::internal_memcpy(uint8_t* dst, const uint8_t* src, int32_t count)
+RtResultVoid SystemBuffer::internal_memcpy(uint8_t* dst, const uint8_t* src, int32_t count) noexcept
 {
     std::memcpy(dst, src, static_cast<size_t>(count));
     RET_VOID_OK();
 }
 
-RtResult<bool> SystemBuffer::internal_block_copy(RtArray* src, int32_t src_offset, RtArray* dst, int32_t dst_offset, int32_t count)
+RtResult<bool> SystemBuffer::internal_block_copy(RtArray* src, int32_t src_offset, RtArray* dst, int32_t dst_offset, int32_t count) noexcept
 {
     if (src == nullptr || dst == nullptr)
     {
@@ -99,7 +99,7 @@ RtResult<bool> SystemBuffer::internal_block_copy(RtArray* src, int32_t src_offse
 // Invoker functions
 
 /// @icall: System.Buffer::_ByteLength(System.Array)
-static RtResultVoid byte_length_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret)
+static RtResultVoid byte_length_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret) noexcept
 {
     RtArray* arr = EvalStackOp::get_param<RtArray*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, SystemBuffer::byte_length(arr));
@@ -108,7 +108,7 @@ static RtResultVoid byte_length_invoker(RtManagedMethodPointer, const RtMethodIn
 }
 
 /// @icall: System.Buffer::InternalMemcpy(System.Byte*,System.Byte*,System.Int32)
-static RtResultVoid internal_memcpy_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret)
+static RtResultVoid internal_memcpy_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret) noexcept
 {
     uint8_t* dst = EvalStackOp::get_param<uint8_t*>(params, 0);
     const uint8_t* src = EvalStackOp::get_param<const uint8_t*>(params, 1);
@@ -118,7 +118,7 @@ static RtResultVoid internal_memcpy_invoker(RtManagedMethodPointer, const RtMeth
 }
 
 /// @icall: System.Buffer::InternalBlockCopy(System.Array,System.Int32,System.Array,System.Int32,System.Int32)
-static RtResultVoid internal_block_copy_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret)
+static RtResultVoid internal_block_copy_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret) noexcept
 {
     RtArray* src = EvalStackOp::get_param<RtArray*>(params, 0);
     int32_t src_offset = EvalStackOp::get_param<int32_t>(params, 1);
@@ -139,7 +139,7 @@ static InternalCallEntry s_internal_call_entries_system_buffer[] = {
      (InternalCallFunction)&SystemBuffer::internal_block_copy, internal_block_copy_invoker},
 };
 
-utils::Span<InternalCallEntry> SystemBuffer::get_internal_call_entries()
+utils::Span<InternalCallEntry> SystemBuffer::get_internal_call_entries() noexcept
 {
     constexpr size_t entry_count = sizeof(s_internal_call_entries_system_buffer) / sizeof(s_internal_call_entries_system_buffer[0]);
     return utils::Span<InternalCallEntry>(s_internal_call_entries_system_buffer, entry_count);

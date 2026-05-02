@@ -12,7 +12,7 @@ namespace icalls
 
 // ========== Implementation Functions ==========
 
-RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle_type(metadata::RtFieldInfo* field, const metadata::RtTypeSig* type_sig)
+RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle_type(metadata::RtFieldInfo* field, const metadata::RtTypeSig* type_sig) noexcept
 {
     const metadata::RtClass* field_parent = field->parent;
     if (type_sig == nullptr)
@@ -32,7 +32,7 @@ RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle
     RET_OK(nullptr);
 }
 
-RtResult<vm::RtCustomAttribute*> SystemReflectionFieldInfo::get_marshal_info(vm::RtReflectionField* field)
+RtResult<vm::RtCustomAttribute*> SystemReflectionFieldInfo::get_marshal_info(vm::RtReflectionField* field) noexcept
 {
     return vm::CustomAttribute::get_marshal_info(field->field);
 }
@@ -68,7 +68,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_fieldinfo
     {"System.Reflection.FieldInfo::get_marshal_info()", (vm::InternalCallFunction)&SystemReflectionFieldInfo::get_marshal_info, get_marshal_info_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemReflectionFieldInfo::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemReflectionFieldInfo::get_internal_call_entries() noexcept
 {
     constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_fieldinfo) / sizeof(s_internal_call_entries_system_reflection_fieldinfo[0]);
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_fieldinfo, entry_count);

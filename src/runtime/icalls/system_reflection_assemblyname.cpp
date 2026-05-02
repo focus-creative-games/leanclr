@@ -10,7 +10,7 @@ namespace icalls
 {
 
 RtResult<bool> SystemReflectionAssemblyName::parse_assembly_name(intptr_t name_cstr, metadata::RtMonoAssemblyName* aname, bool* is_version_defined,
-                                                                 bool* is_token_defined)
+                                                                 bool* is_token_defined) noexcept
 {
     const char* name_str = reinterpret_cast<const char*>(name_cstr);
     size_t name_len = std::strlen(name_str);
@@ -36,7 +36,7 @@ static RtResultVoid parse_assembly_name_invoker(metadata::RtManagedMethodPointer
     RET_VOID_OK();
 }
 
-RtResultVoid SystemReflectionAssemblyName::get_public_token(const uint8_t* public_key, uint8_t* public_token, int32_t len)
+RtResultVoid SystemReflectionAssemblyName::get_public_token(const uint8_t* public_key, uint8_t* public_token, int32_t len) noexcept
 {
     (void)public_key;
     (void)public_token;
@@ -60,7 +60,7 @@ static RtResultVoid get_public_token_invoker(metadata::RtManagedMethodPointer me
     RET_VOID_OK();
 }
 
-RtResult<metadata::RtMonoAssemblyName*> SystemReflectionAssemblyName::get_native_name(metadata::RtAssembly* ass)
+RtResult<metadata::RtMonoAssemblyName*> SystemReflectionAssemblyName::get_native_name(metadata::RtAssembly* ass) noexcept
 {
     return vm::Reflection::get_assembly_name_object(ass);
 }
@@ -78,7 +78,7 @@ static RtResultVoid get_native_name_invoker(metadata::RtManagedMethodPointer met
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemReflectionAssemblyName::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemReflectionAssemblyName::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Reflection.AssemblyName::ParseAssemblyName(System.IntPtr,Mono.MonoAssemblyName&,System.Boolean&,System.Boolean&)",

@@ -14,14 +14,14 @@ namespace icalls
 
 // Implementation functions
 
-RtResult<uint32_t> SystemReflectionRuntimeConstructorInfo::get_metadata_token(RtReflectionConstructor* constructor)
+RtResult<uint32_t> SystemReflectionRuntimeConstructorInfo::get_metadata_token(RtReflectionConstructor* constructor) noexcept
 {
     const RtMethodInfo* method = constructor->method;
     RET_OK(method->token);
 }
 
 RtResult<RtObject*> SystemReflectionRuntimeConstructorInfo::internal_invoke(RtReflectionConstructor* constructor, RtObject* obj, RtArray* parameters,
-                                                                            RtObject** out_exc)
+                                                                            RtObject** out_exc) noexcept
 {
     const RtMethodInfo* method = constructor->method;
     return Reflection::invoke_method(method, obj, parameters, out_exc);
@@ -31,7 +31,7 @@ RtResult<RtObject*> SystemReflectionRuntimeConstructorInfo::internal_invoke(RtRe
 
 /// @icall: System.Reflection.RuntimeConstructorInfo::get_metadata_token
 static RtResultVoid get_metadata_token_invoker_system_reflection_runtimeconstructorinfo(RtManagedMethodPointer, const RtMethodInfo*,
-                                                                                        const RtStackObject* params, RtStackObject* ret)
+                                                                                        const RtStackObject* params, RtStackObject* ret) noexcept
 {
     RtReflectionConstructor* constructor = EvalStackOp::get_param<RtReflectionConstructor*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, token, SystemReflectionRuntimeConstructorInfo::get_metadata_token(constructor));
@@ -40,7 +40,8 @@ static RtResultVoid get_metadata_token_invoker_system_reflection_runtimeconstruc
 }
 
 /// @icall: System.Reflection.RuntimeConstructorInfo::InternalInvoke(System.Object,System.Object[],System.Exception&)
-static RtResultVoid runtimeconstructioninfo_internal_invoke_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params, RtStackObject* ret)
+static RtResultVoid runtimeconstructioninfo_internal_invoke_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params,
+                                                                    RtStackObject* ret) noexcept
 {
     RtReflectionConstructor* constructor = EvalStackOp::get_param<RtReflectionConstructor*>(params, 0);
     RtObject* obj = EvalStackOp::get_param<RtObject*>(params, 1);
@@ -61,9 +62,10 @@ static InternalCallEntry s_internal_call_entries_system_reflection_runtimeconstr
      (InternalCallFunction)&SystemReflectionRuntimeConstructorInfo::internal_invoke, runtimeconstructioninfo_internal_invoke_invoker},
 };
 
-utils::Span<InternalCallEntry> SystemReflectionRuntimeConstructorInfo::get_internal_call_entries()
+utils::Span<InternalCallEntry> SystemReflectionRuntimeConstructorInfo::get_internal_call_entries() noexcept
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_runtimeconstructorinfo) / sizeof(s_internal_call_entries_system_reflection_runtimeconstructorinfo[0]);
+    constexpr size_t entry_count =
+        sizeof(s_internal_call_entries_system_reflection_runtimeconstructorinfo) / sizeof(s_internal_call_entries_system_reflection_runtimeconstructorinfo[0]);
     return utils::Span<InternalCallEntry>(s_internal_call_entries_system_reflection_runtimeconstructorinfo, entry_count);
 }
 

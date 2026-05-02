@@ -13,7 +13,7 @@ namespace icalls
 
 // TypedReference operations
 RtResultVoid SystemTypedReference::internal_make_typed_reference(vm::RtTypedReference* result, vm::RtObject* target, vm::RtArray* fields,
-                                                                 vm::RtReflectionType* last_field_type)
+                                                                 vm::RtReflectionType* last_field_type) noexcept
 {
     (void)last_field_type;
 
@@ -47,7 +47,7 @@ RtResultVoid SystemTypedReference::internal_make_typed_reference(vm::RtTypedRefe
     RET_VOID_OK();
 }
 
-RtResult<vm::RtObject*> SystemTypedReference::internal_to_object(const vm::RtTypedReference* typed_ref)
+RtResult<vm::RtObject*> SystemTypedReference::internal_to_object(const vm::RtTypedReference* typed_ref) noexcept
 {
     if (vm::Class::is_reference_type(typed_ref->klass))
     {
@@ -99,7 +99,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_typedreference[] = {
     {"System.TypedReference::InternalToObject", (vm::InternalCallFunction)&SystemTypedReference::internal_to_object, invoker_internal_to_object},
 };
 
-utils::Span<vm::InternalCallEntry> SystemTypedReference::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemTypedReference::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_typedreference,
                                               sizeof(s_internal_call_entries_system_typedreference) / sizeof(vm::InternalCallEntry));

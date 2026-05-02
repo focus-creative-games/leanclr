@@ -5,7 +5,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<bool> SystemSecuritySecurityManager::get_security_enabled()
+RtResult<bool> SystemSecuritySecurityManager::get_security_enabled() noexcept
 {
     RET_OK(false);
 }
@@ -18,7 +18,7 @@ RtResultVoid get_security_enabled_invoker(metadata::RtManagedMethodPointer metho
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemSecuritySecurityManager::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemSecuritySecurityManager::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Security.SecurityManager::get_SecurityEnabled", (vm::InternalCallFunction)&SystemSecuritySecurityManager::get_security_enabled,

@@ -20,45 +20,45 @@ namespace icalls
 
 // Implementation functions
 
-RtResult<uint32_t> SystemRuntimeTypeHandle::get_attributes(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<uint32_t> SystemRuntimeTypeHandle::get_attributes(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
     RET_OK(klass->flags);
 }
 
-RtResult<int32_t> SystemRuntimeTypeHandle::get_metadata_token(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<int32_t> SystemRuntimeTypeHandle::get_metadata_token(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
     RET_OK(static_cast<int32_t>(klass->token));
 }
 
-RtResult<metadata::RtElementType> SystemRuntimeTypeHandle::get_cor_element_type(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<metadata::RtElementType> SystemRuntimeTypeHandle::get_cor_element_type(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     auto ret = type_sig->is_by_ref() ? metadata::RtElementType::ByRef : type_sig->ele_type;
     RET_OK(ret);
 }
 
-RtResult<bool> SystemRuntimeTypeHandle::has_instantiation(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<bool> SystemRuntimeTypeHandle::has_instantiation(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
     RET_OK(vm::Class::is_generic(klass) || vm::Class::is_generic_inst(klass));
 }
 
-RtResult<bool> SystemRuntimeTypeHandle::is_com_object(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<bool> SystemRuntimeTypeHandle::is_com_object(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     RET_OK(false);
 }
 
-RtResult<bool> SystemRuntimeTypeHandle::has_references(metadata::RtClass* klass)
+RtResult<bool> SystemRuntimeTypeHandle::has_references(metadata::RtClass* klass) noexcept
 {
     RET_OK(vm::Class::get_has_references(klass));
 }
 
-RtResult<int32_t> SystemRuntimeTypeHandle::get_array_rank(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<int32_t> SystemRuntimeTypeHandle::get_array_rank(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     switch (type_sig->ele_type)
@@ -72,7 +72,7 @@ RtResult<int32_t> SystemRuntimeTypeHandle::get_array_rank(const vm::RtReflection
     }
 }
 
-RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_element_type(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_element_type(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
 
@@ -104,14 +104,14 @@ RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_element_type
     RET_OK(reinterpret_cast<vm::RtReflectionRuntimeType*>(ref_type));
 }
 
-RtResult<bool> SystemRuntimeTypeHandle::is_generic_variable(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<bool> SystemRuntimeTypeHandle::is_generic_variable(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     auto ele_type = type_sig->ele_type;
     RET_OK(!type_sig->is_by_ref() && (ele_type == metadata::RtElementType::Var || ele_type == metadata::RtElementType::MVar));
 }
 
-RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_base_type(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_base_type(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
@@ -127,14 +127,14 @@ RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_base_type(co
     }
 }
 
-RtResult<bool> SystemRuntimeTypeHandle::is_generic_type_definition(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<bool> SystemRuntimeTypeHandle::is_generic_type_definition(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
     RET_OK(vm::Class::is_generic(klass));
 }
 
-RtResult<const metadata::RtGenericParam*> SystemRuntimeTypeHandle::get_generic_parameter_info(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<const metadata::RtGenericParam*> SystemRuntimeTypeHandle::get_generic_parameter_info(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     switch (type_sig->ele_type)
@@ -147,7 +147,7 @@ RtResult<const metadata::RtGenericParam*> SystemRuntimeTypeHandle::get_generic_p
     }
 }
 
-RtResult<bool> SystemRuntimeTypeHandle::is_subclass_of(const metadata::RtTypeSig* child_type, const metadata::RtTypeSig* parent_type)
+RtResult<bool> SystemRuntimeTypeHandle::is_subclass_of(const metadata::RtTypeSig* child_type, const metadata::RtTypeSig* parent_type) noexcept
 {
     if (parent_type->is_by_ref())
     {
@@ -175,14 +175,14 @@ RtResult<bool> SystemRuntimeTypeHandle::is_subclass_of(const metadata::RtTypeSig
     RET_OK(vm::Class::is_subclass_of_initialized(child_class, parent_class, true));
 }
 
-RtResult<bool> SystemRuntimeTypeHandle::is_by_ref_like(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<bool> SystemRuntimeTypeHandle::is_by_ref_like(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
     RET_OK(vm::Class::is_by_ref_like(klass));
 }
 
-RtResult<bool> SystemRuntimeTypeHandle::type_is_assignable_from(vm::RtReflectionRuntimeType* to_type, vm::RtReflectionRuntimeType* from_type)
+RtResult<bool> SystemRuntimeTypeHandle::type_is_assignable_from(vm::RtReflectionRuntimeType* to_type, vm::RtReflectionRuntimeType* from_type) noexcept
 {
     auto to_type_sig = to_type->reflection_type.type_handle;
     auto from_type_sig = from_type->reflection_type.type_handle;
@@ -198,7 +198,7 @@ RtResult<bool> SystemRuntimeTypeHandle::type_is_assignable_from(vm::RtReflection
     RET_OK(vm::Class::is_assignable_from(from_klass, to_klass));
 }
 
-RtResult<vm::RtReflectionAssembly*> SystemRuntimeTypeHandle::get_assembly(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtReflectionAssembly*> SystemRuntimeTypeHandle::get_assembly(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
@@ -206,7 +206,7 @@ RtResult<vm::RtReflectionAssembly*> SystemRuntimeTypeHandle::get_assembly(const 
     return vm::Reflection::get_assembly_reflection_object(mod->get_assembly());
 }
 
-RtResult<bool> SystemRuntimeTypeHandle::is_instance_of_type(const vm::RtReflectionRuntimeType* runtime_type, vm::RtObject* obj)
+RtResult<bool> SystemRuntimeTypeHandle::is_instance_of_type(const vm::RtReflectionRuntimeType* runtime_type, vm::RtObject* obj) noexcept
 {
     if (obj == nullptr)
     {
@@ -218,7 +218,7 @@ RtResult<bool> SystemRuntimeTypeHandle::is_instance_of_type(const vm::RtReflecti
     RET_OK(vm::Object::is_inst(obj, klass) != nullptr);
 }
 
-RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_generic_type_definition_impl(vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_generic_type_definition_impl(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     if (type_sig->is_by_ref())
@@ -244,7 +244,7 @@ RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_generic_type
     RET_OK(nullptr);
 }
 
-RtResult<vm::RtReflectionModule*> SystemRuntimeTypeHandle::get_module(const vm::RtReflectionRuntimeType* runtime_type)
+RtResult<vm::RtReflectionModule*> SystemRuntimeTypeHandle::get_module(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
@@ -253,7 +253,7 @@ RtResult<vm::RtReflectionModule*> SystemRuntimeTypeHandle::get_module(const vm::
 }
 
 RtResult<vm::RtReflectionType*> SystemRuntimeTypeHandle::internal_from_name(vm::RtString* name, int32_t* stack_crawl_mark, vm::RtReflectionAssembly* assembly,
-    bool throw_on_error, bool ignore_case, bool reflection_only)
+    bool throw_on_error, bool ignore_case, bool reflection_only) noexcept
 {
     utils::StringBuilder name_buf;
     utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)), name_buf);
@@ -536,7 +536,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtimetypehandle[] 
      (vm::InternalCallFunction)&SystemRuntimeTypeHandle::internal_from_name, internal_from_name_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemRuntimeTypeHandle::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemRuntimeTypeHandle::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetypehandle,
                                               sizeof(s_internal_call_entries_system_runtimetypehandle) / sizeof(vm::InternalCallEntry));

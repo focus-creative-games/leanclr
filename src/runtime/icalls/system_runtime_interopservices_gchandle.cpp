@@ -6,30 +6,30 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<bool> SystemRuntimeInteropServicesGCHandle::check_current_domain(void* handle)
+RtResult<bool> SystemRuntimeInteropServicesGCHandle::check_current_domain(void* handle) noexcept
 {
     (void)handle;
     // In WebAssembly, there is only a single AppDomain.
     RET_OK(true);
 }
 
-RtResult<vm::RtObject*> SystemRuntimeInteropServicesGCHandle::get_target(void* handle)
+RtResult<vm::RtObject*> SystemRuntimeInteropServicesGCHandle::get_target(void* handle) noexcept
 {
     RET_OK(vm::GCHandle::get_target(handle));
 }
 
-RtResult<void*> SystemRuntimeInteropServicesGCHandle::get_target_handle(vm::RtObject* obj, void* handle, int32_t handle_type)
+RtResult<void*> SystemRuntimeInteropServicesGCHandle::get_target_handle(vm::RtObject* obj, void* handle, int32_t handle_type) noexcept
 {
     RET_OK(vm::GCHandle::get_target_handle(obj, handle, handle_type));
 }
 
-RtResultVoid SystemRuntimeInteropServicesGCHandle::free_handle(void* handle)
+RtResultVoid SystemRuntimeInteropServicesGCHandle::free_handle(void* handle) noexcept
 {
     vm::GCHandle::free_handle(handle);
     RET_VOID_OK();
 }
 
-RtResult<void*> SystemRuntimeInteropServicesGCHandle::get_addr_of_pinned_object(void* handle)
+RtResult<void*> SystemRuntimeInteropServicesGCHandle::get_addr_of_pinned_object(void* handle) noexcept
 {
     RET_OK(vm::GCHandle::get_addr_of_pinned_object(handle));
 }
@@ -96,7 +96,7 @@ static RtResultVoid get_addr_of_pinned_object_invoker(metadata::RtManagedMethodP
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesGCHandle::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesGCHandle::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Runtime.InteropServices.GCHandle::CheckCurrentDomain(System.IntPtr)",

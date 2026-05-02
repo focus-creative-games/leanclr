@@ -8,7 +8,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<const metadata::RtTypeSig*> MonoRuntimeClassHandle::get_type_from_class(metadata::RtClass* klass)
+RtResult<const metadata::RtTypeSig*> MonoRuntimeClassHandle::get_type_from_class(metadata::RtClass* klass) noexcept
 {
     RET_OK(vm::Class::get_by_val_type_sig(klass));
 }
@@ -23,7 +23,7 @@ static RtResultVoid get_type_from_class_invoker(metadata::RtManagedMethodPointer
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> MonoRuntimeClassHandle::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> MonoRuntimeClassHandle::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"Mono.RuntimeClassHandle::GetTypeFromClass", (vm::InternalCallFunction)&MonoRuntimeClassHandle::get_type_from_class, get_type_from_class_invoker},

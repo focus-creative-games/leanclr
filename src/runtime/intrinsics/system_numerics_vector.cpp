@@ -7,7 +7,7 @@ namespace leanclr
 namespace intrinsics
 {
 
-RtResult<bool> SystemNumericsVector::get_is_hardware_accelerated()
+RtResult<bool> SystemNumericsVector::get_is_hardware_accelerated() noexcept
 {
     RET_OK(pal::Hardware::is_hardware_accelerated());
 }
@@ -30,7 +30,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_numerics_vector[] = {
      get_is_hardware_accelerated_invoker},
 };
 
-utils::Span<vm::IntrinsicEntry> SystemNumericsVector::get_intrinsic_entries()
+utils::Span<vm::IntrinsicEntry> SystemNumericsVector::get_intrinsic_entries() noexcept
 {
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_numerics_vector, sizeof(s_intrinsic_entries_system_numerics_vector) / sizeof(vm::IntrinsicEntry));
 }

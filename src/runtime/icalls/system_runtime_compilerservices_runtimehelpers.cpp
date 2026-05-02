@@ -13,7 +13,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::initialize_array(vm::RtArray* arr, size_t runtime_field_handle)
+RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::initialize_array(vm::RtArray* arr, size_t runtime_field_handle) noexcept
 {
     if (runtime_field_handle == 0)
     {
@@ -36,12 +36,12 @@ RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::initialize_array(vm::R
     RET_VOID_OK();
 }
 
-RtResult<int32_t> SystemRuntimeCompilerServicesRuntimeHelpers::get_offset_to_string_data()
+RtResult<int32_t> SystemRuntimeCompilerServicesRuntimeHelpers::get_offset_to_string_data() noexcept
 {
     RET_OK(vm::String::get_offset_to_string_data());
 }
 
-RtResult<vm::RtObject*> SystemRuntimeCompilerServicesRuntimeHelpers::get_object_value(vm::RtObject* obj)
+RtResult<vm::RtObject*> SystemRuntimeCompilerServicesRuntimeHelpers::get_object_value(vm::RtObject* obj) noexcept
 {
     if (obj == nullptr || !vm::Class::is_value_type(obj->klass))
     {
@@ -53,19 +53,19 @@ RtResult<vm::RtObject*> SystemRuntimeCompilerServicesRuntimeHelpers::get_object_
     }
 }
 
-RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::run_class_constructor(intptr_t type_handle)
+RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::run_class_constructor(intptr_t type_handle) noexcept
 {
     const metadata::RtTypeSig* type_sig = reinterpret_cast<const metadata::RtTypeSig*>(type_handle);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
     return vm::Runtime::run_class_static_constructor(klass);
 }
 
-RtResult<bool> SystemRuntimeCompilerServicesRuntimeHelpers::sufficient_execution_stack()
+RtResult<bool> SystemRuntimeCompilerServicesRuntimeHelpers::sufficient_execution_stack() noexcept
 {
     RET_OK(true);
 }
 
-RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::run_module_constructor(intptr_t module_handle)
+RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::run_module_constructor(intptr_t module_handle) noexcept
 {
     metadata::RtModuleDef* module = reinterpret_cast<metadata::RtModuleDef*>(module_handle);
     return vm::Runtime::run_module_static_constructor(module);
@@ -140,7 +140,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtime_compilerserv
      (vm::InternalCallFunction)&SystemRuntimeCompilerServicesRuntimeHelpers::run_module_constructor, run_module_constructor_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemRuntimeCompilerServicesRuntimeHelpers::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemRuntimeCompilerServicesRuntimeHelpers::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers, sizeof(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers) / sizeof(vm::InternalCallEntry));
 }

@@ -70,12 +70,12 @@ namespace icalls
 {
 
 template <typename T>
-static void Append(utils::Vector<T>& entries, const utils::Span<T>& sub_entries)
+static void Append(utils::Vector<T>& entries, const utils::Span<T>& sub_entries) noexcept
 {
     entries.push_range(sub_entries.begin(), sub_entries.size());
 }
 
-void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCallEntry>& entries)
+void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCallEntry>& entries) noexcept
 {
     entries.reserve(1000);
     // append all internal call entries here
@@ -144,7 +144,7 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemSecuritySecurityManager::get_internal_call_entries());
 }
 
-void InternalCallStubs::get_newobj_internal_call_entries(utils::Vector<vm::NewobjInternalCallEntry>& entries)
+void InternalCallStubs::get_newobj_internal_call_entries(utils::Vector<vm::NewobjInternalCallEntry>& entries) noexcept
 {
     entries.reserve(200);
     // append all newobj internal call entries here

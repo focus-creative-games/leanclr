@@ -10,7 +10,7 @@ namespace intrinsics
 
 // ========== Implementation Functions ==========
 
-RtResult<const uint8_t*> SystemSpan::get_item(const vm::RtReadOnlySpan<uint8_t>& span, int32_t index, size_t ele_size)
+RtResult<const uint8_t*> SystemSpan::get_item(const vm::RtReadOnlySpan<uint8_t>& span, int32_t index, size_t ele_size) noexcept
 {
     if ((uint32_t)index >= (uint32_t)span.length)
     {
@@ -47,7 +47,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_span[] = {
     {"System.ReadOnlySpan`1::get_Item", (vm::IntrinsicFunction)&SystemSpan::get_item, get_item_invoker},
 };
 
-utils::Span<vm::IntrinsicEntry> SystemSpan::get_intrinsic_entries()
+utils::Span<vm::IntrinsicEntry> SystemSpan::get_intrinsic_entries() noexcept
 {
     constexpr size_t entry_count = sizeof(s_intrinsic_entries_system_span) / sizeof(s_intrinsic_entries_system_span[0]);
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_span, entry_count);

@@ -9,7 +9,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<bool> SystemDiagnosticsDebugger::is_attached_internal()
+RtResult<bool> SystemDiagnosticsDebugger::is_attached_internal() noexcept
 {
     RET_OK(false);
 }
@@ -23,7 +23,7 @@ static RtResultVoid is_attached_internal_invoker(metadata::RtManagedMethodPointe
     RET_VOID_OK();
 }
 
-RtResult<bool> SystemDiagnosticsDebugger::is_logging()
+RtResult<bool> SystemDiagnosticsDebugger::is_logging() noexcept
 {
     RET_OK(false);
 }
@@ -37,7 +37,7 @@ static RtResultVoid is_logging_invoker(metadata::RtManagedMethodPointer methodPt
     RET_VOID_OK();
 }
 
-RtResultVoid SystemDiagnosticsDebugger::log_icall(int32_t level, vm::RtString** category, vm::RtString** message)
+RtResultVoid SystemDiagnosticsDebugger::log_icall(int32_t level, vm::RtString** category, vm::RtString** message) noexcept
 {
     vm::Debugger::log(level, *category, *message);
     RET_VOID_OK();
@@ -55,7 +55,7 @@ static RtResultVoid log_icall_invoker(metadata::RtManagedMethodPointer methodPtr
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemDiagnosticsDebugger::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemDiagnosticsDebugger::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Diagnostics.Debugger::IsAttached_internal()", (vm::InternalCallFunction)&SystemDiagnosticsDebugger::is_attached_internal,

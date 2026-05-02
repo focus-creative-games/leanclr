@@ -10,9 +10,9 @@ namespace icalls
 class SystemThreadingTimer
 {
   public:
-    static utils::Span<vm::InternalCallEntry> get_internal_call_entries();
+    static utils::Span<vm::InternalCallEntry> get_internal_call_entries() noexcept;
 
-    static RtResult<int64_t> get_time_monotonic();
+    static RtResult<int64_t> get_time_monotonic() noexcept;
 };
 
 } // namespace icalls

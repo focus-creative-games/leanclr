@@ -10,7 +10,7 @@ namespace icalls
 
 RtResultVoid SystemReflectionCustomAttributeData::resolve_arguments_internal(vm::RtReflectionMethod* ctor, vm::RtReflectionAssembly* ctor_assembly,
                                                                              intptr_t data, uint32_t data_length, vm::RtArray** typed_arg_arr_ptr,
-                                                                             vm::RtArray** named_arg_arr_ptr)
+                                                                             vm::RtArray** named_arg_arr_ptr) noexcept
 {
     const void* data_ptr = reinterpret_cast<const void*>(data);
     utils::BinaryReader reader(data_ptr, static_cast<size_t>(data_length));
@@ -40,7 +40,7 @@ static RtResultVoid resolve_arguments_internal_invoker(metadata::RtManagedMethod
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemReflectionCustomAttributeData::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemReflectionCustomAttributeData::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Reflection.CustomAttributeData::ResolveArgumentsInternal(System.Reflection.ConstructorInfo,System.Reflection.Assembly,System.IntPtr,System."

@@ -10,7 +10,7 @@ namespace icalls
 
 // ========== Implementation Functions ==========
 
-RtResult<vm::RtReflectionMethod*> SystemReflectionMethodBase::get_current_method()
+RtResult<vm::RtReflectionMethod*> SystemReflectionMethodBase::get_current_method() noexcept
 {
     interp::InterpFrame* executing_frame = interp::MachineState::get_global_machine_state().get_executing_frame_stack();
     if (executing_frame == nullptr)
@@ -41,7 +41,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_methodbas
     {"System.Reflection.MethodBase::GetCurrentMethod", (vm::InternalCallFunction)&SystemReflectionMethodBase::get_current_method, get_current_method_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemReflectionMethodBase::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemReflectionMethodBase::get_internal_call_entries() noexcept
 {
     constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_methodbase) / sizeof(s_internal_call_entries_system_reflection_methodbase[0]);
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_methodbase, entry_count);

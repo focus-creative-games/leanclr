@@ -8,7 +8,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<int64_t> SystemDateTime::get_system_time_as_file_time()
+RtResult<int64_t> SystemDateTime::get_system_time_as_file_time() noexcept
 {
     RET_OK(os::Time::get_system_time_as_file_time());
 }
@@ -25,7 +25,7 @@ static RtResultVoid get_system_time_as_file_time_invoker(metadata::RtManagedMeth
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemDateTime::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemDateTime::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.DateTime::GetSystemTimeAsFileTime()", (vm::InternalCallFunction)&SystemDateTime::get_system_time_as_file_time,

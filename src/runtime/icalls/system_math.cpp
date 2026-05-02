@@ -7,7 +7,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<double> SystemMath::round(double value)
+RtResult<double> SystemMath::round(double value) noexcept
 {
     RET_OK(std::round(value));
 }
@@ -24,7 +24,7 @@ static RtResultVoid round_invoker_math(metadata::RtManagedMethodPointer methodPt
     RET_VOID_OK();
 }
 
-RtResult<float> SystemMath::abs_f32(float value)
+RtResult<float> SystemMath::abs_f32(float value) noexcept
 {
     RET_OK(static_cast<float>(std::fabs(value)));
 }
@@ -41,7 +41,7 @@ static RtResultVoid abs_f32_invoker_math(metadata::RtManagedMethodPointer method
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::abs_f64(double value)
+RtResult<double> SystemMath::abs_f64(double value) noexcept
 {
     RET_OK(std::fabs(value));
 }
@@ -58,7 +58,7 @@ static RtResultVoid abs_f64_invoker_math(metadata::RtManagedMethodPointer method
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::acos(double value)
+RtResult<double> SystemMath::acos(double value) noexcept
 {
     RET_OK(std::acos(value));
 }
@@ -72,7 +72,7 @@ static RtResultVoid acos_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::acosh(double value)
+RtResult<double> SystemMath::acosh(double value) noexcept
 {
     RET_OK(std::acosh(value));
 }
@@ -86,7 +86,7 @@ static RtResultVoid acosh_invoker_math(metadata::RtManagedMethodPointer, const m
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::asin(double value)
+RtResult<double> SystemMath::asin(double value) noexcept
 {
     RET_OK(std::asin(value));
 }
@@ -100,7 +100,7 @@ static RtResultVoid asin_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::asinh(double value)
+RtResult<double> SystemMath::asinh(double value) noexcept
 {
     RET_OK(std::asinh(value));
 }
@@ -114,7 +114,7 @@ static RtResultVoid asinh_invoker_math(metadata::RtManagedMethodPointer, const m
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::atan(double value)
+RtResult<double> SystemMath::atan(double value) noexcept
 {
     RET_OK(std::atan(value));
 }
@@ -128,7 +128,7 @@ static RtResultVoid atan_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::atan2(double y, double x)
+RtResult<double> SystemMath::atan2(double y, double x) noexcept
 {
     RET_OK(std::atan2(y, x));
 }
@@ -143,7 +143,7 @@ static RtResultVoid atan2_invoker_math(metadata::RtManagedMethodPointer, const m
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::atanh(double value)
+RtResult<double> SystemMath::atanh(double value) noexcept
 {
     RET_OK(std::atanh(value));
 }
@@ -157,7 +157,7 @@ static RtResultVoid atanh_invoker_math(metadata::RtManagedMethodPointer, const m
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::cbrt(double value)
+RtResult<double> SystemMath::cbrt(double value) noexcept
 {
     RET_OK(std::cbrt(value));
 }
@@ -171,7 +171,7 @@ static RtResultVoid cbrt_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::ceiling(double value)
+RtResult<double> SystemMath::ceiling(double value) noexcept
 {
     RET_OK(std::ceil(value));
 }
@@ -185,7 +185,7 @@ static RtResultVoid ceiling_invoker_math(metadata::RtManagedMethodPointer, const
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::cos(double value)
+RtResult<double> SystemMath::cos(double value) noexcept
 {
     RET_OK(std::cos(value));
 }
@@ -199,7 +199,7 @@ static RtResultVoid cos_invoker_math(metadata::RtManagedMethodPointer, const met
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::cosh(double value)
+RtResult<double> SystemMath::cosh(double value) noexcept
 {
     RET_OK(std::cosh(value));
 }
@@ -213,7 +213,7 @@ static RtResultVoid cosh_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::exp(double value)
+RtResult<double> SystemMath::exp(double value) noexcept
 {
     RET_OK(std::exp(value));
 }
@@ -227,7 +227,7 @@ static RtResultVoid exp_invoker_math(metadata::RtManagedMethodPointer, const met
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::floor(double value)
+RtResult<double> SystemMath::floor(double value) noexcept
 {
     RET_OK(std::floor(value));
 }
@@ -241,7 +241,7 @@ static RtResultVoid floor_invoker_math(metadata::RtManagedMethodPointer, const m
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::log(double value)
+RtResult<double> SystemMath::log(double value) noexcept
 {
     RET_OK(std::log(value));
 }
@@ -255,7 +255,7 @@ static RtResultVoid log_invoker_math(metadata::RtManagedMethodPointer, const met
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::log10(double value)
+RtResult<double> SystemMath::log10(double value) noexcept
 {
     RET_OK(std::log10(value));
 }
@@ -269,7 +269,7 @@ static RtResultVoid log10_invoker_math(metadata::RtManagedMethodPointer, const m
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::pow(double x, double y)
+RtResult<double> SystemMath::pow(double x, double y) noexcept
 {
     RET_OK(std::pow(x, y));
 }
@@ -284,7 +284,7 @@ static RtResultVoid pow_invoker_math(metadata::RtManagedMethodPointer, const met
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::sin(double value)
+RtResult<double> SystemMath::sin(double value) noexcept
 {
     RET_OK(std::sin(value));
 }
@@ -298,7 +298,7 @@ static RtResultVoid sin_invoker_math(metadata::RtManagedMethodPointer, const met
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::sinh(double value)
+RtResult<double> SystemMath::sinh(double value) noexcept
 {
     RET_OK(std::sinh(value));
 }
@@ -312,7 +312,7 @@ static RtResultVoid sinh_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::sqrt(double value)
+RtResult<double> SystemMath::sqrt(double value) noexcept
 {
     RET_OK(std::sqrt(value));
 }
@@ -326,7 +326,7 @@ static RtResultVoid sqrt_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::tan(double value)
+RtResult<double> SystemMath::tan(double value) noexcept
 {
     RET_OK(std::tan(value));
 }
@@ -340,7 +340,7 @@ static RtResultVoid tan_invoker_math(metadata::RtManagedMethodPointer, const met
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::tanh(double value)
+RtResult<double> SystemMath::tanh(double value) noexcept
 {
     RET_OK(std::tanh(value));
 }
@@ -354,7 +354,7 @@ static RtResultVoid tanh_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::fmod(double x, double y)
+RtResult<double> SystemMath::fmod(double x, double y) noexcept
 {
     RET_OK(std::fmod(x, y));
 }
@@ -369,7 +369,7 @@ static RtResultVoid fmod_invoker_math(metadata::RtManagedMethodPointer, const me
     RET_VOID_OK();
 }
 
-RtResult<double> SystemMath::modf(double value, double* intpart)
+RtResult<double> SystemMath::modf(double value, double* intpart) noexcept
 {
     double int_component = 0.0;
     double frac = std::modf(value, &int_component);
@@ -418,7 +418,7 @@ static vm::InternalCallEntry s_entries_system_math[] = {
     {"System.Math::ModF(System.Double,System.Double*)", (vm::InternalCallFunction)&SystemMath::modf, modf_invoker_math},
 };
 
-utils::Span<vm::InternalCallEntry> SystemMath::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemMath::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_entries_system_math, sizeof(s_entries_system_math) / sizeof(s_entries_system_math[0]));
 }

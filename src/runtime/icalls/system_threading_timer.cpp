@@ -7,7 +7,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<int64_t> SystemThreadingTimer::get_time_monotonic()
+RtResult<int64_t> SystemThreadingTimer::get_time_monotonic() noexcept
 {
     RET_OK(os::Time::get_ticks_100nanos());
 }
@@ -24,7 +24,7 @@ static RtResultVoid get_time_monotonic_invoker(metadata::RtManagedMethodPointer 
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemThreadingTimer::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemThreadingTimer::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Threading.Timer::GetTimeMonotonic()", (vm::InternalCallFunction)&SystemThreadingTimer::get_time_monotonic, get_time_monotonic_invoker},

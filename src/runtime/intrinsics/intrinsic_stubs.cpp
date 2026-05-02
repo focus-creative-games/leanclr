@@ -12,12 +12,12 @@ namespace leanclr
 namespace intrinsics
 {
 template <typename T>
-static void Append(utils::Vector<T>& entries, const utils::Span<T>& sub_entries)
+static void Append(utils::Vector<T>& entries, const utils::Span<T>& sub_entries) noexcept
 {
     entries.push_range(sub_entries.begin(), sub_entries.size());
 }
 
-void IntrinsicStubs::get_intrinsic_entries(utils::Vector<vm::IntrinsicEntry>& entries)
+void IntrinsicStubs::get_intrinsic_entries(utils::Vector<vm::IntrinsicEntry>& entries) noexcept
 {
     entries.reserve(1000);
     // append intrinsic entries from various classes
@@ -30,7 +30,7 @@ void IntrinsicStubs::get_intrinsic_entries(utils::Vector<vm::IntrinsicEntry>& en
     Append(entries, SystemNumericsVector::get_intrinsic_entries());
 }
 
-void IntrinsicStubs::get_newobj_intrinsic_entries(utils::Vector<vm::NewobjIntrinsicEntry>& entries)
+void IntrinsicStubs::get_newobj_intrinsic_entries(utils::Vector<vm::NewobjIntrinsicEntry>& entries) noexcept
 {
     entries.reserve(200);
     Append(entries, SystemObject::get_newobj_intrinsic_entries());

@@ -21,7 +21,7 @@ static bool eq_any(const void* ptr1, const void* ptr2)
     return val1 == val2;
 }
 
-RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject* obj2, vm::RtArray** uncompared_field_objs)
+RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject* obj2, vm::RtArray** uncompared_field_objs) noexcept
 {
     *uncompared_field_objs = nullptr;
 
@@ -269,7 +269,7 @@ static RtResultVoid internal_equals_invoker(metadata::RtManagedMethodPointer met
     RET_VOID_OK();
 }
 
-RtResult<int32_t> SystemValueType::internal_get_hash_code(vm::RtObject* obj, vm::RtArray** uncompared_field_objs)
+RtResult<int32_t> SystemValueType::internal_get_hash_code(vm::RtObject* obj, vm::RtArray** uncompared_field_objs) noexcept
 {
     *uncompared_field_objs = nullptr;
 
@@ -472,7 +472,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_valuetype[] = {
      internal_get_hash_code_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemValueType::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemValueType::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_valuetype,
                                               sizeof(s_internal_call_entries_system_valuetype) / sizeof(vm::InternalCallEntry));

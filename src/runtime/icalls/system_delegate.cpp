@@ -13,7 +13,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<vm::RtReflectionMethod*> SystemDelegate::get_virtual_method_internal(vm::RtDelegate* this_delegate)
+RtResult<vm::RtReflectionMethod*> SystemDelegate::get_virtual_method_internal(vm::RtDelegate* this_delegate) noexcept
 {
     const metadata::RtMethodInfo* virtual_method = nullptr;
 
@@ -42,7 +42,7 @@ static RtResultVoid get_virtual_method_internal_invoker(metadata::RtManagedMetho
 }
 
 RtResult<vm::RtMulticastDelegate*> SystemDelegate::create_delegate_internal(vm::RtReflectionType* delegate_type, vm::RtObject* target,
-                                                                            vm::RtReflectionMethod* method, bool throw_on_bind)
+                                                                            vm::RtReflectionMethod* method, bool throw_on_bind) noexcept
 {
     return vm::Delegate::create_delegate_from_reflection(delegate_type, target, method->method, throw_on_bind);
 }
@@ -62,7 +62,7 @@ static RtResultVoid create_delegate_internal_invoker(metadata::RtManagedMethodPo
     RET_VOID_OK();
 }
 
-RtResult<vm::RtMulticastDelegate*> SystemDelegate::alloc_delegate_like_internal(vm::RtDelegate* source)
+RtResult<vm::RtMulticastDelegate*> SystemDelegate::alloc_delegate_like_internal(vm::RtDelegate* source) noexcept
 {
     // Get the delegate's class from the object header
     const metadata::RtClass* del_klass = source->klass;
@@ -89,7 +89,7 @@ static RtResultVoid alloc_delegate_like_internal_invoker(metadata::RtManagedMeth
     RET_VOID_OK();
 }
 
-utils::Span<vm::InternalCallEntry> SystemDelegate::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemDelegate::get_internal_call_entries() noexcept
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Delegate::GetVirtualMethod_internal()", (vm::InternalCallFunction)&SystemDelegate::get_virtual_method_internal,

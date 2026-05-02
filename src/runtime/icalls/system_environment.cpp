@@ -14,7 +14,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<int32_t> SystemEnvironment::get_exit_code()
+RtResult<int32_t> SystemEnvironment::get_exit_code() noexcept
 {
     RET_OK(vm::Environment::get_exit_code());
 }
@@ -28,7 +28,7 @@ static RtResultVoid get_exit_code_invoker(metadata::RtManagedMethodPointer, cons
     RET_VOID_OK();
 }
 
-RtResultVoid SystemEnvironment::set_exit_code(int32_t code)
+RtResultVoid SystemEnvironment::set_exit_code(int32_t code) noexcept
 {
     vm::Environment::set_exit_code(code);
     RET_VOID_OK();
@@ -36,13 +36,13 @@ RtResultVoid SystemEnvironment::set_exit_code(int32_t code)
 
 /// @icall: System.Environment::set_ExitCode
 static RtResultVoid set_exit_code_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                          interp::RtStackObject* /*ret*/)
+                                          interp::RtStackObject* /*ret*/) noexcept
 {
     int32_t code = EvalStackOp::get_param<int32_t>(params, 0);
     return SystemEnvironment::set_exit_code(code);
 }
 
-RtResult<bool> SystemEnvironment::get_has_shutdown_started()
+RtResult<bool> SystemEnvironment::get_has_shutdown_started() noexcept
 {
     RET_OK(vm::Environment::has_shutdown_started());
 }
@@ -56,7 +56,7 @@ static RtResultVoid get_has_shutdown_started_invoker(metadata::RtManagedMethodPo
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemEnvironment::get_machine_name()
+RtResult<vm::RtString*> SystemEnvironment::get_machine_name() noexcept
 {
     return vm::Environment::get_machine_name();
 }
@@ -70,7 +70,7 @@ static RtResultVoid get_machine_name_invoker(metadata::RtManagedMethodPointer, c
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemEnvironment::get_new_line()
+RtResult<vm::RtString*> SystemEnvironment::get_new_line() noexcept
 {
     return vm::Environment::get_new_line();
 }
@@ -84,7 +84,7 @@ static RtResultVoid get_new_line_invoker(metadata::RtManagedMethodPointer, const
     RET_VOID_OK();
 }
 
-RtResult<int32_t> SystemEnvironment::get_platform()
+RtResult<int32_t> SystemEnvironment::get_platform() noexcept
 {
     RET_OK(static_cast<int32_t>(vm::Environment::get_platform()));
 }
@@ -98,7 +98,7 @@ static RtResultVoid get_platform_invoker(metadata::RtManagedMethodPointer, const
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemEnvironment::get_os_version_string()
+RtResult<vm::RtString*> SystemEnvironment::get_os_version_string() noexcept
 {
     return vm::Environment::get_os_version_string();
 }
@@ -112,7 +112,7 @@ static RtResultVoid get_os_version_string_invoker(metadata::RtManagedMethodPoint
     RET_VOID_OK();
 }
 
-RtResult<int32_t> SystemEnvironment::get_tick_count()
+RtResult<int32_t> SystemEnvironment::get_tick_count() noexcept
 {
     RET_OK(os::Time::get_tick_count());
 }
@@ -126,7 +126,7 @@ static RtResultVoid get_tick_count_invoker(metadata::RtManagedMethodPointer, con
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemEnvironment::get_user_name()
+RtResult<vm::RtString*> SystemEnvironment::get_user_name() noexcept
 {
     return vm::Environment::get_user_name();
 }
@@ -140,7 +140,7 @@ static RtResultVoid get_user_name_invoker(metadata::RtManagedMethodPointer, cons
     RET_VOID_OK();
 }
 
-RtResultVoid SystemEnvironment::exit(int32_t code)
+RtResultVoid SystemEnvironment::exit(int32_t code) noexcept
 {
     vm::Environment::exit(code);
     RET_VOID_OK();
@@ -148,14 +148,14 @@ RtResultVoid SystemEnvironment::exit(int32_t code)
 
 /// @icall: System.Environment::Exit
 static RtResultVoid exit_invoker_system_environment(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* /*ret*/)
+                                 interp::RtStackObject* /*ret*/) noexcept
 {
     int32_t code = EvalStackOp::get_param<int32_t>(params, 0);
     RET_ERR_ON_FAIL(SystemEnvironment::exit(code));
     RET_VOID_OK();
 }
 
-RtResult<vm::RtArray*> SystemEnvironment::get_command_line_args()
+RtResult<vm::RtArray*> SystemEnvironment::get_command_line_args() noexcept
 {
     RET_OK(vm::Environment::get_command_line_args());
 }
@@ -169,7 +169,7 @@ static RtResultVoid get_command_line_args_invoker(metadata::RtManagedMethodPoint
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemEnvironment::internal_get_environment_variable_native(const char* variable_name)
+RtResult<vm::RtString*> SystemEnvironment::internal_get_environment_variable_native(const char* variable_name) noexcept
 {
     if (variable_name == nullptr)
         RET_OK(vm::String::get_empty_string());
@@ -187,14 +187,14 @@ static RtResultVoid internal_get_environment_variable_native_invoker(metadata::R
 }
 
 RtResultVoid SystemEnvironment::internal_set_environment_variable_native(const Utf16Char* variable_name, int32_t variable_name_length, const Utf16Char* value,
-                                                                         int32_t value_length)
+                                                                         int32_t value_length) noexcept
 {
     return vm::Environment::set_environment_variable(variable_name, variable_name_length, value, value_length);
 }
 
 /// @icall: System.Environment::InternalSetEnvironmentVariable(System.Char*,System.Int32,System.Char*,System.Int32)
 static RtResultVoid internal_set_environment_variable_native_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
-                                                                     const interp::RtStackObject* params, interp::RtStackObject* /*ret*/)
+                                                                     const interp::RtStackObject* params, interp::RtStackObject* /*ret*/) noexcept
 {
     auto var_name = EvalStackOp::get_param<const Utf16Char*>(params, 0);
     auto var_name_len = EvalStackOp::get_param<int32_t>(params, 1);
@@ -204,7 +204,7 @@ static RtResultVoid internal_set_environment_variable_native_invoker(metadata::R
     RET_VOID_OK();
 }
 
-RtResult<vm::RtArray*> SystemEnvironment::get_environment_variable_names()
+RtResult<vm::RtArray*> SystemEnvironment::get_environment_variable_names() noexcept
 {
     return vm::Environment::get_environment_variable_names();
 }
@@ -218,7 +218,7 @@ static RtResultVoid get_environment_variable_names_invoker(metadata::RtManagedMe
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemEnvironment::get_windows_folder_path(int32_t folder)
+RtResult<vm::RtString*> SystemEnvironment::get_windows_folder_path(int32_t folder) noexcept
 {
     return vm::Environment::get_windows_folder_path(folder);
 }
@@ -233,7 +233,7 @@ static RtResultVoid get_windows_folder_path_invoker(metadata::RtManagedMethodPoi
     RET_VOID_OK();
 }
 
-RtResult<vm::RtArray*> SystemEnvironment::get_logical_drives_internal()
+RtResult<vm::RtArray*> SystemEnvironment::get_logical_drives_internal() noexcept
 {
     return vm::Environment::get_logical_drives();
 }
@@ -247,7 +247,7 @@ static RtResultVoid get_logical_drives_internal_invoker(metadata::RtManagedMetho
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemEnvironment::get_machine_config_path()
+RtResult<vm::RtString*> SystemEnvironment::get_machine_config_path() noexcept
 {
     return vm::Environment::get_machine_config_path();
 }
@@ -261,7 +261,7 @@ static RtResultVoid get_machine_config_path_invoker(metadata::RtManagedMethodPoi
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemEnvironment::internal_get_home()
+RtResult<vm::RtString*> SystemEnvironment::internal_get_home() noexcept
 {
     return vm::Environment::get_home();
 }
@@ -275,7 +275,7 @@ static RtResultVoid internal_get_home_invoker(metadata::RtManagedMethodPointer, 
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemEnvironment::get_bundled_machine_config()
+RtResult<vm::RtString*> SystemEnvironment::get_bundled_machine_config() noexcept
 {
     return vm::Environment::get_bundled_machine_config();
 }
@@ -289,7 +289,7 @@ static RtResultVoid get_bundled_machine_config_invoker(metadata::RtManagedMethod
     RET_VOID_OK();
 }
 
-RtResultVoid SystemEnvironment::fail_fast()
+RtResultVoid SystemEnvironment::fail_fast() noexcept
 {
     vm::Environment::fail_fast();
     RET_VOID_OK();
@@ -297,13 +297,13 @@ RtResultVoid SystemEnvironment::fail_fast()
 
 /// @icall: System.Environment::FailFast
 static RtResultVoid fail_fast_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                      interp::RtStackObject* /*ret*/)
+                                      interp::RtStackObject* /*ret*/) noexcept
 {
     RET_ERR_ON_FAIL(SystemEnvironment::fail_fast());
     RET_VOID_OK();
 }
 
-RtResult<bool> SystemEnvironment::get_is_64bit_operating_system()
+RtResult<bool> SystemEnvironment::get_is_64bit_operating_system() noexcept
 {
     RET_OK(sizeof(void*) == 8);
 }
@@ -316,7 +316,7 @@ static RtResultVoid get_is_64bit_operating_system_invoker(metadata::RtManagedMet
     RET_VOID_OK();
 }
 
-RtResult<int32_t> SystemEnvironment::get_processor_count()
+RtResult<int32_t> SystemEnvironment::get_processor_count() noexcept
 {
     RET_OK(vm::Environment::get_processor_count());
 }
@@ -330,7 +330,7 @@ static RtResultVoid get_processor_count_invoker(metadata::RtManagedMethodPointer
     RET_VOID_OK();
 }
 
-RtResult<int32_t> SystemEnvironment::get_page_size()
+RtResult<int32_t> SystemEnvironment::get_page_size() noexcept
 {
     RET_OK(vm::Environment::get_page_size());
 }
@@ -371,7 +371,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_environment[] = {
     {"System.Environment::GetPageSize", (vm::InternalCallFunction)SystemEnvironment::get_page_size, get_page_size_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemEnvironment::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemEnvironment::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_environment, sizeof(s_internal_call_entries_system_environment) / sizeof(vm::InternalCallEntry));
 }

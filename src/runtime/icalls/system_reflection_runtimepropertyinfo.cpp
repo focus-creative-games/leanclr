@@ -25,7 +25,7 @@ enum class PInfo : int32_t
 // ========== Implementation Functions ==========
 
 RtResult<vm::RtReflectionProperty*> SystemReflectionRuntimePropertyInfo::internal_from_handle_type(metadata::RtPropertyInfo* property,
-                                                                                                   const metadata::RtTypeSig* type_sig)
+                                                                                                   const metadata::RtTypeSig* type_sig) noexcept
 {
     const metadata::RtClass* property_parent = property->parent;
     if (type_sig == nullptr)
@@ -45,7 +45,7 @@ RtResult<vm::RtReflectionProperty*> SystemReflectionRuntimePropertyInfo::interna
     RET_OK(nullptr);
 }
 
-RtResultVoid SystemReflectionRuntimePropertyInfo::get_property_info(vm::RtReflectionProperty* property, vm::RtMonoPropertyInfo* result_info, int32_t pinfo)
+RtResultVoid SystemReflectionRuntimePropertyInfo::get_property_info(vm::RtReflectionProperty* property, vm::RtMonoPropertyInfo* result_info, int32_t pinfo) noexcept
 {
     if (pinfo & static_cast<int32_t>(PInfo::Attributes))
     {
@@ -98,7 +98,7 @@ RtResultVoid SystemReflectionRuntimePropertyInfo::get_property_info(vm::RtReflec
     RET_VOID_OK();
 }
 
-RtResult<vm::RtArray*> SystemReflectionRuntimePropertyInfo::get_type_modifiers(vm::RtReflectionProperty* property, bool optional)
+RtResult<vm::RtArray*> SystemReflectionRuntimePropertyInfo::get_type_modifiers(vm::RtReflectionProperty* property, bool optional) noexcept
 {
     const metadata::RtPropertyInfo* prop = property->property;
     metadata::RtModuleDef* mod = prop->parent->image;
@@ -118,12 +118,12 @@ RtResult<vm::RtArray*> SystemReflectionRuntimePropertyInfo::get_type_modifiers(v
     RET_OK(modifier_type_arr);
 }
 
-RtResult<vm::RtObject*> SystemReflectionRuntimePropertyInfo::get_default_value(vm::RtReflectionProperty* property)
+RtResult<vm::RtObject*> SystemReflectionRuntimePropertyInfo::get_default_value(vm::RtReflectionProperty* property) noexcept
 {
     return vm::Property::get_const_object(property->property);
 }
 
-RtResult<int32_t> SystemReflectionRuntimePropertyInfo::get_metadata_token(vm::RtReflectionProperty* property)
+RtResult<int32_t> SystemReflectionRuntimePropertyInfo::get_metadata_token(vm::RtReflectionProperty* property) noexcept
 {
     RET_OK(static_cast<int32_t>(property->property->token));
 }
@@ -203,7 +203,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimepr
      get_metadata_token_invoker_system_reflection_runtimepropertyinfo},
 };
 
-utils::Span<vm::InternalCallEntry> SystemReflectionRuntimePropertyInfo::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemReflectionRuntimePropertyInfo::get_internal_call_entries() noexcept
 {
     constexpr size_t entry_count =
         sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo) / sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo[0]);

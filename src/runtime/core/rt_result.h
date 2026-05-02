@@ -261,11 +261,28 @@ struct function_return<R(Args...)>
 {
     typedef R type;
 };
+
+#if defined(__cpp_noexcept_function_type) && (__cpp_noexcept_function_type >= 201510L)
+template <typename R, typename... Args>
+struct function_return<R(Args...) noexcept>
+{
+    typedef R type;
+};
+#endif
+
 template <typename R, typename... Args>
 struct function_return<R (*)(Args...)>
 {
     typedef R type;
 };
+
+#if defined(__cpp_noexcept_function_type) && (__cpp_noexcept_function_type >= 201510L)
+template <typename R, typename... Args>
+struct function_return<R (*)(Args...) noexcept>
+{
+    typedef R type;
+};
+#endif
 
 } // namespace core
 } // namespace leanclr

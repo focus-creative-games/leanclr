@@ -12,7 +12,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<vm::RtString*> SystemString::newobj_char_array(vm::RtArray* charArray)
+RtResult<vm::RtString*> SystemString::newobj_char_array(vm::RtArray* charArray) noexcept
 {
     if (charArray == nullptr)
         RET_ERR(RtErr::NullReference);
@@ -36,7 +36,7 @@ static RtResultVoid newobj_char_array_invoker(metadata::RtManagedMethodPointer m
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::newobj_char_array_range(vm::RtArray* charArray, int32_t startIndex, int32_t length)
+RtResult<vm::RtString*> SystemString::newobj_char_array_range(vm::RtArray* charArray, int32_t startIndex, int32_t length) noexcept
 {
     if (charArray == nullptr)
         RET_ERR(RtErr::NullReference);
@@ -66,7 +66,7 @@ static RtResultVoid newobj_char_array_range_invoker(metadata::RtManagedMethodPoi
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::newobj_utf16chars(const Utf16Char* chars)
+RtResult<vm::RtString*> SystemString::newobj_utf16chars(const Utf16Char* chars) noexcept
 {
     // Determine length of null-terminated UTF-16 string
     int32_t length = static_cast<int32_t>(utils::StringUtil::get_utf16chars_length(chars));
@@ -84,7 +84,7 @@ static RtResultVoid newobj_utf16chars_invoker(metadata::RtManagedMethodPointer m
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::newobj_utf16chars_range(const Utf16Char* chars, int32_t startIndex, int32_t length)
+RtResult<vm::RtString*> SystemString::newobj_utf16chars_range(const Utf16Char* chars, int32_t startIndex, int32_t length) noexcept
 {
     // Compute total length of null-terminated UTF-16 buffer
     if (startIndex < 0 || length < 0 || startIndex > vm::RT_MAX_ARRAY_INDEX - length)
@@ -106,7 +106,7 @@ static RtResultVoid newobj_utf16chars_range_invoker(metadata::RtManagedMethodPoi
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::newobj_utf8chars(const int8_t* chars)
+RtResult<vm::RtString*> SystemString::newobj_utf8chars(const int8_t* chars) noexcept
 {
     int32_t utf8_length = static_cast<int32_t>(std::strlen(reinterpret_cast<const char*>(chars)));
     vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(reinterpret_cast<const char*>(chars), utf8_length);
@@ -123,7 +123,7 @@ static RtResultVoid newobj_utf8chars_invoker(metadata::RtManagedMethodPointer me
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const int8_t* chars, int32_t start_index, int32_t length)
+RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const int8_t* chars, int32_t start_index, int32_t length) noexcept
 {
     if (start_index < 0 || length < 0 || start_index > vm::RT_MAX_ARRAY_INDEX - length)
         RET_ERR(RtErr::ArgumentOutOfRange);
@@ -144,7 +144,7 @@ static RtResultVoid newobj_utf8chars_range_invoker(metadata::RtManagedMethodPoin
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::newobj_char_count(Utf16Char c, int32_t charCount)
+RtResult<vm::RtString*> SystemString::newobj_char_count(Utf16Char c, int32_t charCount) noexcept
 {
     if (charCount < 0)
         RET_ERR(RtErr::ArgumentOutOfRange);
@@ -165,7 +165,7 @@ static RtResultVoid newobj_char_count_invoker(metadata::RtManagedMethodPointer m
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::newobj_readonlyspan(const vm::RtReadOnlySpan<Utf16Char> span)
+RtResult<vm::RtString*> SystemString::newobj_readonlyspan(const vm::RtReadOnlySpan<Utf16Char> span) noexcept
 {
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(span.pointer), span.length);
     RET_OK(utf16_string);
@@ -181,7 +181,7 @@ static RtResultVoid newobj_readonlyspan_invoker(metadata::RtManagedMethodPointer
     RET_VOID_OK();
 }
 
-RtResult<vm::RtString*> SystemString::fast_allocate_string(int32_t length)
+RtResult<vm::RtString*> SystemString::fast_allocate_string(int32_t length) noexcept
 {
     // Prevent overflow: UTF-16 uses 2 bytes per char; ensure length*2 fits in u32
     if (static_cast<uint32_t>(length) > (std::numeric_limits<uint32_t>::max() / 2))
@@ -201,7 +201,7 @@ static RtResultVoid fast_allocate_string_invoker(metadata::RtManagedMethodPointe
 }
 
 /// @icall: System.String::InternalIntern
-RtResult<vm::RtString*> SystemString::internal_intern(vm::RtString* s)
+RtResult<vm::RtString*> SystemString::internal_intern(vm::RtString* s) noexcept
 {
     if (s == nullptr)
         RET_OK(s);
@@ -210,7 +210,7 @@ RtResult<vm::RtString*> SystemString::internal_intern(vm::RtString* s)
 }
 
 /// @icall: System.String::InternalIsInterned
-RtResult<vm::RtString*> SystemString::internal_is_interned(vm::RtString* s)
+RtResult<vm::RtString*> SystemString::internal_is_interned(vm::RtString* s) noexcept
 {
     if (s == nullptr)
         RET_OK(static_cast<vm::RtString*>(nullptr));
@@ -258,7 +258,7 @@ static vm::NewobjInternalCallEntry s_newobj_internal_call_entries[] = {
     {"System.String::.ctor(System.ReadOnlySpan`1<System.Char>)", newobj_readonlyspan_invoker},
 };
 
-utils::Span<vm::InternalCallEntry> SystemString::get_internal_call_entries()
+utils::Span<vm::InternalCallEntry> SystemString::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_string, sizeof(s_internal_call_entries_system_string) / sizeof(vm::InternalCallEntry));
 }

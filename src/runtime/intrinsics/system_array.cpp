@@ -8,17 +8,17 @@ namespace leanclr
 namespace intrinsics
 {
 
-RtResult<int32_t> SystemArray::get_length(vm::RtArray* arr)
+RtResult<int32_t> SystemArray::get_length(vm::RtArray* arr) noexcept
 {
     RET_OK(vm::Array::get_array_length(arr));
 }
 
-RtResult<int64_t> SystemArray::get_long_length(vm::RtArray* arr)
+RtResult<int64_t> SystemArray::get_long_length(vm::RtArray* arr) noexcept
 {
     RET_OK(static_cast<int64_t>(vm::Array::get_array_length(arr)));
 }
 
-RtResultVoid SystemArray::get_generic_value_impl(vm::RtArray* arr, int32_t index, void* value)
+RtResultVoid SystemArray::get_generic_value_impl(vm::RtArray* arr, int32_t index, void* value) noexcept
 {
     if (vm::Array::is_out_of_range(arr, index))
     {
@@ -28,7 +28,7 @@ RtResultVoid SystemArray::get_generic_value_impl(vm::RtArray* arr, int32_t index
     RET_VOID_OK();
 }
 
-RtResultVoid SystemArray::set_generic_value_impl(vm::RtArray* arr, int32_t index, void* value)
+RtResultVoid SystemArray::set_generic_value_impl(vm::RtArray* arr, int32_t index, void* value) noexcept
 {
     if (vm::Array::is_out_of_range(arr, index))
     {
@@ -95,7 +95,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_array[] = {
     {"System.Array::SetGenericValueImpl<>", (vm::IntrinsicFunction)&SystemArray::set_generic_value_impl, set_generic_value_impl_invoker},
 };
 
-utils::Span<vm::IntrinsicEntry> SystemArray::get_intrinsic_entries()
+utils::Span<vm::IntrinsicEntry> SystemArray::get_intrinsic_entries() noexcept
 {
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_array, sizeof(s_intrinsic_entries_system_array) / sizeof(vm::IntrinsicEntry));
 }
