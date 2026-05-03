@@ -345,17 +345,12 @@ namespace Tests.CSharp.CustomeAttrites
         [FT_Type(Type = typeof(Vector3), Value = typeof(FT_ushortAttribute))]
         public void NamedArgSystemType()
         {
-            Debugger.Log(0, "", $"enter {nameof(NamedArgSystemType)}");
             var method = GetType().GetMethod(nameof(NamedArgSystemType));
             Assert.NotNull(method);
-            Debugger.Log(0, "", $"stage 2");
             var attrs = method.GetCustomAttributes(typeof(FT_TypeAttribute), false);
-            Debugger.Log(0, "", $"stage 3");
-            Debugger.Log(0, "", $"attrs length: {attrs.Length}");
             Assert.NotNull(attrs);
             Assert.Equal(1, attrs.Length);
             var attr = (FT_TypeAttribute)attrs[0];
-            Debugger.Log(0, "", $"attr.Type: {attr.Type}, attr.Value: {attr.Value}");
             Assert.Equal(typeof(Vector3), attr.Type);
             Assert.Equal(typeof(FT_ushortAttribute), attr.Value);
         }
