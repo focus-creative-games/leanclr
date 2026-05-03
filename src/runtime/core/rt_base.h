@@ -17,9 +17,9 @@ using core::RtErr;
 using core::Unit;
 
 template <typename T>
-using RtResult = core::Result<T, RtErr>;
+using RtResult = core::Result<T>;
 
-using RtResultVoid = RtResult<Unit>;
+using RtResultVoid = core::ResultVoid;
 
 typedef uint16_t Utf16Char;
 

@@ -3,6 +3,7 @@
 #include <new>
 #include <type_traits>
 #include <utility>
+#include "rt_err.h"
 
 namespace leanclr
 {
@@ -13,11 +14,11 @@ struct Unit
 {
 };
 
-template <typename T, typename E>
+template <typename T>
 class Result
 {
-    typedef
-        typename std::aligned_storage<(sizeof(T) > sizeof(E) ? sizeof(T) : sizeof(E)), (alignof(T) > alignof(E) ? alignof(T) : alignof(E))>::type StorageType;
+    typedef typename std::aligned_storage<(sizeof(T) > sizeof(RtErr) ? sizeof(T) : sizeof(RtErr)),
+                                          (alignof(T) > alignof(RtErr) ? alignof(T) : alignof(RtErr))>::type StorageType;
 
     StorageType _data;
     bool _is_ok;
@@ -35,14 +36,14 @@ class Result
         return reinterpret_cast<const T*>(&_data);
     }
 
-    E* err_ptr()
+    RtErr* err_ptr()
     {
-        return reinterpret_cast<E*>(&_data);
+        return reinterpret_cast<RtErr*>(&_data);
     }
 
-    const E* err_ptr() const
+    const RtErr* err_ptr() const
     {
-        return reinterpret_cast<const E*>(&_data);
+        return reinterpret_cast<const RtErr*>(&_data);
     }
 
     void destroy_active()
@@ -50,7 +51,7 @@ class Result
         if (_is_ok)
             ok_ptr()->~T();
         else
-            err_ptr()->~E();
+            err_ptr()->~RtErr();
     }
 
   public:
@@ -63,25 +64,25 @@ class Result
         new (&_data) T(std::move(value));
     }
 
-    Result(const E& error) noexcept : _is_ok(false)
+    Result(const RtErr& error) noexcept : _is_ok(false)
     {
-        new (&_data) E(error);
+        new (&_data) RtErr(error);
     }
 
-    Result(E&& error) noexcept : _is_ok(false)
+    Result(RtErr&& error) noexcept : _is_ok(false)
     {
-        new (&_data) E(std::move(error));
+        new (&_data) RtErr(std::move(error));
     }
 
-    Result(const Result<T, E>& other) = delete;
-    Result<T, E>& operator=(const Result<T, E>& other) = delete;
+    Result(const Result<T>& other) = delete;
+    Result<T>& operator=(const Result<T>& other) = delete;
 
-    Result(Result<T, E>&& other) noexcept : _is_ok(other._is_ok)
+    Result(Result<T>&& other) noexcept : _is_ok(other._is_ok)
     {
         if (_is_ok)
             new (&_data) T(std::move(*other.ok_ptr()));
         else
-            new (&_data) E(std::move(*other.err_ptr()));
+            new (&_data) RtErr(std::move(*other.err_ptr()));
 
 #if LEANCLR_DEBUG
         _checked = other._checked;
@@ -89,14 +90,14 @@ class Result
 #endif
     }
 
-    static Result<T, E> Ok(const T& value)
+    static Result<T> Ok(const T& value)
     {
-        return Result<T, E>(value);
+        return Result<T>(value);
     }
 
-    static Result<T, E> Err(const E& error)
+    static Result<T> Err(const RtErr& error)
     {
-        return Result<T, E>(error);
+        return Result<T>(error);
     }
 
 #if LEANCLR_DEBUG
@@ -146,59 +147,57 @@ class Result
     //     return std::get<T>(data);
     // }
 
-    E unwrap_err() const
+    RtErr unwrap_err() const
     {
         assert(is_err() && "Result::unwrap_err() called on ok value");
         return *err_ptr();
     }
 
     template <typename F>
-    auto map_err(F f) -> Result<T, decltype(f(std::declval<E>()))>
+    auto map_err(F f) -> Result<T>
     {
-        typedef decltype(f(std::declval<E>())) NewErrorType;
-        return is_err() ? Result<T, NewErrorType>::Err(f(unwrap_err())) : Result<T, NewErrorType>::Ok(unwrap());
+        return is_err() ? Result<T>::Err(f(unwrap_err())) : Result<T>::Ok(unwrap());
     }
 
     template <typename F>
-    auto map(F f) -> Result<decltype(f(std::declval<T>())), E>
+    auto map(F f) -> Result<decltype(f(std::declval<T>()))>
     {
         typedef decltype(f(std::declval<T>())) NewValueType;
         if (is_ok())
-            return Result<NewValueType, E>::Ok(f(unwrap()));
-        return Result<NewValueType, E>::Err(unwrap_err());
+            return Result<NewValueType>::Ok(f(unwrap()));
+        return Result<NewValueType>::Err(unwrap_err());
     }
 
     template <typename U>
-    Result<U, E> cast()
+    Result<U> cast()
     {
         // Use tag dispatch so only the well-formed branch is instantiated.
         // `if constexpr` would be cleaner but requires C++17.
-        return cast_impl<U>(std::integral_constant < bool, std::is_same<U, E>::value&& std::is_same<T, E>::value > {});
+        return cast_impl<U>(std::integral_constant < bool, std::is_same<U, RtErr>::value&& std::is_same<T, RtErr>::value > {});
     }
 
   private:
-    // Fast path: when T == U == E the storage is already the desired Result<E, E>,
+    // Fast path: when T == U == RtErr the storage is already the desired Result<RtErr>,
     // so we can just move ourselves to avoid touching the payload.
     template <typename U>
-    Result<U, E> cast_impl(std::true_type)
+    Result<U> cast_impl(std::true_type)
     {
         return std::move(*this);
     }
 
-    // General path: rebuild a Result<U, E> from the current ok/err state.
+    // General path: rebuild a Result<U> from the current ok/err state.
     template <typename U>
-    Result<U, E> cast_impl(std::false_type)
+    Result<U> cast_impl(std::false_type)
     {
         if (is_ok())
-            return Result<U, E>::Ok((U)(unwrap()));
-        return Result<U, E>::Err(unwrap_err());
+            return Result<U>::Ok((U)(unwrap()));
+        return Result<U>::Err(unwrap_err());
     }
 };
 
-template <typename E>
 class ResultVoid
 {
-    E _err;
+    RtErr _err;
     bool _is_ok;
 #if LEANCLR_DEBUG
     mutable bool _checked = false;
@@ -209,14 +208,14 @@ class ResultVoid
     {
     }
 
-    ResultVoid(const E& error) noexcept : _err(error), _is_ok(false)
+    ResultVoid(const RtErr& error) noexcept : _err(error), _is_ok(false)
     {
     }
 
-    ResultVoid(const ResultVoid<E>& other) = delete;
-    ResultVoid<E>& operator=(const ResultVoid<E>& other) = delete;
+    ResultVoid(const ResultVoid& other) = delete;
+    ResultVoid& operator=(const ResultVoid& other) = delete;
 
-    ResultVoid(ResultVoid<E>&& other) noexcept : _err(other._err), _is_ok(other._is_ok)
+    ResultVoid(ResultVoid&& other) noexcept : _err(other._err), _is_ok(other._is_ok)
     {
 #if LEANCLR_DEBUG
         _checked = other._checked;
@@ -247,7 +246,7 @@ class ResultVoid
         return !_is_ok;
     }
 
-    E unwrap_err()
+    RtErr unwrap_err()
     {
         assert(is_err() && "Result::unwrap_err() called on ok value");
         return _err;
