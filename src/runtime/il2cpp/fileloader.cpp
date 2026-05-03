@@ -88,7 +88,7 @@ static RtResultVoid load_global_metadata_bundle_once()
     if (file_size < 8)
     {
         assert(false && "global-metadata.dat is too small");
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     file.seekg(0, std::ios::beg);
 
@@ -103,7 +103,7 @@ static RtResultVoid load_global_metadata_bundle_once()
     {
         assert(false && "invalid global-metadata.dat signature, expected COPH");
         printf("invalid global-metadata.dat signature, expected COPH, data_path='%s'\n", dat_path.c_str());
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
 
     const uint32_t assembly_count = read_u32_le(s_cached_bundle_data.data() + 4);
@@ -118,7 +118,7 @@ static RtResultVoid load_global_metadata_bundle_once()
         {
             assert(false && "truncated global-metadata.dat while reading assembly entries");
             printf("truncated global-metadata.dat while reading assembly entries, data_path='%s'\n", dat_path.c_str());
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
 
         size_t name_end = cursor;
@@ -130,7 +130,7 @@ static RtResultVoid load_global_metadata_bundle_once()
         {
             assert(false && "assembly name in global-metadata.dat is not null-terminated");
             printf("assembly name in global-metadata.dat is not null-terminated, data_path='%s'\n", dat_path.c_str());
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
 
         const size_t name_len_with_null = (name_end - cursor) + 1;
@@ -139,7 +139,7 @@ static RtResultVoid load_global_metadata_bundle_once()
         {
             assert(false && "truncated assembly info record in global-metadata.dat");
             printf("truncated assembly info record in global-metadata.dat, data_path='%s'\n", dat_path.c_str());
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
 
         AssemblyEntry e;
@@ -165,7 +165,7 @@ static RtResultVoid load_global_metadata_bundle_once()
         {
             assert(false && "assembly byte range out of bounds in global-metadata.dat");
             printf("assembly byte range out of bounds in global-metadata.dat, data_path='%s'\n", dat_path.c_str());
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
         e.file_data = s_cached_bundle_data.data() + abs_offset;
     }

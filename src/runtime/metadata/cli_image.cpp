@@ -75,26 +75,26 @@ struct StreamHeader
 RtResultVoid CliImage::load_streams()
 {
     if (metadata_offset >= image_length)
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     BinaryReader reader(image_data + metadata_offset, metadata_length);
 
     // Read metadata root header
     const MetadataRootPartial* meta_root = nullptr;
     if (!reader.try_peek_any_ptr(meta_root))
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     if (meta_root->signature != 0x424A5342) // "BSJB"
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     // Skip version string (aligned to 4-byte boundary)
     if (!reader.try_advance(meta_root->length + 16 + 2))
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     // Read stream header count
     uint16_t stream_header_count;
     if (!reader.try_read_u16(stream_header_count))
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     // Process each stream header
     for (uint16_t i = 0; i < stream_header_count; ++i)
@@ -103,26 +103,26 @@ RtResultVoid CliImage::load_streams()
         uint32_t stream_offset;
         uint32_t stream_size;
         if (!reader.try_read_u32(stream_offset) || !reader.try_read_u32(stream_size))
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
 
         // Peek at the stream name (null-terminated string)
         const char* heap_name = nullptr;
         if (!reader.try_peek_any_ptr(heap_name))
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
 
         // Calculate name length (including null terminator)
         size_t name_len = std::strlen(heap_name);
         if (name_len > MAX_STREAM_NAME_LENGTH)
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
 
         // Align position to 4-byte boundary after name
         size_t aligned_name_len = (name_len / 4 + 1) * 4;
         if (!reader.try_advance(aligned_name_len))
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
 
         // Validate stream data is within bounds
         if (stream_offset + stream_size > metadata_length)
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
 
         // Find matching heap and set its data
         CliHeap* cur_heap = nullptr;
@@ -153,31 +153,31 @@ RtResultVoid CliImage::load_streams()
 RtResultVoid CliImage::load_tables(alloc::MemPool& pool)
 {
     if (!tables_heap.data || tables_heap.size < TABLE_HEAP_HEADER_SIZE)
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     BinaryReader reader(tables_heap.data, tables_heap.size);
 
     // Skip reserved field (4 bytes)
     uint32_t reserved;
     if (!reader.try_read_u32(reserved))
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     // Read version info
     uint8_t major_version;
     uint8_t minor_version;
     if (!reader.try_read_byte(major_version) || !reader.try_read_byte(minor_version))
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     if (major_version != 2 || minor_version != 0)
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     // Read heap sizes flags
     uint8_t heap_sizes;
     if (!reader.try_read_byte(heap_sizes))
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     if ((heap_sizes & ~0x7) != 0)
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     string_heap_size_4_byte = (heap_sizes & 0x1) != 0;
     guid_heap_size_4_byte = (heap_sizes & 0x2) != 0;
@@ -186,31 +186,31 @@ RtResultVoid CliImage::load_tables(alloc::MemPool& pool)
     // Skip reserved byte
     uint8_t reserved2;
     if (!reader.try_read_byte(reserved2))
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     // Read valid table bits
     uint64_t valid_table_bits;
     if (!reader.try_read_u64(valid_table_bits))
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     if ((valid_table_bits & ~((1ULL << MAX_TABLE_COUNT) - 1)) != 0)
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     uint32_t valid_table_count = utils::MemOp::get_not_zero_bit_count(valid_table_bits);
     if (valid_table_count == 0)
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     // Read sorted table bits (not used currently)
     uint64_t sorted_table_bits;
     if (!reader.try_read_u64(sorted_table_bits))
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
 
     // Read row counts for all valid tables
     utils::Vector<uint32_t> row_counts(valid_table_count);
     for (uint32_t i = 0; i < valid_table_count; ++i)
     {
         if (!reader.try_read_u32(row_counts[i]))
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
 
     // Initialize valid tables and row counts
@@ -239,11 +239,11 @@ RtResultVoid CliImage::load_tables(alloc::MemPool& pool)
 
         const uint8_t* table_data = nullptr;
         if (!reader.try_peek_any_ptr(table_data))
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
 
         cur.data = table_data;
         if (!reader.try_advance(cur.row_count * cur.total_field_size))
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
 
     RET_VOID_OK();

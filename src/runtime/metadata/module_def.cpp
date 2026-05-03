@@ -179,7 +179,7 @@ RtResultVoid RtModuleDef::setup_assembly_name()
     const auto opt_row = _cliImage.read_assembly(1);
     if (!opt_row)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
 
     auto& row = opt_row.value();
@@ -1007,7 +1007,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
         uint8_t byteEleType = 0;
         if (!reader.try_read_byte(byteEleType))
         {
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
         RtElementType ele_type = static_cast<RtElementType>(byteEleType);
         result.ele_type = ele_type;
@@ -1059,7 +1059,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
             uint32_t coded_index = 0;
             if (!reader.try_read_compressed_uint32(coded_index))
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             RtToken token = RtMetadata::decode_type_def_ref_spec_coded_index(coded_index);
 
@@ -1078,14 +1078,14 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
                 auto row_opt = _cliImage.read_type_spec(token.rid);
                 if (!row_opt.has_value())
                 {
-                    return RtErr::BadImageFormat;
+                    RET_ASSERT_ERR(RtErr::BadImageFormat);
                 }
                 auto decoded_blob_result = get_decoded_blob_reader(row_opt->signature);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL2(utils::BinaryReader, spec_reader, decoded_blob_result);
                 return read_typesig_impl(spec_reader, gcc, gc, result);
             }
             default:
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             RET_VOID_OK();
         }
@@ -1095,12 +1095,12 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
             uint32_t rank;
             if (!reader.try_read_compressed_uint32(rank))
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             uint32_t numSizes;
             if (!reader.try_read_compressed_uint32(numSizes))
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             const uint32_t* sizes = nullptr;
             if (numSizes > 0)
@@ -1110,7 +1110,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
             uint32_t numLoBounds;
             if (!reader.try_read_compressed_uint32(numLoBounds))
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             const uint32_t* loBounds = nullptr;
             if (numLoBounds > 0)
@@ -1142,12 +1142,12 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
 
             if (baseTypeSig.ele_type != RtElementType::Class && baseTypeSig.ele_type != RtElementType::ValueType)
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             uint32_t genericArgCount;
             if (!reader.try_read_compressed_uint32(genericArgCount) || genericArgCount > RT_MAX_GENERIC_PARAM_COUNT)
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
 
             const RtTypeSig* tempGenericArgs[RT_MAX_GENERIC_PARAM_COUNT];
@@ -1167,7 +1167,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
             uint32_t num = 0;
             if (!reader.try_read_compressed_uint32(num))
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             bool is_mvar = (ele_type == RtElementType::MVar);
 
@@ -1179,7 +1179,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
                 {
                     if (num >= used_gi->generic_arg_count)
                     {
-                        return RtErr::BadImageFormat;
+                        RET_ASSERT_ERR(RtErr::BadImageFormat);
                     }
                     const RtTypeSig* arg = used_gi->generic_args[num];
                     // preserve flags like ByRef
@@ -1195,7 +1195,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
             {
                 if (num >= container->generic_param_count)
                 {
-                    return RtErr::BadImageFormat;
+                    RET_ASSERT_ERR(RtErr::BadImageFormat);
                 }
                 result.data.generic_param = &container->generic_params[num];
             }
@@ -1212,7 +1212,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
             uint32_t encoded_index = 0;
             if (!reader.try_read_compressed_uint32(encoded_index))
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             RtToken token = RtMetadata::decode_type_def_ref_spec_coded_index(encoded_index);
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, mod_class, get_class_by_type_def_ref_spec_token(token, gcc, gc));
@@ -1239,7 +1239,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
             uint32_t encoded_index = 0;
             if (!reader.try_read_compressed_uint32(encoded_index))
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             continue;
         }
@@ -1251,7 +1251,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
 
         default:
             // Unknown element type
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
     }
 
@@ -1266,7 +1266,7 @@ RtResultVoid RtModuleDef::read_type_modifier(utils::BinaryReader& reader, bool o
         uint8_t byteEleType = 0;
         if (!reader.try_read_byte(byteEleType))
         {
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
         RtElementType ele_type = static_cast<RtElementType>(byteEleType);
 
@@ -1278,7 +1278,7 @@ RtResultVoid RtModuleDef::read_type_modifier(utils::BinaryReader& reader, bool o
             uint32_t encoded_index = 0;
             if (!reader.try_read_compressed_uint32(encoded_index))
             {
-                return RtErr::BadImageFormat;
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
             if (optional != (ele_type == RtElementType::CModReqd))
             {
@@ -1301,7 +1301,7 @@ RtResultVoid RtModuleDef::read_member_modifier(utils::BinaryReader& reader, bool
     uint8_t byteType;
     if (!reader.try_read_byte(byteType))
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     return read_type_modifier(reader, optional, gcc, gc, outMemberMods);
 }
@@ -1318,19 +1318,19 @@ RtResultVoid RtModuleDef::read_parameter_modifier(utils::BinaryReader& reader, i
     uint8_t byteType;
     if (!reader.try_read_byte(byteType))
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RtSigType sigType = RtMetadata::decode_sig_type(byteType);
     if ((uint8_t)sigType >= (uint8_t)RtSigType::Field)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     uint32_t genericParamCount;
     if (((uint8_t)sigType & (uint8_t)RtSigType::GenericInst) != 0)
     {
         if (!reader.try_read_compressed_uint32(genericParamCount) || genericParamCount > RT_MAX_GENERIC_PARAM_COUNT)
         {
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
     }
     else
@@ -1341,7 +1341,7 @@ RtResultVoid RtModuleDef::read_parameter_modifier(utils::BinaryReader& reader, i
     uint32_t paramCount;
     if (!reader.try_read_compressed_uint32(paramCount) || paramCount > RT_MAX_PARAM_COUNT)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     if (index == -1)
     {
@@ -1349,7 +1349,7 @@ RtResultVoid RtModuleDef::read_parameter_modifier(utils::BinaryReader& reader, i
     }
     if ((uint32_t)index >= paramCount)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     for (int32_t i = 0; i < index; ++i)
     {
@@ -1363,12 +1363,12 @@ RtResult<const RtTypeSig*> RtModuleDef::read_field_sig(utils::BinaryReader& read
     uint8_t byteType;
     if (!reader.try_read_byte(byteType))
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RtSigType sigType = RtMetadata::decode_sig_type(byteType);
     if (sigType != RtSigType::Field)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     return read_typesig(reader, gcc, gc);
 }
@@ -1378,18 +1378,18 @@ RtResult<RtPropertySig> RtModuleDef::read_property_sig(utils::BinaryReader& read
     uint8_t byteType;
     if (!reader.try_read_byte(byteType))
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RtSigType sigType = RtMetadata::decode_sig_type(byteType);
     if (sigType != RtSigType::Property)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
 
     uint32_t paramCount;
     if (!reader.try_read_compressed_uint32(paramCount) || paramCount > RT_MAX_PARAM_COUNT)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, returnTypeSig, read_typesig(reader, gcc, gc));
 
@@ -1409,12 +1409,12 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig(utils::BinaryReader& reader, 
     uint8_t byteType;
     if (!reader.try_read_byte(byteType))
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RtSigType sigType = RtMetadata::decode_sig_type(byteType);
     if (sigType >= RtSigType::Field)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     return read_method_sig_skip_prologue(byteType, reader, gcc, gc);
 }
@@ -1427,7 +1427,7 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig_skip_prologue(uint8_t sigType
     {
         if (!reader.try_read_compressed_uint32(genericParamCount) || genericParamCount > RT_MAX_GENERIC_PARAM_COUNT)
         {
-            return RtErr::BadImageFormat;
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
     }
     else
@@ -1437,7 +1437,7 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig_skip_prologue(uint8_t sigType
     uint32_t paramCount;
     if (!reader.try_read_compressed_uint32(paramCount) || paramCount > RT_MAX_PARAM_COUNT)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, returnTypeSig, read_typesig(reader, gcc, gc));
 
@@ -1474,17 +1474,17 @@ RtResult<const RtGenericInst*> RtModuleDef::read_method_spec_generic_inst(utils:
     uint8_t byteType;
     if (!reader.try_read_byte(byteType))
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RtSigType sigType = RtMetadata::decode_sig_type(byteType);
     if (sigType != RtSigType::MethodSpec)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     uint32_t genericArgCount;
     if (!reader.try_read_compressed_uint32(genericArgCount) || genericArgCount > RT_MAX_GENERIC_PARAM_COUNT)
     {
-        return RtErr::BadImageFormat;
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     const RtTypeSig* tempGenericArgs[RT_MAX_GENERIC_PARAM_COUNT];
     for (uint32_t i = 0; i < genericArgCount; ++i)
