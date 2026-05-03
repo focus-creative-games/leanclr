@@ -98,7 +98,7 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
 
     utils::StringBuilder sb;
 
-    metadata::MetadataName::append_klass_full_name(sb, ex->klass).unwrap();
+    metadata::MetadataName::append_klass_full_name(sb, ex->klass).is_ok();
     sb.append_cstr(": ");
     sb.sure_null_terminator_but_not_append();
     std::cerr << sb.as_cstr();
