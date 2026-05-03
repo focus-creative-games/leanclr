@@ -18,46 +18,46 @@ namespace icalls
 // Add operations
 RtResult<int32_t> SystemThreadingInterlocked::add_i32(int32_t* location, int32_t value) noexcept
 {
-    int32_t old = *location;
-    *location = old + value;
-    RET_OK(old);
+    int32_t result = *location + value;
+    *location = result;
+    RET_OK(result);
 }
 
 RtResult<int64_t> SystemThreadingInterlocked::add_i64(int64_t* location, int64_t value) noexcept
 {
-    int64_t old = *location;
-    *location = old + value;
-    RET_OK(old);
+    int64_t result = *location + value;
+    *location = result;
+    RET_OK(result);
 }
 
 // Increment operations
 RtResult<int32_t> SystemThreadingInterlocked::increment_i32(int32_t* location) noexcept
 {
-    int32_t old = *location;
-    *location = old + 1;
-    RET_OK(old);
+    int32_t result = *location + 1;
+    *location = result;
+    RET_OK(result);
 }
 
 RtResult<int64_t> SystemThreadingInterlocked::increment_i64(int64_t* location) noexcept
 {
-    int64_t old = *location;
-    *location = old + 1;
-    RET_OK(old);
+    int64_t result = *location + 1;
+    *location = result;
+    RET_OK(result);
 }
 
 // Decrement operations
 RtResult<int32_t> SystemThreadingInterlocked::decrement_i32(int32_t* location) noexcept
 {
-    int32_t old = *location;
-    *location = old - 1;
-    RET_OK(old);
+    int32_t result = *location - 1;
+    *location = result;
+    RET_OK(result);
 }
 
 RtResult<int64_t> SystemThreadingInterlocked::decrement_i64(int64_t* location) noexcept
 {
-    int64_t old = *location;
-    *location = old - 1;
-    RET_OK(old);
+    int64_t result = *location - 1;
+    *location = result;
+    RET_OK(result);
 }
 
 // CompareExchange operations
@@ -88,10 +88,6 @@ RtResult<int32_t> SystemThreadingInterlocked::compare_exchange2_i32(int32_t* loc
 
 RtResult<int64_t> SystemThreadingInterlocked::compare_exchange_i64(int64_t* location, int64_t value, int64_t comparand) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     int64_t old = *location;
     if (old == comparand)
     {
@@ -102,10 +98,6 @@ RtResult<int64_t> SystemThreadingInterlocked::compare_exchange_i64(int64_t* loca
 
 RtResult<intptr_t> SystemThreadingInterlocked::compare_exchange_intptr(intptr_t* location, intptr_t value, intptr_t comparand) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     intptr_t old = *location;
     if (old == comparand)
     {
@@ -116,10 +108,6 @@ RtResult<intptr_t> SystemThreadingInterlocked::compare_exchange_intptr(intptr_t*
 
 RtResultVoid SystemThreadingInterlocked::compare_exchange_object2(RtObject** location, RtObject** value, RtObject** comparand, RtObject** result) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     RtObject* old = *location;
     if (old == *comparand)
     {
@@ -131,10 +119,6 @@ RtResultVoid SystemThreadingInterlocked::compare_exchange_object2(RtObject** loc
 
 RtResult<RtObject*> SystemThreadingInterlocked::compare_exchange_object(RtObject** location, RtObject* value, RtObject* comparand) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     RtObject* old = *location;
     if (old == comparand)
     {
@@ -145,10 +129,6 @@ RtResult<RtObject*> SystemThreadingInterlocked::compare_exchange_object(RtObject
 
 RtResult<float> SystemThreadingInterlocked::compare_exchange_f32(float* location, float value, float comparand) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     float old = *location;
     uint32_t old_bits;
     uint32_t comparand_bits;
@@ -163,10 +143,6 @@ RtResult<float> SystemThreadingInterlocked::compare_exchange_f32(float* location
 
 RtResult<double> SystemThreadingInterlocked::compare_exchange_f64(double* location, double value, double comparand) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     double old = *location;
     uint64_t old_bits;
     uint64_t comparand_bits;
@@ -182,10 +158,6 @@ RtResult<double> SystemThreadingInterlocked::compare_exchange_f64(double* locati
 // Exchange operations
 RtResult<int32_t> SystemThreadingInterlocked::exchange_i32(int32_t* location, int32_t value) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     int32_t old = *location;
     *location = value;
     RET_OK(old);
@@ -193,10 +165,6 @@ RtResult<int32_t> SystemThreadingInterlocked::exchange_i32(int32_t* location, in
 
 RtResult<int64_t> SystemThreadingInterlocked::exchange_i64(int64_t* location, int64_t value) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     int64_t old = *location;
     *location = value;
     RET_OK(old);
@@ -204,10 +172,6 @@ RtResult<int64_t> SystemThreadingInterlocked::exchange_i64(int64_t* location, in
 
 RtResult<intptr_t> SystemThreadingInterlocked::exchange_intptr(intptr_t* location, intptr_t value) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     intptr_t old = *location;
     *location = value;
     RET_OK(old);
@@ -215,10 +179,6 @@ RtResult<intptr_t> SystemThreadingInterlocked::exchange_intptr(intptr_t* locatio
 
 RtResult<float> SystemThreadingInterlocked::exchange_f32(float* location, float value) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     float old = *location;
     *location = value;
     RET_OK(old);
@@ -226,10 +186,6 @@ RtResult<float> SystemThreadingInterlocked::exchange_f32(float* location, float 
 
 RtResult<double> SystemThreadingInterlocked::exchange_f64(double* location, double value) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     double old = *location;
     *location = value;
     RET_OK(old);
@@ -237,10 +193,6 @@ RtResult<double> SystemThreadingInterlocked::exchange_f64(double* location, doub
 
 RtResultVoid SystemThreadingInterlocked::exchange_object(RtObject** location, RtObject** value, RtObject** result) noexcept
 {
-    if (location == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
     RtObject* old = *location;
     *location = *value;
     *result = old;
@@ -256,8 +208,7 @@ RtResultVoid SystemThreadingInterlocked::memory_barrier_process_wide() noexcept
 // Read
 RtResult<int64_t> SystemThreadingInterlocked::read(int64_t* location) noexcept
 {
-    int64_t value = *location;
-    RET_OK(value);
+    RET_OK(*location);
 }
 
 // ========== Invoker Functions ==========
