@@ -598,13 +598,6 @@ struct function_return<R (*)(Args...) noexcept>
         return err;  \
     } while (0)
 
-#define RET_ASSERT_ERR(err)    \
-    do                         \
-    {                          \
-        assert(false && #err); \
-        return err;            \
-    } while (0)
-
 #define RET_ERR_ON_FALSE(expr, err) \
     do                              \
     {                               \

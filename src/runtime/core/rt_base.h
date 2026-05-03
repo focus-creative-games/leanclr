@@ -34,4 +34,11 @@ RtErr fatal_on_not_implemented_error();
 #define RETURN_NOT_IMPLEMENTED_ERROR() RET_ERR(RtErr::NotImplemented)
 #endif
 
+#define RET_ASSERT_ERR(err)    \
+    do                         \
+    {                          \
+        assert(false && #err); \
+        return err;            \
+    } while (0)
+
 } // namespace leanclr
