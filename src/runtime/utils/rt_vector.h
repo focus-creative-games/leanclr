@@ -59,7 +59,8 @@ class Vector
 
     explicit Vector(const_iterator begin, const_iterator end, const Allocator& alloc = Allocator()) : allocator_(alloc), data_(nullptr), size_(0), capacity_(0)
     {
-        push_range(begin, end - begin);
+        assert(begin <= end);
+        push_range(begin, static_cast<size_t>(end - begin));
     }
 
     Vector(const Vector& other) : allocator_(other.allocator_), data_(nullptr), size_(0), capacity_(0)
