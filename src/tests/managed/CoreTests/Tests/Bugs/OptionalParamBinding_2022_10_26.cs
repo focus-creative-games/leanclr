@@ -31,6 +31,18 @@ namespace Tests.Bugs
             return a;
         }
 
+        enum Color
+        {
+            Red,
+            Green,
+            Blue,
+        }
+
+        static Color Foo4(Color c = Color.Red)
+        {
+            return c;
+        }
+
         [UnitTest]
         public void ParamIsNotOptional()
         {
@@ -77,6 +89,15 @@ namespace Tests.Bugs
             BindingFlags.Instance | BindingFlags.Static | BindingFlags.InvokeMethod | BindingFlags.OptionalParamBinding, null, null,
                 null);
             Assert.Null(x);
+        }
+
+        [UnitTest]
+        public void invoke4()
+        {
+            Color x = (Color)GetType().InvokeMember("Foo4", BindingFlags.Public | BindingFlags.NonPublic |
+            BindingFlags.Instance | BindingFlags.Static | BindingFlags.InvokeMethod | BindingFlags.OptionalParamBinding, null, null,
+                null);
+            Assert.Equal(Color.Red, x);
         }
     }
 }
