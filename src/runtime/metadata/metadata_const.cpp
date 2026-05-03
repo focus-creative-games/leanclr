@@ -37,7 +37,7 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
     {
         if (reader.length() % 2 != 0)
         {
-            RET_ASSERT_ERR(RtErr::ExecutionEngine);
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
         RET_OK(vm::String::create_string_from_utf16chars(reinterpret_cast<const Utf16Char*>(dataPtr),
                                                          static_cast<int32_t>(reader.length() / 2)));
@@ -45,6 +45,32 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
     case RtElementType::Class:
     {
         return nullptr;
+    }
+    case RtElementType::ValueType:
+    {
+        if (vm::Class::is_enum_type(fieldClass))
+        {
+            return vm::Object::box_object(fieldClass, dataPtr);
+        }
+        else
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+    }
+    case RtElementType::GenericInst:
+    {
+        if (vm::Class::is_enum_type(fieldClass))
+        {
+            return vm::Object::box_object(fieldClass, dataPtr);
+        }
+        else if (vm::Class::is_reference_type(fieldClass))
+        {
+            return nullptr;
+        }
+        else
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
     }
     default:
     {
