@@ -198,24 +198,24 @@ class Result
 class ResultVoid
 {
     RtErr _err;
-    bool _is_ok;
 #if LEANCLR_DEBUG
     mutable bool _checked = false;
 #endif
 
   public:
-    ResultVoid(const Unit& value) noexcept : _is_ok(true)
+    ResultVoid(const Unit& value) noexcept : _err(RtErr::None)
     {
     }
 
-    ResultVoid(const RtErr& error) noexcept : _err(error), _is_ok(false)
+    ResultVoid(const RtErr& error) noexcept : _err(error)
     {
+        assert(error != RtErr::None);
     }
 
     ResultVoid(const ResultVoid& other) = delete;
     ResultVoid& operator=(const ResultVoid& other) = delete;
 
-    ResultVoid(ResultVoid&& other) noexcept : _err(other._err), _is_ok(other._is_ok)
+    ResultVoid(ResultVoid&& other) noexcept : _err(other._err)
     {
 #if LEANCLR_DEBUG
         _checked = other._checked;
@@ -235,7 +235,7 @@ class ResultVoid
 #if LEANCLR_DEBUG
         _checked = true;
 #endif
-        return _is_ok;
+        return _err == RtErr::None;
     }
 
     bool is_err() const
@@ -243,7 +243,7 @@ class ResultVoid
 #if LEANCLR_DEBUG
         _checked = true;
 #endif
-        return !_is_ok;
+        return _err != RtErr::None;
     }
 
     RtErr unwrap_err()
