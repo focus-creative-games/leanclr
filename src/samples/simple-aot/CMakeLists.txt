@@ -28,7 +28,7 @@ if(EMSCRIPTEN)
     set(LEAN_SIMPLE_AOT_WASM_LINK
         "SHELL:-s WASM=1"
         "SHELL:-s ALLOW_MEMORY_GROWTH=1"
-        "SHELL:-sDEFAULT_LIBRARY_FUNCS_TO_INCLUDE=malloc,free"
+        "SHELL:-sEXPORTED_FUNCTIONS=['_malloc','_free','_main']"
         "SHELL:--js-library=${LEAN_SIMPLE_AOT_PINVOKE_JS}"
     )
     if(CMAKE_BUILD_TYPE STREQUAL "Debug")
