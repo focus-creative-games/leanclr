@@ -59,6 +59,20 @@ RtResult<vm::RtArray*> SystemGlobalizationCultureInfo::internal_get_cultures(boo
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
+RtResultVoid SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_app_x(vm::RtCultureInfo* /*_this*/, vm::RtString* /*name*/) noexcept
+{
+    RET_VOID_OK();
+}
+
+/// @icall: System.Globalization.CultureInfo::SetUserPreferredCultureInfoInAppX(System.String)
+static RtResultVoid set_user_preferred_culture_info_in_app_x_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                                                     const interp::RtStackObject* params, interp::RtStackObject* /*ret*/) noexcept
+{
+    auto _this = EvalStackOp::get_param<vm::RtCultureInfo*>(params, 0);
+    auto name = EvalStackOp::get_param<vm::RtString*>(params, 1);
+    return SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_app_x(_this, name);
+}
+
 /// @icall: System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)
 static RtResultVoid internal_get_cultures_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
@@ -80,6 +94,9 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultur
      get_current_locale_name_invoker},
     {"System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)",
      (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::internal_get_cultures, internal_get_cultures_invoker},
+    {"System.Globalization.CultureInfo::SetUserPreferredCultureInfoInAppX(System.String)",
+     (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_app_x,
+     set_user_preferred_culture_info_in_app_x_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries() noexcept
