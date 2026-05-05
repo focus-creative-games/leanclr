@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cstdlib>
 #include <limits>
 #include "vm/rt_managed_types.h"
 #include "vm/rt_exception.h"
@@ -12,6 +13,8 @@
 #include "vm/delegate.h"
 #include "vm/reflection.h"
 #include "vm/internal_calls.h"
+#include "vm/rt_string.h"
+#include "vm/marshal.h"
 #include "metadata/module_def.h"
 #include "interp/interp_defs.h"
 #include "interp/execution_helper.h"
@@ -316,8 +319,15 @@ inline bool is_pointer_element_compatible_with(const metadata::RtClass* fromClas
     return vm::Class::is_pointer_element_compatible_with(fromClass, toClass);
 }
 
+
 template <typename T>
-inline T get_array_element_data_at(const vm::RtArray* array, int32_t index)
+inline T* get_array_element_data_start_as(vm::RtArray* array)
+{
+    return vm::Array::get_array_data_start_as<T>(array);
+}
+
+template <typename T>
+inline T get_array_element_data_at(vm::RtArray* array, int32_t index)
 {
     return vm::Array::get_array_data_at<T>(array, index);
 }
@@ -334,7 +344,7 @@ inline void set_array_element_data_at(vm::RtArray* array, int32_t index, T value
     vm::Array::set_array_data_at<T>(array, index, value);
 }
 
-inline RtResult<int32_t> get_mdarray_global_index_from_indices(const vm::RtArray* arr, int32_t* indices)
+inline RtResult<int32_t> get_mdarray_global_index_from_indices(vm::RtArray* arr, int32_t* indices)
 {
     return vm::Array::get_mdarray_global_index_from_indices3(arr, indices);
 }
@@ -416,6 +426,21 @@ inline intptr_t cast_float_to_intptr(Src value)
 inline vm::InternalCallFunction resolve_internal_call(const char* name)
 {
     return (vm::InternalCallFunction)vm::InternalCalls::get_lite_internal_call(name);
+}
+
+using vm::TempUtf16StringToUtf8Converter;
+
+inline vm::RtString* marshal_utf8_string_to_utf16(const char* str)
+{
+    return str ? vm::String::create_string_from_utf8cstr(str) : nullptr;
+}
+
+inline void free_pinvoke_returned_utf8_cstr(const char* str)
+{
+    if (str != nullptr)
+    {
+        std::free(const_cast<char*>(str));
+    }
 }
 
 } // namespace codegen

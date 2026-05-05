@@ -1,6 +1,8 @@
 #include "leanclr_common.h"
 #include "vm/object.h"
 #include "metadata/module_def.h"
+#include "utils/string_builder.h"
+#include "vm/rt_string.h"
 
 namespace leanclr
 {
@@ -144,5 +146,18 @@ void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const m
     }
     }
 }
+
+const char* marshal_utf16_string_to_utf8(vm::RtString* str)
+{
+    if (str == nullptr)
+    {
+        return nullptr;
+    }
+    utils::StringBuilder sb;
+    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)), sb);
+    // FIXME: should we use std::malloc instead of alloc::GeneralAllocation::malloc?
+    return sb.dup_to_zero_end_cstr();
+}
+
 } // namespace codegen
 } // namespace leanclr
