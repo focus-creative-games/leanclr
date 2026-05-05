@@ -392,6 +392,12 @@ namespace LeanAOT.ToCpp
                 AddTypeForwardDefineAny(typeSig.Next, true);
                 break;
             }
+            case ElementType.Array:
+            case ElementType.SZArray:
+            {
+                AddTypeForwardDefineAny(typeSig.Next, true);
+                break;
+            }
             case ElementType.Void:
             case ElementType.Boolean:
             case ElementType.Char:
