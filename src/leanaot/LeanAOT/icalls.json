@@ -705,6 +705,11 @@
     "header": "icalls/system_globalization_cultureinfo.h"
   },
   {
+    "name": "System.Globalization.CultureInfo::SetUserPreferredCultureInfoInAppX(System.String)",
+    "func": "SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_app_x",
+    "header": "icalls/system_globalization_cultureinfo.h"
+  },
+  {
     "name": "System.IO.MonoIO::Close(System.IntPtr,System.IO.MonoIOError&)",
     "func": "SystemIOMonoIO::close",
     "header": "icalls/system_io_monoio.h"

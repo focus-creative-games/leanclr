@@ -1,3 +1,4 @@
+using System;
 using dnlib.DotNet;
 using LeanAOT.Core;
 using System.Text;
@@ -40,7 +41,16 @@ namespace LeanAOT.ToCpp
             string nativeParamDecls = string.Join(", ", nativeParams.Select((p, index) => $"{p.TypeName} __arg{index}"));
             string nativeParamExprs = string.Join(", ", nativeParams.Select(p => p.Expr));
 
-            _bodyWriter.AddLine("#if defined(__EMSCRIPTEN__)");
+            bool kernel32Guard = IsWinOnlyDll(GetPInvokeModuleName());
+            if (kernel32Guard)
+            {
+                _bodyWriter.AddLine("#if !LEANCLR_PLATFORM_WIN");
+                _bodyWriter.AddLine($"printf(\"PInvoke method {_method.FullName} is not supported on non-Windows platforms for symbol {EscapeCppString(importName)}\\n\");");
+                _bodyWriter.AddLine($"LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR();");
+                _bodyWriter.AddLine("#else");
+            }
+
+            _bodyWriter.AddLine("#if LEANCLR_PLATFORM_WASM");
             _bodyWriter.AddLine($"extern {nativeRetType} {pinvokeSymbol}({nativeParamDecls}) __asm__(\"{EscapeCppString(importName)}\");");
             foreach (var param in nativeParams)
             {
@@ -73,6 +83,11 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine($"printf(\"PInvoke method {_method.FullName} requires wasm static linking for symbol {EscapeCppString(importName)}\\n\");");
             _bodyWriter.AddLine($"LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR();");
             _bodyWriter.AddLine("#endif");
+
+            if (kernel32Guard)
+            {
+                _bodyWriter.AddLine("#endif");
+            }
         }
 
         private NativeParam CreateNativeParam(ParamDetail param)
@@ -149,6 +164,16 @@ namespace LeanAOT.ToCpp
                 }
                 return MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(type, TypeNameRelaxLevel.Exactly);
             }
+            case ElementType.Class:
+            {
+                TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
+                // if type is sub class of SafeHandle, return void*
+                if (MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle"))
+                {
+                    return "void*";
+                }
+                throw new NotSupportedException($"PInvoke native ABI does not support parameter or return type {type.FullName}.");
+            }
             default:
                 throw new NotSupportedException($"PInvoke native ABI does not support parameter or return type {type.FullName}.");
             }
@@ -163,6 +188,32 @@ namespace LeanAOT.ToCpp
             }
             string name = implMap.Name?.String;
             return string.IsNullOrEmpty(name) ? _method.MethodDef.Name : name;
+        }
+
+        private string GetPInvokeModuleName()
+        {
+            ImplMap implMap = _method.MethodDef.ImplMap;
+            return implMap?.Module?.Name?.String;
+        }
+
+        private readonly static string[] s_winOnlyDlls = { "kernel32", "user32", "gdi32", "ole32", "shell32", "advapi32", "msvcrt", "ntdll" };
+
+        private static bool IsWinOnlyDll(string moduleName)
+        {
+            if (string.IsNullOrEmpty(moduleName))
+            {
+                return false;
+            }
+            string n = moduleName.Trim();
+            if (n.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+            {
+                n = n.Substring(0, n.Length - 4);
+            }
+            if (s_winOnlyDlls.Contains(n, StringComparer.OrdinalIgnoreCase))
+            {
+                return true;
+            }
+            return false;
         }
 
         private static bool IsStringType(TypeSig type)

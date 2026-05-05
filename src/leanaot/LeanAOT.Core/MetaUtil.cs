@@ -166,6 +166,20 @@ namespace LeanAOT.Core
             }
         }
 
+        public static bool IsInheritFrom(TypeDef typeDef, string baseTypeFullName)
+        {
+            TypeDef cur = typeDef;
+            while (cur != null)
+            {
+                if (cur.FullName == baseTypeFullName)
+                {
+                    return true;
+                }
+                cur = GetBaseTypeDef(cur);
+            }
+            return false;
+        }
+
         public static bool IsInheritFromDOTSTypes(TypeDef typeDef)
         {
             TypeDef cur = typeDef;
