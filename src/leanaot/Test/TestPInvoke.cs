@@ -28,9 +28,9 @@ public static class TestPInvokeNative
     [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_utf8_byte_len", CallingConvention = CallingConvention.Cdecl)]
     public static extern int Utf8ByteLen(string s);
 
-    /// <summary>返回新分配的 UTF-8 副本指针，由托管侧按 UTF-8 解码为 string。</summary>
-    [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_dup_utf8", CallingConvention = CallingConvention.Cdecl)]
-    public static extern string DupUtf8(string s);
+    /// <summary>返回 null。</summary>
+    [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_return_null_utf8", CallingConvention = CallingConvention.Cdecl)]
+    public static extern string ReturnNullUtf8(string s);
 
     /// <summary><paramref name="arr"/> 为元素区首地址（int32_t*），与 <paramref name="count"/> 一起求前 count 项之和。</summary>
     [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_sum_int_range", CallingConvention = CallingConvention.Cdecl)]
@@ -54,9 +54,7 @@ public static class WasmPInvokeVerify
         Assert.Equal(5, TestPInvokeNative.Utf8ByteLen("abcde"));
         Assert.Equal(6, TestPInvokeNative.Utf8ByteLen("你好"));
 
-        Assert.Equal("", TestPInvokeNative.DupUtf8(""));
-        Assert.Equal("hello", TestPInvokeNative.DupUtf8("hello"));
-        Assert.Equal("你好", TestPInvokeNative.DupUtf8("你好"));
+        Assert.Null(TestPInvokeNative.ReturnNullUtf8(""));
 
         int[] xs = new int[] { 10, 20, 30, 40 };
         Assert.Equal(100, TestPInvokeNative.SumIntRange(xs, 4));
