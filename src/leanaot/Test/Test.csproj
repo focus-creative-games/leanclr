@@ -107,6 +107,7 @@
     <Compile Include="TestNewMdArray.cs" />
     <Compile Include="TestNewobj.cs" />
     <Compile Include="TestNullable.cs" />
+    <Compile Include="TestPInvoke.cs" />
     <Compile Include="TestSizeOf.cs" />
     <Compile Include="TestLdelema.cs" />
     <Compile Include="TestStelem.cs" />
