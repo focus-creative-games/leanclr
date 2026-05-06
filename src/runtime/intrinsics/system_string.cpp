@@ -41,8 +41,8 @@ RtResultVoid get_chars_invoker(metadata::RtManagedMethodPointer methodPtr, const
 }
 
 /// @intrinsic: System.String::get_Length
-RtResultVoid get_length_invoker_intrinsics_system_string(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                interp::RtStackObject* ret) noexcept
+RtResultVoid get_length_invoker_intrinsics_system_string(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     vm::RtString* s = interp::EvalStackOp::get_param<vm::RtString*>(params, 0);
 

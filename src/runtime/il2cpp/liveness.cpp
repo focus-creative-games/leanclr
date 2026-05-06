@@ -22,7 +22,6 @@ struct LivenessState
 
     void finalize()
     {
-
     }
 };
 

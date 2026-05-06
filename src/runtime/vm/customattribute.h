@@ -45,7 +45,8 @@ class CustomAttribute
     static RtResult<bool> has_customattribute_on_assembly(metadata::RtModuleDef* mod, const metadata::RtClass* customattribute_klass);
     static RtResult<bool> has_attribute(RtObject* obj, const metadata::RtClass* attr_klass);
 
-    static RtResult<RtArray*> get_customattributes_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token, const metadata::RtClass* attr_klass);
+    static RtResult<RtArray*> get_customattributes_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token,
+                                                                   const metadata::RtClass* attr_klass);
     static RtResult<RtArray*> get_customattributes_on_target_object(RtObject* obj, const metadata::RtClass* attr_klass);
     static RtResult<RtArray*> get_customattributes_data_on_target(RtObject* obj);
     static RtResult<RtArray*> get_customattributes_data_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token);

@@ -619,7 +619,8 @@ static RtResult<NamedArgWithoutValue> read_named_arg(metadata::RtModuleDef* mod,
 RtResult<RtReflectionType*> CustomAttribute::parse_assembly_qualified_type(metadata::RtModuleDef* default_mod, const char* assembly_qualified_type_name,
                                                                            size_t name_len, bool ignore_case)
 {
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig, vm::Type::parse_assembly_qualified_type(default_mod, assembly_qualified_type_name, name_len, ignore_case));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig,
+                                            vm::Type::parse_assembly_qualified_type(default_mod, assembly_qualified_type_name, name_len, ignore_case));
     return Reflection::get_type_reflection_object(typeSig);
 }
 
@@ -1267,7 +1268,7 @@ RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::R
     metadata::RtMarshalNativeType native_intrinsic_type = static_cast<metadata::RtMarshalNativeType>(native_type);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, marshal_as_obj, Object::new_object(corlib_types.cls_marshal_as));
-    const void* ctor_args[1] = { &native_intrinsic_type};
+    const void* ctor_args[1] = {&native_intrinsic_type};
     RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(s_marshal_as_ctor, marshal_as_obj, ctor_args));
 
     metadata::RtMarshalNativeType ele_type = metadata::RtMarshalNativeType::Max;

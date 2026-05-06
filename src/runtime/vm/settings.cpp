@@ -20,7 +20,6 @@ static void default_debugger_log_function(int32_t level, const uint16_t* categor
 static FileLoader g_file_loader = nullptr;
 static InternalFunctionInitializer g_internal_functions_initializer = nullptr;
 
-
 static size_t g_default_eval_stack_object_count = 1024 * 128;
 static size_t g_default_frame_stack_size = 1024 * 2;
 
@@ -101,14 +100,12 @@ void Settings::set_temp_dir(const char* temp_dir)
     g_temp_dir = utils::StringUtil::strdup(temp_dir);
 }
 
-
 void Settings::set_config(const char* executablePath)
 {
     assert(executablePath != nullptr);
     assert(g_config == nullptr);
     g_config = utils::StringUtil::strdup(executablePath);
 }
-
 
 const char* Settings::get_config()
 {

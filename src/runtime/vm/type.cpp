@@ -632,8 +632,7 @@ static RtResultVoid parse_assembly_version(const char* start, const char* end, m
     {
         if (*p >= '0' && *p <= '9')
         {
-            parts[part_idx] = static_cast<uint16_t>(static_cast<unsigned int>(parts[part_idx]) * 10u +
-                                                    static_cast<unsigned int>(*p - '0'));
+            parts[part_idx] = static_cast<uint16_t>(static_cast<unsigned int>(parts[part_idx]) * 10u + static_cast<unsigned int>(*p - '0'));
             p++;
         }
         else if (*p == '.')
@@ -755,7 +754,7 @@ RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, meta
 }
 
 RtResult<const metadata::RtTypeSig*> Type::parse_assembly_qualified_type(metadata::RtModuleDef* default_mod, const char* assembly_qualified_type_name,
-    size_t name_len, bool ignore_case)
+                                                                         size_t name_len, bool ignore_case)
 {
     AssemblyQualifiedNames qn(assembly_qualified_type_name, name_len);
     qn.parse();
@@ -785,7 +784,7 @@ RtResult<const metadata::RtTypeSig*> Type::parse_assembly_qualified_type(metadat
             break;
         }
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig,
-            Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), false));
+                                                Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), false));
         if (!typeSig)
         {
             continue;
@@ -798,7 +797,7 @@ RtResult<const metadata::RtTypeSig*> Type::parse_assembly_qualified_type(metadat
     for (metadata::RtModuleDef* mod : registered_modules)
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig,
-            Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), false));
+                                                Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), false));
         if (!typeSig)
         {
             continue;

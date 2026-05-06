@@ -1260,7 +1260,7 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
     }
     if (has_references)
     {
-         // If the class has reference type fields, we need to use natural alignment for those fields, so ignore packing size
+        // If the class has reference type fields, we need to use natural alignment for those fields, so ignore packing size
         packingSize = 0;
     }
 

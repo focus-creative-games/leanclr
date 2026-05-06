@@ -81,8 +81,7 @@ RtResult<int32_t> SystemReflectionRuntimeEventInfo::get_metadata_token(vm::RtRef
 
 /// @icall: System.Reflection.RuntimeEventInfo::get_metadata_token(System.Reflection.RuntimeEventInfo)
 static RtResultVoid get_metadata_token_invoker_system_reflection_runtimeeventinfo(metadata::RtManagedMethodPointer methodPtr,
-                                                                                  const metadata::RtMethodInfo* method,
-                                                                                  const interp::RtStackObject* params,
+                                                                                  const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                                                   interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
@@ -99,8 +98,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeEventInfo::get_interna
         {"System.Reflection.RuntimeEventInfo::get_event_info(System.Reflection.RuntimeEventInfo,System.Reflection.MonoEventInfo&)",
          (vm::InternalCallFunction)&SystemReflectionRuntimeEventInfo::get_event_info, get_event_info_invoker},
         {"System.Reflection.RuntimeEventInfo::get_metadata_token(System.Reflection.RuntimeEventInfo)",
-         (vm::InternalCallFunction)&SystemReflectionRuntimeEventInfo::get_metadata_token,
-         get_metadata_token_invoker_system_reflection_runtimeeventinfo},
+         (vm::InternalCallFunction)&SystemReflectionRuntimeEventInfo::get_metadata_token, get_metadata_token_invoker_system_reflection_runtimeeventinfo},
     };
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }

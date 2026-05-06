@@ -21,9 +21,11 @@ class Runtime
 
     // Method invocation functions
     static RtResult<RtObject*> invoke_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, const void* const* params);
-    
-    static RtResult<RtObject*> invoke_object_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params, int32_t paramCount);
-    static RtResult<RtObject*> invoke_object_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params, int32_t paramCount);
+
+    static RtResult<RtObject*> invoke_object_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params,
+                                                                      int32_t paramCount);
+    static RtResult<RtObject*> invoke_object_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params,
+                                                                         int32_t paramCount);
 
     static RtResult<RtObject*> invoke_array_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params);
 

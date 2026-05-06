@@ -345,9 +345,9 @@ static RtResult<RtObject*> invoke_without_run_cctor(const metadata::RtMethodInfo
 
     interp::RtStackObject* arg_buffer = buffers.args_buffer;
     interp::RtStackObject* ret_buffer = buffers.ret_buffer;
-    
+
     // Invoke the method
-    auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr); 
+    auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
     RET_ERR_ON_FAIL(invoke_ptr(method->method_ptr, method, arg_buffer, ret_buffer));
 
     return convert_return_value(method->return_type, ret_buffer);
@@ -473,10 +473,8 @@ RtResult<RtObject*> Runtime::invoke_with_run_cctor(const metadata::RtMethodInfo*
     return invoke_without_run_cctor(method, obj, params);
 }
 
-
-
-
-RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params, int32_t paramCount)
+RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params,
+                                                                       int32_t paramCount)
 {
     assert(method);
 

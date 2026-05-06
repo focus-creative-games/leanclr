@@ -171,7 +171,6 @@ void Thread::set_priority_native(RtThread* thread, int32_t priority)
 
 void Thread::set_default_affinity_mask(int64_t affinity_mask)
 {
-    
 }
 
 } // namespace vm

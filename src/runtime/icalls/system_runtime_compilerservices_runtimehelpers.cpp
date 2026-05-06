@@ -142,7 +142,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtime_compilerserv
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeCompilerServicesRuntimeHelpers::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers, sizeof(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers,
+                                              sizeof(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

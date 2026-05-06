@@ -51,7 +51,8 @@ utils::Span<vm::IntrinsicEntry> SystemObject::get_intrinsic_entries() noexcept
 
 utils::Span<vm::NewobjIntrinsicEntry> SystemObject::get_newobj_intrinsic_entries() noexcept
 {
-    return utils::Span<vm::NewobjIntrinsicEntry>(s_newobj_intrinsic_entries_system_object, sizeof(s_newobj_intrinsic_entries_system_object) / sizeof(vm::NewobjIntrinsicEntry));
+    return utils::Span<vm::NewobjIntrinsicEntry>(s_newobj_intrinsic_entries_system_object,
+                                                 sizeof(s_newobj_intrinsic_entries_system_object) / sizeof(vm::NewobjIntrinsicEntry));
 }
 
 } // namespace intrinsics

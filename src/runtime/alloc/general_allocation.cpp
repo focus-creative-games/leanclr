@@ -105,14 +105,7 @@ static void* default_aligned_realloc(void* ptr, size_t size, size_t alignment)
 }
 } // namespace
 
-MemoryCallbacks GeneralAllocation::s_memory_callbacks = {
-    default_malloc,
-    default_aligned_malloc,
-    default_free,
-    default_aligned_free,
-    default_calloc,
-    default_realloc,
-    default_aligned_realloc
-};
-}
-}
+MemoryCallbacks GeneralAllocation::s_memory_callbacks = {default_malloc, default_aligned_malloc, default_free,           default_aligned_free,
+                                                         default_calloc, default_realloc,        default_aligned_realloc};
+} // namespace alloc
+} // namespace leanclr

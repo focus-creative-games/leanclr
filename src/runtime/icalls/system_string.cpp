@@ -260,7 +260,8 @@ static vm::NewobjInternalCallEntry s_newobj_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemString::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_string, sizeof(s_internal_call_entries_system_string) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_string,
+                                              sizeof(s_internal_call_entries_system_string) / sizeof(vm::InternalCallEntry));
 }
 
 utils::Span<vm::NewobjInternalCallEntry> SystemString::get_newobj_internal_call_entries()

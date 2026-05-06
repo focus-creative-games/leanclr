@@ -10,10 +10,10 @@ namespace vm
 class GCHandle
 {
   public:
-    #if !LEANCLR_USE_VOID_PTR_GCHANDLE
+#if !LEANCLR_USE_VOID_PTR_GCHANDLE
     static uint32_t get_handle_id(void* handle);
     static void* get_handle_by_id(uint32_t id);
-    #endif
+#endif
     static void* new_handle(RtObject* obj, bool pinned);
     static void* new_weakref_handle(RtObject* obj, bool track_resurrection);
     static void free_handle(void* handle);

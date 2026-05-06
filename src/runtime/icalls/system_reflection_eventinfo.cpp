@@ -8,7 +8,8 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_handle_type(metadata::RtEventInfo* event, const metadata::RtTypeSig* type_sig) noexcept
+RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_handle_type(metadata::RtEventInfo* event,
+                                                                                          const metadata::RtTypeSig* type_sig) noexcept
 {
     const metadata::RtClass* klass;
     if (!type_sig)
@@ -30,7 +31,7 @@ RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_ha
 
 /// @icall: System.Reflection.EventInfo::internal_from_handle_type
 static RtResultVoid internal_from_handle_type_invoker_eventinfo(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                                      const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+                                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;

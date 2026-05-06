@@ -8,12 +8,12 @@
 
 #if !defined(IL2CPP_EXPORT)
 #ifdef _MSC_VER
-# include <malloc.h>
-# define IL2CPP_EXPORT __declspec(dllexport)
-# define IL2CPP_IMPORT __declspec(dllimport)
+#include <malloc.h>
+#define IL2CPP_EXPORT __declspec(dllexport)
+#define IL2CPP_IMPORT __declspec(dllimport)
 #else
-# define IL2CPP_EXPORT __attribute__ ((visibility ("default")))
-# define IL2CPP_IMPORT
+#define IL2CPP_EXPORT __attribute__((visibility("default")))
+#define IL2CPP_IMPORT
 #endif
 #endif
 
@@ -23,8 +23,8 @@
 extern "C"
 {
 #endif // __cplusplus
-IL2CPP_EXPORT void il2cpp_api_register_symbols(void);
-IL2CPP_EXPORT void* il2cpp_api_lookup_symbol(const char* name);
+    IL2CPP_EXPORT void il2cpp_api_register_symbols(void);
+    IL2CPP_EXPORT void* il2cpp_api_lookup_symbol(const char* name);
 #if defined(__cplusplus)
 }
 #endif // __cplusplus
@@ -90,8 +90,8 @@ extern leanclr::metadata::RtAotModulesData g_aot_modules_data;
 extern "C"
 {
 #endif // __cplusplus
-#define DO_API(r, n, p)             IL2CPP_EXPORT r n p;
-#define DO_API_NO_RETURN(r, n, p)   IL2CPP_EXPORT NORETURN r n p;
+#define DO_API(r, n, p) IL2CPP_EXPORT r n p;
+#define DO_API_NO_RETURN(r, n, p) IL2CPP_EXPORT NORETURN r n p;
 #include "il2cpp-api-functions.h"
 #undef DO_API
 #undef DO_API_NO_RETURN

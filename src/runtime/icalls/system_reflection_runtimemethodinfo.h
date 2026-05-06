@@ -13,7 +13,8 @@ class SystemReflectionRuntimeMethodInfo
 
     static RtResult<vm::RtReflectionMethodBody*> get_method_body_internal(const metadata::RtMethodInfo* method) noexcept;
     static RtResult<vm::RtReflectionMethod*> get_method_from_handle_internal_type_native(const metadata::RtMethodInfo* method,
-                                                                                         const metadata::RtTypeSig* type_sig, bool check_same_generic_base) noexcept;
+                                                                                         const metadata::RtTypeSig* type_sig,
+                                                                                         bool check_same_generic_base) noexcept;
     static RtResult<vm::RtString*> get_name(vm::RtReflectionMethod* method) noexcept;
     static RtResult<vm::RtReflectionMethod*> get_base_method(vm::RtReflectionMethod* method, bool definition) noexcept;
     static RtResult<int32_t> get_metadata_token(vm::RtReflectionMethod* method) noexcept;

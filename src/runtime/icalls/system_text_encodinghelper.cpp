@@ -33,8 +33,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_text_encodinghelper[
 
 utils::Span<vm::InternalCallEntry> SystemTextEncodingHelper::get_internal_call_entries() noexcept
 {
-
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_text_encodinghelper, sizeof(s_internal_call_entries_system_text_encodinghelper) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_text_encodinghelper,
+                                              sizeof(s_internal_call_entries_system_text_encodinghelper) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

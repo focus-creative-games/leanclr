@@ -32,7 +32,8 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_numerics_vector[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemNumericsVector::get_intrinsic_entries() noexcept
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_numerics_vector, sizeof(s_intrinsic_entries_system_numerics_vector) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_numerics_vector,
+                                           sizeof(s_intrinsic_entries_system_numerics_vector) / sizeof(vm::IntrinsicEntry));
 }
 
 } // namespace intrinsics

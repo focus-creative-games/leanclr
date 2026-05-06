@@ -96,8 +96,8 @@ RtResult<const RtVirtualInvokeData*> Method::get_interface_method_invoke_data(co
     }
     else
     {
-        // FIXME: same to il2cpp, but it seems that il2cpp doesn't consider the case where the same generic interface is implemented multiple times with different generic arguments,
-        // which is legal in C#. We may need to add more checks here to find the correct interface vtable offset.
+        // FIXME: same to il2cpp, but it seems that il2cpp doesn't consider the case where the same generic interface is implemented multiple times with
+        // different generic arguments, which is legal in C#. We may need to add more checks here to find the correct interface vtable offset.
         for (int32_t i = klass->interface_vtable_offset_count; i > 0; --i)
         {
             const RtInterfaceOffset& off = offsets[i - 1];
@@ -511,7 +511,7 @@ RtResult<const RtMethodInfo*> Method::inflate_method(const RtMethodInfo* method,
         }
         else
         {
-            //assert(gc->method_inst && "Method generic instance must be provided in generic context");
+            // assert(gc->method_inst && "Method generic instance must be provided in generic context");
             newMethodInst = gc->method_inst;
         }
     }

@@ -150,7 +150,6 @@ void GC::start_gc_world()
 
 void GC::stop_gc_world()
 {
-
 }
 
 void* GC::alloc_fixed(size_t size)

@@ -24,7 +24,8 @@ class SystemRuntimeType
                                                                                               int32_t bind_flags, int32_t list_type) noexcept;
     static RtResult<utils::SafeGPtrArray<metadata::RtPropertyInfo>*> get_properties_by_name_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
                                                                                                    int32_t bind_flags, int32_t list_type) noexcept;
-    static RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> get_constructors_native(vm::RtReflectionRuntimeType* runtime_type, int32_t bind_flags) noexcept;
+    static RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> get_constructors_native(vm::RtReflectionRuntimeType* runtime_type,
+                                                                                           int32_t bind_flags) noexcept;
     static RtResult<utils::SafeGPtrArray<metadata::RtEventInfo>*> get_events_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
                                                                                     int32_t list_type) noexcept;
     static RtResult<utils::SafeGPtrArray<metadata::RtFieldInfo>*> get_fields_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,

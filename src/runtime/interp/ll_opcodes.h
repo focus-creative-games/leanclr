@@ -7377,7 +7377,6 @@ struct GetEnumLongHashCode
     uint8_t __padding_7;
 };
 
-
 //}}LOW_LEVEL_INSTRUCTION_STRUCTSS
 
 struct GeneralInst;

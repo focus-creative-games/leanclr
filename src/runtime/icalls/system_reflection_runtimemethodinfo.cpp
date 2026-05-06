@@ -66,7 +66,8 @@ RtResult<vm::RtString*> SystemReflectionRuntimeMethodInfo::get_name(vm::RtReflec
     RET_OK(name);
 }
 
-static RtResult<std::pair<const metadata::RtMethodInfo*, const metadata::RtClass*>> get_base_method_impl(const metadata::RtMethodInfo* method, bool definition) noexcept
+static RtResult<std::pair<const metadata::RtMethodInfo*, const metadata::RtClass*>> get_base_method_impl(const metadata::RtMethodInfo* method,
+                                                                                                         bool definition) noexcept
 {
     const metadata::RtClass* klass = method->parent;
     if (!vm::Method::is_virtual(method) || vm::Method::is_new_slot(method) || vm::Class::is_interface(klass))
@@ -206,7 +207,8 @@ RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::get_generic
     RET_OK(ref_method);
 }
 
-RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::make_generic_method_impl(vm::RtReflectionMethod* method, vm::RtArray* generic_args) noexcept
+RtResult<vm::RtReflectionMethod*> SystemReflectionRuntimeMethodInfo::make_generic_method_impl(vm::RtReflectionMethod* method,
+                                                                                              vm::RtArray* generic_args) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     if (m->generic_container == nullptr)
@@ -268,7 +270,8 @@ RtResult<vm::RtObject*> SystemReflectionRuntimeMethodInfo::internal_invoke(vm::R
     return vm::Reflection::invoke_method(method, obj, parameters, exc);
 }
 
-RtResultVoid SystemReflectionRuntimeMethodInfo::get_pinvoke(vm::RtReflectionMethod* method, int32_t* flags, vm::RtString** entry_name, vm::RtString** dll_name) noexcept
+RtResultVoid SystemReflectionRuntimeMethodInfo::get_pinvoke(vm::RtReflectionMethod* method, int32_t* flags, vm::RtString** entry_name,
+                                                            vm::RtString** dll_name) noexcept
 {
     const metadata::RtMethodInfo* m = method->method;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<metadata::RowImplMap>, pinvoke_info, vm::Method::get_imp_map_info(m));
@@ -346,8 +349,7 @@ static RtResultVoid get_base_method_invoker(metadata::RtManagedMethodPointer met
 
 /// @icall: System.Reflection.RuntimeMethodInfo::get_metadata_token(System.Reflection.RuntimeMethodInfo)
 static RtResultVoid get_metadata_token_invoker_system_reflection_runtimemethodinfo(metadata::RtManagedMethodPointer methodPtr,
-                                                                                    const metadata::RtMethodInfo* method,
-                                                                                    const interp::RtStackObject* params,
+                                                                                   const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                                                    interp::RtStackObject* ret) noexcept
 {
     auto ref_method = EvalStackOp::get_param<vm::RtReflectionMethod*>(params, 0);

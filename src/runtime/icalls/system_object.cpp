@@ -19,7 +19,7 @@ RtResult<int32_t> SystemObject::get_hash_code(vm::RtObject* obj) noexcept
 }
 
 static RtResultVoid object_get_hash_code_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                          interp::RtStackObject* ret) noexcept
+                                                 interp::RtStackObject* ret) noexcept
 {
     auto obj = EvalStackOp::get_this(params);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, hash_code, SystemObject::get_hash_code(obj));
@@ -74,7 +74,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_object[] = {
 
 utils::Span<vm::InternalCallEntry> SystemObject::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_object, sizeof(s_internal_call_entries_system_object) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_object,
+                                              sizeof(s_internal_call_entries_system_object) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

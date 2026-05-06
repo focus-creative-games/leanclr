@@ -181,7 +181,8 @@ static RtResultVoid get_reflection_only_invoker(metadata::RtManagedMethodPointer
     RET_VOID_OK();
 }
 
-RtResult<bool> SystemReflectionRuntimeAssembly::get_manifest_resource_info_internal(vm::RtReflectionAssembly* ref_ass, vm::RtString* name, vm::RtObject* info) noexcept
+RtResult<bool> SystemReflectionRuntimeAssembly::get_manifest_resource_info_internal(vm::RtReflectionAssembly* ref_ass, vm::RtString* name,
+                                                                                    vm::RtObject* info) noexcept
 {
     (void)ref_ass;
     (void)name;
@@ -253,7 +254,8 @@ static RtResultVoid get_modules_internal_invoker(metadata::RtManagedMethodPointe
     RET_VOID_OK();
 }
 
-RtResult<vm::RtObject*> SystemReflectionRuntimeAssembly::get_files_internal(vm::RtReflectionAssembly* ref_ass, vm::RtString* path, bool get_resource_modules) noexcept
+RtResult<vm::RtObject*> SystemReflectionRuntimeAssembly::get_files_internal(vm::RtReflectionAssembly* ref_ass, vm::RtString* path,
+                                                                            bool get_resource_modules) noexcept
 {
     (void)ref_ass;
     (void)path;

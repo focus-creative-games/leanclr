@@ -12,7 +12,8 @@ namespace icalls
 
 // ========== Implementation Functions ==========
 
-RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle_type(metadata::RtFieldInfo* field, const metadata::RtTypeSig* type_sig) noexcept
+RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle_type(metadata::RtFieldInfo* field,
+                                                                                      const metadata::RtTypeSig* type_sig) noexcept
 {
     const metadata::RtClass* field_parent = field->parent;
     if (type_sig == nullptr)

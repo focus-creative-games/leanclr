@@ -63,7 +63,8 @@ bool Kernel32::set_thread_error_mode(uint32_t mode, uint32_t& old_mode)
 bool Kernel32::get_file_attributes_ex_private(vm::RtString* name, uint32_t file_info_level, void* file_info)
 {
 #ifdef LEANCLR_PLATFORM_WIN
-    return ::GetFileAttributesExW(reinterpret_cast<LPCWSTR>(vm::String::get_chars_ptr(name)), static_cast<GET_FILEEX_INFO_LEVELS>(file_info_level), file_info) != 0;
+    return ::GetFileAttributesExW(reinterpret_cast<LPCWSTR>(vm::String::get_chars_ptr(name)), static_cast<GET_FILEEX_INFO_LEVELS>(file_info_level),
+                                  file_info) != 0;
 #else
     (void)name;
     (void)file_info_level;
@@ -82,7 +83,7 @@ intptr_t Kernel32::find_first_file_ex_private(vm::RtString* lp_file_name, uint32
 
     LPVOID search_filter = (lp_search_filter != 0) ? reinterpret_cast<LPVOID>(lp_search_filter) : nullptr;
     HANDLE h = ::FindFirstFileExW(reinterpret_cast<LPCWSTR>(vm::String::get_chars_ptr(lp_file_name)), static_cast<FINDEX_INFO_LEVELS>(f_info_level_id),
-                                    lp_find_file_data, static_cast<FINDEX_SEARCH_OPS>(f_search_op), search_filter, static_cast<DWORD>(dw_additional_flags));
+                                  lp_find_file_data, static_cast<FINDEX_SEARCH_OPS>(f_search_op), search_filter, static_cast<DWORD>(dw_additional_flags));
     return reinterpret_cast<intptr_t>(h);
 #else
     (void)lp_file_name;

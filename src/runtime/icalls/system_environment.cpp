@@ -148,7 +148,7 @@ RtResultVoid SystemEnvironment::exit(int32_t code) noexcept
 
 /// @icall: System.Environment::Exit
 static RtResultVoid exit_invoker_system_environment(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* /*ret*/) noexcept
+                                                    interp::RtStackObject* /*ret*/) noexcept
 {
     int32_t code = EvalStackOp::get_param<int32_t>(params, 0);
     RET_ERR_ON_FAIL(SystemEnvironment::exit(code));
@@ -356,24 +356,30 @@ static vm::InternalCallEntry s_internal_call_entries_system_environment[] = {
     {"System.Environment::get_UserName", (vm::InternalCallFunction)SystemEnvironment::get_user_name, get_user_name_invoker},
     {"System.Environment::Exit", (vm::InternalCallFunction)SystemEnvironment::exit, exit_invoker_system_environment},
     {"System.Environment::GetCommandLineArgs", (vm::InternalCallFunction)SystemEnvironment::get_command_line_args, get_command_line_args_invoker},
-    {"System.Environment::internalGetEnvironmentVariable_native", (vm::InternalCallFunction)SystemEnvironment::internal_get_environment_variable_native, internal_get_environment_variable_native_invoker},
-    {"System.Environment::InternalSetEnvironmentVariable(System.Char*,System.Int32,System.Char*,System.Int32)", (vm::InternalCallFunction)SystemEnvironment::internal_set_environment_variable_native,
-     internal_set_environment_variable_native_invoker},
-    {"System.Environment::GetEnvironmentVariableNames", (vm::InternalCallFunction)SystemEnvironment::get_environment_variable_names, get_environment_variable_names_invoker},
+    {"System.Environment::internalGetEnvironmentVariable_native", (vm::InternalCallFunction)SystemEnvironment::internal_get_environment_variable_native,
+     internal_get_environment_variable_native_invoker},
+    {"System.Environment::InternalSetEnvironmentVariable(System.Char*,System.Int32,System.Char*,System.Int32)",
+     (vm::InternalCallFunction)SystemEnvironment::internal_set_environment_variable_native, internal_set_environment_variable_native_invoker},
+    {"System.Environment::GetEnvironmentVariableNames", (vm::InternalCallFunction)SystemEnvironment::get_environment_variable_names,
+     get_environment_variable_names_invoker},
     {"System.Environment::GetWindowsFolderPath", (vm::InternalCallFunction)SystemEnvironment::get_windows_folder_path, get_windows_folder_path_invoker},
-    {"System.Environment::GetLogicalDrivesInternal", (vm::InternalCallFunction)SystemEnvironment::get_logical_drives_internal, get_logical_drives_internal_invoker},
+    {"System.Environment::GetLogicalDrivesInternal", (vm::InternalCallFunction)SystemEnvironment::get_logical_drives_internal,
+     get_logical_drives_internal_invoker},
     {"System.Environment::GetMachineConfigPath", (vm::InternalCallFunction)SystemEnvironment::get_machine_config_path, get_machine_config_path_invoker},
     {"System.Environment::internalGetHome", (vm::InternalCallFunction)SystemEnvironment::internal_get_home, internal_get_home_invoker},
-    {"System.Environment::get_bundled_machine_config", (vm::InternalCallFunction)SystemEnvironment::get_bundled_machine_config, get_bundled_machine_config_invoker},
+    {"System.Environment::get_bundled_machine_config", (vm::InternalCallFunction)SystemEnvironment::get_bundled_machine_config,
+     get_bundled_machine_config_invoker},
     {"System.Environment::FailFast", (vm::InternalCallFunction)SystemEnvironment::fail_fast, fail_fast_invoker},
-    {"System.Environment::get_Is64BitOperatingSystem", (vm::InternalCallFunction)SystemEnvironment::get_is_64bit_operating_system, get_is_64bit_operating_system_invoker},
+    {"System.Environment::get_Is64BitOperatingSystem", (vm::InternalCallFunction)SystemEnvironment::get_is_64bit_operating_system,
+     get_is_64bit_operating_system_invoker},
     {"System.Environment::get_ProcessorCount", (vm::InternalCallFunction)SystemEnvironment::get_processor_count, get_processor_count_invoker},
     {"System.Environment::GetPageSize", (vm::InternalCallFunction)SystemEnvironment::get_page_size, get_page_size_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemEnvironment::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_environment, sizeof(s_internal_call_entries_system_environment) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_environment,
+                                              sizeof(s_internal_call_entries_system_environment) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

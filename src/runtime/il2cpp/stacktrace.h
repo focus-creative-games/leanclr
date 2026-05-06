@@ -11,7 +11,6 @@ class StackTrace
   public:
     static void override_stack_backtrace(Il2CppBacktraceFunc stackBacktraceFunc)
     {
-        
     }
 };
 } // namespace il2cpp

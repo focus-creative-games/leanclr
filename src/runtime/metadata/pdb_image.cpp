@@ -240,8 +240,8 @@ RtResult<const PdbImage::SymbolMethodDefData*> PdbImage::GetMethodDataFromCache(
                 }
             }
 
-            const int32_t ilOffset = sequencePoints.empty() ? static_cast<int32_t>(deltaIlOffset)
-                                                              : sequencePoints.back().ilOffset + static_cast<int32_t>(deltaIlOffset);
+            const int32_t ilOffset =
+                sequencePoints.empty() ? static_cast<int32_t>(deltaIlOffset) : sequencePoints.back().ilOffset + static_cast<int32_t>(deltaIlOffset);
 
             SymbolSequencePoint ssp = {};
             ssp.document = document;

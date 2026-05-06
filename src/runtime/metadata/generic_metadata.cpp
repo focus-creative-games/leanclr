@@ -292,7 +292,8 @@ RtResult<const RtMethodSig*> GenericMetadata::inflate_method_sig(const RtMethodS
     {
         RET_OK(methodSig);
     }
-    RtMethodSig* new_method_sig = new (alloc::MetadataAllocation::malloc_any_zeroed<RtMethodSig>()) RtMethodSig{methodSig->flags, methodSig->generic_param_count, inflated_return_type, std::move(inflated_params)};
+    RtMethodSig* new_method_sig = new (alloc::MetadataAllocation::malloc_any_zeroed<RtMethodSig>())
+        RtMethodSig{methodSig->flags, methodSig->generic_param_count, inflated_return_type, std::move(inflated_params)};
     RET_OK(new_method_sig);
 }
 

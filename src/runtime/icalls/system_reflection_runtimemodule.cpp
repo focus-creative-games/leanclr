@@ -22,10 +22,8 @@ RtResult<int32_t> SystemReflectionRuntimeModule::get_metadata_token(vm::RtReflec
 }
 
 /// @icall: System.Reflection.RuntimeModule::get_MetadataToken(System.Reflection.Module)
-static RtResultVoid get_metadata_token_invoker_system_reflection_runtimemodule(metadata::RtManagedMethodPointer methodPtr,
-                                                                               const metadata::RtMethodInfo* method,
-                                                                               const interp::RtStackObject* params,
-                                                                               interp::RtStackObject* ret) noexcept
+static RtResultVoid get_metadata_token_invoker_system_reflection_runtimemodule(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto module = EvalStackOp::get_param<vm::RtReflectionModule*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, SystemReflectionRuntimeModule::get_metadata_token(module));
@@ -181,7 +179,8 @@ static RtResultVoid resolve_type_token_invoker(metadata::RtManagedMethodPointer 
 }
 
 RtResult<const metadata::RtMethodInfo*> SystemReflectionRuntimeModule::resolve_method_token(metadata::RtModuleDef* module, int32_t token,
-                                                                                            vm::RtArray* type_args, vm::RtArray* method_args, int32_t* error) noexcept
+                                                                                            vm::RtArray* type_args, vm::RtArray* method_args,
+                                                                                            int32_t* error) noexcept
 {
     const metadata::RtTypeSig** typesig_arr = type_args ? vm::Array::get_array_data_start_as<const metadata::RtTypeSig*>(type_args) : nullptr;
     const metadata::RtTypeSig** methodsig_arr = method_args ? vm::Array::get_array_data_start_as<const metadata::RtTypeSig*>(method_args) : nullptr;
@@ -533,8 +532,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeModule::get_internal_c
 {
     static vm::InternalCallEntry s_entries[] = {
         {"System.Reflection.RuntimeModule::get_MetadataToken(System.Reflection.Module)",
-         (vm::InternalCallFunction)&SystemReflectionRuntimeModule::get_metadata_token,
-         get_metadata_token_invoker_system_reflection_runtimemodule},
+         (vm::InternalCallFunction)&SystemReflectionRuntimeModule::get_metadata_token, get_metadata_token_invoker_system_reflection_runtimemodule},
         {"System.Reflection.RuntimeModule::GetMDStreamVersion(System.IntPtr)", (vm::InternalCallFunction)&SystemReflectionRuntimeModule::get_md_stream_version,
          get_md_stream_version_invoker},
         {"System.Reflection.RuntimeModule::InternalGetTypes(System.IntPtr)", (vm::InternalCallFunction)&SystemReflectionRuntimeModule::internal_get_types,

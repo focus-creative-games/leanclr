@@ -25,10 +25,11 @@ class Method
     static const metadata::RtVirtualInvokeData* get_vtable_method_invoke_data(const metadata::RtClass* klass, size_t method_index);
     static metadata::RtManagedMethodPointer get_vtable_method_ptr(const metadata::RtClass* klass, size_t method_index);
     static const metadata::RtMethodInfo* get_vtable_method(const metadata::RtClass* klass, size_t method_index);
-    static RtResult<const metadata::RtVirtualInvokeData*> get_interface_method_invoke_data(const metadata::RtClass* klass, const metadata::RtClass* interface_klass,
-                                                                                           size_t slot);
+    static RtResult<const metadata::RtVirtualInvokeData*> get_interface_method_invoke_data(const metadata::RtClass* klass,
+                                                                                           const metadata::RtClass* interface_klass, size_t slot);
     static RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl(RtObject* obj, const metadata::RtMethodInfo* virtual_method);
-    static RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl_on_klass(const metadata::RtClass* klass, const metadata::RtMethodInfo* virtual_method);
+    static RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl_on_klass(const metadata::RtClass* klass,
+                                                                                    const metadata::RtMethodInfo* virtual_method);
 
     // Method queries/search
     static const metadata::RtMethodInfo* find_matched_method_in_class(const metadata::RtClass* klass, const metadata::RtMethodInfo* to_match_method);

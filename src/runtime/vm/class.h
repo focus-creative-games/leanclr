@@ -223,7 +223,8 @@ class Class
 
     // Type assignability checking functions
     static bool is_assignable_from_class(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
-    static bool is_assignable_from_generic_parameter_convariant(const metadata::RtClass* from_class, const metadata::RtClass* to_class, const metadata::RtClass* implement_class);
+    static bool is_assignable_from_generic_parameter_convariant(const metadata::RtClass* from_class, const metadata::RtClass* to_class,
+                                                                const metadata::RtClass* implement_class);
     static bool is_assignable_from_generic_interface(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
     static bool is_assignable_from_interface(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
     static bool is_assignable_from(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
@@ -235,6 +236,7 @@ class Class
     static void get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size);
 
     static void walk_ptr_classes(metadata::ClassWalkCallback callback, void* userData);
+
   private:
     static RtResultVoid setup_interfaces_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_nested_classes_typedef(metadata::RtClass* klass);
@@ -246,7 +248,8 @@ class Class
     static RtResultVoid setup_properties_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_events_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_vtable_typedef(metadata::RtClass* klass);
-    static bool is_assignable_from_generic_parameter_convariant0(const metadata::RtClass* from_class, const metadata::RtClass* to_class, bool implemented_in_array);
+    static bool is_assignable_from_generic_parameter_convariant0(const metadata::RtClass* from_class, const metadata::RtClass* to_class,
+                                                                 bool implemented_in_array);
 };
 } // namespace vm
 } // namespace leanclr

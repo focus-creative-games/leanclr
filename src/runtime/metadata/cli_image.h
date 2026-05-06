@@ -16,7 +16,7 @@ namespace utils
 {
 class MemPool;
 }
-}
+} // namespace leanclr
 
 namespace leanclr
 {

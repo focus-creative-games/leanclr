@@ -43,8 +43,8 @@ RtResult<Utf16Char> SystemIOMonoIO::get_directory_separator_char() noexcept
     RET_OK(os::Path::get_directory_separator_char());
 }
 
-static RtResultVoid get_directory_separator_char_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
-                                                         interp::RtStackObject* ret) noexcept
+static RtResultVoid get_directory_separator_char_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                         const interp::RtStackObject* /*params*/, interp::RtStackObject* ret) noexcept
 {
     EvalStackOp::set_return(ret, static_cast<int32_t>(os::Path::get_directory_separator_char()));
     RET_VOID_OK();
@@ -246,7 +246,7 @@ RtResult<int32_t> SystemIOMonoIO::read(intptr_t handle, vm::RtArray* dest, int32
 }
 
 static RtResultVoid monoio_read_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                 interp::RtStackObject* ret) noexcept
+                                        interp::RtStackObject* ret) noexcept
 {
     intptr_t handle = EvalStackOp::get_param<intptr_t>(params, 0);
     auto dest = EvalStackOp::get_param<vm::RtArray*>(params, 1);

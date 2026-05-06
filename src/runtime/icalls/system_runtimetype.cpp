@@ -160,8 +160,8 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::make_generic_type(vm::RtRefle
     return vm::Reflection::get_type_reflection_object(&generic_class->by_val_type_sig);
 }
 
-RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*> SystemRuntimeType::get_methods_by_name_native(vm::RtReflectionRuntimeType* runtime_type,
-                                                                                                      const char* name, int32_t bind_flags, int32_t list_type) noexcept
+RtResult<utils::SafeGPtrArray<metadata::RtMethodInfo>*>
+SystemRuntimeType::get_methods_by_name_native(vm::RtReflectionRuntimeType* runtime_type, const char* name, int32_t bind_flags, int32_t list_type) noexcept
 {
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
 

@@ -14,7 +14,8 @@ RtResultVoid SystemThreadingMonitor::enter(vm::RtObject* monitor) noexcept
 }
 
 /// @icall: System.Threading.Monitor::Enter
-static RtResultVoid enter_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params, interp::RtStackObject*) noexcept
+static RtResultVoid enter_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                  interp::RtStackObject*) noexcept
 {
     auto monitor = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     return SystemThreadingMonitor::enter(monitor);
@@ -27,7 +28,8 @@ RtResultVoid SystemThreadingMonitor::exit(vm::RtObject* monitor) noexcept
 }
 
 /// @icall: System.Threading.Monitor::Exit
-static RtResultVoid exit_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params, interp::RtStackObject*) noexcept
+static RtResultVoid exit_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                 interp::RtStackObject*) noexcept
 {
     auto monitor = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     return SystemThreadingMonitor::exit(monitor);
@@ -138,7 +140,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_threading_monitor[] 
 
 utils::Span<vm::InternalCallEntry> SystemThreadingMonitor::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_monitor, sizeof(s_internal_call_entries_system_threading_monitor) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_monitor,
+                                              sizeof(s_internal_call_entries_system_threading_monitor) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

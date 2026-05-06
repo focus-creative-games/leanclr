@@ -151,7 +151,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_compar
 
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCompareInfo::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_compareinfo, sizeof(s_internal_call_entries_system_globalization_compareinfo) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_compareinfo,
+                                              sizeof(s_internal_call_entries_system_globalization_compareinfo) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

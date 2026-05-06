@@ -322,7 +322,6 @@ inline bool is_pointer_element_compatible_with(const metadata::RtClass* fromClas
     return vm::Class::is_pointer_element_compatible_with(fromClass, toClass);
 }
 
-
 template <typename T>
 inline T* get_array_element_data_start_as(vm::RtArray* array)
 {
@@ -455,7 +454,6 @@ inline void free_pinvoke_returned_utf8_cstr(const char* str)
         std::free(const_cast<char*>(str));
     }
 }
-
 
 } // namespace codegen
 } // namespace leanclr

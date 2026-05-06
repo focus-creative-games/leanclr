@@ -96,10 +96,8 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeFieldInfo::get_type_modifiers(vm::
 // ========== Invoker Functions ==========
 
 /// @icall: System.Reflection.RuntimeFieldInfo::get_metadata_token
-static RtResultVoid get_metadata_token_invoker_system_reflection_runtimefieldinfo(metadata::RtManagedMethodPointer,
-                                                                                  const metadata::RtMethodInfo*,
-                                                                                  const interp::RtStackObject* params,
-                                                                                  interp::RtStackObject* ret) noexcept
+static RtResultVoid get_metadata_token_invoker_system_reflection_runtimefieldinfo(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     vm::RtReflectionField* field = EvalStackOp::get_param<vm::RtReflectionField*>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, result, SystemReflectionRuntimeFieldInfo::get_metadata_token(field));

@@ -97,12 +97,12 @@ void* GCHandle::get_handle_by_id(uint32_t id)
 
 void* GCHandle::new_handle(RtObject* obj, bool pinned)
 {
-   return get_target_handle(obj, nullptr, (int32_t)(pinned ? GCHandleType::Pinned : GCHandleType::Normal));
+    return get_target_handle(obj, nullptr, (int32_t)(pinned ? GCHandleType::Pinned : GCHandleType::Normal));
 }
 
 void* GCHandle::new_weakref_handle(RtObject* obj, bool track_resurrection)
 {
-   return get_target_handle(obj, nullptr, (int32_t)(track_resurrection ? GCHandleType::WeakTrackResurrection : GCHandleType::Weak));
+    return get_target_handle(obj, nullptr, (int32_t)(track_resurrection ? GCHandleType::WeakTrackResurrection : GCHandleType::Weak));
 }
 
 void GCHandle::free_handle(void* handle)

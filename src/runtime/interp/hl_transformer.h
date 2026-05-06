@@ -414,7 +414,7 @@ struct GeneralInst
         extra_data.method_sig = method_sig;
     }
 
-    const metadata::RtMethodSig * get_method_sig() const
+    const metadata::RtMethodSig* get_method_sig() const
     {
         return extra_data.method_sig;
     }

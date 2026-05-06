@@ -95,8 +95,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultur
     {"System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)",
      (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::internal_get_cultures, internal_get_cultures_invoker},
     {"System.Globalization.CultureInfo::SetUserPreferredCultureInfoInAppX(System.String)",
-     (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_app_x,
-     set_user_preferred_culture_info_in_app_x_invoker},
+     (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_app_x, set_user_preferred_culture_info_in_app_x_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries() noexcept

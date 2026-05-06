@@ -13,8 +13,8 @@ RtResult<double> SystemMath::round(double value) noexcept
 }
 
 /// @icall: System.Math::Round(System.Double)
-static RtResultVoid round_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+static RtResultVoid round_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
+                                       interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -30,8 +30,8 @@ RtResult<float> SystemMath::abs_f32(float value) noexcept
 }
 
 /// @icall: System.Math::Abs(System.Single)
-static RtResultVoid abs_f32_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+static RtResultVoid abs_f32_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
+                                         interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -47,8 +47,8 @@ RtResult<double> SystemMath::abs_f64(double value) noexcept
 }
 
 /// @icall: System.Math::Abs(System.Double)
-static RtResultVoid abs_f64_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
-                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+static RtResultVoid abs_f64_invoker_math(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
+                                         interp::RtStackObject* ret) noexcept
 {
     (void)methodPtr;
     (void)method;
@@ -177,7 +177,7 @@ RtResult<double> SystemMath::ceiling(double value) noexcept
 }
 /// @icall: System.Math::Ceiling(System.Double)
 static RtResultVoid ceiling_invoker_math(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                      interp::RtStackObject* ret) noexcept
+                                         interp::RtStackObject* ret) noexcept
 {
     auto value = EvalStackOp::get_param<double>(params, 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(double, result, SystemMath::ceiling(value));

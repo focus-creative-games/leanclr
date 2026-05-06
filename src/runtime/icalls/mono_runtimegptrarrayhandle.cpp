@@ -32,7 +32,8 @@ static vm::InternalCallEntry s_internal_call_entries_mono_runtimegptrarrayhandle
 
 utils::Span<vm::InternalCallEntry> MonoRuntimeGPtrArrayHandle::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_mono_runtimegptrarrayhandle, sizeof(s_internal_call_entries_mono_runtimegptrarrayhandle) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_mono_runtimegptrarrayhandle,
+                                              sizeof(s_internal_call_entries_mono_runtimegptrarrayhandle) / sizeof(vm::InternalCallEntry));
 }
 
 } // namespace icalls

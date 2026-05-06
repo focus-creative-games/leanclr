@@ -9,7 +9,8 @@ namespace icalls
 {
 
 RtResult<bool> SystemDiagnosticsStackFrame::get_frame_info(int32_t skip, bool need_file_info, vm::RtReflectionMethod** method, int32_t* il_offset,
-                                                           int32_t* native_offset, vm::RtString** file_name, int32_t* line_number, int32_t* column_number) noexcept
+                                                           int32_t* native_offset, vm::RtString** file_name, int32_t* line_number,
+                                                           int32_t* column_number) noexcept
 {
     return vm::StackTrace::get_frame_info(skip, need_file_info, method, il_offset, native_offset, file_name, line_number, column_number);
 }

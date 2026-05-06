@@ -10,10 +10,10 @@ namespace alloc
 class MetadataAllocation
 {
   public:
-      static void init()
-      {
-          s_memPool = new MemPool();
-      }
+    static void init()
+    {
+        s_memPool = new MemPool();
+    }
 
     static void* malloc(size_t size)
     {

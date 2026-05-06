@@ -244,7 +244,8 @@ RtResult<void*> SystemRuntimeInteropServicesMarshal::unsafe_addr_of_pinned_array
     RET_OK(addr);
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::copy_to_unmanaged_fixed(vm::RtArray* arr, int32_t start_index, void* dest, int32_t length, void* etype) noexcept
+RtResultVoid SystemRuntimeInteropServicesMarshal::copy_to_unmanaged_fixed(vm::RtArray* arr, int32_t start_index, void* dest, int32_t length,
+                                                                          void* etype) noexcept
 {
     assert(arr);
     assert(length >= 0);
@@ -258,7 +259,8 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::copy_to_unmanaged_fixed(vm::Rt
     RET_VOID_OK();
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed(void* src, int32_t start_index, vm::RtArray* arr, int32_t length, void* etype) noexcept
+RtResultVoid SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed(void* src, int32_t start_index, vm::RtArray* arr, int32_t length,
+                                                                            void* etype) noexcept
 {
     assert(arr);
     assert(length >= 0);

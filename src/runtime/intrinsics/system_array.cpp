@@ -42,8 +42,8 @@ RtResultVoid SystemArray::set_generic_value_impl(vm::RtArray* arr, int32_t index
 }
 
 /// @intrinsic: System.Array::get_Length
-static RtResultVoid get_length_invoker_intrinsics_system_array(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret) noexcept
+static RtResultVoid get_length_invoker_intrinsics_system_array(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     vm::RtArray* arr = interp::EvalStackOp::get_param<vm::RtArray*>(params, 0);
 

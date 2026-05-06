@@ -46,9 +46,9 @@ class Exception
     // static RtResultVoid raise_null_reference_exception(interp::InterpFrame* frame, const void* ip);
 };
 
-#define RET_ERR_WITH_MSG(err, msg)                                          \
-    do                                                                      \
-    {                                                                       \
+#define RET_ERR_WITH_MSG(err, msg)                                                   \
+    do                                                                               \
+    {                                                                                \
         RET_ERR(vm::Exception::raise_internal_runtime_error_as_exception(err, msg)); \
     } while (0)
 

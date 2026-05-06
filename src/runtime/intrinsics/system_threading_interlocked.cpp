@@ -57,7 +57,8 @@ RtResult<void*> SystemThreadingInterlocked::exchange(void** location, void* valu
 }
 
 /// @intrinsic: System.Threading.Interlocked::Exchange<>
-static RtResultVoid exchange_invoker(RtManagedMethodPointer _method_pointer, const RtMethodInfo* _method, const RtStackObject* params, RtStackObject* ret) noexcept
+static RtResultVoid exchange_invoker(RtManagedMethodPointer _method_pointer, const RtMethodInfo* _method, const RtStackObject* params,
+                                     RtStackObject* ret) noexcept
 {
     void** location = EvalStackOp::get_param<void**>(params, 0);
     void* value = EvalStackOp::get_param<void*>(params, 1);
@@ -131,7 +132,8 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_threading_interlocked[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemThreadingInterlocked::get_intrinsic_entries() noexcept
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_threading_interlocked, sizeof(s_intrinsic_entries_system_threading_interlocked) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_threading_interlocked,
+                                           sizeof(s_intrinsic_entries_system_threading_interlocked) / sizeof(vm::IntrinsicEntry));
 }
 
 } // namespace intrinsics

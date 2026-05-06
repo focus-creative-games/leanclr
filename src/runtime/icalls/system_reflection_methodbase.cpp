@@ -43,7 +43,8 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_methodbas
 
 utils::Span<vm::InternalCallEntry> SystemReflectionMethodBase::get_internal_call_entries() noexcept
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_methodbase) / sizeof(s_internal_call_entries_system_reflection_methodbase[0]);
+    constexpr size_t entry_count =
+        sizeof(s_internal_call_entries_system_reflection_methodbase) / sizeof(s_internal_call_entries_system_reflection_methodbase[0]);
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_methodbase, entry_count);
 }
 
