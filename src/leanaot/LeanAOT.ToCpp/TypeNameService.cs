@@ -1,4 +1,5 @@
 ﻿using dnlib.DotNet;
+using LeanAOT.Core;
 
 namespace LeanAOT.ToCpp
 {
@@ -32,7 +33,7 @@ namespace LeanAOT.ToCpp
 
         public bool IsPtrLikeSystemValueType(TypeDef typeDef)
         {
-            return typeDef.Module.IsCoreLibraryModule == true && _ptrLikeTypeNames.Contains(typeDef.FullName);
+            return MetaUtil.IsCorlibOrSystemOrSystemCore(typeDef.Module) && _ptrLikeTypeNames.Contains(typeDef.FullName);
         }
 
         public string GetCppTypeNameAsFieldOrArgOrLoc(TypeSig typeSig, TypeNameRelaxLevel relaxLevel)

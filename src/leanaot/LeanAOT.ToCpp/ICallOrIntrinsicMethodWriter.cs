@@ -13,7 +13,7 @@ namespace LeanAOT.ToCpp
 
         protected override void WriteMethodBody()
         {
-            var argsStr = CreateMethodFunctionArgsWithCast();
+            var argsStr = MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(_method);
             string namespaceStr = _entry.MethodKind == MethodKind.ICall || _entry.MethodKind == MethodKind.ICallNewObj ? "leanclr::icalls" : "leanclr::intrinsics";
             string funcFullName = $"{namespaceStr}::{_entry.Func}";
             if (_method.IsVoidReturn)

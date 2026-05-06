@@ -17,12 +17,12 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine($"assert(__icall_method_pointer != nullptr);");
             if (_method.IsVoidReturn)
             {
-                _bodyWriter.AddLine($"(({icallMethodType})__icall_method_pointer)({CreateMethodFunctionArgsWithCast()});");
+                _bodyWriter.AddLine($"(({icallMethodType})__icall_method_pointer)({MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(_method)});");
                 _bodyWriter.AddLine($"{ConstStrings.CodegenReturnVoid}();");
             }
             else
             {
-                _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}((({icallMethodType})__icall_method_pointer)({CreateMethodFunctionArgsWithCast()}));");
+                _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}((({icallMethodType})__icall_method_pointer)({MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(_method)}));");
             }
         }
     }

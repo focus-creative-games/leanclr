@@ -61,5 +61,19 @@ namespace LeanAOT.ToCpp
             sb.Append(')');
             return sb.ToString();
         }
+
+        public static string CreateMethodFunctionArgsWithoutCast(MethodDetail methodDetail)
+        {
+            var sb = new StringBuilder();
+            foreach (var param in methodDetail.ParamsIncludeThis)
+            {
+                if (param.Index > 0)
+                {
+                    sb.Append(", ");
+                }
+                sb.Append($"{param.Name}");
+            }
+            return sb.ToString();
+        }
     }
 }

@@ -61,6 +61,10 @@ namespace LeanAOT.ToCpp
         {
             entry = null;
             methodKind = MethodKind.Normal;
+            if (methodDef == null || methodDef.HasGenericParameters || methodDef.DeclaringType.HasGenericParameters)
+            {
+                return false;
+            }
             UTF8String moduleName = methodDef.Module.Assembly.Name;
             if (moduleName != "mscorlib" && moduleName != "System" && moduleName != "System.Core")
             {
@@ -96,7 +100,7 @@ namespace LeanAOT.ToCpp
             Debug.Assert(methodDef.IsConstructor, "methodDef must be a constructor");
             entry = null;
             methodKind = MethodKind.Normal;
-            if (methodDef.Module.IsCoreLibraryModule != true)
+            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(methodDef.Module))
             {
                 return false;
             }

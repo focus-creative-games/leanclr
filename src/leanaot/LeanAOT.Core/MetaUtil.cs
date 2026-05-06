@@ -933,5 +933,11 @@ namespace LeanAOT.Core
             result.Append(')');
             return result.ToString();
         }
+
+        public static bool IsCorlibOrSystemOrSystemCore(ModuleDef module)
+        {
+            UTF8String moduleName = module.Assembly.Name;
+            return module.IsCoreLibraryModule == true || moduleName == "mscorlib" || moduleName == "System" || moduleName == "System.Core";
+        }
     }
 }

@@ -43,8 +43,7 @@ namespace LeanAOT.ToCpp
                 return false;
             }
 
-
-            if (methodDef.Module.IsCoreLibraryModule != true)
+            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(methodDef.Module))
             {
                 return false;
             }
@@ -88,26 +87,13 @@ namespace LeanAOT.ToCpp
                 break;
             }
             
-
-            // ITypeDefOrRef parentType = declaringType.BaseType;
-            // TypeDef parentTypeDef = parentType.ResolveTypeDef();
-            // if (parentTypeDef != null)
-            // {
-            //     switch (parentTypeDef.Name.ToString())
-            //     {
-            //     case "MulticastDelegate":
-            //     {
-            //         if (methodName == VmFunctionNames.Ctor)
-            //         {
-            //             // If the method is an override of System.Object's .ctor, we can also ignore the call to it.
-            //             return true;
-            //         }
-            //         break;
-            //     }
-            //     default:
-            //         break;
-            //     }
-            // }
+            
+            var runtimeApiCatalog = GlobalServices.Inst.RuntimeApiCatalog;
+            if (runtimeApiCatalog.TryGetIcallOrIntrinsic(methodDef, out var entry, out var _methodKind))
+            {
+                EmitCallICallOrIntrinsic(inst, methodDetail, entry, args, retVar);
+                return true;
+            }
 
             return false;
         }
@@ -150,7 +136,7 @@ namespace LeanAOT.ToCpp
             {
                 return false;
             }
-            if (methodDef.Module.IsCoreLibraryModule != true)
+            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(methodDef.Module))
             {
                 return false;
             }
@@ -201,7 +187,7 @@ namespace LeanAOT.ToCpp
                 }
                 return false;
             }
-            if (methodDef.Module.IsCoreLibraryModule != true)
+            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(methodDef.Module))
             {
                 return false;
             }
@@ -266,6 +252,25 @@ namespace LeanAOT.ToCpp
             return true;
         }
 
+        private void EmitCallICallOrIntrinsic(Instruction inst, MethodDetail methodDetail, RuntimeApiEntry entry, List<EvalVariable> args, EvalVariable retVar)
+        {
+            _forwardDeclaration.AddInclude(entry.Header);
+            var argsStr = CreateMethodFunctionArgsWithCast(methodDetail, args);
+            string namespaceStr = entry.MethodKind == MethodKind.ICall || entry.MethodKind == MethodKind.ICallNewObj ? "leanclr::icalls" : "leanclr::intrinsics";
+            string funcFullName = $"{namespaceStr}::{entry.Func}";
+            if (methodDetail.IsVoidReturn)
+            {
+                EmitThrowOnError(inst, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName()}){funcFullName})({argsStr})");
+            }
+            else
+            {
+                string relaxRetTypeName = MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(methodDetail.RetType, TypeNameRelaxLevel.AbiRelaxed);
+                _bodyWriter.BeginBlock();
+                _bodyWriter.AddLine($"using __RetType = leanclr::core::function_return<decltype({funcFullName})>::type;");
+                EmitAssignOrThrow(inst, retVar, $"(({methodDetail.CreateOverrideRetTypeRelaxMethodFunctionTypeDefine("", "__RetType")}){funcFullName})({argsStr}).cast<{relaxRetTypeName}>()");
+                _bodyWriter.EndBlock();
+            }
+        }
 
         private void DefineLengthsAndBoundsVar(List<EvalVariable> args, int rank)
         {

@@ -63,6 +63,18 @@ namespace LeanAOT.ToCpp
             _indentStr = new string(' ', _indentLevel * 4);
         }
 
+        public void BeginBlock()
+        {
+            AddLine("{");
+            IncreaseIndent();
+        }
+
+        public void EndBlock()
+        {
+            DecreaseIndent();
+            AddLine("}");
+        }
+
         public void AddLine(string line)
         {
             string lineWithIndent = _indentStr + line;

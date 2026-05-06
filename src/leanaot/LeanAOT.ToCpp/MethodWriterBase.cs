@@ -1723,7 +1723,7 @@ namespace LeanAOT.ToCpp
                 {
                     sb.Append(", ");
                 }
-                sb.Append($"{GetVariableMayCast(args[param.Index], param.Type)} ");
+                sb.Append($"{GetVariableMayCast(args[param.Index], param.Type)}");
             }
             return sb.ToString();
         }
@@ -1934,7 +1934,7 @@ namespace LeanAOT.ToCpp
                 // for interface, we should check value type at runtime since it can be implemented by value type
                 return true;
             }
-            if (declaringTypeDef.Module.IsCoreLibraryModule != true)
+            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(declaringTypeDef.Module))
             {
                 return false;
             }
