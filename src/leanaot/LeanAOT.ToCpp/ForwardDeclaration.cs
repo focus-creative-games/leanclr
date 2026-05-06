@@ -24,6 +24,8 @@ namespace LeanAOT.ToCpp
         private readonly HashSet<ITypeDefOrRef> _addedTypes = new HashSet<ITypeDefOrRef>(TypeEqualityComparer.Instance);
         private readonly HashSet<MethodInvokerInfo> _addedInvokers = new HashSet<MethodInvokerInfo>();
 
+        private readonly HashSet<string> _addedPinvokeEntries = new HashSet<string>();
+
         public ForwardDeclaration(CodeThunkZone writer)
         {
             _includesWriter = writer.CreateThunk("includes");
@@ -36,6 +38,18 @@ namespace LeanAOT.ToCpp
             _metadataService = globalServices.MetadataService;
             _typeNameService = globalServices.TypeNameService;
             _manifestService = globalServices.ManifestService;
+        }
+
+        // File-scope extern "C" for static P/Invoke (not inside a method — avoids Clang/Emscripten parse issues).
+        public void AddPInvokeNativeExternDeclaration(string externDeclLine)
+        {
+            if (!_addedPinvokeEntries.Add(externDeclLine))
+            {
+                return;
+            }
+            _methodDeclsWriter.AddLine("#if LEANCLR_PINVOKE_STATIC_LINKING");
+            _methodDeclsWriter.AddLine(externDeclLine);
+            _methodDeclsWriter.AddLine("#endif");
         }
 
         public void AddCommonIncludes(ModuleDef mod)

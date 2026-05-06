@@ -1,12 +1,16 @@
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
 using dnlib.DotNet;
 using LeanAOT.Core;
-using System.Text;
 
 namespace LeanAOT.ToCpp
 {
     class PInvokeMethodWriter : SpecialMethodWriterBase
     {
+        private const string PInvokeFnPtrVar = "__leanclr_pinvoke_fn";
+
         private class NativeParam
         {
             public string TypeName;
@@ -24,7 +28,7 @@ namespace LeanAOT.ToCpp
             string importName = GetImportName();
             try
             {
-                WriteWasmPInvokeBody(importName);
+                WritePInvokeBody(importName);
             }
             catch (NotSupportedException ex)
             {
@@ -33,25 +37,38 @@ namespace LeanAOT.ToCpp
             }
         }
 
-        private void WriteWasmPInvokeBody(string importName)
+        private void WritePInvokeBody(string importName)
         {
             string nativeRetType = GetNativeTypeName(_method.RetType, true);
-            string pinvokeSymbol = $"__leanclr_pinvoke_{_method.UniqueName}";
+            string callConvMacro = GetPInvokeCallConvCppMacro();
             var nativeParams = _method.ParamsIncludeThis.Select(CreateNativeParam).ToList();
             string nativeParamDecls = string.Join(", ", nativeParams.Select((p, index) => $"{p.TypeName} __arg{index}"));
             string nativeParamExprs = string.Join(", ", nativeParams.Select(p => p.Expr));
+            string escapedImportLiteral = EscapeCppString(importName);
+            string fnTypedefName = $"__leanclr_pinvoke_fn_{_method.UniqueName}";
+            bool staticLinkingStubNoNative = IsCorlibSystemOrSystemCorePInvoke();
 
-            bool kernel32Guard = IsWinOnlyDll(GetPInvokeModuleName());
-            if (kernel32Guard)
+            _bodyWriter.AddLine($"typedef {nativeRetType} ({callConvMacro} *{fnTypedefName})({nativeParamDecls});");
+            _bodyWriter.AddLine("#if LEANCLR_PINVOKE_STATIC_LINKING");
+            if (staticLinkingStubNoNative)
             {
-                _bodyWriter.AddLine("#if !LEANCLR_PLATFORM_WIN");
-                _bodyWriter.AddLine($"printf(\"PInvoke method {_method.FullName} is not supported on non-Windows platforms for symbol {EscapeCppString(importName)}\\n\");");
-                _bodyWriter.AddLine($"LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR();");
-                _bodyWriter.AddLine("#else");
+                _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = nullptr;");
             }
+            else
+            {
+                _forwardDeclaration.AddPInvokeNativeExternDeclaration(
+                    $"extern \"C\" {nativeRetType} {callConvMacro} {importName}({nativeParamDecls});");
+                _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = {importName};");
+            }
+            _bodyWriter.AddLine("#else");
+            _bodyWriter.AddLine(
+                $"{fnTypedefName} {PInvokeFnPtrVar} = reinterpret_cast<{fnTypedefName}>({ConstStrings.CodegenNamespace}::resolve_pinvoke_function(\"{escapedImportLiteral}\"));");
+            _bodyWriter.AddLine("#endif");
+            _bodyWriter.AddLine($"if ({PInvokeFnPtrVar} == nullptr)");
+            _bodyWriter.AddLine("{");
+            _bodyWriter.AddLine($"    return {ConstStrings.CodegenNamespace}::raise_pinvoke_entry_not_found_error(\"{escapedImportLiteral}\");");
+            _bodyWriter.AddLine("}");
 
-            _bodyWriter.AddLine("#if LEANCLR_PLATFORM_WASM");
-            _bodyWriter.AddLine($"extern {nativeRetType} {pinvokeSymbol}({nativeParamDecls}) __asm__(\"{EscapeCppString(importName)}\");");
             foreach (var param in nativeParams)
             {
                 foreach (string line in param.SetupLines)
@@ -60,14 +77,19 @@ namespace LeanAOT.ToCpp
                 }
             }
 
+            WritePInvokeInvokeAndReturn(PInvokeFnPtrVar, nativeParamExprs);
+        }
+
+        private void WritePInvokeInvokeAndReturn(string calleeExpr, string nativeParamExprs)
+        {
             if (_method.IsVoidReturn)
             {
-                _bodyWriter.AddLine($"{pinvokeSymbol}({nativeParamExprs});");
+                _bodyWriter.AddLine($"{calleeExpr}({nativeParamExprs});");
                 _bodyWriter.AddLine($"{ConstStrings.CodegenReturnVoid}();");
             }
             else if (IsStringType(_method.RetType))
             {
-                _bodyWriter.AddLine($"const char* __pinvoke_utf8_ret = {pinvokeSymbol}({nativeParamExprs});");
+                _bodyWriter.AddLine($"const char* __pinvoke_utf8_ret = {calleeExpr}({nativeParamExprs});");
                 _bodyWriter.AddLine($"auto __pinvoke_managed_str = {ConstStrings.CodegenNamespace}::marshal_utf8_string_to_utf16(__pinvoke_utf8_ret);");
                 _bodyWriter.AddLine($"{ConstStrings.CodegenNamespace}::free_pinvoke_returned_utf8_cstr(__pinvoke_utf8_ret);");
                 _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}(__pinvoke_managed_str);");
@@ -75,18 +97,30 @@ namespace LeanAOT.ToCpp
             else
             {
                 string managedRetType = MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(_method.RetType, TypeNameRelaxLevel.AbiRelaxed);
-                _bodyWriter.AddLine($"auto __pinvoke_ret = {pinvokeSymbol}({nativeParamExprs});");
+                _bodyWriter.AddLine($"auto __pinvoke_ret = {calleeExpr}({nativeParamExprs});");
                 _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}(({managedRetType})__pinvoke_ret);");
             }
+        }
 
-            _bodyWriter.AddLine("#else");
-            _bodyWriter.AddLine($"printf(\"PInvoke method {_method.FullName} requires wasm static linking for symbol {EscapeCppString(importName)}\\n\");");
-            _bodyWriter.AddLine($"LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR();");
-            _bodyWriter.AddLine("#endif");
-
-            if (kernel32Guard)
+        private string GetPInvokeCallConvCppMacro()
+        {
+            ImplMap implMap = _method.MethodDef.ImplMap;
+            PInvokeAttributes cc = (implMap?.Attributes ?? 0) & PInvokeAttributes.CallConvMask;
+            switch (cc)
             {
-                _bodyWriter.AddLine("#endif");
+            case 0:
+            case PInvokeAttributes.CallConvWinapi:
+                return "LEANCLR_PINVOKE_CALL_WINAPI";
+            case PInvokeAttributes.CallConvCdecl:
+                return "LEANCLR_PINVOKE_CALL_CDECL";
+            case PInvokeAttributes.CallConvStdCall:
+                return "LEANCLR_PINVOKE_CALL_STDCALL";
+            case PInvokeAttributes.CallConvThiscall:
+                return "LEANCLR_PINVOKE_CALL_THISCALL";
+            case PInvokeAttributes.CallConvFastcall:
+                return "LEANCLR_PINVOKE_CALL_FASTCALL";
+            default:
+                throw new NotSupportedException($"PInvoke calling convention mask 0x{(ushort)cc:X4} is not supported for {_method.FullName}.");
             }
         }
 
@@ -190,30 +224,12 @@ namespace LeanAOT.ToCpp
             return string.IsNullOrEmpty(name) ? _method.MethodDef.Name : name;
         }
 
-        private string GetPInvokeModuleName()
+        private bool IsCorlibSystemOrSystemCorePInvoke()
         {
-            ImplMap implMap = _method.MethodDef.ImplMap;
-            return implMap?.Module?.Name?.String;
-        }
-
-        private readonly static string[] s_winOnlyDlls = { "kernel32", "user32", "gdi32", "ole32", "shell32", "advapi32", "msvcrt", "ntdll" };
-
-        private static bool IsWinOnlyDll(string moduleName)
-        {
-            if (string.IsNullOrEmpty(moduleName))
-            {
-                return false;
-            }
-            string n = moduleName.Trim();
-            if (n.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
-            {
-                n = n.Substring(0, n.Length - 4);
-            }
-            if (s_winOnlyDlls.Contains(n, StringComparer.OrdinalIgnoreCase))
-            {
-                return true;
-            }
-            return false;
+            string asmName = _method.MethodDef.Module.Assembly.Name;
+            return asmName.Equals("mscorlib", StringComparison.OrdinalIgnoreCase)
+                || asmName.Equals("System", StringComparison.OrdinalIgnoreCase)
+                || asmName.Equals("System.Core", StringComparison.OrdinalIgnoreCase);
         }
 
         private static bool IsStringType(TypeSig type)

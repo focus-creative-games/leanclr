@@ -26,7 +26,7 @@ class Exception
     static RtException* raise_error_as_exception(RtErr err, interp::InterpFrame* frame, const void* ip);
     static RtException* raise_aot_error_as_exception(RtErr err, const metadata::RtMethodInfo* methodInfo, int32_t ip);
     static RtException* raise_aot_exception(RtException* ex, const metadata::RtMethodInfo* methodInfo, int32_t ip);
-    static void raise_internal_runtime_error_as_exception(RtErr err, const char* message);
+    static RtErr raise_internal_runtime_error_as_exception(RtErr err, const char* message);
     static RtException* raise_exception(RtException* ex, interp::InterpFrame* frame, const void* ip);
     static RtException* raise_internal_runtime_exception(metadata::RtClass* ex_klass, const char* message);
     [[noreturn]] static void raise_as_cpp_exception(RtException* ex);
@@ -49,8 +49,7 @@ class Exception
 #define RET_ERR_WITH_MSG(err, msg)                                          \
     do                                                                      \
     {                                                                       \
-        vm::Exception::raise_internal_runtime_error_as_exception(err, msg); \
-        RET_ERR(RtErr::ManagedException);                                   \
+        RET_ERR(vm::Exception::raise_internal_runtime_error_as_exception(err, msg)); \
     } while (0)
 
 } // namespace vm

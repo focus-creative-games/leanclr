@@ -133,9 +133,10 @@ RtException* Exception::raise_aot_exception(RtException* ex, const metadata::RtM
     return raise_exception(ex, nullptr, reinterpret_cast<const void*>(static_cast<intptr_t>(ip)));
 }
 
-void Exception::raise_internal_runtime_error_as_exception(RtErr err, const char* message)
+RtErr Exception::raise_internal_runtime_error_as_exception(RtErr err, const char* message)
 {
     raise_error_as_exception(err, nullptr, nullptr);
+    return RtErr::ManagedException;
 }
 
 static void prepare_exception_info(RtException* ex, interp::InterpFrame* frame, const void* ip)

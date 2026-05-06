@@ -78,4 +78,55 @@ typedef double float64_t;
 
 #define LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR 1
 
+#if LEANCLR_PLATFORM_WASM || LEANCLR_PLATFORM_IOS || LEANCLR_PLATFORM_MAC
+#define LEANCLR_PINVOKE_STATIC_LINKING 1
+#else
+#define LEANCLR_PINVOKE_STATIC_LINKING 0
+#endif
+
+// ---------------------------------------------------------------------------
+// P/Invoke native calling conventions
+//
+// LeanAOT emits typedefs / extern declarations using these macros so the
+// generated signature matches DllImport CallingConvention across MSVC,
+// Clang, and GCC. On 32-bit x86 Windows, cdecl/stdcall/thiscall/fastcall
+// differ; on x64, ARM, Wasm, and Unix 32/64-bit targets they usually
+// collapse to a single C ABI (macros expand empty on those targets).
+// ---------------------------------------------------------------------------
+#if LEANCLR_PLATFORM_WIN && (defined(_M_IX86) || defined(__i386__))
+#define LEANCLR_PINVOKE_ABI_WIN_X86 1
+#else
+#define LEANCLR_PINVOKE_ABI_WIN_X86 0
+#endif
+
+#if defined(_MSC_VER)
+#define LEANCLR_PINVOKE_CALL_CDECL __cdecl
+#define LEANCLR_PINVOKE_CALL_STDCALL __stdcall
+#define LEANCLR_PINVOKE_CALL_FASTCALL __fastcall
+#define LEANCLR_PINVOKE_CALL_THISCALL __thiscall
+#elif defined(__clang__) || defined(__GNUC__)
+#if LEANCLR_PINVOKE_ABI_WIN_X86
+#define LEANCLR_PINVOKE_CALL_CDECL __attribute__((cdecl))
+#define LEANCLR_PINVOKE_CALL_STDCALL __attribute__((stdcall))
+#define LEANCLR_PINVOKE_CALL_FASTCALL __attribute__((fastcall))
+#define LEANCLR_PINVOKE_CALL_THISCALL __attribute__((thiscall))
+#else
+#define LEANCLR_PINVOKE_CALL_CDECL
+#define LEANCLR_PINVOKE_CALL_STDCALL
+#define LEANCLR_PINVOKE_CALL_FASTCALL
+#define LEANCLR_PINVOKE_CALL_THISCALL
+#endif
+#else
+#define LEANCLR_PINVOKE_CALL_CDECL
+#define LEANCLR_PINVOKE_CALL_STDCALL
+#define LEANCLR_PINVOKE_CALL_FASTCALL
+#define LEANCLR_PINVOKE_CALL_THISCALL
+#endif
+
+#if LEANCLR_PLATFORM_WIN
+#define LEANCLR_PINVOKE_CALL_WINAPI LEANCLR_PINVOKE_CALL_STDCALL
+#else
+#define LEANCLR_PINVOKE_CALL_WINAPI LEANCLR_PINVOKE_CALL_CDECL
+#endif
+
 #include "il2cpp/unityversion.h"

@@ -3,6 +3,8 @@
 #include "metadata/module_def.h"
 #include "utils/string_builder.h"
 #include "vm/rt_string.h"
+#include "vm/pinvoke.h"
+#include "vm/rt_exception.h"
 
 namespace leanclr
 {
@@ -157,6 +159,21 @@ const char* marshal_utf16_string_to_utf8(vm::RtString* str)
     utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)), sb);
     // FIXME: should we use std::malloc instead of alloc::GeneralAllocation::malloc?
     return sb.dup_to_zero_end_cstr();
+}
+
+PInvokeFunction resolve_pinvoke_function(const char* name)
+{
+    auto pinvoke_registry = vm::PInvokes::get_pinvoke(name);
+    if (pinvoke_registry != nullptr)
+    {
+        return pinvoke_registry->func;
+    }
+    return nullptr;
+}
+
+RtErr raise_pinvoke_entry_not_found_error(const char* name)
+{
+    RET_ERR_WITH_MSG(RtErr::EntryPointNotFound, name);
 }
 
 } // namespace codegen

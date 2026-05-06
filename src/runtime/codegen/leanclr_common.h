@@ -13,6 +13,7 @@
 #include "vm/delegate.h"
 #include "vm/reflection.h"
 #include "vm/internal_calls.h"
+#include "vm/pinvoke.h"
 #include "vm/rt_string.h"
 #include "vm/marshal.h"
 #include "metadata/module_def.h"
@@ -428,6 +429,9 @@ inline vm::InternalCallFunction resolve_internal_call(const char* name)
     return (vm::InternalCallFunction)vm::InternalCalls::get_lite_internal_call(name);
 }
 
+using vm::PInvokeFunction;
+PInvokeFunction resolve_pinvoke_function(const char* name);
+
 using vm::TempUtf16StringToUtf8Converter;
 
 inline vm::RtString* marshal_utf8_string_to_utf16(const char* str)
@@ -442,6 +446,8 @@ inline void free_pinvoke_returned_utf8_cstr(const char* str)
         std::free(const_cast<char*>(str));
     }
 }
+
+RtErr raise_pinvoke_entry_not_found_error(const char* name);
 
 } // namespace codegen
 } // namespace leanclr

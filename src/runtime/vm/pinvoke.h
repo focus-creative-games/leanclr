@@ -15,7 +15,7 @@ namespace leanclr
 namespace vm
 {
 
-using PInvokeFunction = metadata::RtManagedMethodPointer;
+using PInvokeFunction = metadata::RtNativeMethodPointer;
 using PInvokeInvoker = metadata::RtInvokeMethodPointer;
 
 // Registry struct for internal call functions

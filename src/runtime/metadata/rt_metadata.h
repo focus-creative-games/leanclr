@@ -508,6 +508,7 @@ struct RtMethodArgDesc
 // Managed method pointer type (noexcept not on alias - MSVC C2279; all invokers implement noexcept)
 using RtManagedMethodPointer = void (*)();
 using RtInvokeMethodPointer = RtResultVoid (*)(RtManagedMethodPointer, const RtMethodInfo*, const interp::RtStackObject*, interp::RtStackObject*);
+using RtNativeMethodPointer = void (*)();
 
 #define CAST_AS_NOEXCEP_MANAGED_METHOD_POINTER(p) ((void (*)() noexcept)(p))
 #define CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(p) ((::leanclr::RtResultVoid (*)(::leanclr::metadata::RtManagedMethodPointer, const ::leanclr::metadata::RtMethodInfo*, const ::leanclr::interp::RtStackObject*, ::leanclr::interp::RtStackObject*) noexcept)(p))
