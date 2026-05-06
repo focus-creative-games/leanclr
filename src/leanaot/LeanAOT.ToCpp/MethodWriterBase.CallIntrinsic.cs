@@ -267,7 +267,7 @@ namespace LeanAOT.ToCpp
                 string relaxRetTypeName = MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(methodDetail.RetType, TypeNameRelaxLevel.AbiRelaxed);
                 _bodyWriter.BeginBlock();
                 _bodyWriter.AddLine($"using __RetType = leanclr::core::function_return<decltype({funcFullName})>::type;");
-                EmitAssignOrThrow(inst, retVar, $"(({methodDetail.CreateOverrideRetTypeRelaxMethodFunctionTypeDefine("", "__RetType")}){funcFullName})({argsStr}).cast<{relaxRetTypeName}>()");
+                EmitAssignOrThrow(inst, retVar, $"(({methodDetail.CreateOverrideRetTypeRelaxMethodFunctionTypeDefine("", "__RetType")}){funcFullName})({argsStr})");
                 _bodyWriter.EndBlock();
             }
         }

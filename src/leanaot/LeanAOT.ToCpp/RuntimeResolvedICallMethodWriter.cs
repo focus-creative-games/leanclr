@@ -13,8 +13,15 @@ namespace LeanAOT.ToCpp
         protected override void WriteMethodBody()
         {
             string icallMethodType = _method.CreateNativeMethodFunctionTypeDefine("");
-            _bodyWriter.AddLine($"static auto __icall_method_pointer = {ConstStrings.CodegenNamespace}::resolve_internal_call(\"{NameUtil.GetICallFullMethodName(_method.MethodDef)}\");");
-            _bodyWriter.AddLine($"assert(__icall_method_pointer != nullptr);");
+            _bodyWriter.AddLine($"static leanclr::vm::InternalCallFunction __icall_method_pointer = nullptr;");
+            _bodyWriter.AddLine("if (__icall_method_pointer == nullptr)");
+            _bodyWriter.BeginBlock();
+            _bodyWriter.AddLine($"__icall_method_pointer = {ConstStrings.CodegenNamespace}::resolve_internal_call(\"{NameUtil.GetICallFullMethodName(_method.MethodDef)}\");");
+            _bodyWriter.AddLine("if (__icall_method_pointer == nullptr)");
+            _bodyWriter.BeginBlock();
+            _bodyWriter.AddLine($"{ConstStrings.CodegenReturnErr}({ConstStrings.CodegenNamespace}::raise_internal_call_entry_not_found_error(\"{NameUtil.GetICallFullMethodName(_method.MethodDef)}\"));");
+            _bodyWriter.EndBlock();
+            _bodyWriter.EndBlock();
             if (_method.IsVoidReturn)
             {
                 _bodyWriter.AddLine($"(({icallMethodType})__icall_method_pointer)({MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(_method)});");

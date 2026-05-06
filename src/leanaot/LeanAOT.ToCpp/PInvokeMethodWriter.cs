@@ -65,17 +65,15 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine("#else");
             _bodyWriter.AddLine($"static {fnTypedefName} __leanclr_pinvoke_fn_cache = nullptr;");
             _bodyWriter.AddLine("if (__leanclr_pinvoke_fn_cache == nullptr)");
-            _bodyWriter.AddLine("{");
-            _bodyWriter.AddLine(
-                $"    __leanclr_pinvoke_fn_cache = reinterpret_cast<{fnTypedefName}>({ConstStrings.CodegenNamespace}::resolve_pinvoke_function(\"{escapedDllLiteral}\", \"{escapedImportLiteral}\"));");
-            _bodyWriter.AddLine("}");
+            _bodyWriter.BeginBlock();
+            _bodyWriter.AddLine($"__leanclr_pinvoke_fn_cache = reinterpret_cast<{fnTypedefName}>({ConstStrings.CodegenNamespace}::resolve_pinvoke_function(\"{escapedDllLiteral}\", \"{escapedImportLiteral}\"));");
+            _bodyWriter.EndBlock();
             _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = __leanclr_pinvoke_fn_cache;");
             _bodyWriter.AddLine("#endif");
             _bodyWriter.AddLine($"if ({PInvokeFnPtrVar} == nullptr)");
-            _bodyWriter.AddLine("{");
-            _bodyWriter.AddLine(
-                $"    return {ConstStrings.CodegenNamespace}::raise_pinvoke_entry_not_found_error(\"{escapedDllLiteral}\", \"{escapedImportLiteral}\");");
-            _bodyWriter.AddLine("}");
+            _bodyWriter.BeginBlock();
+            _bodyWriter.AddLine($"{ConstStrings.CodegenReturnErr}({ConstStrings.CodegenNamespace}::raise_pinvoke_entry_not_found_error(\"{escapedDllLiteral}\", \"{escapedImportLiteral}\"));");
+            _bodyWriter.EndBlock();
 
             foreach (var param in nativeParams)
             {
@@ -140,8 +138,8 @@ namespace LeanAOT.ToCpp
                 string converterName = $"__temp_utf8_converter_{param.Name}";
                 return new NativeParam
                 {
-                        TypeName = "const char*",
-                        Expr = $"{converterName}.get_utf8_str()",
+                    TypeName = "const char*",
+                    Expr = $"{converterName}.get_utf8_str()",
                     SetupLines = new List<string>
                     {
                         $"{ConstStrings.CodegenNamespace}::TempUtf16StringToUtf8Converter {converterName}({param.Name});",
