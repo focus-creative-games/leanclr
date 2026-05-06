@@ -15,6 +15,8 @@ echo [2/2] Running LeanAOT...
   -d ..\..\libraries\dotnetframework4.x-linux ^
   -d ..\..\leanaot\Test\bin\Debug ^
   -a mscorlib ^
+  -a System ^
+  -a System.Core ^
   -a Test
 
 if errorlevel 1 exit /b %ERRORLEVEL%
