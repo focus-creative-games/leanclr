@@ -31,6 +31,11 @@ const PInvokeRegistry* PInvokes::get_pinvoke(const char* name)
     return nullptr;
 }
 
+PInvokeFunction PInvokes::get_pinvoke_function(const char* dll_name_no_ext, const char* function_name)
+{
+    return nullptr;
+}
+
 // Get internal call by method info (builds full method name with params)
 RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata::RtMethodInfo* method)
 {

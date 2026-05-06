@@ -44,6 +44,8 @@ namespace LeanAOT.ToCpp
             var nativeParams = _method.ParamsIncludeThis.Select(CreateNativeParam).ToList();
             string nativeParamDecls = string.Join(", ", nativeParams.Select((p, index) => $"{p.TypeName} __arg{index}"));
             string nativeParamExprs = string.Join(", ", nativeParams.Select(p => p.Expr));
+            string dllNameNoExt = GetPInvokeDllNameNoExt();
+            string escapedDllLiteral = EscapeCppString(dllNameNoExt);
             string escapedImportLiteral = EscapeCppString(importName);
             string fnTypedefName = $"__leanclr_pinvoke_fn_{_method.UniqueName}";
             bool staticLinkingStubNoNative = IsCorlibSystemOrSystemCorePInvoke();
@@ -61,12 +63,18 @@ namespace LeanAOT.ToCpp
                 _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = {importName};");
             }
             _bodyWriter.AddLine("#else");
+            _bodyWriter.AddLine($"static {fnTypedefName} __leanclr_pinvoke_fn_cache = nullptr;");
+            _bodyWriter.AddLine("if (__leanclr_pinvoke_fn_cache == nullptr)");
+            _bodyWriter.AddLine("{");
             _bodyWriter.AddLine(
-                $"{fnTypedefName} {PInvokeFnPtrVar} = reinterpret_cast<{fnTypedefName}>({ConstStrings.CodegenNamespace}::resolve_pinvoke_function(\"{escapedImportLiteral}\"));");
+                $"    __leanclr_pinvoke_fn_cache = reinterpret_cast<{fnTypedefName}>({ConstStrings.CodegenNamespace}::resolve_pinvoke_function(\"{escapedDllLiteral}\", \"{escapedImportLiteral}\"));");
+            _bodyWriter.AddLine("}");
+            _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = __leanclr_pinvoke_fn_cache;");
             _bodyWriter.AddLine("#endif");
             _bodyWriter.AddLine($"if ({PInvokeFnPtrVar} == nullptr)");
             _bodyWriter.AddLine("{");
-            _bodyWriter.AddLine($"    return {ConstStrings.CodegenNamespace}::raise_pinvoke_entry_not_found_error(\"{escapedImportLiteral}\");");
+            _bodyWriter.AddLine(
+                $"    return {ConstStrings.CodegenNamespace}::raise_pinvoke_entry_not_found_error(\"{escapedDllLiteral}\", \"{escapedImportLiteral}\");");
             _bodyWriter.AddLine("}");
 
             foreach (var param in nativeParams)
@@ -222,6 +230,27 @@ namespace LeanAOT.ToCpp
             }
             string name = implMap.Name?.String;
             return string.IsNullOrEmpty(name) ? _method.MethodDef.Name : name;
+        }
+
+        private string GetPInvokeModuleName()
+        {
+            ImplMap implMap = _method.MethodDef.ImplMap;
+            return implMap?.Module?.Name?.String;
+        }
+
+        private string GetPInvokeDllNameNoExt()
+        {
+            string module = GetPInvokeModuleName();
+            if (string.IsNullOrEmpty(module))
+            {
+                return string.Empty;
+            }
+            string n = module.Trim();
+            if (n.EndsWith(".dll", StringComparison.OrdinalIgnoreCase))
+            {
+                n = n.Substring(0, n.Length - 4);
+            }
+            return n;
         }
 
         private bool IsCorlibSystemOrSystemCorePInvoke()

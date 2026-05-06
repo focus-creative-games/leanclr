@@ -161,19 +161,11 @@ const char* marshal_utf16_string_to_utf8(vm::RtString* str)
     return sb.dup_to_zero_end_cstr();
 }
 
-PInvokeFunction resolve_pinvoke_function(const char* name)
+RtErr raise_pinvoke_entry_not_found_error(const char* dll_name_no_ext, const char* function_name)
 {
-    auto pinvoke_registry = vm::PInvokes::get_pinvoke(name);
-    if (pinvoke_registry != nullptr)
-    {
-        return pinvoke_registry->func;
-    }
-    return nullptr;
-}
-
-RtErr raise_pinvoke_entry_not_found_error(const char* name)
-{
-    RET_ERR_WITH_MSG(RtErr::EntryPointNotFound, name);
+    char err_msg[1024];
+    snprintf(err_msg, sizeof(err_msg), "P/Invoke entry not found: dll=%s, function=%s", dll_name_no_ext, function_name);
+    RET_ERR_WITH_MSG(RtErr::EntryPointNotFound, err_msg);
 }
 
 } // namespace codegen

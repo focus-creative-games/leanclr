@@ -41,6 +41,7 @@ class PInvokes
     // Register/get internal call functions
     static void register_pinvoke(const char* name, PInvokeFunction func, PInvokeInvoker invoker);
     static const PInvokeRegistry* get_pinvoke(const char* name);
+    static PInvokeFunction get_pinvoke_function(const char* dll_name_no_ext, const char* function_name);
     static RtResult<const PInvokeRegistry*> get_pinvoke_by_method(const metadata::RtMethodInfo* method);
 };
 } // namespace vm
