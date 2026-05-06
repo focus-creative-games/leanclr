@@ -39,6 +39,7 @@ else()
 endif()
 
 target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS)
+target_compile_definitions(leanclr PUBLIC UNITY_VERSION=60000400)
 
 target_include_directories(leanclr PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}

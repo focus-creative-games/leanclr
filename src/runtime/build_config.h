@@ -129,4 +129,10 @@ typedef double float64_t;
 #define LEANCLR_PINVOKE_CALL_WINAPI LEANCLR_PINVOKE_CALL_CDECL
 #endif
 
-#include "il2cpp/unityversion.h"
+// UNITY_VERSION (and optionally UNITY_TUANJIE_ENGINE) must be supplied as
+// C preprocessor defines for the libil2cpp compile, via IL2CPP additional
+// arguments (--compiler-flags). LeanCLR's editor preprocess applies this
+// automatically; see UpdateUnityVersionMacrosInCpp.
+#ifndef UNITY_VERSION
+#error "UNITY_VERSION must be defined for LeanCLR (IL2CPP --compiler-flags / PlayerSettings additional IL2CPP args)."
+#endif
