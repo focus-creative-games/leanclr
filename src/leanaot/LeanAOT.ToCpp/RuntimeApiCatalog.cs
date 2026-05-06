@@ -61,7 +61,8 @@ namespace LeanAOT.ToCpp
         {
             entry = null;
             methodKind = MethodKind.Normal;
-            if (methodDef.Module.IsCoreLibraryModule != true)
+            UTF8String moduleName = methodDef.Module.Assembly.Name;
+            if (moduleName != "mscorlib" && moduleName != "System" && moduleName != "System.Core")
             {
                 return false;
             }
