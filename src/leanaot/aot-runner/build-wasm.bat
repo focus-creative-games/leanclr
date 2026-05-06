@@ -9,9 +9,9 @@ if errorlevel 1 goto :fail
 call emmake cmake --build build-wasm --parallel
 if errorlevel 1 goto :fail
 
-echo Done. Output: "%~dp0build-wasm\bin\simple-aot.js" and simple-aot.wasm
+echo Done. Output: "%~dp0build-wasm\bin\aot-runner.js" and aot-runner.wasm
 echo P/Invoke 验证请先执行 gen_cpp.bat 生成 cpp，再用 node 运行，例如：
-echo   node build-wasm\bin\simple-aot.js -l ..\..\libraries\dotnetframework4.x -l ..\..\leanaot\Test\bin\Debug -e WasmPInvokeVerify::Main Test
+echo   node build-wasm\bin\aot-runner.js -l ..\..\libraries\dotnetframework4.x -l ..\..\leanaot\Test\bin\Debug -e WasmPInvokeVerify::Main Test
 endlocal
 exit /b 0
 

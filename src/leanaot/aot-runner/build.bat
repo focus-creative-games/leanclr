@@ -24,11 +24,11 @@ rem Avoid trailing backslash in quoted -S path (Windows arg parsing)
 cmake -S "%SCRIPT_DIR%." -B "%BUILD_DIR%" -G "Visual Studio 17 2022" -A %ARCH%
 if errorlevel 1 goto :error
 
-echo [2/2] Build target 'simple-aot'...
-cmake --build "%BUILD_DIR%" --config %CONFIG% --target simple-aot --parallel
+echo [2/2] Build target 'aot-runner'...
+cmake --build "%BUILD_DIR%" --config %CONFIG% --target aot-runner --parallel
 if errorlevel 1 goto :error
 
-set "EXE=%BUILD_DIR%\bin\%CONFIG%\simple-aot.exe"
+set "EXE=%BUILD_DIR%\bin\%CONFIG%\aot-runner.exe"
 if exist "%EXE%" (
   echo Built: "%EXE%"
 ) else (
