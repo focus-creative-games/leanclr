@@ -89,6 +89,11 @@ namespace Tests.CSharp.Delegates
             return (sbyte)(x + b);
         }
 
+        public static int ShowStatic(int b)
+        {
+            return 100 + b;
+        }
+
         public static void Run2(FT_Class s, int b)
         {
             s.x += b;
@@ -947,5 +952,19 @@ namespace Tests.CSharp.Delegates
             int r = f();
             Assert.Equal(1, r);
         }
+
+
+        delegate int MyRunDelegate(int a);
+        delegate int MyRunDelegate2(int a);
+
+        [UnitTest]
+        public void call_delegate_to_delegate_invoke()
+        {
+            MyRunDelegate f = FT_Class.ShowStatic;
+            MyRunDelegate2 del = f.Invoke;
+            int v = del(1);
+            Assert.Equal(101, v);
+        }
+        
     }
 }
