@@ -40,6 +40,17 @@ typedef double float64_t;
 #define LEANCLR_PLATFORM_UNKNOWN 1
 #endif
 
+// Native aligned heap: Windows CRT (_aligned_*), or POSIX posix_memalign where
+// we can query usable size for aligned_realloc (Apple / glibc / bionic). Other
+// targets use a portable header-based aligned allocator in general_allocation.cpp.
+#if LEANCLR_PLATFORM_WIN
+#define LEANCLR_USE_POSIX_ALIGNED_HEAP 0
+#elif LEANCLR_PLATFORM_POSIX && !LEANCLR_PLATFORM_WASM && (defined(__APPLE__) || defined(__ANDROID__) || (defined(__linux__) && !defined(__MUSL__)))
+#define LEANCLR_USE_POSIX_ALIGNED_HEAP 1
+#else
+#define LEANCLR_USE_POSIX_ALIGNED_HEAP 0
+#endif
+
 #if defined(DEBUG) || defined(_DEBUG)
 #define LEANCLR_DEBUG 1
 #else
