@@ -71,6 +71,10 @@ IncludeCategories:
 
 # Other
 KeepEmptyLinesAtTheStartOfBlocks: false
+# Keep at most one consecutive empty line (avoids stacked blanks).
 MaxEmptyLinesToKeep: 1
+# Always insert one empty line between adjacent top-level definitions (functions,
+# classes, etc.) so function boundaries stay readable; does not target `if`/`for` bodies.
+SeparateDefinitionBlocks: Always
 NamespaceIndentation: None
 ReflowComments: true
