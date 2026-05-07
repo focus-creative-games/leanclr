@@ -46,6 +46,16 @@ D:\workspace\wasmclr\TestWeb\LeanCLR\LocalIl2CppData-WindowsEditor\il2cpp\build\
 
 当命令过长时，会使用rsp文件传递参数，此时命令行变成这样 `il2cpp.exe @{rsp file}`。
 
+### LeanAOT 额外参数（不改 Unity 命令行）
+
+Unity 传给 `il2cpp.exe` 的实参无法随意扩展时，可在启动 Unity / Bee 之前设置环境变量 **`LEANAOT_EXTRA_ARGS`**（与工具名 **LeanAOT** 一致：`L-E-A-N-A-O-T`，勿漏写 `A`）。值为一段与 rsp 相同的「单行命令」：空白分词，双引号可包住含空格的片段；这些 token **追加**在 Unity 解析出的参数之后，与 Unity 原有实参**合并成同一组** `effectiveArgs`，再交给 `CommandLineParser` 一次解析（与 `--leanaot-aot-percent` 等相同，无单独字符串扫描）。
+
+当前支持的 Lean 专有开关示例（均可放在 **`LEANAOT_EXTRA_ARGS`** 中，或直接写在命令行）：
+
+- `--leanaot-aot-percent=<0–100>`：计划中的 AOT 方法采样比例（已校验并写入配置；生成计划尚未消费）。
+- `--leanaot-aot-rule-file=<path>`：方法 AOT 规则文件路径（文件须存在；格式与清单集成保留待实现）。
+- `--leanaot-enable-layout-validation`：开启托管类型布局校验（**默认关闭**；需要校验时在 `LEANAOT_EXTRA_ARGS` 或命令行中显式加上）。
+
 ## 实现leanaot工具
 
 需要实现以下功能：
