@@ -315,10 +315,6 @@ internal class Program
         return merged;
     }
 
-    /// <summary>
-    /// Unity/Bee：命令行过长时只会传入一个实参 <c>@xxx.rsp</c>（可带外层引号），从 rsp 的单行内容中拆出全部参数。
-    /// 非 rsp 模式则沿用进程传入的各实参（跳过空项、去掉外层成对引号）。
-    /// </summary>
     private static string[] GetEffectiveCommandLineArgs(string[] args)
     {
         var list = new List<string>();
@@ -345,9 +341,6 @@ internal class Program
         return list.ToArray();
     }
 
-    /// <summary>
-    /// 去掉最外层一对 ASCII 双引号（命令行或路径上常见）。
-    /// </summary>
     private static string UnwrapOuterQuotes(string token)
     {
         if (string.IsNullOrEmpty(token))
@@ -358,10 +351,6 @@ internal class Program
         return t;
     }
 
-    /// <summary>
-    /// Unity 生成的 rsp：整份文件即一行命令（参数之间空白分隔）；若存在换行仅当作空格合并后再分词。
-    /// 双引号可包住含空格的片段；形如 <c>--assembly="path"</c> 的值两侧双引号在分词后去掉。
-    /// </summary>
     private static string[] ReadUnityRspFile(string fullPath)
     {
         var raw = File.ReadAllText(fullPath).Trim();
@@ -378,9 +367,6 @@ internal class Program
         return TokenizeUnityRspSingleLine(line).Select(NormalizeUnityRspArgument).ToArray();
     }
 
-    /// <summary>
-    /// 在一行上按空白分词；引号内空白不拆分；<c>""</c> 表示字面双引号。
-    /// </summary>
     private static List<string> TokenizeUnityRspSingleLine(string line)
     {
         var tokens = new List<string>();
@@ -429,9 +415,6 @@ internal class Program
         return tokens;
     }
 
-    /// <summary>
-    /// 将单个参数 <c>--name="value"</c> 规范为 <c>--name=value</c>（仅去掉值段首尾多余引号；无 <c>=</c> 的开关原样返回）。
-    /// </summary>
     private static string NormalizeUnityRspArgument(string token)
     {
         var eq = token.IndexOf('=');
@@ -452,9 +435,6 @@ internal class Program
         return v;
     }
 
-    /// <summary>
-    /// IL2CPP 工具链有时会传入 <c>-convert-to-cpp</c> 这类单横线长参数，这里统一转为双横线格式。
-    /// </summary>
     private static string[] NormalizeSingleDashLongOptions(IEnumerable<string> args)
     {
         return args.Select(a =>
@@ -462,7 +442,7 @@ internal class Program
             if (string.IsNullOrEmpty(a) || !a.StartsWith("-") || a.StartsWith("--"))
                 return a;
             if (a.Length <= 2)
-                return a; // 保留短参数，如 -d / -a / -o
+                return a;
 
             var eqIndex = a.IndexOf('=');
             var optionName = eqIndex >= 0 ? a.Substring(1, eqIndex - 1) : a.Substring(1);
@@ -524,9 +504,6 @@ internal class Program
         }
     }
 
-    /// <summary>
-    /// 合并多次 <c>--compiler-flags</c>，去掉空白与 CR，单条内 trim。
-    /// </summary>
     private static string NormalizeCompilerFlags(IEnumerable<string> rawParts)
     {
         if (rawParts == null)
@@ -543,9 +520,6 @@ internal class Program
         return tokens.Count == 0 ? null : string.Join(" ", tokens);
     }
 
-    /// <summary>
-    /// IL2CPP 兼容：在 <see cref="GlobalConfig.ProfilerOutputFile"/> 中给出路径时，创建空文件（含父目录）。
-    /// </summary>
     private static void EnsureEmptyProfilerOutputFile(GlobalConfig config)
     {
         var path = config.ProfilerOutputFile?.Trim();
@@ -569,6 +543,7 @@ internal class Program
         {
             assemblyCache = assemblyCache,
             aotAssemblyNames = aotAssemblyNames,
+            aotSamplingPercent = il2CppOptions.AotSamplingPercent,
         };
         var manifest = new Manifest(manifestArgs);
 

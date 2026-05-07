@@ -4,6 +4,15 @@ using LeanAOT.Core;
 namespace LeanAOT.GenerationPlan
 {
 
+    public class ManifestArgs
+    {
+        public AssemblyCache assemblyCache;
+
+        public List<string> aotAssemblyNames;
+
+        public int? aotSamplingPercent;
+    }
+
     public class Manifest
     {
 
@@ -20,6 +29,8 @@ namespace LeanAOT.GenerationPlan
 
         public Manifest(ManifestArgs args)
         {
+            var r = new Random(0);
+            int aotSamplingPercent = args.aotSamplingPercent ?? 100;
             foreach (var assName in args.aotAssemblyNames)
             {
 
@@ -50,9 +61,26 @@ namespace LeanAOT.GenerationPlan
                             continue;
                         }
                         string typeName = method.DeclaringType.Name;
-                        if (method.CustomAttributes.Any(ca => ca.TypeFullName == "AotMethodAttribute" && ca.ConstructorArguments[0].Value.Equals(false)))
+                        CustomAttribute ca = method.CustomAttributes.FirstOrDefault(ca => ca.TypeFullName == "AotMethodAttribute" );
+                        if (ca != null)
                         {
-                            continue;
+                            bool isAotMethod = (bool)ca.ConstructorArguments[0].Value;
+                            if (!isAotMethod)
+                            {
+                                continue;
+                            }
+                        }
+                        else if (method.IsPinvokeImpl || method.IsInternalCall)
+                        {
+                            // aot or intrinsic methods must be aot
+                        }
+                        else
+                        {
+                            if (r.Next(0, 100) >= aotSamplingPercent)
+                            {
+                                s_logger.Debug($"[Manifest] Skip method: {method.FullName} token: {method.MDToken} because of aot sampling percent: {aotSamplingPercent}");
+                                continue;
+                            }
                         }
                         var methodPlan = new MethodDefPlan()
                         {
@@ -78,13 +106,6 @@ namespace LeanAOT.GenerationPlan
             }
             return false;
         }
-    }
-
-    public class ManifestArgs
-    {
-        public AssemblyCache assemblyCache;
-
-        public List<string> aotAssemblyNames;
     }
 
 }
