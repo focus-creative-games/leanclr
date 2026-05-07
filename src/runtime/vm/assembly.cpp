@@ -123,6 +123,8 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const utils::Span<byte>
         {
             aotModuleData->initializer(mod);
         }
+        utils::Vector<metadata::RtAssembly*> ref_assemblies;
+        RET_ERR_ON_FAIL(mod->get_reference_assemblies(ref_assemblies));
         // corlib should call deferred_initializer after Class::initialize
         if (!mod->is_corlib() && aotModuleData->deferred_initializer)
         {
