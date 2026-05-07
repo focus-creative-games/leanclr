@@ -86,8 +86,8 @@ LeanAOT ^
 
 LeanAOT can load one or more XML rule files to control which managed methods are included in AOT generation. These files are **not** related to Unity `link.xml`.
 
-- **User guide (Chinese):** [aot-rule-file.md](aot-rule-file.md)
-- **Implementation design (Chinese):** [aot-rule-file-design.md](aot-rule-file-design.md)
+- **AOT rule file user guide:** [aot-rule-file.md](aot-rule-file.md)
+- **AOT rule file implementation design:** [aot-rule-file-design.md](aot-rule-file-design.md)
 
 ---
 

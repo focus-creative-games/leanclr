@@ -1,157 +1,157 @@
-# LeanAOT AOT 规则文件（`aot.xml`）配置指南
+# LeanAOT AOT rule files (`aot.xml`) — user guide
 
-本文说明如何编写 **AOT 规则 XML**，以控制哪些托管方法参与 AOT 生成。该文件 **独立于 Unity 的 `link.xml`**，仅由 LeanAOT 使用。
+This guide explains how to author **AOT rule XML** to control which managed methods are included in AOT code generation. These files are **independent of Unity’s `link.xml`** and are consumed only by LeanAOT.
 
-**实现细节与算法**（冲突处理、与清单代码的衔接等）见 [aot-rule-file-design.md](aot-rule-file-design.md)。  
-**整体 AOT 工作流**见 [aot.md](aot.md)。
-
----
-
-## 1. 规则文件是什么
-
-- 一个或多个 **XML 文件**，根节点为 **`<aot>`**。
-- 通过 **程序集 → 类型 → 方法** 的层级，声明方法是否要进 AOT（`1` = 要，`0` = 不要）。
-- 可为程序集或整组类型设置 **默认**，再用 **单条方法规则** 做例外。
-
-**当前限制**：只针对普通 **`MethodDef`**；不描述泛型实例化等特殊形态。配置里 **不要** 使用 metadata **token**（重编 DLL 会变）。
+**Implementation details and algorithms** (conflict handling, manifest integration, etc.): [aot-rule-file-design.md](aot-rule-file-design.md).  
+**End-to-end AOT workflow:** [aot.md](aot.md).
 
 ---
 
-## 2. 在命令行里指定规则文件
+## 1. What is a rule file?
 
-使用 LeanAOT 时，可 **多次** 传入规则文件路径（每次一个文件），例如：
+- One or more **XML documents** whose root element is **`<aot>`**.
+- A hierarchy of **assembly → type → method** declares whether methods should be AOT-compiled (`1` = include, `0` = exclude).
+- You may set **defaults** at assembly or type scope, then use **per-method rules** as exceptions.
+
+**Current limitation:** only ordinary **`MethodDef`** instances; generic instantiation and similar cases are out of scope. Do **not** use metadata **tokens** in configuration (they change when the DLL is rebuilt).
+
+---
+
+## 2. Specifying rule files on the command line
+
+Pass each rule file with **`--leanaot-aot-rule-file`**; repeat the option for multiple files:
 
 ```text
 LeanAOT ... --leanaot-aot-rule-file path\to\base.xml --leanaot-aot-rule-file path\to\game.xml
 ```
 
-- 路径可以是 **绝对路径** 或相对 **当前工作目录** 的相对路径。
-- **多个文件**：后面的文件用于在「不冲突」的前提下补充或细化规则；若 **不同文件对同一个方法一个写 `1`、一个写 `0`**，工具会 **报错退出**（详见下文「多个规则文件」）。
+- Paths may be **absolute** or **relative to the current working directory**.
+- **Multiple files:** later files refine or extend rules when there is **no conflict**; if **one file assigns `1` and another assigns `0`** to the **same method**, LeanAOT **fails** (see “Multiple rule files” below).
 
-具体选项名以你使用的 LeanAOT 版本帮助信息为准。
+The exact option spelling may vary by LeanAOT build; use `--help` if in doubt.
 
 ---
 
-## 3. 根结构与编码
+## 3. Root structure and encoding
 
-- 推荐使用 **UTF-8**。
-- 根元素必须是 **`<aot>`**。
+- **UTF-8** is recommended.
+- The root element must be **`<aot>`**.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
 <aot>
-  <!-- 一个或多个 <assembly> -->
+  <!-- one or more <assembly> elements -->
 </aot>
 ```
 
 ---
 
-## 4. `aot` 属性：只用 `1` 和 `0`
+## 4. The `aot` attribute: only `1` and `0`
 
-在 **`<assembly>`**、**`<type>`**、**`<method>`** 上都可以写 **`aot`**，取值 **只能是字符串 `1` 或 `0`**（不要写 `true`/`required` 等，避免拼错）。
+On **`<assembly>`**, **`<type>`**, and **`<method>`**, the **`aot`** attribute must be the literal string **`1`** or **`0`** (do not use `true`, `required`, etc., to avoid typos).
 
-| 值 | 含义 |
-|----|------|
-| **`1`** | **要 AOT**：参与 AOT 生成。写在程序集/类型上时，表示 **默认要 AOT**（对下面还没被单条方法规则点名的情况）。 |
-| **`0`** | **不要 AOT**：不参与 AOT 生成。写在程序集/类型上时，表示 **默认不要 AOT**。 |
+| Value | Meaning |
+|-------|---------|
+| **`1`** | **Include in AOT.** On an assembly or type, this is the **default include** for methods not matched more specifically below. |
+| **`0`** | **Exclude from AOT.** On an assembly or type, this is the **default exclude** for that scope. |
 
-写错值会导致 LeanAOT **报错**，不会静默忽略。
+Invalid values cause LeanAOT to **fail**; they are not ignored.
 
 ---
 
-## 5. 三个层级：程序集、类型、方法
+## 5. Three levels: assembly, type, method
 
 ### 5.1 `<assembly fullname="..." aot="...">`
 
-- **`fullname`**（必填）：程序集名称，需与你在 LeanAOT 里 `-a` / `--assembly` 使用的命名方式一致（是否带 `.dll` 等以工具实际要求为准）。
-- **`aot`**（可选）：整个程序集的 **默认策略**。不写表示该程序集节点 **不提供程序集级默认**；子级若也未给出结论，则该方法在规则层可能 **无任何匹配**，最终 **默认 AOT**（见第 7、8.1 节）。
+- **`fullname`** (required): assembly identity; must match how you pass assemblies to LeanAOT (`-a` / `--assembly`, with or without `.dll`, per tool behavior).
+- **`aot`** (optional): **default** for the whole assembly. If omitted, this `<assembly>` node contributes **no assembly-level default**; if children also omit defaults, a method may end up with **no XML verdict** and then **defaults to AOT** (see Sections 7 and 8.1).
 
 ### 5.2 `<type fullname="..." aot="...">`
 
-- **`fullname`**（必填）：类型的 **完整名称**（含命名空间）。**支持通配符**（见第 6 节）。嵌套类型怎么写，请与项目文档或工具报错提示保持一致。
-- **`aot`**（可选）：该类型下方法的 **默认**（对「没有被下面 `<method>` 匹配到」的方法生效）。  
-  - 若 **不写 `aot`**：类型的默认 **跟随所在程序集** 的 `aot`（若程序集也没写，则类型在规则层可能不产生默认，未命中 `<method>` 的方法将落到 **无 XML 结论 → 默认 AOT**）。
+- **`fullname`** (required): the type’s **full name** (including namespace). **Wildcards** are supported (Section 6). For nested types, use the same full-name format as LeanAOT/metadata (see project docs or error messages).
+- **`aot`** (optional): **default** for methods under this type that are **not matched by any `<method>`** child.  
+  - If **`aot`** is omitted on `<type>`: the type inherits the **parent `<assembly>`** `aot` value; if the assembly also omits `aot`, there may be **no XML default** for that type, and methods not matched by `<method>` fall through to **no XML verdict → AOT by default**.
 
 ### 5.3 `<method name="..." signature="..." aot="1|0">`
 
-- **`name`**（必填）：方法短名，**支持通配符**。
-- **`signature`**（可选）：用来区分重载或批量匹配；格式须与 LeanAOT 内部使用的 **方法签名字符串** 一致，**支持通配符**。不写时，**所有同名重载** 都会被这条规则匹配到。
-- **`aot`**（必填）：`1` 或 `0`。
+- **`name`** (required): short method name; **wildcards** allowed.
+- **`signature`** (optional): disambiguates overloads or matches in bulk; must match LeanAOT’s internal **method signature string**; **wildcards** allowed. If omitted, the rule matches **every overload** with that short name.
+- **`aot`** (required): `1` or `0`.
 
 ---
 
-## 6. 通配符
+## 6. Wildcards
 
-在 **`type` 的 `fullname`**、**`method` 的 `name`**、以及 **`method` 的 `signature`**（若写）中可以使用：
+In **`type/@fullname`**, **`method/@name`**, and **`method/@signature`** (when present):
 
-| 符号 | 含义 |
-|------|------|
-| `*` | 匹配任意长度的一段（也可以是空） |
-| `?` | 匹配 **一个** 字符 |
+| Symbol | Meaning |
+|--------|---------|
+| `*` | Matches a substring of any length (including empty). |
+| `?` | Matches **exactly one** character. |
 
-示例：
+Examples:
 
-- `MyCompany.Game.Logic.*`：命名空间 `MyCompany.Game.Logic` 下的所有类型（具体是否包含子命名空间取决于工具对 `*` 的匹配规则，以文档/实现为准）。
-- `Update*`：所有以 `Update` 开头的方法名。
-
----
-
-## 7. 默认如何向下继承（直觉版）
-
-1. **程序集上写了 `aot`**：下面各个 **类型** 若 **自己没有写 `aot`**，则这些类型的 **默认** 与程序集相同。  
-2. **类型上写了 `aot`**：该类型里 **没有被任何 `<method>` 规则匹配到** 的方法，用这个 **类型默认**。  
-3. **只有 `<assembly>`、里面没有 `<type>`**：若程序集写了 `aot`，对该程序集里 **没被 `<method>` 匹配到** 的方法，仍可使用 **程序集默认**。
-
-若某方法在 **规则文件这一层** 上 **没有任何匹配**（没有任何 `assembly`/`type`/`method` 组合能为它给出 `1` 或 `0`），在已通过下面 **第 8 节** 前两步的前提下，**默认仍会 AOT**（即「没写到规则里 = 要 AOT」）。  
-若要排除某些方法，必须在规则里用 **`aot="0"`**（程序集/类型默认或单条 `<method>`）显式写出来。
+- `MyCompany.Game.Logic.*`: types under the `MyCompany.Game.Logic` namespace (whether child namespaces are included depends on the implementation’s glob rules; see design doc).
+- `Update*`: every method whose short name starts with `Update`.
 
 ---
 
-## 8. 哪些情况会「盖过」规则文件（必读）
+## 7. How defaults flow (intuitive summary)
 
-以下两类 **不需要你在 XML 里配置**，且 **规则文件也改不了**：
+1. If the **assembly** has **`aot`**: any **`<type>`** that **does not set its own `aot`** uses that assembly default.  
+2. If a **type** has **`aot`**: methods under that type that **match no `<method>` rule** use the **type default**.  
+3. **Assembly only, no `<type>` children:** if the assembly sets **`aot`**, methods in that assembly that **match no `<method>` rule** still get the **assembly default**.
 
-1. **`[AotMethod]` 特性**  
-   若方法上用了你们项目里的 **`AotMethod`**（或文档中的 `[AotMethod]`）特性，**一律以特性为准**。规则文件里的 `1`/`0` **不会覆盖**特性。
-
-2. **P/Invoke 与内部调用（internal call）等**  
-   这类方法 **一定会被 AOT**，不受规则文件里 `0` 的影响。在 XML 里写 `0` 通常会被忽略（或仅提示警告），**不要依赖 XML 去关掉它们**。
-
-只有 **既没有上述特性结论、又不属于强制 AOT 类别** 的普通方法，才进入 **规则文件** 的判定：  
-- 若 **匹配到规则**（含程序集/类型默认），则按规则里的 **`1`/`0`**；  
-- 若 **完全没有匹配到任何规则**，则 **默认 AOT**（不需要在 XML 里为每个方法都写 `1`）。
+If, at the **rule layer**, a method **matches no rule** that assigns `1` or `0` (no applicable `assembly` / `type` / `method` combination), then after Section **8** steps 1–2, the method is still **included in AOT** (“not mentioned in rules ⇒ AOT”).  
+To exclude methods, you must set **`aot="0"`** explicitly (assembly/type default or a specific `<method>`).
 
 ---
 
-## 8.1 默认行为小结（规则层）
+## 8. What overrides the rule file (required reading)
 
-| 情况 | 是否 AOT（在不受第 8 节前两项约束时） |
-|------|----------------------------------------|
-| 规则里对该方法得到 **`1`** | 是 |
-| 规则里对该方法得到 **`0`** | 否 |
-| **没有任何规则匹配到该方法** | **是**（默认 AOT） |
+These two cases **do not require XML** and **cannot be turned off** by the rule file:
 
----
+1. **`[AotMethod]` attribute**  
+   If the method carries your **`AotMethod`** attribute (sometimes written `[AotMethod]` in docs), the **attribute always wins**. Rule file `1`/`0` **does not override** it.
 
-## 9. 一个文件里写多条规则：谁说了算
+2. **P/Invoke and internal calls**  
+   Such methods **must be AOT-compiled**. Rule file `aot="0"` is **ignored** (optionally with a warning). **Do not rely on XML** to strip them from AOT.
 
-在 **同一个 XML 文件** 里，如果 **多条规则** 都作用到 **同一个方法**（包括程序集/类型默认值和方法规则混用），以 **文件中从前往后的顺序** 为准：**写在后面的覆盖写在前面的**。
-
-因此你可以先写一条宽规则，再在下面写窄规则做例外。
+Only ordinary methods that **neither** are decided by the attribute path **nor** belong to the forced-AOT category are evaluated by the **rule file**:
+- If **rules assign** `1` or `0` (including inherited defaults), that value is used.  
+- If **no rule matches**, the method is **included in AOT by default** (you do not need to list every method with `1`).
 
 ---
 
-## 10. 多个规则文件一起用
+## 8.1 Rule-layer outcome summary
 
-- 按命令行 **从左到右 / 从先到后** 加载多个文件。
-- **同一个方法**：若 **一个文件** 里最终结论是 **`1`**，**另一个文件** 里最终结论是 **`0`**，LeanAOT会 **报错并停止**，避免 silently 选边。
-- 若所有对该方法有结论的文件 **都是 `1` 或都是 `0`**，则没有冲突，可以正常继续。
-
-若你希望「基础规则 + 补丁」，建议：**补丁文件里只写需要改的方法**，且避免与基础文件对同一方法给出相反的 `1`/`0`。
+| Situation | AOT? (when Section 8 steps 1–2 do not apply) |
+|-----------|-----------------------------------------------|
+| Rules yield **`1`** for the method | Yes |
+| Rules yield **`0`** | No |
+| **No rule matches the method** | **Yes** (default AOT) |
 
 ---
 
-## 11. 完整示例
+## 9. Multiple rules in one file: which wins?
+
+Within a **single** XML file, if several rules **apply to the same method** (mixing assembly/type defaults and `<method>` rules), **document order** applies: **a later rule overrides an earlier one**.
+
+You can therefore write a broad rule first, then narrower rules below as exceptions.
+
+---
+
+## 10. Using multiple rule files
+
+- Files are loaded in **command-line order** (left to right / first to last).
+- **Same method:** if one file’s **final** verdict is **`1`** and another’s is **`0`**, LeanAOT **errors and stops** (no silent tie-break).
+- If every file that assigns a verdict **agrees** (`1` everywhere or `0` everywhere), there is no conflict.
+
+For a “base + patch” workflow, put **only deltas** in the patch file and avoid assigning **opposite** `1`/`0` to the same method across files.
+
+---
+
+## 11. Full example
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -165,38 +165,38 @@ LeanAOT ... --leanaot-aot-rule-file path\to\base.xml --leanaot-aot-rule-file pat
 </aot>
 ```
 
-在 **第 8 节** 的前提下，大致含义是：
+Assuming Section **8** does not short-circuit:
 
-- `Game` 程序集里，默认 **不 AOT**（`0`）。  
-- 但 `Game.Core.*` 这一批类型默认 **要 AOT**（`1`）。  
-- 其中名叫 `Tick` 的方法 **强制不 AOT**。  
-- 名字像 `Init*`、且签名匹配所写模式的方法 **强制要 AOT**。  
-- 若下面还有规则再次点到同一方法，**以更靠后的规则为准**（同一文件内）。
-
----
-
-## 12. 常见问题
-
-**问：能用 token 指定方法吗？**  
-不能。请用程序集 + 类型全名 + 方法名，必要时加 `signature`。
-
-**问：`signature` 必须和源码里一模一样吗？**  
-须与 LeanAOT 使用的 **内部签名字符串格式** 一致；若匹配不上，可开调试日志或查 [设计文档](aot-rule-file-design.md) 中的实现约定。
-
-**问：规则文件和 `link.xml` 要一起维护吗？**  
-不需要。二者无关；`link.xml` 给 Unity 裁剪等用，本 `aot.xml` 只给 LeanAOT。
-
-**问：想「只 AOT 少数方法」怎么写？**  
-因 **未匹配任何规则的方法默认会 AOT**，若要「只 AOT 少数」，需要 **大范围默认 `aot="0"`**（程序集或类型上），再对少数类型或 `<method>` 写 **`aot="1"`** 拉回。
-
-**问：完全没写规则文件会怎样？**  
-在 **第 8 节** 前两步之后，等价于「规则层无结论」→ **默认 AOT**（与设计文档 **8.4** 一致）。
+- Under assembly **`Game`**, the default is **exclude** (`0`).  
+- Types matching **`Game.Core.*`** default to **include** (`1`).  
+- Method **`Tick`** is **forced off** AOT (`0`).  
+- Methods named like **`Init*`** whose signature matches the pattern are **forced on** (`1`).  
+- If another rule below targets the same method again, the **lower rule in the file wins**.
 
 ---
 
-## 13. 相关链接
+## 12. FAQ
 
-| 文档 | 内容 |
-|------|------|
-| [aot-rule-file-design.md](aot-rule-file-design.md) | 实现规格、判定顺序、冲突算法 |
-| [aot.md](aot.md) | LeanAOT 工作流、输入输出、运行时注册 |
+**Can I address a method by metadata token?**  
+No. Use assembly + type full name + method name, and add `signature` when needed.
+
+**Must `signature` match my C# source exactly?**  
+It must match LeanAOT’s **internal signature string**. If matching fails, enable debug logging or read the mapping in [aot-rule-file-design.md](aot-rule-file-design.md).
+
+**Do I maintain `link.xml` together with this?**  
+No. They are unrelated: `link.xml` is for Unity’s linker pipeline; `aot.xml` is for LeanAOT only.
+
+**How do I “AOT only a handful of methods”?**  
+Because **unmatched methods default to AOT**, you need a **broad default `aot="0"`** (assembly or type), then **`aot="1"`** on the few types or `<method>` entries you want included.
+
+**What if I pass no rule files at all?**  
+After Section **8** steps 1–2, there is **no rule-layer verdict** ⇒ **AOT by default**, consistent with design **8.4**.
+
+---
+
+## 13. Related documents
+
+| Document | Contents |
+|----------|----------|
+| [aot-rule-file-design.md](aot-rule-file-design.md) | Implementation spec, evaluation order, conflict algorithm |
+| [aot.md](aot.md) | LeanAOT workflow, inputs/outputs, runtime registration |

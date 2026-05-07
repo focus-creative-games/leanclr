@@ -1,170 +1,170 @@
-# LeanAOT AOT 规则文件（`aot.xml`）— 实现规格
+# LeanAOT AOT rule files (`aot.xml`) — implementation specification
 
-本文档供 **实现与代码评审** 使用，约定解析、合并与与清单生成的衔接方式。面向使用者的配置说明见 [aot-rule-file.md](aot-rule-file.md)。
+This document is intended for **implementers and code review**. It specifies parsing, merging, and integration with manifest generation. The end-user configuration guide is [aot-rule-file.md](aot-rule-file.md).
 
-相关背景：[AOT 工作流总览](aot.md)。
-
----
-
-## 1. 目标与范围
-
-### 1.1 目标
-
-- 通过 **独立 XML 文件**（实现与文档中可统称 `aot.xml`，文件名任意）控制哪些 **`MethodDef`** 参与 AOT。
-- 支持 **程序集 / 类型默认** + **方法级规则**；支持 **glob 通配符**；支持 **多文件** 与明确的 **冲突语义**。
-
-### 1.2 范围与非目标
-
-| 项目 | 说明 |
-|------|------|
-| **仅 `MethodDef`** | 不包含泛型实例化、`MethodSpec` 等。 |
-| **与 `link.xml` 无关** | 不读取、不依赖 Unity `link.xml`。 |
-| **禁止 token** | 配置中不得出现 `MethodDef` metadata token。 |
+Background: [AOT workflow overview](aot.md).
 
 ---
 
-## 2. 文件与根元素
+## 1. Goals and scope
 
-- 编码：推荐 UTF-8。
-- 根元素名：**`aot`**（固定）。
-- 可选：`version` 属性供未来不兼容扩展；v1 可不强制校验。
+### 1.1 Goals
+
+- Control which **`MethodDef`** instances are included in AOT via **standalone XML files** (collectively referred to as `aot.xml` in code and docs; the physical filename is arbitrary).
+- Support **assembly-level and type-level defaults** plus **method-level rules**; support **glob wildcards**; support **multiple files** with explicit **conflict semantics**.
+
+### 1.2 Scope and non-goals
+
+| Item | Description |
+|------|-------------|
+| **`MethodDef` only** | Does not cover generic instantiations, `MethodSpec`, etc. |
+| **Independent of `link.xml`** | Does not read or depend on Unity `link.xml`. |
+| **No tokens** | `MethodDef` metadata tokens must not appear in configuration. |
 
 ---
 
-## 3. 属性与合法值
+## 2. File format and root element
 
-### 3.1 `aot` 取值
+- Encoding: UTF-8 is recommended.
+- Root element name: **`aot`** (fixed).
+- Optional: a `version` attribute for future incompatible revisions; v1 may omit strict validation.
 
-在 **`assembly` / `type` / `method`** 上：
+---
 
-- 仅允许 **`"1"`** 或 **`"0"`**。
-- 其它值：解析 **失败**（硬失败，报告文件路径与元素）。
+## 3. Attributes and allowed values
 
-语义：
+### 3.1 `aot` values
 
-- **`1`**：需要 AOT（纳入清单）；作默认时表示子范围内未单独匹配的方法的默认值。
-- **`0`**：不要 AOT（不纳入清单）；作默认时表示默认排除。
+On **`assembly`**, **`type`**, and **`method`**:
 
-### 3.2 元素属性表
+- Only **`"1"`** or **`"0"`** are allowed.
+- Any other value: parse **fails** (hard failure; report file path and element).
+
+Semantics:
+
+- **`1`**: include in AOT (manifest); when used as a default, it is the default for methods in the subtree that are not matched more specifically.
+- **`0`**: exclude from AOT; when used as a default, it is the default exclusion for that scope.
+
+### 3.2 Element attribute reference
 
 **`<assembly>`**
 
-| 属性 | 必填 | 说明 |
-|------|------|------|
-| `fullname` | 是 | 与运行时/加载逻辑一致的程序集匹配键；实现须 **固定一种匹配规则**（简单名、是否去 `.dll` 等）并写清。 |
-| `aot` | 否 | 程序集级默认。 |
+| Attribute | Required | Description |
+|-----------|----------|-------------|
+| `fullname` | Yes | Assembly match key; must align with runtime/load logic. The implementation must **pick one matching rule** (simple name vs. full display name, `.dll` suffix, etc.) and document it. |
+| `aot` | No | Assembly-wide default. |
 
 **`<type>`**
 
-| 属性 | 必填 | 说明 |
-|------|------|------|
-| `fullname` | 是 | 类型全名；glob；嵌套类型全名格式 **固定一种**（与元数据一致）。 |
-| `aot` | 否 | 类型级默认；缺省时继承 `assembly/@aot`（若亦无则无 XML 默认）。 |
+| Attribute | Required | Description |
+|-----------|----------|-------------|
+| `fullname` | Yes | Type full name; glob; **one fixed format** for nested types (consistent with metadata). |
+| `aot` | No | Type-level default; if omitted, inherits `assembly/@aot` (if the assembly also omits `aot`, there is no XML default at that level). |
 
 **`<method>`**
 
-| 属性 | 必填 | 说明 |
-|------|------|------|
-| `name` | 是 | 短名；glob。 |
-| `signature` | 否 | 与实现内 **`MethodDef` 显示签名** 一致；glob；省略则匹配所有同名重载。 |
-| `aot` | 是 | `1` 或 `0`。 |
+| Attribute | Required | Description |
+|-----------|----------|-------------|
+| `name` | Yes | Short method name; glob. |
+| `signature` | No | Must match the implementation’s **`MethodDef` display signature** string; glob; if omitted, the rule matches **all overloads** with that short name. |
+| `aot` | Yes | `1` or `0`. |
 
 ---
 
-## 4. Glob 子集
+## 4. Glob subset
 
-- `*`：任意长度子串（含空）。
-- `?`：单字符。
-- 适用：`type/@fullname`、`method/@name`、`method/@signature`。
-- v1 可不实现 `*`、`?` 字面转义；若需演进用 `version`。
-
----
-
-## 5. 默认继承（assembly → type）
-
-1. 有 `assembly/@aot`：凡需要「类型默认」且对应 **`<type>` 未写 `aot`** 的类型，其默认等于程序集默认。
-2. 有 `type/@aot`：该类型下 **未被任何 `<method>` 匹配** 的 `MethodDef`，在仅走 XML 分支时取类型默认。
-3. 仅有 `<assembly aot="...">` 且无 `<type>` 子节点：该程序集内、未被 `<method>` 命中的方法，在需要默认时取 **程序集默认**。
-4. 无 XML 结论：在通过 **8.1、8.2** 后，由 **8.4** 处理（**默认 AOT**）。
+- `*`: any-length substring (including empty).
+- `?`: exactly one character.
+- Applies to: `type/@fullname`, `method/@name`, `method/@signature`.
+- v1 may omit escaping of literal `*` and `?`; evolve via `version` if needed.
 
 ---
 
-## 6. 单文件内合并：后者覆盖前者
+## 5. Default inheritance (assembly → type)
 
-- 对同一 **`MethodDef`**，在同一 XML 文档内，凡能产生 **明确 `1`/`0` 结论** 的规则（含 `<method>` 匹配结果及由 `assembly`/`type` 默认推导出的结论），按 **文档顺序** 依次应用。
-- **最后一次** 写入该方法的结论为 **单文件内最终 XML 结论**。
-- 单文件内 **1 与 0 交替不报错**。
-
-实现提示：可将「默认」也建模为按顺序压入的更新，或与 `<method>` 统一为有序规则列表；须与文档行为等价。
-
----
-
-## 7. 多文件合并与冲突
-
-- 路径列表来自 **`AotMethodRuleFiles`**，顺序 = **CLI 多次指定顺序**。
-- 对每个 **`MethodDef`**，收集 **每个文件** 是否给出 **明确 XML 结论**（在应用完该文件内部「后者覆盖前者」之后）。
-- **若 ≥2 个文件均给出结论且值不同（`1` vs `0`）**：**硬失败**，错误信息包含程序集、类型、方法标识、冲突文件路径及各自值。
-- 若所有有结论的文件 **值相同**：采纳该值。
-- 若 **仅一个文件** 有结论：采纳该值。
-
-**不参与多文件冲突检测的方法**（见第 8 节）：规则文件 **根本不产生有效 XML 结论** 的方法（如已被特性决定、或属强制 AOT 类别）——实现应在判定 8.1、8.2 **之后** 再对剩余方法做 XML 合并与 7.2 冲突检测，或对「无 XML 参与」的方法跳过冲突表。
+1. If `assembly/@aot` is present: any **`<type>`** that **does not specify its own `aot`** uses the assembly default as its type-level default.
+2. If `type/@aot` is present: any **`MethodDef`** under that type that **is not matched by any `<method>`** rule uses the type default when evaluating the XML branch only.
+3. If there is only `<assembly ... aot="...">` with **no `<type>` children**: methods in that assembly that are **not matched by `<method>`** use the **assembly default** when a default is needed.
+4. No XML conclusion: after **8.1** and **8.2**, **8.4** applies (**AOT by default**).
 
 ---
 
-## 8. 与特性、强制 AOT、现有逻辑的判定顺序
+## 6. Single-file merge: later overrides earlier
 
-对是否纳入 AOT 清单，**自上而下短路**（先命中先定案，后续不得推翻）：
+- For a given **`MethodDef`**, within one XML document, every rule that yields an explicit **`1`/`0`** (including `<method>` matches and defaults implied by `assembly`/`type`) is applied in **document order**.
+- The **last** verdict written for that method is the **single-file XML verdict**.
+- Alternating `1` and `0` in one file is **not** an error.
 
-| 顺序 | 条件 | 结果 |
-|------|------|------|
-| **8.1** | 存在 **`AotMethodAttribute`** 且实现据此得到是否 AOT | **以特性为准**；**不读规则文件对该方法的覆盖**。 |
-| **8.2** | **`IsPinvokeImpl`** 或 **`IsInternalCall`**（及实现约定与之一致的「必须 AOT」类别） | **必须 AOT**；规则文件 **`aot="0"` 无效**；可选 Warning 或忽略 XML。 |
-| **8.3** | 否则 | 使用 **`aot.xml`**：单文件 **6**、多文件 **7**、默认继承 **5**；若由此得到 **`1`/`0` 明确结论**，则采纳该结论。 |
-| **8.4** | 经过 **8.3** 后 **仍无任何 XML 结论**（未匹配到任何可产生该方法结论的 `assembly`/`type`/`method` 及继承默认） | **默认纳入 AOT**（视为 XML 层对该方法的最终结论为 **`1`**）。 |
-
-**说明**：未加载任何规则文件、或已加载但对该方法 **所有文件均无结论** 时，同样属于「无 XML 结论」，适用 **8.4**，即 **AOT**。
+Implementation note: model defaults as ordered updates in the same stream as `<method>` rules, or as one ordered rule list; behavior must match this specification.
 
 ---
 
-## 9. CLI 与 `CliOptions`
+## 7. Multi-file merge and conflicts
 
-| 项 | 规格 |
-|----|------|
-| CLI | 选项名与项目其它 `leanaot-*` 一致；例如 **`--leanaot-aot-rule-file <path>`**，**可重复**；每出现一次追加一个路径。 |
-| 类型 | **`AotMethodRuleFiles`**：`IEnumerable<string>`（替代旧名 `AotMethodRuleFile`）。 |
-| 顺序 | 集合顺序 = 命令行出现顺序。 |
-| 错误 | 路径不存在、XML 非法、多文件冲突：失败并报告路径或详情。 |
+- Paths come from **`AotMethodRuleFiles`**, in **CLI order** (each repeated `--leanaot-aot-rule-file` occurrence appends one path).
+- For each **`MethodDef`**, record whether **each file** produced an **explicit XML verdict** (`1` or `0`) after applying that file’s internal “later overrides earlier” merge.
+- If **at least two files** each produce a verdict and the values **differ** (`1` vs `0`): **hard fail**; the error must identify assembly, type, method, conflicting paths, and values.
+- If all files that produce a verdict **agree**: use that value.
+- If **only one file** produces a verdict: use that value.
 
----
-
-## 10. 与 Manifest 的衔接
-
-- 在 **生成方法级 AOT 清单** 的路径上（`Manifest` 或其前置步骤），对每个候选 **`MethodDef`** 执行 **第 8 节** 顺序。
-- **签名字符串**：实现须在 LeanAOT 内定义唯一 **`MethodDef` → string** 规则，并与 `method/@signature` 的 glob 匹配一致；该规则应在代码注释或本设计文档附录中可引用。
+**Methods excluded from cross-file conflict checks** (Section 8): methods for which the rule files **never produce an applicable XML verdict** (e.g. already decided by an attribute, or in the “must AOT” category). The implementation should apply **8.1** and **8.2** first, then run XML merge and **§7** conflict detection only on the remaining methods (or skip conflict rows for methods with no XML participation).
 
 ---
 
-## 11. 实现检查清单
+## 8. Interaction with attributes, forced AOT, and defaults
 
-1. XML 解析与校验：根为 `aot`，`aot` 属性仅 `1`/`0`。  
-2. Glob：`assembly` / `type` / `method` 三层及 `signature`。  
-3. 单文件有序应用，**后者覆盖前者**。  
-4. 多文件每方法结论收集与 **7** 冲突检测。  
-5. CLI + **`AotMethodRuleFiles`**。  
-6. Manifest 接入 **8.1 → 8.2 → 8.3 → 8.4**（**8.4 = 无 XML 结论则 AOT**）。  
-7. 固定 **`fullname`** 与 **签名** 格式；单元测试覆盖边界与冲突。
+Whether a **`MethodDef`** is included in the AOT manifest is decided **top-down** (first match wins; later stages must not override):
 
----
+| Step | Condition | Outcome |
+|------|-----------|---------|
+| **8.1** | **`AotMethodAttribute`** is present and the implementation derives include/exclude from it | **Attribute wins**; **rule file must not override**. |
+| **8.2** | **`IsPinvokeImpl`** or **`IsInternalCall`** (and any other implementation-defined **must-AOT** category) | **Always AOT**; rule file **`aot="0"` has no effect**; optional warning or silent ignore of XML. |
+| **8.3** | Otherwise | Evaluate **`aot.xml`**: single-file **§6**, multi-file **§7**, inheritance **§5**; if a clear **`1`/`0`** is produced, use it. |
+| **8.4** | After **8.3**, there is **still no XML verdict** (no matching `assembly`/`type`/`method` chain plus inherited defaults that assign `1`/`0`) | **Include in AOT** (treat the XML layer’s final verdict as **`1`**). |
 
-## 12. 诊断（建议）
-
-- Debug/Verbose：可选输出某方法是否由 XML 决定、`1`/`0`、来源文件、匹配到的模式。
+**Note:** No rule files loaded, or all loaded files yield **no verdict** for a method, counts as “no XML conclusion”; **8.4** applies — **AOT**.
 
 ---
 
-## 13. 修订记录
+## 9. CLI and `CliOptions`
 
-| 日期 | 说明 |
-|------|------|
-| — | 从原合并文档拆出；单文件后者覆盖；多文件冲突报错；`[AotMethod]` 优先；P/Invoke / InternalCall 强制 AOT 且不受规则文件影响。 |
-| — | **8.4**：无任何规则匹配（无 XML 结论）时 **默认 AOT**。 |
+| Item | Specification |
+|------|----------------|
+| CLI | Same naming style as other `leanaot-*` options; e.g. **`--leanaot-aot-rule-file <path>`**, **repeatable**; each occurrence appends one path. |
+| Type | **`AotMethodRuleFiles`**: `IEnumerable<string>` (replaces the former `AotMethodRuleFile`). |
+| Order | Collection order equals the order of occurrences on the command line. |
+| Errors | Missing path, invalid XML, or cross-file conflict: fail with path or detailed message. |
+
+---
+
+## 10. Integration with `Manifest`
+
+- On the code path that **builds the per-method AOT manifest** (`Manifest` or an equivalent step), apply Section **8** in order for each candidate **`MethodDef`**.
+- **Signature string:** the implementation must define a single, stable **`MethodDef` → string`** mapping for `method/@signature` glob matching; document it in code comments or in an appendix to this spec.
+
+---
+
+## 11. Implementation checklist
+
+1. XML parse and validation: root is `aot`; `aot` attributes are only `1`/`0`.  
+2. Glob: assembly, type, method, and optional `signature`.  
+3. Single-file ordered application: **later overrides earlier**.  
+4. Per-method per-file verdicts and **§7** conflict detection.  
+5. CLI wiring for **`AotMethodRuleFiles`**.  
+6. `Manifest` integration: **8.1 → 8.2 → 8.3 → 8.4** (**8.4 = AOT when there is no XML verdict**).  
+7. Pin down **`fullname`** and **signature** formats; unit tests for edge cases and conflicts.
+
+---
+
+## 12. Diagnostics (recommended)
+
+- Debug/Verbose: optionally log whether a method’s decision came from XML, `1`/`0`, source file, and matched pattern.
+
+---
+
+## 13. Revision history
+
+| Date | Notes |
+|------|--------|
+| — | Split from combined draft; single-file later-overrides; multi-file conflict error; `[AotMethod]` precedence; P/Invoke and InternalCall always AOT and ignore rule file exclusions. |
+| — | **8.4:** no rule match (no XML verdict) ⇒ **AOT by default**. |
