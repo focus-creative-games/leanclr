@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aot>
+  <!--
+    LeanAOT aot.xml smoke tests for Test.dll (assembly short name: Test).
+    Wildcards (glob subset):
+    - assembly fullname="T??t" matches Test (each ? = one character).
+    - type fullname="Ass*" matches Assert.
+    - method name="IsTr*" matches IsTrue; exact "IsTrue" line runs later and sets aot=1 (document order: later wins).
+    - method/@signature: glob on MethodDef.FullName; "*Assert*IsFalse*" then bare IsFalse aot=1 (later wins).
+  -->
+  <assembly fullname="T??t" aot="1">
+    <type fullname="Ass*">
+      <method name="IsTr*" aot="0" />
+      <method name="IsTrue" aot="1" />
+      <method name="IsFalse" signature="*Assert*IsFalse*" aot="0" />
+      <method name="IsFalse" aot="1" />
+    </type>
+
+    <type fullname="TC_conv_ovf_i1">
+      <method name="int_1" aot="1" />
+      <method name="int_overflow_up" aot="0" />
+    </type>
+
+    <type fullname="TC_conv_ovf_i4" aot="0">
+      <method name="uint_1" aot="1" />
+    </type>
+  </assembly>
+</aot>

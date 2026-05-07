@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aot>
+  <!--
+    LeanAOT aot.xml smoke tests for mscorlib (see docs/aot-rule-file-design.md).
+    Wildcards (glob subset):
+    - assembly fullname="mscor*" matches the mscorlib short name.
+    - type fullname="System.Diagnostics.Debu??er" matches System.Diagnostics.Debugger (? = one char).
+    - method name="Brea?" matches Break.
+    Block 2: assembly "mscor*" aot=1 runs later (later wins) and resets verdicts for mscorlib.
+    Debugger.Break remains AOT via Manifest (internalcall); rules here exercise matching only.
+  -->
+  <assembly fullname="mscor*">
+    <type fullname="System.Diagnostics.Debu??er">
+      <method name="Brea?" aot="0" />
+    </type>
+  </assembly>
+  <assembly fullname="mscor*" aot="1" />
+</aot>

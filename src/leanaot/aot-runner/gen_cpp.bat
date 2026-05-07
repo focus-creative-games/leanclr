@@ -21,6 +21,8 @@ echo [3/3] Running LeanAOT...
   -o cpp ^
   -d ..\..\libraries\dotnetframework4.x ^
   -d ..\..\leanaot\Test\bin\Debug ^
+  --leanaot-aot-rule-file "%~dp0aot-rules-mscorlib.xml" ^
+  --leanaot-aot-rule-file "%~dp0aot-rules-test.xml" ^
   -a mscorlib ^
   -a System ^
   -a System.Core ^
