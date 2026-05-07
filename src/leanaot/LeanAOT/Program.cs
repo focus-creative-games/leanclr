@@ -100,8 +100,20 @@ internal class Program
         [Option("stats-output-dir", Required = false, HelpText = "IL2CPP: stats output directory (reserved).")]
         public string StatsOutputDir { get; set; }
 
-        [Option("enable-layout-validation", Required = false, HelpText = "IL2CPP: enable layout validation.")]
-        public bool EnableLayoutValidation { get; set; }
+        /// <summary>
+        /// LeanAOT-only (not passed by Unity IL2CPP). Use env <c>LEANAOT_EXTRA_ARGS</c> or append on the command line.
+        /// </summary>
+        [Option("leanaot-aot-percent", Required = false, HelpText = "LeanAOT-only: integer in [0,100], reserved for AOT method sampling (not applied to manifest yet).")]
+        public int? AotSamplingPercent { get; set; }
+
+        /// <summary>
+        /// LeanAOT-only: JSON or other rule file path; reserved until the generation plan consumes it.
+        /// </summary>
+        [Option("leanaot-aot-rule-file", Required = false, HelpText = "LeanAOT-only: path to a rule file that will select methods for AOT (reserved; file format TBD).")]
+        public string AotMethodRuleFile { get; set; }
+
+        [Option("leanaot-enable-layout-validation", Required = false, HelpText = "LeanAOT-only: enable managed type layout validation in codegen (default off).")]
+        public bool LeanAotEnableLayoutValidation { get; set; }
     }
 
     private static Logger s_logger;
@@ -133,11 +145,13 @@ internal class Program
             settings.AllowMultiInstance = true;
             settings.CaseInsensitiveEnumValues = true;
             settings.HelpWriter = helpWriter;
+            settings.IgnoreUnknownArguments = true;
         });
         string[] effectiveArgs;
         try
         {
-            effectiveArgs = GetEffectiveCommandLineArgs(args ?? Array.Empty<string>());
+            var primary = GetEffectiveCommandLineArgs(args ?? Array.Empty<string>());
+            effectiveArgs = MergeLeanAotExtraArgsFromEnvironment(primary);
         }
         catch (Exception ex)
         {
@@ -255,7 +269,50 @@ internal class Program
             return false;
         }
 
+        if (options.AotSamplingPercent is int pct && (pct < 0 || pct > 100))
+        {
+            errorMessage = "--leanaot-aot-percent must be between 0 and 100.";
+            return false;
+        }
+
+        if (!string.IsNullOrWhiteSpace(options.AotMethodRuleFile))
+        {
+            var rulePath = Path.GetFullPath(options.AotMethodRuleFile.Trim());
+            if (!File.Exists(rulePath))
+            {
+                errorMessage = $"AOT rule file not found: {rulePath}";
+                return false;
+            }
+        }
+
         return true;
+    }
+
+    /// <summary>
+    /// Appends tokens from <c>LEANAOT_EXTRA_ARGS</c> after Unity argv / rsp.
+    /// Same token rules as Unity rsp: whitespace split, double quotes for spaces.
+    /// </summary>
+    private static string[] MergeLeanAotExtraArgsFromEnvironment(string[] primaryArgs)
+    {
+        var extraRaw = Environment.GetEnvironmentVariable("LEANAOT_EXTRA_ARGS");
+        if (string.IsNullOrWhiteSpace(extraRaw))
+            return primaryArgs ?? Array.Empty<string>();
+
+        var line = extraRaw.Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ").Trim();
+        if (line.Length == 0)
+            return primaryArgs ?? Array.Empty<string>();
+
+        var extraTokens = TokenizeUnityRspSingleLine(line).Select(NormalizeUnityRspArgument).Where(t => t.Length > 0).ToArray();
+        if (extraTokens.Length == 0)
+            return primaryArgs ?? Array.Empty<string>();
+
+        if (primaryArgs == null || primaryArgs.Length == 0)
+            return extraTokens;
+
+        var merged = new string[primaryArgs.Length + extraTokens.Length];
+        primaryArgs.CopyTo(merged, 0);
+        extraTokens.CopyTo(merged, primaryArgs.Length);
+        return merged;
     }
 
     /// <summary>
@@ -446,10 +503,25 @@ internal class Program
         config.AvoidDynamicLibraryCopy = options.AvoidDynamicLibraryCopy;
         config.StatsOutputDir = options.StatsOutputDir;
         config.CompilerFlags = NormalizeCompilerFlags(options.CompilerFlags);
-        // default to validate class size and field offset.
-        //config.EnableLayoutValidation = options.EnableLayoutValidation;
-        // force enable for test.
-        config.EnableLayoutValidation = true;
+        config.EnableLayoutValidation = options.LeanAotEnableLayoutValidation;
+        if (options.LeanAotEnableLayoutValidation)
+        {
+            s_logger.Info("LeanAOT layout validation enabled (--leanaot-enable-layout-validation).");
+        }
+
+        config.AotSamplingPercent = options.AotSamplingPercent;
+        config.AotMethodRuleFile = string.IsNullOrWhiteSpace(options.AotMethodRuleFile)
+            ? null
+            : Path.GetFullPath(options.AotMethodRuleFile.Trim());
+        if (config.AotSamplingPercent is int p)
+        {
+            s_logger.Info("LeanAOT AOT sampling percent (reserved): {0}", p);
+        }
+
+        if (!string.IsNullOrEmpty(config.AotMethodRuleFile))
+        {
+            s_logger.Info("LeanAOT AOT method rule file (reserved): {0}", config.AotMethodRuleFile);
+        }
     }
 
     /// <summary>

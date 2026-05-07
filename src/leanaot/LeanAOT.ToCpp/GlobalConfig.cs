@@ -48,5 +48,15 @@ namespace LeanAOT.ToCpp
         public string CompilerFlags { get; set; }
 
         public bool EnableLayoutValidation { get; set; }
+
+        /// <summary>
+        /// LeanAOT-only (from <c>--leanaot-aot-percent</c> or <c>LEANAOT_EXTRA_ARGS</c>): 0–100, reserved for future AOT method sampling.
+        /// </summary>
+        public int? AotSamplingPercent { get; set; }
+
+        /// <summary>
+        /// LeanAOT-only: path to a rule file listing which methods should be AOT-compiled (reserved; manifest does not load it yet).
+        /// </summary>
+        public string AotMethodRuleFile { get; set; }
     }
 }
