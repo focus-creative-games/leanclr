@@ -1,4 +1,5 @@
-﻿using dnlib.DotNet;
+﻿using System.Linq;
+using dnlib.DotNet;
 using LeanAOT.Core;
 
 namespace LeanAOT.GenerationPlan
@@ -10,7 +11,10 @@ namespace LeanAOT.GenerationPlan
 
         public List<string> aotAssemblyNames;
 
-        public int? aotSamplingPercent;
+        /// <summary>
+        /// When non-null, method inclusion after attribute/intrinsic checks follows <c>aot.xml</c> rules (see design doc).
+        /// </summary>
+        public AotMethodRulesEvaluator AotRulesEvaluator;
     }
 
     public class Manifest
@@ -29,8 +33,6 @@ namespace LeanAOT.GenerationPlan
 
         public Manifest(ManifestArgs args)
         {
-            var r = new Random(0);
-            int aotSamplingPercent = args.aotSamplingPercent ?? 100;
             foreach (var assName in args.aotAssemblyNames)
             {
 
@@ -69,31 +71,40 @@ namespace LeanAOT.GenerationPlan
                             {
                                 continue;
                             }
+                            AddMethodPlan(methodPlans, method);
+                            continue;
                         }
-                        else if (method.IsPinvokeImpl || method.IsInternalCall)
+                        if (method.IsPinvokeImpl || method.IsInternalCall)
                         {
                             // aot or intrinsic methods must be aot
+                            AddMethodPlan(methodPlans, method);
+                            continue;
                         }
-                        else
+
+                        // 8.3–8.4: rule files; no match => AOT (design)
+                        if (args.AotRulesEvaluator != null && !args.AotRulesEvaluator.ShouldIncludeByRules(assName, method))
                         {
-                            if (r.Next(0, 100) >= aotSamplingPercent)
-                            {
-                                s_logger.Debug($"[Manifest] Skip method: {method.FullName} token: {method.MDToken} because of aot sampling percent: {aotSamplingPercent}");
-                                continue;
-                            }
+                            s_logger.Debug($"[Manifest] Skip method (AOT rules): {method.FullName} token: {method.MDToken}");
+                            continue;
                         }
-                        var methodPlan = new MethodDefPlan()
-                        {
-                            MethodDef = method,
-                        };
-                        s_logger.Debug($"[Manifest] Add MethodDefPlan: {method.FullName}");
-                        methodPlans.Add(methodPlan);
+
+                        AddMethodPlan(methodPlans, method);
                     }
                 }
                 var assPlan = new AssemblyPlan(mod, assName, classPlans, methodPlans);
 
                 _assemblyPlans[assName] = assPlan;
             }
+        }
+
+        private static void AddMethodPlan(List<MethodDefPlan> methodPlans, MethodDef method)
+        {
+            var methodPlan = new MethodDefPlan()
+            {
+                MethodDef = method,
+            };
+            s_logger.Debug($"[Manifest] Add MethodDefPlan: {method.FullName}");
+            methodPlans.Add(methodPlan);
         }
 
         public bool ShouldAOT(IMethod method)

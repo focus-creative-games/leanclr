@@ -101,16 +101,10 @@ internal class Program
         public string StatsOutputDir { get; set; }
 
         /// <summary>
-        /// LeanAOT-only (not passed by Unity IL2CPP). Use env <c>LEANAOT_EXTRA_ARGS</c> or append on the command line.
+        /// LeanAOT-only: <c>aot.xml</c> rule paths (repeat option for multiple files). See docs/aot-rule-file-design.md.
         /// </summary>
-        [Option("leanaot-aot-percent", Required = false, HelpText = "LeanAOT-only: integer in [0,100], reserved for AOT method sampling (not applied to manifest yet).")]
-        public int? AotSamplingPercent { get; set; }
-
-        /// <summary>
-        /// LeanAOT-only: JSON or other rule file path; reserved until the generation plan consumes it.
-        /// </summary>
-        [Option("leanaot-aot-rule-file", Required = false, HelpText = "LeanAOT-only: path to a rule file that will select methods for AOT (reserved; file format TBD).")]
-        public string AotMethodRuleFile { get; set; }
+        [Option("leanaot-aot-rule-file", Required = false, HelpText = "LeanAOT-only: path to an aot.xml rule file (repeat for multiple files).")]
+        public IEnumerable<string> AotMethodRuleFiles { get; set; }
 
         [Option("leanaot-enable-layout-validation", Required = false, HelpText = "LeanAOT-only: enable managed type layout validation in codegen (default off).")]
         public bool LeanAotEnableLayoutValidation { get; set; }
@@ -182,7 +176,20 @@ internal class Program
                     return;
                 }
 
-                Run(dllSearchPaths, aotAssemblyNames, outputCodeDir, options, runtimeApiCatalog);
+                try
+                {
+                    Run(dllSearchPaths, aotAssemblyNames, outputCodeDir, options, runtimeApiCatalog);
+                }
+                catch (AotRuleFileException ex)
+                {
+                    s_logger.Error(ex, ex.Message);
+                    exitCode = 1;
+                }
+                catch (AotRuleConflictException ex)
+                {
+                    s_logger.Error(ex, ex.Message);
+                    exitCode = 1;
+                }
             });
         Environment.ExitCode = exitCode;
     }
@@ -269,15 +276,11 @@ internal class Program
             return false;
         }
 
-        if (options.AotSamplingPercent is int pct && (pct < 0 || pct > 100))
+        foreach (var rawRule in options.AotMethodRuleFiles ?? Enumerable.Empty<string>())
         {
-            errorMessage = "--leanaot-aot-percent must be between 0 and 100.";
-            return false;
-        }
-
-        if (!string.IsNullOrWhiteSpace(options.AotMethodRuleFile))
-        {
-            var rulePath = Path.GetFullPath(options.AotMethodRuleFile.Trim());
+            if (string.IsNullOrWhiteSpace(rawRule))
+                continue;
+            var rulePath = Path.GetFullPath(rawRule.Trim());
             if (!File.Exists(rulePath))
             {
                 errorMessage = $"AOT rule file not found: {rulePath}";
@@ -489,18 +492,15 @@ internal class Program
             s_logger.Info("LeanAOT layout validation enabled (--leanaot-enable-layout-validation).");
         }
 
-        config.AotSamplingPercent = options.AotSamplingPercent;
-        config.AotMethodRuleFile = string.IsNullOrWhiteSpace(options.AotMethodRuleFile)
-            ? null
-            : Path.GetFullPath(options.AotMethodRuleFile.Trim());
-        if (config.AotSamplingPercent is int p)
-        {
-            s_logger.Info("LeanAOT AOT sampling percent (reserved): {0}", p);
-        }
+        config.AotMethodRuleFiles = (options.AotMethodRuleFiles ?? Enumerable.Empty<string>())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => Path.GetFullPath(s.Trim()))
+            .ToList();
 
-        if (!string.IsNullOrEmpty(config.AotMethodRuleFile))
+        if (config.AotMethodRuleFiles is { Count: > 0 })
         {
-            s_logger.Info("LeanAOT AOT method rule file (reserved): {0}", config.AotMethodRuleFile);
+            foreach (var rulePath in config.AotMethodRuleFiles)
+                s_logger.Info("LeanAOT AOT rule file: {0}", rulePath);
         }
     }
 
@@ -539,11 +539,20 @@ internal class Program
     {
         var generator = new CppGenerator();
         var assemblyCache = new Core.AssemblyCache(new Core.MultiDirectoryAssemblyResolver(dllSearchPaths));
+
+        var rulePaths = (il2CppOptions.AotMethodRuleFiles ?? Enumerable.Empty<string>())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => Path.GetFullPath(s.Trim()))
+            .ToList();
+        AotMethodRulesEvaluator aotRules = null;
+        if (rulePaths.Count > 0)
+            aotRules = new AotMethodRulesEvaluator(rulePaths, assemblyCache, aotAssemblyNames);
+
         var manifestArgs = new ManifestArgs()
         {
             assemblyCache = assemblyCache,
             aotAssemblyNames = aotAssemblyNames,
-            aotSamplingPercent = il2CppOptions.AotSamplingPercent,
+            AotRulesEvaluator = aotRules,
         };
         var manifest = new Manifest(manifestArgs);
 
