@@ -82,6 +82,13 @@ LeanAOT ^
 	-o samples\simple-aot\cpp
 ```
 
+### AOT rule files (`aot.xml`, optional)
+
+LeanAOT can load one or more XML rule files to control which managed methods are included in AOT generation. These files are **not** related to Unity `link.xml`.
+
+- **User guide (Chinese):** [aot-rule-file.md](aot-rule-file.md)
+- **Implementation design (Chinese):** [aot-rule-file-design.md](aot-rule-file-design.md)
+
 ---
 
 ## 2) How Generated C++ Code Participates in Build
