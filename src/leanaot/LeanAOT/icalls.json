@@ -2195,6 +2195,26 @@
     "header": "icalls/system_threading_monitor.h"
   },
   {
+    "name": "System.Threading.NativeEventCalls::CloseEvent_internal(System.IntPtr)",
+    "func": "SystemThreadingNativeEventCalls::close_event_internal",
+    "header": "icalls/system_threading_nativeeventcalls.h"
+  },
+  {
+    "name": "System.Threading.NativeEventCalls::CreateEvent_icall(System.Boolean,System.Boolean,System.Char*,System.Int32,System.Int32&)",
+    "func": "SystemThreadingNativeEventCalls::create_event_icall",
+    "header": "icalls/system_threading_nativeeventcalls.h"
+  },
+  {
+    "name": "System.Threading.NativeEventCalls::ResetEvent_internal(System.IntPtr)",
+    "func": "SystemThreadingNativeEventCalls::reset_event_internal",
+    "header": "icalls/system_threading_nativeeventcalls.h"
+  },
+  {
+    "name": "System.Threading.NativeEventCalls::SetEvent_internal(System.IntPtr)",
+    "func": "SystemThreadingNativeEventCalls::set_event_internal",
+    "header": "icalls/system_threading_nativeeventcalls.h"
+  },
+  {
     "name": "System.Threading.Thread::Abort_internal(System.Threading.InternalThread,System.Object)",
     "func": "SystemThreadingThread::abort_internal",
     "header": "icalls/system_threading_thread.h"
