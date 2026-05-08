@@ -97,9 +97,9 @@ RtResult<int32_t> SystemThreadingThread::get_domain_id() noexcept
 }
 
 // Thread initialization
-RtResult<bool> SystemThreadingThread::thread_internal(vm::RtThread* this_thread, vm::RtObject* start) noexcept
+RtResult<bool> SystemThreadingThread::thread_internal(vm::RtThread* this_thread, vm::RtMulticastDelegate* start) noexcept
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    RET_OK(vm::Thread::start_thread(this_thread, start));
 }
 
 // Thread name operations
@@ -130,12 +130,13 @@ RtResultVoid SystemThreadingThread::set_name_icall(vm::RtInternalThread* interna
 // Thread abort
 RtResultVoid SystemThreadingThread::abort_internal(vm::RtObject* internal_thread, vm::RtObject* state) noexcept
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    vm::Thread::abort(static_cast<vm::RtThread*>(internal_thread));
+    RET_VOID_OK();
 }
 
 RtResult<vm::RtObject*> SystemThreadingThread::get_abort_exception_state() noexcept
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    return vm::Thread::get_abort_exception_state();
 }
 
 // Spin wait
@@ -465,7 +466,7 @@ static RtResultVoid thread_internal_invoker(metadata::RtManagedMethodPointer met
                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
-    auto start = EvalStackOp::get_param<vm::RtObject*>(params, 1);
+    auto start = EvalStackOp::get_param<vm::RtMulticastDelegate*>(params, 1);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemThreadingThread::thread_internal(this_thread, start));
     EvalStackOp::set_return(ret, static_cast<int32_t>(result));
     RET_VOID_OK();

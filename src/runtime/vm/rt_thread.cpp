@@ -173,5 +173,21 @@ void Thread::set_default_affinity_mask(int64_t affinity_mask)
 {
 }
 
+bool Thread::start_thread(RtThread* thread, vm::RtMulticastDelegate* start)
+{
+    // TODO: Implement
+    return false;
+}
+
+void Thread::abort(RtThread* thread)
+{
+    // TODO: Implement
+}
+
+RtResult<vm::RtObject*> Thread::get_abort_exception_state()
+{
+    RET_OK(nullptr);
+}
+
 } // namespace vm
 } // namespace leanclr

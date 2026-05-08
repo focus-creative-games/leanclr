@@ -33,7 +33,7 @@ class SystemThreadingThread
     static RtResult<int32_t> get_domain_id() noexcept;
 
     // Thread initialization
-    static RtResult<bool> thread_internal(vm::RtThread* this_thread, vm::RtObject* start) noexcept;
+    static RtResult<bool> thread_internal(vm::RtThread* this_thread, vm::RtMulticastDelegate* start) noexcept;
 
     // Thread name operations
     static RtResult<vm::RtString*> get_name_internal(vm::RtInternalThread* internal_thread) noexcept;

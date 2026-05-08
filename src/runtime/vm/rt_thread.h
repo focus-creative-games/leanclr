@@ -63,6 +63,12 @@ class Thread
     static void set_priority_native(RtThread* thread, int32_t priority);
 
     static void set_default_affinity_mask(int64_t affinity_mask);
+
+    static bool start_thread(RtThread* thread, vm::RtMulticastDelegate* start);
+
+    static void abort(RtThread* thread);
+
+    static RtResult<vm::RtObject*> get_abort_exception_state();
 };
 
 } // namespace vm
