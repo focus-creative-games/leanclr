@@ -55,5 +55,10 @@ namespace LeanAOT.ToCpp
         /// LeanAOT-only: paths to <c>aot.xml</c> rule files (CLI order). Empty when unset.
         /// </summary>
         public List<string> AotMethodRuleFiles { get; set; } = new List<string>();
+
+        /// <summary>
+        /// LeanAOT-only: assembly short names (same as <c>-a</c>) omitted from <c>global-metadata.dat</c> COPH only; case-insensitive keys, stored as first-seen spelling.
+        /// </summary>
+        public List<string> AssembliesExcludedFromGlobalMetadata { get; set; } = new List<string>();
     }
 }

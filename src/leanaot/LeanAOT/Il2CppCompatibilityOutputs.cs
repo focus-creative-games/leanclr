@@ -25,7 +25,7 @@ internal static class Il2CppCompatibilityOutputs
         {
             try
             {
-                WriteDataFolder(config.DataFolder.Trim(), dllSearchPaths, aotAssemblyNames);
+                WriteDataFolder(config.DataFolder.Trim(), dllSearchPaths, aotAssemblyNames, config);
             }
             catch (Exception ex)
             {
@@ -51,14 +51,14 @@ internal static class Il2CppCompatibilityOutputs
     /// <summary>
     /// docs/unity.md: Metadata/global-metadata.dat (COPH bundle) and Resouces/mscorlib.dll-resources.dat (empty).
     /// </summary>
-    private static void WriteDataFolder(string dataFolder, List<string> dllSearchPaths, List<string> aotAssemblyNames)
+    private static void WriteDataFolder(string dataFolder, List<string> dllSearchPaths, List<string> aotAssemblyNames, GlobalConfig config)
     {
         Directory.CreateDirectory(dataFolder);
 
         var metadataDir = Path.Combine(dataFolder, "Metadata");
         Directory.CreateDirectory(metadataDir);
         var datPath = Path.Combine(metadataDir, "global-metadata.dat");
-        WriteGlobalMetadataDat(datPath, dllSearchPaths, aotAssemblyNames);
+        WriteGlobalMetadataDat(datPath, dllSearchPaths, aotAssemblyNames, config);
 
         // Doc spelling "Resouces" (Unity compatibility)
         var resourcesDir = Path.Combine(dataFolder, "Resources");
@@ -73,10 +73,19 @@ internal static class Il2CppCompatibilityOutputs
     /// <summary>
     /// Format: Signature | AssemblyCount | AssemblyInfos | AssemblyBytes (see docs/unity.md).
     /// </summary>
-    private static void WriteGlobalMetadataDat(string outputPath, List<string> dllSearchPaths, List<string> aotAssemblyNames)
+    private static void WriteGlobalMetadataDat(string outputPath, List<string> dllSearchPaths, List<string> aotAssemblyNames, GlobalConfig config)
     {
+        var exclude = config.AssembliesExcludedFromGlobalMetadata ?? new List<string>();
+        var excludeSet = new HashSet<string>(exclude, StringComparer.OrdinalIgnoreCase);
+        var metadataAssemblyNames = aotAssemblyNames.Where(n => !excludeSet.Contains(n)).ToList();
+        if (excludeSet.Count > 0)
+        {
+            var omitted = aotAssemblyNames.Where(n => excludeSet.Contains(n)).ToList();
+            s_logger.Info("Excluding from global-metadata.dat ({0}): {1}", omitted.Count, string.Join(", ", omitted));
+        }
+
         var assemblies = new List<(string ShortName, byte[] Bytes)>();
-        foreach (var name in aotAssemblyNames)
+        foreach (var name in metadataAssemblyNames)
         {
             var path = ResolveAssemblyDllPath(name, dllSearchPaths);
             assemblies.Add((name, File.ReadAllBytes(path)));

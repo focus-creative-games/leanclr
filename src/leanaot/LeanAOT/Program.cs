@@ -106,6 +106,12 @@ internal class Program
         [Option("leanaot-aot-rule-file", Required = false, HelpText = "LeanAOT-only: path to an aot.xml rule file (repeat for multiple files).")]
         public IEnumerable<string> AotMethodRuleFiles { get; set; }
 
+        /// <summary>
+        /// LeanAOT-only: assembly short names (same as <c>-a</c> / <c>--assembly</c>, without .dll) to omit from <c>global-metadata.dat</c> only.
+        /// </summary>
+        [Option("leanaot-exclude-assembly-from-global-metadata", Required = false, HelpText = "LeanAOT-only: assembly short name to omit from global-metadata.dat only (repeat for multiple); must appear in -a/--assembly list.")]
+        public IEnumerable<string> AssembliesExcludedFromGlobalMetadata { get; set; }
+
         [Option("leanaot-enable-layout-validation", Required = false, HelpText = "LeanAOT-only: enable managed type layout validation in codegen (default off).")]
         public bool LeanAotEnableLayoutValidation { get; set; }
     }
@@ -284,6 +290,19 @@ internal class Program
             if (!File.Exists(rulePath))
             {
                 errorMessage = $"AOT rule file not found: {rulePath}";
+                return false;
+            }
+        }
+
+        foreach (var rawExclude in options.AssembliesExcludedFromGlobalMetadata ?? Enumerable.Empty<string>())
+        {
+            if (string.IsNullOrWhiteSpace(rawExclude))
+                continue;
+            var shortName = Path.GetFileNameWithoutExtension(rawExclude.Trim());
+            if (!aotAssemblyNames.Contains(shortName, StringComparer.OrdinalIgnoreCase))
+            {
+                errorMessage =
+                    $"Assembly '{shortName}' is not in the AOT assembly list; --leanaot-exclude-assembly-from-global-metadata only applies to assemblies passed via -a/--assembly (or discovered with --directory).";
                 return false;
             }
         }
@@ -502,6 +521,20 @@ internal class Program
             foreach (var rulePath in config.AotMethodRuleFiles)
                 s_logger.Info("LeanAOT AOT rule file: {0}", rulePath);
         }
+
+        config.AssembliesExcludedFromGlobalMetadata = new List<string>();
+        foreach (var raw in options.AssembliesExcludedFromGlobalMetadata ?? Enumerable.Empty<string>())
+        {
+            if (string.IsNullOrWhiteSpace(raw))
+                continue;
+            var shortName = Path.GetFileNameWithoutExtension(raw.Trim());
+            if (config.AssembliesExcludedFromGlobalMetadata.Contains(shortName, StringComparer.OrdinalIgnoreCase))
+                continue;
+            config.AssembliesExcludedFromGlobalMetadata.Add(shortName);
+        }
+
+        if (config.AssembliesExcludedFromGlobalMetadata.Count > 0)
+            s_logger.Info("LeanAOT assemblies excluded from global-metadata.dat: {0}", string.Join(", ", config.AssembliesExcludedFromGlobalMetadata));
     }
 
     private static string NormalizeCompilerFlags(IEnumerable<string> rawParts)
