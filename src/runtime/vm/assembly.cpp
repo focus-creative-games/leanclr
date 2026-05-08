@@ -144,10 +144,14 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(RtAppDomain* app_domain
     {
         RET_ERR(RtErr::ArgumentNull);
     }
-    utils::Span<byte> dll_span(Array::get_array_data_start_as<uint8_t>(dll_data), static_cast<size_t>(Array::get_array_length(dll_data)));
+    size_t dll_data_len = static_cast<size_t>(Array::get_array_length(dll_data));
+    byte* dup_dll_data = (byte*)utils::MemOp::dup_mem(Array::get_array_data_start_as<uint8_t>(dll_data), dll_data_len);
+    utils::Span<byte> dll_span(dup_dll_data, dll_data_len);
     if (symbol_data)
     {
-        utils::Span<byte> symbol_span(Array::get_array_data_start_as<uint8_t>(symbol_data), static_cast<size_t>(Array::get_array_length(symbol_data)));
+        size_t symbol_data_len = static_cast<size_t>(Array::get_array_length(symbol_data));
+        byte* dup_symbol_data = (byte*)utils::MemOp::dup_mem(Array::get_array_data_start_as<uint8_t>(symbol_data), symbol_data_len);
+        utils::Span<byte> symbol_span(dup_symbol_data, symbol_data_len);
         return load_from_data(dll_span, &symbol_span);
     }
     else
