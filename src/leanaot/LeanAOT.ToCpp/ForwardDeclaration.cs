@@ -24,7 +24,7 @@ namespace LeanAOT.ToCpp
         private readonly HashSet<ITypeDefOrRef> _addedTypes = new HashSet<ITypeDefOrRef>(TypeEqualityComparer.Instance);
         private readonly HashSet<MethodInvokerInfo> _addedInvokers = new HashSet<MethodInvokerInfo>();
 
-        private readonly HashSet<string> _addedPinvokeEntries = new HashSet<string>();
+        private readonly HashSet<(string, string)> _addedPinvokeEntries = new HashSet<(string, string)>();
 
         public ForwardDeclaration(CodeThunkZone writer)
         {
@@ -41,13 +41,13 @@ namespace LeanAOT.ToCpp
         }
 
         // File-scope extern "C" for static P/Invoke (not inside a method — avoids Clang/Emscripten parse issues).
-        public void AddPInvokeNativeExternDeclaration(string externDeclLine)
+        public void AddPInvokeNativeExternDeclaration(string dllNameNoExt, string standardedDllLiteral, string externDeclLine)
         {
-            if (!_addedPinvokeEntries.Add(externDeclLine))
+            if (!_addedPinvokeEntries.Add((dllNameNoExt, externDeclLine)))
             {
                 return;
             }
-            _methodDeclsWriter.AddLine("#if LEANCLR_PINVOKE_STATIC_LINKING");
+            _methodDeclsWriter.AddLine($"#if FORCE_PINVOKE_INTERNAL || FORCE_PINVOKE_{standardedDllLiteral}_INTERNAL");
             _methodDeclsWriter.AddLine(externDeclLine);
             _methodDeclsWriter.AddLine("#endif");
         }

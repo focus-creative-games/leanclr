@@ -45,34 +45,41 @@ namespace LeanAOT.ToCpp
             string nativeParamDecls = string.Join(", ", nativeParams.Select((p, index) => $"{p.TypeName} __arg{index}"));
             string nativeParamExprs = string.Join(", ", nativeParams.Select(p => p.Expr));
             string dllNameNoExt = GetPInvokeDllNameNoExt();
-            string escapedDllLiteral = EscapeCppString(dllNameNoExt);
-            string escapedImportLiteral = EscapeCppString(importName);
+            string escapedDllName = EscapeCppString(dllNameNoExt);
+            string standardedDllName = StandardizedDllName(dllNameNoExt);
+            string escapedImportLiteral = importName;
             string fnTypedefName = $"__leanclr_pinvoke_fn_{_method.UniqueName}";
-            bool staticLinkingStubNoNative = IsCorlibSystemOrSystemCorePInvoke();
+            bool isInternalDll = dllNameNoExt == "__Internal";
 
             _bodyWriter.AddLine($"typedef {nativeRetType} ({callConvMacro} *{fnTypedefName})({nativeParamDecls});");
-            _bodyWriter.AddLine("#if LEANCLR_PINVOKE_STATIC_LINKING");
-            if (staticLinkingStubNoNative)
-            {
-                _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = nullptr;");
-            }
-            else
+            if (isInternalDll)
             {
                 _forwardDeclaration.AddPInvokeNativeExternDeclaration(
+                    dllNameNoExt,
+                    standardedDllName,
                     $"extern \"C\" {nativeRetType} {callConvMacro} {importName}({nativeParamDecls});");
                 _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = {importName};");
             }
-            _bodyWriter.AddLine("#else");
-            _bodyWriter.AddLine($"static {fnTypedefName} __leanclr_pinvoke_fn_cache = nullptr;");
-            _bodyWriter.AddLine("if (__leanclr_pinvoke_fn_cache == nullptr)");
-            _bodyWriter.BeginBlock();
-            _bodyWriter.AddLine($"__leanclr_pinvoke_fn_cache = reinterpret_cast<{fnTypedefName}>({ConstStrings.CodegenNamespace}::resolve_pinvoke_function(\"{escapedDllLiteral}\", \"{escapedImportLiteral}\"));");
-            _bodyWriter.EndBlock();
-            _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = __leanclr_pinvoke_fn_cache;");
-            _bodyWriter.AddLine("#endif");
+            else
+            {
+                _bodyWriter.AddLine($"#if FORCE_PINVOKE_INTERNAL || FORCE_PINVOKE_{standardedDllName}_INTERNAL");
+                _forwardDeclaration.AddPInvokeNativeExternDeclaration(
+                    dllNameNoExt,
+                    standardedDllName,
+                    $"extern \"C\" {nativeRetType} {callConvMacro} {importName}({nativeParamDecls});");
+                _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = {importName};");
+                _bodyWriter.AddLine("#else");
+                _bodyWriter.AddLine($"static {fnTypedefName} __leanclr_pinvoke_fn_cache = nullptr;");
+                _bodyWriter.AddLine("if (__leanclr_pinvoke_fn_cache == nullptr)");
+                _bodyWriter.BeginBlock();
+                _bodyWriter.AddLine($"__leanclr_pinvoke_fn_cache = reinterpret_cast<{fnTypedefName}>({ConstStrings.CodegenNamespace}::resolve_pinvoke_function(\"{escapedDllName}\", \"{escapedImportLiteral}\"));");
+                _bodyWriter.EndBlock();
+                _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = __leanclr_pinvoke_fn_cache;");
+                _bodyWriter.AddLine("#endif");
+            }
             _bodyWriter.AddLine($"if ({PInvokeFnPtrVar} == nullptr)");
             _bodyWriter.BeginBlock();
-            _bodyWriter.AddLine($"{ConstStrings.CodegenReturnErr}({ConstStrings.CodegenNamespace}::raise_pinvoke_entry_not_found_error(\"{escapedDllLiteral}\", \"{escapedImportLiteral}\"));");
+            _bodyWriter.AddLine($"{ConstStrings.CodegenReturnErr}({ConstStrings.CodegenNamespace}::raise_pinvoke_entry_not_found_error(\"{escapedDllName}\", \"{escapedImportLiteral}\"));");
             _bodyWriter.EndBlock();
 
             foreach (var param in nativeParams)
@@ -280,6 +287,11 @@ namespace LeanAOT.ToCpp
                 }
             }
             return sb.ToString();
+        }
+
+        private static string StandardizedDllName(string value)
+        {
+            return value.Replace('.', '_').Replace('/', '_').Replace('\\', '_').Replace('-', '_');
         }
     }
 }
