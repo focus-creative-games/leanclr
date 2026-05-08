@@ -12,36 +12,43 @@ using System.Runtime.InteropServices;
 /// </remarks>
 public static class TestPInvokeNative
 {
-    [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_add_i32", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_add_i32", CallingConvention = CallingConvention.Cdecl)]
     public static extern int AddI32(int a, int b);
 
-    [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_mul_i32", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_mul_i32", CallingConvention = CallingConvention.Cdecl)]
     public static extern int MulI32(int a, int b);
 
-    [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_neg_i32", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_neg_i32", CallingConvention = CallingConvention.Cdecl)]
     public static extern int NegI32(int x);
 
-    [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_is_nonzero_i32", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_is_nonzero_i32", CallingConvention = CallingConvention.Cdecl)]
     public static extern bool IsNonZeroI32(int x);
 
     /// <summary>入参为 UTF-8（由运行时代码从 UTF-16 转换），返回字节数（不含结尾 0）。</summary>
-    [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_utf8_byte_len", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_utf8_byte_len", CallingConvention = CallingConvention.Cdecl)]
     public static extern int Utf8ByteLen(string s);
 
     /// <summary>返回 null。</summary>
-    [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_return_null_utf8", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_return_null_utf8", CallingConvention = CallingConvention.Cdecl)]
     public static extern string ReturnNullUtf8(string s);
 
     /// <summary><paramref name="arr"/> 为元素区首地址（int32_t*），与 <paramref name="count"/> 一起求前 count 项之和。</summary>
-    [DllImport("LeanClrTestPInvoke.dll", EntryPoint = "leanclr_pinvoke_sum_int_range", CallingConvention = CallingConvention.Cdecl)]
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_sum_int_range", CallingConvention = CallingConvention.Cdecl)]
     public static extern int SumIntRange(int[] arr, int count);
 }
 
 /// <summary>
 /// 仅用于 Wasm 端到端验证（见文件头说明）；与 <see cref="App"/> 的全量单元测试入口分离。
 /// </summary>
-public static class WasmPInvokeVerify
+public class WasmPInvokeVerify
 {
+    [UnitTest]
+    public static void CallAddI32()
+    {
+        Assert.Equal(7, TestPInvokeNative.AddI32(3, 4));
+    }
+
+
     public static void Main()
     {
         Assert.Equal(7, TestPInvokeNative.AddI32(3, 4));
