@@ -49,7 +49,7 @@ namespace LeanAOT.ToCpp
             string standardedDllName = StandardizedDllName(dllNameNoExt);
             string escapedImportLiteral = importName;
             string fnTypedefName = $"__leanclr_pinvoke_fn_{_method.UniqueName}";
-            bool isInternalDll = dllNameNoExt == "__Internal";
+            bool isInternalDll = dllNameNoExt == ConstStrings.InternalDllName;
 
             _bodyWriter.AddLine($"typedef {nativeRetType} ({callConvMacro} *{fnTypedefName})({nativeParamDecls});");
             if (isInternalDll)

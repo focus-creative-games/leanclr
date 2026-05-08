@@ -47,6 +47,11 @@ namespace LeanAOT.ToCpp
             {
                 return;
             }
+            if (dllNameNoExt == ConstStrings.InternalDllName)
+            {
+                _methodDeclsWriter.AddLine(externDeclLine);
+                return;
+            }
             _methodDeclsWriter.AddLine($"#if FORCE_PINVOKE_INTERNAL || FORCE_PINVOKE_{standardedDllLiteral}_INTERNAL");
             _methodDeclsWriter.AddLine(externDeclLine);
             _methodDeclsWriter.AddLine("#endif");
