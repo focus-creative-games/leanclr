@@ -64,14 +64,9 @@ class Result
         new (&_data) T(std::move(value));
     }
 
-    Result(const RtErr& error) noexcept : _is_ok(false)
+    Result(RtErr error) noexcept : _is_ok(false)
     {
         new (&_data) RtErr(error);
-    }
-
-    Result(RtErr&& error) noexcept : _is_ok(false)
-    {
-        new (&_data) RtErr(std::move(error));
     }
 
     Result(const Result<T>& other) = delete;
@@ -95,7 +90,7 @@ class Result
         return Result<T>(value);
     }
 
-    static Result<T> Err(const RtErr& error)
+    static Result<T> Err(RtErr error)
     {
         return Result<T>(error);
     }
@@ -246,7 +241,7 @@ class ResultPointerImpl<T, true>
         assert((_data & 1) == 0 && "Pointer must be at least 2-byte aligned to be used in Result<T*> optimization");
     }
 
-    ResultPointerImpl(const RtErr& error) noexcept : _data((static_cast<uintptr_t>(error) << 1) | 1)
+    ResultPointerImpl(RtErr error) noexcept : _data((static_cast<uintptr_t>(error) << 1) | 1)
     {
         assert(error != RtErr::None);
     }
@@ -319,7 +314,7 @@ class ResultPointerImpl<T, false>
     {
     }
 
-    ResultPointerImpl(const RtErr& error) noexcept : _value(nullptr), _err(error)
+    ResultPointerImpl(RtErr error) noexcept : _value(nullptr), _err(error)
     {
         assert(error != RtErr::None);
     }
@@ -386,7 +381,7 @@ class Result<T*> : public ResultPointerImpl<T>
     {
     }
 
-    Result(const RtErr& error) noexcept : Base(error)
+    Result(RtErr error) noexcept : Base(error)
     {
     }
 
@@ -402,7 +397,7 @@ class Result<T*> : public ResultPointerImpl<T>
         return Result<T*>(value);
     }
 
-    static Result<T*> Err(const RtErr& error)
+    static Result<T*> Err(RtErr error)
     {
         return Result<T*>(error);
     }
@@ -469,7 +464,7 @@ class ResultVoid
     {
     }
 
-    ResultVoid(const RtErr& error) noexcept : _err(error)
+    ResultVoid(RtErr error) noexcept : _err(error)
     {
         assert(error != RtErr::None);
     }
