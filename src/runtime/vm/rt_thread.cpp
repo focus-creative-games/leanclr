@@ -1,8 +1,11 @@
+
+#include "rt_managed_types.h"
 #include "rt_thread.h"
 #include "object.h"
 #include "class.h"
-#include "rt_managed_types.h"
+#include "appdomain.h"
 #include "alloc/general_allocation.h"
+#include "gc/garbage_collector.h"
 
 namespace leanclr
 {
@@ -173,10 +176,53 @@ void Thread::set_default_affinity_mask(int64_t affinity_mask)
 {
 }
 
+struct StartData
+{
+    RtThread* m_Thread;
+    RtAppDomain* m_Domain;
+    RtMulticastDelegate* m_Delegate;
+    RtObject* m_StartArg;
+    void* m_Semaphore;
+};
+
+static int32_t g_thread_id_counter = 0;
+
+static int32_t get_next_thread_id()
+{
+    return ++g_thread_id_counter;
+}
+
 bool Thread::start_thread(RtThread* thread, vm::RtMulticastDelegate* start)
 {
-    // TODO: Implement
-    return false;
+    RtInternalThread* internal_thread = thread->internal_thread;
+    if ((int32_t)get_state(internal_thread) & (int32_t)RtThreadState::Aborted)
+    {
+        return internal_thread->handle != nullptr;
+    }
+    StartData* start_data = (StartData*)gc::GarbageCollector::allocate_fixed(sizeof(StartData));
+    start_data->m_Thread = thread;
+    start_data->m_Domain = AppDomain::get_default_appdomain();
+    start_data->m_Delegate = start;
+    start_data->m_StartArg = thread->thread_start_arg;
+    start_data->m_Semaphore = nullptr;
+
+    RtNativeThread* native_thread = internal_thread->handle;
+    // TODO
+    // native_thread->set_stack_size(internal_thread->stack_size);
+    // native_thread->set_explicit_apartment_state(internal_thread->apartment_state);
+    // auto ret = native_thread->run(start_data);
+    // if (ret != 0)
+    // {
+    //     return false;
+    // }
+    // return true;
+    internal_thread->state = (RtThreadState)((int32_t)internal_thread->state & ~(int32_t)RtThreadState::Unstarted);
+
+    // TODO: Get thread id from native thread
+    // internal_thread->thread_id = native_thread->thread_id;
+    internal_thread->managed_id = get_next_thread_id();
+    internal_thread->handle = native_thread;
+    return true;
 }
 
 void Thread::abort(RtThread* thread)
