@@ -53,6 +53,7 @@ Unity 传给 `il2cpp.exe` 的实参无法随意扩展时，可在启动 Unity / 
 当前支持的 Lean 专有开关示例（均可放在 **`LEANAOT_EXTRA_ARGS`** 中，或直接写在命令行）：
 
 - `--leanaot-aot-rule-file=<path>`：方法 AOT 规则文件（`aot.xml`）；可重复指定多个路径；详见 `docs/aot-rule-file.md`。
+- `--leanaot-exclude-assembly-from-global-metadata=<shortName>`：将已在 `-a` / `--assembly`（或 `--directory` 发现）中的程序集**短名**（与 `-a` 一致，无 `.dll` 后缀）从 **`Metadata/global-metadata.dat` 的 COPH 打包中排除**；可重复；不影响 C++ 生成与 `MethodMap.tsv`。仅允许排除当前 AOT 列表中的程序集，否则报错。
 - `--leanaot-enable-layout-validation`：开启托管类型布局校验（**默认关闭**；需要校验时在 `LEANAOT_EXTRA_ARGS` 或命令行中显式加上）。
 
 ## 实现leanaot工具
@@ -75,6 +76,8 @@ Unity 传给 `il2cpp.exe` 的实参无法随意扩展时，可在启动 Unity / 
 - `Resouces/mscorlib.dll-resources.dat`
 
 `Resouces/mscorlib.dll-resources.dat`目前没有用到，直接生成空文件即可。
+
+LeanAOT 可通过 `--leanaot-exclude-assembly-from-global-metadata`（可经 `LEANAOT_EXTRA_ARGS` 传入）从上述 COPH 中省略部分仍参与 AOT 的程序集短名；见上文「LeanAOT 额外参数」列表。
 
 global-metadata.data 为无压缩的文件bundle格式。格式如下：
 
