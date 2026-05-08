@@ -89,12 +89,6 @@ typedef double float64_t;
 
 #define LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR 1
 
-#if LEANCLR_PLATFORM_WASM || LEANCLR_PLATFORM_IOS || LEANCLR_PLATFORM_MAC
-#define LEANCLR_PINVOKE_STATIC_LINKING 1
-#else
-#define LEANCLR_PINVOKE_STATIC_LINKING 0
-#endif
-
 // ---------------------------------------------------------------------------
 // P/Invoke native calling conventions
 //
