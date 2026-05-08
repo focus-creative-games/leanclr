@@ -41,6 +41,7 @@
 #include "system_reflection_runtimeparameterinfo.h"
 #include "system_threading_monitor.h"
 #include "system_threading_timer.h"
+#include "system_threading_nativeeventcalls.h"
 #include "system_threading_volatile.h"
 #include "system_appdomain.h"
 #include "system_delegate.h"
@@ -123,6 +124,7 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemReflectionRuntimeParameterInfo::get_internal_call_entries());
     Append(entries, SystemThreadingMonitor::get_internal_call_entries());
     Append(entries, SystemThreadingTimer::get_internal_call_entries());
+    Append(entries, SystemThreadingNativeEventCalls::get_internal_call_entries());
     Append(entries, SystemThreadingVolatile::get_internal_call_entries());
     Append(entries, SystemAppDomain::get_internal_call_entries());
     Append(entries, SystemDelegate::get_internal_call_entries());
