@@ -1,4 +1,6 @@
 #include "system_runtime_runtimeimports.h"
+#include <cstdio>
+#include <cstdlib>
 #include <cstring>
 
 namespace leanclr
@@ -67,8 +69,8 @@ RtResultVoid SystemRuntimeRuntimeImports::ecvt_s(uint8_t* buffer, int32_t size, 
     {
         RET_ERR(RtErr::Argument);
     }
-#elif defined(LEANCLR_PLATFORM_POSIX)
-    // POSIX: ecvt
+#elif defined(LEANCLR_PLATFORM_POSIX) && !defined(__ANDROID__)
+    // POSIX: ecvt (not provided by Android Bionic)
     char* str = ecvt(value, digits, decpt, sign);
     if (!str)
     {

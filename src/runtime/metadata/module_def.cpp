@@ -17,6 +17,8 @@ namespace leanclr
 namespace metadata
 {
 
+constexpr EncodedTokenId RtToken::Invalid;
+
 // Helper constants
 
 static uint32_t allocate_image_id()
