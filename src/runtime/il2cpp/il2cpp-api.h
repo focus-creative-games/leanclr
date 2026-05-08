@@ -6,16 +6,7 @@
 #include <cstdio>
 #include <vector>
 
-#if !defined(IL2CPP_EXPORT)
-#ifdef _MSC_VER
-#include <malloc.h>
-#define IL2CPP_EXPORT __declspec(dllexport)
-#define IL2CPP_IMPORT __declspec(dllimport)
-#else
-#define IL2CPP_EXPORT __attribute__((visibility("default")))
-#define IL2CPP_IMPORT
-#endif
-#endif
+#include "il2cpp-config.h"
 
 #define IL2CPP_API_DYNAMIC_NO_DLSYM 1
 #if IL2CPP_API_DYNAMIC_NO_DLSYM
