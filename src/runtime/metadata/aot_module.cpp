@@ -35,7 +35,7 @@ std::optional<RtAotMethodImplData> AotModule::find_aot_method_impl(const RtMetho
     {
         return std::nullopt;
     }
-    return RtAotMethodImplData{aotMethodDefData->method_ptr, aotMethodDefData->invoke_method_ptr, aotMethodDefData->virtual_invoke_method_ptr};
+    return RtAotMethodImplData{aotMethodDefData->method_ptr, aotMethodDefData->virtual_method_ptr, aotMethodDefData->invoke_method_ptr};
 }
 
 const RtAotMethodDefData* AotModule::find_aot_method_def_impl(const RtModuleDef* module, EncodedTokenId token)

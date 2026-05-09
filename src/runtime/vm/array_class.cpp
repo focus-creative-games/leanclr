@@ -116,8 +116,9 @@ static RtResult<const RtMethodInfo*> build_array_method(RtClass* klass, const ch
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InvokeTypeAndMethod, invoker_type_and_method, Shim::get_invoker(method));
     method->invoke_method_ptr = invoker_type_and_method.invoker;
     method->invoker_type = invoker_type_and_method.invoker_type;
-    method->virtual_invoke_method_ptr = invoker_type_and_method.virtual_invoker;
-    method->method_ptr = Shim::get_method_pointer(method);
+    MethodAndVirtualMethod method_and_virtual_method = Shim::get_method_pointer(method);
+    method->method_ptr = method_and_virtual_method.method_ptr;
+    method->virtual_method_ptr = method_and_virtual_method.virtual_method_ptr;
 
     RET_OK(method);
 }
@@ -144,8 +145,8 @@ static RtResult<const RtMethodInfo*> build_array_generic_method(RtClass* klass, 
     new_method->name = template_method.final_name;
 
     new_method->invoke_method_ptr = inflated_method->invoke_method_ptr;
-    new_method->virtual_invoke_method_ptr = inflated_method->virtual_invoke_method_ptr;
     new_method->method_ptr = inflated_method->method_ptr;
+    new_method->virtual_method_ptr = inflated_method->virtual_method_ptr;
     new_method->invoker_type = inflated_method->invoker_type;
 
     RET_OK(new_method);

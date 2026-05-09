@@ -563,8 +563,8 @@ struct RtMethodInfo
     const RtTypeSig** parameters;
     const RtMethodArgDesc* arg_descs;
     RtManagedMethodPointer method_ptr;
+    RtManagedMethodPointer virtual_method_ptr;
     RtInvokeMethodPointer invoke_method_ptr;
-    RtInvokeMethodPointer virtual_invoke_method_ptr;
     const interp::RtInterpMethodInfo* interp_data;
     EncodedTokenId token;
     uint16_t parameter_count;
@@ -911,15 +911,15 @@ struct RtAotMethodDefData
 {
     EncodedTokenId token;
     RtManagedMethodPointer method_ptr;
+    RtManagedMethodPointer virtual_method_ptr;
     RtInvokeMethodPointer invoke_method_ptr;
-    RtInvokeMethodPointer virtual_invoke_method_ptr;
 };
 
 struct RtAotMethodImplData
 {
     RtManagedMethodPointer method_ptr;
+    RtManagedMethodPointer virtual_method_ptr;
     RtInvokeMethodPointer invoke_method_ptr;
-    RtInvokeMethodPointer virtual_invoke_method_ptr;
 };
 
 struct RtAotModuleData

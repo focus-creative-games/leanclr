@@ -170,8 +170,9 @@ RtResult<const RtMethodInfo*> GenericMethod::get_method_from_pooled_generic_meth
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InvokeTypeAndMethod, invoker_type_and_method, Shim::get_invoker(new_method));
     new_method->invoke_method_ptr = invoker_type_and_method.invoker;
     new_method->invoker_type = invoker_type_and_method.invoker_type;
-    new_method->virtual_invoke_method_ptr = invoker_type_and_method.virtual_invoker;
-    new_method->method_ptr = Shim::get_method_pointer(new_method);
+    MethodAndVirtualMethod method_and_virtual_method = Shim::get_method_pointer(new_method);
+    new_method->method_ptr = method_and_virtual_method.method_ptr;
+    new_method->virtual_method_ptr = method_and_virtual_method.virtual_method_ptr;
     g_method_map.insert({genericMethod, new_method});
     RET_OK(new_method);
 }

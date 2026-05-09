@@ -573,8 +573,8 @@ RtResultVoid Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(con
 {
     assert(method);
 
-    auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->virtual_invoke_method_ptr);
-    return invoke_ptr(method->method_ptr, method, params, ret);
+    auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
+    return invoke_ptr(method->virtual_method_ptr, method, params, ret);
 }
 
 RtResultVoid Runtime::invoke_stackobject_arguments_with_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
