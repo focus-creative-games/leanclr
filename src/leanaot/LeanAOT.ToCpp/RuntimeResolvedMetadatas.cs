@@ -53,7 +53,7 @@ namespace LeanAOT.ToCpp
 
         public string GetFullReferenceVariableName()
         {
-            return $"{owner.GetResolveMetadatasPtrVariableName()}->{GetVariableName()}";
+            return $"{owner.GetResolveMetadatasVariableName()}.{GetVariableName()}";
         }
 
         //public string GetFullReferenceVariableNameAsMethodInfo()
@@ -131,12 +131,17 @@ namespace LeanAOT.ToCpp
 
         public string GetResolveMetadatasVariableName()
         {
-            return $"__resolvedMetadatas";
+            return $"{_method.UniqueName}__resolvedMetadatas";
         }
 
-        public string GetResolveMetadatasPtrVariableName()
+        public string GetResolveMetadatasInitedVariableName()
         {
-            return $"__resolvedMetadatas_ptr";
+            return $"{_method.UniqueName}__resolvedMetadatas_inited";
+        }
+
+        public string GetResolveMetadatasTokensVariableName()
+        {
+            return $"{_method.UniqueName}__resolvedMetadatas_tokens";
         }
 
         public RuntimeResolvedVariable GetUserStringVariable(string value, MDToken token)

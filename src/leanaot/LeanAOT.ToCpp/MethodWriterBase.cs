@@ -265,21 +265,18 @@ namespace LeanAOT.ToCpp
                 }
                 _beforeBodyWriter.DecreaseIndent();
                 _beforeBodyWriter.AddLine("};");
+                _beforeBodyWriter.AddLine($"static {_runtimeResolvedMetadatas.GetResolveMetadataStructName()} {_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()};");
+                _beforeBodyWriter.AddLine($"static bool {_runtimeResolvedMetadatas.GetResolveMetadatasInitedVariableName()};");
+                _beforeBodyWriter.AddLine($"constexpr uint32_t {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}[] = {{ {string.Join(", ", _runtimeResolvedMetadatas.ResolvedVariables.Select(v => $"0x{v.token:X8}"))} }};");
+                _beforeBodyWriter.AddLine($"static_assert(sizeof({_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}) / sizeof(uint32_t) == {_runtimeResolvedMetadatas.ResolvedVariables.Count}, \"The size of the tokens array does not match the number of resolved variables\");");
+                _beforeBodyWriter.AddLine($"static_assert(sizeof({_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()}) / sizeof(void*) == {_runtimeResolvedMetadatas.ResolvedVariables.Count}, \"The size of the resolved metadatas variable does not match the size of a pointer times the number of resolved variables\");");
 
                 _headWriter.SetIndent(1);
-                _headWriter.AddLine($"static {_runtimeResolvedMetadatas.GetResolveMetadataStructName()} {_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()};");
-                _headWriter.AddLine($"static {_runtimeResolvedMetadatas.GetResolveMetadataStructName()}* {_runtimeResolvedMetadatas.GetResolveMetadatasPtrVariableName()} = nullptr;");
-                _headWriter.AddLine($"if ({_runtimeResolvedMetadatas.GetResolveMetadatasPtrVariableName()} == nullptr)");
-                _headWriter.AddLine("{");
-                _headWriter.IncreaseIndent();
-                foreach (var resolvedVar in _runtimeResolvedMetadatas.ResolvedVariables)
-                {
-                    _headWriter.AddLine($"// Token: 0x{resolvedVar.token:X8}");
-                    _headWriter.AddLine($"{resolvedVar.GetFullReferenceVariableNameBeforeInit()} = {resolvedVar.ResolveCode()};");
-                }
-                _headWriter.AddLine($"{_runtimeResolvedMetadatas.GetResolveMetadatasPtrVariableName()} = &{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()};");
-                _headWriter.DecreaseIndent();
-                _headWriter.AddLine("}");
+                _headWriter.AddLine($"if (!{_runtimeResolvedMetadatas.GetResolveMetadatasInitedVariableName()})");
+                _headWriter.BeginBlock();
+                _headWriter.AddLine($"{ConstStrings.CodegenNamespace}::resolve_metadata_tokens({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
+                _headWriter.AddLine($"{_runtimeResolvedMetadatas.GetResolveMetadatasInitedVariableName()} = true;");
+                _headWriter.EndBlock();
             }
         }
 
