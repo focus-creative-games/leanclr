@@ -221,6 +221,11 @@ inline RtResultVoid run_class_static_constructor(const metadata::RtClass* klass)
     return vm::Runtime::run_class_static_constructor(klass);
 }
 
+inline bool is_aot_method(const metadata::RtMethodInfo* method)
+{
+    return method->invoker_type == metadata::RtInvokerType::Aot;
+}
+
 inline RtResultVoid invoke_with_run_class_static_constructor(const metadata::RtMethodInfo* method, interp::RtStackObject* arg_buff,
                                                              interp::RtStackObject* ret_buff)
 {
