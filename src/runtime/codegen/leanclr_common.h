@@ -140,6 +140,8 @@ inline RtResult<vm::RtObject*> new_object(const metadata::RtClass* klass)
 }
 
 void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const metadata::RtMethodInfo* generic_method_info);
+void resolve_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, void** resolved_metadatas);
+void resolve_generic_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, const metadata::RtMethodInfo* generic_method_info, void** resolved_metadatas);
 vm::RtString* resolve_string_literal(metadata::RtModuleDef* mod, uint32_t token);
 
 template <typename ArgType>

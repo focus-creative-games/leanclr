@@ -294,7 +294,7 @@ static RtResultVoid resolve_field_token_invoker(metadata::RtManagedMethodPointer
 RtResult<vm::RtString*> SystemReflectionRuntimeModule::resolve_string_token(metadata::RtModuleDef* module, int32_t token, int32_t* error) noexcept
 {
     metadata::RtToken rt_token = metadata::RtToken::decode(static_cast<metadata::EncodedTokenId>(token));
-    if ((int32_t)rt_token.table_type != metadata::USER_STRING_HEAP_FAKE_TABLE_TYPE)
+    if (rt_token.table_type != metadata::TableType::String)
     {
         *error = (int32_t)ResolveTokenError::BadTable;
         RET_OK(nullptr);

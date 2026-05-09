@@ -13,7 +13,7 @@ namespace codegen
 
 vm::RtString* resolve_string_literal(metadata::RtModuleDef* mod, uint32_t token)
 {
-    assert((int32_t)metadata::RtToken::decode_table_type(token) == metadata::USER_STRING_HEAP_FAKE_TABLE_TYPE && "Token is not a string literal");
+    assert(metadata::RtToken::decode_table_type(token) == metadata::TableType::String && "Token is not a string literal");
     uint32_t string_index = metadata::RtToken::decode_rid(token);
     auto ret = mod->get_user_string(string_index);
     return ret.is_ok() ? ret.unwrap() : nullptr;
@@ -141,11 +141,35 @@ void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const m
         }
         }
     }
+    case metadata::TableType::String:
+    {
+        uint32_t string_index = t.rid;
+        auto ret = mod->get_user_string(string_index);
+        if (ret.is_err())
+        {
+            assert(false && "Failed to resolve string token in resolve_metadata_token");
+            return nullptr;
+        }
+        return ret.unwrap();
+    }
     default:
     {
         assert(false && "Unsupported token type in resolve_metadata_token");
         return nullptr;
     }
+    }
+}
+
+void resolve_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, void** resolved_metadatas)
+{
+    resolve_generic_metadata_tokens(mod, tokens, count, nullptr, resolved_metadatas);
+}
+
+void resolve_generic_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, const metadata::RtMethodInfo* generic_method_info, void** resolved_metadatas)
+{
+    for (size_t i = 0; i < count; i++)
+    {
+        resolved_metadatas[i] = resolve_metadata_token(mod, tokens[i], generic_method_info);
     }
 }
 

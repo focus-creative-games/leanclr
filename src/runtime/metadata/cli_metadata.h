@@ -66,9 +66,8 @@ enum class TableType : uint8_t
     StateMachineMethod,
     CustomDebugInformation,
     Invalid = 0xFF,
+    String = 0x70,
 };
-
-constexpr int32_t USER_STRING_HEAP_FAKE_TABLE_TYPE = 0x70;
 
 // Row structures
 struct RowModule
