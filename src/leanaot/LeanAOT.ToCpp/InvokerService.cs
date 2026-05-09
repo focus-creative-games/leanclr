@@ -33,37 +33,10 @@ namespace LeanAOT.ToCpp
             return _virtualMethodInvokerInfos.Values.ToList();
         }
 
-        static string CreateRelaxedMethodFunctionTypeDeclaring(IMethod method)
-        {
-            MethodSig methodSig = method.MethodSig;
-            StringBuilder sb = new StringBuilder();
-            sb.Append(MethodGenerationUtil.GetResultTypeName(methodSig.RetType));
-            sb.Append(" (*)(");
-            var typeNameService = GlobalServices.Inst.TypeNameService;
-            bool first = true;
-            if (methodSig.HasThis)
-            {
-                sb.Append(typeNameService.GetCppTypeNameAsFieldOrArgOrLoc(MetaUtil.GetThisType(method), TypeNameRelaxLevel.AbiRelaxed));
-                first = false;
-            }
-            sb.Append(')');
-            foreach (var param in methodSig.Params)
-            {
-                if (first)
-                    first = false;
-                else
-                {
-                    sb.Append(", ");
-                }
-                sb.Append(typeNameService.GetCppTypeNameAsFieldOrArgOrLoc(param, TypeNameRelaxLevel.AbiRelaxed));
-            }
-            sb.Append(')');
-            return sb.ToString();
-        }
-
         private string GetInvokerName(IMethod method)
         {
-            string hash = HashUtil.CreateMd5Hash(CreateRelaxedMethodFunctionTypeDeclaring(method));
+            MethodDetail methodDetail = _metadataService.GetMethodDetail(method);
+            string hash = HashUtil.CreateMd5Hash(MethodGenerationUtil.CreateRelaxedMethodFunctionTypeDeclaring(methodDetail));
             return $"leanclr_generated_invoke_method_{hash}";
         }
 

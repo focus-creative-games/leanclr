@@ -8,8 +8,8 @@ namespace LeanAOT.ToCpp
     {
         ExactlyIncludeStringAndTypedByRef, // Generate the most specific type name possible, including string and typedbyref
         Exactly, // Generate the most specific type name possible
-        EvalStackRelaxed, // Relax all reference types to leanclr::vm::RtObject*, , all pointer or ref types to void*, but keep primitive types unchanged
-        AbiRelaxed, // all reference types to leanclr::vm::RtObject*, all pointer or ref types to void*
+        EvalStackRelaxed, // Relax all reference types to leanclr::vm::RtObject*, , all pointer or ref types to void*
+        AbiRelaxed, // all reference types to leanclr::vm::RtObject*, all pointer or ref types to void*, but keep primitive types unchanged
     }
 
     public class TypeNameService

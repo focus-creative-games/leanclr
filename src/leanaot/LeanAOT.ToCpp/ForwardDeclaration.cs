@@ -23,6 +23,7 @@ namespace LeanAOT.ToCpp
         private readonly HashSet<string> _addedTypeDecls = new HashSet<string>();
         private readonly HashSet<ITypeDefOrRef> _addedTypes = new HashSet<ITypeDefOrRef>(TypeEqualityComparer.Instance);
         private readonly HashSet<MethodInvokerInfo> _addedInvokers = new HashSet<MethodInvokerInfo>();
+        private readonly HashSet<DirectCallBridgeInfo> _addedDirectCallBridges = new HashSet<DirectCallBridgeInfo>();
 
         private readonly HashSet<(string, string)> _addedPinvokeEntries = new HashSet<(string, string)>();
 
@@ -488,7 +489,15 @@ namespace LeanAOT.ToCpp
             if (!_addedInvokers.Add(invoker))
                 return;
             _methodDeclsWriter.AddLine($"{ConstStrings.RtResultVoidTypeName} {invoker.name}({ConstStrings.ManagedMethodPointerTypeName}, {ConstStrings.MethodInfoPtrTypeName}, const {ConstStrings.StackObjectTypeName}*, {ConstStrings.StackObjectTypeName}*){ConstStrings.CppFunctionNoexcept};");
-            _methodDeclsWriter.AddLine();
+        }
+
+        public void AddDirectCallBridgeForwardDeclaration(DirectCallBridgeInfo directCallBridgeInfo)
+        {
+            if (!_addedDirectCallBridges.Add(directCallBridgeInfo))
+            {
+                return;
+            }
+            _methodDeclsWriter.AddLine($"{directCallBridgeInfo.GenerateMethodDeclaring()};");
         }
     }
 }

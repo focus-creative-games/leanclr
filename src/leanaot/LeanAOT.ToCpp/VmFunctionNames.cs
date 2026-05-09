@@ -21,6 +21,8 @@ namespace LeanAOT.ToCpp
         public const string Ctor = ".ctor";
         public const string CCtor = ".cctor";
 
+        public const string ResolveMetadataTokens = "leanclr::codegen::resolve_metadata_tokens";
+
         public const string IsCctorNotFinishied = "leanclr::codegen::is_cctor_not_finished";
         public const string RunClassStaticConstructor = "leanclr::codegen::run_class_static_constructor";
         public const string NewObj = "leanclr::codegen::new_object";
@@ -47,11 +49,21 @@ namespace LeanAOT.ToCpp
         public const string NewDelegate = "leanclr::codegen::new_delegate";
         public const string GetFieldRvaData = "leanclr::codegen::get_field_rva_data";
 
+        public const string GetStackObjectSizeForType = "leanclr::codegen::get_stack_object_size_for_type";
+        public const string ExpandArgumentToEvalStack = "leanclr::codegen::expand_argument_to_eval_stack";
+
         public const string InvokeWithRunClassStaticConstructor = "leanclr::codegen::invoke_with_run_class_static_constructor";
         public const string InvokeWithoutRunClassStaticConstructor = "leanclr::codegen::invoke_without_run_class_static_constructor";
         public const string VirtualInvokeWithoutRunClassStaticConstructor = "leanclr::codegen::virtual_invoke_without_run_class_static_constructor";
 
-        public const string RET_ERROR = "LEANCLR_CODEGEN_RETURN_ERROR";
+        public const string SetRetOrReturnError = "leanclr::codegen::set_ret_or_return_error";
+
+        public const string IsAotMethod = "leanclr::codegen::is_aot_method";
+
+
+        public const string RET_VALUE = "LEANCLR_CODEGEN_RETURN";
+
+        public const string RET_ERROR = "LEANCLR_CODEGEN_RETURN_ERR";
 
         public const string THROW_ON_ERROR = "LEANCLR_CODEGEN_THROW_ON_ERROR";
         public const string DECLARING_ASSIGN_OR_THROW = "LEANCLR_CODEGEN_DECLARING_ASSIGN_OR_THROW_ON_ERROR";

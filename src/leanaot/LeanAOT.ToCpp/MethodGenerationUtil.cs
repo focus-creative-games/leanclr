@@ -31,49 +31,34 @@ namespace LeanAOT.ToCpp
             return GlobalServices.Inst.TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(typeSig, TypeNameRelaxLevel.Exactly);
         }
 
+        public static string GetAbiRelaxedTypeName(TypeSig typeSig)
+        {
+            return GlobalServices.Inst.TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(typeSig, TypeNameRelaxLevel.AbiRelaxed);
+        }
+
         public static string GetCppTypeNameAsFieldOrArgOrLoc(TypeSig typeSig, TypeNameRelaxLevel relaxLevel)
         {
             return GlobalServices.Inst.TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(typeSig, relaxLevel);
         }
 
-        public static string CreateMethodForwardDeclaration(IMethod method, string methodName)
+        public static string CreateMethodExactArgs(MethodDetail methodDetail, bool includeArgName)
         {
-            MethodSig methodSig = method.MethodSig;
-            StringBuilder sb = new StringBuilder();
-            sb.Append(GetResultTypeName(methodSig.RetType));
-            sb.Append($" {methodName}(");
-            bool first = true;
-            if (methodSig.HasThis)
-            {
-                sb.Append(GetExactTypeName(MetaUtil.GetThisType(method)));
-                first = false;
-            }
-            foreach (var param in methodSig.Params)
-            {
-                if (first)
-                    first = false;
-                else
-                {
-                    sb.Append(", ");
-                }
-                sb.Append(GetExactTypeName(param));
-            }
-            sb.Append(')');
-            return sb.ToString();
+            return string.Join(", ", methodDetail.ParamsIncludeThis.Select(param => $"{GetExactTypeName(param.Type)}{(includeArgName ? $" {param.Name}" : "")}"));
+        }
+
+        public static string CreateMethodRelaxedArgs(MethodDetail methodDetail, bool includeArgName)
+        {
+            return string.Join(", ", methodDetail.ParamsIncludeThis.Select(param => $"{GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed)}{(includeArgName ? $" {param.Name}" : "")}"));
         }
 
         public static string CreateMethodFunctionArgsWithoutCast(MethodDetail methodDetail)
         {
-            var sb = new StringBuilder();
-            foreach (var param in methodDetail.ParamsIncludeThis)
-            {
-                if (param.Index > 0)
-                {
-                    sb.Append(", ");
-                }
-                sb.Append($"{param.Name}");
-            }
-            return sb.ToString();
+            return string.Join(", ", methodDetail.ParamsIncludeThis.Select(param => $"{param.Name}"));
+        }
+
+        public static string CreateRelaxedMethodFunctionTypeDeclaring(MethodDetail methodDetail)
+        {
+            return $"{GetResultTypeName(methodDetail.RetType)} (*)({CreateMethodRelaxedArgs(methodDetail, true)}){ConstStrings.CppFunctionNoexcept}";
         }
     }
 }

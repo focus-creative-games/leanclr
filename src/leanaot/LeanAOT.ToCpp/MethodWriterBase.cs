@@ -274,7 +274,7 @@ namespace LeanAOT.ToCpp
                 _headWriter.SetIndent(1);
                 _headWriter.AddLine($"if (!{_runtimeResolvedMetadatas.GetResolveMetadatasInitedVariableName()})");
                 _headWriter.BeginBlock();
-                _headWriter.AddLine($"{ConstStrings.CodegenNamespace}::resolve_metadata_tokens({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
+                _headWriter.AddLine($"{VmFunctionNames.ResolveMetadataTokens}({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
                 _headWriter.AddLine($"{_runtimeResolvedMetadatas.GetResolveMetadatasInitedVariableName()} = true;");
                 _headWriter.EndBlock();
             }
@@ -1759,6 +1759,21 @@ namespace LeanAOT.ToCpp
             return sb.ToString();
         }
 
+        private string CreateMethodFunctionRelaxArgsWithCast(MethodDetail methodDetail, List<EvalVariable> args)
+        {
+            var sb = new StringBuilder();
+            foreach (var param in methodDetail.ParamsIncludeThis)
+            {
+                if (param.Index > 0)
+                {
+                    sb.Append(", ");
+                }
+                string abiRelaxTypeName = MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed);
+                sb.Append($"{GetVariableMayCast(args[param.Index], abiRelaxTypeName)}");
+            }
+            return sb.ToString();
+        }
+
         public string GetMethodPointerFromFullReferenceMethodVariable(string methodVarName, bool callvir)
         {
             if (callvir)
@@ -1819,14 +1834,18 @@ namespace LeanAOT.ToCpp
 
         private void EmitCallByMethodPointerDirectly(Instruction inst, MethodDetail methodDetail, string methodVarName, List<EvalVariable> args, EvalVariable retVar, bool callvir)
         {
-            var argsStr = CreateMethodFunctionArgsWithCast(methodDetail, args);
+            var argsWithoutExtraStr = CreateMethodFunctionRelaxArgsWithCast(methodDetail, args);
+            var extraArgsStr = string.Join(", ", new[] { methodVarName, callvir ? "true" : "false" });
+            var argsStr = args.Count > 0 ? argsWithoutExtraStr + ", " + extraArgsStr : extraArgsStr;
+            DirectCallBridgeInfo directCallBridgeInfo = GlobalServices.Inst.DirectCallBridgeService.GetDirectCallBridgeInfo(methodDetail);
+            _forwardDeclaration.AddDirectCallBridgeForwardDeclaration(directCallBridgeInfo);
             if (!methodDetail.IsVoidReturn)
             {
-                EmitAssignOrThrow(inst, retVar, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName()}){GetMethodPointerFromFullReferenceMethodVariable(methodVarName, callvir)})({argsStr})");
+                EmitAssignOrThrow(inst, retVar, $"{directCallBridgeInfo.name}({argsStr})");
             }
             else
             {
-                EmitThrowOnError(inst, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName()}){GetMethodPointerFromFullReferenceMethodVariable(methodVarName, callvir)})({argsStr})");
+                EmitThrowOnError(inst, $"{directCallBridgeInfo.name}({argsStr})");
             }
         }
 
@@ -1847,22 +1866,21 @@ namespace LeanAOT.ToCpp
                 for (int paramIndex = 0, last = paramCount - 1; paramIndex < last; paramIndex++)
                 {
                     ParamDetail param = methodDetail.ParamsIncludeThis[paramIndex];
-                    _bodyWriter.AddLine($"constexpr size_t ARG{paramIndex + 1}_OFFSET = ARG{paramIndex}_OFFSET + {ConstStrings.CodegenNamespace}::get_stack_object_size_for_type<{MethodGenerationUtil.GetExactTypeName(param.Type)}>();");
+                    _bodyWriter.AddLine($"constexpr size_t ARG{paramIndex + 1}_OFFSET = ARG{paramIndex}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{MethodGenerationUtil.GetExactTypeName(param.Type)}>();");
                 }
-                _bodyWriter.AddLine($"constexpr size_t ARGS_SIZE = ARG{paramCount - 1}_OFFSET + {ConstStrings.CodegenNamespace}::get_stack_object_size_for_type<{MethodGenerationUtil.GetExactTypeName(methodDetail.ParamsIncludeThis.Last().Type)}>();");
+                _bodyWriter.AddLine($"constexpr size_t ARGS_SIZE = ARG{paramCount - 1}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{MethodGenerationUtil.GetExactTypeName(methodDetail.ParamsIncludeThis.Last().Type)}>();");
                 argsStr = "__argsBuf";
                 _bodyWriter.AddLine($"{ConstStrings.StackObjectTypeName} {argsStr}[ARGS_SIZE];");
                 foreach (var param in methodDetail.ParamsIncludeThis)
                 {
                     int paramIndex = param.Index;
-                    string argTypeName = GetExactTypeName(param.Type);
-                    _bodyWriter.AddLine($"{ConstStrings.CodegenNamespace}::expand_argument_to_eval_stack({GetEvalVariableName(args[paramIndex])}, {argsStr} + ARG{paramIndex}_OFFSET);");
+                    _bodyWriter.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}({GetEvalVariableName(args[paramIndex])}, {argsStr} + ARG{paramIndex}_OFFSET);");
                 }
             }
             string retStr;
             if (hasReturnValue)
             {
-                _bodyWriter.AddLine($"constexpr size_t RET_SIZE = {ConstStrings.CodegenNamespace}::get_stack_object_size_for_type<{MethodGenerationUtil.GetExactTypeName(methodDetail.RetType)}>();");
+                _bodyWriter.AddLine($"constexpr size_t RET_SIZE = {VmFunctionNames.GetStackObjectSizeForType}<{MethodGenerationUtil.GetExactTypeName(methodDetail.RetType)}>();");
                 retStr = "__retBuf";
                 _bodyWriter.AddLine($"{ConstStrings.StackObjectTypeName} {retStr}[RET_SIZE];");
             }
@@ -1875,7 +1893,7 @@ namespace LeanAOT.ToCpp
             EmitThrowOnError(inst, $"{invokeMethodName}({methodVarName}, {argsStr}, {retStr})");
             if (hasReturnValue)
             {
-                string getFromEvalStackStr = $"{ConstStrings.CodegenNamespace}::get_eval_stack_value_as_type<{GetExactTypeName(methodDetail.RetType)}>({retStr})";
+                string getFromEvalStackStr = $"{VmFunctionNames.GetStackObjectSizeForType}<{GetExactTypeName(methodDetail.RetType)}>({retStr})";
                 _bodyWriter.AddLine($"{GetEvalVariableName(retVar)} = {MayFoldCast(GetExactTypeName(methodDetail.RetType), GetTypeName(retVar), getFromEvalStackStr)};");
             }
             _bodyWriter.DecreaseIndent();

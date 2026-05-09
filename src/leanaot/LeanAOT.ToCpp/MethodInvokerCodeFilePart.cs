@@ -61,7 +61,7 @@ namespace LeanAOT.ToCpp
                 for (int paramIndex = 0, last = methodDetail.ParamCountIncludeThis - 1; paramIndex < last; paramIndex++)
                 {
                     ParamDetail param = methodDetail.ParamsIncludeThis[paramIndex];
-                    _invokerImplWriter.AddLine($"constexpr size_t ARG{paramIndex + 1}_OFFSET = ARG{paramIndex}_OFFSET + {ConstStrings.CodegenNamespace}::get_stack_object_size_for_type<{MethodGenerationUtil.GetExactTypeName(param.Type)}>();");
+                    _invokerImplWriter.AddLine($"constexpr size_t ARG{paramIndex + 1}_OFFSET = ARG{paramIndex}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{MethodGenerationUtil.GetExactTypeName(param.Type)}>();");
                 }
             }
             string args = string.Join(", ", methodDetail.ParamsIncludeThis.Select((param, index) => $"*({MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed)}*)(args + ARG{index}_OFFSET)"));
@@ -71,7 +71,7 @@ namespace LeanAOT.ToCpp
             }
             else
             {
-                _invokerImplWriter.AddLine($"return leanclr::codegen::set_ret_or_return_error((({castFnPtrType})method_ptr)({args}), ret);");
+                _invokerImplWriter.AddLine($"return {VmFunctionNames.SetRetOrReturnError}((({castFnPtrType})method_ptr)({args}), ret);");
             }
             _invokerImplWriter.DecreaseIndent();
             _invokerImplWriter.AddLine("}");

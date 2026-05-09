@@ -25,6 +25,11 @@ namespace LeanAOT.ToCpp
             return $"method_invokers_part{partIndex}.cpp";
         }
 
+        public static string GetMethodDirectCallBridgeCppFileNameWithExt(int partIndex)
+        {
+            return $"method_direct_call_bridges_part{partIndex}.cpp";
+        }
+
         public static string GetAllModuleRegistrationCppFileNameWithExt()
         {
             return $"modules_registration.cpp";

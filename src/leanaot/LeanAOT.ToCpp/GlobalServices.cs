@@ -13,6 +13,8 @@
 
         public InvokerService InvokerService { get; set; }
 
+        public DirectCallBridgeService DirectCallBridgeService { get; set; }
+
         public MetadataService MetadataService { get; set; }
 
         public RuntimeApiCatalog RuntimeApiCatalog { get; set; }

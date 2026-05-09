@@ -161,6 +161,7 @@ namespace LeanAOT.ToCpp
         {
             GenerateAllModuleRegistrationCpp();
             GenerateAllMethodInvokerCpp();
+            GenerateAllDirectCallBridgeCpp();
         }
 
         private void GenerateAllModuleRegistrationCpp()
@@ -198,6 +199,30 @@ namespace LeanAOT.ToCpp
             foreach (var invokerFile in invokerFiles)
             {
                 invokerFile.Save();
+            }
+        }
+
+        private void GenerateAllDirectCallBridgeCpp()
+        {
+            int partIndex = 0;
+            var directCallBridgeFiles = new List<MethodDirectCallBridgeCodeFilePart>();
+            var directCallBridgeCodeFile = new MethodDirectCallBridgeCodeFilePart($"{_config.outputCodeDir}/{ModuleGenerationUtil.GetMethodDirectCallBridgeCppFileNameWithExt(partIndex++)}");
+            directCallBridgeFiles.Add(directCallBridgeCodeFile);
+            var directCallBridgeService = GlobalServices.Inst.DirectCallBridgeService;
+            var directCallBridgeInfos = directCallBridgeService.GetDirectCallBridgeInfos();
+            directCallBridgeInfos.Sort((a, b) => a.name.CompareTo(b.name));
+            foreach (var directCallBridgeInfo in directCallBridgeInfos)
+            {
+                if (directCallBridgeCodeFile.ExceedsMaxSize())
+                {
+                    directCallBridgeCodeFile = new MethodDirectCallBridgeCodeFilePart($"{_config.outputCodeDir}/{ModuleGenerationUtil.GetMethodDirectCallBridgeCppFileNameWithExt(partIndex++)}");
+                    directCallBridgeFiles.Add(directCallBridgeCodeFile);
+                }
+                directCallBridgeCodeFile.AddDirectCallBridgeImpl(directCallBridgeInfo);
+            }
+            foreach (var directCallBridgeFile in directCallBridgeFiles)
+            {
+                directCallBridgeFile.Save();
             }
         }
     }

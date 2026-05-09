@@ -596,6 +596,7 @@ internal class Program
             ManifestService = new ManifestService(manifest),
             TypeNameService = new TypeNameService(metaService),
             InvokerService = new InvokerService(metaService),
+            DirectCallBridgeService = new DirectCallBridgeService(metaService),
             MetadataService = metaService,
             RuntimeApiCatalog = runtimeApiCatalog,
         };
