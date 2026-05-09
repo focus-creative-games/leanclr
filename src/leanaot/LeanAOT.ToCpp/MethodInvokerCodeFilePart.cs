@@ -64,7 +64,7 @@ namespace LeanAOT.ToCpp
                     _invokerImplWriter.AddLine($"constexpr size_t ARG{paramIndex + 1}_OFFSET = ARG{paramIndex}_OFFSET + {ConstStrings.CodegenNamespace}::get_stack_object_size_for_type<{MethodGenerationUtil.GetExactTypeName(param.Type)}>();");
                 }
             }
-            string args = string.Join(", ", methodDetail.ParamsIncludeThis.Select((param, index) => index == 0 && info.isVirtual ? "args[0].obj + 1" : $"*({MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed)}*)(args + ARG{index}_OFFSET)"));
+            string args = string.Join(", ", methodDetail.ParamsIncludeThis.Select((param, index) => $"*({MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed)}*)(args + ARG{index}_OFFSET)"));
             if (methodDetail.IsVoidReturn)
             {
                 _invokerImplWriter.AddLine($"return (({castFnPtrType})method_ptr)({args});");

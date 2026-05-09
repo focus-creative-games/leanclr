@@ -33,6 +33,11 @@ namespace LeanAOT.ToCpp
             InitMethodVariables();
         }
 
+        protected virtual string GetMethodName()
+        {
+            return _method.UniqueName;
+        }
+
         protected virtual void InitMethodVariables()
         {
         }
@@ -63,15 +68,13 @@ namespace LeanAOT.ToCpp
         void WriteMethodHeader()
         {
             _bodyWriter.AddLine($"// Method: {_method.FullName}");
-            _bodyWriter.AddLine(_method.GenerateMethodDeclaring());
-            _bodyWriter.AddLine("{");
-            _bodyWriter.IncreaseIndent();
+            _bodyWriter.AddLine(_method.GenerateMethodDeclaring(GetMethodName()));
+            _bodyWriter.BeginBlock();
         }
 
         void WriteMethodEnd()
         {
-            _bodyWriter.DecreaseIndent();
-            _bodyWriter.AddLine("}");
+            _bodyWriter.EndBlock();
         }
 
         protected abstract void WriteMethodBody();

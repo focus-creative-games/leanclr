@@ -476,6 +476,10 @@ namespace LeanAOT.ToCpp
                 return;
             }
             _methodDeclsWriter.AddLine($"{methodDetail.GenerateMethodDeclaring()};");
+            if (methodDetail.ShouldGenerateVirtualMethod)
+            {
+                _methodDeclsWriter.AddLine($"{methodDetail.GenerateVirtualMethodDeclaring()};");
+            }
             _methodDeclsWriter.AddLine();
         }
 

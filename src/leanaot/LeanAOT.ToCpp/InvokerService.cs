@@ -6,7 +6,6 @@ namespace LeanAOT.ToCpp
 {
     public class MethodInvokerInfo
     {
-        public bool isVirtual;
         public string name;
         public IMethod method;
     }
@@ -62,48 +61,25 @@ namespace LeanAOT.ToCpp
             return sb.ToString();
         }
 
-        private string GetInvokerName(IMethod method, bool callVir)
+        private string GetInvokerName(IMethod method)
         {
             string hash = HashUtil.CreateMd5Hash(CreateRelaxedMethodFunctionTypeDeclaring(method));
-            return $"leanclr_generated_invoke_{(callVir ? "virtual" : "")}method_{hash}";
+            return $"leanclr_generated_invoke_method_{hash}";
         }
 
-        public MethodInvokerInfo GetNotVirtualInvoker(IMethod method)
+        public MethodInvokerInfo GetInvoker(IMethod method)
         {
-            string invokerName = GetInvokerName(method, false);
+            string invokerName = GetInvokerName(method);
             if (_methodInvokerInfos.TryGetValue(invokerName, out var info))
             {
                 return info;
             }
             var newInfo = new MethodInvokerInfo
             {
-                isVirtual = false,
                 name = invokerName,
                 method = method,
             };
             _methodInvokerInfos[invokerName] = newInfo;
-            return newInfo;
-        }
-
-        public MethodInvokerInfo GetVirtualInvoker(IMethod method)
-        {
-            var methodDetail = _metadataService.GetMethodDetail(method);
-            if (!MetaUtil.IsValueType(method.DeclaringType.ToTypeSig()) || methodDetail.IsStatic)
-            {
-                return GetNotVirtualInvoker(method);
-            }
-            string invokerName = GetInvokerName(method, true);
-            if (_virtualMethodInvokerInfos.TryGetValue(invokerName, out var info))
-            {
-                return info;
-            }
-            var newInfo = new MethodInvokerInfo
-            {
-                isVirtual = true,
-                name = invokerName,
-                method = method,
-            };
-            _virtualMethodInvokerInfos[invokerName] = newInfo;
             return newInfo;
         }
     }

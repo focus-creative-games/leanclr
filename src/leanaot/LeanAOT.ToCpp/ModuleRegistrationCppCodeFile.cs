@@ -107,12 +107,10 @@ namespace LeanAOT.ToCpp
                 {
                     MethodDef method = methodPlan.MethodDef;
                     _forwardDeclaration.AddMethodForwardDeclaration(method);
-                    MethodInvokerInfo notVirtualInvoker = invokerService.GetNotVirtualInvoker(method);
-                    _forwardDeclaration.AddInvokerForwardDeclaration(notVirtualInvoker);
-                    MethodInvokerInfo virtualInvoker = invokerService.GetVirtualInvoker(method);
-                    _forwardDeclaration.AddInvokerForwardDeclaration(virtualInvoker);
+                    MethodInvokerInfo invoker = invokerService.GetInvoker(method);
+                    _forwardDeclaration.AddInvokerForwardDeclaration(invoker);
                     MethodDetail md = GlobalServices.Inst.MetadataService.GetMethodDetail(method);
-                    _implWriter.AddLine($"{{ 0x{method.MDToken.ToInt32():X8}, ({ConstStrings.ManagedMethodPointerTypeName}){md.UniqueName}, ({ConstStrings.InvokeMethodPointerTypeName}){notVirtualInvoker.name}, ({ConstStrings.InvokeMethodPointerTypeName}){virtualInvoker.name} }},");
+                    _implWriter.AddLine($"{{ 0x{method.MDToken.ToInt32():X8}, ({ConstStrings.ManagedMethodPointerTypeName}){md.UniqueName}, ({ConstStrings.ManagedMethodPointerTypeName}){(md.ShouldGenerateVirtualMethod ? md.VirtualMethodUniqueName : md.UniqueName)}, ({ConstStrings.InvokeMethodPointerTypeName}){invoker.name} }},");
                 }
             }
             else
@@ -196,7 +194,7 @@ namespace LeanAOT.ToCpp
                     {
                         _implWriter.AddLine($"offsetof({typeLayoutInfo.typeDetail.InstanceTypeName}, {fd.Name}){(typeLayoutInfo.typeDetail.IsValueType ? $" + {ConstStrings.CodegenNamespace}::RT_OBJECT_HEADER_SIZE" : "")}, // {field.Name}");
                     }
-                     else
+                    else
                     {
                         if (field.IsLiteral || field.HasFieldRVA)
                         {
@@ -263,25 +261,25 @@ namespace LeanAOT.ToCpp
 
             _implWriter.AddLine();
 
-            foreach(TypeDef type in _validateTypes)
+            foreach (TypeDef type in _validateTypes)
             {
                 _forwardDeclaration.AddTypeForwardDefine(type);
                 var typeLayoutInfo = BuildTypeLayoutInfo(type);
                 AddTypeFieldOffsets(typeLayoutInfo);
             }
-            
+
             _implWriter.AddLine();
             _implWriter.AddLine($"static TypeLayoutInfo {GetClassesLayoutInfoArrayVariableName()}[] = {{");
             _implWriter.IncreaseIndent();
-            foreach(TypeDef type in _validateTypes)
+            foreach (TypeDef type in _validateTypes)
             {
                 var typeLayoutInfo = BuildTypeLayoutInfo(type);
                 AddTypeLayoutInfo(typeLayoutInfo);
             }
             _implWriter.DecreaseIndent();
-             _implWriter.AddLine("};");
+            _implWriter.AddLine("};");
 
-             AddTypesLayoutValidationFunction();
+            AddTypesLayoutValidationFunction();
         }
 
         public void Save()

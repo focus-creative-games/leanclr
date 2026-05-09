@@ -101,13 +101,16 @@ namespace LeanAOT.ToCpp
             }
             context.SaveAll();
         }
-
         public override void GenerateMethodDef(MethodDefPlan plan, object ctx)
         {
+            GenerateMethodDefSelf(plan.MethodDef, ctx);
+            GenerateVirtualMethodDefSelf(plan.MethodDef, ctx);
+        }
+
+        private void GenerateMethodDefSelf(MethodDef methodDef, object ctx)
+        {
             var invokerService = GlobalServices.Inst.InvokerService;
-            invokerService.GetNotVirtualInvoker(plan.MethodDef);
-            MethodDef methodDef = plan.MethodDef;
-            invokerService.GetVirtualInvoker(methodDef);
+            invokerService.GetInvoker(methodDef);
             var methodCtx = (MethodDefGenerationContext)ctx;
             var methodDetail = GlobalServices.Inst.MetadataService.GetMethodDetail(methodDef);
             var runtimeApiCatalog = GlobalServices.Inst.RuntimeApiCatalog;
@@ -139,6 +142,19 @@ namespace LeanAOT.ToCpp
 
             var methodWriter = new MethodWriter(methodDetail, methodCtx.methodBodyCodeFile);
             methodWriter.WriteCode();
+        }
+
+
+        private void GenerateVirtualMethodDefSelf(MethodDef methodDef, object ctx)
+        {
+            var methodCtx = (MethodDefGenerationContext)ctx;
+            var methodDetail = GlobalServices.Inst.MetadataService.GetMethodDetail(methodDef);
+            if (!methodDetail.ShouldGenerateVirtualMethod)
+            {
+                return;
+            }
+            var virtualMethodWriter = new VirtualMethodWriter(methodDetail, methodCtx.methodBodyCodeFile);
+            virtualMethodWriter.WriteCode();
         }
 
         public override void GenerateGlobalInitializationCpp()

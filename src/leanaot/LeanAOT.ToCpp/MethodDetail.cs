@@ -71,6 +71,8 @@ namespace LeanAOT.ToCpp
 
         public string UniqueName => _uniqueName;
 
+        public string VirtualMethodUniqueName => $"{_uniqueName}_virtual";
+
         public IMethod Method => _method;
 
         public MethodDef MethodDef => _methodDef;
@@ -103,7 +105,9 @@ namespace LeanAOT.ToCpp
 
         public TypeDef DeclaringTypeDef => _methodDef?.DeclaringType;
 
-        public bool IsNotVirtualOrSealed => !_methodDef.IsVirtual || (_methodDef.IsFinal || _methodDef.DeclaringType.IsSealed);
+        public bool IsNotVirtualOrSealed => !_methodDef.IsVirtual || _methodDef.IsFinal || _methodDef.DeclaringType.IsSealed;
+
+        public bool ShouldGenerateVirtualMethod => _methodDef != null && MetaUtil.IsValueType(_methodDef.DeclaringType.ToTypeSig()) && !IsStatic;
 
         public TypeSig InflateType(TypeSig type)
         {
@@ -201,9 +205,14 @@ namespace LeanAOT.ToCpp
             return string.Join(", ", paramList);
         }
 
-        public string GenerateMethodDeclaring()
+        public string GenerateMethodDeclaring(string overrideMethodName = null)
         {
-            return $"{MethodGenerationUtil.GetResultTypeName(_retType)} {_uniqueName}({CreateMethodParameters()}){ConstStrings.CppFunctionNoexcept}";
+            return $"{MethodGenerationUtil.GetResultTypeName(_retType)} {overrideMethodName ?? _uniqueName}({CreateMethodParameters()}){ConstStrings.CppFunctionNoexcept}";
+        }
+
+        public string GenerateVirtualMethodDeclaring()
+        {
+            return GenerateMethodDeclaring(VirtualMethodUniqueName);
         }
 
         public string CreateMethodFunctionTypedefStatement(string cppTypedefName)
