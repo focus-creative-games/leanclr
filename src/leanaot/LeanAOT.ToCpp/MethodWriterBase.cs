@@ -1759,9 +1759,16 @@ namespace LeanAOT.ToCpp
             return sb.ToString();
         }
 
-        public string GetMethodPointerFromFullReferenceMethodVariable(string methodVarName)
+        public string GetMethodPointerFromFullReferenceMethodVariable(string methodVarName, bool callvir)
         {
-            return $"{methodVarName}->{ConstStrings.MethodPointerFieldName}";
+            if (callvir)
+            {
+                return $"{methodVarName}->{ConstStrings.VirtualMethodPointerFieldName}";
+            }
+            else
+            {
+                return $"{methodVarName}->{ConstStrings.MethodPointerFieldName}";
+            }
         }
 
         public string GetParentFromFullReferenceMethodVariable(string methodVarName)
@@ -1810,16 +1817,16 @@ namespace LeanAOT.ToCpp
         }
 
 
-        private void EmitCallByMethodPointerDirectly(Instruction inst, MethodDetail methodDetail, string methodVarName, List<EvalVariable> args, EvalVariable retVar)
+        private void EmitCallByMethodPointerDirectly(Instruction inst, MethodDetail methodDetail, string methodVarName, List<EvalVariable> args, EvalVariable retVar, bool callvir)
         {
             var argsStr = CreateMethodFunctionArgsWithCast(methodDetail, args);
             if (!methodDetail.IsVoidReturn)
             {
-                EmitAssignOrThrow(inst, retVar, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName()}){GetMethodPointerFromFullReferenceMethodVariable(methodVarName)})({argsStr})");
+                EmitAssignOrThrow(inst, retVar, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName()}){GetMethodPointerFromFullReferenceMethodVariable(methodVarName, callvir)})({argsStr})");
             }
             else
             {
-                EmitThrowOnError(inst, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName()}){GetMethodPointerFromFullReferenceMethodVariable(methodVarName)})({argsStr})");
+                EmitThrowOnError(inst, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName()}){GetMethodPointerFromFullReferenceMethodVariable(methodVarName, callvir)})({argsStr})");
             }
         }
 
@@ -1892,11 +1899,10 @@ namespace LeanAOT.ToCpp
                 {
                     EmitThrowOnError(inst, $"{methodDetail.UniqueName}({argsStr})");
                 }
-                //EmitCallByMethodPointerDirectly(inst, methodDetail, methodVarName, args, retVar);
             }
             else
             {
-                EmitCallByInvoker(inst, methodDetail, methodVarNameProvider(), args, retVar, false);
+                EmitCallByMethodPointerDirectly(inst, methodDetail, methodVarNameProvider(), args, retVar, false);
             }
         }
 
@@ -2108,39 +2114,7 @@ namespace LeanAOT.ToCpp
 
             var finalMethodVar = CreateTempVariable(ConstStrings.MethodInfoPtrTypeName);
             _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}({finalMethodVar.TypeName}, {finalMethodVar.Name}, {VmFunctionNames.GetVirtualMethodOnObj}({GetEvalVariableName(thisVar)}, {methodVar.GetFullReferenceVariableName()}), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
-
-
-            _bodyWriter.AddLine($"if ({finalMethodVar.Name}->invoker_type == leanclr::metadata::RtInvokerType::Aot)");
-            _bodyWriter.AddLine("{");
-            _bodyWriter.IncreaseIndent();
-            TypeDef declaringTypeDef = methodDetail.DeclaringTypeDef;
-            if (declaringTypeDef != null)
-            {
-                if (IsParentOrInterfaceOfValueType(declaringTypeDef))
-                {
-                    _bodyWriter.AddLine($"if ({VmFunctionNames.IsValueType}({GetParentFromFullReferenceMethodVariable(finalMethodVar.Name)}))");
-                    _bodyWriter.AddLine("{");
-                    _bodyWriter.IncreaseIndent();
-                    _bodyWriter.AddLine($"{GetEvalVariableName(thisVar)} += 1;");
-                    _bodyWriter.DecreaseIndent();
-                    _bodyWriter.AddLine("}");
-                }
-                else if (declaringTypeDef.IsValueType)
-                {
-                    _bodyWriter.AddLine($"{GetEvalVariableName(thisVar)} += 1;");
-                }
-            }
-            // declaringTypeDef may be null for Array's get/set methods since we treat them as declared in System.Array which is a type forward to System.Private.CoreLib's Array, and we currently don't have the definition of System.Private.CoreLib's Array, but we can still check if it's interface or not by the metadata of System.Array
-
-            EmitCallByMethodPointerDirectly(inst, methodDetail, finalMethodVar.Name, args, retVar);
-            _bodyWriter.DecreaseIndent();
-            _bodyWriter.AddLine("}");
-            _bodyWriter.AddLine("else");
-            _bodyWriter.AddLine("{");
-            _bodyWriter.IncreaseIndent();
-            EmitCallByInvoker(inst, methodDetail, finalMethodVar.Name, args, retVar, true);
-            _bodyWriter.DecreaseIndent();
-            _bodyWriter.AddLine("}");
+            EmitCallByMethodPointerDirectly(inst, methodDetail, finalMethodVar.Name, args, retVar, true);
         }
 
         private string CreateMethodFunctionTypeDefine(MethodSig methodSig)
@@ -2173,7 +2147,7 @@ namespace LeanAOT.ToCpp
 
             var argsStr = CreateMethodFunctionArgsWithCast(callSite, args);
             string methodFunctionTypeDefine = CreateMethodFunctionTypeDefine(callSite);
-            string methodPointerVarName = GetMethodPointerFromFullReferenceMethodVariable($"({GetEvalVariableExprWithCast(ftnVar, ConstStrings.MethodInfoPtrTypeName)})");
+            string methodPointerVarName = GetMethodPointerFromFullReferenceMethodVariable($"({GetEvalVariableExprWithCast(ftnVar, ConstStrings.MethodInfoPtrTypeName)})", false);
             if (!MetaUtil.IsVoidType(callSite.RetType))
             {
                 var retVar = PushStack(callSite.RetType);
