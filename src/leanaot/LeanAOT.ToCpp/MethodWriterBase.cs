@@ -1830,9 +1830,16 @@ namespace LeanAOT.ToCpp
         private void EmitRunClassStaticConstructor(Instruction inst, Func<RuntimeResolvedVariable> fieldOrMethodVarProvider, ITypeDefOrRef klass)
         {
             TypeDef klassTypeDef = klass.ResolveTypeDef();
-            if (klassTypeDef == null || klassTypeDef.FindStaticConstructor() == null || (TypeEqualityComparer.Instance.Equals(klass, _method.DeclaringType) && _method.MethodDef.IsStaticConstructor))
+            if (klassTypeDef == null || klassTypeDef.FindStaticConstructor() == null)
             {
                 return;
+            }
+            if (TypeEqualityComparer.Instance.Equals(klass, _method.DeclaringType))
+            {
+                if (_method.MethodDef.IsStatic || !MetaUtil.IsValueType(klass.ToTypeSig()))
+                {
+                    return;
+                }
             }
             if (!_klassStaticConstructorVariables.TryGetValue(klass, out var klassStaticConstructorVar))
             {
