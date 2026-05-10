@@ -285,7 +285,7 @@ namespace LeanAOT.ToCpp
             foreach (var (klass, metadataVar) in _klassStaticConstructorVariables)
             {
                 //Debug.Assert(!TypeEqualityComparer.Instance.Equals(klass, _method.DeclaringType));
-                _headWriter.AddLine($"static bool {GetHasRunKlassStaticConstructorVariableName(klass, metadataVar)} = false;");
+                _headWriter.AddLine($"bool {GetHasRunKlassStaticConstructorVariableName(klass, metadataVar)} = false;");
             }
         }
 
