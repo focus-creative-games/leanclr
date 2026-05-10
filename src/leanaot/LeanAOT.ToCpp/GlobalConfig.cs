@@ -49,7 +49,17 @@ namespace LeanAOT.ToCpp
 
         public string CompilerFlags { get; set; }
 
+        /// <summary>
+        /// verify aot type instance-static size and instance-static field offsets are exactly same as in runtime.
+        /// </summary>
         public bool EnableLayoutValidation { get; set; }
+
+
+        /// <summary>
+        /// emit null check before calling instance method. this behavior is same as il2cpp, but it is not in coreclr and mono.
+        /// if we check null before calling instance method, we can avoid null check to this pointer in the called method.
+        /// </summary>
+        public bool EmitNullCheckBeforeCallInstanceMethod { get; set;} = true;
 
         /// <summary>
         /// LeanAOT-only: paths to <c>aot.xml</c> rule files (CLI order). Empty when unset.

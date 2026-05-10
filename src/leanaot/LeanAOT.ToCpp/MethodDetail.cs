@@ -99,7 +99,7 @@ namespace LeanAOT.ToCpp
 
         public bool HasNotVoidReturn => !MetaUtil.IsVoidType(_retType);
 
-        public bool IsStatic => _methodDef.IsStatic;
+        public bool IsStatic => _methodDef != null && _methodDef.IsStatic;
 
         public ITypeDefOrRef DeclaringType => _declaringType;
 

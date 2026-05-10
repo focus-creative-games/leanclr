@@ -67,6 +67,7 @@ namespace LeanAOT.ToCpp
     partial class MethodWriterBase
     {
         //private readonly IMethod _method;
+        private readonly GlobalConfig _globalConfig;
         private readonly MethodDetail _method;
         private readonly ICorLibTypes _corlibTypes;
         private readonly MetadataService _metadataService;
@@ -113,6 +114,7 @@ namespace LeanAOT.ToCpp
 
         public MethodWriterBase(MethodDetail method, IMethodBodyCodeFilePart methodBodyCodeFile)
         {
+            _globalConfig = GlobalServices.Inst.Config;
             _method = method;
             _corlibTypes = method.ModuleOfMethodDef.CorLibTypes;
             _metadataService = GlobalServices.Inst.MetadataService;
@@ -1806,11 +1808,6 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine("}");
         }
 
-        private void EmitAssumeNotNull(EvalVariable objVar)
-        {
-            _bodyWriter.AddLine($"{VmFunctionNames.AssumeNotNull}({GetEvalVariableName(objVar)});");
-        }
-
         private void EmitThrowRuntimeError(Instruction inst, string errName)
         {
             _bodyWriter.AddLine($"{VmFunctionNames.THROW_RUNTIME_ERROR}(leanclr::RtErr::{errName}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
@@ -1828,9 +1825,8 @@ namespace LeanAOT.ToCpp
         /// After IL <c>box</c>, only call when <see cref="MayBoxToNullReference"/> is false (non-<c>Nullable&lt;T&gt;</c> and not a generic type/method parameter).
         /// </summary>
         /// <param name="inst">Current IL instruction (reserved for diagnostics / future use).</param>
-        private void EmitAssumeNotNull(Instruction inst, EvalVariable objVar)
+        private void EmitAssumeNotNull(EvalVariable objVar)
         {
-            _ = inst;
             if (objVar.type != EvalDataType.Ref && objVar.type != EvalDataType.I)
             {
                 return;
@@ -1839,9 +1835,8 @@ namespace LeanAOT.ToCpp
         }
 
         /// <summary>Same as <see cref="EmitAssumeNotNull(Instruction, EvalVariable)"/> but for a raw C++ pointer expression.</summary>
-        private void EmitAssumeNotNull(Instruction inst, string ptrExpr)
+        private void EmitAssumeNotNull(string ptrExpr)
         {
-            _ = inst;
             _bodyWriter.AddLine($"{VmFunctionNames.AssumeNotNull}({ptrExpr});");
         }
 
@@ -1980,7 +1975,7 @@ namespace LeanAOT.ToCpp
             int paramCount = methodDetail.ParamCountIncludeThis;
             bool hasReturnValue = !methodDetail.IsVoidReturn;
             var args = new List<EvalVariable>(_curState.runStackDatas.GetRange(_curState.runStackDatas.Count - paramCount, paramCount));
-            if (emitCheckNullForInstanceMethod && !methodDetail.IsStatic)
+            if (!methodDetail.IsStatic && (emitCheckNullForInstanceMethod || _globalConfig.EmitNullCheckBeforeCallInstanceMethod))
             {
                 EmitCheckNotNull(inst, args[0]);
             }
@@ -2141,7 +2136,7 @@ namespace LeanAOT.ToCpp
                         EmitDeclaringAssignOrThrow(inst, actualThisVar, $"{VmFunctionNames.Box}({constrainedTypeVar.GetFullReferenceVariableName()}, {GetEvalVariableExprWithCast(originalThisVar, "void*")})");
                         if (!MayBoxToNullReference(constaintedType.ToTypeSig()))
                         {
-                            EmitAssumeNotNull(inst, actualThisVar);
+                            EmitAssumeNotNull(actualThisVar);
                         }
                         args[0] = actualThisVar;
                     }
@@ -2184,7 +2179,7 @@ namespace LeanAOT.ToCpp
 
             var finalMethodVar = CreateTempVariable(ConstStrings.MethodInfoPtrTypeName);
             _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}({finalMethodVar.TypeName}, {finalMethodVar.Name}, {VmFunctionNames.GetVirtualMethodOnObj}({GetEvalVariableName(thisVar)}, {methodVar.GetFullReferenceVariableName()}), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
-            EmitAssumeNotNull(inst, finalMethodVar.Name);
+            EmitAssumeNotNull(finalMethodVar.Name);
             EmitCallByMethodPointerDirectly(inst, methodDetail, finalMethodVar.Name, args, retVar, true);
         }
 
@@ -2236,7 +2231,7 @@ namespace LeanAOT.ToCpp
             var methodVar = _runtimeResolvedMetadatas.GetMethodVariable(method);
             var retVar = PushStack(_corlibTypes.IntPtr);
             _bodyWriter.AddLine($"{ConstStrings.MethodInfoPtrTypeName} {GetEvalVariableName(retVar)} = {methodVar.GetFullReferenceVariableName()};");
-            EmitAssumeNotNull(inst, retVar);
+            EmitAssumeNotNull(retVar);
         }
 
         private void EmitLdvirtftn(Instruction inst, IMethod method)
@@ -2247,7 +2242,7 @@ namespace LeanAOT.ToCpp
             var retVar = PushStack(_corlibTypes.IntPtr);
             //var finalMethodVar = CreateTempVariable(ConstStrings.MethodInfoPtrTypeName);
             _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}({ConstStrings.MethodInfoPtrTypeName}, {GetEvalVariableName(retVar)}, {VmFunctionNames.GetVirtualMethodOnObj}({GetEvalVariableName(thisVar)}, {methodVar.GetFullReferenceVariableName()}), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
-            EmitAssumeNotNull(inst, retVar);
+            EmitAssumeNotNull(retVar);
         }
 
         private void EmitNewObj(Instruction inst, IMethod method, uint token)
@@ -2290,7 +2285,7 @@ namespace LeanAOT.ToCpp
             EmitCallCommon(inst, methodDetail, methodVarNameProvider, args, retVar);
             if (!declaringTypeDetail.IsValueType)
             {
-                EmitAssumeNotNull(inst, retVar);
+                EmitAssumeNotNull(retVar);
             }
         }
 
@@ -2328,7 +2323,7 @@ namespace LeanAOT.ToCpp
             var dstObj = PushStack(_corlibTypes.IntPtr);
             RuntimeResolvedVariable targetTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(targetType);
             EmitDeclaringAssignOrThrow(inst, dstObj, $"{VmFunctionNames.Unbox}({GetEvalVariableName(srcObj)}, {targetTypeVar.GetFullReferenceVariableName()})");
-            EmitAssumeNotNull(inst, dstObj);
+            EmitAssumeNotNull(dstObj);
         }
 
         private void EmitUnboxAny(Instruction inst, ITypeDefOrRef targetType)
@@ -2361,7 +2356,7 @@ namespace LeanAOT.ToCpp
             EmitDeclaringAssignOrThrow(inst, dstObj, $"{VmFunctionNames.Box}({targetTypeVar.GetFullReferenceVariableName()}, &{GetEvalVariableName(srcObj)})");
             if (!MayBoxToNullReference(targetType.ToTypeSig()))
             {
-                EmitAssumeNotNull(inst, dstObj);
+                EmitAssumeNotNull(dstObj);
             }
         }
 
@@ -2582,7 +2577,7 @@ namespace LeanAOT.ToCpp
             if (fieldDef.HasFieldRVA)
             {
                 EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.GetFieldRvaData}({fieldVar.GetFullReferenceVariableName()})");
-                EmitAssumeNotNull(inst, retVar);
+                EmitAssumeNotNull(retVar);
             }
             else
             {
@@ -2590,7 +2585,7 @@ namespace LeanAOT.ToCpp
                 EmitRunClassStaticConstructor(inst, klassVarName);
                 string loadFieldExpr = $"&(({fd.Parent.StaticTypeName}*)({klassVarName}->{ConstStrings.KlassFieldNameStaticFieldsData}))->{fd.Name}";
                 _bodyWriter.AddLine($"{retTypeName} {GetEvalVariableName(retVar)} = ({retTypeName})({loadFieldExpr});");
-                EmitAssumeNotNull(inst, retVar);
+                EmitAssumeNotNull(retVar);
             }
         }
 
@@ -2613,7 +2608,7 @@ namespace LeanAOT.ToCpp
             RuntimeResolvedVariable elementKlassVar = _runtimeResolvedMetadatas.GetTypeVariable(operand);
             string indexVarExpr = GetVariableMayCast(indexVar, "int32_t");
             EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewSZArrayFromEleKlass}({elementKlassVar.GetFullReferenceVariableName()}, {indexVarExpr})");
-            EmitAssumeNotNull(inst, retVar);
+            EmitAssumeNotNull(retVar);
         }
 
         private void EmitLdlen(Instruction inst)
@@ -2965,6 +2960,13 @@ namespace LeanAOT.ToCpp
         void WriteMethodBody()
         {
             _bodyWriter.SetIndent(1);
+
+            // emit null check before calling instance method, so we can avoid null check to this pointer in the called method.
+            if (_globalConfig.EmitNullCheckBeforeCallInstanceMethod && !_method.IsStatic)
+            {
+                EmitAssumeNotNull(GetParameterName(_parameterVariables[0]));
+            }
+            
             MethodDef methodDef = _method.MethodDef;
             var body = methodDef.Body;
             var insts = body.Instructions;

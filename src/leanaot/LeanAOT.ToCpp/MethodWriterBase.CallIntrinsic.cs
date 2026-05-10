@@ -249,7 +249,7 @@ namespace LeanAOT.ToCpp
             }
             _forwardDeclaration.AddInclude(icallsHeader);
             EmitDeclaringAssignOrThrow(inst, retVar, $"leanclr::icalls::{icallsFuncName}({argsStr})");
-            EmitAssumeNotNull(inst, retVar);
+            EmitAssumeNotNull(retVar);
             return true;
         }
 
@@ -321,7 +321,7 @@ namespace LeanAOT.ToCpp
             EmitAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewMdArrayFromArrayKlass}({GetParentFromFullReferenceMethodVariable(methodVarName)}, __lengths, __lowerBounds)");
             _bodyWriter.DecreaseIndent();
             _bodyWriter.AddLine("}");
-            EmitAssumeNotNull(inst, retVar);
+            EmitAssumeNotNull(retVar);
         }
 
         private void EmitCallMdArrayGetIntrinsic(Instruction inst, MethodDetail methodDetail, string methodVarName, List<EvalVariable> args, EvalVariable retVar)
@@ -411,7 +411,7 @@ namespace LeanAOT.ToCpp
                 throw new Exception("impossible: the constructor of a delegate should always have 2 parameters.");
             }
             EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewDelegate}({GetParentFromFullReferenceMethodVariable(methodVarName)}, ({ConstStrings.ObjectPtrTypeName}){GetEvalVariableName(args[0])}, ({ConstStrings.MethodInfoPtrTypeName}){GetEvalVariableName(args[1])})");
-            EmitAssumeNotNull(inst, retVar);
+            EmitAssumeNotNull(retVar);
         }
     }
 }
