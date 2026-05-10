@@ -112,6 +112,8 @@ namespace LeanAOT.ToCpp
             }
         }
 
+        private readonly Dictionary<ITypeDefOrRef, RuntimeResolvedVariable> _klassStaticConstructorVariables = new Dictionary<ITypeDefOrRef, RuntimeResolvedVariable>(TypeEqualityComparer.Instance);
+
         public MethodWriterBase(MethodDetail method, IMethodBodyCodeFilePart methodBodyCodeFile)
         {
             _globalConfig = GlobalServices.Inst.Config;
@@ -279,6 +281,11 @@ namespace LeanAOT.ToCpp
                 _headWriter.AddLine($"{VmFunctionNames.ResolveMetadataTokens}({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
                 _headWriter.AddLine($"{_runtimeResolvedMetadatas.GetResolveMetadatasInitedVariableName()} = true;");
                 _headWriter.EndBlock();
+            }
+            foreach (var (klass, metadataVar) in _klassStaticConstructorVariables)
+            {
+                //Debug.Assert(!TypeEqualityComparer.Instance.Equals(klass, _method.DeclaringType));
+                _headWriter.AddLine($"static bool {GetHasRunKlassStaticConstructorVariableName(klass, metadataVar)} = false;");
             }
         }
 
@@ -1798,14 +1805,49 @@ namespace LeanAOT.ToCpp
             return $"{fieldVarName}->{ConstStrings.ParentFieldName}";
         }
 
-        private void EmitRunClassStaticConstructor(Instruction inst, string klassVar)
+        private void EmitRunClassStaticConstructor(Instruction inst, MethodDetail methodDetail, IMethod method)
         {
-            _bodyWriter.AddLine($"if ({VmFunctionNames.IsCctorNotFinishied}({klassVar}))");
-            _bodyWriter.AddLine("{");
-            _bodyWriter.IncreaseIndent();
+            Debug.Assert(methodDetail.IsStatic);
+            // run class static constructor only if the declaring type has a static constructor
+            if (methodDetail.MethodDef.DeclaringType.FindStaticConstructor() == null)
+            {
+                return;
+            }
+            EmitRunClassStaticConstructor(inst, () => _runtimeResolvedMetadatas.GetMethodVariable(method), method.DeclaringType);
+        }
+
+        private void EmitRunClassStaticConstructor(Instruction inst, FieldDetail fieldDetail, IField field)
+        {
+            EmitRunClassStaticConstructor(inst, () => _runtimeResolvedMetadatas.GetFieldVariable(field), field.DeclaringType);
+        }
+
+
+        private string GetHasRunKlassStaticConstructorVariableName(ITypeDefOrRef klass, RuntimeResolvedVariable fieldOrMethodVar)
+        {
+            return $"__hasRunClassStaticConstructor_{fieldOrMethodVar.GetVariableName()}";
+        }
+
+        private void EmitRunClassStaticConstructor(Instruction inst, Func<RuntimeResolvedVariable> fieldOrMethodVarProvider, ITypeDefOrRef klass)
+        {
+            TypeDef klassTypeDef = klass.ResolveTypeDef();
+            if (klassTypeDef == null || klassTypeDef.FindStaticConstructor() == null || (TypeEqualityComparer.Instance.Equals(klass, _method.DeclaringType) && _method.MethodDef.IsStaticConstructor))
+            {
+                return;
+            }
+            if (!_klassStaticConstructorVariables.TryGetValue(klass, out var klassStaticConstructorVar))
+            {
+                RuntimeResolvedVariable fieldOrMethodVar = fieldOrMethodVarProvider();
+                klassStaticConstructorVar = fieldOrMethodVar;
+                _klassStaticConstructorVariables.Add(klass, klassStaticConstructorVar);
+            }
+
+            string klassVar = GetParentFromFullReferenceMethodVariable(klassStaticConstructorVar.GetFullReferenceVariableName());
+            string hasRunKlassStaticConstructorVarName = GetHasRunKlassStaticConstructorVariableName(klass, klassStaticConstructorVar);
+            _bodyWriter.AddLine($"if (!{hasRunKlassStaticConstructorVarName})");
+            _bodyWriter.BeginBlock();
+            _bodyWriter.AddLine($"{hasRunKlassStaticConstructorVarName} = true;");
             _bodyWriter.AddLine($"{VmFunctionNames.THROW_ON_ERROR}({VmFunctionNames.RunClassStaticConstructor}({klassVar}), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
-            _bodyWriter.DecreaseIndent();
-            _bodyWriter.AddLine("}");
+            _bodyWriter.EndBlock();
         }
 
         private void EmitThrowRuntimeError(Instruction inst, string errName)
@@ -1975,9 +2017,16 @@ namespace LeanAOT.ToCpp
             int paramCount = methodDetail.ParamCountIncludeThis;
             bool hasReturnValue = !methodDetail.IsVoidReturn;
             var args = new List<EvalVariable>(_curState.runStackDatas.GetRange(_curState.runStackDatas.Count - paramCount, paramCount));
-            if (!methodDetail.IsStatic && (emitCheckNullForInstanceMethod || _globalConfig.EmitNullCheckBeforeCallInstanceMethod))
+            if (!methodDetail.IsStatic)
             {
-                EmitCheckNotNull(inst, args[0]);
+                if (emitCheckNullForInstanceMethod || _globalConfig.EmitNullCheckBeforeCallInstanceMethod)
+                {
+                    EmitCheckNotNull(inst, args[0]);
+                }
+            }
+            else
+            {
+                EmitRunClassStaticConstructor(inst, methodDetail, method);
             }
             Pop(paramCount);
 
@@ -2509,7 +2558,7 @@ namespace LeanAOT.ToCpp
             }
             RuntimeResolvedVariable fieldVar = _runtimeResolvedMetadatas.GetFieldVariable(field);
             string klassVarName = GetParentFromFullReferenceFieldVariable(fieldVar.GetFullReferenceVariableName());
-            EmitRunClassStaticConstructor(inst, klassVarName);
+            EmitRunClassStaticConstructor(inst, fd, field);
             string retTypeName = GetTypeName(retVar);
             string exactFieldTypeName = GetExactTypeName(fd.Type);
             string loadFieldExpr = $"(({fd.Parent.StaticTypeName}*)({klassVarName}->{ConstStrings.KlassFieldNameStaticFieldsData}))->{fd.Name}";
@@ -2527,7 +2576,7 @@ namespace LeanAOT.ToCpp
             }
             RuntimeResolvedVariable fieldVar = _runtimeResolvedMetadatas.GetFieldVariable(field);
             string klassVarName = GetParentFromFullReferenceFieldVariable(fieldVar.GetFullReferenceVariableName());
-            EmitRunClassStaticConstructor(inst, klassVarName);
+            EmitRunClassStaticConstructor(inst, fd, field);
             string exactFieldTypeName = GetExactTypeName(fd.Type);
             _bodyWriter.AddLine($"(({fd.Parent.StaticTypeName}*)({klassVarName}->{ConstStrings.KlassFieldNameStaticFieldsData}))->{fd.Name} = {GetEvalVariableExprWithCast(valueVar, exactFieldTypeName)};");
         }
@@ -2582,7 +2631,7 @@ namespace LeanAOT.ToCpp
             else
             {
                 string klassVarName = GetParentFromFullReferenceFieldVariable(fieldVar.GetFullReferenceVariableName());
-                EmitRunClassStaticConstructor(inst, klassVarName);
+                EmitRunClassStaticConstructor(inst, fd, field);
                 string loadFieldExpr = $"&(({fd.Parent.StaticTypeName}*)({klassVarName}->{ConstStrings.KlassFieldNameStaticFieldsData}))->{fd.Name}";
                 _bodyWriter.AddLine($"{retTypeName} {GetEvalVariableName(retVar)} = ({retTypeName})({loadFieldExpr});");
                 EmitAssumeNotNull(retVar);
@@ -2966,7 +3015,7 @@ namespace LeanAOT.ToCpp
             {
                 EmitAssumeNotNull(GetParameterName(_parameterVariables[0]));
             }
-            
+
             MethodDef methodDef = _method.MethodDef;
             var body = methodDef.Body;
             var insts = body.Instructions;
