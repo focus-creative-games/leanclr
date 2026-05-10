@@ -1180,16 +1180,16 @@ namespace LeanAOT.ToCpp
                 // fix compiler warning C4312: "conversion from 'int' to 'void*' of greater size"
                 if (ret.type == EvalDataType.Int32 && GetEvalDataType(_method.RetType) == EvalDataType.Ref)
                 {
-                    _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}(({ConstStrings.ObjectPtrTypeName})({ConstStrings.IntPtrTypeName}){GetEvalVariableName(ret)});");
+                    _bodyWriter.AddLine($"{VmFunctionNames.RET_VALUE}(({ConstStrings.ObjectPtrTypeName})({ConstStrings.IntPtrTypeName}){GetEvalVariableName(ret)});");
                 }
                 else
                 {
-                    _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}({GetVariableMayCast(ret, TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(_method.RetType, TypeNameRelaxLevel.AbiRelaxed))});");
+                    _bodyWriter.AddLine($"{VmFunctionNames.RET_VALUE}({GetVariableMayCast(ret, TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(_method.RetType, TypeNameRelaxLevel.AbiRelaxed))});");
                 }
             }
             else
             {
-                _bodyWriter.AddLine($"{ConstStrings.CodegenReturnVoid}();");
+                _bodyWriter.AddLine($"{VmFunctionNames.RET_VOID}();");
             }
             _curState.runStackDatas.Clear();
         }
@@ -1806,6 +1806,11 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine("}");
         }
 
+        private void EmitAssumeNotNull(EvalVariable objVar)
+        {
+            _bodyWriter.AddLine($"{VmFunctionNames.AssumeNotNull}({GetEvalVariableName(objVar)});");
+        }
+
         private void EmitThrowRuntimeError(Instruction inst, string errName)
         {
             _bodyWriter.AddLine($"{VmFunctionNames.THROW_RUNTIME_ERROR}(leanclr::RtErr::{errName}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
@@ -1814,6 +1819,49 @@ namespace LeanAOT.ToCpp
         private void EmitCheckNotNull(Instruction inst, EvalVariable objVar)
         {
             _bodyWriter.AddLine($"{VmFunctionNames.CHECK_NULL_REFERENCE}({GetEvalVariableName(objVar)}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+        }
+
+        /// <summary>
+        /// Emits <c>LEANCLR_CODEGEN_ASSUME_NOT_NULL</c> after an operation whose successful <c>RtResult</c> unwrap
+        /// (or runtime contract) guarantees a non-null reference or non-null pointer (managed object, array, delegate,
+        /// RVA pointer, method pointer, etc.). Undefined behavior if the pointer can actually be null.
+        /// After IL <c>box</c>, only call when <see cref="MayBoxToNullReference"/> is false (non-<c>Nullable&lt;T&gt;</c> and not a generic type/method parameter).
+        /// </summary>
+        /// <param name="inst">Current IL instruction (reserved for diagnostics / future use).</param>
+        private void EmitAssumeNotNull(Instruction inst, EvalVariable objVar)
+        {
+            _ = inst;
+            if (objVar.type != EvalDataType.Ref && objVar.type != EvalDataType.I)
+            {
+                return;
+            }
+            _bodyWriter.AddLine($"{VmFunctionNames.AssumeNotNull}({GetEvalVariableName(objVar)});");
+        }
+
+        /// <summary>Same as <see cref="EmitAssumeNotNull(Instruction, EvalVariable)"/> but for a raw C++ pointer expression.</summary>
+        private void EmitAssumeNotNull(Instruction inst, string ptrExpr)
+        {
+            _ = inst;
+            _bodyWriter.AddLine($"{VmFunctionNames.AssumeNotNull}({ptrExpr});");
+        }
+
+        /// <summary>
+        /// Whether IL <c>box</c> on this value type can yield a null reference, or the type might be System.Nullable at runtime.
+        /// </summary>
+        private static bool MayBoxToNullReference(TypeSig typeSig)
+        {
+            TypeSig t = typeSig.RemovePinnedAndModifiers();
+            if (t.ElementType == ElementType.Var || t.ElementType == ElementType.MVar)
+            {
+                return true;
+            }
+            if (t.ElementType != ElementType.GenericInst)
+            {
+                return false;
+            }
+            var gis = (GenericInstSig)t;
+            TypeDef td = gis.GenericType.TypeDefOrRef.ResolveTypeDef();
+            return td != null && td.Namespace == "System" && td.Name == "Nullable`1";
         }
 
         private void EmitThrowOnError(Instruction inst, string sourceExpr)
@@ -2091,6 +2139,10 @@ namespace LeanAOT.ToCpp
                         var actualThisVar = PushStack(_corlibTypes.Object);
                         RuntimeResolvedVariable constrainedTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(constaintedType);
                         EmitDeclaringAssignOrThrow(inst, actualThisVar, $"{VmFunctionNames.Box}({constrainedTypeVar.GetFullReferenceVariableName()}, {GetEvalVariableExprWithCast(originalThisVar, "void*")})");
+                        if (!MayBoxToNullReference(constaintedType.ToTypeSig()))
+                        {
+                            EmitAssumeNotNull(inst, actualThisVar);
+                        }
                         args[0] = actualThisVar;
                     }
                 }
@@ -2132,6 +2184,7 @@ namespace LeanAOT.ToCpp
 
             var finalMethodVar = CreateTempVariable(ConstStrings.MethodInfoPtrTypeName);
             _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}({finalMethodVar.TypeName}, {finalMethodVar.Name}, {VmFunctionNames.GetVirtualMethodOnObj}({GetEvalVariableName(thisVar)}, {methodVar.GetFullReferenceVariableName()}), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            EmitAssumeNotNull(inst, finalMethodVar.Name);
             EmitCallByMethodPointerDirectly(inst, methodDetail, finalMethodVar.Name, args, retVar, true);
         }
 
@@ -2183,6 +2236,7 @@ namespace LeanAOT.ToCpp
             var methodVar = _runtimeResolvedMetadatas.GetMethodVariable(method);
             var retVar = PushStack(_corlibTypes.IntPtr);
             _bodyWriter.AddLine($"{ConstStrings.MethodInfoPtrTypeName} {GetEvalVariableName(retVar)} = {methodVar.GetFullReferenceVariableName()};");
+            EmitAssumeNotNull(inst, retVar);
         }
 
         private void EmitLdvirtftn(Instruction inst, IMethod method)
@@ -2193,6 +2247,7 @@ namespace LeanAOT.ToCpp
             var retVar = PushStack(_corlibTypes.IntPtr);
             //var finalMethodVar = CreateTempVariable(ConstStrings.MethodInfoPtrTypeName);
             _bodyWriter.AddLine($"{VmFunctionNames.DECLARING_ASSIGN_OR_THROW}({ConstStrings.MethodInfoPtrTypeName}, {GetEvalVariableName(retVar)}, {VmFunctionNames.GetVirtualMethodOnObj}({GetEvalVariableName(thisVar)}, {methodVar.GetFullReferenceVariableName()}), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            EmitAssumeNotNull(inst, retVar);
         }
 
         private void EmitNewObj(Instruction inst, IMethod method, uint token)
@@ -2233,6 +2288,10 @@ namespace LeanAOT.ToCpp
                 EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewObj}({GetParentFromFullReferenceMethodVariable(methodVarNameProvider())})");
             }
             EmitCallCommon(inst, methodDetail, methodVarNameProvider, args, retVar);
+            if (!declaringTypeDetail.IsValueType)
+            {
+                EmitAssumeNotNull(inst, retVar);
+            }
         }
 
         private void EmitCastClass(Instruction inst, ITypeDefOrRef targetType)
@@ -2269,6 +2328,7 @@ namespace LeanAOT.ToCpp
             var dstObj = PushStack(_corlibTypes.IntPtr);
             RuntimeResolvedVariable targetTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(targetType);
             EmitDeclaringAssignOrThrow(inst, dstObj, $"{VmFunctionNames.Unbox}({GetEvalVariableName(srcObj)}, {targetTypeVar.GetFullReferenceVariableName()})");
+            EmitAssumeNotNull(inst, dstObj);
         }
 
         private void EmitUnboxAny(Instruction inst, ITypeDefOrRef targetType)
@@ -2299,6 +2359,10 @@ namespace LeanAOT.ToCpp
             var dstObj = PushStack(_corlibTypes.Object);
             RuntimeResolvedVariable targetTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(targetType);
             EmitDeclaringAssignOrThrow(inst, dstObj, $"{VmFunctionNames.Box}({targetTypeVar.GetFullReferenceVariableName()}, &{GetEvalVariableName(srcObj)})");
+            if (!MayBoxToNullReference(targetType.ToTypeSig()))
+            {
+                EmitAssumeNotNull(inst, dstObj);
+            }
         }
 
         private void EmitThrow(Instruction inst)
@@ -2518,6 +2582,7 @@ namespace LeanAOT.ToCpp
             if (fieldDef.HasFieldRVA)
             {
                 EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.GetFieldRvaData}({fieldVar.GetFullReferenceVariableName()})");
+                EmitAssumeNotNull(inst, retVar);
             }
             else
             {
@@ -2525,6 +2590,7 @@ namespace LeanAOT.ToCpp
                 EmitRunClassStaticConstructor(inst, klassVarName);
                 string loadFieldExpr = $"&(({fd.Parent.StaticTypeName}*)({klassVarName}->{ConstStrings.KlassFieldNameStaticFieldsData}))->{fd.Name}";
                 _bodyWriter.AddLine($"{retTypeName} {GetEvalVariableName(retVar)} = ({retTypeName})({loadFieldExpr});");
+                EmitAssumeNotNull(inst, retVar);
             }
         }
 
@@ -2547,6 +2613,7 @@ namespace LeanAOT.ToCpp
             RuntimeResolvedVariable elementKlassVar = _runtimeResolvedMetadatas.GetTypeVariable(operand);
             string indexVarExpr = GetVariableMayCast(indexVar, "int32_t");
             EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewSZArrayFromEleKlass}({elementKlassVar.GetFullReferenceVariableName()}, {indexVarExpr})");
+            EmitAssumeNotNull(inst, retVar);
         }
 
         private void EmitLdlen(Instruction inst)

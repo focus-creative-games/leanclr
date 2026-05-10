@@ -79,7 +79,7 @@ namespace LeanAOT.ToCpp
             }
             _bodyWriter.AddLine($"if ({PInvokeFnPtrVar} == nullptr)");
             _bodyWriter.BeginBlock();
-            _bodyWriter.AddLine($"{ConstStrings.CodegenReturnErr}({ConstStrings.CodegenNamespace}::raise_pinvoke_entry_not_found_error(\"{escapedDllName}\", \"{escapedImportLiteral}\"));");
+            _bodyWriter.AddLine($"{VmFunctionNames.RET_ERROR}({ConstStrings.CodegenNamespace}::raise_pinvoke_entry_not_found_error(\"{escapedDllName}\", \"{escapedImportLiteral}\"));");
             _bodyWriter.EndBlock();
 
             foreach (var param in nativeParams)
@@ -98,20 +98,20 @@ namespace LeanAOT.ToCpp
             if (_method.IsVoidReturn)
             {
                 _bodyWriter.AddLine($"{calleeExpr}({nativeParamExprs});");
-                _bodyWriter.AddLine($"{ConstStrings.CodegenReturnVoid}();");
+                _bodyWriter.AddLine($"{VmFunctionNames.RET_VOID}();");
             }
             else if (IsStringType(_method.RetType))
             {
                 _bodyWriter.AddLine($"const char* __pinvoke_utf8_ret = {calleeExpr}({nativeParamExprs});");
                 _bodyWriter.AddLine($"auto __pinvoke_managed_str = {ConstStrings.CodegenNamespace}::marshal_utf8_string_to_utf16(__pinvoke_utf8_ret);");
                 _bodyWriter.AddLine($"{ConstStrings.CodegenNamespace}::free_pinvoke_returned_utf8_cstr(__pinvoke_utf8_ret);");
-                _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}(__pinvoke_managed_str);");
+                _bodyWriter.AddLine($"{VmFunctionNames.RET_VALUE}(__pinvoke_managed_str);");
             }
             else
             {
                 string managedRetType = MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(_method.RetType, TypeNameRelaxLevel.AbiRelaxed);
                 _bodyWriter.AddLine($"auto __pinvoke_ret = {calleeExpr}({nativeParamExprs});");
-                _bodyWriter.AddLine($"{ConstStrings.CodegenReturn}(({managedRetType})__pinvoke_ret);");
+                _bodyWriter.AddLine($"{VmFunctionNames.RET_VALUE}(({managedRetType})__pinvoke_ret);");
             }
         }
 

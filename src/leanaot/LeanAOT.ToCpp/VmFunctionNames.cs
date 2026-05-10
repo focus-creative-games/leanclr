@@ -60,10 +60,14 @@ namespace LeanAOT.ToCpp
 
         public const string IsAotMethod = "leanclr::codegen::is_aot_method";
 
+        public const string Likely = "LEANCLR_CODEGEN_LIKELY";
+        public const string Unlikely = "LEANCLR_CODEGEN_UNLIKELY";
+        public const string Assume = "LEANCLR_CODEGEN_ASSUME";
+        public const string AssumeNotNull = "LEANCLR_CODEGEN_ASSUME_NOT_NULL";
 
         public const string RET_VALUE = "LEANCLR_CODEGEN_RETURN";
-
         public const string RET_ERROR = "LEANCLR_CODEGEN_RETURN_ERR";
+        public const string RET_VOID = "LEANCLR_CODEGEN_RETURN_VOID";
 
         public const string THROW_ON_ERROR = "LEANCLR_CODEGEN_THROW_ON_ERROR";
         public const string DECLARING_ASSIGN_OR_THROW = "LEANCLR_CODEGEN_DECLARING_ASSIGN_OR_THROW_ON_ERROR";

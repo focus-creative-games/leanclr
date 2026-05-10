@@ -8,10 +8,6 @@ namespace LeanAOT.ToCpp
         public const string RtResultVoidTypeName = "leanclr::RtResultVoid";
         public const string RtResultTypeName = "leanclr::RtResult";
 
-        public const string CodegenReturn = "LEANCLR_CODEGEN_RETURN";
-        public const string CodegenReturnErr = "LEANCLR_CODEGEN_RETURN_ERR";
-        public const string CodegenReturnVoid = "LEANCLR_CODEGEN_RETURN_VOID";
-
         public const string MethodDefDataTypeName = "leanclr::metadata::RtAotMethodDefData";
         public const string ModuleDataTypeName = "leanclr::metadata::RtAotModuleData";
         public const string ModulesDataDataTypeName = "leanclr::metadata::RtAotModulesData";
