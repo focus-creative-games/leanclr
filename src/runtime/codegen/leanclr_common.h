@@ -22,6 +22,12 @@
 
 #define LEANCLR_CODEGEN_DEBUG LEANCLR_DEBUG
 
+#define LEANCLR_CODEGEN_LIKELY(expr) LEANCLR_LIKELY(expr)
+#define LEANCLR_CODEGEN_UNLIKELY(expr) LEANCLR_UNLIKELY(expr)
+
+#define LEANCLR_CODEGEN_ASSUME(expr) LEANCLR_ASSUME(expr)
+#define LEANCLR_CODEGEN_ASSUME_NOT_NULL(ptr) LEANCLR_ASSUME_NOT_NULL(ptr)
+
 #define LEANCLR_CODEGEN_THROW_ON_ERROR(retExpr, methodInfo, ip)                                          \
     do                                                                                                   \
     {                                                                                                    \

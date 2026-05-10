@@ -90,6 +90,52 @@ typedef double float64_t;
 #define LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR 1
 
 // ---------------------------------------------------------------------------
+// Branch prediction and optimization assumptions (C++11)
+//
+// LEANCLR_LIKELY / LEANCLR_UNLIKELY
+//   Wrap boolean conditions. On GCC/Clang/ICC (GNU compat), expands to
+//   __builtin_expect; elsewhere expands to a no-op cast.
+//
+// LEANCLR_ASSUME(expr)
+//   Tells the optimizer that (expr) is true at this program point. If (expr)
+//   is false at runtime, the program has undefined behavior (MSVC __assume;
+//   GCC/Clang via __builtin_unreachable). Use only when (expr) is already
+//   guaranteed by prior logic (e.g. after a successful allocation check).
+//
+// LEANCLR_ASSUME_NON_NULL(ptr) / LEANCLR_ASSUME_NOT_ZERO(value)
+//   Convenience wrappers around LEANCLR_ASSUME for pointers and scalar non-zero.
+// ---------------------------------------------------------------------------
+#if defined(__GNUC__) || defined(__clang__)
+#define LEANCLR_LIKELY(x) (__builtin_expect(!!(x), 1))
+#define LEANCLR_UNLIKELY(x) (__builtin_expect(!!(x), 0))
+#else
+#define LEANCLR_LIKELY(x) (x)
+#define LEANCLR_UNLIKELY(x) (x)
+#endif
+
+#ifndef LIKELY
+#define LIKELY(x) LEANCLR_LIKELY(x)
+#endif
+#ifndef UNLIKELY
+#define UNLIKELY(x) LEANCLR_UNLIKELY(x)
+#endif
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#define LEANCLR_ASSUME(expr) __assume(!!(expr))
+#elif defined(__GNUC__) || defined(__clang__)
+#define LEANCLR_ASSUME(expr) \
+    do \
+    { \
+        if (!(expr)) \
+            __builtin_unreachable(); \
+    } while (0)
+#else
+#define LEANCLR_ASSUME(expr) ((void)0)
+#endif
+
+#define LEANCLR_ASSUME_NOT_NULL(ptr) LEANCLR_ASSUME(ptr)
+
+// ---------------------------------------------------------------------------
 // P/Invoke native calling conventions
 //
 // LeanAOT emits typedefs / extern declarations using these macros so the
