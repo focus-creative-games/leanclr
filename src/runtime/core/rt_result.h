@@ -4,6 +4,7 @@
 #include <type_traits>
 #include <utility>
 #include "rt_err.h"
+#include "build_config.h"
 
 namespace leanclr
 {
@@ -59,6 +60,7 @@ class Result
     {
         new (&_data) T(value);
     }
+
     Result(T&& value) noexcept : _is_ok(true)
     {
         new (&_data) T(std::move(value));
@@ -512,6 +514,7 @@ class ResultVoid
 
 template <typename T>
 struct function_return;
+
 template <typename R, typename... Args>
 struct function_return<R(Args...)>
 {
@@ -543,19 +546,19 @@ struct function_return<R (*)(Args...) noexcept>
 } // namespace core
 } // namespace leanclr
 
-#define RET_ERR_ON_FAIL(expr)         \
-    do                                \
-    {                                 \
-        auto&& _res = (expr);         \
-        if (_res.is_err())            \
-            return _res.unwrap_err(); \
+#define RET_ERR_ON_FAIL(expr)                \
+    do                                       \
+    {                                        \
+        auto&& _res = (expr);                \
+        if (LEANCLR_UNLIKELY(_res.is_err())) \
+            return _res.unwrap_err();        \
     } while (0)
 
 #define UNWRAP_OR_RET_ERR_ON_FAIL(var, expr) \
     do                                       \
     {                                        \
         auto&& _res = (expr);                \
-        if (_res.is_err())                   \
+        if (LEANCLR_UNLIKELY(_res.is_err())) \
         {                                    \
             return _res.unwrap_err();        \
         }                                    \
@@ -567,7 +570,7 @@ struct function_return<R (*)(Args...) noexcept>
     UNWRAP_OR_RET_ERR_ON_FAIL(var, expr)
 
 #define DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL2(type, var, unique_temp_name) \
-    if (unique_temp_name.is_err())                                            \
+    if (LEANCLR_UNLIKELY(unique_temp_name.is_err()))                          \
     {                                                                         \
         return unique_temp_name.unwrap_err();                                 \
     }                                                                         \
@@ -575,7 +578,7 @@ struct function_return<R (*)(Args...) noexcept>
 
 #define DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(type, var, expr) \
     auto&& __opt##var = (expr);                                   \
-    if (__opt##var.is_err())                                      \
+    if (LEANCLR_UNLIKELY(__opt##var.is_err()))                    \
     {                                                             \
         return __opt##var.unwrap_err();                           \
     }                                                             \
@@ -593,11 +596,11 @@ struct function_return<R (*)(Args...) noexcept>
         return err;  \
     } while (0)
 
-#define RET_ERR_ON_FALSE(expr, err) \
-    do                              \
-    {                               \
-        if (!(expr))                \
-            return err;             \
+#define RET_ERR_ON_FALSE(expr, err)    \
+    do                                 \
+    {                                  \
+        if (LEANCLR_UNLIKELY(!(expr))) \
+            return err;                \
     } while (0)
 
 #define RET_VOID_OK()  \
