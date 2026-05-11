@@ -1915,6 +1915,10 @@ namespace LeanAOT.ToCpp
 
         private void EmitCheckNotNull(Instruction inst, EvalVariable objVar)
         {
+            if (!_globalConfig.EmitNullChecks)
+            {
+                return;
+            }
             _bodyWriter.AddLine($"{VmFunctionNames.GOTO_CHECK_NULL_REFERENCE}({GetEvalVariableName(objVar)}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
         }
 
@@ -2698,6 +2702,10 @@ namespace LeanAOT.ToCpp
 
         private void EmitCheckArrayIndexOutOfRange(Instruction inst, EvalVariable objVar, EvalVariable indexVar)
         {
+            if (!_globalConfig.EnableArrayBoundsCheck)
+            {
+                return;
+            }
             string arrVarExpr = GetVariableMayCast(objVar, ConstStrings.ArrayPtrTypeName);
             string indexVarExpr = GetVariableMayCast(indexVar, "int32_t");
             _bodyWriter.AddLine($"if ({VmFunctionNames.IsArrayIndexOutOfRange}({arrVarExpr}, {indexVarExpr}))");
