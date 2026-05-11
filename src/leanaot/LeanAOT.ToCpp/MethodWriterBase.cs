@@ -1170,7 +1170,7 @@ namespace LeanAOT.ToCpp
             }
             string retTypeName = isUnsigned ? GetUnsignedTypeName(retVar) : GetTypeName(retVar);
             _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)};");
-            _bodyWriter.AddLine($"if ({functionName}({GetEvalVariableExpr(op1, isUnsigned)}, {GetEvalVariableExpr(op2, isUnsigned)}, ({retTypeName}*)&{GetEvalVariableName(retVar)}))");
+            _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{functionName}({GetEvalVariableExpr(op1, isUnsigned)}, {GetEvalVariableExpr(op2, isUnsigned)}, ({retTypeName}*)&{GetEvalVariableName(retVar)})")})");
             _bodyWriter.AddLine("{");
             _bodyWriter.IncreaseIndent();
             EmitThrowRuntimeError(inst, "Overflow");
@@ -1195,7 +1195,7 @@ namespace LeanAOT.ToCpp
             case EvalDataType.I:
             {
                 isInteger = true;
-                _bodyWriter.AddLine($"if ({op2Expr} == 0)");
+                _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{op2Expr} == 0")})");
                 _bodyWriter.AddLine("{");
                 _bodyWriter.IncreaseIndent();
                 EmitThrowRuntimeError(inst, "DivideByZero");
@@ -1203,7 +1203,7 @@ namespace LeanAOT.ToCpp
                 _bodyWriter.AddLine("}");
                 if (!isUnsigned)
                 {
-                    _bodyWriter.AddLine($"if ({op1Expr} == std::numeric_limits<{opType}>::min() && {op2Expr} == -1)");
+                    _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{op1Expr} == std::numeric_limits<{opType}>::min() && {op2Expr} == -1")})");
                     _bodyWriter.AddLine("{");
                     _bodyWriter.IncreaseIndent();
                     EmitThrowRuntimeError(inst, "Overflow");
@@ -1656,7 +1656,7 @@ namespace LeanAOT.ToCpp
         {
             if (srcIsUnsigned == dstIsUnsigned)
             {
-                _bodyWriter.AddLine($"if ({srcExpr} < std::numeric_limits<{dstTypeNameWithCast}>::min() || {srcExpr} > std::numeric_limits<{dstTypeNameWithCast}>::max())");
+                _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{srcExpr} < std::numeric_limits<{dstTypeNameWithCast}>::min() || {srcExpr} > std::numeric_limits<{dstTypeNameWithCast}>::max()")})");
             }
             else
             {
@@ -1664,18 +1664,18 @@ namespace LeanAOT.ToCpp
                 {
                     if (dstSizeLevel < srcSizeLevel)
                     {
-                        _bodyWriter.AddLine($"if ({srcExpr} < 0 || {srcExpr} > static_cast<{srcTypeNameWithCast}>(std::numeric_limits<{dstTypeNameWithCast}>::max()))");
+                        _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{srcExpr} < 0 || {srcExpr} > static_cast<{srcTypeNameWithCast}>(std::numeric_limits<{dstTypeNameWithCast}>::max())")})");
                     }
                     else
                     {
-                        _bodyWriter.AddLine($"if ({srcExpr} < 0)");
+                        _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{srcExpr} < 0")})");
                     }
                 }
                 else
                 {
                     if (dstSizeLevel <= srcSizeLevel)
                     {
-                        _bodyWriter.AddLine($"if ({srcExpr} > static_cast<{srcTypeNameWithCast}>(std::numeric_limits<{dstTypeNameWithCast}>::max()))");
+                        _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{srcExpr} > static_cast<{srcTypeNameWithCast}>(std::numeric_limits<{dstTypeNameWithCast}>::max())")})");
                     }
                     else
                     {
@@ -1721,7 +1721,7 @@ namespace LeanAOT.ToCpp
                 case EvalDataType.Float:
                 case EvalDataType.Double:
                 {
-                    _bodyWriter.AddLine($"if ({VmFunctionNames.IsNan}({srcExpr}) || {srcExpr} < static_cast<{GetTypeName(srcVar)}>(std::numeric_limits<{dstTypeNameWithCast}>::min()) || {srcExpr} > static_cast<{GetTypeName(srcVar)}>(std::numeric_limits<{dstTypeNameWithCast}>::max()))");
+                    _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{VmFunctionNames.IsNan}({srcExpr}) || {srcExpr} < static_cast<{GetTypeName(srcVar)}>(std::numeric_limits<{dstTypeNameWithCast}>::min()) || {srcExpr} > static_cast<{GetTypeName(srcVar)}>(std::numeric_limits<{dstTypeNameWithCast}>::max())")})");
                     break;
                 }
                 default:
@@ -1920,6 +1920,11 @@ namespace LeanAOT.ToCpp
                 return;
             }
             _bodyWriter.AddLine($"{VmFunctionNames.GOTO_CHECK_NULL_REFERENCE}({GetEvalVariableName(objVar)}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+        }
+
+        private string GetUnlikelyExpr(string expr)
+        {
+            return $"{VmFunctionNames.Unlikely}({expr})";
         }
 
         /// <summary>
@@ -2406,7 +2411,7 @@ namespace LeanAOT.ToCpp
             var dstObj = PushStack(_corlibTypes.Object);
             string srcVarName = GetEvalVariableName(srcObj);
             RuntimeResolvedVariable targetTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(targetType);
-            _bodyWriter.AddLine($"if ({srcVarName} != nullptr && {VmFunctionNames.CastClass}({srcVarName}, {targetTypeVar.GetFullReferenceVariableName()}) == nullptr)");
+            _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{srcVarName} != nullptr && {VmFunctionNames.CastClass}({srcVarName}, {targetTypeVar.GetFullReferenceVariableName()}) == nullptr")})");
             _bodyWriter.AddLine("{");
             _bodyWriter.IncreaseIndent();
             EmitThrowRuntimeError(inst, "InvalidCast");
@@ -2708,7 +2713,7 @@ namespace LeanAOT.ToCpp
             }
             string arrVarExpr = GetVariableMayCast(objVar, ConstStrings.ArrayPtrTypeName);
             string indexVarExpr = GetVariableMayCast(indexVar, "int32_t");
-            _bodyWriter.AddLine($"if ({VmFunctionNames.IsArrayIndexOutOfRange}({arrVarExpr}, {indexVarExpr}))");
+            _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{VmFunctionNames.IsArrayIndexOutOfRange}({arrVarExpr}, {indexVarExpr})")})");
             _bodyWriter.AddLine("{");
             _bodyWriter.IncreaseIndent();
             EmitThrowRuntimeError(inst, "IndexOutOfRange");
@@ -2752,7 +2757,7 @@ namespace LeanAOT.ToCpp
                 if (evalDataType == EvalDataType.Ref)
                 {
                     RuntimeResolvedVariable elementKlassVar = _runtimeResolvedMetadatas.GetTypeVariable(elementType);
-                    _bodyWriter.AddLine($"if (!{VmFunctionNames.IsPointerElementCompatibleWith}({VmFunctionNames.GetArrayElementKlass}({GetEvalVariableExprWithCast(arrayVar, ConstStrings.ArrayPtrTypeName)}), {elementKlassVar.GetFullReferenceVariableName()}))");
+                    _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"!{VmFunctionNames.IsPointerElementCompatibleWith}({VmFunctionNames.GetArrayElementKlass}({GetEvalVariableExprWithCast(arrayVar, ConstStrings.ArrayPtrTypeName)}), {elementKlassVar.GetFullReferenceVariableName()})")})");
                     _bodyWriter.AddLine("{");
                     _bodyWriter.IncreaseIndent();
                     EmitThrowRuntimeError(inst, "ArrayTypeMismatch");
@@ -2819,7 +2824,7 @@ namespace LeanAOT.ToCpp
             EmitCheckArrayIndexOutOfRange(inst, arrayVar, indexVar);
 
             string valueVarName = GetEvalVariableName(valueVar);
-            _bodyWriter.AddLine($"if ({valueVarName} != nullptr && !{VmFunctionNames.IsAssignableFrom}({valueVarName}->klass, {VmFunctionNames.GetArrayElementKlass}({GetEvalVariableExprWithCast(arrayVar, ConstStrings.ArrayPtrTypeName)})))");
+            _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{valueVarName} != nullptr && !{VmFunctionNames.IsAssignableFrom}({valueVarName}->klass, {VmFunctionNames.GetArrayElementKlass}({GetEvalVariableExprWithCast(arrayVar, ConstStrings.ArrayPtrTypeName)}))")})");
             _bodyWriter.AddLine("{");
             _bodyWriter.IncreaseIndent();
             EmitThrowRuntimeError(inst, "ArrayTypeMismatch");
@@ -2869,7 +2874,7 @@ namespace LeanAOT.ToCpp
             {
                 string valueVarName = GetEvalVariableName(valueVar);
                 RuntimeResolvedVariable elementKlassVar = _runtimeResolvedMetadatas.GetTypeVariable(elementType);
-                _bodyWriter.AddLine($"if ({valueVarName} != nullptr && !{VmFunctionNames.IsAssignableFrom}({valueVarName}->klass, {VmFunctionNames.GetArrayElementKlass}({GetEvalVariableExprWithCast(arrayVar, ConstStrings.ArrayPtrTypeName)})))");
+                _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{valueVarName} != nullptr && !{VmFunctionNames.IsAssignableFrom}({valueVarName}->klass, {VmFunctionNames.GetArrayElementKlass}({GetEvalVariableExprWithCast(arrayVar, ConstStrings.ArrayPtrTypeName)}))")})");
                 _bodyWriter.AddLine("{");
                 _bodyWriter.IncreaseIndent();
                 EmitThrowRuntimeError(inst, "ArrayTypeMismatch");
@@ -2895,7 +2900,7 @@ namespace LeanAOT.ToCpp
             {
                 throw new Exception($"ckfinite can only be applied to float or double. Method: {_method.FullName}, Value Type: {valueVar.type}.");
             }
-            _bodyWriter.AddLine($"if (!{VmFunctionNames.IsFinite}({GetEvalVariableName(valueVar)}))");
+            _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"!{VmFunctionNames.IsFinite}({GetEvalVariableName(valueVar)})")})");
             _bodyWriter.AddLine("{");
             _bodyWriter.IncreaseIndent();
             EmitThrowRuntimeError(inst, "Arithmetic");
@@ -2985,11 +2990,11 @@ namespace LeanAOT.ToCpp
             RuntimeResolvedVariable typeVar = _runtimeResolvedMetadatas.GetTypeVariable(inflatedType);
             if (MetaUtil.IsValueType(inflatedType.ToTypeSig()))
             {
-                _bodyWriter.AddLine($"if ({typeRefVarName}.klass != {typeVar.GetFullReferenceVariableName()})");
+                _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{typeRefVarName}.klass != {typeVar.GetFullReferenceVariableName()}")})");
             }
             else
             {
-                _bodyWriter.AddLine($"if ( !{VmFunctionNames.IsAssignableFrom}({typeRefVarName}.klass, {typeVar.GetFullReferenceVariableName()}))");
+                _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"!{VmFunctionNames.IsAssignableFrom}({typeRefVarName}.klass, {typeVar.GetFullReferenceVariableName()})")})");
             }
             _bodyWriter.AddLine("{");
             _bodyWriter.IncreaseIndent();
