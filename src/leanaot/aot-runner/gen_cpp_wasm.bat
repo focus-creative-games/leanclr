@@ -19,6 +19,8 @@ if errorlevel 1 (
 echo [3/3] Running LeanAOT...
 "..\LeanAOT\bin\Debug\net8.0\LeanAOT.exe" ^
   -o cpp ^
+  --emit-null-checks ^
+  --enable-array-bounds-check ^
   -d ..\..\libraries\dotnetframework4.x-linux ^
   -d ..\..\leanaot\Test\bin\Debug ^
   --leanaot-aot-rule-file "%~dp0aot-rules-mscorlib.xml" ^
