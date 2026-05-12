@@ -2374,6 +2374,10 @@ bool Class::is_assignable_from_class(const metadata::RtClass* from_class, const 
     {
         if (is_value_type(to_class))
         {
+            if (is_nullable_type(to_class))
+            {
+                return is_assignable_from(from_class, to_class->element_class);
+            }
             return to_class->cast_class == from_class->cast_class;
         }
         else
