@@ -1967,6 +1967,11 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine($"{VmFunctionNames.AssumeNotNull}({ptrExpr});");
         }
 
+        private void EmitAssumeCondition(string condition)
+        {
+            _bodyWriter.AddLine($"{VmFunctionNames.Assume}({condition});");
+        }
+
         /// <summary>
         /// Whether IL <c>box</c> on this value type can yield a null reference, or the type might be System.Nullable at runtime.
         /// </summary>
@@ -2739,12 +2744,14 @@ namespace LeanAOT.ToCpp
             }
             string arrVarExpr = GetVariableMayCast(objVar, ConstStrings.ArrayPtrTypeName);
             string indexVarExpr = GetVariableMayCast(indexVar, "int32_t");
-            _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{VmFunctionNames.IsArrayIndexOutOfRange}({arrVarExpr}, {indexVarExpr})")})");
+            EmitAssumeCondition($"({arrVarExpr})->length >= 0");
+            _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"(uint32_t)({indexVarExpr}) >= (uint32_t)({arrVarExpr})->length")})");
             _bodyWriter.AddLine("{");
             _bodyWriter.IncreaseIndent();
             EmitThrowRuntimeError(inst, "IndexOutOfRange");
             _bodyWriter.DecreaseIndent();
             _bodyWriter.AddLine("}");
+            EmitAssumeCondition($"({indexVarExpr}) >= 0");
         }
 
         private void EmitNewarr(Instruction inst, ITypeDefOrRef operand)
@@ -2753,8 +2760,12 @@ namespace LeanAOT.ToCpp
             var retVar = PushStack(new SZArraySig(operand.ToTypeSig()));
             TypeDetail typeDetail = _metadataService.GetTypeDetail(operand);
             RuntimeResolvedVariable elementKlassVar = _runtimeResolvedMetadatas.GetTypeVariable(operand, typeDetail);
-            string indexVarExpr = GetVariableMayCast(indexVar, "int32_t");
-            EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewSZArrayFromEleKlass}({elementKlassVar.GetFullReferenceVariableName()}, {indexVarExpr})");
+            string sizeVarExpr = GetVariableMayCast(indexVar, "int32_t");
+            EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewSZArrayFromEleKlass}({elementKlassVar.GetFullReferenceVariableName()}, {sizeVarExpr})");
+            EmitAssumeCondition($"({sizeVarExpr}) >= 0");
+            string arrVarExpr = GetVariableMayCast(retVar, ConstStrings.ArrayPtrTypeName);
+            EmitAssumeCondition($"({sizeVarExpr}) == ({arrVarExpr})->length");
+            EmitAssumeCondition($"({arrVarExpr})->length >= 0");
             EmitAssumeNotNull(retVar);
         }
 
@@ -2763,7 +2774,9 @@ namespace LeanAOT.ToCpp
             var arrayVar = Pop();
             var retVar = PushStack(EvalDataType.Int32);
             EmitCheckNotNull(inst, arrayVar);
-            _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = {VmFunctionNames.GetArrayLength}({GetVariableMayCast(arrayVar, ConstStrings.ArrayPtrTypeName)});");
+            string arrayVarExpr = GetVariableMayCast(arrayVar, ConstStrings.ArrayPtrTypeName);
+            EmitAssumeCondition($"({arrayVarExpr})->length >= 0");
+            _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = ({arrayVarExpr})->length;");
         }
 
         private void EmitLdelema(Instruction inst, ITypeDefOrRef elementType, uint token)

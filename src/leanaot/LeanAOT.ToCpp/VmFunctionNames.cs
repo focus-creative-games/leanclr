@@ -40,7 +40,6 @@ namespace LeanAOT.ToCpp
         public const string NewMdArrayFromArrayKlass = "leanclr::codegen::new_mdarray_from_array_class";
         public const string GetArrayLength = "leanclr::codegen::get_array_length";
         public const string GetArrayElementKlass = "leanclr::codegen::get_array_element_class";
-        public const string IsArrayIndexOutOfRange = "leanclr::codegen::is_array_index_out_of_range";
         public const string IsPointerElementCompatibleWith = "leanclr::codegen::is_pointer_element_compatible_with";
         public const string GetArrayElementAddress = "leanclr::codegen::get_array_element_address";
         public const string GetArrayElementDataAt = "leanclr::codegen::get_array_element_data_at";
