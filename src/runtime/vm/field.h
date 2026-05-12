@@ -56,7 +56,7 @@ class Field
     static RtResult<const uint8_t*> get_field_rva_data(const metadata::RtFieldInfo* field);
 
     // Get field const blob (for literal fields)
-    static RtResult<utils::BinaryReader> get_field_const_reader(const metadata::RtFieldInfo* field);
+    static RtResult<metadata::TypedConstRawData> get_field_const_reader(const metadata::RtFieldInfo* field);
     static RtResult<const void*> get_field_const_data(const metadata::RtFieldInfo* field);
 
     // Get field const object (for literal object fields)

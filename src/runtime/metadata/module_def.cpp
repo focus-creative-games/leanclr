@@ -2101,14 +2101,14 @@ RtResult<const uint8_t*> RtModuleDef::get_field_rva_data(EncodedTokenId fieldTok
     RET_OK(_cliImage.get_image_data() + offset);
 }
 
-RtResult<utils::BinaryReader> RtModuleDef::get_const_or_default_value(EncodedTokenId fieldOrParamToken) const
+RtResult<TypedConstRawData> RtModuleDef::get_const_or_default_value(EncodedTokenId fieldOrParamToken) const
 {
     RtToken token = RtToken::decode(fieldOrParamToken);
     uint32_t encodedIndex = RtMetadata::encode_has_constant_coded_index(token.table_type, token.rid);
     auto optConstRid = _cliImage.find_row_of_owner(TableType::Constant, 2, encodedIndex);
     if (!optConstRid)
     {
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        return TypedConstRawData{RtElementType::Class, nullptr, 0};
     }
     auto optRow = _cliImage.read_constant(optConstRid.value());
     if (!optRow)
@@ -2116,7 +2116,11 @@ RtResult<utils::BinaryReader> RtModuleDef::get_const_or_default_value(EncodedTok
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RowConstant& row = optRow.value();
-    return get_decoded_blob_reader(row.value);
+    auto ret_reader = get_decoded_blob_reader(row.value);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL2(utils::BinaryReader, reader, ret_reader);
+    RtElementType eleType = (RtElementType)row.type_;
+    TypedConstRawData raw_data = {eleType, reader.get_current_ptr(), reader.length()};
+    return raw_data;
 }
 
 RtResult<EncodedTokenId> RtModuleDef::get_parameter_token(EncodedTokenId methodDefToken, int32_t paramIndex)

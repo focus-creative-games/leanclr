@@ -100,8 +100,6 @@ struct RtILEHSectionHeaderFat
     RtILEHFat clauses[1]; // trailing data
 };
 
-class RtModuleDef;
-
 class RtModuleDef
 {
   public:
@@ -304,7 +302,7 @@ class RtModuleDef
     std::optional<ClassLayoutData> get_class_layout_data(EncodedTokenId typeDefToken) const;
 
     RtResult<const uint8_t*> get_field_rva_data(EncodedTokenId fieldToken) const;
-    RtResult<utils::BinaryReader> get_const_or_default_value(EncodedTokenId fieldOrParamToken) const;
+    RtResult<TypedConstRawData> get_const_or_default_value(EncodedTokenId fieldOrParamToken) const;
 
     // Export types
     RtResult<RtClass*> get_global_type_def();

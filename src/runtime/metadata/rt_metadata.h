@@ -663,6 +663,13 @@ constexpr uint16_t RT_MAX_INTERFACE_COUNT = 0xFFFF;
 constexpr uint32_t RT_MAX_NESTED_CLASS_COUNT = 0xFFFF;
 constexpr uint8_t RT_MAX_ARRAY_RANK = 0x32;
 
+struct TypedConstRawData
+{
+    RtElementType type;
+    const uint8_t* data;
+    size_t size;
+};
+
 // Forward declarations for assembly
 struct RtAssembly;
 class RtModuleDef;

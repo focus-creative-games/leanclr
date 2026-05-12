@@ -149,7 +149,7 @@ RtResult<const uint8_t*> Field::get_field_rva_data(const metadata::RtFieldInfo* 
 }
 
 // Get field const data (placeholder)
-RtResult<utils::BinaryReader> Field::get_field_const_reader(const metadata::RtFieldInfo* field)
+RtResult<metadata::TypedConstRawData> Field::get_field_const_reader(const metadata::RtFieldInfo* field)
 {
     if (is_static_literal(field))
     {
@@ -160,9 +160,15 @@ RtResult<utils::BinaryReader> Field::get_field_const_reader(const metadata::RtFi
 
 RtResult<const void*> Field::get_field_const_data(const metadata::RtFieldInfo* field)
 {
-    auto retReader = get_field_const_reader(field);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL2(utils::BinaryReader, reader, retReader);
-    RET_OK(reader.data());
+    auto ret_const_data = get_field_const_reader(field);
+    if (ret_const_data.is_ok())
+    {
+        return ret_const_data.unwrap().data;
+    }
+    else
+    {
+        return ret_const_data.unwrap_err();
+    }
 }
 
 // Get field const object
