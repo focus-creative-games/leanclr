@@ -72,7 +72,13 @@ namespace LeanAOT.ToCpp
         public void EndBlock()
         {
             DecreaseIndent();
-            AddLine("}");
+                AddLine("}");
+        }
+
+        public void EndBlockWithVariableDeclaration(string variableName)
+        {
+            DecreaseIndent();
+            AddLine($"}} {variableName};");
         }
 
         public void AddLine(string line)
