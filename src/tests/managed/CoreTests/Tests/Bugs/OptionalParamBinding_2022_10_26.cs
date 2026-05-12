@@ -284,12 +284,10 @@ namespace Tests.Bugs
             {
                 Assert.Fail($"FooNullableEnumVal default value: expected boxed Color or int: type:{dv?.GetType()} value:{dv}");
             }
-            Debugger.Log(0, "DefaultValue", "FooNullableEnumVal default value: " + dv + "\n");
 
             Color? r = (Color?)GetType().InvokeMember("FooNullableEnumVal", BindingFlags.Public | BindingFlags.NonPublic |
                 BindingFlags.Instance | BindingFlags.Static | BindingFlags.InvokeMethod | BindingFlags.OptionalParamBinding, null, null,
                 null);
-            Debugger.Log(0, "DefaultValue", "FooNullableEnumVal Invoke return value: " + r + "\n");
             Assert.Equal<Color?>((Color?)Color.Blue, r);
         }
 
