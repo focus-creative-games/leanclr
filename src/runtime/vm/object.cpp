@@ -225,8 +225,7 @@ RtResultVoid Object::unbox_any(const RtObject* obj, const metadata::RtClass* kla
     }
 
     // Get the underlying value type
-    const metadata::RtClass* obj_ele_klass = obj->klass->element_class;
-    if (obj_ele_klass->element_class != unbox_cast_klass)
+    if (obj->klass->cast_class != unbox_cast_klass)
     {
         RET_ERR(RtErr::InvalidCast);
     }
