@@ -26,13 +26,13 @@
         <Aliases>global</Aliases>
     </Reference> -->
     <Reference Include="mscorlib">
-      <HintPath>$(ProjectDir)\..\..\..\..\..\netframework\2022.3.67f2-unityaot-linux\mscorlib.dll</HintPath>
+      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\mscorlib.dll</HintPath>
     </Reference>
     <Reference Include="System.Core">
-      <HintPath>$(ProjectDir)\..\..\..\..\..\netframework\2022.3.67f2-unityaot-linux\System.Core.dll</HintPath>
+      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\System.Core.dll</HintPath>
     </Reference>
     <Reference Include="System">
-      <HintPath>$(ProjectDir)\..\..\..\..\..\netframework\2022.3.67f2-unityaot-linux\System.dll</HintPath>
+      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\System.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
