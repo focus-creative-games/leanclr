@@ -700,6 +700,11 @@
     "header": "icalls/system_globalization_cultureinfo.h"
   },
   {
+    "name": "System.Globalization.CultureInfo::InitializeUserPreferredCultureInfoInAppX(System.Globalization.CultureInfo/OnCultureInfoChangedDelegate)",
+    "func": "SystemGlobalizationCultureInfo::initialize_user_preferred_culture_info_in_app_x",
+    "header": "icalls/system_globalization_cultureinfo.h"
+  },
+  {
     "name": "System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)",
     "func": "SystemGlobalizationCultureInfo::internal_get_cultures",
     "header": "icalls/system_globalization_cultureinfo.h"

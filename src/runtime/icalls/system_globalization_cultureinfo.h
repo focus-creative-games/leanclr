@@ -18,6 +18,7 @@ class SystemGlobalizationCultureInfo
     static RtResult<vm::RtString*> get_current_locale_name() noexcept;
     static RtResult<vm::RtArray*> internal_get_cultures(bool neutral, bool specific, bool installed) noexcept;
     static RtResultVoid set_user_preferred_culture_info_in_app_x(vm::RtCultureInfo* _this, vm::RtString* name) noexcept;
+    static RtResultVoid initialize_user_preferred_culture_info_in_app_x(vm::RtMulticastDelegate* onCultureInfoChangedInAppX) noexcept;
 };
 
 } // namespace icalls

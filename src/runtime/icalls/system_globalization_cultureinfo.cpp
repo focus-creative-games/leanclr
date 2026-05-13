@@ -64,6 +64,12 @@ RtResultVoid SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_
     RET_VOID_OK();
 }
 
+RtResultVoid SystemGlobalizationCultureInfo::initialize_user_preferred_culture_info_in_app_x(
+    vm::RtMulticastDelegate* /*onCultureInfoChangedInAppX*/) noexcept
+{
+    WARN_NOT_IMPLEMENTED_ERROR_THEN_RETURN_VOID("System.Globalization.CultureInfo::initialize_user_preferred_culture_info_in_app_x");
+}
+
 /// @icall: System.Globalization.CultureInfo::SetUserPreferredCultureInfoInAppX(System.String)
 static RtResultVoid set_user_preferred_culture_info_in_app_x_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
                                                                      const interp::RtStackObject* params, interp::RtStackObject* /*ret*/) noexcept
@@ -71,6 +77,14 @@ static RtResultVoid set_user_preferred_culture_info_in_app_x_invoker(metadata::R
     auto _this = EvalStackOp::get_param<vm::RtCultureInfo*>(params, 0);
     auto name = EvalStackOp::get_param<vm::RtString*>(params, 1);
     return SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_app_x(_this, name);
+}
+
+/// @icall: System.Globalization.CultureInfo::InitializeUserPreferredCultureInfoInAppX(System.Globalization.CultureInfo/OnCultureInfoChangedDelegate)
+static RtResultVoid initialize_user_preferred_culture_info_in_app_x_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                                                            const interp::RtStackObject* params, interp::RtStackObject* /*ret*/) noexcept
+{
+    auto on_changed = EvalStackOp::get_param<vm::RtMulticastDelegate*>(params, 0);
+    return SystemGlobalizationCultureInfo::initialize_user_preferred_culture_info_in_app_x(on_changed);
 }
 
 /// @icall: System.Globalization.CultureInfo::internal_get_cultures(System.Boolean,System.Boolean,System.Boolean)
@@ -96,6 +110,9 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultur
      (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::internal_get_cultures, internal_get_cultures_invoker},
     {"System.Globalization.CultureInfo::SetUserPreferredCultureInfoInAppX(System.String)",
      (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_app_x, set_user_preferred_culture_info_in_app_x_invoker},
+    {"System.Globalization.CultureInfo::InitializeUserPreferredCultureInfoInAppX(System.Globalization.CultureInfo/OnCultureInfoChangedDelegate)",
+     (vm::InternalCallFunction)&SystemGlobalizationCultureInfo::initialize_user_preferred_culture_info_in_app_x,
+     initialize_user_preferred_culture_info_in_app_x_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries() noexcept
