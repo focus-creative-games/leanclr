@@ -65,7 +65,6 @@ class Marshal
 
     static RtResult<int32_t> sizeof_type(vm::RtReflectionType* ref_type);
     static RtResult<intptr_t> offset_of(vm::RtReflectionType* ref_type, const char* field_name);
-    static RtResult<void*> unsafe_addr_of_pinned_array_element(vm::RtArray* arr, int32_t index);
 
     static RtResult<RtDelegate*> marshal_function_pointer_to_delegate(void* ptr, metadata::RtClass* delegate_class);
     static RtResult<metadata::RtNativeMethodPointer> get_function_pointer_for_delegate(RtDelegate* delegate);

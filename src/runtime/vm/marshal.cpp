@@ -140,11 +140,6 @@ RtResult<intptr_t> Marshal::offset_of(vm::RtReflectionType* ref_type, const char
     RET_OK(static_cast<intptr_t>(offset));
 }
 
-RtResult<void*> Marshal::unsafe_addr_of_pinned_array_element(vm::RtArray* arr, int32_t index)
-{
-    RETURN_NOT_IMPLEMENTED_ERROR();
-}
-
 RtResult<RtDelegate*> Marshal::marshal_function_pointer_to_delegate(void* ptr, metadata::RtClass* delegate_class)
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
