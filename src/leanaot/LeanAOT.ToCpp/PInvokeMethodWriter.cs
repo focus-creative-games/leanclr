@@ -1,6 +1,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using dnlib.DotNet;
 using LeanAOT.Core;
@@ -140,6 +141,27 @@ namespace LeanAOT.ToCpp
         private NativeParam CreateNativeParam(ParamDetail param)
         {
             TypeSig type = param.Type.RemovePinnedAndModifiers();
+            if (type.ElementType == ElementType.Class)
+            {
+                TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
+                if (MetaUtil.IsInheritFrom(typeDef, "System.Delegate"))
+                {
+                    return new NativeParam
+                    {
+                        TypeName = "void*",
+                        Expr = $"{ConstStrings.CodegenNamespace}::pinvoke_marshal_delegate_to_void_ptr(reinterpret_cast<leanclr::vm::RtDelegate*>({param.Name}))",
+                    };
+                }
+                if (MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle")
+                    || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.CriticalHandle"))
+                {
+                    return new NativeParam
+                    {
+                        TypeName = "void*",
+                        Expr = $"{ConstStrings.CodegenNamespace}::pinvoke_marshal_safe_handle_to_void_ptr(reinterpret_cast<leanclr::vm::RtObject*>({param.Name}))",
+                    };
+                }
+            }
             if (IsStringType(type))
             {
                 string converterName = $"__temp_utf8_converter_{param.Name}";
@@ -195,12 +217,14 @@ namespace LeanAOT.ToCpp
                 return $"{GetNativeTypeName(((PtrSig)type).Next, false)}*";
             case ElementType.ByRef:
                 return $"{GetNativeTypeName(((ByRefSig)type).Next, false)}*";
+            case ElementType.FnPtr:
+                return "void*";
             case ElementType.String:
                 return isReturnType ? "const char*" : "const char*";
             case ElementType.ValueType:
             case ElementType.GenericInst:
             {
-                TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
+                TypeDef typeDef = ResolveTypeDefForStructTypeSig(type);
                 if (typeDef.IsEnum)
                 {
                     return GetNativeTypeName(typeDef.GetEnumUnderlyingType(), isReturnType);
@@ -209,14 +233,29 @@ namespace LeanAOT.ToCpp
                 {
                     return typeDef.FullName == "System.UIntPtr" ? "uintptr_t" : "intptr_t";
                 }
+                EnsureBlittableStructForPInvoke(type, isReturnType);
                 return MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(type, TypeNameRelaxLevel.Exactly);
             }
             case ElementType.Class:
             {
                 TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
-                // if type is sub class of SafeHandle, return void*
-                if (MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle"))
+                if (MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle")
+                    || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.CriticalHandle"))
                 {
+                    if (isReturnType)
+                    {
+                        throw new NotSupportedException(
+                            $"PInvoke does not marshal return type `{type.FullName}` from an unmanaged handle; use IntPtr or wrap the value in managed code.");
+                    }
+                    return "void*";
+                }
+                if (MetaUtil.IsInheritFrom(typeDef, "System.Delegate"))
+                {
+                    if (isReturnType)
+                    {
+                        throw new NotSupportedException(
+                            $"PInvoke does not marshal return type `{type.FullName}` from a native function pointer; use IntPtr, void*, or Marshal.GetDelegateForFunctionPointer in managed code.");
+                    }
                     return "void*";
                 }
                 throw new NotSupportedException($"PInvoke native ABI does not support parameter or return type {type.FullName}.");
@@ -264,6 +303,157 @@ namespace LeanAOT.ToCpp
             return asmName.Equals("mscorlib", StringComparison.OrdinalIgnoreCase)
                 || asmName.Equals("System", StringComparison.OrdinalIgnoreCase)
                 || asmName.Equals("System.Core", StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static TypeDef ResolveTypeDefForStructTypeSig(TypeSig type)
+        {
+            type = type.RemovePinnedAndModifiers();
+            if (type.ElementType == ElementType.GenericInst)
+            {
+                return ((GenericInstSig)type).GenericType.ToTypeDefOrRef().ResolveTypeDefThrow();
+            }
+            return type.ToTypeDefOrRef().ResolveTypeDefThrow();
+        }
+
+        private static void EnsureBlittableStructForPInvoke(TypeSig structType, bool isReturnType)
+        {
+            structType = structType.RemovePinnedAndModifiers();
+            TypeDef typeDef = ResolveTypeDefForStructTypeSig(structType);
+            if (typeDef.IsEnum)
+            {
+                return;
+            }
+            int? layoutKind = TryGetStructLayoutKindFromStructLayoutAttribute(typeDef);
+            if (layoutKind == (int)LayoutKind.Auto)
+            {
+                string r = isReturnType ? "return" : "parameter";
+                throw new NotSupportedException(
+                    $"PInvoke {r}: struct `{typeDef.FullName}` uses LayoutKind.Auto and cannot be passed by value with a stable unmanaged layout.");
+            }
+            GenericArgumentContext ctx = null;
+            if (structType.ElementType == ElementType.GenericInst)
+            {
+                var g = (GenericInstSig)structType;
+                ctx = new GenericArgumentContext(g.GenericArguments, null);
+            }
+            foreach (FieldDef field in typeDef.Fields)
+            {
+                if (field.IsStatic)
+                {
+                    continue;
+                }
+                TypeSig ft = MetaUtil.Inflate(field.FieldType, ctx);
+                if (!IsPInvokeBlittableFieldType(ft))
+                {
+                    string r = isReturnType ? "return" : "parameter";
+                    throw new NotSupportedException(
+                        $"PInvoke {r}: struct `{typeDef.FullName}` has a non-blittable instance field `{field.Name}` ({ft}).");
+                }
+            }
+        }
+
+        private static int? TryGetStructLayoutKindFromStructLayoutAttribute(TypeDef typeDef)
+        {
+            foreach (CustomAttribute ca in typeDef.CustomAttributes)
+            {
+                if (ca.AttributeType.FullName != "System.Runtime.InteropServices.StructLayoutAttribute")
+                {
+                    continue;
+                }
+                if (ca.ConstructorArguments.Count == 0)
+                {
+                    return null;
+                }
+                object v = ca.ConstructorArguments[0].Value;
+                if (v is int i)
+                {
+                    return i;
+                }
+                if (v is byte b)
+                {
+                    return b;
+                }
+                if (v is sbyte sb)
+                {
+                    return sb;
+                }
+                if (v is short s)
+                {
+                    return s;
+                }
+                if (v is ushort us)
+                {
+                    return us;
+                }
+                if (v is uint ui)
+                {
+                    return (int)ui;
+                }
+                return null;
+            }
+            return null;
+        }
+
+        private static bool IsPInvokeBlittableFieldType(TypeSig t)
+        {
+            t = t.RemovePinnedAndModifiers();
+            switch (t.ElementType)
+            {
+            case ElementType.Void:
+                return false;
+            case ElementType.Boolean:
+            case ElementType.Char:
+            case ElementType.I1:
+            case ElementType.U1:
+            case ElementType.I2:
+            case ElementType.U2:
+            case ElementType.I4:
+            case ElementType.U4:
+            case ElementType.I8:
+            case ElementType.U8:
+            case ElementType.R4:
+            case ElementType.R8:
+            case ElementType.I:
+            case ElementType.U:
+            case ElementType.Ptr:
+            case ElementType.FnPtr:
+                return true;
+            case ElementType.TypedByRef:
+            case ElementType.String:
+            case ElementType.Object:
+            case ElementType.Class:
+            case ElementType.Array:
+            case ElementType.SZArray:
+            case ElementType.ByRef:
+                return false;
+            case ElementType.ValueType:
+            {
+                TypeDef td = t.ToTypeDefOrRef().ResolveTypeDefThrow();
+                if (td.IsEnum)
+                {
+                    return IsPInvokeBlittableFieldType(td.GetEnumUnderlyingType());
+                }
+                EnsureBlittableStructForPInvoke(t, false);
+                return true;
+            }
+            case ElementType.GenericInst:
+            {
+                var gi = (GenericInstSig)t;
+                TypeDef td = gi.GenericType.ToTypeDefOrRef().ResolveTypeDefThrow();
+                if (td.IsEnum)
+                {
+                    return IsPInvokeBlittableFieldType(td.GetEnumUnderlyingType());
+                }
+                if (!td.IsValueType)
+                {
+                    return false;
+                }
+                EnsureBlittableStructForPInvoke(t, false);
+                return true;
+            }
+            default:
+                return false;
+            }
         }
 
         private static bool IsStringType(TypeSig type)
