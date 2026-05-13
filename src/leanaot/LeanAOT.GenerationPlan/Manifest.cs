@@ -39,6 +39,9 @@ namespace LeanAOT.GenerationPlan
                 var mod = args.assemblyCache.LoadModule(assName);
                 var classPlans = new List<ClassPlan>();
                 var methodPlans = new List<MethodDefPlan>();
+                var monoPInvokeCallbackPlans = new List<MethodDefPlan>();
+                var methodsInAotPlan = new HashSet<IMethod>(MethodEqualityComparer.CompareDeclaringTypes);
+                var monoMethodDefs = new HashSet<IMethod>(MethodEqualityComparer.CompareDeclaringTypes);
                 foreach (TypeDef type in mod.GetTypes())
                 {
                     var classPlan = new ClassPlan()
@@ -62,6 +65,20 @@ namespace LeanAOT.GenerationPlan
                             s_logger.Warn($"Skip method with vararg calling convention: {method.FullName} token: {method.MDToken}");
                             continue;
                         }
+
+                        void RegisterMonoPInvokeCallbackIfPresent()
+                        {
+                            if (!MetaUtil.HasMonoPInvokeCallbackAttribute(method))
+                            {
+                                return;
+                            }
+                            if (monoMethodDefs.Add(method))
+                            {
+                                monoPInvokeCallbackPlans.Add(new MethodDefPlan { MethodDef = method });
+                            }
+                            TryAddMethodPlan(methodPlans, methodsInAotPlan, method);
+                        }
+
                         string typeName = method.DeclaringType.Name;
                         CustomAttribute ca = method.CustomAttributes.FirstOrDefault(ca => ca.TypeFullName == "AotMethodAttribute" );
                         if (ca != null)
@@ -69,15 +86,18 @@ namespace LeanAOT.GenerationPlan
                             bool isAotMethod = (bool)ca.ConstructorArguments[0].Value;
                             if (!isAotMethod)
                             {
+                                RegisterMonoPInvokeCallbackIfPresent();
                                 continue;
                             }
-                            AddMethodPlan(methodPlans, method);
+                            TryAddMethodPlan(methodPlans, methodsInAotPlan, method);
+                            RegisterMonoPInvokeCallbackIfPresent();
                             continue;
                         }
                         if (method.IsPinvokeImpl || method.IsInternalCall)
                         {
                             // aot or intrinsic methods must be aot
-                            AddMethodPlan(methodPlans, method);
+                            TryAddMethodPlan(methodPlans, methodsInAotPlan, method);
+                            RegisterMonoPInvokeCallbackIfPresent();
                             continue;
                         }
 
@@ -85,20 +105,26 @@ namespace LeanAOT.GenerationPlan
                         if (args.AotRulesEvaluator != null && !args.AotRulesEvaluator.ShouldIncludeByRules(assName, method))
                         {
                             s_logger.Debug($"[Manifest] Skip method (AOT rules): {method.FullName} token: {method.MDToken}");
+                            RegisterMonoPInvokeCallbackIfPresent();
                             continue;
                         }
 
-                        AddMethodPlan(methodPlans, method);
+                        TryAddMethodPlan(methodPlans, methodsInAotPlan, method);
+                        RegisterMonoPInvokeCallbackIfPresent();
                     }
                 }
-                var assPlan = new AssemblyPlan(mod, assName, classPlans, methodPlans);
+                var assPlan = new AssemblyPlan(mod, assName, classPlans, methodPlans, monoPInvokeCallbackPlans);
 
                 _assemblyPlans[assName] = assPlan;
             }
         }
 
-        private static void AddMethodPlan(List<MethodDefPlan> methodPlans, MethodDef method)
+        private static void TryAddMethodPlan(List<MethodDefPlan> methodPlans, HashSet<IMethod> methodsInAotPlan, MethodDef method)
         {
+            if (!methodsInAotPlan.Add(method))
+            {
+                return;
+            }
             var methodPlan = new MethodDefPlan()
             {
                 MethodDef = method,
@@ -113,7 +139,7 @@ namespace LeanAOT.GenerationPlan
             if (methodDef != null)
             {
                 return AssemblyPlans.TryGetValue(methodDef.Module.Assembly.Name, out var assPlan) &&
-                    assPlan.ContainsMethod(method);
+                    assPlan.ContaisAOTMethod(method);
             }
             return false;
         }

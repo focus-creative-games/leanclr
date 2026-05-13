@@ -11,6 +11,7 @@ namespace LeanAOT.ToCpp
         public const string RtErrTypeName = "leanclr::RtErr";
 
         public const string MethodDefDataTypeName = "leanclr::metadata::RtAotMethodDefData";
+        public const string MonoPInvokeCallbackDataTypeName = "leanclr::metadata::RtAotMethodMonoPInvokeCallbackData";
         public const string ModuleDataTypeName = "leanclr::metadata::RtAotModuleData";
         public const string ModulesDataDataTypeName = "leanclr::metadata::RtAotModulesData";
 

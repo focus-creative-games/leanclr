@@ -45,6 +45,8 @@ namespace LeanAOT.ToCpp
             AddIncludes();
             AddGlobalVariableDeclaration();
             AddModuleMethodDefDatasDeclaration();
+            MonoPInvokeCallbackWriter.GenerateAll(_plan, _forwardDeclaration, _implWriter);
+            AddModuleMonoPInvokeCallbackDatasDeclaration();
             if (_enableTypesLayoutValidation)
             {
                 AddTypesLayoutValidation();
@@ -95,6 +97,30 @@ namespace LeanAOT.ToCpp
             _implWriter.AddLine("}");
         }
 
+        private string GetMonoPInvokeCallbackDatasVariableName()
+        {
+            return $"s_mono_pinvoke_cb_datas_{ModuleGenerationUtil.GetStandardizedModuleNameWithoutExt(_mod)}";
+        }
+
+        private void AddModuleMonoPInvokeCallbackDatasDeclaration()
+        {
+            _implWriter.AddLine();
+            if (_plan.MonoPInvokeCallbackMethodPlans.Count == 0)
+            {
+                return;
+            }
+            _implWriter.AddLine($"static {ConstStrings.MonoPInvokeCallbackDataTypeName} {GetMonoPInvokeCallbackDatasVariableName()}[] = {{");
+            _implWriter.IncreaseIndent();
+            foreach (MethodDefPlan mp in _plan.MonoPInvokeCallbackMethodPlans)
+            {
+                MethodDef method = mp.MethodDef;
+                string sym = MonoPInvokeCallbackWriter.GetNativeThunkSymbolName(_mod, method);
+                _implWriter.AddLine($"{{ 0x{method.MDToken.ToInt32():X8}, reinterpret_cast<leanclr::metadata::RtNativeMethodPointer>(&{sym}) }},");
+            }
+            _implWriter.DecreaseIndent();
+            _implWriter.AddLine("};");
+        }
+
         private void AddModuleMethodDefDatasDeclaration()
         {
             _implWriter.AddLine();
@@ -131,6 +157,16 @@ namespace LeanAOT.ToCpp
             _implWriter.AddLine($"{ModuleGenerationUtil.GetModuleDeferredInitializeMethodName(_mod)},");
             _implWriter.AddLine($"{GetMethodDefDatasVariableName()},");
             _implWriter.AddLine($"{_plan.MethodPlans.Count},");
+            if (_plan.MonoPInvokeCallbackMethodPlans.Count > 0)
+            {
+                _implWriter.AddLine($"{GetMonoPInvokeCallbackDatasVariableName()},");
+                _implWriter.AddLine($"{_plan.MonoPInvokeCallbackMethodPlans.Count},");
+            }
+            else
+            {
+                _implWriter.AddLine("nullptr,");
+                _implWriter.AddLine("0,");
+            }
             _implWriter.DecreaseIndent();
             _implWriter.AddLine("};");
         }

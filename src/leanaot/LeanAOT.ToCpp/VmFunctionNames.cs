@@ -57,6 +57,8 @@ namespace LeanAOT.ToCpp
 
         public const string SetRetOrReturnError = "leanclr::codegen::set_ret_or_return_error";
 
+        public const string GetEvalStackValueAsType = "leanclr::codegen::get_eval_stack_value_as_type";
+
         public const string IsAotMethod = "leanclr::codegen::is_aot_method";
 
         public const string Likely = "LEANCLR_CODEGEN_LIKELY";
