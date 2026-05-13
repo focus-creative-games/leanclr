@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include "core/rt_base.h"
 #include "metadata/rt_metadata.h"
 #include "utils/rt_vector.h"
@@ -14,43 +16,106 @@ class Field
 {
   public:
     // Check if field is instance field (not static)
-    static bool is_instance(const metadata::RtFieldInfo* field);
+    static bool is_instance(const metadata::RtFieldInfo* field)
+    {
+        return (field->flags & static_cast<uint32_t>(metadata::RtFieldAttribute::Static)) == 0;
+    }
 
     // Check if field is static (includes literal and RVA)
-    static bool is_static_included_literal_and_rva(const metadata::RtFieldInfo* field);
+    static bool is_static_included_literal_and_rva(const metadata::RtFieldInfo* field)
+    {
+        return (field->flags & static_cast<uint32_t>(metadata::RtFieldAttribute::Static)) != 0;
+    }
 
     // Check if field is static (excludes literal and RVA)
-    static bool is_static_excluded_literal_and_rva(const metadata::RtFieldInfo* field);
+    static bool is_static_excluded_literal_and_rva(const metadata::RtFieldInfo* field)
+    {
+        uint32_t flags = field->flags;
+        return (flags & static_cast<uint32_t>(metadata::RtFieldAttribute::Static)) != 0 &&
+               (flags & (static_cast<uint32_t>(metadata::RtFieldAttribute::Literal) | static_cast<uint32_t>(metadata::RtFieldAttribute::HasFieldRva))) == 0;
+    }
 
     // Check if field is static literal
-    static bool is_static_literal(const metadata::RtFieldInfo* field);
+    static bool is_static_literal(const metadata::RtFieldInfo* field)
+    {
+        uint32_t flags = field->flags;
+        return (flags & static_cast<uint32_t>(metadata::RtFieldAttribute::Static)) != 0 &&
+               (flags & static_cast<uint32_t>(metadata::RtFieldAttribute::Literal)) != 0;
+    }
 
     // Check if field is static with RVA
-    static bool is_static_rva(const metadata::RtFieldInfo* field);
+    static bool is_static_rva(const metadata::RtFieldInfo* field)
+    {
+        uint32_t flags = field->flags;
+        return (flags & static_cast<uint32_t>(metadata::RtFieldAttribute::Static)) != 0 &&
+               (flags & static_cast<uint32_t>(metadata::RtFieldAttribute::HasFieldRva)) != 0;
+    }
 
     // Check if field is thread static
-    static bool is_thread_static(const metadata::RtFieldInfo* field);
+    static bool is_thread_static(const metadata::RtFieldInfo* field)
+    {
+        (void)field;
+        // Thread static fields not yet implemented
+        return false;
+    }
 
     // Check if field is public
-    static bool is_public(const metadata::RtFieldInfo* field);
+    static bool is_public(const metadata::RtFieldInfo* field)
+    {
+        uint32_t visibility = field->flags & static_cast<uint32_t>(metadata::RtFieldAttribute::FieldAccessMask);
+        return visibility == static_cast<uint32_t>(metadata::RtFieldAttribute::Public);
+    }
 
     // Check if field is private
-    static bool is_private(const metadata::RtFieldInfo* field);
+    static bool is_private(const metadata::RtFieldInfo* field)
+    {
+        uint32_t visibility = field->flags & static_cast<uint32_t>(metadata::RtFieldAttribute::FieldAccessMask);
+        return visibility == static_cast<uint32_t>(metadata::RtFieldAttribute::Private);
+    }
 
-    static bool has_field_marshal(const metadata::RtFieldInfo* field);
+    static bool has_field_marshal(const metadata::RtFieldInfo* field)
+    {
+        return (field->flags & static_cast<uint32_t>(metadata::RtFieldAttribute::HasFieldMarshal)) != 0;
+    }
 
     // Inflate field with generic context
     static RtResult<const metadata::RtFieldInfo*> inflate_field(const metadata::RtFieldInfo* field, const metadata::RtGenericContext* generic_context);
 
-    static uint32_t get_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field);
+    static uint32_t get_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field)
+    {
+        if (is_instance(field))
+        {
+            return field->offset + RT_OBJECT_HEADER_SIZE;
+        }
+        return field->offset;
+    }
+
     // Get field offset including object header for reference types
-    static uint32_t get_field_offset_includes_object_header_for_reference_type(const metadata::RtFieldInfo* field);
+    static uint32_t get_field_offset_includes_object_header_for_reference_type(const metadata::RtFieldInfo* field)
+    {
+        if (is_instance(field))
+        {
+            const metadata::RtClass* parent = field->parent;
+            if ((parent->extra_flags & static_cast<uint32_t>(metadata::RtClassExtraAttribute::ReferenceType)) != 0)
+            {
+                return field->offset + RT_OBJECT_HEADER_SIZE;
+            }
+        }
+        return field->offset;
+    }
 
     // Get field offset including object header for all types
-    static uint32_t get_instance_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field);
+    static uint32_t get_instance_field_offset_includes_object_header_for_all_type(const metadata::RtFieldInfo* field)
+    {
+        assert(is_instance(field));
+        return field->offset + RT_OBJECT_HEADER_SIZE;
+    }
 
     // Get field offset excluding object header
-    static uint32_t get_field_offset_excludes_object_header_for_all_type(const metadata::RtFieldInfo* field);
+    static uint32_t get_field_offset_excludes_object_header_for_all_type(const metadata::RtFieldInfo* field)
+    {
+        return field->offset;
+    }
 
     // Get field RVA data
     static RtResult<const uint8_t*> get_field_rva_data(const metadata::RtFieldInfo* field);

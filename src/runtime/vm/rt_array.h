@@ -3,6 +3,7 @@
 #include "rt_managed_types.h"
 #include "metadata/rt_metadata.h"
 #include "interp/interp_defs.h"
+#include "class.h"
 
 namespace leanclr
 {
@@ -13,7 +14,12 @@ class Array
   public:
     // Array creation methods
     static size_t get_array_allocation_size(const metadata::RtClass* klass, int32_t length);
-    static RtResult<RtArray*> new_empty_szarray_by_ele_klass(const metadata::RtClass* ele_class);
+
+    static RtResult<RtArray*> new_empty_szarray_by_ele_klass(const metadata::RtClass* ele_class)
+    {
+        return new_szarray_from_ele_klass(ele_class, 0);
+    }
+
     static RtResult<RtArray*> new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length);
     static RtResult<RtArray*> new_szarray_from_ele_klass(const metadata::RtClass* ele_class, int32_t length);
     static RtResult<RtArray*> new_mdarray_from_array_klass(const metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds);
@@ -26,9 +32,27 @@ class Array
         return array->length;
     }
 
-    static size_t get_array_byte_length(const RtArray* array);
-    static size_t get_array_element_size(const RtArray* array);
-    static size_t get_array_element_size_by_klass(const metadata::RtClass* array_klass);
+    static size_t get_array_byte_length(const RtArray* array)
+    {
+        assert(array);
+        size_t ele_size = get_array_element_size(array);
+        int32_t length = get_array_length(array);
+        return ele_size * static_cast<size_t>(length);
+    }
+
+    static size_t get_array_element_size(const RtArray* array)
+    {
+        assert(array);
+        const metadata::RtClass* ele_class = get_array_element_class(array);
+        return Class::get_stack_location_size(ele_class);
+    }
+
+    static size_t get_array_element_size_by_klass(const metadata::RtClass* array_klass)
+    {
+        assert(array_klass && array_klass->element_class);
+        return Class::get_stack_location_size(array_klass->element_class);
+    }
+
     static const metadata::RtClass* get_array_element_class(const RtArray* array)
     {
         assert(array);
@@ -55,7 +79,12 @@ class Array
         assert(array);
         return reinterpret_cast<T*>(const_cast<uint64_t*>(&array->first_data));
     }
-    static void* get_array_data_start_as_ptr_void(RtArray* array);
+
+    static void* get_array_data_start_as_ptr_void(RtArray* array)
+    {
+        assert(array);
+        return &array->first_data;
+    }
 
     template <typename T>
     static T* get_array_element_address(RtArray* array, int32_t index)
@@ -64,8 +93,21 @@ class Array
         assert(get_array_element_size(array) == sizeof(T));
         return reinterpret_cast<T*>(&array->first_data) + static_cast<size_t>(index);
     }
-    static void* get_array_element_address_as_ptr_void(RtArray* array, int32_t index);
-    static void* get_array_element_address_with_size_as_ptr_void(RtArray* array, int32_t index, size_t ele_size);
+
+    static void* get_array_element_address_as_ptr_void(RtArray* array, int32_t index)
+    {
+        assert(array);
+        assert(index >= 0 && index < get_array_length(array));
+        size_t ele_size = get_array_element_size(array);
+        return reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(&array->first_data) + ele_size * static_cast<size_t>(index));
+    }
+
+    static void* get_array_element_address_with_size_as_ptr_void(RtArray* array, int32_t index, size_t ele_size)
+    {
+        assert(array);
+        assert(index >= 0 && index < get_array_length(array));
+        return reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(&array->first_data) + ele_size * static_cast<size_t>(index));
+    }
 
     template <typename T>
     static T get_array_data_at(const RtArray* array, int32_t index)

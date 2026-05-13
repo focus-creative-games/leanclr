@@ -460,15 +460,15 @@ inline int32_t get_array_length(const vm::RtArray* array) noexcept
     return vm::Array::get_array_length(array);
 }
 
-inline metadata::RtClass* get_array_element_class(const vm::RtArray* array) noexcept
+inline const metadata::RtClass* get_array_element_class(const vm::RtArray* array) noexcept
 {
-    return const_cast<metadata::RtClass*>(vm::Array::get_array_element_class(array));
+    return vm::Array::get_array_element_class(array);
 }
 
-// inline bool is_array_index_out_of_range(const vm::RtArray* array, int32_t index) noexcept
-// {
-//     return vm::Array::is_out_of_range(array, index);
-// }
+inline bool is_array_index_out_of_range(const vm::RtArray* array, int32_t index) noexcept
+{
+    return vm::Array::is_out_of_range(array, index);
+}
 
 inline bool is_pointer_element_compatible_with(const metadata::RtClass* fromClass, const metadata::RtClass* toClass) noexcept
 {
@@ -478,25 +478,25 @@ inline bool is_pointer_element_compatible_with(const metadata::RtClass* fromClas
 template <typename T>
 inline T* get_array_element_data_start_as(vm::RtArray* array) noexcept
 {
-    return reinterpret_cast<T*>(&array->first_data);
+    return vm::Array::get_array_data_start_as<T>(array);
 }
 
 template <typename T>
 inline T get_array_element_data_at(vm::RtArray* array, int32_t index) noexcept
 {
-    return *(reinterpret_cast<T*>(&array->first_data) + index);
+    return vm::Array::get_array_data_at<T>(array, index);
 }
 
 template <typename T>
 inline T* get_array_element_address(vm::RtArray* array, int32_t index) noexcept
 {
-    return reinterpret_cast<T*>(&array->first_data) + index;
+    return vm::Array::get_array_element_address<T>(array, index);
 }
 
 template <typename T>
 inline void set_array_element_data_at(vm::RtArray* array, int32_t index, T value) noexcept
 {
-    *(reinterpret_cast<T*>(&array->first_data) + index) = value;
+    vm::Array::set_array_data_at<T>(array, index, value);
 }
 
 inline RtResult<int32_t> get_mdarray_global_index_from_indices(vm::RtArray* arr, int32_t* indices) noexcept
@@ -537,7 +537,7 @@ inline uint32_t get_class_instance_size_without_object_header(const metadata::Rt
 
 inline uint32_t get_class_field_count(const metadata::RtClass* klass) noexcept
 {
-    return klass->field_count;
+    return  klass->field_count;
 }
 
 inline uint32_t get_class_static_size(const metadata::RtClass* klass) noexcept

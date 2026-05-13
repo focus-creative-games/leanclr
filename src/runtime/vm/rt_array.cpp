@@ -24,11 +24,6 @@ size_t Array::get_array_allocation_size(const metadata::RtClass* klass, int32_t 
 
 // Array creation methods
 
-RtResult<RtArray*> Array::new_empty_szarray_by_ele_klass(const metadata::RtClass* ele_class)
-{
-    return new_szarray_from_ele_klass(ele_class, 0);
-}
-
 RtResult<RtArray*> Array::new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length)
 {
     assert(klass);
@@ -139,50 +134,6 @@ RtResult<RtArray*> Array::new_mdarray_from_ele_klass(const metadata::RtClass* el
 }
 
 // Array information methods
-
-size_t Array::get_array_byte_length(const RtArray* array)
-{
-    assert(array);
-    size_t ele_size = get_array_element_size(array);
-    int32_t length = get_array_length(array);
-    return ele_size * static_cast<size_t>(length);
-}
-
-size_t Array::get_array_element_size(const RtArray* array)
-{
-    assert(array);
-    const metadata::RtClass* ele_class = get_array_element_class(array);
-    return Class::get_stack_location_size(ele_class);
-}
-
-size_t Array::get_array_element_size_by_klass(const metadata::RtClass* array_klass)
-{
-    assert(array_klass && array_klass->element_class);
-    return Class::get_stack_location_size(array_klass->element_class);
-}
-
-// Array data access methods
-
-void* Array::get_array_data_start_as_ptr_void(RtArray* array)
-{
-    assert(array);
-    return &array->first_data;
-}
-
-void* Array::get_array_element_address_as_ptr_void(RtArray* array, int32_t index)
-{
-    assert(array);
-    assert(index >= 0 && index < get_array_length(array));
-    size_t ele_size = get_array_element_size(array);
-    return reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(&array->first_data) + ele_size * static_cast<size_t>(index));
-}
-
-void* Array::get_array_element_address_with_size_as_ptr_void(RtArray* array, int32_t index, size_t ele_size)
-{
-    assert(array);
-    assert(index >= 0 && index < get_array_length(array));
-    return reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(&array->first_data) + ele_size * static_cast<size_t>(index));
-}
 
 void Array::copy_array_data_to_no_eval_stack(const RtArray* arr, int32_t start_index, void* dest)
 {

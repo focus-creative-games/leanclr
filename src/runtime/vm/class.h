@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cassert>
+
 #include "rt_managed_types.h"
 
 namespace leanclr
@@ -114,12 +116,19 @@ struct CorLibTypes
     metadata::RtClass* cls_stackframe;
 };
 
+extern CorLibTypes g_corlibTypes;
+
 class Class
 {
   public:
     static RtResultVoid initialize();
     static RtResultVoid init_corlib_classes(metadata::RtModuleDef* corlib);
-    static const CorLibTypes& get_corlib_types();
+
+    static const CorLibTypes& get_corlib_types()
+    {
+        return g_corlibTypes;
+    }
+
     static RtResultVoid verify_integrity_of_corlib_classes();
 
     static RtResult<metadata::RtClass*> init_class_of_type_def(metadata::RtModuleDef* moduleDef, uint32_t rid);
@@ -134,9 +143,26 @@ class Class
     static RtResultVoid initialize_events(metadata::RtClass* klass);
     static RtResultVoid initialize_vtables(metadata::RtClass* klass);
 
-    static bool has_initialized_part(const metadata::RtClass* klass, metadata::RtClassInitPart parts);
-    static void set_initialized_part(metadata::RtClass* klass, metadata::RtClassInitPart parts);
-    static bool try_set_initialized_part(metadata::RtClass* klass, metadata::RtClassInitPart parts);
+    static bool has_initialized_part(const metadata::RtClass* klass, metadata::RtClassInitPart parts)
+    {
+        return (klass->init_flags & (uint32_t)parts) != 0;
+    }
+
+    static void set_initialized_part(metadata::RtClass* klass, metadata::RtClassInitPart parts)
+    {
+        klass->init_flags |= (uint32_t)parts;
+    }
+
+    static bool try_set_initialized_part(metadata::RtClass* klass, metadata::RtClassInitPart parts)
+    {
+        if ((klass->init_flags & (uint32_t)parts) == 0)
+        {
+            klass->init_flags |= (uint32_t)parts;
+            return true;
+        }
+        return false;
+    }
+
     static metadata::RtClassFamily get_family(const metadata::RtClass* klass);
 
     static uint32_t get_instance_size_without_object_header(const metadata::RtClass* cls)
@@ -156,46 +182,204 @@ class Class
     static RtResult<metadata::RtClass*> get_class_by_type_def_gid(uint32_t gid);
 
     // Transliterated EEClass member functions
-    static bool is_value_type(const metadata::RtClass* klass);
-    static bool is_reference_type(const metadata::RtClass* klass);
-    static bool is_enum_type(const metadata::RtClass* klass);
-    static bool is_nullable_type(const metadata::RtClass* klass);
-    static bool is_multicastdelegate_subclass(const metadata::RtClass* klass);
-    static bool get_has_references(const metadata::RtClass* klass);
-    static void set_has_references(metadata::RtClass* klass);
-    static bool is_blittable(const metadata::RtClass* klass);
-    static bool is_array_or_szarray(const metadata::RtClass* klass);
-    static bool is_ptr(const metadata::RtClass* klass);
-    static bool has_static_constructor(const metadata::RtClass* klass);
-    static bool has_finalizer(const metadata::RtClass* klass);
-    static bool is_interface(const metadata::RtClass* klass);
-    static bool is_abstract(const metadata::RtClass* klass);
-    static bool is_sealed(const metadata::RtClass* klass);
-    static bool is_generic(const metadata::RtClass* klass);
-    static bool is_generic_inst(const metadata::RtClass* klass);
-    static bool is_cctor_not_finished(const metadata::RtClass* klass);
-    static void set_cctor_finished(metadata::RtClass* klass);
-    static const metadata::RtTypeSig* get_by_val_type_sig(const metadata::RtClass* klass);
-    static const metadata::RtTypeSig* get_by_ref_type_sig(const metadata::RtClass* klass);
-    static bool is_object_class(const metadata::RtClass* klass);
-    static bool is_string_class(const metadata::RtClass* klass);
-    static bool is_szarray_class(const metadata::RtClass* klass);
-    static uint8_t get_rank(const metadata::RtClass* klass);
-    static metadata::RtElementType get_element_type(const metadata::RtClass* klass);
-    static metadata::RtElementType get_enum_element_type(const metadata::RtClass* klass);
-    static bool is_by_ref(const metadata::RtClass* klass);
-    static bool is_public(const metadata::RtClass* klass);
-    static bool is_nested_public(const metadata::RtClass* klass);
-    static bool is_initialized(const metadata::RtClass* klass);
-    static bool is_explicit_layout(const metadata::RtClass* klass);
+    static bool is_value_type(const metadata::RtClass* klass)
+    {
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::ValueType) != 0;
+    }
+
+    static bool is_reference_type(const metadata::RtClass* klass)
+    {
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::ReferenceType) != 0;
+    }
+
+    static bool is_enum_type(const metadata::RtClass* klass)
+    {
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::Enum) != 0;
+    }
+
+    static bool is_nullable_type(const metadata::RtClass* klass)
+    {
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::Nullable) != 0;
+    }
+
+    static bool is_multicastdelegate_subclass(const metadata::RtClass* klass)
+    {
+        return klass->parent == g_corlibTypes.cls_multicastdelegate;
+    }
+
+    static bool get_has_references(const metadata::RtClass* klass)
+    {
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasReferences) != 0;
+    }
+
+    static void set_has_references(metadata::RtClass* klass)
+    {
+        klass->extra_flags |= (uint32_t)metadata::RtClassExtraAttribute::HasReferences;
+    }
+
+    static bool is_blittable(const metadata::RtClass* klass)
+    {
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasReferences) == 0;
+    }
+
+    static bool is_array_or_szarray(const metadata::RtClass* klass)
+    {
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::ArrayOrSZArray) != 0;
+    }
+
+    static bool is_ptr(const metadata::RtClass* klass)
+    {
+        return klass->by_val->ele_type == metadata::RtElementType::Ptr;
+    }
+
+    static bool has_static_constructor(const metadata::RtClass* klass)
+    {
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasStaticConstructor) != 0;
+    }
+
+    static bool has_finalizer(const metadata::RtClass* klass)
+    {
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasFinalizer) != 0;
+    }
+
+    static bool is_interface(const metadata::RtClass* klass)
+    {
+        return (klass->flags & (uint32_t)metadata::RtTypeAttribute::Interface) != 0;
+    }
+
+    static bool is_abstract(const metadata::RtClass* klass)
+    {
+        return (klass->flags & (uint32_t)metadata::RtTypeAttribute::Abstract) != 0;
+    }
+
+    static bool is_sealed(const metadata::RtClass* klass)
+    {
+        return (klass->flags & (uint32_t)metadata::RtTypeAttribute::Sealed) != 0;
+    }
+
+    static bool is_generic(const metadata::RtClass* klass)
+    {
+        return klass->generic_container != nullptr;
+    }
+
+    static bool is_generic_inst(const metadata::RtClass* klass)
+    {
+        return klass->by_val->ele_type == metadata::RtElementType::GenericInst;
+    }
+
+    static bool is_cctor_not_finished(const metadata::RtClass* klass)
+    {
+        return (klass->init_flags & (uint32_t)metadata::RtClassInitPart::RuntimeClassInit) == 0;
+    }
+
+    static void set_cctor_finished(metadata::RtClass* klass)
+    {
+        klass->init_flags |= (uint32_t)metadata::RtClassInitPart::RuntimeClassInit;
+    }
+
+    static const metadata::RtTypeSig* get_by_val_type_sig(const metadata::RtClass* klass)
+    {
+        return klass->by_val;
+    }
+
+    static const metadata::RtTypeSig* get_by_ref_type_sig(const metadata::RtClass* klass)
+    {
+        return klass->by_ref;
+    }
+
+    static bool is_object_class(const metadata::RtClass* klass)
+    {
+        return klass->by_val->ele_type == metadata::RtElementType::Object;
+    }
+
+    static bool is_string_class(const metadata::RtClass* klass)
+    {
+        return klass->by_val->ele_type == metadata::RtElementType::String;
+    }
+
+    static bool is_szarray_class(const metadata::RtClass* klass)
+    {
+        return klass->by_val->ele_type == metadata::RtElementType::SZArray;
+    }
+
+    static uint8_t get_rank(const metadata::RtClass* klass)
+    {
+        switch (klass->by_val->ele_type)
+        {
+        case metadata::RtElementType::Array:
+            return klass->by_val->data.array_type->rank;
+        case metadata::RtElementType::SZArray:
+            return 1;
+        default:
+            return 0;
+        }
+    }
+
+    static metadata::RtElementType get_element_type(const metadata::RtClass* klass)
+    {
+        return klass->by_val->ele_type;
+    }
+
+    static metadata::RtElementType get_enum_element_type(const metadata::RtClass* klass)
+    {
+        assert(is_enum_type(klass));
+        return get_element_type(klass->element_class);
+    }
+
+    static bool is_by_ref(const metadata::RtClass* klass)
+    {
+        return klass->by_val->by_ref;
+    }
+
+    static bool is_public(const metadata::RtClass* klass)
+    {
+        return (klass->flags & (uint32_t)metadata::RtTypeAttribute::Public) != 0;
+    }
+
+    static bool is_nested_public(const metadata::RtClass* klass)
+    {
+        return (klass->flags & (uint32_t)metadata::RtTypeAttribute::NestedPublic) != 0;
+    }
+
+    static bool is_initialized(const metadata::RtClass* klass)
+    {
+        return (klass->init_flags & (uint32_t)metadata::RtClassInitPart::All) != 0;
+    }
+
+    static bool is_explicit_layout(const metadata::RtClass* klass)
+    {
+        return (klass->flags & (uint32_t)metadata::RtTypeAttribute::ExplicitLayout) != 0;
+    }
+
     static RtResult<bool> is_by_ref_like(const metadata::RtClass* klass);
 
     // Extended query and state management functions
-    static uint32_t get_type_def_gid(const metadata::RtClass* klass);
-    static metadata::RtGenericContainerContext get_generic_container_context(const metadata::RtClass* klass);
+    static uint32_t get_type_def_gid(const metadata::RtClass* klass)
+    {
+        return klass->by_val->data.type_def_gid;
+    }
+
+    static metadata::RtGenericContainerContext get_generic_container_context(const metadata::RtClass* klass)
+    {
+        return metadata::RtGenericContainerContext{klass->generic_container, nullptr};
+    }
+
     static metadata::RtClass* get_generic_base_klass_of_generic_class(const metadata::RtClass* klass);
-    static metadata::RtClass* get_generic_base_klass_or_self(const metadata::RtClass* klass);
-    static bool has_class_parent_fast(const metadata::RtClass* klass, const metadata::RtClass* parent);
+
+    static metadata::RtClass* get_generic_base_klass_or_self(const metadata::RtClass* klass)
+    {
+        if (is_generic_inst(klass))
+        {
+            return get_generic_base_klass_of_generic_class(klass);
+        }
+        return const_cast<metadata::RtClass*>(klass);
+    }
+
+    static bool has_class_parent_fast(const metadata::RtClass* klass, const metadata::RtClass* parent)
+    {
+        assert(has_initialized_part(klass, metadata::RtClassInitPart::SuperTypes));
+        return parent->hierarchy_depth <= klass->hierarchy_depth && klass->super_types[parent->hierarchy_depth] == parent;
+    }
 
     // Reflection/search functions
     static const metadata::RtFieldInfo* get_field_for_name(const metadata::RtClass* klass, const char* name, bool search_parent);
@@ -207,9 +391,28 @@ class Class
     static const metadata::RtMethodInfo* get_static_constructor(const metadata::RtClass* klass);
 
     // Utility helper functions
-    static metadata::RtClass* get_array_element_class(const metadata::RtClass* array_class);
-    static metadata::RtClass* get_nullable_underlying_class(const metadata::RtClass* klass);
-    static uint32_t get_stack_location_size(const metadata::RtClass* klass);
+    static metadata::RtClass* get_array_element_class(const metadata::RtClass* array_class)
+    {
+        return const_cast<metadata::RtClass*>(array_class->element_class);
+    }
+
+    static metadata::RtClass* get_nullable_underlying_class(const metadata::RtClass* klass)
+    {
+        if (is_nullable_type(klass))
+        {
+            return const_cast<metadata::RtClass*>(klass->element_class);
+        }
+        return const_cast<metadata::RtClass*>(klass);
+    }
+
+    static uint32_t get_stack_location_size(const metadata::RtClass* klass)
+    {
+        if (is_value_type(klass))
+        {
+            return get_instance_size_without_object_header(klass);
+        }
+        return static_cast<uint32_t>(sizeof(void*));
+    }
 
     // Type signature resolution
     static RtResult<metadata::RtClass*> get_ptr_class_by_element_typesig(const metadata::RtTypeSig* ele_type_sig);
@@ -218,7 +421,11 @@ class Class
 
     // Nested class lookup
     // static RtResult<uint32_t> find_nested_class_gid_by_name(metadata::RtClass* enclosing_class, const char* nested_class_name);
-    static metadata::RtClass* get_enclosing_class(const metadata::RtClass* nestedClass);
+    static metadata::RtClass* get_enclosing_class(const metadata::RtClass* nestedClass)
+    {
+        return const_cast<metadata::RtClass*>(nestedClass->declaring_class);
+    }
+
     static RtResult<metadata::RtClass*> find_nested_class_by_name(const metadata::RtClass* enclosingClass, const char* nestedClassName, bool ignore_case);
 
     // Type assignability checking functions
@@ -228,12 +435,31 @@ class Class
     static bool is_assignable_from_generic_interface(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
     static bool is_assignable_from_interface(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
     static bool is_assignable_from(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
-    static bool is_exception_sub_class(const metadata::RtClass* klass);
-    static bool is_subclass_of_initialized(const metadata::RtClass* from_class, const metadata::RtClass* to_class, bool check_interfaces);
-    static bool is_pointer_element_compatible_with(const metadata::RtClass* from_class, const metadata::RtClass* to_class);
 
-    static size_t get_gc_bitmap_size(const metadata::RtClass* klass);
-    static void get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size);
+    static bool is_exception_sub_class(const metadata::RtClass* klass)
+    {
+        return has_class_parent_fast(klass, get_corlib_types().cls_exception);
+    }
+
+    static bool is_subclass_of_initialized(const metadata::RtClass* from_class, const metadata::RtClass* to_class, bool check_interfaces);
+
+    static bool is_pointer_element_compatible_with(const metadata::RtClass* from_class, const metadata::RtClass* to_class)
+    {
+        return from_class->cast_class == to_class->cast_class;
+    }
+
+    static size_t get_gc_bitmap_size(const metadata::RtClass* klass)
+    {
+        (void)klass;
+        return 0;
+    }
+
+    static void get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size)
+    {
+        (void)klass;
+        (void)bitmaps;
+        bitmaps_size = 0;
+    }
 
     static void walk_ptr_classes(metadata::ClassWalkCallback callback, void* userData);
 
