@@ -627,5 +627,9 @@ void* pinvoke_marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept;
 RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const metadata::RtTypeSig* array_param_typesig, const void* native_element_data,
                                                                           int32_t length) noexcept;
 
+/// MonoPInvokeCallback / reverse P/Invoke: native raw handle pointer -> managed SafeHandle / CriticalHandle (or derived).
+/// \a handle_param_typesig must match \c RtMethodInfo::parameters for that formal (excluding implicit \c this).
+RtResult<vm::RtObject*> mono_pinvoke_reverse_marshal_handle(const metadata::RtTypeSig* handle_param_typesig, void* raw_handle) noexcept;
+
 } // namespace codegen
 } // namespace leanclr

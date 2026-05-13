@@ -84,7 +84,7 @@ namespace LeanAOT.ToCpp
                         i += 2;
                         continue;
                     }
-                    EmitMarshalNativeArgToEvalStack(w, p, i);
+                    EmitMarshalNativeArgToEvalStack(w, methodDetail, p, i);
                     i++;
                 }
             }
@@ -112,7 +112,22 @@ namespace LeanAOT.ToCpp
             w.AddLine("}");
         }
 
-        private static void EmitMarshalNativeArgToEvalStack(CodeThrunkWriter w, ParamDetail param, int index)
+        private static int GetRtMethodParametersIndex(MethodDetail methodDetail, int paramsIncludeThisIndex)
+        {
+            if (!methodDetail.IsStatic && paramsIncludeThisIndex == 0)
+            {
+                throw new InvalidOperationException(
+                    $"MonoPInvokeCallback: parameter index {paramsIncludeThisIndex} is implicit this; cannot map to RtMethodInfo::parameters. Method: {methodDetail.FullName}.");
+            }
+            int rt = methodDetail.IsStatic ? paramsIncludeThisIndex : paramsIncludeThisIndex - 1;
+            if (rt < 0)
+            {
+                throw new InvalidOperationException($"MonoPInvokeCallback: invalid RtMethodInfo::parameters index. Method: {methodDetail.FullName}.");
+            }
+            return rt;
+        }
+
+        private static void EmitMarshalNativeArgToEvalStack(CodeThrunkWriter w, MethodDetail methodDetail, ParamDetail param, int index)
         {
             TypeSig type = param.Type.RemovePinnedAndModifiers();
             string dst = $"__args + ARG{index}_OFFSET";
@@ -127,6 +142,16 @@ namespace LeanAOT.ToCpp
             {
                 w.AddLine($"{{ auto __s = {ConstStrings.CodegenNamespace}::marshal_utf8_string_to_utf16(__arg{index}); {VmFunctionNames.ExpandArgumentToEvalStack}(__s, {dst}); }}");
                 return;
+            }
+            if (type.ElementType == ElementType.Class)
+            {
+                TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
+                if (MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle")
+                    || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.CriticalHandle"))
+                {
+                    EmitMarshalNativeHandleFromRawPtr(w, methodDetail, index, dst);
+                    return;
+                }
             }
             if (type.ElementType == ElementType.SZArray)
             {
@@ -157,16 +182,7 @@ namespace LeanAOT.ToCpp
             int lengthArgIndex,
             ParamDetail lengthParam)
         {
-            if (!methodDetail.IsStatic && arrayArgIndex == 0)
-            {
-                throw new InvalidOperationException(
-                    $"MonoPInvokeCallback: SZArray at parameter index 0 with instance method is invalid (index 0 is this). Method: {methodDetail.FullName}.");
-            }
-            int rtParametersIndex = methodDetail.IsStatic ? arrayArgIndex : arrayArgIndex - 1;
-            if (rtParametersIndex < 0)
-            {
-                throw new InvalidOperationException($"MonoPInvokeCallback: invalid parameter index mapping for SZArray. Method: {methodDetail.FullName}.");
-            }
+            int rtParametersIndex = GetRtMethodParametersIndex(methodDetail, arrayArgIndex);
             string arrayTypesigExpr = $"__method->parameters[{rtParametersIndex}]";
 
             string dstArr = $"__args + ARG{arrayArgIndex}_OFFSET";
@@ -185,6 +201,17 @@ namespace LeanAOT.ToCpp
             w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(__arr{arrayArgIndex}, {dstArr});");
             w.EndBlock();
             w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(static_cast<{lenExact}>(__arg{lengthArgIndex}), {dstLen});");
+        }
+
+        private static void EmitMarshalNativeHandleFromRawPtr(CodeThrunkWriter w, MethodDetail methodDetail, int argIndex, string dst)
+        {
+            int rtParametersIndex = GetRtMethodParametersIndex(methodDetail, argIndex);
+            string handleTypesigExpr = $"__method->parameters[{rtParametersIndex}]";
+
+            w.AddLine($"auto __h_r{argIndex} = {ConstStrings.CodegenNamespace}::mono_pinvoke_reverse_marshal_handle({handleTypesigExpr}, __arg{argIndex});");
+            w.AddLine($"if (LEANCLR_UNLIKELY(__h_r{argIndex}.is_err())) {{ LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK(); }}");
+            w.AddLine($"auto* __h{argIndex} = __h_r{argIndex}.unwrap();");
+            w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(__h{argIndex}, {dst});");
         }
 
         /// <summary>Expression type for <c>static_cast</c> from native thunk parameter into overload used by expand_argument_to_eval_stack.</summary>
@@ -208,7 +235,18 @@ namespace LeanAOT.ToCpp
             case ElementType.I:
             case ElementType.U:
             case ElementType.Ptr:
+                return MethodGenerationUtil.GetExactTypeName(type);
             case ElementType.Class:
+            {
+                TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
+                if (MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle")
+                    || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.CriticalHandle"))
+                {
+                    throw new NotSupportedException(
+                        $"MonoPInvokeCallback: SafeHandle/CriticalHandle must use {nameof(EmitMarshalNativeHandleFromRawPtr)}. Parameter #{argIndex}.");
+                }
+                return MethodGenerationUtil.GetExactTypeName(type);
+            }
             case ElementType.ValueType:
             case ElementType.GenericInst:
             case ElementType.FnPtr:

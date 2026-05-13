@@ -235,10 +235,7 @@ void* pinvoke_marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept
 RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const metadata::RtTypeSig* array_param_typesig, const void* native_element_data,
                                                                           int32_t length) noexcept
 {
-    if (array_param_typesig == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
+    assert(array_param_typesig != nullptr);
     if (length < 0)
     {
         RET_ERR(RtErr::Overflow);
@@ -258,6 +255,35 @@ RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const
     const size_t ele_size = vm::Array::get_array_element_size(arr);
     std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_element_data, static_cast<size_t>(length) * ele_size);
     RET_OK(arr);
+}
+
+RtResult<vm::RtObject*> mono_pinvoke_reverse_marshal_handle(const metadata::RtTypeSig* handle_param_typesig, void* raw_handle) noexcept
+{
+    if (raw_handle == nullptr)
+    {
+        RET_OK(nullptr);
+    }
+    assert (handle_param_typesig != nullptr);
+    assert (handle_param_typesig->ele_type == metadata::RtElementType::Class);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, handle_klass, vm::Class::get_class_from_typesig(handle_param_typesig));
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(handle_klass));
+
+    #if LEANCLR_DEBUG
+
+    const metadata::RtFieldInfo* fi = vm::Class::get_field_for_name(handle_klass, "handle", true);
+    if (fi == nullptr)
+    {
+        fi = vm::Class::get_field_for_name(handle_klass, "_handle", true);
+    }
+    assert(fi != nullptr);
+    // handle field is the first field of the class
+    assert(fi->offset == 0);
+    #endif
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, vm::Object::new_object(handle_klass));
+    void** field_addr = reinterpret_cast<void**>(obj + 1);
+    *field_addr = raw_handle;
+    RET_OK(obj);
 }
 
 } // namespace codegen
