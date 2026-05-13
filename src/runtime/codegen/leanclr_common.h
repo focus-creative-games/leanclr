@@ -610,5 +610,39 @@ inline void free_pinvoke_returned_utf8_cstr(const char* str) noexcept
     }
 }
 
+/// P/Invoke: single-target delegate -> native function pointer (void*). Multicast with more than one
+/// invocation entry returns nullptr (see vm::Marshal::get_function_pointer_for_delegate).
+inline void* pinvoke_marshal_delegate_to_void_ptr(vm::RtDelegate* del) noexcept
+{
+    const auto r = vm::Marshal::get_function_pointer_for_delegate(del);
+    if (LEANCLR_UNLIKELY(r.is_err()))
+    {
+        return nullptr;
+    }
+    return r.unwrap();
+}
+
+/// P/Invoke: SafeHandle / CriticalHandle (or derived) -> raw handle for native APIs.
+inline void* pinvoke_marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept
+{
+    if (obj == nullptr)
+    {
+        return nullptr;
+    }
+    const metadata::RtClass* klass = obj->klass;
+    const metadata::RtFieldInfo* fi = vm::Class::get_field_for_name(klass, "handle", true);
+    if (fi == nullptr)
+    {
+        fi = vm::Class::get_field_for_name(klass, "_handle", true);
+    }
+    if (fi == nullptr)
+    {
+        return nullptr;
+    }
+    const uint8_t* field_addr =
+        reinterpret_cast<const uint8_t*>(obj) + vm::Field::get_field_offset_includes_object_header_for_all_type(fi);
+    return reinterpret_cast<void*>(*reinterpret_cast<const intptr_t*>(field_addr));
+}
+
 } // namespace codegen
 } // namespace leanclr

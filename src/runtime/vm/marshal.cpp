@@ -2,6 +2,7 @@
 
 #include "alloc/general_allocation.h"
 #include "rt_string.h"
+#include "rt_array.h"
 #include "class.h"
 #include "field.h"
 #include "utils/string_util.h"
@@ -150,7 +151,30 @@ RtResult<RtDelegate*> Marshal::marshal_function_pointer_to_delegate(void* ptr, m
 
 RtResult<void*> Marshal::get_function_pointer_for_delegate(RtDelegate* delegate)
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    if (delegate == nullptr)
+    {
+        RET_OK(nullptr);
+    }
+    auto* md = reinterpret_cast<RtMulticastDelegate*>(delegate);
+    RtDelegate* single = nullptr;
+    if (md->deles != nullptr)
+    {
+        const int32_t len = Array::get_array_length(md->deles);
+        if (len != 1)
+        {
+            RET_ERR(RtErr::NotSupported);
+        }
+        single = *Array::get_array_data_start_as<RtDelegate*>(md->deles);
+    }
+    else
+    {
+        single = &md->dele;
+    }
+    if (single == nullptr)
+    {
+        RET_OK(nullptr);
+    }
+    RET_OK(reinterpret_cast<void*>(single->_method_ptr));
 }
 
 int32_t Marshal::get_last_win32_error()
