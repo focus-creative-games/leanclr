@@ -12,4 +12,9 @@ RtErr fatal_on_not_implemented_error()
     return RtErr::NotImplemented;
 }
 #endif
+
+void print_not_implemented_error(const char* errMsg)
+{
+    printf("Not implemented error: %s\n", errMsg);
+}
 } // namespace leanclr

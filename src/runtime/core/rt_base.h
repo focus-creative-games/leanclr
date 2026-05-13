@@ -34,6 +34,22 @@ RtErr fatal_on_not_implemented_error();
 #define RETURN_NOT_IMPLEMENTED_ERROR() RET_ERR(RtErr::NotImplemented)
 #endif
 
+void print_not_implemented_error(const char* errMsg);
+
+#define WARN_NOT_IMPLEMENTED_ERROR_THEN_RETURN_OK(value, errMsg) \
+    do                                                           \
+    {                                                            \
+        print_not_implemented_error(errMsg);                     \
+        RET_OK(value);                                           \
+    } while (0)
+
+#define WARN_NOT_IMPLEMENTED_ERROR_THEN_RETURN_VOID(errMsg) \
+    do                                                      \
+    {                                                       \
+        print_not_implemented_error(errMsg);                \
+        RET_VOID_OK();                                      \
+    } while (0)
+
 #define RET_ASSERT_ERR(err)    \
     do                         \
     {                          \
