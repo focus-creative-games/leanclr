@@ -208,7 +208,7 @@ void* pinvoke_marshal_delegate_to_void_ptr(vm::RtDelegate* del) noexcept
     {
         return nullptr;
     }
-    return r.unwrap();
+    return (void*)r.unwrap();
 }
 
 void* pinvoke_marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept
