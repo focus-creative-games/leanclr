@@ -7,7 +7,7 @@ add_subdirectory(../../runtime runtime_build)
 # aot-runner executable
 
 file(GLOB CPP_SOURCES "cpp/*.cpp")
-add_executable(aot-runner main.cpp ${CPP_SOURCES})
+add_executable(aot-runner main.cpp pinvoke_impl.cpp ${CPP_SOURCES})
 
 target_link_libraries(aot-runner PRIVATE leanclr)
 
