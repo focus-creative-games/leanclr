@@ -59,6 +59,66 @@ mergeInto(LibraryManager.library, {
     return tbl.get(cbPtr)(a | 0, b | 0) | 0;
   },
 
+  leanclr_pinvoke_invoke_string_utf8_len_op: function (cbPtr, sPtr) {
+    if (!cbPtr) {
+      return 0;
+    }
+    var tbl = typeof wasmTable !== 'undefined' ? wasmTable : (typeof Module !== 'undefined' ? Module['wasmTable'] : null);
+    if (!tbl || !tbl.get) {
+      console.warn('leanclr_pinvoke_invoke_string_utf8_len_op: wasmTable not available');
+      return 0;
+    }
+    return tbl.get(cbPtr)(sPtr) | 0;
+  },
+
+  leanclr_pinvoke_invoke_array_sum_op: function (cbPtr, arrPtr, count) {
+    if (!cbPtr || !arrPtr || count <= 0) {
+      return 0;
+    }
+    var tbl = typeof wasmTable !== 'undefined' ? wasmTable : (typeof Module !== 'undefined' ? Module['wasmTable'] : null);
+    if (!tbl || !tbl.get) {
+      console.warn('leanclr_pinvoke_invoke_array_sum_op: wasmTable not available');
+      return 0;
+    }
+    return tbl.get(cbPtr)(arrPtr, count | 0) | 0;
+  },
+
+  leanclr_pinvoke_invoke_struct_op: function (cbPtr, a, b) {
+    if (!cbPtr) {
+      return 0;
+    }
+    var tbl = typeof wasmTable !== 'undefined' ? wasmTable : (typeof Module !== 'undefined' ? Module['wasmTable'] : null);
+    if (!tbl || !tbl.get) {
+      console.warn('leanclr_pinvoke_invoke_struct_op: wasmTable not available');
+      return 0;
+    }
+    return tbl.get(cbPtr)(a | 0, b | 0) | 0;
+  },
+
+  leanclr_pinvoke_invoke_safe_handle_op: function (cbPtr, h) {
+    if (!cbPtr) {
+      return 0;
+    }
+    var tbl = typeof wasmTable !== 'undefined' ? wasmTable : (typeof Module !== 'undefined' ? Module['wasmTable'] : null);
+    if (!tbl || !tbl.get) {
+      console.warn('leanclr_pinvoke_invoke_safe_handle_op: wasmTable not available');
+      return 0;
+    }
+    return tbl.get(cbPtr)(h | 0) | 0;
+  },
+
+  leanclr_pinvoke_invoke_nested_binary_op: function (outerPtr, innerPtr, a, b) {
+    if (!outerPtr) {
+      return 0;
+    }
+    var tbl = typeof wasmTable !== 'undefined' ? wasmTable : (typeof Module !== 'undefined' ? Module['wasmTable'] : null);
+    if (!tbl || !tbl.get) {
+      console.warn('leanclr_pinvoke_invoke_nested_binary_op: wasmTable not available');
+      return 0;
+    }
+    return tbl.get(outerPtr)(innerPtr, a | 0, b | 0) | 0;
+  },
+
   leanclr_pinvoke_safe_handle_add_ten: function (h) {
     return (h + 10) | 0;
   },

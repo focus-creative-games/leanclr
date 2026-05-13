@@ -69,6 +69,36 @@ extern "C" int32_t leanclr_pinvoke_invoke_binary_op(void* op, int32_t a, int32_t
     return reinterpret_cast<LeanClrPinvokeBinaryOp_fn>(op)(a, b);
 }
 
+using LeanClrPinvokeStringUtf8LenOp_fn = int32_t(LEANCLR_TEST_PINVOKE_CC*)(const char*);
+extern "C" int32_t leanclr_pinvoke_invoke_string_utf8_len_op(void* op, const char* s)
+{
+    return reinterpret_cast<LeanClrPinvokeStringUtf8LenOp_fn>(op)(s);
+}
+
+using LeanClrPinvokeArraySumOp_fn = int32_t(LEANCLR_TEST_PINVOKE_CC*)(int32_t*, int32_t);
+extern "C" int32_t leanclr_pinvoke_invoke_array_sum_op(void* op, int32_t* arr, int32_t count)
+{
+    return reinterpret_cast<LeanClrPinvokeArraySumOp_fn>(op)(arr, count);
+}
+
+using LeanClrPinvokeStructPairOp_fn = int32_t(LEANCLR_TEST_PINVOKE_CC*)(LeanClrPinvokeTestPair_abi);
+extern "C" int32_t leanclr_pinvoke_invoke_struct_op(void* op, LeanClrPinvokeTestPair_abi p)
+{
+    return reinterpret_cast<LeanClrPinvokeStructPairOp_fn>(op)(p);
+}
+
+using LeanClrPinvokeSafeHandleOp_fn = int32_t(LEANCLR_TEST_PINVOKE_CC*)(void*);
+extern "C" int32_t leanclr_pinvoke_invoke_safe_handle_op(void* op, void* raw_handle)
+{
+    return reinterpret_cast<LeanClrPinvokeSafeHandleOp_fn>(op)(raw_handle);
+}
+
+using LeanClrPinvokeNestedBinaryOp_fn = int32_t(LEANCLR_TEST_PINVOKE_CC*)(void*, int32_t, int32_t);
+extern "C" int32_t leanclr_pinvoke_invoke_nested_binary_op(void* outer, void* inner, int32_t a, int32_t b)
+{
+    return reinterpret_cast<LeanClrPinvokeNestedBinaryOp_fn>(outer)(inner, a, b);
+}
+
 extern "C" int32_t leanclr_pinvoke_safe_handle_add_ten(void* raw_handle)
 {
     return static_cast<int32_t>(reinterpret_cast<intptr_t>(raw_handle)) + 10;

@@ -1,5 +1,18 @@
 using System;
 using System.Runtime.InteropServices;
+using System.Text;
+
+/// <summary>LeanAOT / Mono-style marker for reverse P/Invoke thunks (recognized by name <c>MonoPInvokeCallbackAttribute</c>).</summary>
+[AttributeUsage(AttributeTargets.Method)]
+internal sealed class MonoPInvokeCallbackAttribute : Attribute
+{
+    public MonoPInvokeCallbackAttribute(Type delegateType)
+    {
+        DelegateType = delegateType;
+    }
+
+    public Type DelegateType { get; }
+}
 
 /// <summary>
 /// P/Invoke 覆盖：在 Emscripten 下由 <c>leanclr_test_pinvoke.js</c> 提供 wasm 导入实现，
@@ -20,6 +33,22 @@ public struct LeanClrPinvokeTestPair
 
 [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 public delegate int LeanClrPinvokeBinaryOp(int a, int b);
+
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+public delegate int LeanClrPinvokeStringUtf8LenOp(string s);
+
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+public delegate int LeanClrPinvokeArraySumOp(int[] arr, int count);
+
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+public delegate int LeanClrPinvokeStructPairOp(LeanClrPinvokeTestPair p);
+
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+public delegate int LeanClrPinvokeSafeHandleOp(LeanClrPinvokeTestHandle h);
+
+/// <summary>Native passes inner reverse-P/Invoke thunk as <c>void*</c>; use <see cref="Marshal.GetDelegateForFunctionPointer"/>.</summary>
+[UnmanagedFunctionPointer(CallingConvention.Cdecl)]
+public delegate int LeanClrPinvokeNestedBinaryOp(IntPtr innerCb, int a, int b);
 
 // Minimal SafeHandle subclass for P/Invoke handle field extraction tests.
 public sealed class LeanClrPinvokeTestHandle : SafeHandle
@@ -75,6 +104,21 @@ public static class TestPInvokeNative
     [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_invoke_binary_op", CallingConvention = CallingConvention.Cdecl)]
     public static extern int InvokeBinaryOp(LeanClrPinvokeBinaryOp op, int a, int b);
 
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_invoke_string_utf8_len_op", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int InvokeStringUtf8LenOp(LeanClrPinvokeStringUtf8LenOp op, string s);
+
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_invoke_array_sum_op", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int InvokeArraySumOp(LeanClrPinvokeArraySumOp op, int[] arr, int count);
+
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_invoke_struct_op", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int InvokeStructOp(LeanClrPinvokeStructPairOp op, LeanClrPinvokeTestPair p);
+
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_invoke_safe_handle_op", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int InvokeSafeHandleOp(LeanClrPinvokeSafeHandleOp op, LeanClrPinvokeTestHandle h);
+
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_invoke_nested_binary_op", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int InvokeNestedBinaryOp(LeanClrPinvokeNestedBinaryOp outer, IntPtr innerCb, int a, int b);
+
     /// <summary>Receives raw handle value from <see cref="SafeHandle"/> plus ten.</summary>
     [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_safe_handle_add_ten", CallingConvention = CallingConvention.Cdecl)]
     public static extern int SafeHandleAddTen(LeanClrPinvokeTestHandle h);
@@ -82,6 +126,41 @@ public static class TestPInvokeNative
 
 public class WasmPInvokeVerify
 {
+    [MonoPInvokeCallback(typeof(LeanClrPinvokeBinaryOp))]
+    private static int MulBinaryOpForNativeCallback(int a, int b) => a * b;
+
+    [MonoPInvokeCallback(typeof(LeanClrPinvokeStringUtf8LenOp))]
+    private static int StringUtf8LenMonoPInvokeCallback(string s) => s == null ? -1 : Encoding.UTF8.GetByteCount(s);
+
+    [MonoPInvokeCallback(typeof(LeanClrPinvokeArraySumOp))]
+    private static int ArraySumMonoPInvokeCallback(int[] arr, int count)
+    {
+        if (arr == null || count <= 0)
+        {
+            return 0;
+        }
+        int sum = 0;
+        for (int i = 0; i < count; i++)
+        {
+            sum += arr[i];
+        }
+        return sum;
+    }
+
+    [MonoPInvokeCallback(typeof(LeanClrPinvokeStructPairOp))]
+    private static int StructPairMonoPInvokeCallback(LeanClrPinvokeTestPair p) => p.First * 2 + p.Second;
+
+    [MonoPInvokeCallback(typeof(LeanClrPinvokeSafeHandleOp))]
+    private static int SafeHandleMonoPInvokeCallback(LeanClrPinvokeTestHandle h) =>
+        h == null ? -1 : (int)h.DangerousGetHandle() + 7;
+
+    [MonoPInvokeCallback(typeof(LeanClrPinvokeNestedBinaryOp))]
+    private static int NestedBinaryMonoPInvokeCallback(IntPtr innerCb, int a, int b)
+    {
+        var inner = (LeanClrPinvokeBinaryOp)Marshal.GetDelegateForFunctionPointer(innerCb, typeof(LeanClrPinvokeBinaryOp));
+        return inner(a, b) + 100;
+    }
+
     [UnitTest]
     public void UnitTest_AddI32()
     {
@@ -124,8 +203,46 @@ public class WasmPInvokeVerify
     [UnitTest]
     public void UnitTest_DelegateCallback()
     {
-        LeanClrPinvokeBinaryOp mul = (a, b) => a * b;
-        Assert.Equal(12, TestPInvokeNative.InvokeBinaryOp(mul, 3, 4));
+        Assert.Equal(12, TestPInvokeNative.InvokeBinaryOp(MulBinaryOpForNativeCallback, 3, 4));
+    }
+
+    [UnitTest]
+    public void UnitTest_MonoPInvokeCallback_String()
+    {
+        Assert.Equal(0, TestPInvokeNative.InvokeStringUtf8LenOp(StringUtf8LenMonoPInvokeCallback, ""));
+        Assert.Equal(5, TestPInvokeNative.InvokeStringUtf8LenOp(StringUtf8LenMonoPInvokeCallback, "abcde"));
+        Assert.Equal(6, TestPInvokeNative.InvokeStringUtf8LenOp(StringUtf8LenMonoPInvokeCallback, "你好"));
+    }
+
+    [UnitTest]
+    public void UnitTest_MonoPInvokeCallback_Array()
+    {
+        int[] xs = new int[] { 1, 2, 3, 4 };
+        Assert.Equal(10, TestPInvokeNative.InvokeArraySumOp(ArraySumMonoPInvokeCallback, xs, 4));
+        Assert.Equal(3, TestPInvokeNative.InvokeArraySumOp(ArraySumMonoPInvokeCallback, xs, 2));
+    }
+
+    [UnitTest]
+    public void UnitTest_MonoPInvokeCallback_Struct()
+    {
+        var pair = new LeanClrPinvokeTestPair { First = 5, Second = 6 };
+        Assert.Equal(16, TestPInvokeNative.InvokeStructOp(StructPairMonoPInvokeCallback, pair));
+    }
+
+    [UnitTest]
+    public void UnitTest_MonoPInvokeCallback_SafeHandle()
+    {
+        using (LeanClrPinvokeTestHandle h = LeanClrPinvokeTestHandle.FromValue(40))
+        {
+            Assert.Equal(47, TestPInvokeNative.InvokeSafeHandleOp(SafeHandleMonoPInvokeCallback, h));
+        }
+    }
+
+    [UnitTest]
+    public void UnitTest_MonoPInvokeCallback_NestedDelegate()
+    {
+        IntPtr innerPtr = Marshal.GetFunctionPointerForDelegate((LeanClrPinvokeBinaryOp)MulBinaryOpForNativeCallback);
+        Assert.Equal(112, TestPInvokeNative.InvokeNestedBinaryOp(NestedBinaryMonoPInvokeCallback, innerPtr, 3, 4));
     }
 
     [UnitTest]
