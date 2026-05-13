@@ -1,4 +1,6 @@
 #include "leanclr_common.h"
+#include <cstdio>
+#include <cstring>
 #include "vm/object.h"
 #include "metadata/module_def.h"
 #include "utils/string_builder.h"
@@ -197,6 +199,58 @@ RtErr raise_pinvoke_entry_not_found_error(const char* dll_name_no_ext, const cha
     char err_msg[1024];
     snprintf(err_msg, sizeof(err_msg), "P/Invoke entry not found: dll=%s, function=%s", dll_name_no_ext, function_name);
     RET_ERR_WITH_MSG(RtErr::EntryPointNotFound, err_msg);
+}
+
+void* pinvoke_marshal_delegate_to_void_ptr(vm::RtDelegate* del) noexcept
+{
+    const auto r = vm::Marshal::get_function_pointer_for_delegate(del);
+    if (LEANCLR_UNLIKELY(r.is_err()))
+    {
+        return nullptr;
+    }
+    return r.unwrap();
+}
+
+void* pinvoke_marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept
+{
+    if (obj == nullptr)
+    {
+        return nullptr;
+    }
+    const metadata::RtClass* klass = obj->klass;
+    const metadata::RtFieldInfo* fi = vm::Class::get_field_for_name(klass, "handle", true);
+    if (fi == nullptr)
+    {
+        fi = vm::Class::get_field_for_name(klass, "_handle", true);
+    }
+    if (fi == nullptr)
+    {
+        return nullptr;
+    }
+    const uint8_t* field_addr =
+        reinterpret_cast<const uint8_t*>(obj) + vm::Field::get_field_offset_includes_object_header_for_all_type(fi);
+    return reinterpret_cast<void*>(*reinterpret_cast<const intptr_t*>(field_addr));
+}
+
+RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const metadata::RtClass* ele_klass, const void* native_element_data,
+                                                                          int32_t length) noexcept
+{
+    if (length < 0)
+    {
+        RET_ERR(RtErr::Overflow);
+    }
+    if (native_element_data == nullptr)
+    {
+        RET_OK(nullptr);
+    }
+    if (!vm::Class::is_blittable(ele_klass))
+    {
+        RET_ERR(RtErr::NotSupported);
+    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, new_szarray_from_ele_class(ele_klass, length));
+    const size_t ele_size = vm::Class::get_stack_location_size(ele_klass);
+    std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_element_data, static_cast<size_t>(length) * ele_size);
+    RET_OK(arr);
 }
 
 } // namespace codegen
