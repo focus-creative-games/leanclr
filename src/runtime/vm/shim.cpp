@@ -238,8 +238,8 @@ RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* me
             RET_OK(InvokeTypeAndMethod(RtInvokerType::Intrinsic, intrinsic_entry->invoker));
         }
 
-        std::optional<metadata::RtAotMethodImplData> aot_data = metadata::AotModule::find_aot_method_impl(method);
-        if (aot_data.has_value())
+        const metadata::RtAotMethodDefData* aot_data = metadata::AotModule::find_aot_method_impl(method);
+        if (aot_data != nullptr)
         {
             RET_OK(InvokeTypeAndMethod(RtInvokerType::Aot, aot_data->invoke_method_ptr));
         }
@@ -321,8 +321,8 @@ MethodAndVirtualMethod Shim::get_method_pointer(const metadata::RtMethodInfo* me
     const metadata::RtAotModuleData* aotModuleData = method->parent->image->get_aot_module_data();
     if (aotModuleData != nullptr)
     {
-        std::optional<metadata::RtAotMethodImplData> aot_data = metadata::AotModule::find_aot_method_impl(method);
-        if (aot_data.has_value())
+        const metadata::RtAotMethodDefData* aot_data = metadata::AotModule::find_aot_method_impl(method);
+        if (aot_data != nullptr)
         {
             return MethodAndVirtualMethod(aot_data->method_ptr, aot_data->virtual_method_ptr);
         }

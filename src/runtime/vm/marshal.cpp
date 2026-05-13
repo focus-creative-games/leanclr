@@ -5,6 +5,7 @@
 #include "rt_array.h"
 #include "class.h"
 #include "field.h"
+#include "metadata/aot_module.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
 #include "platform/kernel32.h"
@@ -149,7 +150,7 @@ RtResult<RtDelegate*> Marshal::marshal_function_pointer_to_delegate(void* ptr, m
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<void*> Marshal::get_function_pointer_for_delegate(RtDelegate* delegate)
+RtResult<metadata::RtNativeMethodPointer> Marshal::get_function_pointer_for_delegate(RtDelegate* delegate)
 {
     if (delegate == nullptr)
     {
@@ -174,7 +175,18 @@ RtResult<void*> Marshal::get_function_pointer_for_delegate(RtDelegate* delegate)
     {
         RET_OK(nullptr);
     }
-    RET_OK(reinterpret_cast<void*>(single->_method_ptr));
+    const metadata::RtMethodInfo* target_method = single->method;
+    if (target_method == nullptr)
+    {
+        RET_ERR(RtErr::NotSupported);
+    }
+    const metadata::RtAotMethodMonoPInvokeCallbackData* cb =
+        metadata::AotModule::find_mono_pinvoke_callback_method(target_method->parent->image, target_method->token);
+    if (cb == nullptr || cb->native_method_ptr == nullptr)
+    {
+        RET_ERR(RtErr::NotSupported);
+    }
+    RET_OK(cb->native_method_ptr);
 }
 
 int32_t Marshal::get_last_win32_error()

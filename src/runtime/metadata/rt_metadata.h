@@ -922,11 +922,10 @@ struct RtAotMethodDefData
     RtInvokeMethodPointer invoke_method_ptr;
 };
 
-struct RtAotMethodImplData
+struct RtAotMethodMonoPInvokeCallbackData
 {
-    RtManagedMethodPointer method_ptr;
-    RtManagedMethodPointer virtual_method_ptr;
-    RtInvokeMethodPointer invoke_method_ptr;
+    EncodedTokenId token;
+    RtNativeMethodPointer native_method_ptr;
 };
 
 struct RtAotModuleData
@@ -936,6 +935,8 @@ struct RtAotModuleData
     RtAotModuleInitializer deferred_initializer;
     const RtAotMethodDefData* method_def_entries;
     uint32_t method_def_entry_count;
+    const RtAotMethodMonoPInvokeCallbackData* mono_pinvoke_callback_entries;
+    uint32_t mono_pinvoke_callback_entry_count;
 };
 
 struct RtAotModulesData

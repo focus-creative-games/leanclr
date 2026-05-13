@@ -284,7 +284,7 @@ RtResult<vm::RtDelegate*> SystemRuntimeInteropServicesMarshal::get_delegate_for_
 
 RtResult<void*> SystemRuntimeInteropServicesMarshal::get_function_pointer_for_delegate_internal(vm::RtDelegate* delegate) noexcept
 {
-    return vm::Marshal::get_function_pointer_for_delegate(delegate);
+    return vm::Marshal::get_function_pointer_for_delegate(delegate).cast<void*>();
 }
 
 // ========== Win32 error ==========

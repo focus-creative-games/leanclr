@@ -68,7 +68,7 @@ class Marshal
     static RtResult<void*> unsafe_addr_of_pinned_array_element(vm::RtArray* arr, int32_t index);
 
     static RtResult<RtDelegate*> marshal_function_pointer_to_delegate(void* ptr, metadata::RtClass* delegate_class);
-    static RtResult<void*> get_function_pointer_for_delegate(RtDelegate* delegate);
+    static RtResult<metadata::RtNativeMethodPointer> get_function_pointer_for_delegate(RtDelegate* delegate);
 
     static int32_t get_last_win32_error();
     static void set_last_win32_error(int32_t error);
