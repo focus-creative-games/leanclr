@@ -1,4 +1,5 @@
 using dnlib.DotNet;
+using LeanAOT.Core;
 using LeanAOT.GenerationPlan;
 
 namespace LeanAOT.ToCpp
@@ -114,7 +115,7 @@ namespace LeanAOT.ToCpp
             foreach (MethodDefPlan mp in _plan.MonoPInvokeCallbackMethodPlans)
             {
                 MethodDef method = mp.MethodDef;
-                string sym = MonoPInvokeCallbackWriter.GetNativeThunkSymbolName(_mod, method);
+                string sym = MonoPInvokeCallbackWriter.GetNativeThunkSymbolName(GlobalServices.Inst.MetadataService.GetMethodDetail(method));
                 _implWriter.AddLine($"{{ 0x{method.MDToken.ToInt32():X8}, reinterpret_cast<leanclr::metadata::RtNativeMethodPointer>(&{sym}) }},");
             }
             _implWriter.DecreaseIndent();

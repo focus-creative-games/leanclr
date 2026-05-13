@@ -256,6 +256,9 @@
 #define LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR() LEANCLR_CODEGEN_RETURN(leanclr::RtErr::NotImplemented)
 #endif
 
+
+#define LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK() std::abort()
+
 namespace leanclr
 {
 namespace codegen
@@ -619,7 +622,9 @@ void* pinvoke_marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept;
 
 /// MonoPInvokeCallback / reverse P/Invoke: native points at a contiguous element buffer; build a managed
 /// SZArray by copying bytes into a new array (element type must be blittable).
-RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const metadata::RtClass* ele_klass, const void* native_element_data,
+/// \a array_param_typesig must be the method parameter's full array type (typically \c RtElementType::SZArray)
+/// from \c RtMethodInfo::parameters (same slot as the formal parameter, excluding implicit \c this).
+RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const metadata::RtTypeSig* array_param_typesig, const void* native_element_data,
                                                                           int32_t length) noexcept;
 
 } // namespace codegen

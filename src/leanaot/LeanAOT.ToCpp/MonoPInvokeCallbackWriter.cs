@@ -13,9 +13,13 @@ namespace LeanAOT.ToCpp
     /// </summary>
     static class MonoPInvokeCallbackWriter
     {
-        public static string GetNativeThunkSymbolName(ModuleDef mod, MethodDef method)
+        /// <summary>
+        /// Stable native thunk symbol: same stem as managed <see cref="MethodDetail.UniqueName"/> plus <c>__monopinvokecallback</c>
+        /// (mirrors MethodWriterBase naming; embeds declaring type, method name, token, and MD5 disambiguator).
+        /// </summary>
+        public static string GetNativeThunkSymbolName(MethodDetail methodDetail)
         {
-            return $"__leanclr_mono_pinvoke_cb_{ModuleGenerationUtil.GetStandardizedModuleNameWithoutExt(mod)}_{method.MDToken.ToInt32():X8}";
+            return $"{methodDetail.UniqueName}__monopinvokecallback";
         }
 
         public static void GenerateAll(AssemblyPlan plan, ForwardDeclaration forwardDeclaration, CodeThrunkWriter implWriter)
@@ -33,7 +37,7 @@ namespace LeanAOT.ToCpp
         private static void WriteThunk(ModuleDef mod, CodeThrunkWriter w, MethodDetail methodDetail)
         {
             MethodDef method = methodDetail.MethodDef;
-            string sym = GetNativeThunkSymbolName(mod, method);
+            string sym = GetNativeThunkSymbolName(methodDetail);
             string nativeRet = GetNativeReturnType(methodDetail);
             string returnStmt = methodDetail.IsVoidReturn ? string.Empty : "return __native_ret;";
 
@@ -45,6 +49,14 @@ namespace LeanAOT.ToCpp
             w.AddLine($"extern \"C\" {nativeRet} {callConv} {sym}({paramDecl}){ConstStrings.CppFunctionNoexcept}");
             w.AddLine("{");
             w.IncreaseIndent();
+
+            string cachedMethodVarName = $"s_mono_pinvoke_resolved_method_{method.MDToken.ToInt32():X8}";
+            w.AddLine($"static {ConstStrings.MethodInfoPtrTypeName} {cachedMethodVarName} = nullptr;");
+            w.AddLine($"if (LEANCLR_UNLIKELY({cachedMethodVarName} == nullptr))");
+            w.BeginBlock();
+            w.AddLine($"{cachedMethodVarName} = reinterpret_cast<{ConstStrings.MethodInfoPtrTypeName}>({ConstStrings.CodegenNamespace}::resolve_metadata_token({ModuleGenerationUtil.GetModuleGlobalVariableName(mod)}, 0x{method.MDToken.ToInt32():X8}, nullptr));");
+            w.EndBlock();
+            w.AddLine($"{ConstStrings.MethodInfoPtrTypeName} __method = {cachedMethodVarName};");
 
             int paramCount = methodDetail.ParamCountIncludeThis;
             if (paramCount > 0)
@@ -68,7 +80,7 @@ namespace LeanAOT.ToCpp
                             throw new NotSupportedException(
                                 $"MonoPInvokeCallback: parameter #{i} is SZArray but is not followed by int32_t/uint32_t length (use e.g. int[] arr, int count). Method: {methodDetail.FullName}.");
                         }
-                        EmitMarshalNativeSzArrayFromPointerAndLength(w, method, t, i, lenIdx, methodDetail.ParamsIncludeThis[lenIdx]);
+                        EmitMarshalNativeSzArrayFromPointerAndLength(w, methodDetail, i, lenIdx, methodDetail.ParamsIncludeThis[lenIdx]);
                         i += 2;
                         continue;
                     }
@@ -80,24 +92,17 @@ namespace LeanAOT.ToCpp
             string argsPtr = paramCount > 0 ? "__args" : "nullptr";
             string invokeFn = methodDetail.IsStatic ? VmFunctionNames.InvokeWithRunClassStaticConstructor : VmFunctionNames.InvokeWithoutRunClassStaticConstructor;
 
-            string cachedMethodVarName = $"s_mono_pinvoke_resolved_method_{method.MDToken.ToInt32():X8}";
-            w.AddLine($"static {ConstStrings.MethodInfoPtrTypeName} {cachedMethodVarName} = nullptr;");
-            w.AddLine($"if (LEANCLR_UNLIKELY({cachedMethodVarName} == nullptr))");
-            w.BeginBlock();
-            w.AddLine($"{cachedMethodVarName} = reinterpret_cast<{ConstStrings.MethodInfoPtrTypeName}>({ConstStrings.CodegenNamespace}::resolve_metadata_token({ModuleGenerationUtil.GetModuleGlobalVariableName(mod)}, 0x{method.MDToken.ToInt32():X8}, nullptr));");
-            w.EndBlock();
-            w.AddLine($"{ConstStrings.MethodInfoPtrTypeName} __method = {cachedMethodVarName};");
             if (methodDetail.IsVoidReturn)
             {
                 w.AddLine($"auto __inv_r = {invokeFn}(__method, {argsPtr}, nullptr);");
-                w.AddLine("if (LEANCLR_UNLIKELY(__inv_r.is_err())) { std::abort(); }");
+                w.AddLine("if (LEANCLR_UNLIKELY(__inv_r.is_err())) { LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK(); }");
             }
             else
             {
                 w.AddLine($"constexpr size_t RET_SIZE = {VmFunctionNames.GetStackObjectSizeForType}<{MethodGenerationUtil.GetExactTypeName(methodDetail.RetType)}>();");
                 w.AddLine($"{ConstStrings.StackObjectTypeName} __ret[RET_SIZE];");
                 w.AddLine($"auto __inv_r = {invokeFn}(__method, {argsPtr}, __ret);");
-                w.AddLine("if (LEANCLR_UNLIKELY(__inv_r.is_err())) { std::abort(); }");
+                w.AddLine("if (LEANCLR_UNLIKELY(__inv_r.is_err())) { LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK(); }");
                 string retExact = MethodGenerationUtil.GetExactTypeName(methodDetail.RetType);
                 w.AddLine($"{nativeRet} __native_ret = {ConstStrings.CodegenNamespace}::get_eval_stack_value_as_type<{retExact}>(__ret);");
                 w.AddLine(returnStmt);
@@ -147,17 +152,23 @@ namespace LeanAOT.ToCpp
         /// </summary>
         private static void EmitMarshalNativeSzArrayFromPointerAndLength(
             CodeThrunkWriter w,
-            MethodDef method,
-            TypeSig arrayParamType,
+            MethodDetail methodDetail,
             int arrayArgIndex,
             int lengthArgIndex,
             ParamDetail lengthParam)
         {
-            TypeSig elem = ((SZArraySig)arrayParamType.RemovePinnedAndModifiers()).Next.RemovePinnedAndModifiers();
-            TypeDef elemTd = elem.ToTypeDefOrRef().ResolveTypeDefThrow();
-            string elemCache = $"s_mono_pinvoke_szarray_ele_{method.MDToken.ToInt32():X8}_{arrayArgIndex}";
-            string modGv = ModuleGenerationUtil.GetModuleGlobalVariableName(elemTd.Module);
-            string tok = $"0x{elemTd.MDToken.ToInt32():X8}";
+            if (!methodDetail.IsStatic && arrayArgIndex == 0)
+            {
+                throw new InvalidOperationException(
+                    $"MonoPInvokeCallback: SZArray at parameter index 0 with instance method is invalid (index 0 is this). Method: {methodDetail.FullName}.");
+            }
+            int rtParametersIndex = methodDetail.IsStatic ? arrayArgIndex : arrayArgIndex - 1;
+            if (rtParametersIndex < 0)
+            {
+                throw new InvalidOperationException($"MonoPInvokeCallback: invalid parameter index mapping for SZArray. Method: {methodDetail.FullName}.");
+            }
+            string arrayTypesigExpr = $"__method->parameters[{rtParametersIndex}]";
+
             string dstArr = $"__args + ARG{arrayArgIndex}_OFFSET";
             string dstLen = $"__args + ARG{lengthArgIndex}_OFFSET";
             string lenExact = MethodGenerationUtil.GetExactTypeName(lengthParam.Type.RemovePinnedAndModifiers());
@@ -168,13 +179,8 @@ namespace LeanAOT.ToCpp
             w.EndBlock();
             w.AddLine("else");
             w.BeginBlock();
-            w.AddLine($"static {ConstStrings.ClassPtrTypeName} {elemCache} = nullptr;");
-            w.AddLine($"if (LEANCLR_UNLIKELY({elemCache} == nullptr))");
-            w.BeginBlock();
-            w.AddLine($"{elemCache} = reinterpret_cast<{ConstStrings.ClassPtrTypeName}>({ConstStrings.CodegenNamespace}::resolve_metadata_token({modGv}, {tok}, nullptr));");
-            w.EndBlock();
-            w.AddLine($"auto __arr_r{arrayArgIndex} = {ConstStrings.CodegenNamespace}::mono_pinvoke_reverse_marshal_szarray_blittable_copy({elemCache}, __arg{arrayArgIndex}, static_cast<int32_t>(__arg{lengthArgIndex}));");
-            w.AddLine($"if (LEANCLR_UNLIKELY(__arr_r{arrayArgIndex}.is_err())) {{ std::abort(); }}");
+            w.AddLine($"auto __arr_r{arrayArgIndex} = {ConstStrings.CodegenNamespace}::mono_pinvoke_reverse_marshal_szarray_blittable_copy({arrayTypesigExpr}, __arg{arrayArgIndex}, static_cast<int32_t>(__arg{lengthArgIndex}));");
+            w.AddLine($"if (LEANCLR_UNLIKELY(__arr_r{arrayArgIndex}.is_err())) {{ LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK(); }}");
             w.AddLine($"auto* __arr{arrayArgIndex} = __arr_r{arrayArgIndex}.unwrap();");
             w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(__arr{arrayArgIndex}, {dstArr});");
             w.EndBlock();

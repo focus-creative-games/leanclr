@@ -232,9 +232,13 @@ void* pinvoke_marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept
     return reinterpret_cast<void*>(*reinterpret_cast<const intptr_t*>(field_addr));
 }
 
-RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const metadata::RtClass* ele_klass, const void* native_element_data,
+RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const metadata::RtTypeSig* array_param_typesig, const void* native_element_data,
                                                                           int32_t length) noexcept
 {
+    if (array_param_typesig == nullptr)
+    {
+        RET_ERR(RtErr::NullReference);
+    }
     if (length < 0)
     {
         RET_ERR(RtErr::Overflow);
@@ -243,12 +247,15 @@ RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const
     {
         RET_OK(nullptr);
     }
-    if (!vm::Class::is_blittable(ele_klass))
+    assert(array_param_typesig->ele_type == metadata::RtElementType::SZArray);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, arr_klass, vm::Class::get_class_from_typesig(array_param_typesig));
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(arr_klass));
+    if (!vm::Class::is_blittable(arr_klass->element_class))
     {
         RET_ERR(RtErr::NotSupported);
     }
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, new_szarray_from_ele_class(ele_klass, length));
-    const size_t ele_size = vm::Class::get_stack_location_size(ele_klass);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, new_szarray_from_array_class(arr_klass, length));
+    const size_t ele_size = vm::Array::get_array_element_size(arr);
     std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_element_data, static_cast<size_t>(length) * ele_size);
     RET_OK(arr);
 }
