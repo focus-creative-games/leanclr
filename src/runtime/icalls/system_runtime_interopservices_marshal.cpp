@@ -200,7 +200,7 @@ RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::ptr_to_structure_ty
     return vm::Marshal::ptr_to_structure_type(ptr, ref_type);
 }
 
-RtResultVoid SystemRuntimeInteropServicesMarshal::structure_to_ptr(vm::RtObject* obj, void* ptr, int32_t delete_old) noexcept
+RtResultVoid SystemRuntimeInteropServicesMarshal::structure_to_ptr(vm::RtObject* obj, void* ptr, bool delete_old) noexcept
 {
     if (!obj || !ptr)
     {
@@ -564,7 +564,7 @@ static RtResultVoid structure_to_ptr_invoker(metadata::RtManagedMethodPointer, c
 {
     vm::RtObject* obj = EvalStackOp::get_param<vm::RtObject*>(params, 0);
     void* ptr = EvalStackOp::get_param<void*>(params, 1);
-    int32_t delete_old = EvalStackOp::get_param<int32_t>(params, 2);
+    bool delete_old = EvalStackOp::get_param<bool>(params, 2);
     return SystemRuntimeInteropServicesMarshal::structure_to_ptr(obj, ptr, delete_old);
 }
 

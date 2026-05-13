@@ -35,7 +35,7 @@ class SystemRuntimeInteropServicesMarshal
     // Structure marshaling
     static RtResultVoid ptr_to_structure(void* ptr, vm::RtObject* obj) noexcept;
     static RtResult<vm::RtObject*> ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type) noexcept;
-    static RtResultVoid structure_to_ptr(vm::RtObject* obj, void* ptr, int32_t delete_old) noexcept;
+    static RtResultVoid structure_to_ptr(vm::RtObject* obj, void* ptr, bool delete_old) noexcept;
     static RtResultVoid destroy_structure(void* ptr, vm::RtReflectionType* ref_type) noexcept;
 
     // Type operations

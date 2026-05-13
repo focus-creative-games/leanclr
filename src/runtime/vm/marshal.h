@@ -60,7 +60,7 @@ class Marshal
 
     static RtResultVoid ptr_to_structure(void* ptr, vm::RtObject* obj);
     static RtResult<vm::RtObject*> ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type);
-    static RtResultVoid structure_to_ptr(vm::RtObject* obj, void* ptr, int32_t delete_old);
+    static RtResultVoid structure_to_ptr(vm::RtObject* obj, void* ptr, bool delete_old);
     static RtResultVoid destroy_structure(void* ptr, vm::RtReflectionType* ref_type);
 
     static RtResult<int32_t> sizeof_type(vm::RtReflectionType* ref_type);

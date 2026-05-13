@@ -5,6 +5,7 @@
 #include "rt_array.h"
 #include "class.h"
 #include "field.h"
+#include "object.h"
 #include "metadata/aot_module.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
@@ -53,7 +54,6 @@ void* Marshal::alloc_co_task_mem_size(size_t size)
 vm::RtString* Marshal::ptr_to_string_ansi(void* ptr)
 {
     return String::create_string_from_utf8cstr(reinterpret_cast<const char*>(ptr));
-    ;
 }
 
 vm::RtString* Marshal::ptr_to_string_ansi_len(void* ptr, int32_t len)
@@ -99,24 +99,48 @@ void Marshal::free_bstr(void* ptr)
     alloc::GeneralAllocation::free(ptr);
 }
 
-RtResultVoid Marshal::ptr_to_structure(void* ptr, vm::RtObject* obj)
+static RtResultVoid structure_to_ptr_impl(vm::RtObject* obj, void* ptr)
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
+}
+
+static RtResultVoid ptr_to_structure_impl(void* ptr, vm::RtObject* obj)
+{
+    RETURN_NOT_IMPLEMENTED_ERROR();
+}
+
+static RtResultVoid destroy_structure_impl(void* ptr, const metadata::RtClass* klass)
+{
+    RETURN_NOT_IMPLEMENTED_ERROR();
+}
+
+RtResultVoid Marshal::ptr_to_structure(void* ptr, vm::RtObject* obj)
+{
+    return ptr_to_structure_impl(ptr, obj);
 }
 
 RtResult<vm::RtObject*> Marshal::ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type)
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, Class::get_class_from_typesig(ref_type->type_handle));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, Object::new_object(klass));
+    RET_ERR_ON_FAIL(ptr_to_structure_impl(ptr, obj));
+    RET_OK(obj);
 }
 
-RtResultVoid Marshal::structure_to_ptr(vm::RtObject* obj, void* ptr, int32_t delete_old)
+RtResultVoid Marshal::structure_to_ptr(vm::RtObject* obj, void* ptr, bool delete_old)
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    if (delete_old)
+    {
+        RET_ERR_ON_FAIL(destroy_structure_impl(ptr, obj->klass));
+    }
+    return structure_to_ptr_impl(obj, ptr);
 }
 
 RtResultVoid Marshal::destroy_structure(void* ptr, vm::RtReflectionType* ref_type)
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, Class::get_class_from_typesig(ref_type->type_handle));
+    RET_ERR_ON_FAIL(Class::initialize_all(klass));
+    return destroy_structure_impl(ptr, klass);
 }
 
 RtResult<int32_t> Marshal::sizeof_type(vm::RtReflectionType* ref_type)
