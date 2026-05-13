@@ -57,9 +57,23 @@ namespace LeanAOT.ToCpp
                 }
                 w.AddLine($"constexpr size_t ARGS_SIZE = ARG{paramCount - 1}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{MethodGenerationUtil.GetExactTypeName(methodDetail.ParamsIncludeThis.Last().Type)}>();");
                 w.AddLine($"{ConstStrings.StackObjectTypeName} __args[ARGS_SIZE];");
-                for (int i = 0; i < paramCount; i++)
+                for (int i = 0; i < paramCount;)
                 {
-                    EmitMarshalNativeArgToEvalStack(w, methodDetail.ParamsIncludeThis[i], i);
+                    ParamDetail p = methodDetail.ParamsIncludeThis[i];
+                    TypeSig t = p.Type.RemovePinnedAndModifiers();
+                    if (t.ElementType == ElementType.SZArray)
+                    {
+                        if (!TryGetFollowingNativeLengthIndex(methodDetail.ParamsIncludeThis, i, out int lenIdx))
+                        {
+                            throw new NotSupportedException(
+                                $"MonoPInvokeCallback: parameter #{i} is SZArray but is not followed by int32_t/uint32_t length (use e.g. int[] arr, int count). Method: {methodDetail.FullName}.");
+                        }
+                        EmitMarshalNativeSzArrayFromPointerAndLength(w, method, t, i, lenIdx, methodDetail.ParamsIncludeThis[lenIdx]);
+                        i += 2;
+                        continue;
+                    }
+                    EmitMarshalNativeArgToEvalStack(w, p, i);
+                    i++;
                 }
             }
 
@@ -109,8 +123,62 @@ namespace LeanAOT.ToCpp
                 w.AddLine($"{{ auto __s = {ConstStrings.CodegenNamespace}::marshal_utf8_string_to_utf16(__arg{index}); {VmFunctionNames.ExpandArgumentToEvalStack}(__s, {dst}); }}");
                 return;
             }
+            if (type.ElementType == ElementType.SZArray)
+            {
+                throw new InvalidOperationException("SZArray marshalling must use EmitMarshalNativeSzArrayFromPointerAndLength (paired with length parameter).");
+            }
             string expandType = GetExpandTypeForNativeEdge(type, index);
             w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(static_cast<{expandType}>(__arg{index}), {dst});");
+        }
+
+        private static bool TryGetFollowingNativeLengthIndex(IReadOnlyList<ParamDetail> @params, int arrayParamIndex, out int lengthParamIndex)
+        {
+            lengthParamIndex = arrayParamIndex + 1;
+            if (arrayParamIndex + 1 >= @params.Count)
+            {
+                return false;
+            }
+            ElementType et = @params[arrayParamIndex + 1].Type.RemovePinnedAndModifiers().ElementType;
+            return et == ElementType.I4 || et == ElementType.U4;
+        }
+
+        /// <summary>
+        /// Native ABI: element pointer + length (e.g. <c>int32_t*</c> and <c>int32_t</c>); allocates a managed SZArray and copies blittable elements.
+        /// </summary>
+        private static void EmitMarshalNativeSzArrayFromPointerAndLength(
+            CodeThrunkWriter w,
+            MethodDef method,
+            TypeSig arrayParamType,
+            int arrayArgIndex,
+            int lengthArgIndex,
+            ParamDetail lengthParam)
+        {
+            TypeSig elem = ((SZArraySig)arrayParamType.RemovePinnedAndModifiers()).Next.RemovePinnedAndModifiers();
+            TypeDef elemTd = elem.ToTypeDefOrRef().ResolveTypeDefThrow();
+            string elemCache = $"s_mono_pinvoke_szarray_ele_{method.MDToken.ToInt32():X8}_{arrayArgIndex}";
+            string modGv = ModuleGenerationUtil.GetModuleGlobalVariableName(elemTd.Module);
+            string tok = $"0x{elemTd.MDToken.ToInt32():X8}";
+            string dstArr = $"__args + ARG{arrayArgIndex}_OFFSET";
+            string dstLen = $"__args + ARG{lengthArgIndex}_OFFSET";
+            string lenExact = MethodGenerationUtil.GetExactTypeName(lengthParam.Type.RemovePinnedAndModifiers());
+
+            w.AddLine($"if (__arg{arrayArgIndex} == nullptr)");
+            w.BeginBlock();
+            w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(static_cast<{ConstStrings.ArrayPtrTypeName}>(nullptr), {dstArr});");
+            w.EndBlock();
+            w.AddLine("else");
+            w.BeginBlock();
+            w.AddLine($"static {ConstStrings.ClassPtrTypeName} {elemCache} = nullptr;");
+            w.AddLine($"if (LEANCLR_UNLIKELY({elemCache} == nullptr))");
+            w.BeginBlock();
+            w.AddLine($"{elemCache} = reinterpret_cast<{ConstStrings.ClassPtrTypeName}>({ConstStrings.CodegenNamespace}::resolve_metadata_token({modGv}, {tok}, nullptr));");
+            w.EndBlock();
+            w.AddLine($"auto __arr_r{arrayArgIndex} = {ConstStrings.CodegenNamespace}::mono_pinvoke_reverse_marshal_szarray_blittable_copy({elemCache}, __arg{arrayArgIndex}, static_cast<int32_t>(__arg{lengthArgIndex}));");
+            w.AddLine($"if (LEANCLR_UNLIKELY(__arr_r{arrayArgIndex}.is_err())) {{ std::abort(); }}");
+            w.AddLine($"auto* __arr{arrayArgIndex} = __arr_r{arrayArgIndex}.unwrap();");
+            w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(__arr{arrayArgIndex}, {dstArr});");
+            w.EndBlock();
+            w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(static_cast<{lenExact}>(__arg{lengthArgIndex}), {dstLen});");
         }
 
         /// <summary>Expression type for <c>static_cast</c> from native thunk parameter into overload used by expand_argument_to_eval_stack.</summary>
@@ -139,8 +207,6 @@ namespace LeanAOT.ToCpp
             case ElementType.GenericInst:
             case ElementType.FnPtr:
                 return MethodGenerationUtil.GetExactTypeName(type);
-            case ElementType.SZArray:
-                return ConstStrings.ArrayPtrTypeName;
             default:
                 throw new NotSupportedException($"MonoPInvokeCallback parameter #{argIndex} type {type} is not supported yet.");
             }
