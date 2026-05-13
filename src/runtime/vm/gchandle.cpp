@@ -206,7 +206,15 @@ void GCHandle::foreach_strong_handles(void (*callback)(void*, void*), void* user
 {
     for (auto it = s_handle_map.begin(); it != s_handle_map.end(); ++it)
     {
-        callback(it->second->obj, userData);
+        HandleInfo* hi = it->second;
+        if (hi->type_ == GCHandleType::Weak || hi->type_ == GCHandleType::WeakTrackResurrection)
+        {
+            continue;
+        }
+        if (hi->obj != nullptr)
+        {
+            callback(hi->obj, userData);
+        }
     }
 }
 
