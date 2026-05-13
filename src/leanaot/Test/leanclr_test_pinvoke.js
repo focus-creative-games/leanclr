@@ -42,4 +42,24 @@ mergeInto(LibraryManager.library, {
     }
     return sum | 0;
   },
+
+  leanclr_pinvoke_struct_pair_mul_add: function (a, b) {
+    return ((a | 0) * (b | 0) + (b | 0)) | 0;
+  },
+
+  leanclr_pinvoke_invoke_binary_op: function (cbPtr, a, b) {
+    if (!cbPtr) {
+      return 0;
+    }
+    var tbl = typeof wasmTable !== 'undefined' ? wasmTable : (typeof Module !== 'undefined' ? Module['wasmTable'] : null);
+    if (!tbl || !tbl.get) {
+      console.warn('leanclr_pinvoke_invoke_binary_op: wasmTable not available');
+      return 0;
+    }
+    return tbl.get(cbPtr)(a | 0, b | 0) | 0;
+  },
+
+  leanclr_pinvoke_safe_handle_add_ten: function (h) {
+    return (h + 10) | 0;
+  },
 });
