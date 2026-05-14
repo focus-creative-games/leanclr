@@ -292,7 +292,7 @@ namespace LeanAOT.ToCpp
                 case TypeNameRelaxLevel.EvalStackRelaxed:
                     return "intptr_t";
                 case TypeNameRelaxLevel.AbiRelaxed:
-                    return "void*";
+                    return "intptr_t";
                 }
                 break;
             }
@@ -305,7 +305,7 @@ namespace LeanAOT.ToCpp
                 case TypeNameRelaxLevel.EvalStackRelaxed:
                     return "uintptr_t";
                 case TypeNameRelaxLevel.AbiRelaxed:
-                    return "void*";
+                    return "uintptr_t";
                 }
                 break;
             }

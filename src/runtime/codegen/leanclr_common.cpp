@@ -8,6 +8,11 @@
 #include "vm/pinvoke.h"
 #include "vm/rt_exception.h"
 
+#if LEANCLR_PLATFORM_WIN
+#include <windows.h>
+#include <cwchar>
+#endif
+
 namespace leanclr
 {
 namespace codegen
@@ -167,7 +172,8 @@ void resolve_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens,
     resolve_generic_metadata_tokens(mod, tokens, count, nullptr, resolved_metadatas);
 }
 
-void resolve_generic_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, const metadata::RtMethodInfo* generic_method_info, void** resolved_metadatas)
+void resolve_generic_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, const metadata::RtMethodInfo* generic_method_info,
+                                     void** resolved_metadatas)
 {
     for (size_t i = 0; i < count; i++)
     {
@@ -175,16 +181,49 @@ void resolve_generic_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t*
     }
 }
 
-const char* marshal_utf16_string_to_utf8(vm::RtString* str)
+NativeChar* marshal_managed_string_to_ansi_string(vm::RtString* str, StringBuilder& temp) noexcept
 {
     if (str == nullptr)
     {
         return nullptr;
     }
-    utils::StringBuilder sb;
-    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)), sb);
-    // FIXME: should we use std::malloc instead of alloc::GeneralAllocation::malloc?
-    return sb.dup_to_zero_end_cstr();
+    
+    #if LEANCLR_PLATFORM_WIN
+        temp.append_utf16_to_ansi_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
+    #else
+        temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
+    #endif
+    return temp.as_ansi_chars();
+}
+
+NativeChar* marshal_managed_string_to_ansi_string(vm::RtString* str) noexcept
+{
+    if (str == nullptr)
+    {
+        return nullptr;
+    }
+    StringBuilder temp;
+    #if LEANCLR_PLATFORM_WIN
+    temp.append_utf16_to_ansi_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
+#else
+    temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
+#endif
+return temp.dup_to_zero_end_ansi_chars();
+}
+
+vm::RtString* marshal_ansi_string_to_managed_string(const NativeChar* str) noexcept
+{
+    if (str == nullptr)
+    {
+        return nullptr;
+    }
+    #if LEANCLR_PLATFORM_WIN
+    StringBuilder temp;
+    temp.append_ansi_to_utf16_str(str, static_cast<size_t>(wcslen(str)));
+    return vm::String::create_string_from_utf16chars(temp.as_utf16chars(), static_cast<int32_t>(temp.get_utf16chars_length()));
+    #else
+    return vm::String::create_string_from_utf8cstr(reinterpret_cast<const char*>(str));
+    #endif
 }
 
 RtErr raise_internal_call_entry_not_found_error(const char* name) noexcept
@@ -201,39 +240,47 @@ RtErr raise_pinvoke_entry_not_found_error(const char* dll_name_no_ext, const cha
     RET_ERR_WITH_MSG(RtErr::EntryPointNotFound, err_msg);
 }
 
-void* pinvoke_marshal_delegate_to_void_ptr(vm::RtDelegate* del) noexcept
-{
-    const auto r = vm::Marshal::get_function_pointer_for_delegate(del);
-    if (LEANCLR_UNLIKELY(r.is_err()))
-    {
-        return nullptr;
-    }
-    return (void*)r.unwrap();
-}
-
-void* pinvoke_marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept
+void* marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept
 {
     if (obj == nullptr)
     {
         return nullptr;
     }
+    #if LEANCLR_DEBUG
     const metadata::RtClass* klass = obj->klass;
     const metadata::RtFieldInfo* fi = vm::Class::get_field_for_name(klass, "handle", true);
     if (fi == nullptr)
     {
         fi = vm::Class::get_field_for_name(klass, "_handle", true);
     }
-    if (fi == nullptr)
-    {
-        return nullptr;
-    }
-    const uint8_t* field_addr =
-        reinterpret_cast<const uint8_t*>(obj) + vm::Field::get_field_offset_includes_object_header_for_all_type(fi);
-    return reinterpret_cast<void*>(*reinterpret_cast<const intptr_t*>(field_addr));
+    assert(fi);
+    assert(fi->offset == 0);
+    #endif
+    return *reinterpret_cast<void**>(obj + 1);
 }
 
-RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const metadata::RtTypeSig* array_param_typesig, const void* native_element_data,
-                                                                          int32_t length) noexcept
+
+RtResult<vm::RtObject*> marshal_void_ptr_to_safe_handle(void* ptr, const metadata::RtTypeSig* handle_typesig) noexcept
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(handle_typesig));
+    #if LEANCLR_DEBUG
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(klass));
+    const metadata::RtFieldInfo* fi = vm::Class::get_field_for_name(klass, "handle", true);
+    if (fi == nullptr)
+    {
+        fi = vm::Class::get_field_for_name(klass, "_handle", true);
+    }
+    assert(fi);
+    assert(fi->offset == 0);
+    #endif
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, vm::Object::new_object(klass));
+    void** field_addr = reinterpret_cast<void**>(obj + 1);
+    *field_addr = ptr;
+    RET_OK(obj);
+}
+
+RtResult<vm::RtArray*> marshal_native_array_to_managed_array(const metadata::RtTypeSig* array_param_typesig, const void* native_element_data,
+                                                                           int32_t length) noexcept
 {
     assert(array_param_typesig != nullptr);
     if (length < 0)
@@ -257,33 +304,63 @@ RtResult<vm::RtArray*> mono_pinvoke_reverse_marshal_szarray_blittable_copy(const
     RET_OK(arr);
 }
 
-RtResult<vm::RtObject*> mono_pinvoke_reverse_marshal_handle(const metadata::RtTypeSig* handle_param_typesig, void* raw_handle) noexcept
+RtResult<void*> marshal_managed_array_to_native_array(vm::RtArray* managed_array, size_t& native_element_count) noexcept
 {
-    if (raw_handle == nullptr)
+    if (managed_array == nullptr)
     {
         RET_OK(nullptr);
     }
-    assert (handle_param_typesig != nullptr);
-    assert (handle_param_typesig->ele_type == metadata::RtElementType::Class);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, handle_klass, vm::Class::get_class_from_typesig(handle_param_typesig));
-    RET_ERR_ON_FAIL(vm::Class::initialize_all(handle_klass));
+    const size_t ele_size = vm::Array::get_array_element_size(managed_array);
+    native_element_count = vm::Array::get_array_length(managed_array);
 
-    #if LEANCLR_DEBUG
+    void* native_array = alloc::GeneralAllocation::malloc(native_element_count * ele_size);
+    std::memcpy(native_array, vm::Array::get_array_data_start_as_ptr_void(managed_array), native_element_count * ele_size);
+    return native_array;
+}
 
-    const metadata::RtFieldInfo* fi = vm::Class::get_field_for_name(handle_klass, "handle", true);
-    if (fi == nullptr)
+RtResult<vm::RtArray*> marshal_native_array_to_managed_array(void* native_array, size_t native_element_count, const metadata::RtTypeSig* array_param_typesig) noexcept
+{
+    assert(array_param_typesig != nullptr);
+    if (native_array == nullptr)
     {
-        fi = vm::Class::get_field_for_name(handle_klass, "_handle", true);
+        RET_OK(nullptr);
     }
-    assert(fi != nullptr);
-    // handle field is the first field of the class
-    assert(fi->offset == 0);
-    #endif
+    assert(array_param_typesig->ele_type == metadata::RtElementType::SZArray);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, arr_klass, vm::Class::get_class_from_typesig(array_param_typesig));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, new_szarray_from_array_class(arr_klass, static_cast<int32_t>(native_element_count)));
+    const size_t ele_size = vm::Array::get_array_element_size(arr);
+    std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_array, native_element_count * ele_size);
+    RET_OK(arr);
+}
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, vm::Object::new_object(handle_klass));
-    void** field_addr = reinterpret_cast<void**>(obj + 1);
-    *field_addr = raw_handle;
-    RET_OK(obj);
+void free_native_array(void* native_array) noexcept
+{
+    alloc::GeneralAllocation::free(native_array);
+}
+
+void marshal_managed_array_to_native_val_array(vm::RtArray* managed_array, void* native_array, size_t native_element_count) noexcept
+{
+    if (managed_array == nullptr)
+    {
+        return;
+    }
+    const size_t ele_size = vm::Array::get_array_element_size(managed_array);
+    std::memcpy(native_array, vm::Array::get_array_data_start_as_ptr_void(managed_array), native_element_count * ele_size);
+}
+
+RtResult<vm::RtArray*> marshal_native_val_array_to_managed_array(void* native_array, size_t native_element_count, const metadata::RtTypeSig* array_typesig) noexcept
+{
+    if (native_array == nullptr)
+    {
+        RET_ERR(RtErr::NullReference);
+    }
+    assert(array_typesig != nullptr);
+    assert(array_typesig->ele_type == metadata::RtElementType::SZArray);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, arr_klass, vm::Class::get_class_from_typesig(array_typesig));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, new_szarray_from_array_class(arr_klass, static_cast<int32_t>(native_element_count)));
+    const size_t ele_size = vm::Array::get_array_element_size(arr);
+    std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_array, native_element_count * ele_size);
+    RET_OK(arr);
 }
 
 } // namespace codegen

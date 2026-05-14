@@ -1,6 +1,7 @@
 #pragma once
 
 #include "metadata/rt_metadata.h"
+#include "metadata/rt_marshal_types.h"
 
 namespace leanclr
 {

@@ -18,6 +18,8 @@ namespace LeanAOT.ToCpp
         public const string MethodInfoParameterName = "___methodInfo";
         public const string ManagedMethodPointerTypeName = "leanclr::metadata::RtManagedMethodPointer";
         public const string InvokeMethodPointerTypeName = "leanclr::metadata::RtInvokeMethodPointer";
+        public const string NativeMethodPointerTypeName = "leanclr::metadata::RtNativeMethodPointer";
+
         public const string MethodPointerFieldName = "method_ptr";
         public const string VirtualMethodPointerFieldName = "virtual_method_ptr";
         public const string InvokerMethodPointerFieldName = "invoker_method_ptr";
@@ -36,6 +38,11 @@ namespace LeanAOT.ToCpp
 
         public const string StackObjectTypeName = "leanclr::interp::RtStackObject";
 
+        public const string AnsiCharTypeName = "leanclr::NativeChar";
+        public const string Utf16CharTypeName = "leanclr::Utf16Char";
+        public const string AnsiCharPtrTypeName = AnsiCharTypeName + "*";
+        public const string Utf16CharPtrTypeName = Utf16CharTypeName + "*";
+        
         public const string ObjectPtrTypeName = "leanclr::vm::RtObject*";
         public const string StringPtrTypeName = "leanclr::vm::RtString*";
         public const string ArrayPtrTypeName = "leanclr::vm::RtArray*";
@@ -52,5 +59,20 @@ namespace LeanAOT.ToCpp
         public const string CppFunctionNoexcept = " noexcept";
 
         public const string InternalDllName = "__Internal";
+
+        // marshal types
+        public const string MarshalBooleanTypeName = "leanclr::metadata::RtMarshalBoolean";
+        public const string MarshalVariantBoolTypeName = "leanclr::metadata::RtMarshalVariantBool";
+        public const string MarshalCustomMarshalerTypeName = "leanclr::metadata::RtMarshalCustomMarshaler";
+        public const string MarshalErrorTypeName = "leanclr::metadata::RtMarshalError";
+        public const string MarshalIInspectableTypeName = "leanclr::metadata::RtMarshalIInspectable";
+        public const string MarshalHStringTypeName = "leanclr::metadata::RtMarshalHString";
+        public const string MarshalLPUTF8StrTypeName = "leanclr::metadata::RtMarshalLPUTF8Str";
+        public const string MarshalIUnknownTypeName = "leanclr::metadata::RtMarshalIUnknown";
+        public const string MarshalIDispatchTypeName = "leanclr::metadata::RtMarshalIDispatch";
+        public const string MarshalInterfaceTypeName = "leanclr::metadata::RtMarshalInterface";
+        public const string MarshalSafeArrayPtrTypeName = "leanclr::metadata::RtSafeArray*";
+
+        public const string StringBuilderTypeName = "leanclr::utils::StringBuilder";
     }
 }

@@ -1,343 +1,125 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 using dnlib.DotNet;
-using LeanAOT.Core;
-using LeanAOT.GenerationPlan;
 
 namespace LeanAOT.ToCpp
 {
-    /// <summary>
-    /// Emits <c>extern "C"</c> reverse P/Invoke thunks for methods marked with <c>[MonoPInvokeCallback]</c>:
-    /// marshal native parameters onto the interpreter stack and dispatch via <see cref="VmFunctionNames.InvokeWithRunClassStaticConstructor"/>.
-    /// </summary>
-    static class MonoPInvokeCallbackWriter
+    class MonoPInvokeCallbackWriter
     {
-        /// <summary>
-        /// Stable native thunk symbol: same stem as managed <see cref="MethodDetail.UniqueName"/> plus <c>__monopinvokecallback</c>
-        /// (mirrors MethodWriterBase naming; embeds declaring type, method name, token, and MD5 disambiguator).
-        /// </summary>
-        public static string GetNativeThunkSymbolName(MethodDetail methodDetail)
+        private readonly MonoPInvokeCallbackInfo _info;
+        private readonly ForwardDeclaration _forwardDeclaration;
+        private readonly CodeThrunkWriter _writer;
+
+        private readonly List<MarshalParamOrRet> _params;
+        private readonly MarshalParamOrRet _ret;
+
+        public MonoPInvokeCallbackWriter(MonoPInvokeCallbackInfo info, ForwardDeclaration forwardDeclaration, CodeThrunkWriter writer)
         {
-            return $"{methodDetail.UniqueName}__monopinvokecallback";
+            _info = info;
+            _forwardDeclaration = forwardDeclaration;
+            _writer = writer;
+            _params = info.methodDetail.ParamsIncludeThis.Select(p => CreateMarshalParamOrRet(p, false)).ToList();
+            _ret = CreateMarshalParamOrRet(info.methodDetail.RetTypeParam, true);
         }
 
-        public static void GenerateAll(AssemblyPlan plan, ForwardDeclaration forwardDeclaration, CodeThrunkWriter implWriter)
+        private MarshalParamOrRet CreateMarshalParamOrRet(ParamDetail param, bool isReturn)
         {
-            foreach (MethodDefPlan mp in plan.MonoPInvokeCallbackMethodPlans)
+            return new MarshalParamOrRet(param.Type, MarshalUtil.GetParameterOrFieldMarshalInfo(param.ParamDef), CharSet.None, isReturn, param.Name, $"{param.Name}_native");
+        }
+
+        public void WriteCode()
+        {
+            MethodDef method = _info.method;
+            Debug.Assert(method.IsStatic);
+            _forwardDeclaration.AddMethodForwardDeclaration(method);
+            MethodDetail methodDetail = _info.methodDetail;
+            CodeThrunkWriter writer = _writer;
+            string methodName = _info.name;
+
+            string callConv = MarshalUtil.GetMonoPInvokeCallbackCallingConventionCppMacro(method);
+            string paramDecl = string.Join(", ", _params.Select(p => $"{p.NativeTypeName} {p.NativeVarName}"));
+
+            writer.AddLine();
+            writer.AddLine($"{_ret.NativeTypeName} {callConv} {methodName}({paramDecl}){ConstStrings.CppFunctionNoexcept}");
+            writer.BeginBlock();
+
+            if (!(_params.All(p => p.Supported) && _ret.Supported))
             {
-                MethodDef method = mp.MethodDef;
-                MethodDetail methodDetail = GlobalServices.Inst.MetadataService.GetMethodDetail(method);
-                GlobalServices.Inst.InvokerService.GetInvoker(method);
-                forwardDeclaration.AddMethodForwardDeclaration(method);
-                WriteThunk(plan.Module, implWriter, methodDetail);
+                writer.AddLine($"printf(\"MonoPInvokeCallback method {method.FullName} is not supported\");");
+                writer.AddLine($"{VmFunctionNames.ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK}();");
+                if (methodDetail.HasNotVoidReturn)
+                {
+                    writer.AddLine($"return {{}};");
+                }
+                writer.EndBlock();
+                return;
             }
-        }
-
-        private static void WriteThunk(ModuleDef mod, CodeThrunkWriter w, MethodDetail methodDetail)
-        {
-            MethodDef method = methodDetail.MethodDef;
-            string sym = GetNativeThunkSymbolName(methodDetail);
-            string nativeRet = GetNativeReturnType(methodDetail);
-            string returnStmt = methodDetail.IsVoidReturn ? string.Empty : "return __native_ret;";
-
-            string callConv = "LEANCLR_PINVOKE_CALL_CDECL";
-            var nativeParams = methodDetail.ParamsIncludeThis.Select((p, i) => $"{GetNativeParamType(p.Type)} __arg{i}").ToList();
-            string paramDecl = string.Join(", ", nativeParams);
-
-            w.AddLine();
-            w.AddLine($"extern \"C\" {nativeRet} {callConv} {sym}({paramDecl}){ConstStrings.CppFunctionNoexcept}");
-            w.AddLine("{");
-            w.IncreaseIndent();
 
             string cachedMethodVarName = $"s_mono_pinvoke_resolved_method_{method.MDToken.ToInt32():X8}";
-            w.AddLine($"static {ConstStrings.MethodInfoPtrTypeName} {cachedMethodVarName} = nullptr;");
-            w.AddLine($"if (LEANCLR_UNLIKELY({cachedMethodVarName} == nullptr))");
-            w.BeginBlock();
-            w.AddLine($"{cachedMethodVarName} = reinterpret_cast<{ConstStrings.MethodInfoPtrTypeName}>({ConstStrings.CodegenNamespace}::resolve_metadata_token({ModuleGenerationUtil.GetModuleGlobalVariableName(mod)}, 0x{method.MDToken.ToInt32():X8}, nullptr));");
-            w.EndBlock();
-            w.AddLine($"{ConstStrings.MethodInfoPtrTypeName} __method = {cachedMethodVarName};");
+            writer.AddLine($"static {ConstStrings.MethodInfoPtrTypeName} {cachedMethodVarName} = nullptr;");
+            writer.AddLine($"if (LEANCLR_UNLIKELY({cachedMethodVarName} == nullptr))");
+            writer.BeginBlock();
+            writer.AddLine($"{cachedMethodVarName} = reinterpret_cast<{ConstStrings.MethodInfoPtrTypeName}>({ConstStrings.CodegenNamespace}::resolve_metadata_token({ModuleGenerationUtil.GetModuleGlobalVariableName(method.Module)}, 0x{method.MDToken.ToInt32():X8}, nullptr));");
+            writer.EndBlock();
+            writer.AddLine($"{ConstStrings.MethodInfoPtrTypeName} __method = {cachedMethodVarName};");
 
-            int paramCount = methodDetail.ParamCountIncludeThis;
-            if (paramCount > 0)
+            foreach (var param in _params)
             {
-                w.AddLine("constexpr size_t ARG0_OFFSET = 0;");
-                for (int paramIndex = 0, last = paramCount - 1; paramIndex < last; paramIndex++)
-                {
-                    ParamDetail param = methodDetail.ParamsIncludeThis[paramIndex];
-                    w.AddLine($"constexpr size_t ARG{paramIndex + 1}_OFFSET = ARG{paramIndex}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{MethodGenerationUtil.GetExactTypeName(param.Type)}>();");
-                }
-                w.AddLine($"constexpr size_t ARGS_SIZE = ARG{paramCount - 1}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{MethodGenerationUtil.GetExactTypeName(methodDetail.ParamsIncludeThis.Last().Type)}>();");
-                w.AddLine($"{ConstStrings.StackObjectTypeName} __args[ARGS_SIZE];");
-                for (int i = 0; i < paramCount;)
-                {
-                    ParamDetail p = methodDetail.ParamsIncludeThis[i];
-                    TypeSig t = p.Type.RemovePinnedAndModifiers();
-                    if (t.ElementType == ElementType.SZArray)
-                    {
-                        if (!TryGetFollowingNativeLengthIndex(methodDetail.ParamsIncludeThis, i, out int lenIdx))
-                        {
-                            throw new NotSupportedException(
-                                $"MonoPInvokeCallback: parameter #{i} is SZArray but is not followed by int32_t/uint32_t length (use e.g. int[] arr, int count). Method: {methodDetail.FullName}.");
-                        }
-                        EmitMarshalNativeSzArrayFromPointerAndLength(w, methodDetail, i, lenIdx, methodDetail.ParamsIncludeThis[lenIdx]);
-                        i += 2;
-                        continue;
-                    }
-                    EmitMarshalNativeArgToEvalStack(w, methodDetail, p, i);
-                    i++;
-                }
+                writer.AddLines(param.NativeToManagedSetupCode);
             }
 
-            string argsPtr = paramCount > 0 ? "__args" : "nullptr";
-            string invokeFn = methodDetail.IsStatic ? VmFunctionNames.InvokeWithRunClassStaticConstructor : VmFunctionNames.InvokeWithoutRunClassStaticConstructor;
-
-            if (methodDetail.IsVoidReturn)
+            int paramCount = methodDetail.ParamCountIncludeThis;
+            string argsPtr;
+            if (paramCount > 0)
             {
-                w.AddLine($"auto __inv_r = {invokeFn}(__method, {argsPtr}, nullptr);");
-                w.AddLine("if (LEANCLR_UNLIKELY(__inv_r.is_err())) { LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK(); }");
+                argsPtr = "__args_buffer";
+                writer.AddLine("constexpr size_t ARG0_OFFSET = 0;");
+                for (int paramIndex = 0, last = paramCount - 1; paramIndex < last; paramIndex++)
+                {
+                    MarshalParamOrRet param = _params[paramIndex];
+                    writer.AddLine($"constexpr size_t ARG{paramIndex + 1}_OFFSET = ARG{paramIndex}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{param.ManagedTypeName}>();");
+                }
+                writer.AddLine($"constexpr size_t ARGS_SIZE = ARG{paramCount - 1}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{_params.Last().ManagedTypeName}>();");
+                writer.AddLine($"{ConstStrings.StackObjectTypeName} {argsPtr}[ARGS_SIZE];");
+                for (int i = 0; i < paramCount; i++)
+                {
+                    MarshalParamOrRet param = _params[i];
+                    writer.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}({param.ManagedVarName}, {argsPtr} + ARG{i}_OFFSET);");
+                    writer.AddLines(param.NativeToManagedCleanupCode);
+                }
             }
             else
             {
-                w.AddLine($"constexpr size_t RET_SIZE = {VmFunctionNames.GetStackObjectSizeForType}<{MethodGenerationUtil.GetExactTypeName(methodDetail.RetType)}>();");
-                w.AddLine($"{ConstStrings.StackObjectTypeName} __ret[RET_SIZE];");
-                w.AddLine($"auto __inv_r = {invokeFn}(__method, {argsPtr}, __ret);");
-                w.AddLine("if (LEANCLR_UNLIKELY(__inv_r.is_err())) { LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK(); }");
+                argsPtr = "nullptr";
+            }
+            string retPtr;
+            if (methodDetail.HasNotVoidReturn)
+            {
+                writer.AddLine($"constexpr size_t RET_SIZE = {VmFunctionNames.GetStackObjectSizeForType}<{_ret.ManagedTypeName}>();");
+                retPtr = "__ret_buffer";
+                writer.AddLine($"{ConstStrings.StackObjectTypeName} {retPtr}[RET_SIZE];");
+            }
+            else
+            {
+                retPtr = "nullptr";
+            }
+            string invokeFn = VmFunctionNames.InvokeWithRunClassStaticConstructor;
+            writer.AddLine($"auto __inv_result = {invokeFn}(__method, {argsPtr}, {retPtr});");
+            foreach (var param in _params)
+            {
+                writer.AddLines(param.NativeToManagedCleanupCode);
+            }
+            writer.AddLine($"if (LEANCLR_UNLIKELY(__inv_result.is_err())) {{ {VmFunctionNames.ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK}(); }}");
+
+            if (methodDetail.HasNotVoidReturn)
+            {
                 string retExact = MethodGenerationUtil.GetExactTypeName(methodDetail.RetType);
-                w.AddLine($"{nativeRet} __native_ret = {ConstStrings.CodegenNamespace}::get_eval_stack_value_as_type<{retExact}>(__ret);");
-                w.AddLine(returnStmt);
+                writer.AddLine($"{_ret.ManagedTypeName} {_ret.ManagedVarName} = {ConstStrings.CodegenNamespace}::get_eval_stack_value_as_type<{_ret.ManagedTypeName}>({retPtr});");
+                writer.AddLines(_ret.ManagedToNativeSetupCode);
+                writer.AddLines(_ret.ManagedToNativeCleanupCode);
+                writer.AddLine($"return {_ret.NativeVarName};");
             }
-
-            w.DecreaseIndent();
-            w.AddLine("}");
-        }
-
-        private static int GetRtMethodParametersIndex(MethodDetail methodDetail, int paramsIncludeThisIndex)
-        {
-            if (!methodDetail.IsStatic && paramsIncludeThisIndex == 0)
-            {
-                throw new InvalidOperationException(
-                    $"MonoPInvokeCallback: parameter index {paramsIncludeThisIndex} is implicit this; cannot map to RtMethodInfo::parameters. Method: {methodDetail.FullName}.");
-            }
-            int rt = methodDetail.IsStatic ? paramsIncludeThisIndex : paramsIncludeThisIndex - 1;
-            if (rt < 0)
-            {
-                throw new InvalidOperationException($"MonoPInvokeCallback: invalid RtMethodInfo::parameters index. Method: {methodDetail.FullName}.");
-            }
-            return rt;
-        }
-
-        private static void EmitMarshalNativeArgToEvalStack(CodeThrunkWriter w, MethodDetail methodDetail, ParamDetail param, int index)
-        {
-            TypeSig type = param.Type.RemovePinnedAndModifiers();
-            string dst = $"__args + ARG{index}_OFFSET";
-            if (type.ElementType == ElementType.ByRef)
-            {
-                TypeSig inner = ((ByRefSig)type).Next.RemovePinnedAndModifiers();
-                string innerExact = MethodGenerationUtil.GetExactTypeName(inner);
-                w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(*reinterpret_cast<{innerExact}*>(__arg{index}), {dst});");
-                return;
-            }
-            if (type.ElementType == ElementType.String)
-            {
-                w.AddLine($"{{ auto __s = {ConstStrings.CodegenNamespace}::marshal_utf8_string_to_utf16(__arg{index}); {VmFunctionNames.ExpandArgumentToEvalStack}(__s, {dst}); }}");
-                return;
-            }
-            if (type.ElementType == ElementType.Class)
-            {
-                TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
-                if (MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle")
-                    || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.CriticalHandle"))
-                {
-                    EmitMarshalNativeHandleFromRawPtr(w, methodDetail, index, dst);
-                    return;
-                }
-            }
-            if (type.ElementType == ElementType.SZArray)
-            {
-                throw new InvalidOperationException("SZArray marshalling must use EmitMarshalNativeSzArrayFromPointerAndLength (paired with length parameter).");
-            }
-            string expandType = GetExpandTypeForNativeEdge(type, index);
-            w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(static_cast<{expandType}>(__arg{index}), {dst});");
-        }
-
-        private static bool TryGetFollowingNativeLengthIndex(IReadOnlyList<ParamDetail> @params, int arrayParamIndex, out int lengthParamIndex)
-        {
-            lengthParamIndex = arrayParamIndex + 1;
-            if (arrayParamIndex + 1 >= @params.Count)
-            {
-                return false;
-            }
-            ElementType et = @params[arrayParamIndex + 1].Type.RemovePinnedAndModifiers().ElementType;
-            return et == ElementType.I4 || et == ElementType.U4;
-        }
-
-        /// <summary>
-        /// Native ABI: element pointer + length (e.g. <c>int32_t*</c> and <c>int32_t</c>); allocates a managed SZArray and copies blittable elements.
-        /// </summary>
-        private static void EmitMarshalNativeSzArrayFromPointerAndLength(
-            CodeThrunkWriter w,
-            MethodDetail methodDetail,
-            int arrayArgIndex,
-            int lengthArgIndex,
-            ParamDetail lengthParam)
-        {
-            int rtParametersIndex = GetRtMethodParametersIndex(methodDetail, arrayArgIndex);
-            string arrayTypesigExpr = $"__method->parameters[{rtParametersIndex}]";
-
-            string dstArr = $"__args + ARG{arrayArgIndex}_OFFSET";
-            string dstLen = $"__args + ARG{lengthArgIndex}_OFFSET";
-            string lenExact = MethodGenerationUtil.GetExactTypeName(lengthParam.Type.RemovePinnedAndModifiers());
-
-            w.AddLine($"if (__arg{arrayArgIndex} == nullptr)");
-            w.BeginBlock();
-            w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(static_cast<{ConstStrings.ArrayPtrTypeName}>(nullptr), {dstArr});");
-            w.EndBlock();
-            w.AddLine("else");
-            w.BeginBlock();
-            w.AddLine($"auto __arr_r{arrayArgIndex} = {ConstStrings.CodegenNamespace}::mono_pinvoke_reverse_marshal_szarray_blittable_copy({arrayTypesigExpr}, __arg{arrayArgIndex}, static_cast<int32_t>(__arg{lengthArgIndex}));");
-            w.AddLine($"if (LEANCLR_UNLIKELY(__arr_r{arrayArgIndex}.is_err())) {{ LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK(); }}");
-            w.AddLine($"auto* __arr{arrayArgIndex} = __arr_r{arrayArgIndex}.unwrap();");
-            w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(__arr{arrayArgIndex}, {dstArr});");
-            w.EndBlock();
-            w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(static_cast<{lenExact}>(__arg{lengthArgIndex}), {dstLen});");
-        }
-
-        private static void EmitMarshalNativeHandleFromRawPtr(CodeThrunkWriter w, MethodDetail methodDetail, int argIndex, string dst)
-        {
-            int rtParametersIndex = GetRtMethodParametersIndex(methodDetail, argIndex);
-            string handleTypesigExpr = $"__method->parameters[{rtParametersIndex}]";
-
-            w.AddLine($"auto __h_r{argIndex} = {ConstStrings.CodegenNamespace}::mono_pinvoke_reverse_marshal_handle({handleTypesigExpr}, __arg{argIndex});");
-            w.AddLine($"if (LEANCLR_UNLIKELY(__h_r{argIndex}.is_err())) {{ LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK(); }}");
-            w.AddLine($"auto* __h{argIndex} = __h_r{argIndex}.unwrap();");
-            w.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}(__h{argIndex}, {dst});");
-        }
-
-        /// <summary>Expression type for <c>static_cast</c> from native thunk parameter into overload used by expand_argument_to_eval_stack.</summary>
-        private static string GetExpandTypeForNativeEdge(TypeSig type, int argIndex)
-        {
-            type = type.RemovePinnedAndModifiers();
-            switch (type.ElementType)
-            {
-            case ElementType.Boolean:
-            case ElementType.Char:
-            case ElementType.I1:
-            case ElementType.U1:
-            case ElementType.I2:
-            case ElementType.U2:
-            case ElementType.I4:
-            case ElementType.U4:
-            case ElementType.I8:
-            case ElementType.U8:
-            case ElementType.R4:
-            case ElementType.R8:
-            case ElementType.I:
-            case ElementType.U:
-            case ElementType.Ptr:
-                return MethodGenerationUtil.GetExactTypeName(type);
-            case ElementType.Class:
-            {
-                TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
-                if (MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle")
-                    || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.CriticalHandle"))
-                {
-                    throw new NotSupportedException(
-                        $"MonoPInvokeCallback: SafeHandle/CriticalHandle must use {nameof(EmitMarshalNativeHandleFromRawPtr)}. Parameter #{argIndex}.");
-                }
-                return MethodGenerationUtil.GetExactTypeName(type);
-            }
-            case ElementType.ValueType:
-            case ElementType.GenericInst:
-            case ElementType.FnPtr:
-                return MethodGenerationUtil.GetExactTypeName(type);
-            default:
-                throw new NotSupportedException($"MonoPInvokeCallback parameter #{argIndex} type {type} is not supported yet.");
-            }
-        }
-
-        private static string GetNativeReturnType(MethodDetail methodDetail)
-        {
-            return GetNativeParamType(methodDetail.RetType);
-        }
-
-        private static string GetNativeParamType(TypeSig type)
-        {
-            type = type.RemovePinnedAndModifiers();
-            switch (type.ElementType)
-            {
-            case ElementType.Void:
-                return "void";
-            case ElementType.Boolean:
-                return "bool";
-            case ElementType.Char:
-                return "leanclr::Utf16Char";
-            case ElementType.I1:
-                return "int8_t";
-            case ElementType.U1:
-                return "uint8_t";
-            case ElementType.I2:
-                return "int16_t";
-            case ElementType.U2:
-                return "uint16_t";
-            case ElementType.I4:
-                return "int32_t";
-            case ElementType.U4:
-                return "uint32_t";
-            case ElementType.I8:
-                return "int64_t";
-            case ElementType.U8:
-                return "uint64_t";
-            case ElementType.R4:
-                return ConstStrings.Float32TypeName;
-            case ElementType.R8:
-            case ElementType.R:
-                return ConstStrings.Float64TypeName;
-            case ElementType.I:
-                return "intptr_t";
-            case ElementType.U:
-                return "uintptr_t";
-            case ElementType.Ptr:
-                return $"{GetNativeParamType(((PtrSig)type).Next)}*";
-            case ElementType.ByRef:
-                return $"{GetNativeParamType(((ByRefSig)type).Next)}*";
-            case ElementType.FnPtr:
-                return "void*";
-            case ElementType.SZArray:
-            {
-                TypeSig elem = ((SZArraySig)type).Next.RemovePinnedAndModifiers();
-                return $"{GetNativeParamType(elem)}*";
-            }
-            case ElementType.String:
-                return "const char*";
-            case ElementType.ValueType:
-            case ElementType.GenericInst:
-            {
-                TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
-                if (typeDef.IsEnum)
-                {
-                    return GetNativeParamType(typeDef.GetEnumUnderlyingType());
-                }
-                if (GlobalServices.Inst.TypeNameService.IsPtrLikeSystemValueType(typeDef))
-                {
-                    return typeDef.FullName == "System.UIntPtr" ? "uintptr_t" : "intptr_t";
-                }
-                return MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(type, TypeNameRelaxLevel.Exactly);
-            }
-            case ElementType.Class:
-            {
-                TypeDef typeDef = type.ToTypeDefOrRef().ResolveTypeDefThrow();
-                if (MetaUtil.IsInheritFrom(typeDef, "System.Delegate")
-                    || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle")
-                    || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.CriticalHandle"))
-                {
-                    return "void*";
-                }
-                return ConstStrings.ObjectPtrTypeName;
-            }
-            default:
-                throw new NotSupportedException($"MonoPInvokeCallback native ABI does not support type {type.FullName}.");
-            }
+            writer.EndBlock();
         }
     }
 }

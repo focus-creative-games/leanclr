@@ -22,12 +22,18 @@ using RtResult = core::Result<T>;
 using RtResultVoid = core::ResultVoid;
 
 typedef uint16_t Utf16Char;
+#if LEANCLR_PLATFORM_WIN
+typedef wchar_t NativeChar;
+#else
+typedef char NativeChar;
+#endif
 
 constexpr size_t PTR_SIZE = sizeof(void*);
 constexpr size_t PTR_ALIGN = PTR_SIZE;
 
-#if LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR
 RtErr fatal_on_not_implemented_error();
+
+#if LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR
 
 #define RETURN_NOT_IMPLEMENTED_ERROR() RET_ERR(fatal_on_not_implemented_error())
 #else

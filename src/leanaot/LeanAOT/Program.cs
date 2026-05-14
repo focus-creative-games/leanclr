@@ -597,6 +597,7 @@ internal class Program
             TypeNameService = new TypeNameService(metaService),
             InvokerService = new InvokerService(metaService),
             DirectCallBridgeService = new DirectCallBridgeService(metaService),
+            MonoPInvokeCallbackService = new MonoPInvokeCallbackService(metaService),
             MetadataService = metaService,
             RuntimeApiCatalog = runtimeApiCatalog,
         };

@@ -27,6 +27,10 @@ namespace LeanAOT.ToCpp
         private readonly bool _enableTypesLayoutValidation;
         private readonly List<TypeDef> _validateTypes;
 
+        public ForwardDeclaration ForwardDeclaration => throw new NotImplementedException();
+
+        public CodeWriter MethodWriter => throw new NotImplementedException();
+
         public ModuleRegistrationCppCodeFile(string filePath, AssemblyPlan plan)
         {
             _totalWriter = new CodeWriter(filePath);
@@ -46,7 +50,7 @@ namespace LeanAOT.ToCpp
             AddIncludes();
             AddGlobalVariableDeclaration();
             AddModuleMethodDefDatasDeclaration();
-            MonoPInvokeCallbackWriter.GenerateAll(_plan, _forwardDeclaration, _implWriter);
+            GenerateMonoPInvokeCallbackMethods();
             AddModuleMonoPInvokeCallbackDatasDeclaration();
             if (_enableTypesLayoutValidation)
             {
@@ -103,6 +107,18 @@ namespace LeanAOT.ToCpp
             return $"s_mono_pinvoke_cb_datas_{ModuleGenerationUtil.GetStandardizedModuleNameWithoutExt(_mod)}";
         }
 
+        private void GenerateMonoPInvokeCallbackMethods()
+        {
+            MonoPInvokeCallbackService monoPInvokeCallbackService = GlobalServices.Inst.MonoPInvokeCallbackService;
+            foreach (MethodDefPlan mp in _plan.MonoPInvokeCallbackMethodPlans)
+            {
+                MethodDef method = mp.MethodDef;
+                MonoPInvokeCallbackInfo info = monoPInvokeCallbackService.GetMonoPInvokeCallbackInfo(method);
+                var writer = new MonoPInvokeCallbackWriter(info, _forwardDeclaration, _implWriter);
+                writer.WriteCode();
+            }
+        }
+
         private void AddModuleMonoPInvokeCallbackDatasDeclaration()
         {
             _implWriter.AddLine();
@@ -112,11 +128,12 @@ namespace LeanAOT.ToCpp
             }
             _implWriter.AddLine($"static {ConstStrings.MonoPInvokeCallbackDataTypeName} {GetMonoPInvokeCallbackDatasVariableName()}[] = {{");
             _implWriter.IncreaseIndent();
+            MonoPInvokeCallbackService monoPInvokeCallbackService = GlobalServices.Inst.MonoPInvokeCallbackService;
             foreach (MethodDefPlan mp in _plan.MonoPInvokeCallbackMethodPlans)
             {
                 MethodDef method = mp.MethodDef;
-                string sym = MonoPInvokeCallbackWriter.GetNativeThunkSymbolName(GlobalServices.Inst.MetadataService.GetMethodDetail(method));
-                _implWriter.AddLine($"{{ 0x{method.MDToken.ToInt32():X8}, reinterpret_cast<leanclr::metadata::RtNativeMethodPointer>(&{sym}) }},");
+                MonoPInvokeCallbackInfo info = monoPInvokeCallbackService.GetMonoPInvokeCallbackInfo(method);
+                _implWriter.AddLine($"{{ 0x{method.MDToken.ToInt32():X8}, reinterpret_cast<leanclr::metadata::RtNativeMethodPointer>(&{info.name}) }},");
             }
             _implWriter.DecreaseIndent();
             _implWriter.AddLine("};");

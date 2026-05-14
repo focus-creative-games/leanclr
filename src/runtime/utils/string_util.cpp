@@ -103,17 +103,15 @@ void StringUtil::utf16_to_utf8(const Utf16Char* utf16_str, size_t utf16_len, Str
     // UTF-16 characters can be converted to UTF-8 with at most 4 bytes per character
     // Add extra space for safety
     size_t max_utf8_size = utf16_len * 4 + 1;
+    const size_t old_length = out_utf8_str.length();
     out_utf8_str.reserve(max_utf8_size);
 
-    // Convert UTF-16 to UTF-8
-    char* end = utf8::unchecked::utf16to8(utf16_str, utf16_str + utf16_len, out_utf8_str.get_current_write_ptr());
+    char* write_start = out_utf8_str.get_current_write_ptr();
+    char* end = utf8::unchecked::utf16to8(utf16_str, utf16_str + utf16_len, write_start);
     *end = '\0';
 
-    // Calculate actual size written
-    size_t actual_size = static_cast<size_t>(std::distance(out_utf8_str.get_mut_data(), end));
-
-    // Assign to output string
-    out_utf8_str.resize(actual_size);
+    const size_t appended = static_cast<size_t>(end - write_start);
+    out_utf8_str.resize(old_length + appended);
 }
 } // namespace utils
 } // namespace leanclr

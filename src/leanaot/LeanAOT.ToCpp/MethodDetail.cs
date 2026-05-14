@@ -7,18 +7,21 @@ namespace LeanAOT.ToCpp
 
     public class ParamDetail
     {
+        private readonly ParamDef _paramDef;
         private readonly TypeSig _type;
         private readonly int _index;
         private readonly bool _isThis;
         private readonly string _name;
 
+        public ParamDef ParamDef => _paramDef;
         public TypeSig Type => _type;
         public int Index => _index;
         public bool IsThis => _isThis;
         public string Name => _name;
 
-        public ParamDetail(TypeSig type, int index, bool isThis, string name)
+        public ParamDetail(ParamDef paramDef, TypeSig type, int index, bool isThis, string name)
         {
+            _paramDef = paramDef;
             _type = type;
             _index = index;
             _isThis = isThis;
@@ -35,6 +38,8 @@ namespace LeanAOT.ToCpp
         private readonly bool _isGeneric;
         private readonly TypeSig _retType;
         private readonly ParamDetail[] _paramsIncludeThis;
+
+        private readonly ParamDetail _retTypeParam;
         private readonly ITypeDefOrRef _declaringType;
 
         public MethodDetail(IMethod method)
@@ -56,12 +61,15 @@ namespace LeanAOT.ToCpp
             {
                 // instance method, add this
                 TypeSig thisType = MetaUtil.GetThisType(method);
-                paramsIncludeThis.Add(new ParamDetail(InflateType(thisType), paramsIncludeThis.Count, true, "__this"));
+                paramsIncludeThis.Add(new ParamDetail(null, InflateType(thisType), paramsIncludeThis.Count, true, "__this"));
             }
+            int paramIndex = 0;
             foreach (var param in methodSig.Params)
             {
-                paramsIncludeThis.Add(new ParamDetail(InflateType(param), paramsIncludeThis.Count, true, $"__p{paramsIncludeThis.Count}"));
+                ParamDef paramDef = _methodDef != null ? _methodDef.Parameters[paramIndex++].ParamDef : null;
+                paramsIncludeThis.Add(new ParamDetail(paramDef, InflateType(param), paramsIncludeThis.Count, true, $"__p{paramsIncludeThis.Count}"));
             }
+            _retTypeParam = new ParamDetail(_methodDef?.Parameters.ReturnParameter.ParamDef, _retType, -1, false, "__ret");
             _paramsIncludeThis = paramsIncludeThis.ToArray();
             _declaringType = InflateType(method.DeclaringType.ToTypeSig()).ToTypeDefOrRef();
             _uniqueName = GenerateMethodUniqueName();
@@ -88,6 +96,8 @@ namespace LeanAOT.ToCpp
         public string ModuleNameNotExt => _methodDef.Module.Assembly.Name;
 
         public TypeSig RetType => _retType;
+
+        public ParamDetail RetTypeParam => _retTypeParam;
 
         public ParamDetail[] ParamsIncludeThis => _paramsIncludeThis;
 

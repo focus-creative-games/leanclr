@@ -128,6 +128,9 @@ class StringBuilder
         return *this;
     }
 
+    StringBuilder& append_ansi_to_utf16_str(const NativeChar* ansi_str, size_t ansi_len);
+    StringBuilder& append_utf16_to_ansi_str(const Utf16Char* utf16_str, size_t utf16_len);
+
     // Append uint16 as decimal string
     StringBuilder& append_u16(uint16_t value)
     {
@@ -198,6 +201,26 @@ class StringBuilder
         return _buf;
     }
 
+    NativeChar* as_ansi_chars() const
+    {
+        return reinterpret_cast<NativeChar*>(_buf);
+    }
+
+    Utf16Char* as_utf16chars() const
+    {
+        return reinterpret_cast<Utf16Char*>(_buf);
+    }
+
+    size_t get_ansi_chars_length() const
+    {
+        return _length / sizeof(NativeChar);
+    }
+
+    size_t get_utf16chars_length() const
+    {
+        return _length / sizeof(Utf16Char);
+    }
+
     // Ensure null terminator without appending to length
     void sure_null_terminator_but_not_append()
     {
@@ -217,6 +240,28 @@ class StringBuilder
         }
         result[_length] = 0;
 
+        return result;
+    }
+
+    NativeChar* dup_to_zero_end_ansi_chars() const
+    {
+        NativeChar* result = static_cast<NativeChar*>(alloc::GeneralAllocation::calloc(_length + 1, sizeof(NativeChar)));
+        if (_length > 0)
+        {
+            std::memcpy(result, _buf, _length);
+        }
+        result[_length] = 0;
+        return result;
+    }
+
+    Utf16Char* dup_to_zero_end_utf16chars() const
+    {
+        Utf16Char* result = static_cast<Utf16Char*>(alloc::GeneralAllocation::calloc(_length + 1, sizeof(Utf16Char)));
+        if (_length > 0)
+        {
+            std::memcpy(result, _buf, _length);
+        }
+        result[_length] = 0;
         return result;
     }
 
