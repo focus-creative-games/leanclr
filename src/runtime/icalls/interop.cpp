@@ -586,34 +586,6 @@ RtResultVoid kernel32_find_first_file_ex_private_invoker(metadata::RtManagedMeth
     RET_VOID_OK();
 }
 
-RtResult<int32_t> Interop::windows_console_get_console_cp() noexcept
-{
-    RET_OK(platform::Kernel32::get_console_cp());
-}
-
-/// @icall: System.Console/WindowsConsole::GetConsoleCP
-RtResultVoid windows_console_get_console_cp_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
-                                                    interp::RtStackObject* ret) noexcept
-{
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::windows_console_get_console_cp());
-    EvalStackOp::set_return(ret, result);
-    RET_VOID_OK();
-}
-
-RtResult<int32_t> Interop::windows_console_get_console_output_cp() noexcept
-{
-    RET_OK(platform::Kernel32::get_console_output_cp());
-}
-
-/// @icall: System.Console/WindowsConsole::GetConsoleOutputCP
-RtResultVoid windows_console_get_console_output_cp_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
-                                                           interp::RtStackObject* ret) noexcept
-{
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, Interop::windows_console_get_console_output_cp());
-    EvalStackOp::set_return(ret, result);
-    RET_VOID_OK();
-}
-
 static vm::InternalCallEntry s_interop_internal_call_entries[] = {
 #if LEANCLR_PLATFORM_POSIX
     {"Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)", (vm::InternalCallFunction)&Interop::double_to_string,
@@ -665,9 +637,6 @@ static vm::InternalCallEntry s_interop_internal_call_entries[] = {
     {"Interop/Kernel32::FindFirstFileExPrivate(System.String,Interop/Kernel32/FINDEX_INFO_LEVELS,Interop/Kernel32/WIN32_FIND_DATA&,Interop/Kernel32/"
      "FINDEX_SEARCH_OPS,System.IntPtr,System.Int32)",
      (vm::InternalCallFunction)&Interop::kernel32_find_first_file_ex_private, kernel32_find_first_file_ex_private_invoker},
-    {"System.Console/WindowsConsole::GetConsoleCP", (vm::InternalCallFunction)&Interop::windows_console_get_console_cp, windows_console_get_console_cp_invoker},
-    {"System.Console/WindowsConsole::GetConsoleOutputCP", (vm::InternalCallFunction)&Interop::windows_console_get_console_output_cp,
-     windows_console_get_console_output_cp_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> Interop::get_internal_call_entries() noexcept

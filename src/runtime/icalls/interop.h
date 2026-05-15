@@ -51,10 +51,6 @@ class Interop
     static RtResult<bool> kernel32_get_file_attributes_ex_private(vm::RtString* name, uint32_t file_info_level, void* file_info) noexcept;
     static RtResult<vm::RtObject*> kernel32_find_first_file_ex_private(vm::RtString* lp_file_name, uint32_t f_info_level_id, void* lp_find_file_data,
                                                                        uint32_t f_search_op, intptr_t lp_search_filter, int32_t dw_additional_flags) noexcept;
-
-    // System.Console/WindowsConsole
-    static RtResult<int32_t> windows_console_get_console_cp() noexcept;
-    static RtResult<int32_t> windows_console_get_console_output_cp() noexcept;
 };
 } // namespace icalls
 } // namespace leanclr

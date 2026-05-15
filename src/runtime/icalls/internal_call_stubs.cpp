@@ -63,6 +63,7 @@
 #include "system_mathf.h"
 #include "system_io_path.h"
 #include "system_io_monoio.h"
+#include "system_console_windowsconsole.h"
 #include "interop.h"
 
 namespace leanclr
@@ -105,6 +106,7 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemRuntimeInteropServicesGCHandle::get_internal_call_entries());
     Append(entries, SystemRuntimeInteropServicesRuntimeInformation::get_internal_call_entries());
     Append(entries, SystemRuntimeRuntimeImports::get_internal_call_entries());
+    Append(entries, SystemConsoleWindowsConsole::get_internal_call_entries());
     Append(entries, Interop::get_internal_call_entries());
     Append(entries, SystemEnum::get_internal_call_entries());
     Append(entries, SystemMonoCustomAttrs::get_internal_call_entries());
