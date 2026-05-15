@@ -75,8 +75,7 @@ RtResultVoid SystemThreadingThread::memory_barrier() noexcept
 
 RtResultVoid SystemThreadingThread::construct_internal_thread(vm::RtThread* this_thread) noexcept
 {
-    vm::Thread::construct_internal_thread(this_thread);
-    RET_VOID_OK();
+    return vm::Thread::construct_internal_thread(this_thread);
 }
 
 // Array domain conversions
