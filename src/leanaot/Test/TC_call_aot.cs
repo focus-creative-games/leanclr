@@ -9,11 +9,17 @@ internal class TC_call_aot
     {
         public int x;
 
+        public ForFunClass(int x)
+        {
+            this.x = x;
+        }
+
         public int Show2()
         {
             return 2;
         }
 
+        public int X => x;
 
     }
 
