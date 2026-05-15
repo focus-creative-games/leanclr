@@ -681,9 +681,10 @@ inline RtMarshalUTF16Str marshal_managed_string_to_utf16_string(vm::RtString* st
     {
         return nullptr;
     }
-    Utf16Char* result = static_cast<Utf16Char*>(alloc::GeneralAllocation::calloc(vm::String::get_length(str) + 1, sizeof(Utf16Char)));
-    std::memcpy(result, vm::String::get_chars_ptr(str), vm::String::get_length(str) * sizeof(Utf16Char));
-    result[vm::String::get_length(str)] = 0;
+    size_t length = static_cast<size_t>(vm::String::get_length(str));
+    Utf16Char* result = static_cast<Utf16Char*>(alloc::GeneralAllocation::calloc(length + 1, sizeof(Utf16Char)));
+    std::memcpy(result, vm::String::get_chars_ptr(str), length * sizeof(Utf16Char));
+    result[length] = 0;
     return result;
 }
 

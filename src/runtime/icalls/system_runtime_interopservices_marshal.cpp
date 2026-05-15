@@ -279,7 +279,7 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed(void
 RtResult<vm::RtDelegate*> SystemRuntimeInteropServicesMarshal::get_delegate_for_function_pointer_internal(void* ptr, vm::RtReflectionType* ref_type) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(ref_type->type_handle));
-    return vm::Marshal::marshal_function_pointer_to_delegate(ptr, klass);
+    return vm::Marshal::marshal_function_pointer_to_delegate(reinterpret_cast<metadata::RtNativeMethodPointer>(ptr), klass);
 }
 
 RtResult<void*> SystemRuntimeInteropServicesMarshal::get_function_pointer_for_delegate_internal(vm::RtDelegate* delegate) noexcept
