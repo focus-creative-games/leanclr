@@ -55,8 +55,8 @@ class Marshal
     static void* string_to_hglobal_ansi(const Utf16Char* chars, int32_t len);
     static void* string_to_hglobal_uni(const Utf16Char* chars, int32_t len);
     static vm::RtString* ptr_to_string_bstr(void* ptr);
-    static void* buffer_to_bstr(const Utf16Char* chars, size_t len);
-    static Utf16Char* alloc_bstr(size_t utf16char_count);
+    static void* buffer_to_bstr(const Utf16Char* chars, int32_t len);
+    static Utf16Char* alloc_bstr(int32_t utf16char_count);
     static void free_bstr(void* ptr);
 
     static void* alloc_native_array(size_t element_count, size_t element_size);

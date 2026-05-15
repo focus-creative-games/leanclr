@@ -163,7 +163,7 @@ RtResult<void*> SystemRuntimeInteropServicesMarshal::string_to_hglobal_uni(const
 
 RtResult<void*> SystemRuntimeInteropServicesMarshal::buffer_to_bstr(const Utf16Char* chars, int32_t len) noexcept
 {
-    if (!chars)
+    if (!chars || len < 0)
     {
         RET_OK(nullptr);
     }
