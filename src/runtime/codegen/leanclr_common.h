@@ -162,17 +162,37 @@
         retVar = (retType)__result.unwrap();                                                             \
     } while (0)
 
-#define LEANCLR_CODEGEN_DECLARING_ASSIGN_OR_THROW_ON_ERROR_WITHOUT_IP(retType, retVar, retExpr)     \
-    retType retVar;                                                                                      \
-    do                                                                                                   \
-    {                                                                                                    \
-        auto&& __result = (retExpr);                                                                     \
-        if (LEANCLR_CODEGEN_UNLIKELY(__result.is_err()))                                                 \
-        {                                                                                                \
-            leanclr::vm::Exception::raise_aot_error_as_exception(__result.unwrap_err(), nullptr, 0); \
-            return leanclr::RtErr::ManagedException;                                                     \
-        }                                                                                                \
-        retVar = (retType)__result.unwrap();                                                             \
+#define LEANCLR_CODEGEN_DECLARING_ASSIGN_OR_THROW_ON_ERROR_WITHOUT_IP(retType, retVar, retExpr, methodInfo) \
+    retType retVar;                                                                                         \
+    do                                                                                                      \
+    {                                                                                                       \
+        auto&& __result = (retExpr);                                                                        \
+        if (LEANCLR_CODEGEN_UNLIKELY(__result.is_err()))                                                    \
+        {                                                                                                   \
+            leanclr::vm::Exception::raise_aot_error_as_exception(__result.unwrap_err(), methodInfo, 0);     \
+            return leanclr::RtErr::ManagedException;                                                        \
+        }                                                                                                   \
+        retVar = (retType)__result.unwrap();                                                                \
+    } while (0)
+
+#if LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR
+#define LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR() LEANCLR_CODEGEN_RETURN(leanclr::fatal_on_not_implemented_error())
+#else
+#define LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR() LEANCLR_CODEGEN_RETURN(leanclr::RtErr::NotImplemented)
+#endif
+
+#define LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK() leanclr::fatal_on_not_implemented_error()
+
+#define LEANCLR_CODEGEN_DECLARING_ASSIGN_OR_ABORT_ON_ERROR(retType, retVar, retExpr, methodInfo) \
+    retType retVar;                                                                              \
+    do                                                                                           \
+    {                                                                                            \
+        auto&& __result = (retExpr);                                                             \
+        if (LEANCLR_CODEGEN_UNLIKELY(__result.is_err()))                                         \
+        {                                                                                        \
+            LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK();               \
+        }                                                                                        \
+        retVar = (retType)__result.unwrap();                                                     \
     } while (0)
 
 #define LEANCLR_CODEGEN_GOTO_HANDLE_RETURN_VALUE() goto ___label_handle_return_value
@@ -263,14 +283,6 @@
         }                                                                                                 \
         retVar = (retType)__result.unwrap();                                                              \
     } while (0)
-
-#if LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR
-#define LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR() LEANCLR_CODEGEN_RETURN(leanclr::fatal_on_not_implemented_error())
-#else
-#define LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR() LEANCLR_CODEGEN_RETURN(leanclr::RtErr::NotImplemented)
-#endif
-
-#define LEANCLR_CODEGEN_ABORT_WHEN_RAISE_EXCEPTION_IN_MONO_PINVOKE_CALLBACK() leanclr::fatal_on_not_implemented_error()
 
 namespace leanclr
 {
@@ -612,6 +624,10 @@ inline PInvokeFunction resolve_pinvoke_function(const char* dll_name_no_ext, con
 RtErr raise_pinvoke_entry_not_found_error(const char* dll_name_no_ext, const char* function_name) noexcept;
 
 using utils::StringBuilder;
+typedef leanclr::metadata::RtMarshalHandle RtMarshalHandle;
+typedef leanclr::metadata::RtMarshalUTF8Str RtMarshalUTF8Str;
+typedef leanclr::metadata::RtMarshalUTF16Str RtMarshalUTF16Str;
+typedef leanclr::metadata::RtMarshalAnsiStr RtMarshalAnsiStr;
 
 inline Utf16Char marshal_utf8_char_to_managed_char(char c) noexcept
 {
@@ -638,17 +654,17 @@ inline vm::RtString* marshal_utf8_string_to_managed_string(const char* str) noex
     return str ? vm::String::create_string_from_utf8cstr(str) : nullptr;
 }
 
-inline const char* marshal_managed_string_to_utf8_string(vm::RtString* str, StringBuilder& temp) noexcept
+inline RtMarshalUTF8Str marshal_managed_string_to_utf8_string(vm::RtString* str, StringBuilder& temp) noexcept
 {
     if (!str)
     {
         return nullptr;
     }
     temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-    return temp.as_cstr();
+    return (RtMarshalUTF8Str)temp.as_cstr();
 }
 
-inline const char* marshal_managed_string_to_utf8_string(vm::RtString* str) noexcept
+inline RtMarshalUTF8Str marshal_managed_string_to_utf8_string(vm::RtString* str) noexcept
 {
     if (!str)
     {
@@ -656,10 +672,10 @@ inline const char* marshal_managed_string_to_utf8_string(vm::RtString* str) noex
     }
     utils::StringBuilder temp;
     temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-    return temp.dup_to_zero_end_cstr();
+    return (RtMarshalUTF8Str)temp.dup_to_zero_end_cstr();
 }
 
-inline const Utf16Char* marshal_managed_string_to_utf16_string(vm::RtString* str) noexcept
+inline RtMarshalUTF16Str marshal_managed_string_to_utf16_string(vm::RtString* str) noexcept
 {
     if (!str)
     {
@@ -677,9 +693,9 @@ inline vm::RtString* marshal_utf16_string_to_managed_string(const Utf16Char* str
     return vm::String::create_string_from_utf16chars(str, length);
 }
 
-NativeChar* marshal_managed_string_to_ansi_string(vm::RtString* str, StringBuilder& temp) noexcept;
-NativeChar* marshal_managed_string_to_ansi_string(vm::RtString* str) noexcept;
-vm::RtString* marshal_ansi_string_to_managed_string(const NativeChar* str) noexcept;
+RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str, StringBuilder& temp) noexcept;
+RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str) noexcept;
+vm::RtString* marshal_ansi_string_to_managed_string(const RtMarshalAnsiStr str) noexcept;
 
 using metadata::RtNativeMethodPointer;
 
@@ -698,10 +714,10 @@ inline RtResult<vm::RtDelegate*> marshal_fn_ptr_to_delegate(RtNativeMethodPointe
     return vm::Marshal::marshal_function_pointer_to_delegate(fn_ptr, klass);
 }
 
-void* marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept;
-RtResult<vm::RtObject*> marshal_void_ptr_to_safe_handle(void* ptr, const metadata::RtTypeSig* handle_typesig) noexcept;
+RtMarshalHandle marshal_safe_handle_to_handle(vm::RtObject* obj) noexcept;
+RtResult<vm::RtObject*> marshal_handle_to_safe_handle(RtMarshalHandle handle, const metadata::RtTypeSig* handle_typesig) noexcept;
 
-RtResult<void*> marshal_managed_array_to_native_array(vm::RtArray* managed_array, size_t& native_element_count) noexcept;
+void* marshal_managed_array_to_native_array(vm::RtArray* managed_array, size_t& native_element_count) noexcept;
 RtResult<vm::RtArray*> marshal_native_array_to_managed_array(void* native_array, size_t native_element_count,
                                                              const metadata::RtTypeSig* array_param_typesig) noexcept;
 void free_native_array(void* native_array) noexcept;

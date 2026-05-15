@@ -22,9 +22,11 @@ namespace LeanAOT.ToCpp
             _ret = CreateMarshalParamOrRet(info.methodDetail.RetTypeParam, true);
         }
 
+        private string MethodVarName => "__method";
+
         private MarshalParamOrRet CreateMarshalParamOrRet(ParamDetail param, bool isReturn)
         {
-            return new MarshalParamOrRet(param.Type, MarshalUtil.GetParameterOrFieldMarshalInfo(param.ParamDef), CharSet.None, isReturn, param.Name, $"{param.Name}_native");
+            return new MarshalParamOrRet(param.Index, param.Type, param.ParamDef?.MarshalType, CharSet.None, isReturn, param.Name, $"{param.Name}_native", false, MethodVarName);
         }
 
         public void WriteCode()
@@ -61,7 +63,7 @@ namespace LeanAOT.ToCpp
             writer.BeginBlock();
             writer.AddLine($"{cachedMethodVarName} = reinterpret_cast<{ConstStrings.MethodInfoPtrTypeName}>({ConstStrings.CodegenNamespace}::resolve_metadata_token({ModuleGenerationUtil.GetModuleGlobalVariableName(method.Module)}, 0x{method.MDToken.ToInt32():X8}, nullptr));");
             writer.EndBlock();
-            writer.AddLine($"{ConstStrings.MethodInfoPtrTypeName} __method = {cachedMethodVarName};");
+            writer.AddLine($"{ConstStrings.MethodInfoPtrTypeName} {MethodVarName} = {cachedMethodVarName};");
 
             foreach (var param in _params)
             {
@@ -104,7 +106,7 @@ namespace LeanAOT.ToCpp
                 retPtr = "nullptr";
             }
             string invokeFn = VmFunctionNames.InvokeWithRunClassStaticConstructor;
-            writer.AddLine($"auto __inv_result = {invokeFn}(__method, {argsPtr}, {retPtr});");
+            writer.AddLine($"auto __inv_result = {invokeFn}({MethodVarName}, {argsPtr}, {retPtr});");
             foreach (var param in _params)
             {
                 writer.AddLines(param.NativeToManagedCleanupCode);

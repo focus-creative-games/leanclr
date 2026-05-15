@@ -77,7 +77,7 @@ namespace LeanAOT.ToCpp
         public const string CHECK_NULL_REFERENCE = "LEANCLR_CODEGEN_CHECK_NOT_NULL_OR_THROW_NULL_REFERENCE_EXCEPTION";
         public const string THROW_EXCEPTION = "LEANCLR_CODEGEN_THROW_EXCEPTION";
         public const string DECLARING_ASSIGN_OR_THROW_WITHOUT_IP = "LEANCLR_CODEGEN_DECLARING_ASSIGN_OR_THROW_ON_ERROR_WITHOUT_IP";
-
+        public const string DECLARING_ASSIGN_OR_ABORT_ON_ERROR = "LEANCLR_CODEGEN_DECLARING_ASSIGN_OR_ABORT_ON_ERROR";
 
         public const string GOTO_RET_VALUE = "LEANCLR_CODEGEN_GOTO_RETURN";
         public const string GOTO_RET_ERROR = "LEANCLR_CODEGEN_GOTO_RETURN_ERR";
@@ -110,8 +110,8 @@ namespace LeanAOT.ToCpp
         public const string MarshalManagedStringToAnsiString = "leanclr::codegen::marshal_managed_string_to_ansi_string";
         public const string MarshalDelegateToFnPtr = "leanclr::codegen::marshal_delegate_to_fn_ptr";
         public const string MarshalFnPtrToDelegate = "leanclr::codegen::marshal_fn_ptr_to_delegate";
-        public const string MarshalSafeHandleToVoidPtr = "leanclr::codegen::marshal_safe_handle_to_void_ptr";
-        public const string MarshalVoidPtrToSafeHandle = "leanclr::codegen::marshal_void_ptr_to_safe_handle";
+        public const string MarshalSafeHandleToHandle = "leanclr::codegen::marshal_safe_handle_to_handle";
+        public const string MarshalHandleToSafeHandle = "leanclr::codegen::marshal_handle_to_safe_handle";
         public const string MarshalManagedArrayToNativeArray = "leanclr::codegen::marshal_managed_array_to_native_array";
         public const string MarshalNativeArrayToManagedArray = "leanclr::codegen::marshal_native_array_to_managed_array";
         public const string FreeNativeArray = "leanclr::codegen::free_native_array";

@@ -75,7 +75,10 @@ typedef void* RtMarshalIUnknown;
 typedef void* RtMarshalIDispatch;
 typedef void* RtMarshalInterface;
 typedef void* RtMarshalHString;
-typedef char* RtMarshalLPUTF8Str;
+typedef char* RtMarshalUTF8Str;
+typedef Utf16Char* RtMarshalUTF16Str;
+typedef NativeChar* RtMarshalAnsiStr;
+typedef intptr_t RtMarshalHandle;
 
 } // namespace metadata
 } // namespace leanclr

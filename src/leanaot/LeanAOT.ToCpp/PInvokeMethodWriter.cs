@@ -27,7 +27,7 @@ namespace LeanAOT.ToCpp
 
         private MarshalParamOrRet CreateMarshalParamOrRet(ParamDetail param, bool isReturn)
         {
-            return new MarshalParamOrRet(param.Type, MarshalUtil.GetParameterOrFieldMarshalInfo(param.ParamDef), _defaultCharSet, isReturn, param.Name, $"{param.Name}_native");
+            return new MarshalParamOrRet(param.Index, param.Type, param.ParamDef?.MarshalType, _defaultCharSet, isReturn, param.Name, $"{param.Name}_native", true, MethodVarName);
         }
 
         protected override void WriteMethodBody()
@@ -42,9 +42,18 @@ namespace LeanAOT.ToCpp
                 _bodyWriter.AddLine($"LEANCLR_CODEGEN_RETURN_NOT_IMPLEMENTED_ERROR();");
             }
         }
+        private string MethodVarName => "__method";
 
         private void WritePInvokeBody()
         {
+            string cachedMethodVarName = $"s_mono_pinvoke_resolved_method_{_methodDef.MDToken.ToInt32():X8}";
+            _bodyWriter.AddLine($"static {ConstStrings.MethodInfoPtrTypeName} {cachedMethodVarName} = nullptr;");
+            _bodyWriter.AddLine($"if (LEANCLR_UNLIKELY({cachedMethodVarName} == nullptr))");
+            _bodyWriter.BeginBlock();
+            _bodyWriter.AddLine($"{cachedMethodVarName} = reinterpret_cast<{ConstStrings.MethodInfoPtrTypeName}>({ConstStrings.CodegenNamespace}::resolve_metadata_token({ModuleGenerationUtil.GetModuleGlobalVariableName(_methodDef.Module)}, 0x{_methodDef.MDToken.ToInt32():X8}, nullptr));");
+            _bodyWriter.EndBlock();
+            _bodyWriter.AddLine($"{ConstStrings.MethodInfoPtrTypeName} {MethodVarName} = {cachedMethodVarName};");
+
             string importName = MarshalUtil.GetPInvokeImportName(_methodDef);
             string callConvMacro = MarshalUtil.GetPInvokeCallConvCppMacro(_methodDef);
             string dllNameNoExt = MarshalUtil.GetPInvokeModuleName(_methodDef);
@@ -107,7 +116,8 @@ namespace LeanAOT.ToCpp
                 }
                 _bodyWriter.AddLines(_ret.NativeToManagedSetupCode);
                 _bodyWriter.AddLines(_ret.NativeToManagedCleanupCode);
-                _bodyWriter.AddLine($"{VmFunctionNames.RET_VALUE}({_ret.ManagedVarName});");
+                string abiRelaxedRetTypeName = MethodGenerationUtil.GetAbiRelaxedTypeName(_ret.Type);
+                _bodyWriter.AddLine($"{VmFunctionNames.RET_VALUE}(({abiRelaxedRetTypeName}){_ret.ManagedVarName});");
             }
         }
     }

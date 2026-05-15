@@ -10,7 +10,6 @@
 
 #if LEANCLR_PLATFORM_WIN
 #include <windows.h>
-#include <cwchar>
 #endif
 
 namespace leanclr
@@ -181,49 +180,41 @@ void resolve_generic_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t*
     }
 }
 
-NativeChar* marshal_managed_string_to_ansi_string(vm::RtString* str, StringBuilder& temp) noexcept
+RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str, StringBuilder& temp) noexcept
 {
     if (str == nullptr)
     {
         return nullptr;
     }
-    
-    #if LEANCLR_PLATFORM_WIN
-        temp.append_utf16_to_ansi_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-    #else
-        temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-    #endif
-    return temp.as_ansi_chars();
-}
-
-NativeChar* marshal_managed_string_to_ansi_string(vm::RtString* str) noexcept
-{
-    if (str == nullptr)
-    {
-        return nullptr;
-    }
-    StringBuilder temp;
-    #if LEANCLR_PLATFORM_WIN
     temp.append_utf16_to_ansi_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-#else
-    temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-#endif
-return temp.dup_to_zero_end_ansi_chars();
+    return (RtMarshalAnsiStr)temp.as_ansi_chars();
 }
 
-vm::RtString* marshal_ansi_string_to_managed_string(const NativeChar* str) noexcept
+RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str) noexcept
 {
     if (str == nullptr)
     {
         return nullptr;
     }
-    #if LEANCLR_PLATFORM_WIN
     StringBuilder temp;
-    temp.append_ansi_to_utf16_str(str, static_cast<size_t>(wcslen(str)));
+    temp.append_utf16_to_ansi_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
+    return (RtMarshalAnsiStr)temp.dup_to_zero_end_ansi_chars();
+}
+
+vm::RtString* marshal_ansi_string_to_managed_string(const RtMarshalAnsiStr str) noexcept
+{
+    if (str == nullptr)
+    {
+        return nullptr;
+    }
+#if LEANCLR_PLATFORM_WIN
+    StringBuilder temp;
+    const char* const ansi_bytes = reinterpret_cast<const char*>(str);
+    temp.append_ansi_to_utf16_str(str, std::strlen(ansi_bytes));
     return vm::String::create_string_from_utf16chars(temp.as_utf16chars(), static_cast<int32_t>(temp.get_utf16chars_length()));
-    #else
+#else
     return vm::String::create_string_from_utf8cstr(reinterpret_cast<const char*>(str));
-    #endif
+#endif
 }
 
 RtErr raise_internal_call_entry_not_found_error(const char* name) noexcept
@@ -240,13 +231,13 @@ RtErr raise_pinvoke_entry_not_found_error(const char* dll_name_no_ext, const cha
     RET_ERR_WITH_MSG(RtErr::EntryPointNotFound, err_msg);
 }
 
-void* marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept
+RtMarshalHandle marshal_safe_handle_to_handle(vm::RtObject* obj) noexcept
 {
     if (obj == nullptr)
     {
-        return nullptr;
+        return 0;
     }
-    #if LEANCLR_DEBUG
+#if LEANCLR_DEBUG
     const metadata::RtClass* klass = obj->klass;
     const metadata::RtFieldInfo* fi = vm::Class::get_field_for_name(klass, "handle", true);
     if (fi == nullptr)
@@ -255,15 +246,18 @@ void* marshal_safe_handle_to_void_ptr(vm::RtObject* obj) noexcept
     }
     assert(fi);
     assert(fi->offset == 0);
-    #endif
-    return *reinterpret_cast<void**>(obj + 1);
+#endif
+    return *reinterpret_cast<RtMarshalHandle*>(obj + 1);
 }
 
-
-RtResult<vm::RtObject*> marshal_void_ptr_to_safe_handle(void* ptr, const metadata::RtTypeSig* handle_typesig) noexcept
+RtResult<vm::RtObject*> marshal_handle_to_safe_handle(RtMarshalHandle handle, const metadata::RtTypeSig* handle_typesig) noexcept
 {
+    if (handle == 0)
+    {
+        RET_OK(nullptr);
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(handle_typesig));
-    #if LEANCLR_DEBUG
+#if LEANCLR_DEBUG
     RET_ERR_ON_FAIL(vm::Class::initialize_all(klass));
     const metadata::RtFieldInfo* fi = vm::Class::get_field_for_name(klass, "handle", true);
     if (fi == nullptr)
@@ -272,15 +266,15 @@ RtResult<vm::RtObject*> marshal_void_ptr_to_safe_handle(void* ptr, const metadat
     }
     assert(fi);
     assert(fi->offset == 0);
-    #endif
+#endif
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, vm::Object::new_object(klass));
-    void** field_addr = reinterpret_cast<void**>(obj + 1);
-    *field_addr = ptr;
+    RtMarshalHandle* field_addr = reinterpret_cast<RtMarshalHandle*>(obj + 1);
+    *field_addr = handle;
     RET_OK(obj);
 }
 
 RtResult<vm::RtArray*> marshal_native_array_to_managed_array(const metadata::RtTypeSig* array_param_typesig, const void* native_element_data,
-                                                                           int32_t length) noexcept
+                                                             int32_t length) noexcept
 {
     assert(array_param_typesig != nullptr);
     if (length < 0)
@@ -304,21 +298,22 @@ RtResult<vm::RtArray*> marshal_native_array_to_managed_array(const metadata::RtT
     RET_OK(arr);
 }
 
-RtResult<void*> marshal_managed_array_to_native_array(vm::RtArray* managed_array, size_t& native_element_count) noexcept
+void* marshal_managed_array_to_native_array(vm::RtArray* managed_array, size_t& native_element_count) noexcept
 {
     if (managed_array == nullptr)
     {
-        RET_OK(nullptr);
+        return nullptr;
     }
     const size_t ele_size = vm::Array::get_array_element_size(managed_array);
-    native_element_count = vm::Array::get_array_length(managed_array);
+    native_element_count = static_cast<size_t>(vm::Array::get_array_length(managed_array));
 
     void* native_array = alloc::GeneralAllocation::malloc(native_element_count * ele_size);
     std::memcpy(native_array, vm::Array::get_array_data_start_as_ptr_void(managed_array), native_element_count * ele_size);
     return native_array;
 }
 
-RtResult<vm::RtArray*> marshal_native_array_to_managed_array(void* native_array, size_t native_element_count, const metadata::RtTypeSig* array_param_typesig) noexcept
+RtResult<vm::RtArray*> marshal_native_array_to_managed_array(void* native_array, size_t native_element_count,
+                                                             const metadata::RtTypeSig* array_param_typesig) noexcept
 {
     assert(array_param_typesig != nullptr);
     if (native_array == nullptr)
@@ -348,7 +343,8 @@ void marshal_managed_array_to_native_val_array(vm::RtArray* managed_array, void*
     std::memcpy(native_array, vm::Array::get_array_data_start_as_ptr_void(managed_array), native_element_count * ele_size);
 }
 
-RtResult<vm::RtArray*> marshal_native_val_array_to_managed_array(void* native_array, size_t native_element_count, const metadata::RtTypeSig* array_typesig) noexcept
+RtResult<vm::RtArray*> marshal_native_val_array_to_managed_array(void* native_array, size_t native_element_count,
+                                                                 const metadata::RtTypeSig* array_typesig) noexcept
 {
     if (native_array == nullptr)
     {

@@ -11,39 +11,35 @@ namespace LeanAOT.ToCpp
 
     public static class MarshalUtil
     {
-        public const UnmanagedType MaxManagedType = (UnmanagedType)0x50;
-        public const uint InvalidElementCount = uint.MaxValue;
-
         public static string GetCharTypeName(CharSet charSet)
         {
-            return charSet != CharSet.Ansi ? ConstStrings.Utf16CharTypeName : ConstStrings.AnsiCharTypeName;
+            return charSet != CharSet.Ansi ? ConstStrings.MarshalUtf16CharTypeName : ConstStrings.MarshalAnsiCharTypeName;
         }
 
         public static string GetCharPtrTypeName(CharSet charSet)
         {
-            return charSet != CharSet.Ansi ? ConstStrings.Utf16CharPtrTypeName : ConstStrings.AnsiCharPtrTypeName;
+            return charSet != CharSet.Ansi ? ConstStrings.MarshalUTF16StrTypeName : ConstStrings.MarshalAnsiStrTypeName;
         }
 
-        public static string GetMarshalNativeTypeName(TypeSig typeSig, MarshalAsInfo marshalAsInfo, CharSet charSet)
+        public static bool IsSafeHandleType(TypeSig typeSig)
         {
-            typeSig = typeSig.RemovePinnedAndModifiers();
-            if (marshalAsInfo == null)
+            TypeDef typeDef = typeSig.ToTypeDefOrRef().ResolveTypeDef();
+            if (typeDef == null)
             {
-                return GetMarshalNativeTypeName(typeSig, MaxManagedType, MaxManagedType, InvalidElementCount, InvalidElementCount, charSet);
+                return false;
             }
-            return GetMarshalNativeTypeName(typeSig, marshalAsInfo.UnmanagedType, marshalAsInfo.ArrayElementType, marshalAsInfo.ParamIndex, marshalAsInfo.ElementCount, charSet);
+            return MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle") || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.CriticalHandle");
         }
-
-        public static string GetMarshalNativeTypeName(TypeSig typeSig, UnmanagedType unmanagedType, UnmanagedType arrayElementType, uint paramIndex, uint elementCount, CharSet charSet)
+        public static string GetMarshalNativeTypeName(TypeSig typeSig, MarshalType marshalType, CharSet charSet)
         {
-            if (unmanagedType == MaxManagedType)
+            if (marshalType == null)
             {
                 switch (typeSig.ElementType)
                 {
                 case ElementType.Void: return "void";
                 case ElementType.Boolean:
                 {
-                    unmanagedType = UnmanagedType.Bool;
+                    marshalType = new MarshalType(NativeType.Boolean);
                     break;
                 }
                 case ElementType.Char:
@@ -52,89 +48,90 @@ namespace LeanAOT.ToCpp
                 }
                 case ElementType.I1:
                 {
-                    unmanagedType = UnmanagedType.I1;
+                    marshalType = new MarshalType(NativeType.I1);
                     break;
                 }
                 case ElementType.U1:
                 {
-                    unmanagedType = UnmanagedType.U1;
+                    marshalType = new MarshalType(NativeType.U1);
                     break;
                 }
                 case ElementType.I2:
                 {
-                    unmanagedType = UnmanagedType.I2;
+                    marshalType = new MarshalType(NativeType.I2);
                     break;
                 }
                 case ElementType.U2:
                 {
-                    unmanagedType = UnmanagedType.U2;
+                    marshalType = new MarshalType(NativeType.U2);
                     break;
                 }
                 case ElementType.I4:
                 {
-                    unmanagedType = UnmanagedType.I4;
+                    marshalType = new MarshalType(NativeType.I4);
                     break;
                 }
                 case ElementType.U4:
                 {
-                    unmanagedType = UnmanagedType.U4;
+                    marshalType = new MarshalType(NativeType.U4);
                     break;
                 }
                 case ElementType.I8:
                 {
-                    unmanagedType = UnmanagedType.I8;
+                    marshalType = new MarshalType(NativeType.I8);
                     break;
                 }
                 case ElementType.U8:
                 {
-                    unmanagedType = UnmanagedType.U8;
+                    marshalType = new MarshalType(NativeType.U8);
                     break;
                 }
                 case ElementType.R4:
                 {
-                    unmanagedType = UnmanagedType.R4;
+                    marshalType = new MarshalType(NativeType.R4);
                     break;
                 }
                 case ElementType.R8:
                 {
-                    unmanagedType = UnmanagedType.R8;
+                    marshalType = new MarshalType(NativeType.R8);
                     break;
                 }
                 case ElementType.I:
                 {
-                    unmanagedType = UnmanagedType.SysInt;
+                    marshalType = new MarshalType(NativeType.Int);
                     break;
                 }
                 case ElementType.U:
                 {
-                    unmanagedType = UnmanagedType.SysUInt;
+                    marshalType = new MarshalType(NativeType.UInt);
                     break;
                 }
                 case ElementType.String:
                 {
-                    unmanagedType = UnmanagedType.LPStr;
+                    marshalType = new MarshalType(NativeType.LPStr);
                     break;
                 }
                 case ElementType.Object:
                 {
-                    unmanagedType = UnmanagedType.IUnknown;
+                    marshalType = new InterfaceMarshalType(NativeType.IUnknown);
                     break;
                 }
                 case ElementType.Class:
                 {
                     if (MetaUtil.IsDerivedFromMulticastDelegate(typeSig.ToTypeDefOrRef()))
                     {
-                        unmanagedType = UnmanagedType.FunctionPtr;
+                        marshalType = new MarshalType(NativeType.Func);
                     }
-                    else
+                    else if (IsSafeHandleType(typeSig))
                     {
-                        unmanagedType = UnmanagedType.IUnknown;
+                        return ConstStrings.MarshalHandleTypeName;
                     }
+                    marshalType = new InterfaceMarshalType(NativeType.IUnknown);
                     break;
                 }
                 case ElementType.ValueType:
                 {
-                    unmanagedType = UnmanagedType.Struct;
+                    marshalType = new MarshalType(NativeType.Struct);
                     break;
                 }
                 case ElementType.GenericInst:
@@ -144,21 +141,21 @@ namespace LeanAOT.ToCpp
                 case ElementType.SZArray:
                 case ElementType.Array:
                 {
-                    unmanagedType = UnmanagedType.LPArray;
+                    marshalType = new ArrayMarshalType(NativeType.Array);
                     break;
                 }
                 case ElementType.Ptr:
                 {
-                    unmanagedType = UnmanagedType.SysInt;
+                    marshalType = new MarshalType(NativeType.Int);
                     break;
                 }
                 case ElementType.ByRef:
                 {
-                    return $"{GetMarshalNativeTypeName(typeSig.Next, unmanagedType, arrayElementType, paramIndex, elementCount, charSet)}*";
+                    return $"{GetMarshalNativeTypeName(typeSig.Next, null, charSet)}*";
                 }
                 case ElementType.FnPtr:
                 {
-                    unmanagedType = UnmanagedType.FunctionPtr;
+                    marshalType = new MarshalType(NativeType.Func);
                     break;
                 }
                 default:
@@ -167,249 +164,161 @@ namespace LeanAOT.ToCpp
                 }
                 }
             }
-            switch (unmanagedType)
+            switch (marshalType.NativeType)
             {
-            case UnmanagedType.Bool:
+            case NativeType.Boolean:
                 return ConstStrings.MarshalBooleanTypeName;
-            case UnmanagedType.I1:
+            case NativeType.I1:
                 return "int8_t";
-            case UnmanagedType.U1:
+            case NativeType.U1:
                 return "uint8_t";
-            case UnmanagedType.I2:
+            case NativeType.I2:
                 return "int16_t";
-            case UnmanagedType.U2:
+            case NativeType.U2:
                 return "uint16_t";
-            case UnmanagedType.I4:
+            case NativeType.I4:
                 return "int32_t";
-            case UnmanagedType.U4:
+            case NativeType.U4:
                 return "uint32_t";
-            case UnmanagedType.I8:
+            case NativeType.I8:
                 return "int64_t";
-            case UnmanagedType.U8:
+            case NativeType.U8:
                 return "uint64_t";
-            case UnmanagedType.R4:
+            case NativeType.R4:
                 return ConstStrings.Float32TypeName;
-            case UnmanagedType.R8:
+            case NativeType.R8:
                 return ConstStrings.Float64TypeName;
-            case UnmanagedType.SysInt:
+            case NativeType.Int:
                 return "intptr_t";
-            case UnmanagedType.SysUInt:
+            case NativeType.UInt:
                 return "uintptr_t";
             // obsolete
-            // case UnmanagedType.Currency:
+            // case NativeType.Currency:
             //     return "leanclr::metadata::RtMarshalCurrency";
-            case UnmanagedType.BStr:
+            case NativeType.BStr:
             {
-                return ConstStrings.Utf16CharPtrTypeName;
+                return ConstStrings.MarshalUTF16StrTypeName;
             }
-            case UnmanagedType.LPStr:
+            case NativeType.LPStr:
             {
-                return ConstStrings.AnsiCharPtrTypeName;
+                return ConstStrings.MarshalAnsiStrTypeName;
             }
-            case UnmanagedType.LPWStr:
-            case UnmanagedType.LPTStr:
+            case NativeType.LPWStr:
+            case NativeType.LPTStr:
             {
-                return ConstStrings.Utf16CharPtrTypeName;
+                return ConstStrings.MarshalUTF16StrTypeName;
             }
-            case UnmanagedType.ByValTStr:
+            case NativeType.FixedSysString:
             {
-                if (elementCount == InvalidElementCount)
+                var actualMarshalType = (FixedSysStringMarshalType)marshalType;
+                if (!actualMarshalType.IsSizeValid)
                 {
-                    throw new NotSupportedException("ByValTStr must have a fixed length.");
+                    throw new NotSupportedException("FixedSysString must have a fixed length.");
                 }
-                return $"{GetCharTypeName(charSet)}[{elementCount}]";
+                return $"{GetCharTypeName(charSet)}[{actualMarshalType.Size}]";
             }
-            case UnmanagedType.IUnknown:
+            case NativeType.IUnknown:
             {
                 return ConstStrings.MarshalIUnknownTypeName;
             }
-            case UnmanagedType.IDispatch:
+            case NativeType.IDispatch:
             {
                 return ConstStrings.MarshalIDispatchTypeName;
             }
-            case UnmanagedType.Interface:
+            case NativeType.IntF:
             {
                 return ConstStrings.MarshalInterfaceTypeName;
             }
-            case UnmanagedType.Struct:
+            case NativeType.Struct:
             {
                 return GlobalServices.Inst.TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(typeSig, TypeNameRelaxLevel.Exactly);
             }
-            case UnmanagedType.SafeArray:
+            case NativeType.SafeArray:
             {
                 return ConstStrings.MarshalSafeArrayPtrTypeName;
             }
-            case UnmanagedType.ByValArray:
+            case NativeType.FixedArray:
             {
-                if (elementCount == InvalidElementCount)
+                var actualMarshalType = (FixedArrayMarshalType)marshalType;
+                if (!actualMarshalType.IsSizeValid)
                 {
-                    throw new NotSupportedException("ByValArray must have a fixed length.");
+                    throw new NotSupportedException("FixedArray must have a fixed length.");
                 }
-                if (typeSig.ElementType != ElementType.SZArray)
-                {
-                    throw new NotSupportedException("Only SZArray is supported for array elements.");
-                }
-                return $"{GetMarshalNativeTypeName(typeSig.Next, arrayElementType, MaxManagedType, InvalidElementCount, InvalidElementCount, charSet)}[{elementCount}]";
+                return $"{GetMarshalNativeTypeName(typeSig.Next, null, charSet)}[{actualMarshalType.Size}]";
             }
             // obsolete
-            // case UnmanagedType.VBByRefStr:
-            // case UnmanagedType.AnsiBStr:
-            // case UnmanagedType.TBStr:
+            // case NativeType.VBByRefStr:
+            // case NativeType.AnsiBStr:
+            // case NativeType.TBStr:
             // {
             //     break;
             // }
-            case UnmanagedType.VariantBool:
+            case NativeType.VariantBool:
             {
                 // A 2-byte, OLE-defined VARIANT_BOOL type (true = -1, false = 0).
                 return ConstStrings.MarshalVariantBoolTypeName;
             }
-            case UnmanagedType.FunctionPtr:
+            case NativeType.Func:
             {
                 return ConstStrings.NativeMethodPointerTypeName;
             }
             // obsolete
-            // case UnmanagedType.AsAny:
+            // case NativeType.AsAny:
             // {
 
             // }
-            case UnmanagedType.LPArray:
+            case NativeType.Array:
             {
-                string eleTypeName;
-                if (arrayElementType == MaxManagedType)
+                if (typeSig.ElementType != ElementType.SZArray)
                 {
-                    eleTypeName = GlobalServices.Inst.TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(typeSig, TypeNameRelaxLevel.Exactly);
+                    throw new NotSupportedException("Only SZArray is supported for array elements.");
+                }
+                var actualMarshalType = (ArrayMarshalType)marshalType;
+                string eleTypeName;
+                if (actualMarshalType.IsElementTypeValid)
+                {
+                    eleTypeName = GetMarshalNativeTypeName(typeSig.Next, null, charSet);
                 }
                 else
                 {
-                    if (typeSig.ElementType != ElementType.SZArray)
+                    try
                     {
-                        throw new NotSupportedException("Only SZArray is supported for array elements.");
+                        eleTypeName = GetMarshalNativeTypeName(typeSig.Next, new MarshalType(actualMarshalType.ElementType), charSet);
                     }
-                    eleTypeName = GetMarshalNativeTypeName(typeSig.Next, arrayElementType, MaxManagedType, InvalidElementCount, InvalidElementCount, charSet);
+                    catch (Exception e)
+                    {
+                        throw new NotSupportedException($"Unsupported GetMarshalNativeTypeName for array type: {typeSig}, marshal type: {marshalType}.", e);
+                    }
                 }
                 return $"{eleTypeName}*";
             }
-            case UnmanagedType.LPStruct:
+            case NativeType.LPStruct:
                 return "void*";
-            case UnmanagedType.CustomMarshaler:
+            case NativeType.CustomMarshaler:
             {
                 return ConstStrings.MarshalCustomMarshalerTypeName;
             }
-            case UnmanagedType.Error:
+            case NativeType.Error:
             {
                 return ConstStrings.MarshalErrorTypeName;
             }
-            case UnmanagedType.IInspectable:
+            case NativeType.IInspectable:
             {
                 return ConstStrings.MarshalIInspectableTypeName;
             }
-            case UnmanagedType.HString:
+            case NativeType.HString:
             {
                 return ConstStrings.MarshalHStringTypeName;
             }
-            case UnmanagedType.LPUTF8Str:
+            case NativeType.LPUTF8Str:
             {
-                return ConstStrings.MarshalLPUTF8StrTypeName;
+                return ConstStrings.MarshalUTF8StrTypeName;
             }
             default:
             {
-                throw new NotSupportedException($"Unsupported UnmanagedType: {unmanagedType}");
+                throw new NotSupportedException($"Unsupported NativeType: {marshalType.NativeType}");
             }
             }
-        }
-
-
-        public static MarshalAsInfo ParseMarshalInfo(CustomAttribute marshalAsAttribute)
-        {
-            var result = new MarshalAsInfo()
-            {
-                UnmanagedType = MaxManagedType,
-                ArrayElementType = MaxManagedType,
-                ParamIndex = InvalidElementCount,
-                ElementCount = InvalidElementCount,
-            };
-            if (marshalAsAttribute.ConstructorArguments.Count != 1)
-            {
-                throw new NotSupportedException("MarshalAs attribute must have exactly one parameter.");
-            }
-            object managedTypeArg = marshalAsAttribute.ConstructorArguments[0].Value;
-            if (managedTypeArg is int unmanagedType)
-            {
-                result.UnmanagedType = (UnmanagedType)unmanagedType;
-            }
-            else if (managedTypeArg is short shortUnmanagedType)
-            {
-                result.UnmanagedType = (UnmanagedType)shortUnmanagedType;
-            }
-            else
-            {
-                throw new NotSupportedException("MarshalAs attribute parameter must be an integer.");
-            }
-
-            foreach (CANamedArgument namedArgument in marshalAsAttribute.NamedArguments)
-            {
-                switch (namedArgument.Name)
-                {
-                case "MarshalCookie":
-                {
-                    break;
-                }
-                case "MarshalType":
-                {
-                    break;
-                }
-                case "MarshalTypeRef":
-                {
-                    break;
-                }
-                case "SafeArrayUserDefinedSubType":
-                {
-                    break;
-                }
-                case "ArraySubType":
-                {
-                    result.ArrayElementType = (UnmanagedType)namedArgument.Argument.Value;
-                    break;
-                }
-                case "SafeArraySubType":
-                {
-                    throw new NotSupportedException("SafeArraySubType is not supported.");
-                }
-                case "SizeConst":
-                {
-                    result.ElementCount = (uint)namedArgument.Argument.Value;
-                    break;
-                }
-                case "IidParameterIndex":
-                {
-                    throw new NotSupportedException("IidParameterIndex is not supported.");
-                }
-                case "SizeParamIndex":
-                {
-                    result.ParamIndex = (uint)namedArgument.Argument.Value;
-                    break;
-                }
-                default:
-                {
-                    throw new NotSupportedException($"Unsupported MarshalAs attribute named argument: {namedArgument.Name}.");
-                }
-                }
-            }
-            return result;
-        }
-
-        public static MarshalAsInfo GetParameterOrFieldMarshalInfo(IHasCustomAttribute param)
-        {
-            if (param == null)
-            {
-                return null;
-            }
-            var marshalAsAttribute = param.CustomAttributes.FirstOrDefault(ca => ca.Constructor.DeclaringType.FullName == "System.Runtime.InteropServices.MarshalAsAttribute");
-            if (marshalAsAttribute == null)
-            {
-                return null;
-            }
-            return ParseMarshalInfo(marshalAsAttribute);
         }
 
         public static CharSet GetMethodDefaultCharSet(MethodDef method)
