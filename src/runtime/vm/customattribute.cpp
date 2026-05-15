@@ -12,6 +12,7 @@
 #include "type.h"
 #include "runtime.h"
 #include "marshal.h"
+#include "rt_string.h"
 #include "utils/binary_reader.h"
 #include "utils/rt_span.h"
 #include "gc/garbage_collector.h"
@@ -1210,14 +1211,25 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(me
     RET_OK(ca_data_arr);
 }
 
-static const metadata::RtMethodInfo* s_marshal_as_ctor = nullptr;
-static const metadata::RtFieldInfo* s_marshal_as_size_const_field = nullptr;
-static const metadata::RtFieldInfo* s_marshal_as_array_sub_type_field = nullptr;
-static const metadata::RtFieldInfo* s_marshal_as_size_param_index_field = nullptr;
+struct MarshalAsMetadatas
+{
+    const metadata::RtFieldInfo* marshal_cookie;
+    const metadata::RtFieldInfo* marshal_type;
+    const metadata::RtFieldInfo* marshal_type_ref;
+    const metadata::RtFieldInfo* safe_array_user_defined_sub_type;
+    const metadata::RtFieldInfo* array_sub_type;
+    const metadata::RtFieldInfo* safe_array_sub_type;
+    const metadata::RtFieldInfo* size_const;
+    const metadata::RtFieldInfo* iid_parameter_index;
+    const metadata::RtFieldInfo* size_param_index;
+    const metadata::RtMethodInfo* ctor_int16;
+};
+
+static MarshalAsMetadatas s_marshal_as_metadatas;
 
 static void init_marshal_as_fields()
 {
-    if (s_marshal_as_ctor)
+    if (s_marshal_as_metadatas.ctor_int16)
     {
         return;
     }
@@ -1226,14 +1238,70 @@ static void init_marshal_as_fields()
     const metadata::RtTypeSig* param_type_sigs[] = {
         corlib_types.cls_int16->by_val,
     };
-    s_marshal_as_ctor = Method::find_matched_method_in_class_by_name_and_signature(marshal_as_klass, STR_CTOR, param_type_sigs, 1);
-    assert(s_marshal_as_ctor);
-    s_marshal_as_size_const_field = Class::get_field_for_name(marshal_as_klass, "SizeConst", false);
-    assert(s_marshal_as_size_const_field);
-    s_marshal_as_array_sub_type_field = Class::get_field_for_name(marshal_as_klass, "ArraySubType", false);
-    assert(s_marshal_as_array_sub_type_field);
-    s_marshal_as_size_param_index_field = Class::get_field_for_name(marshal_as_klass, "SizeParamIndex", false);
-    assert(s_marshal_as_size_param_index_field);
+    s_marshal_as_metadatas.ctor_int16 = Method::find_matched_method_in_class_by_name_and_signature(marshal_as_klass, STR_CTOR, param_type_sigs, 1);
+    assert(s_marshal_as_metadatas.ctor_int16);
+    for (uint16_t i = 0; i < marshal_as_klass->field_count; ++i)
+    {
+        const metadata::RtFieldInfo* field = marshal_as_klass->fields + i;
+        if (!Field::is_instance(field))
+        {
+            continue;
+        }
+        if (strcmp(field->name, "MarshalCookie") == 0)
+        {
+            s_marshal_as_metadatas.marshal_cookie = field;
+        }
+        else if (strcmp(field->name, "MarshalType") == 0)
+        {
+            s_marshal_as_metadatas.marshal_type = field;
+        }
+        else if (strcmp(field->name, "MarshalTypeRef") == 0)
+        {
+            s_marshal_as_metadatas.marshal_type_ref = field;
+        }
+        else if (strcmp(field->name, "SafeArrayUserDefinedSubType") == 0)
+        {
+            s_marshal_as_metadatas.safe_array_user_defined_sub_type = field;
+        }
+        else if (strcmp(field->name, "ArraySubType") == 0)
+        {
+            s_marshal_as_metadatas.array_sub_type = field;
+        }
+        else if (strcmp(field->name, "SafeArraySubType") == 0)
+        {
+            s_marshal_as_metadatas.safe_array_sub_type = field;
+        }
+        else if (strcmp(field->name, "SizeConst") == 0)
+        {
+            s_marshal_as_metadatas.size_const = field;
+        }
+        else if (strcmp(field->name, "SizeParamIndex") == 0)
+        {
+            s_marshal_as_metadatas.size_param_index = field;
+        }
+        else if (strcmp(field->name, "IidParameterIndex") == 0)
+        {
+            s_marshal_as_metadatas.iid_parameter_index = field;
+        }
+    }
+    assert(s_marshal_as_metadatas.marshal_cookie);
+    assert(s_marshal_as_metadatas.marshal_type);
+    assert(s_marshal_as_metadatas.marshal_type_ref);
+    assert(s_marshal_as_metadatas.safe_array_user_defined_sub_type);
+    assert(s_marshal_as_metadatas.array_sub_type);
+    assert(s_marshal_as_metadatas.safe_array_sub_type);
+    assert(s_marshal_as_metadatas.size_const);
+    assert(s_marshal_as_metadatas.size_param_index);
+    assert(s_marshal_as_metadatas.iid_parameter_index);
+}
+
+static RtString* create_utf8_span_string(const metadata::RtMarshalUtf8Span& span)
+{
+    if (span.is_invalid())
+    {
+        return nullptr;
+    }
+    return String::create_string_from_utf8chars(span.data, static_cast<int32_t>(span.length));
 }
 
 RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::RtFieldInfo* field)
@@ -1252,22 +1320,74 @@ RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::R
     const CorLibTypes& corlib_types = Class::get_corlib_types();
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, marshal_as_obj, Object::new_object(corlib_types.cls_marshal_as));
     const void* ctor_args[1] = {&spec.native_type};
-    RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(s_marshal_as_ctor, marshal_as_obj, ctor_args));
+    RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(s_marshal_as_metadatas.ctor_int16, marshal_as_obj, ctor_args));
 
     metadata::RtMarshalNativeType ele_type = metadata::RtMarshalNativeType::Max;
     uint32_t param_num = 0;
     uint32_t num_elems = 0;
-    if (spec.native_type == metadata::RtMarshalNativeType::Array)
+    switch (spec.native_type)
     {
-        vm::Field::set_instance_value(s_marshal_as_array_sub_type_field, marshal_as_obj, &spec.array_element_type);
-        if (spec.param_index != metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT)
+        case metadata::RtMarshalNativeType::FixedSysString:
         {
-            vm::Field::set_instance_value(s_marshal_as_size_param_index_field, marshal_as_obj, &spec.param_index);
+            auto& fixed_sys_string_data = spec.fixed_sys_string;
+            vm::Field::set_instance_value(s_marshal_as_metadatas.size_const, marshal_as_obj, &fixed_sys_string_data.size);
+            break;
         }
-        if (spec.element_count != metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT)
+        case metadata::RtMarshalNativeType::SafeArray:
         {
-            vm::Field::set_instance_value(s_marshal_as_size_const_field, marshal_as_obj, &spec.element_count);
+            auto& safe_array_data = spec.safe_array;
+            vm::Field::set_instance_value(s_marshal_as_metadatas.safe_array_user_defined_sub_type, marshal_as_obj, &safe_array_data.variant_type);
+            vm::Field::set_instance_value(s_marshal_as_metadatas.safe_array_sub_type, marshal_as_obj, &safe_array_data.udt);
+            break;
         }
+        case metadata::RtMarshalNativeType::FixedArray:
+        {
+            auto& fixed_array_data = spec.fixed_array;
+            vm::Field::set_instance_value(s_marshal_as_metadatas.size_const, marshal_as_obj, &fixed_array_data.size);
+            vm::Field::set_instance_value(s_marshal_as_metadatas.array_sub_type, marshal_as_obj, &fixed_array_data.array_element_type);
+            break;
+        }
+        case metadata::RtMarshalNativeType::Array:
+        {
+            auto& arr_data = spec.array;
+            vm::Field::set_instance_value(s_marshal_as_metadatas.array_sub_type, marshal_as_obj, &arr_data.array_element_type);
+            vm::Field::set_instance_value(s_marshal_as_metadatas.size_param_index, marshal_as_obj, &arr_data.param_index);
+            vm::Field::set_instance_value(s_marshal_as_metadatas.size_const, marshal_as_obj, &arr_data.element_count);
+            break;
+        }
+        case metadata::RtMarshalNativeType::CustomMarshaler:
+        {
+            auto& custom_marshaler_data = spec.custom_marshaler;
+            if (custom_marshaler_data.guid.is_valid())
+            {
+                RtString* guid_str = create_utf8_span_string(custom_marshaler_data.guid);
+                vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_cookie, marshal_as_obj, &guid_str);
+            }
+            if (custom_marshaler_data.cookie.is_valid())
+            {
+                RtString* cookie_str = create_utf8_span_string(custom_marshaler_data.cookie);
+                vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_cookie, marshal_as_obj, &cookie_str);
+            }
+            if (custom_marshaler_data.type_name.is_valid())
+            {
+                RtString* type_name_str = create_utf8_span_string(custom_marshaler_data.type_name);
+                vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_type, marshal_as_obj, &type_name_str);
+            }
+            if (custom_marshaler_data.custom_marshaler_type)
+            {
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, type_obj, Reflection::get_type_reflection_object(custom_marshaler_data.custom_marshaler_type));
+                vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_type_ref, marshal_as_obj, &type_obj);
+            }
+            break;
+        }
+        case metadata::RtMarshalNativeType::IUnknown:
+        case metadata::RtMarshalNativeType::IDispatch:
+        case metadata::RtMarshalNativeType::IntF:
+        {
+            vm::Field::set_instance_value(s_marshal_as_metadatas.iid_parameter_index, marshal_as_obj, &spec.interface.iid_param_index);
+            break;
+        }
+        default: break;
     }
     RET_OK((RtCustomAttribute*)marshal_as_obj);
 }

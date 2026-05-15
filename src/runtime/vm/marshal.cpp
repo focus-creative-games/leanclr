@@ -6,6 +6,7 @@
 #include "class.h"
 #include "field.h"
 #include "object.h"
+#include "type.h"
 #include "metadata/aot_module.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
@@ -240,6 +241,62 @@ RtResult<metadata::RtNativeMethodPointer> Marshal::get_function_pointer_for_dele
     RET_OK(cb->native_method_ptr);
 }
 
+bool read_utf8_span(utils::BinaryReader& reader, metadata::RtMarshalUtf8Span& span)
+{
+    uint32_t length = 0;
+    if (!reader.try_read_compressed_uint32(length))
+    {
+        return false;
+    }
+    span.data = reinterpret_cast<const char*>(reader.get_current_ptr());
+    if (!reader.try_advance(length))
+    {
+        return false;
+    }
+    span.length = static_cast<size_t>(length);
+    return true;
+}
+
+#define READ_UINT32_OR_SET_INVALID(variable_name, default_value) \
+    if (reader.not_empty())                                      \
+    {                                                            \
+        uint32_t value = 0;                                      \
+        if (!reader.try_read_compressed_uint32(value))           \
+        {                                                        \
+            RET_ASSERT_ERR(RtErr::BadImageFormat);               \
+        }                                                        \
+        variable_name = decltype(variable_name)(value);          \
+    }                                                            \
+    else                                                         \
+    {                                                            \
+        variable_name = default_value;                           \
+    }
+
+#define READ_UTF8_SPAN_OR_SET_INVALID(span_var) \
+    if (reader.not_empty())                                      \
+    {                                                            \
+        if (!read_utf8_span(reader, span_var)) \
+        { \
+            RET_ASSERT_ERR(RtErr::BadImageFormat); \
+        } \
+    } else { \
+        span_var.set_invalid(); \
+    }
+
+#define READ_TYPESIG_OR_SET_NULL(variable_name) \
+    if (reader.not_empty())                                      \
+    {                                                            \
+        metadata::RtMarshalUtf8Span type_name; \
+        if (!read_utf8_span(reader, type_name)) \
+        { \
+            RET_ASSERT_ERR(RtErr::BadImageFormat); \
+        } \
+        UNWRAP_OR_RET_ERR_ON_FAIL(variable_name, Type::parse_assembly_qualified_type(mod, type_name.data, type_name.length, false)); \
+    }                                                            \
+    else                                                         \
+    {                                                            \
+        variable_name = nullptr;                           \
+    }
 RtResult<bool> Marshal::get_marshal_spec(const metadata::RtFieldInfo* field, metadata::RtMarshalSpec& spec) noexcept
 {
     if (!vm::Field::has_field_marshal(field))
@@ -268,31 +325,45 @@ RtResult<bool> Marshal::get_marshal_spec(const metadata::RtFieldInfo* field, met
 
     assert(sizeof(metadata::RtMarshalNativeType) == sizeof(int32_t));
     spec.native_type = static_cast<metadata::RtMarshalNativeType>(native_type);
-    spec.array_element_type = metadata::RtMarshalNativeType::Max;
-    spec.param_index = metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT;
-    spec.element_count = metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT;
     switch (spec.native_type)
     {
+    case metadata::RtMarshalNativeType::FixedSysString:
+    {
+        READ_UINT32_OR_SET_INVALID(spec.fixed_sys_string.size, metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT);
+        break;
+    }
+    case metadata::RtMarshalNativeType::SafeArray:
+    {
+        READ_UINT32_OR_SET_INVALID(spec.safe_array.variant_type, metadata::RtMarshalVariantType::NotInitialized);
+        READ_TYPESIG_OR_SET_NULL(spec.safe_array.udt);
+        break;
+    }
+    case metadata::RtMarshalNativeType::FixedArray:
+    {
+        READ_UINT32_OR_SET_INVALID(spec.fixed_array.size, metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT);
+        READ_UINT32_OR_SET_INVALID(spec.fixed_array.array_element_type, metadata::RtMarshalNativeType::NotInitialized);
+        break;
+    }
     case metadata::RtMarshalNativeType::Array:
     {
-        uint8_t ele_type_byte = 0;
-        if (!reader.try_read_byte(ele_type_byte))
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
-        spec.array_element_type = static_cast<metadata::RtMarshalNativeType>(ele_type_byte);
-        if (reader.not_empty())
-        {
-            if (!reader.try_read_compressed_uint32(spec.param_index))
-            {
-                RET_ASSERT_ERR(RtErr::BadImageFormat);
-            }
-        }
-        if (reader.not_empty())
-        {
-            if (!reader.try_read_compressed_uint32(spec.element_count))
-            {
-                RET_ASSERT_ERR(RtErr::BadImageFormat);
-            }
-        }
+        READ_UINT32_OR_SET_INVALID(spec.array.array_element_type, metadata::RtMarshalNativeType::NotInitialized);
+        READ_UINT32_OR_SET_INVALID(spec.array.param_index, metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT);
+        READ_UINT32_OR_SET_INVALID(spec.array.element_count, metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT);
+        break;
+    }
+    case metadata::RtMarshalNativeType::CustomMarshaler:
+    {
+        READ_UTF8_SPAN_OR_SET_INVALID(spec.custom_marshaler.guid);
+        READ_UTF8_SPAN_OR_SET_INVALID(spec.custom_marshaler.type_name);
+        READ_TYPESIG_OR_SET_NULL(spec.custom_marshaler.custom_marshaler_type);
+        READ_UTF8_SPAN_OR_SET_INVALID(spec.custom_marshaler.cookie);
+        break;
+    }
+    case metadata::RtMarshalNativeType::IUnknown:
+    case metadata::RtMarshalNativeType::IDispatch:
+    case metadata::RtMarshalNativeType::IntF:
+    {
+        READ_UINT32_OR_SET_INVALID(spec.interface.iid_param_index, metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT);
         break;
     }
     default:
