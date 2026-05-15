@@ -2325,7 +2325,7 @@ RtResultVoid Transformer::setup_basic_blocks()
 
     size_t start_index = (offsets_vec[0] == 0) ? 1 : 0;
     const auto& offsets_slice = offsets_vec.data() + start_index;
-    const size_t bb_count = offsets_vec.size() - start_index;
+    const size_t bb_count = offsets_vec.size() - start_index + 1 /* fake tail basic block*/;
 
     _basic_blocks = _pool->calloc_any<BasicBlock>(bb_count);
     _basic_block_count = bb_count;
@@ -2333,7 +2333,8 @@ RtResultVoid Transformer::setup_basic_blocks()
     size_t last_split_offset = 0;
     for (size_t i = 0; i < bb_count; ++i)
     {
-        const size_t split_offset = offsets_slice[i];
+        bool not_last_block = (i < bb_count - 1);
+        const size_t split_offset = not_last_block ? offsets_slice[i] : static_cast<size_t>(_method_body->code_size);
         BasicBlock* cur_bb = _basic_blocks + i;
         new (cur_bb) BasicBlock(_pool); // Placement new to call constructor
         _il_offset_to_basic_block[static_cast<uint32_t>(last_split_offset)] = cur_bb;
@@ -2345,7 +2346,7 @@ RtResultVoid Transformer::setup_basic_blocks()
         cur_bb->eval_stack_top = 0;
         cur_bb->in_eval_stack_top = _eval_stack_base_offset;
         cur_bb->insts.reserve(split_offset - last_split_offset);
-        cur_bb->next_bb = (i + 1 < bb_count) ? &_basic_blocks[i + 1] : nullptr;
+        cur_bb->next_bb = not_last_block ? &_basic_blocks[i + 1] : nullptr;
         last_split_offset = split_offset;
     }
 
