@@ -114,5 +114,14 @@ int32_t Kernel32::get_console_output_cp()
 #endif
 }
 
+#if LEANCLR_PLATFORM_WIN
+uint32_t Kernel32::get_time_zone_information(void* lp_time_zone_information)
+{
+    if (lp_time_zone_information == nullptr)
+        return 0;
+    return static_cast<uint32_t>(::GetTimeZoneInformation(static_cast<TIME_ZONE_INFORMATION*>(lp_time_zone_information)));
+}
+#endif
+
 } // namespace platform
 } // namespace leanclr

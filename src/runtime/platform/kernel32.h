@@ -21,6 +21,12 @@ class Kernel32
     static int32_t get_console_cp();
     static int32_t get_console_output_cp();
 
+#if LEANCLR_PLATFORM_WIN
+    /// Wraps GetTimeZoneInformation. @p lp_time_zone_information points at the managed
+    /// TIME_ZONE_INFORMATION layout (172 bytes, Unicode names).
+    static uint32_t get_time_zone_information(void* lp_time_zone_information);
+#endif
+
     /// GetLastError / non-Win fallback (see marshal.cpp).
     static int32_t get_last_win32_error();
     static void set_last_win32_error(int32_t error);

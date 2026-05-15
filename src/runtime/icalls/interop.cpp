@@ -586,6 +586,23 @@ RtResultVoid kernel32_find_first_file_ex_private_invoker(metadata::RtManagedMeth
     RET_VOID_OK();
 }
 
+#if LEANCLR_PLATFORM_WIN
+RtResult<uint32_t> Interop::kernel32_get_time_zone_information(void* lp_time_zone_information) noexcept
+{
+    RET_OK(platform::Kernel32::get_time_zone_information(lp_time_zone_information));
+}
+
+/// @icall: Interop/Kernel32::GetTimeZoneInformation(Interop/Kernel32/TIME_ZONE_INFORMATION&)
+RtResultVoid kernel32_get_time_zone_information_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    void* lp_time_zone_information = interp::EvalStackOp::get_param<void*>(params, 0);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, result, Interop::kernel32_get_time_zone_information(lp_time_zone_information));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
+#endif
+
 static vm::InternalCallEntry s_interop_internal_call_entries[] = {
 #if LEANCLR_PLATFORM_POSIX
     {"Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)", (vm::InternalCallFunction)&Interop::double_to_string,
@@ -637,6 +654,10 @@ static vm::InternalCallEntry s_interop_internal_call_entries[] = {
     {"Interop/Kernel32::FindFirstFileExPrivate(System.String,Interop/Kernel32/FINDEX_INFO_LEVELS,Interop/Kernel32/WIN32_FIND_DATA&,Interop/Kernel32/"
      "FINDEX_SEARCH_OPS,System.IntPtr,System.Int32)",
      (vm::InternalCallFunction)&Interop::kernel32_find_first_file_ex_private, kernel32_find_first_file_ex_private_invoker},
+#if LEANCLR_PLATFORM_WIN
+    {"Interop/Kernel32::GetTimeZoneInformation(Interop/Kernel32/TIME_ZONE_INFORMATION&)",
+     (vm::InternalCallFunction)&Interop::kernel32_get_time_zone_information, kernel32_get_time_zone_information_invoker},
+#endif
 };
 
 utils::Span<vm::InternalCallEntry> Interop::get_internal_call_entries() noexcept

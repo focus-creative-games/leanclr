@@ -20,6 +20,11 @@
     "header": "icalls/interop.h"
   },
   {
+    "name": "Interop/Kernel32::GetTimeZoneInformation(Interop/Kernel32/TIME_ZONE_INFORMATION&)",
+    "func": "Interop::kernel32_get_time_zone_information",
+    "header": "icalls/interop.h"
+  },
+  {
     "name": "Interop/Kernel32::SetThreadErrorMode(System.UInt32,System.UInt32&)",
     "func": "Interop::kernel32_set_thread_error_mode",
     "header": "icalls/interop.h"
