@@ -32,6 +32,10 @@ namespace LeanAOT.ToCpp
         }
         public static string GetMarshalNativeTypeName(TypeSig typeSig, MarshalType marshalType, CharSet charSet)
         {
+            if (typeSig.IsByRef)
+            {
+                return GetMarshalNativeTypeName(typeSig.Next, marshalType, charSet) + "*";
+            }
             if (marshalType == null)
             {
                 switch (typeSig.ElementType)
