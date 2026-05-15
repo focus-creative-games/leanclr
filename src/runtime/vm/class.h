@@ -381,6 +381,8 @@ class Class
         return parent->hierarchy_depth <= klass->hierarchy_depth && klass->super_types[parent->hierarchy_depth] == parent;
     }
 
+    static void collect_instance_fields(const metadata::RtClass* klass, utils::Vector<const metadata::RtFieldInfo*>& instanceFields, bool inherit);
+
     // Reflection/search functions
     static const metadata::RtFieldInfo* get_field_for_name(const metadata::RtClass* klass, const char* name, bool search_parent);
     static const metadata::RtFieldInfo* get_field_for_name(const metadata::RtClass* klass, const char* name, uint32_t name_len, bool search_parent);

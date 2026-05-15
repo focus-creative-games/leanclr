@@ -72,11 +72,6 @@ vm::RtString* Marshal::ptr_to_string_uni_len(void* ptr, int32_t len)
     return String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(ptr), len);
 }
 
-vm::RtString* Marshal::ptr_to_string_bstr(void* ptr)
-{
-    return ptr_to_string_uni(ptr);
-}
-
 void* Marshal::string_to_hglobal_ansi(const Utf16Char* chars, int32_t len)
 {
     utils::StringBuilder utf8_str;
@@ -89,12 +84,49 @@ void* Marshal::string_to_hglobal_uni(const Utf16Char* chars, int32_t len)
     return (void*)utils::StringUtil::strdup_utf16_with_null_terminator(chars, static_cast<size_t>(len));
 }
 
-void* Marshal::buffer_to_bstr(const Utf16Char* chars, int32_t len)
+/// BStr is a Unicode character string that is a length-prefixed(4 bytes) double byte.
+vm::RtString* Marshal::ptr_to_string_bstr(void* ptr)
 {
-    return (void*)utils::StringUtil::strdup_utf16_with_null_terminator(chars, static_cast<size_t>(len));
+    if (ptr == nullptr)
+    {
+        RET_OK(nullptr);
+    }
+    const Utf16Char* bstr = reinterpret_cast<const Utf16Char*>(ptr);
+    uint32_t len = *reinterpret_cast<const uint32_t*>((const uint8_t*)bstr - sizeof(uint32_t));
+    assert((uintptr_t)bstr % 2 == 0);
+    // null terminator
+    assert(bstr[len] == 0);
+    return String::create_string_from_utf16chars(bstr, len);
+}
+
+Utf16Char* Marshal::alloc_bstr(size_t utf16char_count)
+{
+    // make sure alignment to 4 because this str is used as bstr which is a length-prefixed(4 bytes) double byte. its length should alignment to 4
+    return (Utf16Char*)alloc::GeneralAllocation::calloc(utf16char_count + 2 /* length is 4 bytes */ + 1 /* null terminator */, sizeof(Utf16Char));
+}
+
+void* Marshal::buffer_to_bstr(const Utf16Char* chars, size_t len)
+{
+    Utf16Char* bstr = alloc_bstr(len);
+    *reinterpret_cast<int32_t*>(bstr) = static_cast<int32_t>(len);
+    Utf16Char* str_start = bstr + 2;
+    std::memcpy(str_start, chars, len * sizeof(Utf16Char));
+    str_start[len] = 0;
+    // return address of the string start
+    return str_start;
 }
 
 void Marshal::free_bstr(void* ptr)
+{
+    alloc::GeneralAllocation::free((byte*)ptr - 4);
+}
+
+void* Marshal::alloc_native_array(size_t element_count, size_t element_size)
+{
+    return alloc::GeneralAllocation::calloc(element_count, element_size);
+}
+
+void Marshal::free_array(void* ptr)
 {
     alloc::GeneralAllocation::free(ptr);
 }
@@ -206,6 +238,71 @@ RtResult<metadata::RtNativeMethodPointer> Marshal::get_function_pointer_for_dele
         RET_ERR(RtErr::NotSupported);
     }
     RET_OK(cb->native_method_ptr);
+}
+
+RtResult<bool> Marshal::get_marshal_spec(const metadata::RtFieldInfo* field, metadata::RtMarshalSpec& spec) noexcept
+{
+    if (!vm::Field::has_field_marshal(field))
+    {
+        RET_OK(false);
+    }
+
+    metadata::RtModuleDef* mod = field->parent->image;
+    const metadata::CliImage& cli_image = mod->get_cli_image();
+    uint32_t field_rid = metadata::RtToken::decode_rid(field->token);
+    uint32_t fieldmarshal_parent = metadata::RtMetadata::encode_has_field_marshal_coded_index(metadata::TableType::Field, field_rid);
+    std::optional<uint32_t> marshal_rid = cli_image.find_row_of_owner(metadata::TableType::FieldMarshal, 0, fieldmarshal_parent);
+    if (!marshal_rid)
+    {
+        // impossible for valid dll file.
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    }
+
+    std::optional<metadata::RowFieldMarshal> marshal_row = cli_image.read_field_marshal(marshal_rid.value());
+    assert(marshal_row.has_value());
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(utils::BinaryReader, reader, mod->get_decoded_blob_reader(marshal_row->native_type));
+    uint8_t native_type = 0;
+    if (!reader.try_read_byte(native_type))
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
+
+    assert(sizeof(metadata::RtMarshalNativeType) == sizeof(int32_t));
+    spec.native_type = static_cast<metadata::RtMarshalNativeType>(native_type);
+    spec.array_element_type = metadata::RtMarshalNativeType::Max;
+    spec.param_index = metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT;
+    spec.element_count = metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT;
+    switch (spec.native_type)
+    {
+    case metadata::RtMarshalNativeType::Array:
+    {
+        uint8_t ele_type_byte = 0;
+        if (!reader.try_read_byte(ele_type_byte))
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        spec.array_element_type = static_cast<metadata::RtMarshalNativeType>(ele_type_byte);
+        if (reader.not_empty())
+        {
+            if (!reader.try_read_compressed_uint32(spec.param_index))
+            {
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
+            }
+        }
+        if (reader.not_empty())
+        {
+            if (!reader.try_read_compressed_uint32(spec.element_count))
+            {
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
+            }
+        }
+        break;
+    }
+    default:
+        break;
+    }
+    if (reader.not_empty())
+    {
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    }
+    RET_OK(true);
 }
 
 int32_t Marshal::get_last_win32_error()

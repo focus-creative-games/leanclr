@@ -177,6 +177,26 @@ class MemOp
         write_i64_may_unaligned(ptr, static_cast<int64_t>(value));
     }
 
+    static void* read_ptr_may_unaligned(void* ptr)
+    {
+#if LEANCLR_SUPPORT_UNALIGNED_ACCESS
+        return *reinterpret_cast<void**>(ptr);
+#else
+        void* val;
+        std::memcpy(&val, ptr, sizeof(void*));
+        return val;
+#endif
+    }
+
+    static void write_ptr_may_unaligned(void* ptr, void* value)
+    {
+#if LEANCLR_SUPPORT_UNALIGNED_ACCESS
+        *reinterpret_cast<void**>(ptr) = value;
+#else
+        std::memcpy(ptr, &value, sizeof(void*));
+#endif
+    }
+
     static uint32_t get_not_zero_bit_count(uint64_t bits)
     {
         uint32_t count = 0;

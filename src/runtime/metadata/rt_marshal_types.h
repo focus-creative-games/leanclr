@@ -9,24 +9,102 @@ namespace metadata
 
 enum class RtMarshalNativeType
 {
-    Boolean = 0x2,
-    I1 = 0x3,
-    U1 = 0x4,
-    I2 = 0x5,
-    U2 = 0x6,
-    I4 = 0x7,
-    U4 = 0x8,
-    I8 = 0x9,
-    U8 = 0xA,
-    R4 = 0xB,
-    R8 = 0xC,
-    LPSTR = 0x14,
-    LPWSTR = 0x15,
-    Int = 0X1f,
-    Uint = 0X20,
+    // Deprecated
+    End = 0x00,
+    // void
+    Void = 0x01,
+    // bool
+    Boolean = 0x02,
+    // int8
+    I1 = 0x03,
+    // unsigned int8
+    U1 = 0x04,
+    // int16
+    I2 = 0x05,
+    // unsigned int16
+    U2 = 0x06,
+    // int32
+    I4 = 0x07,
+    // unsigned int32
+    U4 = 0x08,
+    // int64
+    I8 = 0x09,
+    // unsigned int64
+    U8 = 0x0A,
+    // float32
+    R4 = 0x0B,
+    // float64
+    R8 = 0x0C,
+    // syschar
+    SysChar = 0x0D,
+    // variant
+    Variant = 0x0E,
+    // currency
+    Currency = 0x0F,
+    // ptr
+    Ptr = 0x10,
+    // decimal
+    Decimal = 0x11,
+    // date
+    Date = 0x12,
+    // bstr
+    BStr = 0x13,
+    // lpstr
+    LPStr = 0x14,
+    // lpwstr
+    LPWStr = 0x15,
+    // lptstr
+    LPTStr = 0x16,
+    // fixed sysstring
+    FixedSysString = 0x17,
+    // objectref
+    ObjectRef = 0x18,
+    // iunknown
+    IUnknown = 0x19,
+    // idispatch
+    IDispatch = 0x1A,
+    // struct
+    Struct = 0x1B,
+    // interface
+    IntF = 0x1C,
+    // safearray
+    SafeArray = 0x1D,
+    // fixed array
+    FixedArray = 0x1E,
+    // int
+    Int = 0x1F,
+    // uint
+    UInt = 0x20,
+    // nested struct
+    NestedStruct = 0x21,
+    // byvalstr
+    ByValStr = 0x22,
+    // ansi bstr
+    ANSIBStr = 0x23,
+    // tbstr
+    TBStr = 0x24,
+    // variant bool
+    VariantBool = 0x25,
+    // func
     Func = 0x26,
-    Array = 0x2a,
-    Max = 0x50, // NOT DEFINED IN ecma-335, the implementation of coreclr is 0x50
+    // as any
+    ASAny = 0x28,
+    // array
+    Array = 0x2A,
+    // lpstruct
+    LPStruct = 0x2B,
+    // custom marshaler
+    CustomMarshaler = 0x2C,
+    // error
+    Error = 0x2D,
+    // iinspectable
+    IInspectable = 0x2E,
+    // hstring
+    HString = 0x2F,
+    // UTF-8 encoded string
+    LPUTF8Str = 0x30,
+    // first invalid element type
+    Max = 0x50,
 };
 
 constexpr uint32_t RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT = 0xFFFFFFFF;

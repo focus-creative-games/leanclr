@@ -11,6 +11,7 @@
 #include "reflection.h"
 #include "type.h"
 #include "runtime.h"
+#include "marshal.h"
 #include "utils/binary_reader.h"
 #include "utils/rt_span.h"
 #include "gc/garbage_collector.h"
@@ -1242,71 +1243,31 @@ RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::R
         RET_OK(nullptr);
     }
 
-    metadata::RtModuleDef* mod = field->parent->image;
-    const metadata::CliImage& cli_image = mod->get_cli_image();
-    uint32_t field_rid = metadata::RtToken::decode_rid(field->token);
-    uint32_t fieldmarshal_parent = metadata::RtMetadata::encode_has_field_marshal_coded_index(metadata::TableType::Field, field_rid);
-    std::optional<uint32_t> marshal_rid = cli_image.find_row_of_owner(metadata::TableType::FieldMarshal, 0, fieldmarshal_parent);
-    if (!marshal_rid)
-    {
-        // impossible for valid dll file.
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
-    }
-
-    std::optional<metadata::RowFieldMarshal> marshal_row = cli_image.read_field_marshal(marshal_rid.value());
-    assert(marshal_row.has_value());
-
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(utils::BinaryReader, reader, mod->get_decoded_blob_reader(marshal_row->native_type));
-    uint8_t native_type = 0;
-    if (!reader.try_read_byte(native_type))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    metadata::RtMarshalSpec spec{};
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, has_marshal, Marshal::get_marshal_spec(field, spec));
+    assert(has_marshal);
 
     init_marshal_as_fields();
+
     const CorLibTypes& corlib_types = Class::get_corlib_types();
-
-    assert(sizeof(metadata::RtMarshalNativeType) == sizeof(int32_t));
-    metadata::RtMarshalNativeType native_intrinsic_type = static_cast<metadata::RtMarshalNativeType>(native_type);
-
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, marshal_as_obj, Object::new_object(corlib_types.cls_marshal_as));
-    const void* ctor_args[1] = {&native_intrinsic_type};
+    const void* ctor_args[1] = {&spec.native_type};
     RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(s_marshal_as_ctor, marshal_as_obj, ctor_args));
 
     metadata::RtMarshalNativeType ele_type = metadata::RtMarshalNativeType::Max;
     uint32_t param_num = 0;
     uint32_t num_elems = 0;
-    switch (native_intrinsic_type)
+    if (spec.native_type == metadata::RtMarshalNativeType::Array)
     {
-    case metadata::RtMarshalNativeType::Array:
-    {
-        uint8_t ele_type_byte = 0;
-        if (!reader.try_read_byte(ele_type_byte))
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
-        ele_type = static_cast<metadata::RtMarshalNativeType>(ele_type_byte);
-        vm::Field::set_instance_value(s_marshal_as_array_sub_type_field, marshal_as_obj, &ele_type);
-        if (reader.not_empty())
+        vm::Field::set_instance_value(s_marshal_as_array_sub_type_field, marshal_as_obj, &spec.array_element_type);
+        if (spec.param_index != metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT)
         {
-            if (!reader.try_read_compressed_uint32(param_num))
-            {
-                RET_ASSERT_ERR(RtErr::BadImageFormat);
-            }
-            vm::Field::set_instance_value(s_marshal_as_size_param_index_field, marshal_as_obj, &param_num);
+            vm::Field::set_instance_value(s_marshal_as_size_param_index_field, marshal_as_obj, &spec.param_index);
         }
-        if (reader.not_empty())
+        if (spec.element_count != metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT)
         {
-            if (!reader.try_read_compressed_uint32(num_elems))
-            {
-                RET_ASSERT_ERR(RtErr::BadImageFormat);
-            }
-            vm::Field::set_instance_value(s_marshal_as_size_const_field, marshal_as_obj, &num_elems);
+            vm::Field::set_instance_value(s_marshal_as_size_const_field, marshal_as_obj, &spec.element_count);
         }
-        break;
-    }
-    default:
-        break;
-    }
-    if (reader.not_empty())
-    {
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RET_OK((RtCustomAttribute*)marshal_as_obj);
 }

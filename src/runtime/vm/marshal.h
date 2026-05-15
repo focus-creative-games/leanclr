@@ -51,12 +51,16 @@ class Marshal
     static vm::RtString* ptr_to_string_ansi_len(void* ptr, int32_t len);
     static vm::RtString* ptr_to_string_uni(void* ptr);
     static vm::RtString* ptr_to_string_uni_len(void* ptr, int32_t len);
-    static vm::RtString* ptr_to_string_bstr(void* ptr);
 
     static void* string_to_hglobal_ansi(const Utf16Char* chars, int32_t len);
     static void* string_to_hglobal_uni(const Utf16Char* chars, int32_t len);
-    static void* buffer_to_bstr(const Utf16Char* chars, int32_t len);
+    static vm::RtString* ptr_to_string_bstr(void* ptr);
+    static void* buffer_to_bstr(const Utf16Char* chars, size_t len);
+    static Utf16Char* alloc_bstr(size_t utf16char_count);
     static void free_bstr(void* ptr);
+
+    static void* alloc_native_array(size_t element_count, size_t element_size);
+    static void free_array(void* ptr);
 
     static RtResultVoid ptr_to_structure(void* ptr, vm::RtObject* obj);
     static RtResult<vm::RtObject*> ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type);
@@ -68,6 +72,8 @@ class Marshal
 
     static RtResult<RtDelegate*> marshal_function_pointer_to_delegate(metadata::RtNativeMethodPointer ptr, metadata::RtClass* delegate_class);
     static RtResult<metadata::RtNativeMethodPointer> get_function_pointer_for_delegate(RtDelegate* delegate);
+
+    static RtResult<bool> get_marshal_spec(const metadata::RtFieldInfo* field, metadata::RtMarshalSpec& spec) noexcept;
 
     static int32_t get_last_win32_error();
     static void set_last_win32_error(int32_t error);

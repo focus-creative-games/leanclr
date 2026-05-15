@@ -963,11 +963,11 @@ RtResultVoid Class::setup_fields_typedef(metadata::RtClass* klass)
     RET_VOID_OK();
 }
 
-static void collect_inherit_instance_fields(const metadata::RtClass* klass, utils::Vector<const metadata::RtFieldInfo*>& instanceFields)
+void Class::collect_instance_fields(const metadata::RtClass* klass, utils::Vector<const metadata::RtFieldInfo*>& instanceFields, bool inherit)
 {
-    if (klass->parent)
+    if (inherit && klass->parent)
     {
-        collect_inherit_instance_fields(klass->parent, instanceFields);
+        collect_instance_fields(klass->parent, instanceFields, true);
     }
     for (uint16_t i = 0; i < klass->field_count; ++i)
     {
@@ -989,7 +989,7 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
     if (klass->parent)
     {
         has_references = get_has_references(klass->parent);
-        collect_inherit_instance_fields(klass->parent, instanceFields);
+        collect_instance_fields(klass->parent, instanceFields, true);
     }
     int32_t first_field_index_of_current_class = (int32_t)instanceFields.size();
     for (uint16_t i = 0; i < klass->field_count; ++i)
