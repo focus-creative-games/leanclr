@@ -164,7 +164,7 @@ RtResult<intptr_t> Marshal::offset_of(vm::RtReflectionType* ref_type, const char
     RET_OK(static_cast<intptr_t>(offset));
 }
 
-RtResult<RtDelegate*> Marshal::marshal_function_pointer_to_delegate(void* ptr, metadata::RtClass* delegate_class)
+RtResult<RtDelegate*> Marshal::marshal_function_pointer_to_delegate(metadata::RtNativeMethodPointer ptr, metadata::RtClass* delegate_class)
 {
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
