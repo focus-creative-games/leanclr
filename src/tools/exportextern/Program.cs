@@ -80,7 +80,11 @@ namespace Analysis
             icallsLines.Sort(compareFunc);
             pinvokeLines.Sort(compareFunc);
             intrinsicLines.Sort(compareFunc);
-            Directory.CreateDirectory(Path.GetDirectoryName(outputFile));
+            string outputDir = Path.GetDirectoryName(outputFile);
+            if (!string.IsNullOrEmpty(outputDir))
+            {
+                Directory.CreateDirectory(outputDir);
+            }
             var totalLines = icallsLines.Concat(pinvokeLines).Concat(intrinsicLines).ToList();
             System.IO.File.WriteAllLines(outputFile, totalLines, Encoding.UTF8);
             Console.WriteLine($"Found {totalLines.Count} methods, saved to {outputFile}");
