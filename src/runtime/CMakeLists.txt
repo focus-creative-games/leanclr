@@ -1,6 +1,6 @@
 
 cmake_minimum_required(VERSION 3.15)
-project(leanclr CXX)
+project(leanclr CXX C)
 
 # Ninja / single-config generators: produces compile_commands.json for IDE IntelliSense (VS generator omits it on Windows).
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json for clangd / cpptools" FORCE)
@@ -20,6 +20,7 @@ set(RUNTIME_DIRS
     log
     metadata
     misc
+    pinvokes
     platform
     public_impl
     utils
@@ -29,9 +30,12 @@ set(RUNTIME_DIRS
 
 set(RUNTIME_SOURCES)
 foreach(dir ${RUNTIME_DIRS})
-    file(GLOB dir_sources "${CMAKE_CURRENT_LIST_DIR}/${dir}/*.cpp")
-    list(APPEND RUNTIME_SOURCES ${dir_sources})
+    file(GLOB dir_cpp_sources "${CMAKE_CURRENT_LIST_DIR}/${dir}/*.cpp")
+    list(APPEND RUNTIME_SOURCES ${dir_cpp_sources})
 endforeach()
+
+file(GLOB dir_c_sources "${CMAKE_CURRENT_LIST_DIR}/3rd/zlib/*.c")
+list(APPEND RUNTIME_SOURCES ${dir_c_sources})
 
 if(BUILD_SHARED_LEANCLR)
     add_library(leanclr SHARED ${RUNTIME_SOURCES})
@@ -39,7 +43,7 @@ else()
     add_library(leanclr STATIC ${RUNTIME_SOURCES})
 endif()
 
-target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS)
+target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS LEANCLR_USE_SHIPPING_ZLIB=1)
 target_compile_definitions(leanclr PUBLIC UNITY_VERSION=60000400)
 
 target_include_directories(leanclr PUBLIC

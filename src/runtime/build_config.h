@@ -180,6 +180,9 @@ typedef double float64_t;
 #define LEANCLR_PINVOKE_CALL_WINAPI LEANCLR_PINVOKE_CALL_CDECL
 #endif
 
+#ifndef LEANCLR_USE_SHIPPING_ZLIB
+#define LEANCLR_USE_SHIPPING_ZLIB 0
+#endif
 // UNITY_VERSION (and optionally UNITY_TUANJIE_ENGINE) must be supplied as
 // C preprocessor defines for the libil2cpp compile, via IL2CPP additional
 // arguments (--compiler-flags). LeanCLR's editor preprocess applies this
