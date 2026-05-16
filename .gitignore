@@ -435,3 +435,5 @@ launchSettings.json
 .vscode/
 /src/leanaot/sync.bat
 /src/runtime/*.bat
+/src/tools/exportextern/Properties/launchSettings.json
+/src/tools/exportextern/Properties/launchSettings.json
