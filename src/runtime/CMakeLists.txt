@@ -21,9 +21,10 @@ set(RUNTIME_DIRS
     metadata
     misc
     platform
+    public_impl
     utils
     vm
-    public_impl
+    vmutils
 )
 
 set(RUNTIME_SOURCES)
