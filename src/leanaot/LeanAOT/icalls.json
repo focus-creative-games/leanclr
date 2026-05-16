@@ -2575,6 +2575,31 @@
     "header": "icalls/system_threading_thread.h"
   },
   {
+    "name": "System.Threading.ThreadPool::GetAvailableThreadsNative(System.Int32&,System.Int32&)",
+    "func": "SystemThreadingThreadPool::get_available_threads_native",
+    "header": "icalls/system_threading_threadpool.h"
+  },
+  {
+    "name": "System.Threading.ThreadPool::GetMaxThreadsNative(System.Int32&,System.Int32&)",
+    "func": "SystemThreadingThreadPool::get_max_threads_native",
+    "header": "icalls/system_threading_threadpool.h"
+  },
+  {
+    "name": "System.Threading.ThreadPool::GetMinThreadsNative(System.Int32&,System.Int32&)",
+    "func": "SystemThreadingThreadPool::get_min_threads_native",
+    "header": "icalls/system_threading_threadpool.h"
+  },
+  {
+    "name": "System.Threading.ThreadPool::SetMaxThreadsNative(System.Int32,System.Int32)",
+    "func": "SystemThreadingThreadPool::set_max_threads_native",
+    "header": "icalls/system_threading_threadpool.h"
+  },
+  {
+    "name": "System.Threading.ThreadPool::SetMinThreadsNative(System.Int32,System.Int32)",
+    "func": "SystemThreadingThreadPool::set_min_threads_native",
+    "header": "icalls/system_threading_threadpool.h"
+  },
+  {
     "name": "System.Threading.Timer::GetTimeMonotonic()",
     "func": "SystemThreadingTimer::get_time_monotonic",
     "header": "icalls/system_threading_timer.h"
