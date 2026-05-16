@@ -56,6 +56,7 @@
 #include "system_security_cryptography_rngcryptoserviceprovider.h"
 #include "system_security_securitymanager.h"
 #include "system_threading_internalthread.h"
+#include "system_threading_threadpool.h"
 #include "system_typedreference.h"
 #include "system_gc.h"
 #include "system_datetime.h"
@@ -98,6 +99,7 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemEnvironment::get_internal_call_entries());
     Append(entries, SystemThreadingInterlocked::get_internal_call_entries());
     Append(entries, SystemThreadingThread::get_internal_call_entries());
+    Append(entries, SystemThreadingThreadPool::get_internal_call_entries());
     Append(entries, SystemThreadingInternalThread::get_internal_call_entries());
     Append(entries, SystemType::get_internal_call_entries());
     Append(entries, SystemValueType::get_internal_call_entries());
