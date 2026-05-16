@@ -10,8 +10,58 @@
     "header": "icalls/interop.h"
   },
   {
+    "name": "Interop/Kernel32::CloseHandle(System.IntPtr)",
+    "func": "Interop::kernel32_close_handle",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::CopyFile2(System.String,System.String,Interop/Kernel32/COPYFILE2_EXTENDED_PARAMETERS&)",
+    "func": "Interop::kernel32_copy_file2",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::CopyFileExPrivate(System.String,System.String,System.IntPtr,System.IntPtr,System.Int32&,System.Int32)",
+    "func": "Interop::kernel32_copy_file_ex_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::CreateDirectoryPrivate(System.String,Interop/Kernel32/SECURITY_ATTRIBUTES&)",
+    "func": "Interop::kernel32_create_directory_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::CreateFilePrivate(System.String,System.Int32,System.IO.FileShare,Interop/Kernel32/SECURITY_ATTRIBUTES*,System.IO.FileMode,System.Int32,System.IntPtr)",
+    "func": "Interop::kernel32_create_file_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::DeleteFilePrivate(System.String)",
+    "func": "Interop::kernel32_delete_file_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::DeleteVolumeMountPointPrivate(System.String)",
+    "func": "Interop::kernel32_delete_volume_mount_point_private",
+    "header": "icalls/interop.h"
+  },
+  {
     "name": "Interop/Kernel32::FindFirstFileExPrivate(System.String,Interop/Kernel32/FINDEX_INFO_LEVELS,Interop/Kernel32/WIN32_FIND_DATA&,Interop/Kernel32/FINDEX_SEARCH_OPS,System.IntPtr,System.Int32)",
     "func": "Interop::kernel32_find_first_file_ex_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::FindNextFile(Microsoft.Win32.SafeHandles.SafeFindHandle,Interop/Kernel32/WIN32_FIND_DATA&)",
+    "func": "Interop::kernel32_find_next_file",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::FreeLibrary(System.IntPtr)",
+    "func": "Interop::kernel32_free_library",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::GetDynamicTimeZoneInformation(Interop/Kernel32/TIME_DYNAMIC_ZONE_INFORMATION&)",
+    "func": "Interop::kernel32_get_dynamic_time_zone_information",
     "header": "icalls/interop.h"
   },
   {
@@ -20,8 +70,48 @@
     "header": "icalls/interop.h"
   },
   {
+    "name": "Interop/Kernel32::GetFileInformationByHandleEx(System.IntPtr,Interop/Kernel32/FILE_INFO_BY_HANDLE_CLASS,System.IntPtr,System.UInt32)",
+    "func": "Interop::kernel32_get_file_information_by_handle_ex",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::GetLogicalDrives()",
+    "func": "Interop::kernel32_get_logical_drives",
+    "header": "icalls/interop.h"
+  },
+  {
     "name": "Interop/Kernel32::GetTimeZoneInformation(Interop/Kernel32/TIME_ZONE_INFORMATION&)",
     "func": "Interop::kernel32_get_time_zone_information",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::LoadLibraryEx(System.String,System.IntPtr,System.Int32)",
+    "func": "Interop::kernel32_load_library_ex",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::MoveFileExPrivate(System.String,System.String,System.UInt32)",
+    "func": "Interop::kernel32_move_file_ex_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::RemoveDirectoryPrivate(System.String)",
+    "func": "Interop::kernel32_remove_directory_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::ReplaceFilePrivate(System.String,System.String,System.String,System.Int32,System.IntPtr,System.IntPtr)",
+    "func": "Interop::kernel32_replace_file_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::SetFileAttributesPrivate(System.String,System.Int32)",
+    "func": "Interop::kernel32_set_file_attributes_private",
+    "header": "icalls/interop.h"
+  },
+  {
+    "name": "Interop/Kernel32::SetFileInformationByHandle(Microsoft.Win32.SafeHandles.SafeFileHandle,Interop/Kernel32/FILE_INFO_BY_HANDLE_CLASS,Interop/Kernel32/FILE_BASIC_INFO&,System.UInt32)",
+    "func": "Interop::kernel32_set_file_information_by_handle",
     "header": "icalls/interop.h"
   },
   {
