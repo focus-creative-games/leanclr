@@ -42,13 +42,13 @@ namespace LeanAOT.ToCpp
         }
 
         // File-scope extern "C" for static P/Invoke (not inside a method — avoids Clang/Emscripten parse issues).
-        public void AddPInvokeNativeExternDeclaration(string dllNameNoExt, string standardedDllLiteral, string externDeclLine)
+        public void AddPInvokeNativeExternDeclaration(string dllNameNoExt, string standardedDllLiteral, string externDeclLine, bool defaultStaticLink)
         {
             if (!_addedPinvokeEntries.Add((dllNameNoExt, externDeclLine)))
             {
                 return;
             }
-            if (dllNameNoExt == ConstStrings.InternalDllName)
+            if (defaultStaticLink)
             {
                 _methodDeclsWriter.AddLine(externDeclLine);
                 return;

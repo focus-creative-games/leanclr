@@ -205,12 +205,14 @@ internal class Program
         var baseDir = AppContext.BaseDirectory;
         var catalog = RuntimeApiCatalog.LoadFromDirectory(baseDir);
         s_logger.Info(
-            "Loaded runtime API configs from {0}: icalls={1}, intrinsics={2}, icalls_newobj={3}, intrinsics_newobj={4}",
+            "Loaded runtime API configs from {0}: icalls={1}, intrinsics={2}, icalls_newobj={3}, intrinsics_newobj={4}, static_linked_pinvoke_dlls={5}, static_linked_pinvoke_methods={6}",
             baseDir,
             catalog.IcallCount,
             catalog.IntrinsicCount,
             catalog.IcallNewobjCount,
-            catalog.IntrinsicNewobjCount);
+            catalog.IntrinsicNewobjCount,
+            catalog.StaticLinkedPInvokeDllCount,
+            catalog.StaticLinkedPInvokeMethodCount);
         return catalog;
     }
 

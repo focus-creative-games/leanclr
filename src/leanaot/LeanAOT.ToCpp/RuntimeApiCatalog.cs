@@ -1,6 +1,7 @@
 using dnlib.DotNet;
 using LeanAOT.Core;
 using System.Diagnostics;
+using System.Linq;
 using System.Text;
 using System.Text.Json;
 
@@ -17,35 +18,62 @@ namespace LeanAOT.ToCpp
         public MethodKind MethodKind { get; set; }
     }
 
+    internal sealed class PInvokesConfigFile
+    {
+        public Dictionary<string, List<string>> StaticLinkedMethods { get; set; }
+    }
+
     public sealed class RuntimeApiCatalog
     {
         private readonly IReadOnlyDictionary<string, RuntimeApiEntry> _icalls;
         private readonly IReadOnlyDictionary<string, RuntimeApiEntry> _intrinsics;
         private readonly IReadOnlyDictionary<string, RuntimeApiEntry> _icallsNewobj;
         private readonly IReadOnlyDictionary<string, RuntimeApiEntry> _intrinsicsNewobj;
+        private readonly IReadOnlyDictionary<string, HashSet<string>> _staticLinkedMethods;
 
         private RuntimeApiCatalog(
             IReadOnlyDictionary<string, RuntimeApiEntry> icalls,
             IReadOnlyDictionary<string, RuntimeApiEntry> intrinsics,
             IReadOnlyDictionary<string, RuntimeApiEntry> icallsNewobj,
-            IReadOnlyDictionary<string, RuntimeApiEntry> intrinsicsNewobj)
+            IReadOnlyDictionary<string, RuntimeApiEntry> intrinsicsNewobj,
+            IReadOnlyDictionary<string, HashSet<string>> staticLinkedMethods)
         {
             _icalls = icalls;
             _intrinsics = intrinsics;
             _icallsNewobj = icallsNewobj;
             _intrinsicsNewobj = intrinsicsNewobj;
+            _staticLinkedMethods = staticLinkedMethods;
         }
 
         public int IcallCount => _icalls.Count;
         public int IntrinsicCount => _intrinsics.Count;
         public int IcallNewobjCount => _icallsNewobj.Count;
         public int IntrinsicNewobjCount => _intrinsicsNewobj.Count;
+        public int StaticLinkedPInvokeDllCount => _staticLinkedMethods.Count;
+        public int StaticLinkedPInvokeMethodCount => _staticLinkedMethods.Values.Sum(m => m.Count);
 
         public bool TryGetIcall(string name, out RuntimeApiEntry entry) => _icalls.TryGetValue(name, out entry);
         public bool TryGetIntrinsic(string name, out RuntimeApiEntry entry) => _intrinsics.TryGetValue(name, out entry);
         public bool TryGetIcallNewobj(string name, out RuntimeApiEntry entry) => _icallsNewobj.TryGetValue(name, out entry);
         public bool TryGetIntrinsicNewobj(string name, out RuntimeApiEntry entry) => _intrinsicsNewobj.TryGetValue(name, out entry);
 
+        /// <summary>
+        /// Returns true when the P/Invoke target is statically linked (from <c>pinvokes.json</c> or internal DLL).
+        /// </summary>
+        public bool IsStaticLinked(string dllName, string methodName)
+        {
+            if (string.IsNullOrEmpty(dllName) || string.IsNullOrEmpty(methodName))
+            {
+                return false;
+            }
+
+            if (dllName == ConstStrings.InternalDllName)
+            {
+                return true;
+            }
+
+            return _staticLinkedMethods.TryGetValue(dllName, out var methods) && methods.Contains(methodName);
+        }
 
         private string GetFullMethodName(MethodDef methodDef)
         {
@@ -145,8 +173,59 @@ namespace LeanAOT.ToCpp
             var intrinsics = LoadEntries(Path.Combine(baseDirectory, "intrinsics.json"), options, MethodKind.Intrinsic);
             var icallsNewobj = LoadEntries(Path.Combine(baseDirectory, "icalls_newobj.json"), options, MethodKind.ICallNewObj);
             var intrinsicsNewobj = LoadEntries(Path.Combine(baseDirectory, "intrinsics_newobj.json"), options, MethodKind.IntrinsicNewObj);
+            var staticLinkedMethods = LoadStaticLinkedMethods(Path.Combine(baseDirectory, "pinvokes.json"), options);
 
-            return new RuntimeApiCatalog(icalls, intrinsics, icallsNewobj, intrinsicsNewobj);
+            return new RuntimeApiCatalog(icalls, intrinsics, icallsNewobj, intrinsicsNewobj, staticLinkedMethods);
+        }
+
+        private static IReadOnlyDictionary<string, HashSet<string>> LoadStaticLinkedMethods(string path, JsonSerializerOptions options)
+        {
+            if (!File.Exists(path))
+            {
+                return new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+            }
+
+            var json = File.ReadAllText(path);
+            var config = JsonSerializer.Deserialize<PInvokesConfigFile>(json, options);
+            if (config?.StaticLinkedMethods == null)
+            {
+                return new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+            }
+
+            var map = new Dictionary<string, HashSet<string>>(StringComparer.OrdinalIgnoreCase);
+            foreach (var (dllName, methodNames) in config.StaticLinkedMethods)
+            {
+                if (string.IsNullOrWhiteSpace(dllName))
+                {
+                    throw new InvalidDataException($"Invalid static-linked P/Invoke DLL name in file: {path}");
+                }
+
+                if (methodNames == null || methodNames.Count == 0)
+                {
+                    throw new InvalidDataException($"Static-linked P/Invoke methods for DLL '{dllName}' cannot be empty in file: {path}");
+                }
+
+                var methods = new HashSet<string>(StringComparer.Ordinal);
+                foreach (var methodName in methodNames)
+                {
+                    if (string.IsNullOrWhiteSpace(methodName))
+                    {
+                        throw new InvalidDataException($"Invalid static-linked P/Invoke method name for DLL '{dllName}' in file: {path}");
+                    }
+
+                    if (!methods.Add(methodName))
+                    {
+                        throw new InvalidDataException($"Duplicate static-linked P/Invoke method '{methodName}' for DLL '{dllName}' in file: {path}");
+                    }
+                }
+
+                if (!map.TryAdd(dllName, methods))
+                {
+                    throw new InvalidDataException($"Duplicate static-linked P/Invoke DLL '{dllName}' in file: {path}");
+                }
+            }
+
+            return map;
         }
 
         private static IReadOnlyDictionary<string, RuntimeApiEntry> LoadEntries(string path, JsonSerializerOptions options, MethodKind methodKind)

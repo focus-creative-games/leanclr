@@ -62,12 +62,14 @@ namespace LeanAOT.ToCpp
             string fnTypedefName = $"__leanclr_pinvoke_fn_{_method.UniqueName}";
             string nativeParamDeclsWithoutVarName = string.Join(", ", _params.Select(p => p.NativeTypeName));
             _bodyWriter.AddLine($"typedef {_ret.NativeTypeName} ({callConvMacro} *{fnTypedefName})({nativeParamDeclsWithoutVarName});");
-            if (MarshalUtil.IsInternalDll(dllNameNoExt))
+            bool defaultStaticLink = GlobalServices.Inst.RuntimeApiCatalog.IsStaticLinked(dllNameNoExt, importName);
+            if (defaultStaticLink)
             {
                 _forwardDeclaration.AddPInvokeNativeExternDeclaration(
                     dllNameNoExt,
                     standardedDllName,
-                    $"extern \"C\" {_ret.NativeTypeName} {callConvMacro} {importName}({nativeParamDeclsWithoutVarName});");
+                    $"extern \"C\" {_ret.NativeTypeName} {callConvMacro} {importName}({nativeParamDeclsWithoutVarName});",
+                    defaultStaticLink);
                 _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = {importName};");
             }
             else
@@ -76,7 +78,8 @@ namespace LeanAOT.ToCpp
                 _forwardDeclaration.AddPInvokeNativeExternDeclaration(
                     dllNameNoExt,
                     standardedDllName,
-                    $"extern \"C\" {_ret.NativeTypeName} {callConvMacro} {importName}({nativeParamDeclsWithoutVarName});");
+                    $"extern \"C\" {_ret.NativeTypeName} {callConvMacro} {importName}({nativeParamDeclsWithoutVarName});",
+                    defaultStaticLink);
                 _bodyWriter.AddLine($"{fnTypedefName} {PInvokeFnPtrVar} = {importName};");
                 _bodyWriter.AddLine("#else");
                 _bodyWriter.AddLine($"static {fnTypedefName} __leanclr_pinvoke_fn_cache = nullptr;");

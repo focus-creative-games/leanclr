@@ -1,0 +1,11 @@
+{
+  "staticLinkedMethods": {
+    "MonoPosixHelper": [
+      "CreateZStream",
+      "Flush",
+      "ReadZStream",
+      "WriteZStream",
+      "CloseZStream"
+    ]
+  }
+}
