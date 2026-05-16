@@ -2,6 +2,7 @@ using dnlib.DotNet;
 using LeanAOT.Core;
 using LeanAOT.ToCpp;
 using System;
+using System.Diagnostics;
 using System.Reflection;
 using System.Runtime.InteropServices;
 using CallingConvention = System.Runtime.InteropServices.CallingConvention;
@@ -377,10 +378,7 @@ namespace LeanAOT.ToCpp
         public static string GetMonoPInvokeCallbackCallingConventionCppMacro(MethodDef method)
         {
             var ca = method.CustomAttributes.FirstOrDefault(MetaUtil.IsMonoPInvokeCallbackAttribute);
-            if (ca == null)
-            {
-                return "LEANCLR_PINVOKE_CALL_WINAPI";
-            }
+            Debug.Assert(ca != null, $"GetMonoPInvokeCallbackCallingConventionCppMacro should only be called for methods with MonoPInvokeCallbackAttribute. Method: {method.FullName}");
             TypeSig delegateType = ((TypeSig)ca.ConstructorArguments[0].Value).RemovePinnedAndModifiers();
             TypeDef delegateTypeDef = delegateType.ToTypeDefOrRef().ResolveTypeDefThrow();
             CustomAttribute unmanagedFunctionPointerAttribute = delegateTypeDef.CustomAttributes.FirstOrDefault(ca => ca.Constructor.DeclaringType.FullName == "System.Runtime.InteropServices.UnmanagedFunctionPointerAttribute");
