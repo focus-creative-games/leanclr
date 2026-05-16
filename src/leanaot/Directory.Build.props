@@ -1,0 +1,23 @@
+<Project>
+  <PropertyGroup>
+    <Deterministic>true</Deterministic>
+  </PropertyGroup>
+
+  <!-- 仅作用于 SDK 风格项目；旧式 net48 项目 (Test/RunTest) 不导入 Source Link 相关逻辑 -->
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
+    <IncludeSourceRevisionInInformationalVersion>false</IncludeSourceRevisionInInformationalVersion>
+    <Version>1.0.0</Version>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <InformationalVersion>1.0.0</InformationalVersion>
+
+    <EnableSourceLink>false</EnableSourceLink>
+    <PublishRepositoryUrl>false</PublishRepositoryUrl>
+    <EmbedUntrackedSources>false</EmbedUntrackedSources>
+    <!-- 已关闭 Source Link，必须同步关闭 DeterministicSourcePaths，否则会因缺少 SourceRoot 而构建失败 -->
+    <DeterministicSourcePaths>false</DeterministicSourcePaths>
+
+    <DebugType>portable</DebugType>
+    <PathMap>$(MSBuildProjectDirectory)=./</PathMap>
+  </PropertyGroup>
+</Project>
