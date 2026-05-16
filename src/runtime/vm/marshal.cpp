@@ -10,7 +10,7 @@
 #include "metadata/aot_module.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
-#include "platform/kernel32.h"
+#include "platform/rt_sys.h"
 
 namespace leanclr
 {
@@ -379,12 +379,12 @@ RtResult<bool> Marshal::get_marshal_spec(const metadata::RtFieldInfo* field, met
 
 int32_t Marshal::get_last_win32_error()
 {
-    return platform::Kernel32::get_last_win32_error();
+    return platform::RtSys::get_last_win32_error();
 }
 
 void Marshal::set_last_win32_error(int32_t error)
 {
-    platform::Kernel32::set_last_win32_error(error);
+    platform::RtSys::set_last_win32_error(error);
 }
 
 } // namespace vm

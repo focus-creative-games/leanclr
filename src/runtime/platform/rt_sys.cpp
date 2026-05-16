@@ -9,6 +9,7 @@
 #include "platform/rt_io_error_internal.h"
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
+#include "vmutils/safehandle.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -21,6 +22,9 @@
 #include <sys/time.h>
 #include <unistd.h>
 #include <utime.h>
+#elif LEANCLR_PLATFORM_WIN
+#define WIN32_LEAN_AND_MEAN
+#include <windows.h>
 #endif
 
 namespace leanclr
@@ -29,6 +33,7 @@ namespace platform
 {
 namespace
 {
+
 #ifdef LEANCLR_PLATFORM_POSIX
 struct ManagedDirectoryEntry
 {
@@ -126,18 +131,32 @@ static intptr_t extract_safe_handle_raw_handle(vm::RtObject* safe_handle_obj)
 {
     if (safe_handle_obj == nullptr)
         return static_cast<intptr_t>(-1);
-
-    const metadata::RtClass* safe_handle_klass = safe_handle_obj->klass;
-    const metadata::RtFieldInfo* handle_field = vm::Class::get_field_for_name(safe_handle_klass, "handle", static_cast<uint32_t>(std::strlen("handle")), true);
-    if (handle_field == nullptr)
-        return static_cast<intptr_t>(-1);
-
-    intptr_t handle_value = static_cast<intptr_t>(-1);
-    vm::Field::get_instance_value(handle_field, safe_handle_obj, &handle_value);
-    return handle_value;
+    return vmutils::SafeHandle::get_handle(safe_handle_obj);
 }
 #endif
 } // namespace
+
+#ifndef LEANCLR_PLATFORM_WIN
+static int32_t s_last_win32_error = 0;
+#endif
+
+int32_t RtSys::get_last_win32_error()
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::GetLastError());
+#else
+    return s_last_win32_error;
+#endif
+}
+
+void RtSys::set_last_win32_error(int32_t error)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    ::SetLastError(static_cast<DWORD>(static_cast<uint32_t>(error)));
+#else
+    s_last_win32_error = error;
+#endif
+}
 
 int32_t RtSys::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size)
 {

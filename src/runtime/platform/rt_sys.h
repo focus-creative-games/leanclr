@@ -10,6 +10,8 @@ namespace platform
 class RtSys
 {
   public:
+    static int32_t get_last_win32_error();
+    static void set_last_win32_error(int32_t error);
     static int32_t double_to_string(double value, const char* format, char* buffer, int32_t buffer_size);
     static int32_t ch_mod(vm::RtString* path, int32_t mode);
     static int32_t mk_dir(vm::RtString* path, int32_t mode);
