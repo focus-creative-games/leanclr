@@ -137,7 +137,11 @@ RtException* Exception::raise_aot_exception(RtException* ex, const metadata::RtM
 
 RtErr Exception::raise_internal_runtime_error_as_exception(RtErr err, const char* message)
 {
-    raise_error_as_exception(err, nullptr, nullptr);
+    RtException* ex = raise_error_as_exception(err, nullptr, nullptr);
+    if (message)
+    {
+        ex->message = String::create_string_from_utf8cstr(message);
+    }
     return RtErr::ManagedException;
 }
 

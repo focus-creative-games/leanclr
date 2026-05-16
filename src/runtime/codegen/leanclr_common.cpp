@@ -220,8 +220,8 @@ vm::RtString* marshal_ansi_string_to_managed_string(const RtMarshalAnsiStr str) 
 RtErr raise_internal_call_entry_not_found_error(const char* name) noexcept
 {
     char err_msg[1024];
-    snprintf(err_msg, sizeof(err_msg), "Internal call entry not found: %s", name);
-    RET_ERR_WITH_MSG(RtErr::EntryPointNotFound, err_msg);
+    snprintf(err_msg, sizeof(err_msg), "Internal call not implemented: %s", name);
+    RET_ERR_WITH_MSG(RtErr::NotImplemented, err_msg);
 }
 
 RtErr raise_pinvoke_entry_not_found_error(const char* dll_name_no_ext, const char* function_name) noexcept
