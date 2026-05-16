@@ -7,6 +7,8 @@
 #include "field.h"
 #include "object.h"
 #include "type.h"
+#include "rt_exception.h"
+#include "method.h"
 #include "metadata/aot_module.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
@@ -216,7 +218,7 @@ RtResult<metadata::RtNativeMethodPointer> Marshal::get_function_pointer_for_dele
         const int32_t len = Array::get_array_length(md->deles);
         if (len != 1)
         {
-            RET_ERR(RtErr::NotSupported);
+            RET_ERR_WITH_MSG(RtErr::NotSupported, "Delegate has multiple methods");
         }
         single = *Array::get_array_data_start_as<RtDelegate*>(md->deles);
     }
@@ -224,20 +226,24 @@ RtResult<metadata::RtNativeMethodPointer> Marshal::get_function_pointer_for_dele
     {
         single = &md->dele;
     }
-    if (single == nullptr)
-    {
-        RET_OK(nullptr);
-    }
+    assert(single != nullptr);
     const metadata::RtMethodInfo* target_method = single->method;
-    if (target_method == nullptr)
+    assert(target_method != nullptr);
+    if (Method::is_instance(target_method))
     {
-        RET_ERR(RtErr::NotSupported);
+        char msg[1024];
+        const metadata::RtClass* klass = target_method->parent;
+        snprintf(msg, sizeof(msg), "Delegate method should be static method. Method: %s.%s.%s", klass->namespaze, klass->name, target_method->name);
+        RET_ERR_WITH_MSG(RtErr::NotSupported, msg);
     }
     const metadata::RtAotMethodMonoPInvokeCallbackData* cb =
         metadata::AotModule::find_mono_pinvoke_callback_method(target_method->parent->image, target_method->token);
     if (cb == nullptr || cb->native_method_ptr == nullptr)
     {
-        RET_ERR(RtErr::NotSupported);
+        char msg[1024];
+        const metadata::RtClass* klass = target_method->parent;
+        snprintf(msg, sizeof(msg), "To marshal delegate method, the method should contain '[MonoPInvokeCallback]' attribute. Method: %s.%s.%s", klass->namespaze, klass->name, target_method->name);
+        RET_ERR_WITH_MSG(RtErr::NotSupported, msg);
     }
     RET_OK(cb->native_method_ptr);
 }
