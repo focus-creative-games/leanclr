@@ -9,27 +9,40 @@ namespace vmutils
   static const metadata::RtFieldInfo* s_chunkCharsField = nullptr;
   static const metadata::RtFieldInfo* s_chunkLengthField = nullptr;
 
+  static void ensure_string_builder_fields_initialized(vm::RtObject* sb) noexcept
+  {
+    assert(sb != nullptr);
+    if (s_chunkCharsField != nullptr && s_chunkLengthField != nullptr)
+    {
+      return;
+    }
+    const auto* klass = static_cast<const metadata::RtClass*>(sb->klass);
+    s_chunkCharsField = vm::Class::get_field_for_name(klass, "m_ChunkChars", false);
+    s_chunkLengthField = vm::Class::get_field_for_name(klass, "m_ChunkLength", false);
+    assert(s_chunkCharsField != nullptr);
+    assert(s_chunkLengthField != nullptr);
+  }
+
   void StringBuilder::get_chunk_chars(vm::RtObject* sb, Utf16Char** out_data, int32_t* out_capacity_chars) noexcept
   {
     assert(sb != nullptr && out_data != nullptr && out_capacity_chars != nullptr);
-    if (s_chunkCharsField == nullptr)
-    {
-      s_chunkCharsField = vm::Class::get_field_for_name(static_cast<const metadata::RtClass*>(sb->klass), "m_ChunkChars", false);
-      assert(s_chunkCharsField != nullptr);
-    }
+    ensure_string_builder_fields_initialized(sb);
     vm::RtArray* chunk = *(vm::RtArray**)(reinterpret_cast<uint8_t*>(sb + 1) + s_chunkCharsField->offset);
     *out_capacity_chars = vm::Array::get_array_length(chunk);
     *out_data = vm::Array::get_array_data_start_as<Utf16Char>(chunk);
+  }
+
+  int32_t StringBuilder::get_chunk_length(vm::RtObject* sb) noexcept
+  {
+    assert (sb != nullptr);
+    ensure_string_builder_fields_initialized(sb);
+    return *(int32_t*)(reinterpret_cast<uint8_t*>(sb + 1) + s_chunkLengthField->offset);
   }
   
   void StringBuilder::set_chunk_length(vm::RtObject* sb, int32_t len) noexcept
   {
     assert (sb != nullptr);
-    if (s_chunkLengthField == nullptr)
-    {
-      s_chunkLengthField = vm::Class::get_field_for_name(static_cast<const metadata::RtClass*>(sb->klass), "m_ChunkLength", false);
-      assert(s_chunkLengthField != nullptr);
-    }
+    ensure_string_builder_fields_initialized(sb);
     *(int32_t*)(reinterpret_cast<uint8_t*>(sb + 1) + s_chunkLengthField->offset) = len;
   }
   
