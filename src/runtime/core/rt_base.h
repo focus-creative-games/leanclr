@@ -22,11 +22,9 @@ using RtResult = core::Result<T>;
 using RtResultVoid = core::ResultVoid;
 
 typedef uint16_t Utf16Char;
-#if LEANCLR_PLATFORM_WIN
-typedef wchar_t NativeChar;
-#else
-typedef char NativeChar;
-#endif
+typedef char Utf8Char;
+// LPStr / CharSet.Ansi: null-terminated byte string in the system ACP (Windows) or UTF-8 bytes (POSIX).
+typedef char AnsiChar;
 
 constexpr size_t PTR_SIZE = sizeof(void*);
 constexpr size_t PTR_ALIGN = PTR_SIZE;

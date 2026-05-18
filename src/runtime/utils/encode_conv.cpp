@@ -42,19 +42,19 @@ void EncodeConv::utf16_to_utf8(const Utf16Char* utf16_str, size_t utf16_len, cha
     out_utf8_len = static_cast<size_t>(end - out_utf8_str);
 }
 
-void EncodeConv::utf16_to_ansi(const Utf16Char* utf16_str, size_t utf16_len, NativeChar* out_ansi_str, size_t& out_ansi_len)
+void EncodeConv::utf16_to_ansi(const Utf16Char* utf16_str, size_t utf16_len, AnsiChar* out_ansi_str, size_t& out_ansi_len)
 {
     if (!utf16_str || utf16_len == 0)
     {
         out_ansi_len = 0;
-        reinterpret_cast<char*>(out_ansi_str)[0] = '\0';
+        out_ansi_str[0] = '\0';
         return;
     }
 
 #if LEANCLR_PLATFORM_WIN
     const int cch = clamp_size_t_to_int(utf16_len);
     const LPCWCH wch = reinterpret_cast<LPCWCH>(utf16_str);
-    char* const out_bytes = reinterpret_cast<char*>(out_ansi_str);
+    char* const out_bytes = out_ansi_str;
     const int cb = WideCharToMultiByte(CP_ACP, 0, wch, cch, out_bytes, INT_MAX, nullptr, nullptr);
     if (cb == 0)
     {
@@ -85,7 +85,7 @@ void EncodeConv::utf8_to_utf16(const char* utf8_str, size_t utf8_len, Utf16Char*
     out_utf16_len = static_cast<size_t>(end16 - out_utf16_str);
 }
 
-void EncodeConv::ansi_to_utf16(const NativeChar* ansi_str, size_t ansi_len, Utf16Char* out_utf16_str, size_t& out_utf16_len)
+void EncodeConv::ansi_to_utf16(const AnsiChar* ansi_str, size_t ansi_len, Utf16Char* out_utf16_str, size_t& out_utf16_len)
 {
     if (!ansi_str || ansi_len == 0)
     {
@@ -95,7 +95,7 @@ void EncodeConv::ansi_to_utf16(const NativeChar* ansi_str, size_t ansi_len, Utf1
     }
 
 #if LEANCLR_PLATFORM_WIN
-    const char* const ansi_bytes = reinterpret_cast<const char*>(ansi_str);
+    const char* const ansi_bytes = ansi_str;
     const int cb = clamp_size_t_to_int(ansi_len);
     const int cch = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, ansi_bytes, cb, reinterpret_cast<wchar_t*>(out_utf16_str), INT_MAX);
     if (cch == 0)

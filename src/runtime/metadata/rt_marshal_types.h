@@ -321,9 +321,9 @@ typedef void* RtMarshalIUnknown;
 typedef void* RtMarshalIDispatch;
 typedef void* RtMarshalInterface;
 typedef void* RtMarshalHString;
-typedef char* RtMarshalUTF8Str;
+typedef Utf8Char* RtMarshalUTF8Str;
 typedef Utf16Char* RtMarshalUTF16Str;
-typedef NativeChar* RtMarshalAnsiStr;
+typedef AnsiChar* RtMarshalAnsiStr;
 typedef intptr_t RtMarshalHandle;
 
 } // namespace metadata

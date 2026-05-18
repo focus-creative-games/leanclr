@@ -1,6 +1,8 @@
 #include <cstdint>
 #include <cstring>
 
+#include "core/rt_base.h"
+
 #ifndef __EMSCRIPTEN__
 
 extern "C" int32_t leanclr_pinvoke_add_i32(int32_t a, int32_t b)
@@ -102,6 +104,43 @@ extern "C" int32_t leanclr_pinvoke_invoke_nested_binary_op(void* outer, void* in
 extern "C" int32_t leanclr_pinvoke_safe_handle_add_ten(void* raw_handle)
 {
     return static_cast<int32_t>(reinterpret_cast<intptr_t>(raw_handle)) + 10;
+}
+
+extern "C" int32_t leanclr_pinvoke_ansi_string_builder_byte_len(leanclr::AnsiChar* sb)
+{
+    if (sb == nullptr)
+    {
+        return -1;
+    }
+    return static_cast<int32_t>(std::strlen(sb));
+}
+
+extern "C" void leanclr_pinvoke_ansi_string_builder_set_native_text(leanclr::AnsiChar* sb)
+{
+    if (sb == nullptr)
+    {
+        return;
+    }
+    std::strcpy(sb, "native");
+}
+
+extern "C" int32_t leanclr_pinvoke_utf8_string_builder_byte_len(leanclr::Utf8Char* sb)
+{
+    if (sb == nullptr)
+    {
+        return -1;
+    }
+    return static_cast<int32_t>(std::strlen(sb));
+}
+
+extern "C" void leanclr_pinvoke_utf8_string_builder_set_native_text(leanclr::Utf8Char* sb)
+{
+    if (sb == nullptr)
+    {
+        return;
+    }
+    static const char kGoodUtf8[] = "\xE5\xA5\xBD";
+    std::strcpy(sb, kGoodUtf8);
 }
 
 #endif

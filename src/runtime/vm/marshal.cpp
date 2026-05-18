@@ -79,11 +79,11 @@ vm::RtString* Marshal::ptr_to_string_uni_len(void* ptr, int32_t len)
 void* Marshal::string_to_hglobal_ansi(const Utf16Char* chars, int32_t len)
 {
     size_t max_ansi_len = utils::EncodeConv::get_preserved_utf16_to_ansi_length(chars, static_cast<size_t>(len));
-    NativeChar* ansi_str = (NativeChar*)alloc::GeneralAllocation::calloc(max_ansi_len, sizeof(NativeChar));
+    AnsiChar* ansi_str = static_cast<AnsiChar*>(alloc::GeneralAllocation::calloc(max_ansi_len, sizeof(AnsiChar)));
     size_t ansi_len = 0;
     utils::EncodeConv::utf16_to_ansi(chars, static_cast<size_t>(len), ansi_str, ansi_len);
     assert(ansi_len < max_ansi_len);
-    ansi_str[ansi_len] = 0;
+    ansi_str[ansi_len] = '\0';
     return ansi_str;
 }
 

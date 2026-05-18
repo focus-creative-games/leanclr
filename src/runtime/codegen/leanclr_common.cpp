@@ -318,6 +318,17 @@ void sync_managed_string_builder_from_ansi_buffer(vm::RtObject* sb, const RtMars
     copy_utf16_to_managed_string_builder(sb, temp.as_utf16chars(), static_cast<int32_t>(temp.get_utf16chars_length()));
 }
 
+void sync_managed_string_builder_from_utf8_buffer(vm::RtObject* sb, const Utf8Char* str) noexcept
+{
+    if (str == nullptr || sb == nullptr)
+    {
+        return;
+    }
+    Utf16StringBuilder temp;
+    temp.append_utf8_str(str);
+    copy_utf16_to_managed_string_builder(sb, temp.as_utf16chars(), static_cast<int32_t>(temp.get_utf16chars_length()));
+}
+
 RtErr raise_internal_call_entry_not_found_error(const char* name) noexcept
 {
     char err_msg[1024];

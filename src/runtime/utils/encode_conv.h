@@ -35,15 +35,15 @@ class EncodeConv
         return (utf8_len + 1) * sizeof(Utf16Char);
     }
 
-    static size_t get_preserved_ansi_to_utf16_length(const NativeChar* ansi_str, size_t ansi_len)
+    static size_t get_preserved_ansi_to_utf16_length(const AnsiChar* ansi_str, size_t ansi_len)
     {
         return (ansi_len + 1) * sizeof(Utf16Char);
     }
 
     static void utf16_to_utf8(const Utf16Char* utf16_str, size_t utf16_len, char* out_utf8_str, size_t& out_utf8_len);
-    static void utf16_to_ansi(const Utf16Char* utf16_str, size_t utf16_len, NativeChar* out_ansi_str, size_t& out_ansi_len);
+    static void utf16_to_ansi(const Utf16Char* utf16_str, size_t utf16_len, AnsiChar* out_ansi_str, size_t& out_ansi_len);
     static void utf8_to_utf16(const char* utf8_str, size_t utf8_len, Utf16Char* out_utf16_str, size_t& out_utf16_len);
-    static void ansi_to_utf16(const NativeChar* ansi_str, size_t ansi_len, Utf16Char* out_utf16_str, size_t& out_utf16_len);
+    static void ansi_to_utf16(const AnsiChar* ansi_str, size_t ansi_len, Utf16Char* out_utf16_str, size_t& out_utf16_len);
 };
 
 } // namespace utils

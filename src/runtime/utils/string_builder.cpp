@@ -43,7 +43,7 @@ AnsiStringBuilder& AnsiStringBuilder::append_utf16_str(const Utf16Char* utf16_st
     return *this;
 }
 
-NativeChar* AnsiStringBuilder::dup_to_zero_end_ansi_chars() const
+AnsiChar* AnsiStringBuilder::dup_to_zero_end_ansi_chars() const
 {
     char* bytes = static_cast<char*>(alloc::GeneralAllocation::malloc(_length + 1));
     if (_length > 0)
@@ -51,7 +51,7 @@ NativeChar* AnsiStringBuilder::dup_to_zero_end_ansi_chars() const
         std::memcpy(bytes, _buf, _length);
     }
     bytes[_length] = 0;
-    return reinterpret_cast<NativeChar*>(bytes);
+    return reinterpret_cast<AnsiChar*>(bytes);
 }
 
 Utf16StringBuilder& Utf16StringBuilder::append_utf8_str(const char* utf8_str, size_t utf8_len)
@@ -76,7 +76,7 @@ Utf16StringBuilder& Utf16StringBuilder::append_utf8_str(const char* utf8_str)
     return append_utf8_str(utf8_str, std::strlen(utf8_str));
 }
 
-Utf16StringBuilder& Utf16StringBuilder::append_ansi_str(const NativeChar* ansi_str, size_t ansi_len)
+Utf16StringBuilder& Utf16StringBuilder::append_ansi_str(const AnsiChar* ansi_str, size_t ansi_len)
 {
     if (ansi_str == nullptr || ansi_len == 0)
     {
@@ -93,13 +93,9 @@ Utf16StringBuilder& Utf16StringBuilder::append_ansi_str(const NativeChar* ansi_s
     return *this;
 }
 
-Utf16StringBuilder& Utf16StringBuilder::append_ansi_str(const NativeChar* ansi_str)
+Utf16StringBuilder& Utf16StringBuilder::append_ansi_str(const AnsiChar* ansi_str)
 {
-#if LEANCLR_PLATFORM_WIN
-    size_t ansi_len = std::wcslen(ansi_str);
-#else
     size_t ansi_len = std::strlen(ansi_str);
-#endif
     return append_ansi_str(ansi_str, ansi_len);
 }
 

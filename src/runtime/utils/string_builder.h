@@ -303,9 +303,9 @@ class AnsiStringBuilder : public ByteStringBuilder
 
     AnsiStringBuilder& append_utf16_str(const Utf16Char* utf16_str, size_t utf16_len);
 
-    NativeChar* as_ansi_chars() const
+    AnsiChar* as_ansi_chars() const
     {
-        return reinterpret_cast<NativeChar*>(_buf);
+        return reinterpret_cast<AnsiChar*>(_buf);
     }
 
     size_t get_ansi_chars_length() const
@@ -318,7 +318,7 @@ class AnsiStringBuilder : public ByteStringBuilder
         sure_null_terminator_but_not_append();
     }
 
-    NativeChar* dup_to_zero_end_ansi_chars() const;
+    AnsiChar* dup_to_zero_end_ansi_chars() const;
 };
 
 class Utf16StringBuilder : public ByteStringBuilder
@@ -328,8 +328,8 @@ class Utf16StringBuilder : public ByteStringBuilder
 
     Utf16StringBuilder& append_utf8_str(const char* utf8_str, size_t utf8_len);
     Utf16StringBuilder& append_utf8_str(const char* utf8_str);
-    Utf16StringBuilder& append_ansi_str(const NativeChar* ansi_str, size_t ansi_len);
-    Utf16StringBuilder& append_ansi_str(const NativeChar* ansi_str);
+    Utf16StringBuilder& append_ansi_str(const AnsiChar* ansi_str, size_t ansi_len);
+    Utf16StringBuilder& append_ansi_str(const AnsiChar* ansi_str);
 
     Utf16Char* as_utf16chars() const
     {

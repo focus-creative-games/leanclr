@@ -643,14 +643,14 @@ inline char marshal_managed_char_to_utf8_char(Utf16Char c) noexcept
     return static_cast<char>(c);
 }
 
-inline NativeChar marshal_ansi_cstr_to_native_char(NativeChar c) noexcept
+inline Utf16Char marshal_ansi_cstr_to_managed_char(AnsiChar c) noexcept
 {
-    return c;
+    return static_cast<Utf16Char>(static_cast<unsigned char>(c));
 }
 
-inline NativeChar marshal_managed_char_to_ansi_char(Utf16Char c) noexcept
+inline AnsiChar marshal_managed_char_to_ansi_char(Utf16Char c) noexcept
 {
-    return static_cast<NativeChar>(c);
+    return static_cast<AnsiChar>(c);
 }
 
 inline vm::RtString* marshal_utf8_string_to_managed_string(const char* str) noexcept
@@ -704,7 +704,7 @@ vm::RtString* marshal_ansi_string_to_managed_string(const RtMarshalAnsiStr str) 
 RtMarshalUTF8Str marshal_managed_string_builder_to_utf8_string(vm::RtObject* sb, Utf8StringBuilder& temp) noexcept;
 RtMarshalUTF16Str marshal_managed_string_builder_to_utf16_string(vm::RtObject* sb) noexcept;
 RtMarshalAnsiStr marshal_managed_string_builder_to_ansi_string(vm::RtObject* sb, AnsiStringBuilder& temp) noexcept;
-void sync_managed_string_builder_from_utf8_buffer(vm::RtObject* sb, const char* str) noexcept;
+void sync_managed_string_builder_from_utf8_buffer(vm::RtObject* sb, const Utf8Char* str) noexcept;
 void sync_managed_string_builder_from_utf16_buffer(vm::RtObject* sb, const Utf16Char* str) noexcept;
 void sync_managed_string_builder_from_ansi_buffer(vm::RtObject* sb, const RtMarshalAnsiStr str) noexcept;
 
