@@ -37,7 +37,7 @@ case "$CMD" in
         esac
         ;;
     runtime)
-        exec "$REPO_ROOT/src/runtime/build.sh" "$@"
+        exec "$SCRIPT_DIR/runtime/build.sh" "$@"
         ;;
     leanaot)
         SUB="${1:-}"

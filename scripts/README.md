@@ -38,6 +38,7 @@ scripts/
 ├── build.sh / build.bat     # Orchestration entry point
 ├── ci.sh                    # CI: build + run tests (Linux)
 ├── test/                    # Unit test build & run
+├── runtime/                 # leanclr runtime library (CMake)
 ├── leanaot/                 # LeanAOT tooling (aot-runner build, …)
 ├── release/                 # Publish LeanAOT, etc.
 ├── generator/               # Opcode / icall code generation
@@ -52,6 +53,7 @@ scripts/
 | `ci.sh` | CI entry: `test/build-all` + `test/run` |
 | `test/build-all.*` | Build C++ runner + managed test DLLs → copy DLLs to `src/tests/managed/MiscDlls/` |
 | `test/run.*` | Run `out/cmake/tests/basic_test_runner/<Config>-<Arch>/bin/.../test` |
+| `runtime/build.*` | Build `leanclr` → `out/cmake/runtime/<Config>-<Arch>/` (Windows: optional `sln`, `shared`) |
 | `leanaot/aot-runner/build.bat` | Build native `aot-runner` executable |
 | `leanaot/aot-runner/gen_cpp.bat` | Run LeanAOT to generate C++ under `src/leanaot/aot-runner/cpp/` |
 | `leanaot/aot-runner/gen_cpp_posix.bat` | Generate C++ under `cpp-linux/` using POSIX BCL (`dotnetframework4.x-linux`) |
@@ -66,7 +68,7 @@ scripts/
 
 These invoke CMake/dotnet but write outputs only under `out/`:
 
-- `src/runtime/build.*` — runtime library
+- `src/runtime/build.*` — forward to `scripts/runtime/`
 - `src/samples/*/build.*` — platform samples
 - `src/leanaot/aot-runner/*.bat` — forward to `scripts/leanaot/aot-runner/` (generated `cpp/` still under aot-runner until phase 3)
 - `src/tests/basic_test_runner/build.*` — test runner executable

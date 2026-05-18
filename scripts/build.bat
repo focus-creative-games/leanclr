@@ -15,7 +15,7 @@ if /i "%~1"=="test" if /i "%~2"=="run" (
 if /i "%~1"=="test" goto :usage
 
 if /i "%~1"=="runtime" (
-    call "%~dp0..\src\runtime\build.bat" %~2 %~3 %~4 %~5 %~6 %~7 %~8 %~9
+    call "%~dp0runtime\build.bat" %~2 %~3 %~4 %~5 %~6 %~7 %~8 %~9
     exit /b %ERRORLEVEL%
 )
 
