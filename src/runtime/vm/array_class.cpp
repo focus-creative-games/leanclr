@@ -53,7 +53,7 @@ static const char* make_array_name(const char* ele_class_name, uint8_t rank, boo
         sb.append_char('*');
     }
     sb.append_char(']');
-    return sb.dup_to_zero_end_cstr();
+    return sb.dup_zero_terminated_chars();
 }
 
 static void setup_array_cast_class(RtClass* klass)
@@ -174,7 +174,7 @@ RtResultVoid ArrayClass::initialize_array_interface_methods()
             const char* original_name = name + 27;
             sb.append_cstr("System.Collections.Generic.ICollection`1.");
             sb.append_cstr(original_name);
-            const char* new_name = sb.dup_to_zero_end_cstr();
+            const char* new_name = sb.dup_zero_terminated_chars();
             g_icollectionGenericMethods.push_back({original_name, new_name, method});
         }
         else if (std::strncmp(name, "InternalArray__IEnumerable_", 27) == 0)
@@ -182,7 +182,7 @@ RtResultVoid ArrayClass::initialize_array_interface_methods()
             const char* original_name = name + 27;
             sb.append_cstr("System.Collections.Generic.IEnumerable`1.");
             sb.append_cstr(original_name);
-            const char* new_name = sb.dup_to_zero_end_cstr();
+            const char* new_name = sb.dup_zero_terminated_chars();
             g_ienumerableGenericMethods.push_back({original_name, new_name, method});
         }
         else if (std::strncmp(name, "InternalArray__IReadOnlyCollection_", 35) == 0)
@@ -190,7 +190,7 @@ RtResultVoid ArrayClass::initialize_array_interface_methods()
             const char* original_name = name + 35;
             sb.append_cstr("System.Collections.Generic.IReadOnlyCollection`1.");
             sb.append_cstr(original_name);
-            const char* new_name = sb.dup_to_zero_end_cstr();
+            const char* new_name = sb.dup_zero_terminated_chars();
             g_ireadonlyCollectionGenericMethods.push_back({original_name, new_name, method});
         }
         else if (std::strncmp(name, "InternalArray__IReadOnlyList_", 29) == 0)
@@ -198,7 +198,7 @@ RtResultVoid ArrayClass::initialize_array_interface_methods()
             const char* original_name = name + 29;
             sb.append_cstr("System.Collections.Generic.IReadOnlyList`1.");
             sb.append_cstr(original_name);
-            const char* new_name = sb.dup_to_zero_end_cstr();
+            const char* new_name = sb.dup_zero_terminated_chars();
             g_ireadonlyListGenericMethods.push_back({original_name, new_name, method});
         }
         else
@@ -206,7 +206,7 @@ RtResultVoid ArrayClass::initialize_array_interface_methods()
             const char* original_name = name + 15;
             sb.append_cstr("System.Collections.Generic.IList`1.");
             sb.append_cstr(original_name);
-            const char* new_name = sb.dup_to_zero_end_cstr();
+            const char* new_name = sb.dup_zero_terminated_chars();
             g_ilistGenericMethods.push_back({original_name, new_name, method});
         }
     }

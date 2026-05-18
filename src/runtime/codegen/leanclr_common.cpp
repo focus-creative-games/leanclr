@@ -221,7 +221,7 @@ RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str, AnsiSt
         return nullptr;
     }
     temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-    return (RtMarshalAnsiStr)temp.as_ansi_chars();
+    return (RtMarshalAnsiStr)temp.get_mut_chars();
 }
 
 RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str) noexcept
@@ -231,7 +231,7 @@ RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str) noexce
         return nullptr;
     }
     AnsiStringBuilder temp(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-    return (RtMarshalAnsiStr)temp.dup_to_zero_end_ansi_chars();
+    return (RtMarshalAnsiStr)temp.dup_zero_terminated_chars();
 }
 
 vm::RtString* marshal_ansi_string_to_managed_string(const RtMarshalAnsiStr str) noexcept
@@ -242,7 +242,7 @@ vm::RtString* marshal_ansi_string_to_managed_string(const RtMarshalAnsiStr str) 
     }
     Utf16StringBuilder temp;
     temp.append_ansi_str(str);
-    return vm::String::create_string_from_utf16chars(temp.as_utf16chars(), static_cast<int32_t>(temp.get_utf16chars_length()));
+    return vm::String::create_string_from_utf16chars(temp.get_const_chars(), static_cast<int32_t>(temp.length()));
 }
 
 RtMarshalUTF8Str marshal_managed_string_builder_to_utf8_string(vm::RtObject* sb, Utf8StringBuilder& temp) noexcept
@@ -258,7 +258,7 @@ RtMarshalUTF8Str marshal_managed_string_builder_to_utf8_string(vm::RtObject* sb,
     int32_t length = clamp_string_builder_length(vmutils::StringBuilder::get_chunk_length(sb), capacity);
     temp.append_utf16_str(chars, static_cast<size_t>(length));
     // TODO: optimize it , we should avoid the copy here.
-    return (RtMarshalUTF8Str)temp.as_utf8_cstr();
+    return (RtMarshalUTF8Str)temp.get_mut_chars();
 }
 
 RtMarshalUTF16Str marshal_managed_string_builder_to_utf16_string(vm::RtObject* sb) noexcept
@@ -301,7 +301,7 @@ RtMarshalAnsiStr marshal_managed_string_builder_to_ansi_string(vm::RtObject* sb,
     vmutils::StringBuilder::get_chunk_chars(sb, &chars, &capacity);
     int32_t length = clamp_string_builder_length(vmutils::StringBuilder::get_chunk_length(sb), capacity);
     temp.append_utf16_str(chars, static_cast<size_t>(length));
-    return (RtMarshalAnsiStr)temp.as_ansi_chars();
+    return (RtMarshalAnsiStr)temp.get_mut_chars();
 }
 
 void sync_managed_string_builder_from_ansi_buffer(vm::RtObject* sb, const RtMarshalAnsiStr str) noexcept
@@ -312,7 +312,7 @@ void sync_managed_string_builder_from_ansi_buffer(vm::RtObject* sb, const RtMars
     }
     Utf16StringBuilder temp;
     temp.append_ansi_str(str);
-    copy_utf16_to_managed_string_builder(sb, temp.as_utf16chars(), static_cast<int32_t>(temp.get_utf16chars_length()));
+    copy_utf16_to_managed_string_builder(sb, temp.get_const_chars(), static_cast<int32_t>(temp.length()));
 }
 
 void sync_managed_string_builder_from_utf8_buffer(vm::RtObject* sb, const Utf8Char* str) noexcept
@@ -323,7 +323,7 @@ void sync_managed_string_builder_from_utf8_buffer(vm::RtObject* sb, const Utf8Ch
     }
     Utf16StringBuilder temp;
     temp.append_utf8_str(str);
-    copy_utf16_to_managed_string_builder(sb, temp.as_utf16chars(), static_cast<int32_t>(temp.get_utf16chars_length()));
+    copy_utf16_to_managed_string_builder(sb, temp.get_const_chars(), static_cast<int32_t>(temp.length()));
 }
 
 RtErr raise_internal_call_entry_not_found_error(const char* name) noexcept

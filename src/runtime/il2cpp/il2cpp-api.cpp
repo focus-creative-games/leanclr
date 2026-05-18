@@ -45,7 +45,7 @@ int il2cpp_init(const char* domain_name)
 int il2cpp_init_utf16(const Il2CppChar* domain_name)
 {
     utils::Utf8StringBuilder sb(domain_name, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(domain_name)));
-    return il2cpp_init(sb.as_cstr());
+    return il2cpp_init(sb.get_const_chars());
 }
 
 void il2cpp_shutdown()
@@ -86,7 +86,7 @@ void il2cpp_set_memory_callbacks(Il2CppMemoryCallbacks* callbacks)
 void il2cpp_set_config_utf16(const Il2CppChar* executablePath)
 {
     utils::Utf8StringBuilder sb(executablePath, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(executablePath)));
-    vm::Settings::set_config(sb.as_cstr());
+    vm::Settings::set_config(sb.get_const_chars());
 }
 
 void il2cpp_set_config(const char* executablePath)
@@ -768,7 +768,7 @@ void il2cpp_format_exception(const Il2CppException* ex, char* message, int messa
     utils::Utf8StringBuilder sb;
     vm::Exception::format_exception(const_cast<vm::RtException*>(ex), sb);
     size_t copy_size = std::min(sb.length(), static_cast<size_t>(message_size) - 1);
-    std::memcpy(message, sb.as_cstr(), copy_size);
+    std::memcpy(message, sb.get_const_chars(), copy_size);
     message[copy_size] = '\0';
 }
 
@@ -780,7 +780,7 @@ void il2cpp_format_stack_trace(const Il2CppException* ex, char* output, int outp
         sb.append_utf16_str(vm::String::get_chars_ptr(ex->stack_trace), static_cast<size_t>(vm::String::get_length(ex->stack_trace)));
     }
     size_t copy_size = std::min(sb.length(), static_cast<size_t>(output_size) - 1);
-    std::memcpy(output, sb.as_cstr(), copy_size);
+    std::memcpy(output, sb.get_const_chars(), copy_size);
     output[copy_size] = '\0';
 }
 
@@ -1623,7 +1623,7 @@ char* il2cpp_type_get_name(const Il2CppType* type)
     {
         return nullptr;
     }
-    return sb.dup_to_zero_end_cstr();
+    return sb.dup_zero_terminated_chars();
 }
 
 char* il2cpp_type_get_assembly_qualified_name(const Il2CppType* type)
@@ -1635,7 +1635,7 @@ char* il2cpp_type_get_assembly_qualified_name(const Il2CppType* type)
     {
         return nullptr;
     }
-    return sb.dup_to_zero_end_cstr();
+    return sb.dup_zero_terminated_chars();
 }
 
 char* il2cpp_type_get_reflection_name(const Il2CppType* type)
@@ -1647,7 +1647,7 @@ char* il2cpp_type_get_reflection_name(const Il2CppType* type)
     {
         return nullptr;
     }
-    return sb.dup_to_zero_end_cstr();
+    return sb.dup_zero_terminated_chars();
 }
 
 bool il2cpp_type_is_byref(const Il2CppType* type)
@@ -1923,7 +1923,7 @@ void il2cpp_type_get_name_chunked(const Il2CppType* type, void (*chunkReportFunc
         return;
     }
     sb.sure_null_terminator_but_not_append();
-    chunkReportFunc((void*)sb.as_cstr(), userData);
+    chunkReportFunc((void*)sb.get_const_chars(), userData);
 }
 
 // -- class user data ------------------------------------------------------

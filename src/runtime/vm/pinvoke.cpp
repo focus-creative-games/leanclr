@@ -48,13 +48,13 @@ RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata:
         sb.append_char(']');
         size_t length = sb.length();
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method));
-        const char* signature_with_module = sb.as_cstr();
+        const char* signature_with_module = sb.get_const_chars();
         auto it = g_internalcall_map.find(signature_with_module);
         if (it != g_internalcall_map.end())
             RET_OK(&it->second);
 
         // signature: Namespace.Class.Method(params)
-        const char* signature_without_module = sb.as_cstr() + length;
+        const char* signature_without_module = sb.get_const_chars() + length;
         it = g_internalcall_map.find(signature_without_module);
         if (it != g_internalcall_map.end())
             RET_OK(&it->second);
@@ -70,11 +70,11 @@ RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata:
         size_t length = sb.length();
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
 
-        const char* signature_with_module = sb.as_cstr();
+        const char* signature_with_module = sb.get_const_chars();
         auto it = g_internalcall_map.find(signature_with_module);
         if (it != g_internalcall_map.end())
             RET_OK(&it->second);
-        const char* signature_without_module = sb.as_cstr() + length;
+        const char* signature_without_module = sb.get_const_chars() + length;
         it = g_internalcall_map.find(signature_without_module);
         if (it != g_internalcall_map.end())
             RET_OK(&it->second);

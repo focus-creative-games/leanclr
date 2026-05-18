@@ -50,7 +50,7 @@ static void default_debugger_log_function(int32_t level, const uint16_t* categor
     // g_debugger_log_buffer.sure_null_terminator_but_not_append();
 
     // Output to standard output (could be replaced with other logging mechanisms)
-    printf("%s\n", g_debugger_log_buffer.as_cstr());
+    printf("%s\n", g_debugger_log_buffer.get_const_chars());
 }
 
 const char* Settings::get_domain_name()
@@ -182,7 +182,7 @@ void Settings::set_command_line_arguments_utf16(int32_t argc, const Utf16Char** 
     {
         sb.clear();
         sb.append_utf16_str(argv[i], static_cast<size_t>(utils::StringUtil::get_utf16chars_length(argv[i])));
-        g_commandline_arguments[i] = sb.dup_to_zero_end_cstr();
+        g_commandline_arguments[i] = sb.dup_zero_terminated_chars();
     }
 }
 

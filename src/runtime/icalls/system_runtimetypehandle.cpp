@@ -273,7 +273,7 @@ RtResult<vm::RtReflectionType*> SystemRuntimeTypeHandle::internal_from_name(vm::
             default_mod = vm::Assembly::get_corlib()->mod;
         }
     }
-    auto ret_typesig = vm::Type::parse_assembly_qualified_type(default_mod, name_buf.as_cstr(), name_buf.length(), ignore_case);
+    auto ret_typesig = vm::Type::parse_assembly_qualified_type(default_mod, name_buf.get_const_chars(), name_buf.length(), ignore_case);
     if (ret_typesig.is_err())
     {
         if (throw_on_error)

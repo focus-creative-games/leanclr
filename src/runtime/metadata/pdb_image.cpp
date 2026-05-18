@@ -151,7 +151,7 @@ RtResult<const PdbImage::SymbolDocumentData*> PdbImage::GetDocument(metadata::En
     }
 
     char* sourceFileNamesCstr = _pool.calloc_any<char>(sourceFileNames.length() + 1);
-    std::memcpy(sourceFileNamesCstr, sourceFileNames.get_data(), sourceFileNames.length());
+    std::memcpy(sourceFileNamesCstr, sourceFileNames.get_const_chars(), sourceFileNames.length());
     sourceFileNamesCstr[sourceFileNames.length()] = '\0';
 
     SymbolDocumentData* documentData = _pool.malloc_any_zeroed<SymbolDocumentData>();

@@ -161,7 +161,7 @@ RtResult<vm::RtReflectionAssembly*> SystemAppDomain::load_assembly(vm::RtAppDoma
 {
     utils::Utf8StringBuilder name_buf(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, loaded_ass,
-                                            vm::Assembly::load_by_name(this_domain, name_buf.as_cstr(), evidence, ref_only, *stack_crawl_mark));
+                                            vm::Assembly::load_by_name(this_domain, name_buf.get_const_chars(), evidence, ref_only, *stack_crawl_mark));
     return vm::Reflection::get_assembly_reflection_object(loaded_ass);
 }
 

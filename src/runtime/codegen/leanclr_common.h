@@ -665,7 +665,7 @@ inline RtMarshalUTF8Str marshal_managed_string_to_utf8_string(vm::RtString* str,
         return nullptr;
     }
     temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-    return (RtMarshalUTF8Str)temp.as_cstr();
+    return (RtMarshalUTF8Str)temp.get_mut_chars();
 }
 
 inline RtMarshalUTF8Str marshal_managed_string_to_utf8_string(vm::RtString* str) noexcept
@@ -675,7 +675,7 @@ inline RtMarshalUTF8Str marshal_managed_string_to_utf8_string(vm::RtString* str)
         return nullptr;
     }
     utils::Utf8StringBuilder temp(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-    return (RtMarshalUTF8Str)temp.dup_to_zero_end_cstr();
+    return (RtMarshalUTF8Str)temp.dup_zero_terminated_chars();
 }
 
 inline RtMarshalUTF16Str marshal_managed_string_to_utf16_string(vm::RtString* str) noexcept

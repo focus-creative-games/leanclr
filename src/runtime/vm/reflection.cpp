@@ -419,7 +419,7 @@ RtResult<RtReflectionModule*> Reflection::get_module_reflection_object(metadata:
 
     auto name_no_ext = mod->get_name_no_ext();
     auto name = mod->get_name();
-    ref_obj->fqname = String::create_string_from_utf8chars(fqname_buf.as_cstr(), static_cast<int32_t>(fqname_buf.length()));
+    ref_obj->fqname = String::create_string_from_utf8chars(fqname_buf.get_const_chars(), static_cast<int32_t>(fqname_buf.length()));
     ref_obj->name = String::create_string_from_utf8chars(name, static_cast<int32_t>(std::strlen(name)));
     ref_obj->scope_name = String::create_string_from_utf8chars(name_no_ext, static_cast<int32_t>(std::strlen(name_no_ext)));
     ref_obj->token = mod->get_assembly_token();
