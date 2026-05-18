@@ -1,4 +1,7 @@
 <Project>
+  <!-- MSBuild only auto-imports the nearest Directory.Build.props; pull in repo-root output paths. -->
+  <Import Project="$(MSBuildThisFileDirectory)..\..\Directory.Build.props" />
+
   <PropertyGroup>
     <Deterministic>true</Deterministic>
   </PropertyGroup>

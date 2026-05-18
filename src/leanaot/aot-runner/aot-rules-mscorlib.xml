@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <aot>
-  <assembly fullname="mscorlib" aot="1"/>
-  <assembly fullname="System" aot="1"/>
-  <assembly fullname="System.Core" aot="1"/>
+  <assembly fullname="mscorlib" aot="0"/>
+  <assembly fullname="System" aot="0"/>
+  <assembly fullname="System.Core" aot="0"/>
 </aot>

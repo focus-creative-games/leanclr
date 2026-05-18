@@ -5,11 +5,10 @@
     <LeanClrOutRoot Condition="'$(LeanClrOutRoot)' == ''">$(LeanClrRepoRoot)out</LeanClrOutRoot>
   </PropertyGroup>
 
-  <!-- Non-SDK (legacy) projects -->
+  <!-- Non-SDK (legacy) projects: base paths only; OutputPath set in Directory.Build.targets -->
   <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
-    <OutputPath>$(LeanClrOutRoot)\dotnet\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
-    <BaseIntermediateOutputPath>$(LeanClrOutRoot)\dotnet\obj\</BaseIntermediateOutputPath>
-    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(MSBuildProjectName)\$(Configuration)\</IntermediateOutputPath>
+    <BaseOutputPath>$(LeanClrOutRoot)\dotnet\$(MSBuildProjectName)\</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(LeanClrOutRoot)\dotnet\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
   </PropertyGroup>
 
   <!-- SDK-style projects -->

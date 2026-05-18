@@ -6,7 +6,14 @@ add_subdirectory(../../runtime runtime_build)
 
 # aot-runner executable
 
-file(GLOB CPP_SOURCES "cpp/*.cpp")
+if(MSVC)
+    set(AOT_GENERATED_CPP_DIR "cpp")
+else()
+    set(AOT_GENERATED_CPP_DIR "cpp-posix")
+endif()
+message(STATUS "AOT generated sources: ${AOT_GENERATED_CPP_DIR}")
+
+file(GLOB CPP_SOURCES "${AOT_GENERATED_CPP_DIR}/*.cpp")
 add_executable(aot-runner main.cpp pinvoke_impl.cpp ${CPP_SOURCES})
 
 target_link_libraries(aot-runner PRIVATE leanclr)

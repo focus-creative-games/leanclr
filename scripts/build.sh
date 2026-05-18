@@ -17,6 +17,8 @@ Usage:
   scripts/build.sh test run [Config]
   scripts/build.sh runtime [Debug|Release]
   scripts/build.sh leanaot publish
+
+aot-runner commands (Windows): scripts/leanaot/aot-runner/*.bat
 EOF
     exit 1
 }
