@@ -1905,7 +1905,7 @@ namespace LeanAOT.ToCpp
             }
             if (TypeEqualityComparer.Instance.Equals(klass, _method.DeclaringType))
             {
-                if (_method.MethodDef.IsStatic || !MetaUtil.IsValueType(klass.ToTypeSig()))
+                if (_method.MethodDef.IsStatic)
                 {
                     return;
                 }
