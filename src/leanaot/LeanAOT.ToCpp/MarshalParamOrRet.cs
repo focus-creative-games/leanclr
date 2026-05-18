@@ -350,6 +350,7 @@ namespace LeanAOT.ToCpp
                     break;
                 }
                 case ElementType.Class:
+                case ElementType.GenericInst:
                 {
                     if (MarshalUtil.IsStringBuilderType(typeSig))
                     {
@@ -363,9 +364,13 @@ namespace LeanAOT.ToCpp
                     {
                         return SetupSafeHandle();
                     }
-                    else
+                    else if (!MetaUtil.IsValueType(typeSig))
                     {
                         marshalType = new InterfaceMarshalType(NativeType.IUnknown);
+                    }
+                    else
+                    {
+                        marshalType = new MarshalType(NativeType.Struct);
                     }
                     break;
                 }
@@ -373,10 +378,6 @@ namespace LeanAOT.ToCpp
                 {
                     marshalType = new MarshalType(NativeType.Struct);
                     break;
-                }
-                case ElementType.GenericInst:
-                {
-                    throw new NotSupportedException("GenericInst is not supported for marshal.");
                 }
                 case ElementType.SZArray:
                 case ElementType.Array:
