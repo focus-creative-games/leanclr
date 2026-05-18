@@ -24,7 +24,7 @@ public struct LeanClrPinvokeTestPair
 public delegate int LeanClrPinvokeBinaryOp(int a, int b);
 
 [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
-public delegate int LeanClrPinvokeStringUtf8LenOp(string s);
+public delegate int LeanClrPinvokeStringUtf8LenOp([MarshalAs(UnmanagedType.LPUTF8Str)] string s);
 
 [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
 public unsafe delegate int LeanClrPinvokeArraySumOp(int* arr, int count);
@@ -94,7 +94,7 @@ public static class TestPInvokeNative
     public static extern int InvokeBinaryOp(LeanClrPinvokeBinaryOp op, int a, int b);
 
     [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_invoke_string_utf8_len_op", CallingConvention = CallingConvention.Cdecl)]
-    public static extern int InvokeStringUtf8LenOp(LeanClrPinvokeStringUtf8LenOp op, string s);
+    public static extern int InvokeStringUtf8LenOp(LeanClrPinvokeStringUtf8LenOp op, [MarshalAs(UnmanagedType.LPUTF8Str)] string s);
 
     [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_invoke_array_sum_op", CallingConvention = CallingConvention.Cdecl)]
     public static extern int InvokeArraySumOp(LeanClrPinvokeArraySumOp op, int[] arr, int count);
@@ -111,6 +111,22 @@ public static class TestPInvokeNative
     /// <summary>Receives raw handle value from <see cref="SafeHandle"/> plus ten.</summary>
     [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_safe_handle_add_ten", CallingConvention = CallingConvention.Cdecl)]
     public static extern int SafeHandleAddTen(LeanClrPinvokeTestHandle h);
+
+    /// <summary>Native reads ANSI buffer marshaled from <see cref="StringBuilder"/>.</summary>
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_ansi_string_builder_byte_len", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int AnsiStringBuilderByteLen(StringBuilder sb);
+
+    /// <summary>Native overwrites ANSI <see cref="StringBuilder"/> buffer; runtime syncs back after return.</summary>
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_ansi_string_builder_set_native_text", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void AnsiStringBuilderSetNativeText(StringBuilder sb);
+
+    /// <summary>Native reads UTF-8 buffer marshaled from <see cref="StringBuilder"/>.</summary>
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_utf8_string_builder_byte_len", CallingConvention = CallingConvention.Cdecl)]
+    public static extern int Utf8StringBuilderByteLen([MarshalAs(UnmanagedType.LPUTF8Str)] StringBuilder sb);
+
+    /// <summary>Native overwrites UTF-8 <see cref="StringBuilder"/> buffer; runtime syncs back after return.</summary>
+    [DllImport("__Internal", EntryPoint = "leanclr_pinvoke_utf8_string_builder_set_native_text", CallingConvention = CallingConvention.Cdecl)]
+    public static extern void Utf8StringBuilderSetNativeText([MarshalAs(UnmanagedType.LPUTF8Str)] StringBuilder sb);
 }
 
 public class WasmPInvokeVerify
@@ -119,7 +135,7 @@ public class WasmPInvokeVerify
     private static int MulBinaryOpForNativeCallback(int a, int b) => a * b;
 
     [MonoPInvokeCallback(typeof(LeanClrPinvokeStringUtf8LenOp))]
-    private static int StringUtf8LenMonoPInvokeCallback(string s) => s == null ? -1 : Encoding.UTF8.GetByteCount(s);
+    private static int StringUtf8LenMonoPInvokeCallback([MarshalAs(UnmanagedType.LPUTF8Str)] string s) => s == null ? -1 : Encoding.UTF8.GetByteCount(s);
 
     [MonoPInvokeCallback(typeof(LeanClrPinvokeArraySumOp))]
     private static unsafe int ArraySumMonoPInvokeCallback(int* arr, int count)
@@ -241,5 +257,30 @@ public class WasmPInvokeVerify
         {
             Assert.Equal(42, TestPInvokeNative.SafeHandleAddTen(h));
         }
+    }
+
+    [UnitTest]
+    public void UnitTest_StringBuilder_Ansi()
+    {
+        var sb = new StringBuilder("hello");
+        Assert.Equal(5, TestPInvokeNative.AnsiStringBuilderByteLen(sb));
+
+        var outSb = new StringBuilder(16);
+        TestPInvokeNative.AnsiStringBuilderSetNativeText(outSb);
+        Assert.Equal(6, outSb.Length);
+        Assert.Equal('n', outSb[0]);
+        Assert.Equal('e', outSb[5]);
+    }
+
+    [UnitTest]
+    public void UnitTest_StringBuilder_Utf8()
+    {
+        var sb = new StringBuilder("你好");
+        Assert.Equal(6, TestPInvokeNative.Utf8StringBuilderByteLen(sb));
+
+        var outSb = new StringBuilder(16);
+        TestPInvokeNative.Utf8StringBuilderSetNativeText(outSb);
+        Assert.Equal(1, outSb.Length);
+        Assert.Equal('好', outSb[0]);
     }
 }

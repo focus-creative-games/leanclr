@@ -122,4 +122,50 @@ mergeInto(LibraryManager.library, {
   leanclr_pinvoke_safe_handle_add_ten: function (h) {
     return (h + 10) | 0;
   },
+
+  leanclr_pinvoke_ansi_string_builder_byte_len: function (sbPtr) {
+    if (!sbPtr) {
+      return -1;
+    }
+    var h = HEAPU8;
+    var n = 0;
+    while (h[sbPtr + n]) {
+      n++;
+    }
+    return n | 0;
+  },
+
+  leanclr_pinvoke_ansi_string_builder_set_native_text: function (sbPtr) {
+    if (!sbPtr) {
+      return;
+    }
+    var text = "native";
+    for (var i = 0; i < text.length; i++) {
+      HEAPU8[sbPtr + i] = text.charCodeAt(i);
+    }
+    HEAPU8[sbPtr + text.length] = 0;
+  },
+
+  leanclr_pinvoke_utf8_string_builder_byte_len: function (sbPtr) {
+    if (!sbPtr) {
+      return -1;
+    }
+    var h = HEAPU8;
+    var n = 0;
+    while (h[sbPtr + n]) {
+      n++;
+    }
+    return n | 0;
+  },
+
+  leanclr_pinvoke_utf8_string_builder_set_native_text: function (sbPtr) {
+    if (!sbPtr) {
+      return;
+    }
+    // UTF-8 for 好
+    HEAPU8[sbPtr] = 0xe5;
+    HEAPU8[sbPtr + 1] = 0xa5;
+    HEAPU8[sbPtr + 2] = 0xbd;
+    HEAPU8[sbPtr + 3] = 0;
+  },
 });
