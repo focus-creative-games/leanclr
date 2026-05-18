@@ -35,18 +35,38 @@ using namespace leanclr;
 // Global library search directories
 static std::vector<std::string> g_lib_dirs;
 
-static std::string get_current_working_directory()
+static std::string get_executable_directory()
 {
-    char buffer[4096];
 #ifdef _WIN32
-    if (_getcwd(buffer, sizeof(buffer)) == nullptr)
-#else
-    if (getcwd(buffer, sizeof(buffer)) == nullptr)
-#endif
+    char path[MAX_PATH];
+    DWORD len = GetModuleFileNameA(nullptr, path, MAX_PATH);
+    if (len == 0 || len >= MAX_PATH)
     {
         return ".";
     }
-    return std::string(buffer);
+    std::string exe_path(path, path + len);
+    size_t pos = exe_path.find_last_of("\\/");
+    if (pos == std::string::npos)
+    {
+        return ".";
+    }
+    return exe_path.substr(0, pos);
+#else
+    char path[4096];
+    ssize_t len = readlink("/proc/self/exe", path, sizeof(path) - 1);
+    if (len <= 0)
+    {
+        return ".";
+    }
+    path[len] = '\0';
+    std::string exe_path(path, path + len);
+    size_t pos = exe_path.find_last_of('/');
+    if (pos == std::string::npos)
+    {
+        return ".";
+    }
+    return exe_path.substr(0, pos);
+#endif
 }
 
 static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const char* ext)
@@ -84,20 +104,12 @@ static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, co
 
 static void setup_default_lib_dirs()
 {
-    g_lib_dirs.push_back("."); // Current directory
-    std::string cur_dir = get_current_working_directory();
+    g_lib_dirs.push_back(".");
 
-    size_t pos = cur_dir.find("src");
-    if (pos != std::string::npos)
-    {
-        std::string library_dir = cur_dir.substr(0, pos) + "src/libraries";
-        g_lib_dirs.push_back(library_dir + "/dotnetframework4.x"); // Example additional directory
-        std::string test_dir = cur_dir.substr(0, pos) + "src/tests/managed";
-        // g_lib_dirs.push_back(test_dir + "/ILTests/bin/Debug");
-        g_lib_dirs.push_back(test_dir + "/CoreTests/bin/Debug");
-        g_lib_dirs.push_back(test_dir + "/CorlibTests/bin/Debug");
-        g_lib_dirs.push_back(test_dir + "/MiscDlls");
-    }
+    const std::string exe_dir = get_executable_directory();
+    g_lib_dirs.push_back(exe_dir + "/dlls");
+    g_lib_dirs.push_back(exe_dir + "/dlls/dotnetframework4.x");
+
     for (const auto& dir : g_lib_dirs)
     {
         std::cout << "Library search directory: " << dir << std::endl;
