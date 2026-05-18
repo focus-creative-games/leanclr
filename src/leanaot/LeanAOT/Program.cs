@@ -296,15 +296,14 @@ internal class Program
             }
         }
 
-        foreach (var rawExclude in options.AssembliesExcludedFromGlobalMetadata ?? Enumerable.Empty<string>())
+        foreach (var excludedAssName in options.AssembliesExcludedFromGlobalMetadata ?? Enumerable.Empty<string>())
         {
-            if (string.IsNullOrWhiteSpace(rawExclude))
+            if (string.IsNullOrWhiteSpace(excludedAssName))
                 continue;
-            var shortName = Path.GetFileNameWithoutExtension(rawExclude.Trim());
-            if (!aotAssemblyNames.Contains(shortName, StringComparer.OrdinalIgnoreCase))
+            if (!aotAssemblyNames.Contains(excludedAssName, StringComparer.OrdinalIgnoreCase))
             {
                 errorMessage =
-                    $"Assembly '{shortName}' is not in the AOT assembly list; --leanaot-exclude-assembly-from-global-metadata only applies to assemblies passed via -a/--assembly (or discovered with --directory).";
+                    $"Assembly '{excludedAssName}' is not in the AOT assembly list; --leanaot-exclude-assembly-from-global-metadata only applies to assemblies passed via -a/--assembly (or discovered with --directory).";
                 return false;
             }
         }
@@ -529,7 +528,7 @@ internal class Program
         {
             if (string.IsNullOrWhiteSpace(raw))
                 continue;
-            var shortName = Path.GetFileNameWithoutExtension(raw.Trim());
+            var shortName = Path.GetFileName(raw.Trim());
             if (config.AssembliesExcludedFromGlobalMetadata.Contains(shortName, StringComparer.OrdinalIgnoreCase))
                 continue;
             config.AssembliesExcludedFromGlobalMetadata.Add(shortName);
