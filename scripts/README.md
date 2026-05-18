@@ -20,7 +20,7 @@ Clean all outputs: `scripts\dev\clean-out.bat` (Windows) or `./scripts/dev/clean
 | Build tests only | `./scripts/build.sh test build Release` | `scripts\build.bat test build Release` |
 | Run tests | `./scripts/build.sh test run Release` | `scripts\build.bat test run Release` |
 | Build runtime | `./scripts/build.sh runtime Release` | `scripts\build.bat runtime Release` |
-| Publish LeanAOT | `./scripts/build.sh leanaot publish` | `scripts\build.bat leanaot publish` |
+| Build LeanAOT | `./scripts/build.sh leanaot [Debug\|Release]` | `scripts\build.bat leanaot Debug` or `Release` |
 | Build aot-runner | — | `scripts\build.bat aot-runner [Config] [Arch]` |
 | Generate aot-runner C++ | — | `scripts\build.bat aot-runner gen-cpp` |
 | Generate aot-runner C++ (posix) | — | `scripts\build.bat aot-runner gen-cpp-posix` |
@@ -40,7 +40,6 @@ scripts/
 ├── test/                    # Unit test build & run
 ├── runtime/                 # leanclr runtime library (CMake)
 ├── leanaot/                 # LeanAOT tooling (aot-runner build, …)
-├── release/                 # Publish LeanAOT, etc.
 ├── generator/               # Opcode / icall code generation
 ├── dev/                     # clean-out, format-cpp-files
 └── lib/                     # repo-root, out-dir-init, cmake-dir
@@ -59,7 +58,9 @@ scripts/
 | `leanaot/aot-runner/gen_cpp_posix.bat` | Generate C++ under `cpp-linux/` using POSIX BCL (`dotnetframework4.x-linux`) |
 | `leanaot/aot-runner/run.bat` | Build and run `aot-runner` with Test assembly |
 | `leanaot/aot-runner/build-wasm.bat` | Build `aot-runner` with Emscripten → `out/cmake/leanaot/aot-runner/<Config>-wasm/` |
-| `release/publish-leanaot.*` | `dotnet publish` LeanAOT to `src/tools/leanaot/` |
+| `leanaot/build.*` | Build LeanAOT → `out/dotnet/LeanAOT/<Config>/net8.0/` |
+| `publish_leanaot.bat` | `dotnet publish` Release → `../leanclr4unity/LeanCLR~/leanaot/` (sibling repo) |
+| `publish_runtime.bat` | Mirror `src/runtime` → `../leanclr4unity/LeanCLR~/runtime/` (excludes scripts, CMakeLists.txt, `3rd/zlib`) |
 | `generator/gen_*.bat` | Regenerate opcode headers and icall JSON |
 | `dev/format-cpp-files.bat` | clang-format `src/runtime` sources |
 | `dev/clean-out.*` | Remove entire `out/` directory |

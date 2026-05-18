@@ -19,8 +19,12 @@ if /i "%~1"=="runtime" (
     exit /b %ERRORLEVEL%
 )
 
-if /i "%~1"=="leanaot" if /i "%~2"=="publish" (
-    call "%~dp0release\publish-leanaot.bat"
+if /i "%~1"=="leanaot" if /i "%~2"=="Debug" (
+    call "%~dp0leanaot\build.bat" Debug
+    exit /b %ERRORLEVEL%
+)
+if /i "%~1"=="leanaot" if /i "%~2"=="Release" (
+    call "%~dp0leanaot\build.bat" Release
     exit /b %ERRORLEVEL%
 )
 
@@ -54,7 +58,7 @@ echo Usage:
 echo   scripts\build.bat test build [Config] [Arch]
 echo   scripts\build.bat test run [Config]
 echo   scripts\build.bat runtime [Config] [Arch] [clean] [shared] [sln]
-echo   scripts\build.bat leanaot publish
+echo   scripts\build.bat leanaot Debug^|Release
 echo   scripts\build.bat aot-runner [build] [Config] [Arch]
 echo   scripts\build.bat aot-runner gen-cpp
 echo   scripts\build.bat aot-runner gen-cpp-posix

@@ -51,7 +51,7 @@ The **Commercial Edition** also supports HybridCLR's **DHE (Differential Hybrid 
 From repository root:
 
 ```bat
-scripts\release\publish-leanaot.bat
+scripts\publish_leanaot.bat
 ```
 
 This publishes a Release build of `LeanAOT` to:

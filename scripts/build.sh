@@ -4,7 +4,7 @@
 #   ./scripts/build.sh test build [Config] [Arch]
 #   ./scripts/build.sh test run [Config]
 #   ./scripts/build.sh runtime [Debug|Release]
-#   ./scripts/build.sh leanaot publish
+#   ./scripts/build.sh leanaot [Debug|Release]
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -16,7 +16,7 @@ Usage:
   scripts/build.sh test build [Config] [Arch]
   scripts/build.sh test run [Config]
   scripts/build.sh runtime [Debug|Release]
-  scripts/build.sh leanaot publish
+  scripts/build.sh leanaot [Debug|Release]
 
 aot-runner commands (Windows): scripts/leanaot/aot-runner/*.bat
 EOF
@@ -40,12 +40,8 @@ case "$CMD" in
         exec "$SCRIPT_DIR/runtime/build.sh" "$@"
         ;;
     leanaot)
-        SUB="${1:-}"
-        shift || true
-        case "$SUB" in
-            publish) exec "$SCRIPT_DIR/release/publish-leanaot.sh" "$@" ;;
-            *) usage ;;
-        esac
+        CONFIG="${1:-Release}"
+        exec "$SCRIPT_DIR/leanaot/build.sh" "$CONFIG"
         ;;
     *)
         usage

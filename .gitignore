@@ -439,3 +439,5 @@ launchSettings.json
 /src/tools/exportextern/Properties/launchSettings.json
 /src/tools/exportextern/Properties/launchSettings.json
 /src/leanaot/aot-runner/cpp-posix
+/scripts/publish_runtime.bat
+/scripts/publish_leanaot.bat
