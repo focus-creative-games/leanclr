@@ -2240,7 +2240,8 @@ namespace LeanAOT.ToCpp
             }
             else
             {
-                Debug.Assert(method.DeclaringType.ToTypeSig().ElementType == ElementType.Object);
+                string contraintedDeclaringType = method.DeclaringType.FullName;
+                Debug.Assert(contraintedDeclaringType == "System.Object" || contraintedDeclaringType == "System.Enum" || contraintedDeclaringType == "System.ValueType");
                 return implMethod != null;
             }
         }
