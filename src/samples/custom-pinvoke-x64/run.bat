@@ -1,8 +1,10 @@
 
 call build.bat
 
-call dotnet build ..\..\tests\managed\CoreTests\CoreTests.csproj
+call "%~dp0..\..\..\scripts\lib\repo-root.bat"
+call "%REPO_ROOT%\scripts\lib\out-dir-init.bat"
+call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "samples\custom-pinvoke-x64" "Debug" "x64"
 
-build\bin\Debug\custom-pinvoke.exe -l ..\..\libraries\dotnetframework4.x -l ..\..\tests\managed\CoreTests\bin\Debug -e test.App::CallCustomPInvoke CoreTests
+"%CMAKE_BUILD_DIR%\bin\Debug\custom-pinvoke.exe" -l "%REPO_ROOT%\src\libraries\dotnetframework4.x" -l "%OUT_ROOT%\dotnet\CoreTests\Debug" -e test.App::CallCustomPInvoke CoreTests
 
 pause

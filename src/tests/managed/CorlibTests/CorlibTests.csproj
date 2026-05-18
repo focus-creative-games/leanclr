@@ -8,11 +8,12 @@
     <!-- 禁止自动引用系统 mscorlib -->
     <NoStandardLib>true</NoStandardLib>
     <NoConfig>true</NoConfig>
-    <OutputPath>bin\Debug\</OutputPath>
     <ProjectGuid>{B3C8B19B-F8AE-400E-946C-DE7AF2216FC0}</ProjectGuid>
   </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Release'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DebugType>portable</DebugType>
   </PropertyGroup>
   <ItemGroup>

@@ -11,9 +11,11 @@ tests/
 │   ├── CoreTests/         # Core functionality tests
 │   ├── CorlibTests/       # Base class library tests
 │   └── ILTests/           # IL instruction tests
-├── build_all.bat          # One-click build script
-└── run_tests.bat          # Test execution script
+├── scripts\test\build-all.bat          # Forwards to scripts/test/build-all.bat
+└── scripts\test\run.bat          # Forwards to scripts/test/run.bat
 ```
+
+Official scripts live under [`scripts/test/`](../../scripts/test/). See [`scripts/README.md`](../../scripts/README.md).
 
 ---
 
@@ -109,19 +111,19 @@ The `Assert` class provides a rich set of assertion methods for validating test 
 
 ### Option 1: One-Click Build (Recommended)
 
-Use `build_all.bat` to build both the test runner and managed test projects:
+Use `scripts\test\build-all.bat` (or legacy `build_all.bat`) to build both the test runner and managed test projects:
 
 ```batch
 # Build with default Debug configuration, x64 architecture
-build_all.bat
+scripts\test\build-all.bat
 
 # Specify configuration and architecture
-build_all.bat <Config> [Arch]
+scripts\test\build-all.bat <Config> [Arch]
 
 # Examples
-build_all.bat Debug x64
-build_all.bat Release x64
-build_all.bat Debug x86
+scripts\test\build-all.bat Debug x64
+scripts\test\build-all.bat Release x64
+scripts\test\build-all.bat Debug x86
 ```
 
 **Parameters:**
@@ -153,7 +155,7 @@ build.bat Release x64
 
 After building, the executable is located at:
 ```
-basic_test_runner/build/bin/<Config>/test.exe
+out/cmake/tests/basic_test_runner/<Config>-x64/bin/<Config>/test.exe
 ```
 
 #### Build C# Managed Test Projects
@@ -171,18 +173,18 @@ dotnet build -c Release
 
 ## Running Tests
 
-Use `run_tests.bat` to run all tests:
+Use `scripts\test\run.bat` to run all tests:
 
 ```batch
 # Run tests with Debug configuration
-run_tests.bat
+scripts\test\run.bat
 
 # Run tests with specified configuration
-run_tests.bat <Config>
+scripts\test\run.bat <Config>
 
 # Examples
-run_tests.bat Debug
-run_tests.bat Release
+scripts\test\run.bat Debug
+scripts\test\run.bat Release
 ```
 
 **Parameters:**
@@ -202,7 +204,7 @@ Running tests...
 All tests passed.
 ```
 
-> **Note:** Make sure to run `build_all.bat` before running tests. The script will display an error if the test runner is not found.
+> **Note:** Make sure to run `scripts\test\build-all.bat` before running tests. The script will display an error if the test runner is not found.
 
 ---
 
@@ -210,13 +212,13 @@ All tests passed.
 
 ```batch
 # 1. Build all test projects
-build_all.bat
+scripts\test\build-all.bat
 
 # 2. Run tests
-run_tests.bat
+scripts\test\run.bat
 
 # Or complete in one step (Release configuration)
-build_all.bat Release && run_tests.bat Release
+scripts\test\build-all.bat Release && scripts\test\run.bat Release
 ```
 
 ---
@@ -235,7 +237,7 @@ build_all.bat Release && run_tests.bat Release
 
 ### Q: Test run fails with "Test runner not found"
 
-**A:** Run `build_all.bat` first to build the test projects.
+**A:** Run `scripts\test\build-all.bat` first to build the test projects.
 
 ### Q: How do I run only specific tests?
 

@@ -1,0 +1,20 @@
+<Project>
+  <PropertyGroup>
+    <LeanClrRepoRoot>$([System.IO.Path]::GetFullPath('$(MSBuildThisFileDirectory)'))</LeanClrRepoRoot>
+    <LeanClrOutRoot Condition="'$(LEANCLR_OUT_ROOT)' != ''">$([System.IO.Path]::GetFullPath('$(LEANCLR_OUT_ROOT)'))</LeanClrOutRoot>
+    <LeanClrOutRoot Condition="'$(LeanClrOutRoot)' == ''">$(LeanClrRepoRoot)out</LeanClrOutRoot>
+  </PropertyGroup>
+
+  <!-- Non-SDK (legacy) projects -->
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' != 'true'">
+    <OutputPath>$(LeanClrOutRoot)\dotnet\$(MSBuildProjectName)\$(Configuration)\</OutputPath>
+    <BaseIntermediateOutputPath>$(LeanClrOutRoot)\dotnet\obj\</BaseIntermediateOutputPath>
+    <IntermediateOutputPath>$(BaseIntermediateOutputPath)$(MSBuildProjectName)\$(Configuration)\</IntermediateOutputPath>
+  </PropertyGroup>
+
+  <!-- SDK-style projects -->
+  <PropertyGroup Condition="'$(UsingMicrosoftNETSdk)' == 'true'">
+    <BaseOutputPath>$(LeanClrOutRoot)\dotnet\$(MSBuildProjectName)\</BaseOutputPath>
+    <BaseIntermediateOutputPath>$(LeanClrOutRoot)\dotnet\obj\$(MSBuildProjectName)\</BaseIntermediateOutputPath>
+  </PropertyGroup>
+</Project>

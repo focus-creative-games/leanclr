@@ -416,6 +416,7 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+/out/
 /**/build/
 !/docs/build/
 !/src/runtime/log

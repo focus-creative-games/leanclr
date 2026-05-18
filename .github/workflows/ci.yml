@@ -21,19 +21,13 @@ jobs:
 
       - name: Make scripts executable
         run: |
-          chmod +x src/tests/build_all.sh
-          chmod +x src/tests/run_tests.sh
+          chmod +x scripts/ci.sh
+          chmod +x scripts/test/build-all.sh
+          chmod +x scripts/test/run.sh
           chmod +x src/tests/basic_test_runner/build.sh
 
-      - name: Build all tests
-        run: |
-          cd src/tests
-          ./build_all.sh Release
-
-      - name: Run tests
-        run: |
-          cd src/tests
-          ./run_tests.sh Release
+      - name: Build and run tests
+        run: ./scripts/ci.sh Release
 
       - name: Notify Feishu on failure
         if: failure()

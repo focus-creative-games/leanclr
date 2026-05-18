@@ -1,12 +1,19 @@
 #!/bin/bash
-# build.sh for startup (Linux/macOS)
 set -e
-BUILD_DIR="build"
-BUILD_TYPE=${1:-Debug}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../../scripts/lib/out-dir.sh
+source "$SCRIPT_DIR/../../../scripts/lib/out-dir.sh"
 
-cmake -S . -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-cmake --build "$BUILD_DIR" --target startup -- -j$(nproc || sysctl -n hw.ncpu)
-EXE="$BUILD_DIR/bin/startup"
+BUILD_TYPE=${1:-Debug}
+CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir samples/startup "$BUILD_TYPE")"
+
+echo "Build dir: $CMAKE_BUILD_DIR"
+mkdir -p "$CMAKE_BUILD_DIR"
+
+cmake -S "$SCRIPT_DIR" -B "$CMAKE_BUILD_DIR" -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
+cmake --build "$CMAKE_BUILD_DIR" --target startup -- -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+EXE="$CMAKE_BUILD_DIR/bin/startup"
 if [ -f "$EXE" ]; then
   echo "Built: $EXE"
 else

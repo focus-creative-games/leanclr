@@ -16,6 +16,7 @@ This directory contains documentation for the LeanCLR project.
 ### Testing
 
 - [Test Framework](../src/tests/README.md) - Unit test framework and how to add test cases
+- [Scripts](../scripts/README.md) - Build, test, and developer script index
 
 ### Project Resources
 

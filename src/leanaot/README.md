@@ -22,8 +22,10 @@ LeanAOT is an Ahead-Of-Time (AOT) compiler that translates .NET managed assembli
 
 ```bat
 # Publish a Release build to tools/leanaot/
-src\leanaot\publish.bat
+scripts\release\publish-leanaot.bat
 ```
+
+(`src\leanaot\publish.bat` forwards to the script above.)
 
 ## Usage
 

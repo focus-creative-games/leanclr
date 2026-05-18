@@ -1,19 +1,19 @@
 #!/bin/bash
 # build.sh - Build script for leanclr runtime on Linux and macOS
 # Usage: ./build.sh [Debug|Release]
-
 set -e
 
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../scripts/lib/out-dir.sh
+source "$SCRIPT_DIR/../../scripts/lib/out-dir.sh"
+
 BUILD_TYPE=${1:-Release}
-BUILD_DIR="build/$BUILD_TYPE"
+CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir runtime "$BUILD_TYPE")"
 
-# Create build directory
-mkdir -p "$BUILD_DIR"
+echo "Build dir: $CMAKE_BUILD_DIR"
+mkdir -p "$CMAKE_BUILD_DIR"
 
-# Run CMake to configure the project
-cmake -S . -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
+cmake -S "$SCRIPT_DIR" -B "$CMAKE_BUILD_DIR" -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
+cmake --build "$CMAKE_BUILD_DIR" -- -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
 
-# Build the project
-cmake --build "$BUILD_DIR" -- -j$(nproc || sysctl -n hw.ncpu)
-
-echo "Build finished in $BUILD_DIR"
+echo "Build finished in $CMAKE_BUILD_DIR"

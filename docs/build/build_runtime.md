@@ -35,12 +35,14 @@ Ensure the following workloads are installed:
 ```
 src/runtime/
 ├── CMakeLists.txt      # Main CMake configuration
-├── build.bat           # Automated build script
-├── generate-vs-sln.bat # VS solution generator
-├── build/              # Build output directory
-│   ├── Debug/          # Debug build output
-│   └── Release/        # Release build output
+├── build.bat           # Build script (compile or generate VS solution)
 └── [source directories]
+
+Build outputs (not under src/):
+out/cmake/runtime/
+├── Release-x64/        # Release build tree
+├── Debug-x64/          # Debug build tree
+└── vs-sln-x64/         # VS solution only (build.bat sln)
 ```
 
 ## Building on Windows
@@ -62,11 +64,13 @@ This builds a Release x64 configuration by default.
 
 | Option | Description |
 |--------|-------------|
+| `sln` | Generate Visual Studio solution only (no compile) |
 | `Debug` | Build with debug symbols |
 | `Release` | Build optimized release (default) |
 | `x86` | Build for 32-bit Windows |
 | `x64` | Build for 64-bit Windows (default) |
 | `clean` | Clean build directory before building |
+| `shared` | Build shared library variant |
 
 #### Examples
 
@@ -82,6 +86,11 @@ build.bat clean Release
 
 # Debug x86 with clean
 build.bat clean Debug x86
+
+# Generate VS solution only (open in IDE, build from VS)
+build.bat sln
+build.bat sln x86
+build.bat clean sln
 ```
 
 ### Option 2: Using Visual Studio
@@ -89,13 +98,10 @@ build.bat clean Debug x86
 1. Generate the Visual Studio solution:
    ```cmd
    cd src/runtime
-   generate-vs-sln.bat
+   build.bat sln
    ```
 
-2. Open the generated solution:
-   ```cmd
-   build\leanclr.sln
-   ```
+2. Open the generated solution under `out/cmake/runtime/vs-sln-x64/` (e.g. `leanclr.sln`)
 
 3. Select the desired configuration (Debug/Release) and platform (x64/Win32)
 
@@ -142,10 +148,10 @@ After a successful build, the output files are located at:
 
 ### Windows
 ```
-src/runtime/build/<Config>/leanclr.lib
+out/cmake/runtime/<Config>-x64/runtime_build/<Config>/leanclr.lib
 ```
 
-Where `<Config>` is `Debug` or `Release`.
+Where `<Config>` is `Debug` or `Release` (e.g. `Release-x64` build tree).
 
 ### WebAssembly
 ```

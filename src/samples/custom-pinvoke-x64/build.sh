@@ -1,12 +1,19 @@
 #!/bin/bash
-# build.sh for custom-pinvoke-win64 (Linux/macOS)
 set -e
-BUILD_DIR="build"
-BUILD_TYPE=${1:-Debug}
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+# shellcheck source=../../../scripts/lib/out-dir.sh
+source "$SCRIPT_DIR/../../../scripts/lib/out-dir.sh"
 
-cmake -S . -B "$BUILD_DIR" -DCMAKE_BUILD_TYPE=$BUILD_TYPE
-cmake --build "$BUILD_DIR" --target custom-pinvoke -- -j$(nproc || sysctl -n hw.ncpu)
-EXE="$BUILD_DIR/bin/custom-pinvoke"
+BUILD_TYPE=${1:-Debug}
+CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir samples/custom-pinvoke-x64 "$BUILD_TYPE")"
+
+echo "Build dir: $CMAKE_BUILD_DIR"
+mkdir -p "$CMAKE_BUILD_DIR"
+
+cmake -S "$SCRIPT_DIR" -B "$CMAKE_BUILD_DIR" -DCMAKE_BUILD_TYPE="$BUILD_TYPE"
+cmake --build "$CMAKE_BUILD_DIR" --target custom-pinvoke -- -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+EXE="$CMAKE_BUILD_DIR/bin/custom-pinvoke"
 if [ -f "$EXE" ]; then
   echo "Built: $EXE"
 else

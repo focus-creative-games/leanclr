@@ -1,31 +1,32 @@
 @echo off
 setlocal enabledelayedexpansion
 
-rem Directory of this script
 set "SCRIPT_DIR=%~dp0"
-set "BUILD_DIR=%SCRIPT_DIR%build"
+call "%SCRIPT_DIR%..\..\..\scripts\lib\repo-root.bat"
+call "%REPO_ROOT%\scripts\lib\out-dir-init.bat"
 
-rem Args: CONFIG (Debug/Release), ARCH (x64/x86)
 set "CONFIG=%~1"
 if "%CONFIG%"=="" set "CONFIG=Debug"
 set "ARCH=%~2"
 if "%ARCH%"=="" set "ARCH=x64"
 
-echo === Config: %CONFIG% ^| Arch: %ARCH% ===
+call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "tools\lean" "%CONFIG%" "%ARCH%"
 
-if not exist "%BUILD_DIR%" mkdir "%BUILD_DIR%"
+echo === Config: %CONFIG% ^| Arch: %ARCH% ===
+echo Build dir: %CMAKE_BUILD_DIR%
+
+if not exist "%CMAKE_BUILD_DIR%" mkdir "%CMAKE_BUILD_DIR%"
 if errorlevel 1 goto :error
 
 echo [1/2] CMake configure...
-rem Avoid trailing backslash in quoted -S path (Windows arg parsing)
-cmake -S "%SCRIPT_DIR%." -B "%BUILD_DIR%" -G "Visual Studio 17 2022" -A %ARCH%
+cmake -S "%SCRIPT_DIR%." -B "%CMAKE_BUILD_DIR%" -G "Visual Studio 17 2022" -A %ARCH%
 if errorlevel 1 goto :error
 
 echo [2/2] Build target 'lean'...
-cmake --build "%BUILD_DIR%" --config %CONFIG% --target lean --parallel
+cmake --build "%CMAKE_BUILD_DIR%" --config %CONFIG% --target lean --parallel
 if errorlevel 1 goto :error
 
-set "EXE=%BUILD_DIR%\bin\%CONFIG%\lean.exe"
+set "EXE=%CMAKE_BUILD_DIR%\bin\%CONFIG%\lean.exe"
 if exist "%EXE%" (
   echo Built: "%EXE%"
 ) else (

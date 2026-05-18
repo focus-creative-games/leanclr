@@ -29,9 +29,21 @@ LeanCLR is built using CMake and supports multiple platforms:
 ### Windows (Visual Studio)
 
 ```cmd
-cd src/runtime
-build.bat Release
+scripts\build.bat runtime Release
 ```
+
+Or from `src/runtime`: `build.bat Release`
+
+### Run all tests
+
+```cmd
+scripts\build.bat test build Release
+scripts\build.bat test run Release
+```
+
+On Linux/macOS: `./scripts/ci.sh Release`
+
+See [scripts/README.md](../../scripts/README.md) for the full script index.
 
 ### WebAssembly
 

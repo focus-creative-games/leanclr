@@ -1,6 +1,10 @@
 
-call build.bat
+call "%~dp0build.bat"
 
-rem call dotnet build ..\..\leanaot\Test\Test.csproj
+call "%~dp0..\..\..\scripts\lib\repo-root.bat"
+call "%REPO_ROOT%\scripts\lib\out-dir-init.bat"
+call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "leanaot\aot-runner" "Debug" "x64"
 
-build\bin\Debug\aot-runner.exe -l ..\..\libraries\dotnetframework4.x -l ..\..\leanaot\Test\bin\Debug -e App::Main Test
+"%CMAKE_BUILD_DIR%\bin\Debug\aot-runner.exe" -l "%REPO_ROOT%\src\libraries\dotnetframework4.x" -l "%OUT_ROOT%\dotnet\Test\Debug" -e App::Main Test
+
+pause

@@ -2,7 +2,6 @@
   <PropertyGroup>
     <OutputType>Library</OutputType>
     <AssemblyName>ILTests</AssemblyName>
-    <OutputPath>bin\$(Configuration)\</OutputPath>
     <ProjectGuid>{8BF44FE7-FAD8-4796-DFA8-45CB512CA4CD}</ProjectGuid>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>

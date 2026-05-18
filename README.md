@@ -70,6 +70,7 @@ LeanCLR 特别适合以下场景：
 - [嵌入 LeanCLR](./docs/build/embed_leanclr.md) - 如何将 LeanCLR 集成到您的项目
 - [AOT 文档](./docs/aot.md) - AOT 能力与使用说明
 - [测试框架](./src/tests/README.md) - 单元测试框架和测试用例编写指南
+- [脚本说明](./scripts/README.md) - 构建、测试与开发脚本索引
 
 ## 已集成的引擎和平台
 
