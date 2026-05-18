@@ -108,6 +108,12 @@ namespace LeanAOT.ToCpp
         public const string MarshalManagedStringToUtf16String = "leanclr::codegen::marshal_managed_string_to_utf16_string";
         public const string MarshalAnsiStringToManagedString = "leanclr::codegen::marshal_ansi_string_to_managed_string";
         public const string MarshalManagedStringToAnsiString = "leanclr::codegen::marshal_managed_string_to_ansi_string";
+        public const string MarshalManagedStringBuilderToUtf8String = "leanclr::codegen::marshal_managed_string_builder_to_utf8_string";
+        public const string MarshalManagedStringBuilderToUtf16String = "leanclr::codegen::marshal_managed_string_builder_to_utf16_string";
+        public const string MarshalManagedStringBuilderToAnsiString = "leanclr::codegen::marshal_managed_string_builder_to_ansi_string";
+        public const string SyncManagedStringBuilderFromUtf8Buffer = "leanclr::codegen::sync_managed_string_builder_from_utf8_buffer";
+        public const string SyncManagedStringBuilderFromUtf16Buffer = "leanclr::codegen::sync_managed_string_builder_from_utf16_buffer";
+        public const string SyncManagedStringBuilderFromAnsiBuffer = "leanclr::codegen::sync_managed_string_builder_from_ansi_buffer";
         public const string MarshalDelegateToFnPtr = "leanclr::codegen::marshal_delegate_to_fn_ptr";
         public const string MarshalFnPtrToDelegate = "leanclr::codegen::marshal_fn_ptr_to_delegate";
         public const string MarshalSafeHandleToHandle = "leanclr::codegen::marshal_safe_handle_to_handle";

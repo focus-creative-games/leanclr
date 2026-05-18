@@ -31,6 +31,13 @@ namespace LeanAOT.ToCpp
             }
             return MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.SafeHandle") || MetaUtil.IsInheritFrom(typeDef, "System.Runtime.InteropServices.CriticalHandle");
         }
+
+        public static bool IsStringBuilderType(TypeSig typeSig)
+        {
+            ITypeDefOrRef typeDefOrRef = typeSig.ToTypeDefOrRef();
+            return typeDefOrRef?.FullName == "System.Text.StringBuilder";
+        }
+
         public static string GetMarshalNativeTypeName(TypeSig typeSig, MarshalType marshalType, CharSet charSet)
         {
             if (typeSig.IsByRef)
@@ -123,7 +130,11 @@ namespace LeanAOT.ToCpp
                 }
                 case ElementType.Class:
                 {
-                    if (MetaUtil.IsDerivedFromMulticastDelegate(typeSig.ToTypeDefOrRef()))
+                    if (IsStringBuilderType(typeSig))
+                    {
+                        marshalType = new MarshalType(NativeType.LPStr);
+                    }
+                    else if (MetaUtil.IsDerivedFromMulticastDelegate(typeSig.ToTypeDefOrRef()))
                     {
                         marshalType = new MarshalType(NativeType.Func);
                     }
@@ -131,7 +142,10 @@ namespace LeanAOT.ToCpp
                     {
                         return ConstStrings.MarshalHandleTypeName;
                     }
-                    marshalType = new InterfaceMarshalType(NativeType.IUnknown);
+                    else
+                    {
+                        marshalType = new InterfaceMarshalType(NativeType.IUnknown);
+                    }
                     break;
                 }
                 case ElementType.ValueType:

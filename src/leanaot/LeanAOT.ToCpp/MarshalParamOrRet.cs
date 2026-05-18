@@ -71,7 +71,7 @@ namespace LeanAOT.ToCpp
 
         private bool SetupVoid()
         {
-            return false;
+            return IsReturn;
         }
 
         private bool SetupChar()
@@ -100,10 +100,20 @@ namespace LeanAOT.ToCpp
             return $"__string_builder_{NativeVarName}";
         }
 
+        private bool IsStringBuilderType()
+        {
+            return MarshalUtil.IsStringBuilderType(Type);
+        }
+
+        private string GetManagedObjectVarName()
+        {
+            return $"({ConstStrings.ObjectPtrTypeName}){ManagedVarName}";
+        }
+
         private bool SetupAnsiString()
         {
             string stringBuilderVarName = GetStringBuilderVarName();
-            ManagedToNativeSetupCode.Add($"{ConstStrings.StringBuilderTypeName} {stringBuilderVarName};");
+            ManagedToNativeSetupCode.Add($"{ConstStrings.AnsiStringBuilderTypeName} {stringBuilderVarName};");
             string managed2NativeArgs = IsReturn ? ManagedVarName : $"{ManagedVarName}, {stringBuilderVarName}";
             ManagedToNativeSetupCode.Add($"{NativeTypeName} {NativeVarName} = {VmFunctionNames.MarshalManagedStringToAnsiString}({managed2NativeArgs});");
             NativeToManagedSetupCode.Add($"{ManagedTypeName} {ManagedVarName} = {VmFunctionNames.MarshalAnsiStringToManagedString}({NativeVarName});");
@@ -120,10 +130,53 @@ namespace LeanAOT.ToCpp
         private bool SetupUtf8String()
         {
             string stringBuilderVarName = GetStringBuilderVarName();
-            ManagedToNativeSetupCode.Add($"{ConstStrings.StringBuilderTypeName} {stringBuilderVarName};");
+            ManagedToNativeSetupCode.Add($"{ConstStrings.Utf8StringBuilderTypeName} {stringBuilderVarName};");
             string managed2NativeArgs = IsReturn ? ManagedVarName : $"{ManagedVarName}, {stringBuilderVarName}";
             ManagedToNativeSetupCode.Add($"{NativeTypeName} {NativeVarName} = {VmFunctionNames.MarshalManagedStringToUtf8String}({managed2NativeArgs});");
             NativeToManagedSetupCode.Add($"{ManagedTypeName} {ManagedVarName} = {VmFunctionNames.MarshalUtf8StringToManagedString}({NativeVarName});");
+            return true;
+        }
+
+        private bool SetupAnsiStringBuilder()
+        {
+            if (MarshalNativeToManaged)
+            {
+                return false;
+            }
+
+            string stringBuilderVarName = GetStringBuilderVarName();
+            string managedObjectVarName = GetManagedObjectVarName();
+            ManagedToNativeSetupCode.Add($"{ConstStrings.AnsiStringBuilderTypeName} {stringBuilderVarName};");
+            ManagedToNativeSetupCode.Add($"{NativeTypeName} {NativeVarName} = {VmFunctionNames.MarshalManagedStringBuilderToAnsiString}({managedObjectVarName}, {stringBuilderVarName});");
+            ManagedToNativeCleanupCode.Add($"{VmFunctionNames.SyncManagedStringBuilderFromAnsiBuffer}({managedObjectVarName}, {NativeVarName});");
+            return true;
+        }
+
+        private bool SetupUtf16StringBuilder()
+        {
+            if (MarshalNativeToManaged)
+            {
+                return false;
+            }
+
+            string managedObjectVarName = GetManagedObjectVarName();
+            ManagedToNativeSetupCode.Add($"{NativeTypeName} {NativeVarName} = {VmFunctionNames.MarshalManagedStringBuilderToUtf16String}({managedObjectVarName});");
+            ManagedToNativeCleanupCode.Add($"{VmFunctionNames.SyncManagedStringBuilderFromUtf16Buffer}({managedObjectVarName}, {NativeVarName});");
+            return true;
+        }
+
+        private bool SetupUtf8StringBuilder()
+        {
+            if (MarshalNativeToManaged)
+            {
+                return false;
+            }
+
+            string stringBuilderVarName = GetStringBuilderVarName();
+            string managedObjectVarName = GetManagedObjectVarName();
+            ManagedToNativeSetupCode.Add($"{ConstStrings.Utf8StringBuilderTypeName} {stringBuilderVarName};");
+            ManagedToNativeSetupCode.Add($"{NativeTypeName} {NativeVarName} = {VmFunctionNames.MarshalManagedStringBuilderToUtf8String}({managedObjectVarName}, {stringBuilderVarName});");
+            ManagedToNativeCleanupCode.Add($"{VmFunctionNames.SyncManagedStringBuilderFromUtf8Buffer}({managedObjectVarName}, {NativeVarName});");
             return true;
         }
 
@@ -204,6 +257,11 @@ namespace LeanAOT.ToCpp
         {
             MarshalType marshalType = MarshalType;
             TypeSig typeSig = Type;
+            bool isStringBuilder = IsStringBuilderType();
+            if (isStringBuilder && IsReturn)
+            {
+                throw new NotSupportedException("System.Text.StringBuilder is not supported as a marshal return type.");
+            }
             if (marshalType == null)
             {
                 switch (typeSig.ElementType)
@@ -293,7 +351,11 @@ namespace LeanAOT.ToCpp
                 }
                 case ElementType.Class:
                 {
-                    if (MetaUtil.IsDerivedFromMulticastDelegate(typeSig.ToTypeDefOrRef()))
+                    if (MarshalUtil.IsStringBuilderType(typeSig))
+                    {
+                        marshalType = new MarshalType(NativeType.LPStr);
+                    }
+                    else if (MetaUtil.IsDerivedFromMulticastDelegate(typeSig.ToTypeDefOrRef()))
                     {
                         marshalType = new MarshalType(NativeType.Func);
                     }
@@ -371,11 +433,19 @@ namespace LeanAOT.ToCpp
             }
             case NativeType.LPStr:
             {
+                if (IsStringBuilderType())
+                {
+                    return SetupAnsiStringBuilder();
+                }
                 return SetupAnsiString();
             }
             case NativeType.LPWStr:
             case NativeType.LPTStr:
             {
+                if (IsStringBuilderType())
+                {
+                    return SetupUtf16StringBuilder();
+                }
                 return SetupUtf16String();
             }
             case NativeType.FixedSysString:
@@ -453,6 +523,10 @@ namespace LeanAOT.ToCpp
             }
             case NativeType.LPUTF8Str:
             {
+                if (IsStringBuilderType())
+                {
+                    return SetupUtf8StringBuilder();
+                }
                 return SetupUtf8String();
             }
             default:

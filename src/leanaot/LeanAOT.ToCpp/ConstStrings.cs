@@ -60,7 +60,7 @@ namespace LeanAOT.ToCpp
         // marshal types
         public const string MarshalBooleanTypeName = "leanclr::metadata::RtMarshalBoolean";
         public const string MarshalVariantBoolTypeName = "leanclr::metadata::RtMarshalVariantBool";
-        public const string MarshalAnsiCharTypeName = "leanclr::NativeChar";
+        public const string MarshalAnsiCharTypeName = "leanclr::AnsiChar";
         public const string MarshalUtf16CharTypeName = "leanclr::Utf16Char";
         public const string MarshalCustomMarshalerTypeName = "leanclr::metadata::RtMarshalCustomMarshaler";
         public const string MarshalErrorTypeName = "leanclr::metadata::RtMarshalError";
@@ -75,6 +75,8 @@ namespace LeanAOT.ToCpp
         public const string MarshalUTF16StrTypeName = "leanclr::codegen::RtMarshalUTF16Str";
         public const string MarshalUTF8StrTypeName = "leanclr::codegen::RtMarshalUTF8Str";
 
-        public const string StringBuilderTypeName = "leanclr::utils::StringBuilder";
+        public const string Utf8StringBuilderTypeName = "leanclr::utils::Utf8StringBuilder";
+        public const string AnsiStringBuilderTypeName = "leanclr::utils::AnsiStringBuilder";
+        public const string Utf16StringBuilderTypeName = "leanclr::utils::Utf16StringBuilder";
     }
 }
