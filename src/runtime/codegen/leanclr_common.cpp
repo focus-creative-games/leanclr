@@ -230,8 +230,7 @@ RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str) noexce
     {
         return nullptr;
     }
-    AnsiStringBuilder temp;
-    temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
+    AnsiStringBuilder temp(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
     return (RtMarshalAnsiStr)temp.dup_to_zero_end_ansi_chars();
 }
 
@@ -302,8 +301,6 @@ RtMarshalAnsiStr marshal_managed_string_builder_to_ansi_string(vm::RtObject* sb,
     vmutils::StringBuilder::get_chunk_chars(sb, &chars, &capacity);
     int32_t length = clamp_string_builder_length(vmutils::StringBuilder::get_chunk_length(sb), capacity);
     temp.append_utf16_str(chars, static_cast<size_t>(length));
-    temp.reserve(static_cast<size_t>(capacity) + 1);
-    temp.sure_ansi_null_terminator_but_not_append();
     return (RtMarshalAnsiStr)temp.as_ansi_chars();
 }
 

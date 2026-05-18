@@ -9,32 +9,6 @@ namespace leanclr
 namespace vm
 {
 
-class TempUtf16StringToUtf8Converter
-{
-  public:
-    TempUtf16StringToUtf8Converter(RtString* str)
-    {
-        if (str)
-        {
-            _utf8_str_builder.append_utf16_str(String::get_chars_ptr(str), static_cast<size_t>(String::get_length(str)));
-            _utf8_str = _utf8_str_builder.as_cstr();
-        }
-        else
-        {
-            _utf8_str = nullptr;
-        }
-    }
-
-    const char* get_utf8_str() const
-    {
-        return _utf8_str;
-    }
-
-  private:
-    utils::Utf8StringBuilder _utf8_str_builder;
-    const char* _utf8_str;
-};
-
 class Marshal
 {
   public:

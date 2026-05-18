@@ -44,8 +44,7 @@ int il2cpp_init(const char* domain_name)
 
 int il2cpp_init_utf16(const Il2CppChar* domain_name)
 {
-    utils::Utf8StringBuilder sb;
-    sb.append_utf16_str(domain_name, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(domain_name)));
+    utils::Utf8StringBuilder sb(domain_name, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(domain_name)));
     return il2cpp_init(sb.as_cstr());
 }
 
@@ -86,8 +85,7 @@ void il2cpp_set_memory_callbacks(Il2CppMemoryCallbacks* callbacks)
 
 void il2cpp_set_config_utf16(const Il2CppChar* executablePath)
 {
-    utils::Utf8StringBuilder sb;
-    sb.append_utf16_str(executablePath, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(executablePath)));
+    utils::Utf8StringBuilder sb(executablePath, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(executablePath)));
     vm::Settings::set_config(sb.as_cstr());
 }
 

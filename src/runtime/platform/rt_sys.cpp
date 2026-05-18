@@ -89,7 +89,10 @@ static void rt_string_to_utf8_path(vm::RtString* str, utils::Utf8StringBuilder& 
     {
         sb.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
     }
-    sb.sure_null_terminator_but_not_append();
+    else
+    {
+        sb.sure_null_terminator_but_not_append();
+    }
 }
 
 static void convert_stat_to_managed_file_status(const struct stat& src, ManagedFileStatus* dst)

@@ -674,8 +674,7 @@ inline RtMarshalUTF8Str marshal_managed_string_to_utf8_string(vm::RtString* str)
     {
         return nullptr;
     }
-    utils::Utf8StringBuilder temp;
-    temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
+    utils::Utf8StringBuilder temp(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
     return (RtMarshalUTF8Str)temp.dup_to_zero_end_cstr();
 }
 

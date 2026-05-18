@@ -5,6 +5,7 @@
 
 #include "core/rt_base.h"
 #include "alloc/general_allocation.h"
+#include "string_util.h"
 
 namespace leanclr
 {
@@ -44,9 +45,19 @@ class ByteStringBuilder
     ByteStringBuilder(const ByteStringBuilder&) = delete;
     ByteStringBuilder& operator=(const ByteStringBuilder&) = delete;
 
-    ByteStringBuilder(ByteStringBuilder&& other) noexcept : _buf(other._buf), _length(other._length), _capacity(other._capacity)
+    ByteStringBuilder(ByteStringBuilder&& other) noexcept : _length(other._length), _capacity(other._capacity)
     {
-        other._buf = nullptr;
+        if (other._buf != _initial_buffer)
+        {
+            _buf = other._buf;
+            other._buf = other._initial_buffer;
+        }
+        else
+        {
+            std::memcpy(_initial_buffer, other._initial_buffer, other._length);
+            _buf = _initial_buffer;
+            assert(other._capacity == INITIAL_BUFFER_SIZE);
+        }
         other._length = 0;
         other._capacity = 0;
     }
@@ -57,12 +68,11 @@ class ByteStringBuilder
         {
             size_t new_capacity = std::max(_capacity * 2, _length + additional);
             char* new_buf = static_cast<char*>(alloc::GeneralAllocation::malloc(new_capacity));
-
-            if (_buf && _length > 0)
+            if (_length > 0)
             {
                 std::memcpy(new_buf, _buf, _length);
             }
-            if (_buf && _buf != _initial_buffer)
+            if (_buf != _initial_buffer)
             {
                 alloc::GeneralAllocation::free(_buf);
             }
@@ -241,6 +251,18 @@ class Utf8StringBuilder : public ByteStringBuilder
   public:
     using ByteStringBuilder::ByteStringBuilder;
 
+    Utf8StringBuilder() : ByteStringBuilder() {}
+
+    Utf8StringBuilder(const Utf16Char* utf16_str, size_t utf16_len) : ByteStringBuilder()
+    {
+        append_utf16_str(utf16_str, utf16_len);
+    }
+
+    Utf8StringBuilder(const Utf16Char* utf16_str) : ByteStringBuilder()
+    {
+        append_utf16_str(utf16_str, utils::StringUtil::get_utf16chars_length(utf16_str));
+    }
+
     Utf8StringBuilder& append_char(uint8_t c)
     {
         ByteStringBuilder::append_char(c);
@@ -301,6 +323,18 @@ class AnsiStringBuilder : public ByteStringBuilder
   public:
     using ByteStringBuilder::ByteStringBuilder;
 
+    AnsiStringBuilder() : ByteStringBuilder() {}
+
+    AnsiStringBuilder(const Utf16Char* utf16_str, size_t utf16_len) : ByteStringBuilder()
+    {
+        append_utf16_str(utf16_str, utf16_len);
+    }
+
+    AnsiStringBuilder(const Utf16Char* utf16_str) : ByteStringBuilder()
+    {
+        append_utf16_str(utf16_str, utils::StringUtil::get_utf16chars_length(utf16_str));
+    }
+
     AnsiStringBuilder& append_utf16_str(const Utf16Char* utf16_str, size_t utf16_len);
 
     AnsiChar* as_ansi_chars() const
@@ -325,6 +359,8 @@ class Utf16StringBuilder : public ByteStringBuilder
 {
   public:
     using ByteStringBuilder::ByteStringBuilder;
+
+    Utf16StringBuilder() : ByteStringBuilder() {}
 
     Utf16StringBuilder& append_utf8_str(const char* utf8_str, size_t utf8_len);
     Utf16StringBuilder& append_utf8_str(const char* utf8_str);

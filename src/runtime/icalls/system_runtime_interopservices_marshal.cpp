@@ -227,8 +227,7 @@ RtResult<int32_t> SystemRuntimeInteropServicesMarshal::sizeof_type(vm::RtReflect
 
 RtResult<intptr_t> SystemRuntimeInteropServicesMarshal::offset_of(vm::RtReflectionType* ref_type, vm::RtString* field_name) noexcept
 {
-    utils::Utf8StringBuilder utf8_field_name;
-    utf8_field_name.append_utf16_str(vm::String::get_chars_ptr(field_name), static_cast<size_t>(field_name->length));
+    utils::Utf8StringBuilder utf8_field_name(vm::String::get_chars_ptr(field_name), static_cast<size_t>(field_name->length));
     return vm::Marshal::offset_of(ref_type, utf8_field_name.as_cstr());
 }
 

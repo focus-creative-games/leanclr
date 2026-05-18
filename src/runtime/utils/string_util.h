@@ -56,14 +56,8 @@ class StringUtil
 
     static int32_t get_utf16chars_length(const Utf16Char* chars)
     {
-        int32_t length = 0;
-        while (chars[length] != 0)
-        {
-            ++length;
-        }
-        return length;
+        return static_cast<int32_t>(std::char_traits<Utf16Char>::length(chars));
     }
-
 };
 
 struct CStrCompare
