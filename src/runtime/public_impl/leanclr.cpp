@@ -40,12 +40,15 @@ extern "C"
 
     size_t leanclr_get_assembly_count()
     {
-        return metadata::RtModuleDef::get_registered_modules().size();
+        utils::Vector<metadata::RtModuleDef*> modules;
+        metadata::RtModuleDef::get_registered_modules(modules);
+        return modules.size();
     }
 
     size_t leanclr_get_assemblies(LeanclrAssembly** out_assemblies, size_t out_assemblies_capacity, LeanclrException** out_exception)
     {
-        auto modules = metadata::RtModuleDef::get_registered_modules();
+        utils::Vector<metadata::RtModuleDef*> modules;
+        metadata::RtModuleDef::get_registered_modules(modules);
         size_t to_copy = std::min(out_assemblies_capacity, modules.size());
         for (size_t i = 0; i < to_copy; i++)
         {

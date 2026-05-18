@@ -42,20 +42,44 @@ void RtModuleDef::register_module_def(RtModuleDef* moduleDef)
         assert(g_corlibModule == nullptr && "Corlib module already registered");
         g_corlibModule = moduleDef;
     }
-    g_loadedModuleDefs.push_back(moduleDef);
-    assert(g_loadedModuleDefs.size() == moduleDef->get_id());
+    assert(g_loadedModuleDefs.size() < moduleDef->get_id());
+    g_loadedModuleDefs.resize(static_cast<size_t>(moduleDef->get_id()));
+    g_loadedModuleDefs[moduleDef->get_id() - 1] = moduleDef;
 }
 
-utils::Span<RtModuleDef*> RtModuleDef::get_registered_modules()
+void RtModuleDef::unregister_module_def(RtModuleDef* moduleDef)
 {
-    return utils::Span<RtModuleDef*>(g_loadedModuleDefs.data(), g_loadedModuleDefs.size());
+    if (moduleDef->is_corlib())
+    {
+        assert(g_corlibModule == moduleDef && "Corlib module mismatch on unregister");
+        g_corlibModule = nullptr;
+    }
+    uint32_t id = moduleDef->get_id();
+    assert(id > 0 && id <= g_loadedModuleDefs.size() && g_loadedModuleDefs[id - 1] == moduleDef && "ModuleDef ID invalid or mismatch on unregister");
+    g_loadedModuleDefs[id - 1] = nullptr;
+}
+
+void RtModuleDef::get_registered_modules(utils::Vector<metadata::RtModuleDef*>& modules)
+{
+    for (metadata::RtModuleDef* mod : g_loadedModuleDefs)
+    {
+        if (mod)
+        {
+            modules.push_back(mod);
+        }
+    }
 }
 
 RtModuleDef* RtModuleDef::find_module(const char* name)
 {
     for (auto it = g_loadedModuleDefs.begin(); it != g_loadedModuleDefs.end(); ++it)
     {
-        if (strcmp((*it)->get_name_no_ext(), name) == 0)
+        metadata::RtModuleDef* mod = *it;
+        if (!mod)
+        {
+            continue;
+        }
+        if (strcmp(mod->get_name_no_ext(), name) == 0)
         {
             return *it;
         }

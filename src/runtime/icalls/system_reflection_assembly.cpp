@@ -72,7 +72,9 @@ RtResult<vm::RtArray*> SystemReflectionAssembly::get_types(vm::RtReflectionAssem
 RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_entry_assembly() noexcept
 {
     // Find assembly with entrypoint
-    for (metadata::RtModuleDef* mod : metadata::RtModuleDef::get_registered_modules())
+    utils::Vector<metadata::RtModuleDef*> modules;
+    metadata::RtModuleDef::get_registered_modules(modules);
+    for (metadata::RtModuleDef* mod : modules)
     {
         metadata::EncodedTokenId entry_token = mod->get_entrypoint_token();
         if (entry_token != 0)

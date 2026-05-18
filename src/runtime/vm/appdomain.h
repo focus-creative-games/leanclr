@@ -2,7 +2,7 @@
 
 #include "metadata/rt_metadata.h"
 #include "rt_managed_types.h"
-#include "utils/rt_span.h"
+#include "utils/rt_vector.h"
 
 namespace leanclr
 {
@@ -26,7 +26,7 @@ class AppDomain
 
     static int32_t get_appdomain_id();
 
-    static utils::Span<metadata::RtModuleDef*> get_modules(RtAppDomain* this_domain);
+    static void get_modules(RtAppDomain* this_domain, utils::Vector<metadata::RtModuleDef*>& modules);
 };
 } // namespace vm
 } // namespace leanclr

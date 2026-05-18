@@ -13,6 +13,7 @@ struct FileData
 {
     const uint8_t* data;
     size_t length;
+    bool shared;
 };
 
 typedef RtResult<FileData> (*FileLoader)(const char* assembly_name, const char* extension);

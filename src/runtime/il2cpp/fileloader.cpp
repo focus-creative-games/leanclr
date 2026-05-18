@@ -218,7 +218,7 @@ RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const cha
     {
         return RtErr::FileNotFound;
     }
-    return vm::FileData{matched->file_data, matched->size};
+    return vm::FileData{matched->file_data, matched->size, true};
 }
 
 } // namespace il2cpp

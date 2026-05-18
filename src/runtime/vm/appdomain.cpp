@@ -164,10 +164,10 @@ int32_t AppDomain::get_appdomain_id()
     return g_default_mono_domain->domain_id;
 }
 
-utils::Span<metadata::RtModuleDef*> AppDomain::get_modules(RtAppDomain* this_domain)
+void AppDomain::get_modules(RtAppDomain* this_domain, utils::Vector<metadata::RtModuleDef*>& modules)
 {
     (void)this_domain;
-    return metadata::RtModuleDef::get_registered_modules();
+    metadata::RtModuleDef::get_registered_modules(modules);
 }
 } // namespace vm
 } // namespace leanclr

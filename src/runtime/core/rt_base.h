@@ -39,6 +39,7 @@ RtErr fatal_on_not_implemented_error();
 #endif
 
 void print_not_implemented_error(const char* errMsg);
+void panic(const char* errMsg);
 
 #define WARN_NOT_IMPLEMENTED_ERROR_THEN_RETURN_OK(value, errMsg) \
     do                                                           \

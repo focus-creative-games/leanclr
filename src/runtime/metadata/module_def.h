@@ -10,7 +10,7 @@
 #include "utils/binary_reader.h"
 #include "utils/hashmap.h"
 #include "utils/string_util.h"
-#include "utils/rt_span.h"
+#include "utils/rt_vector.h"
 
 namespace leanclr
 {
@@ -111,7 +111,8 @@ class RtModuleDef
     }
 
     static void register_module_def(RtModuleDef* moduleDef);
-    static utils::Span<RtModuleDef*> get_registered_modules();
+    static void unregister_module_def(RtModuleDef* moduleDef);
+    static void get_registered_modules(utils::Vector<metadata::RtModuleDef*>& modules);
     static RtModuleDef* find_module(const char* name);
     static RtModuleDef* get_module_by_id(uint32_t id);
     static RtModuleDef* get_corlib_module();

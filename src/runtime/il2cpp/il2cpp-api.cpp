@@ -707,7 +707,8 @@ size_t s_cached_assemblies_size = 0;
 
 const Il2CppAssembly** il2cpp_domain_get_assemblies(const Il2CppDomain* domain, size_t* size)
 {
-    auto modules = metadata::RtModuleDef::get_registered_modules();
+    utils::Vector<metadata::RtModuleDef*> modules;
+    metadata::RtModuleDef::get_registered_modules(modules);
     if (modules.size() != s_cached_assemblies_size)
     {
         // we don't free last cached assemblies, because they are still in use
@@ -1942,7 +1943,8 @@ int il2cpp_class_get_userdata_offset()
 
 void il2cpp_class_for_each(void (*klassReportFunc)(Il2CppClass* klass, void* userData), void* userData)
 {
-    auto modules = metadata::RtModuleDef::get_registered_modules();
+    utils::Vector<metadata::RtModuleDef*> modules;
+    metadata::RtModuleDef::get_registered_modules(modules);
     for (size_t mi = 0; mi < modules.size(); mi++)
     {
         auto* mod = modules[mi];

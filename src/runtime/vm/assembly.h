@@ -9,6 +9,14 @@ namespace leanclr
 {
 namespace vm
 {
+
+struct AssemblyData
+{
+    const uint8_t* data;
+    size_t length;
+    bool shared;
+};
+
 class Assembly
 {
   public:
@@ -18,7 +26,7 @@ class Assembly
     static RtResult<metadata::RtAssembly*> load_by_name(const char* name_no_ext);
     static RtResult<metadata::RtAssembly*> load_by_name(RtAppDomain* app_domain, const char* name_no_ext, RtObject* evidence, bool ref_only,
                                                         RtStackCrawlMark& stack_crawl_mark);
-    static RtResult<metadata::RtAssembly*> load_from_data(const utils::Span<byte> dllData, const utils::Span<byte>* symbolData);
+    static RtResult<metadata::RtAssembly*> load_from_data(const AssemblyData& dll_data, const AssemblyData* symbol_data_ptr);
     static RtResult<metadata::RtAssembly*> load_from_data(RtAppDomain* app_domain, RtArray* dll_data, RtArray* symbol_data, RtObject* evidence, bool ref_only);
 
     static RtResult<RtArray*> get_types(metadata::RtAssembly* assembly, bool exported_only);

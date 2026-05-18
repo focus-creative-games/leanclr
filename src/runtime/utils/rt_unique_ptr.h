@@ -14,7 +14,7 @@ class UniquePtr
 
   public:
     // Constructor
-    explicit UniquePtr(T* ptr = nullptr) : ptr_(ptr)
+    explicit UniquePtr(T* ptr) : ptr_(ptr)
     {
     }
 
@@ -68,7 +68,7 @@ class UniquePtr
     }
 
     // Release ownership
-    T* release()
+    T* dettach()
     {
         T* temp = ptr_;
         ptr_ = nullptr;

@@ -76,7 +76,9 @@ void RuntimeApi::shutdown_runtime()
 RtResultVoid RuntimeApi::get_assemblies(utils::Vector<metadata::RtAssembly*>& out_assemblies)
 {
     out_assemblies.clear();
-    auto modules = metadata::RtModuleDef::get_registered_modules();
+    utils::Vector<metadata::RtModuleDef*> modules;
+    metadata::RtModuleDef::get_registered_modules(modules);
+    out_assemblies.reserve(modules.size());
     for (auto* mod : modules)
     {
         out_assemblies.push_back(mod->get_assembly());
