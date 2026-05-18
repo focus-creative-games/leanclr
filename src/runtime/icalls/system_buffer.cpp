@@ -81,17 +81,10 @@ RtResult<bool> SystemBuffer::internal_block_copy(RtArray* src, int32_t src_offse
         RET_OK(false);
     }
 
-    uint8_t* src_ptr = Array::get_array_element_address<uint8_t>(src, src_offset);
-    uint8_t* dst_ptr = Array::get_array_element_address<uint8_t>(dst, dst_offset);
+    uint8_t* src_ptr = (uint8_t*)Array::get_array_data_start_as_ptr_void(src) + src_offset;
+    uint8_t* dst_ptr = (uint8_t*)Array::get_array_data_start_as_ptr_void(dst) + dst_offset;
 
-    if (src != dst)
-    {
-        std::memcpy(dst_ptr, src_ptr, static_cast<size_t>(count));
-    }
-    else
-    {
-        std::memmove(dst_ptr, src_ptr, static_cast<size_t>(count));
-    }
+    std::memmove(dst_ptr, src_ptr, static_cast<size_t>(count));
 
     RET_OK(true);
 }
