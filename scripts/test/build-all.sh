@@ -26,4 +26,28 @@ cp -f "$(leanclr_dotnet_out_dir CoreTests "$CONFIG")/CoreTests.dll" MiscDlls/
 cp -f "$(leanclr_dotnet_out_dir CorlibTests "$CONFIG")/CorlibTests.dll" MiscDlls/
 popd >/dev/null
 
+CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic_test_runner "$CONFIG")"
+if [[ -f "$CMAKE_BUILD_DIR/bin/$CONFIG/test" ]]; then
+    EXE_DIR="$CMAKE_BUILD_DIR/bin/$CONFIG"
+elif [[ -f "$CMAKE_BUILD_DIR/bin/test" ]]; then
+    EXE_DIR="$CMAKE_BUILD_DIR/bin"
+else
+    EXE_DIR="$CMAKE_BUILD_DIR/bin/$CONFIG"
+fi
+DLLS_DIR="$EXE_DIR/dlls"
+
+echo "stage test DLLs to $DLLS_DIR"
+rm -rf "$DLLS_DIR"
+mkdir -p "$DLLS_DIR"
+
+cp -a "$REPO_ROOT/src/libraries/dotnetframework4.x" "$DLLS_DIR/"
+cp -f "$REPO_ROOT/src/tests/managed/MiscDlls/"*.dll "$DLLS_DIR/" 2>/dev/null || true
+CORETESTS_DLL="$(leanclr_dotnet_out_dir CoreTests "$CONFIG")/CoreTests.dll"
+CORLIBTESTS_DLL="$(leanclr_dotnet_out_dir CorlibTests "$CONFIG")/CorlibTests.dll"
+if [[ ! -f "$CORLIBTESTS_DLL" ]]; then
+    CORLIBTESTS_DLL="$(leanclr_dotnet_out_dir CorlibTests Debug)/CorlibTests.dll"
+fi
+cp -f "$CORETESTS_DLL" "$DLLS_DIR/"
+cp -f "$CORLIBTESTS_DLL" "$DLLS_DIR/"
+
 echo "All tests built successfully."

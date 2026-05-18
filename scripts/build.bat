@@ -1,29 +1,25 @@
 @echo off
 setlocal
 
-if "%~1"=="test" (
-    if "%~2"=="build" (
-        shift
-        shift
-        call "%~dp0test\build-all.bat" %*
-        exit /b %ERRORLEVEL%
-    )
-    if "%~2"=="run" (
-        shift
-        shift
-        call "%~dp0test\run.bat" %*
-        exit /b %ERRORLEVEL%
-    )
-    goto :usage
-)
+rem Do not use "shift" inside ( ) blocks: %* is expanded at parse time and
+rem would still pass the original args (e.g. test build) to child scripts.
 
-if "%~1"=="runtime" (
-    shift
-    call "%~dp0..\src\runtime\build.bat" %*
+if /i "%~1"=="test" if /i "%~2"=="build" (
+    call "%~dp0test\build-all.bat" %~3 %~4 %~5 %~6 %~7 %~8 %~9
+    exit /b %ERRORLEVEL%
+)
+if /i "%~1"=="test" if /i "%~2"=="run" (
+    call "%~dp0test\run.bat" %~3 %~4 %~5 %~6 %~7 %~8 %~9
+    exit /b %ERRORLEVEL%
+)
+if /i "%~1"=="test" goto :usage
+
+if /i "%~1"=="runtime" (
+    call "%~dp0..\src\runtime\build.bat" %~2 %~3 %~4 %~5 %~6 %~7 %~8 %~9
     exit /b %ERRORLEVEL%
 )
 
-if "%~1"=="leanaot" if "%~2"=="publish" (
+if /i "%~1"=="leanaot" if /i "%~2"=="publish" (
     call "%~dp0release\publish-leanaot.bat"
     exit /b %ERRORLEVEL%
 )
@@ -32,6 +28,6 @@ if "%~1"=="leanaot" if "%~2"=="publish" (
 echo Usage:
 echo   scripts\build.bat test build [Config] [Arch]
 echo   scripts\build.bat test run [Config]
-echo   scripts\build.bat runtime [Config] [Arch]
+echo   scripts\build.bat runtime [Config] [Arch] [clean] [shared] [sln]
 echo   scripts\build.bat leanaot publish
 exit /b 1
