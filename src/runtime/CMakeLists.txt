@@ -35,6 +35,10 @@ foreach(dir ${RUNTIME_DIRS})
 endforeach()
 
 file(GLOB dir_c_sources "${CMAKE_CURRENT_LIST_DIR}/3rd/zlib/*.c")
+# Emscripten: omit gz*.c (gzip file I/O via write/close). Runtime only uses in-memory deflate/inflate.
+if(EMSCRIPTEN)
+    list(FILTER dir_c_sources EXCLUDE REGEX "/gz[^/]*\\.c$")
+endif()
 list(APPEND RUNTIME_SOURCES ${dir_c_sources})
 
 if(BUILD_SHARED_LEANCLR)
