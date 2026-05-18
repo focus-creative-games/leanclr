@@ -56,7 +56,9 @@ class StringUtil
 
     static int32_t get_utf16chars_length(const Utf16Char* chars)
     {
-        return static_cast<int32_t>(std::char_traits<Utf16Char>::length(chars));
+        // Utf16Char is uint16_t; libc++ only specializes char_traits for char16_t, not uint16_t.
+        return static_cast<int32_t>(
+            std::char_traits<char16_t>::length(reinterpret_cast<const char16_t*>(chars)));
     }
 };
 

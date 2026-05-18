@@ -235,7 +235,7 @@ intptr_t File::open(const Utf16Char* filename, int32_t mode, int32_t access, int
     (void)share;
     (void)options;
 
-    int fd = ::open(sb.as_cstr(), flags, 0644);
+    int fd = ::open(sb.get_const_chars(), flags, 0644);
     if (fd < 0)
     {
         set_error(error, errno_to_monoio(errno));

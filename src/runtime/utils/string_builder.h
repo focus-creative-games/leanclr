@@ -168,7 +168,7 @@ class Utf8StringBuilder : public StringBuilderAny<Utf8Char>
 
     Utf8StringBuilder(const Utf16Char* utf16_str) : StringBuilderAny<Utf8Char>()
     {
-        append_utf16_str(utf16_str, utils::StringUtil::get_utf16chars_length(utf16_str));
+        append_utf16_str(utf16_str, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(utf16_str)));
     }
 
     Utf8StringBuilder& append_char(uint8_t c)
@@ -281,7 +281,7 @@ class AnsiStringBuilder : public StringBuilderAny<AnsiChar>
 
     AnsiStringBuilder(const Utf16Char* utf16_str) : StringBuilderAny()
     {
-        append_utf16_str(utf16_str, utils::StringUtil::get_utf16chars_length(utf16_str));
+        append_utf16_str(utf16_str, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(utf16_str)));
     }
 
     AnsiStringBuilder& append_utf16_str(const Utf16Char* utf16_str, size_t utf16_len);
