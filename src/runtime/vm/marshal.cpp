@@ -12,6 +12,7 @@
 #include "metadata/aot_module.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
+#include "utils/encode_conv.h"
 #include "platform/rt_sys.h"
 
 namespace leanclr
@@ -77,9 +78,13 @@ vm::RtString* Marshal::ptr_to_string_uni_len(void* ptr, int32_t len)
 
 void* Marshal::string_to_hglobal_ansi(const Utf16Char* chars, int32_t len)
 {
-    utils::StringBuilder utf8_str;
-    utils::StringUtil::utf16_to_utf8(chars, static_cast<size_t>(len), utf8_str);
-    return const_cast<char*>(utils::StringUtil::strdup(utf8_str.as_cstr()));
+    size_t max_ansi_len = utils::EncodeConv::get_preserved_utf16_to_ansi_length(chars, static_cast<size_t>(len));
+    NativeChar* ansi_str = (NativeChar*)alloc::GeneralAllocation::calloc(max_ansi_len, sizeof(NativeChar));
+    size_t ansi_len = 0;
+    utils::EncodeConv::utf16_to_ansi(chars, static_cast<size_t>(len), ansi_str, ansi_len);
+    assert(ansi_len < max_ansi_len);
+    ansi_str[ansi_len] = 0;
+    return ansi_str;
 }
 
 void* Marshal::string_to_hglobal_uni(const Utf16Char* chars, int32_t len)

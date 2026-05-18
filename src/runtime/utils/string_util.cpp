@@ -1,8 +1,6 @@
 #include "string_util.h"
 
 #include "alloc/general_allocation.h"
-#include "3rd/utf8/utf8.h"
-#include "string_builder.h"
 
 namespace leanclr
 {
@@ -90,28 +88,6 @@ bool StringUtil::equals_ignorecase_n(const char* s1, const char* s2, size_t len)
 #else
     return strncasecmp(s1, s2, len) == 0;
 #endif
-}
-
-void StringUtil::utf16_to_utf8(const Utf16Char* utf16_str, size_t utf16_len, StringBuilder& out_utf8_str)
-{
-    if (!utf16_str || utf16_len == 0)
-    {
-        out_utf8_str.sure_null_terminator_but_not_append();
-        return;
-    }
-
-    // UTF-16 characters can be converted to UTF-8 with at most 4 bytes per character
-    // Add extra space for safety
-    size_t max_utf8_size = utf16_len * 4 + 1;
-    const size_t old_length = out_utf8_str.length();
-    out_utf8_str.reserve(max_utf8_size);
-
-    char* write_start = out_utf8_str.get_current_write_ptr();
-    char* end = utf8::unchecked::utf16to8(utf16_str, utf16_str + utf16_len, write_start);
-    *end = '\0';
-
-    const size_t appended = static_cast<size_t>(end - write_start);
-    out_utf8_str.resize(old_length + appended);
 }
 } // namespace utils
 } // namespace leanclr

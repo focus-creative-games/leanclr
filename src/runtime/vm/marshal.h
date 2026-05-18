@@ -31,7 +31,7 @@ class TempUtf16StringToUtf8Converter
     }
 
   private:
-    utils::StringBuilder _utf8_str_builder;
+    utils::Utf8StringBuilder _utf8_str_builder;
     const char* _utf8_str;
 };
 

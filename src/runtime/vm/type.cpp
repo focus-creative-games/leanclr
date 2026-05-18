@@ -258,7 +258,7 @@ RtResult<const metadata::RtTypeSig*> Type::resolve_assembly_qualified_name(metad
     }
 }
 
-static void append_public_key_token(utils::StringBuilder& sb, const uint8_t* token, size_t length)
+static void append_public_key_token(utils::Utf8StringBuilder& sb, const uint8_t* token, size_t length)
 {
     for (size_t i = 0; i < length; ++i)
     {
@@ -267,7 +267,7 @@ static void append_public_key_token(utils::StringBuilder& sb, const uint8_t* tok
 }
 
 // Append assembly display name (Name, Version, Culture, PublicKeyToken)
-static void append_assembly_name(utils::StringBuilder& sb, const metadata::RtAssemblyName& aname)
+static void append_assembly_name(utils::Utf8StringBuilder& sb, const metadata::RtAssemblyName& aname)
 {
     sb.append_cstr(aname.name ? aname.name : "");
     sb.append_cstr(", Version=");
@@ -300,7 +300,7 @@ static void append_assembly_name(utils::StringBuilder& sb, const metadata::RtAss
     }
 }
 
-RtResultVoid Type::append_type_full_name(utils::StringBuilder& sb, const metadata::RtTypeSig* typeSig, TypeNameFormat format, bool nested)
+RtResultVoid Type::append_type_full_name(utils::Utf8StringBuilder& sb, const metadata::RtTypeSig* typeSig, TypeNameFormat format, bool nested)
 {
     switch (typeSig->ele_type)
     {
@@ -512,14 +512,14 @@ RtResultVoid Type::append_type_full_name(utils::StringBuilder& sb, const metadat
 
 RtResult<RtString*> Type::get_full_name(const metadata::RtTypeSig* typeSig, bool full_name, bool assembly_qualified)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     TypeNameFormat format = full_name ? (assembly_qualified ? TypeNameFormat::AssemblyQualified : TypeNameFormat::FullName) : TypeNameFormat::Reflection;
     RET_ERR_ON_FAIL(append_type_full_name(sb, typeSig, format, false));
     RtString* name = String::create_string_from_utf8chars(sb.as_cstr(), static_cast<int32_t>(sb.length()));
     RET_OK(name);
 }
 
-void Type::append_assembly_name(utils::StringBuilder& sb, const metadata::RtAssemblyName& assemblyName)
+void Type::append_assembly_name(utils::Utf8StringBuilder& sb, const metadata::RtAssemblyName& assemblyName)
 {
     sb.append_cstr(assemblyName.name);
     sb.append_cstr(", Version=");

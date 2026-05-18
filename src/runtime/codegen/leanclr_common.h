@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <cstring>
 #include <limits>
 #include "vm/rt_managed_types.h"
 #include "vm/rt_exception.h"
@@ -16,6 +17,7 @@
 #include "vm/pinvoke.h"
 #include "vm/rt_string.h"
 #include "vm/marshal.h"
+#include "vmutils/stringbuilder.h"
 #include "metadata/module_def.h"
 #include "interp/interp_defs.h"
 #include "interp/execution_helper.h"
@@ -623,7 +625,9 @@ inline PInvokeFunction resolve_pinvoke_function(const char* dll_name_no_ext, con
 
 RtErr raise_pinvoke_entry_not_found_error(const char* dll_name_no_ext, const char* function_name) noexcept;
 
-using utils::StringBuilder;
+using utils::AnsiStringBuilder;
+using utils::Utf16StringBuilder;
+using utils::Utf8StringBuilder;
 typedef leanclr::metadata::RtMarshalHandle RtMarshalHandle;
 typedef leanclr::metadata::RtMarshalUTF8Str RtMarshalUTF8Str;
 typedef leanclr::metadata::RtMarshalUTF16Str RtMarshalUTF16Str;
@@ -654,7 +658,7 @@ inline vm::RtString* marshal_utf8_string_to_managed_string(const char* str) noex
     return str ? vm::String::create_string_from_utf8cstr(str) : nullptr;
 }
 
-inline RtMarshalUTF8Str marshal_managed_string_to_utf8_string(vm::RtString* str, StringBuilder& temp) noexcept
+inline RtMarshalUTF8Str marshal_managed_string_to_utf8_string(vm::RtString* str, Utf8StringBuilder& temp) noexcept
 {
     if (!str)
     {
@@ -670,7 +674,7 @@ inline RtMarshalUTF8Str marshal_managed_string_to_utf8_string(vm::RtString* str)
     {
         return nullptr;
     }
-    utils::StringBuilder temp;
+    utils::Utf8StringBuilder temp;
     temp.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
     return (RtMarshalUTF8Str)temp.dup_to_zero_end_cstr();
 }
@@ -694,9 +698,15 @@ inline vm::RtString* marshal_utf16_string_to_managed_string(const Utf16Char* str
     return vm::String::create_string_from_utf16chars(str, length);
 }
 
-RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str, StringBuilder& temp) noexcept;
+RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str, AnsiStringBuilder& temp) noexcept;
 RtMarshalAnsiStr marshal_managed_string_to_ansi_string(vm::RtString* str) noexcept;
 vm::RtString* marshal_ansi_string_to_managed_string(const RtMarshalAnsiStr str) noexcept;
+RtMarshalUTF8Str marshal_managed_string_builder_to_utf8_string(vm::RtObject* sb, Utf8StringBuilder& temp) noexcept;
+RtMarshalUTF16Str marshal_managed_string_builder_to_utf16_string(vm::RtObject* sb) noexcept;
+RtMarshalAnsiStr marshal_managed_string_builder_to_ansi_string(vm::RtObject* sb, AnsiStringBuilder& temp) noexcept;
+void sync_managed_string_builder_from_utf8_buffer(vm::RtObject* sb, const char* str) noexcept;
+void sync_managed_string_builder_from_utf16_buffer(vm::RtObject* sb, const Utf16Char* str) noexcept;
+void sync_managed_string_builder_from_ansi_buffer(vm::RtObject* sb, const RtMarshalAnsiStr str) noexcept;
 
 using metadata::RtNativeMethodPointer;
 

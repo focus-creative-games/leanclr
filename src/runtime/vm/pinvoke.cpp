@@ -40,7 +40,7 @@ PInvokeFunction PInvokes::get_pinvoke_function(const char* dll_name_no_ext, cons
 RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata::RtMethodInfo* method)
 {
     // Try with full method name (including parameters)
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     {
         // signature: [ModuleName]Namespace.Class.Method(params)
         sb.append_char('[');

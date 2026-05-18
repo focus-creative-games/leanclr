@@ -1,40 +1,38 @@
 #pragma once
 
+#include <algorithm>
 #include <cstring>
 
 #include "core/rt_base.h"
 #include "alloc/general_allocation.h"
-#include "string_util.h"
 
 namespace leanclr
 {
 namespace utils
 {
 
-class StringBuilder
+class ByteStringBuilder
 {
-  private:
+  protected:
     char* _buf;
     size_t _length;
     size_t _capacity;
 
+  private:
     constexpr static size_t INITIAL_BUFFER_SIZE = 32;
     char _initial_buffer[INITIAL_BUFFER_SIZE];
 
   public:
-    // Default constructor with initial capacity of 32
-    StringBuilder() : _buf(_initial_buffer), _length(0), _capacity(INITIAL_BUFFER_SIZE)
+    ByteStringBuilder() : _buf(_initial_buffer), _length(0), _capacity(INITIAL_BUFFER_SIZE)
     {
     }
 
-    // Constructor with specific capacity
-    explicit StringBuilder(size_t capacity_) : StringBuilder()
+    explicit ByteStringBuilder(size_t capacity_) : ByteStringBuilder()
     {
         with_capacity_internal(capacity_);
     }
 
-    // Destructor
-    ~StringBuilder()
+    ~ByteStringBuilder()
     {
         if (_buf && _buf != _initial_buffer)
         {
@@ -43,19 +41,16 @@ class StringBuilder
         }
     }
 
-    // Delete copy constructor and copy assignment
-    StringBuilder(const StringBuilder&) = delete;
-    StringBuilder& operator=(const StringBuilder&) = delete;
+    ByteStringBuilder(const ByteStringBuilder&) = delete;
+    ByteStringBuilder& operator=(const ByteStringBuilder&) = delete;
 
-    // Move constructor
-    StringBuilder(StringBuilder&& other) noexcept : _buf(other._buf), _length(other._length), _capacity(other._capacity)
+    ByteStringBuilder(ByteStringBuilder&& other) noexcept : _buf(other._buf), _length(other._length), _capacity(other._capacity)
     {
         other._buf = nullptr;
         other._length = 0;
         other._capacity = 0;
     }
 
-    // Reserve additional space
     void reserve(size_t additional)
     {
         if (_length + additional > _capacity)
@@ -76,8 +71,7 @@ class StringBuilder
         }
     }
 
-    // Append single character
-    StringBuilder& append_char(uint8_t c)
+    ByteStringBuilder& append_char(uint8_t c)
     {
         reserve(1);
         _buf[_length] = static_cast<char>(c);
@@ -85,7 +79,7 @@ class StringBuilder
         return *this;
     }
 
-    StringBuilder& append_chars(char c, size_t count)
+    ByteStringBuilder& append_chars(char c, size_t count)
     {
         reserve(count);
         for (size_t i = 0; i < count; i++)
@@ -96,8 +90,7 @@ class StringBuilder
         return *this;
     }
 
-    // Append C-string (null-terminated)
-    StringBuilder& append_cstr(const char* s)
+    ByteStringBuilder& append_cstr(const char* s)
     {
         size_t str_len = std::strlen(s);
         reserve(str_len);
@@ -109,8 +102,7 @@ class StringBuilder
         return *this;
     }
 
-    // Append byte slice
-    StringBuilder& append_cstr(const uint8_t* data, size_t len)
+    ByteStringBuilder& append_cstr(const uint8_t* data, size_t len)
     {
         if (len > 0)
         {
@@ -121,26 +113,13 @@ class StringBuilder
         return *this;
     }
 
-    StringBuilder& append_utf16_str(const Utf16Char* utf16_str, size_t utf16_len)
-    {
-        // Convert UTF-16 to UTF-8 and append
-        StringUtil::utf16_to_utf8(utf16_str, utf16_len, *this);
-        return *this;
-    }
-
-    StringBuilder& append_ansi_to_utf16_str(const NativeChar* ansi_str, size_t ansi_len);
-    StringBuilder& append_utf16_to_ansi_str(const Utf16Char* utf16_str, size_t utf16_len);
-
-    // Append uint16 as decimal string
-    StringBuilder& append_u16(uint16_t value)
+    ByteStringBuilder& append_u16(uint16_t value)
     {
         return append_u32(static_cast<uint32_t>(value));
     }
 
-    // Append uint32 as decimal string
-    StringBuilder& append_u32(uint32_t value)
+    ByteStringBuilder& append_u32(uint32_t value)
     {
-        // Count digits
         size_t digit_count = 0;
         uint32_t tmp_value = value;
         do
@@ -165,8 +144,7 @@ class StringBuilder
         return *this;
     }
 
-    // Append uint8 as hexadecimal string (uppercase)
-    StringBuilder& append_hex(uint8_t value)
+    ByteStringBuilder& append_hex(uint8_t value)
     {
         reserve(2);
         if (_buf)
@@ -195,116 +173,38 @@ class StringBuilder
         return _buf + _length;
     }
 
-    // Get current buffer as const pointer
     const char* as_cstr() const
     {
         return _buf;
     }
 
-    NativeChar* as_ansi_chars() const
-    {
-        return reinterpret_cast<NativeChar*>(_buf);
-    }
-
-    Utf16Char* as_utf16chars() const
-    {
-        return reinterpret_cast<Utf16Char*>(_buf);
-    }
-
-    size_t get_ansi_chars_length() const
-    {
-        // Windows: _buf holds CP_ACP multibyte octets; POSIX: UTF-8 octets. _length is always a byte count.
-        return _length;
-    }
-
-    size_t get_utf16chars_length() const
-    {
-        return _length / sizeof(Utf16Char);
-    }
-
-    // Ensure null terminator without appending to length
     void sure_null_terminator_but_not_append()
     {
         reserve(1);
         _buf[_length] = 0;
     }
 
-    void sure_ansi_null_terminator_but_not_append()
-    {
-        reserve(1);
-        _buf[_length] = 0;
-    }
-
-    void sure_utf16_null_terminator_but_not_append()
-    {
-        reserve(2);
-        assert(_length % 2 == 0);
-        _buf[_length] = 0;
-        _buf[_length + 1] = 0;
-    }
-
-    // Duplicate to zero-ended C string
     char* dup_to_zero_end_cstr() const
     {
-        // Allocate space for content + null terminator
         char* result = static_cast<char*>(alloc::GeneralAllocation::malloc(_length + 1));
-
-        if (_length > 0)
-        {
-            std::memcpy(result, _buf, _length);
-        }
-        result[_length] = 0;
-
-        return result;
-    }
-
-    NativeChar* dup_to_zero_end_ansi_chars() const
-    {
-#if LEANCLR_PLATFORM_WIN
-        char* bytes = static_cast<char*>(alloc::GeneralAllocation::malloc(_length + 1));
-        if (_length > 0)
-        {
-            std::memcpy(bytes, _buf, _length);
-        }
-        bytes[_length] = 0;
-        return reinterpret_cast<NativeChar*>(bytes);
-#else
-        NativeChar* result = static_cast<NativeChar*>(alloc::GeneralAllocation::calloc(_length + 1, sizeof(NativeChar)));
         if (_length > 0)
         {
             std::memcpy(result, _buf, _length);
         }
         result[_length] = 0;
         return result;
-#endif
     }
 
-    Utf16Char* dup_to_zero_end_utf16chars() const
-    {
-        assert(_length % 2 == 0);
-        Utf16Char* result = static_cast<Utf16Char*>(alloc::GeneralAllocation::calloc(_length / 2 + 1, sizeof(Utf16Char)));
-        if (_length > 0)
-        {
-            std::memcpy(result, _buf, _length);
-        }
-        result[_length] = 0;
-        result[_length + 1] = 0;
-        return result;
-    }
-
-    // Get current length
     size_t length() const
     {
         return _length;
     }
 
-    // Get current capacity
     size_t get_capacity() const
     {
         return _capacity;
     }
 
-    // Clear the buffer
     void clear()
     {
         _length = 0;
@@ -320,30 +220,136 @@ class StringBuilder
     }
 
   private:
-    // Helper: Initialize with specific capacity
     void with_capacity_internal(size_t cap)
     {
         if (cap > 0)
         {
             _buf = static_cast<char*>(alloc::GeneralAllocation::malloc(cap));
-
             _capacity = cap;
             _length = 0;
         }
     }
 
-    // Helper: Convert hex digit (0-15) to uppercase character
     static char hex_to_uppercase_char(uint8_t digit)
     {
-        if (digit < 10)
-        {
-            return static_cast<char>('0' + digit);
-        }
-        else
-        {
-            return static_cast<char>('A' + (digit - 10));
-        }
+        return digit < 10 ? static_cast<char>('0' + digit) : static_cast<char>('A' + (digit - 10));
     }
+};
+
+class Utf8StringBuilder : public ByteStringBuilder
+{
+  public:
+    using ByteStringBuilder::ByteStringBuilder;
+
+    Utf8StringBuilder& append_char(uint8_t c)
+    {
+        ByteStringBuilder::append_char(c);
+        return *this;
+    }
+
+    Utf8StringBuilder& append_chars(char c, size_t count)
+    {
+        ByteStringBuilder::append_chars(c, count);
+        return *this;
+    }
+
+    Utf8StringBuilder& append_cstr(const char* s)
+    {
+        ByteStringBuilder::append_cstr(s);
+        return *this;
+    }
+
+    Utf8StringBuilder& append_cstr(const uint8_t* data, size_t len)
+    {
+        ByteStringBuilder::append_cstr(data, len);
+        return *this;
+    }
+
+    Utf8StringBuilder& append_u16(uint16_t value)
+    {
+        ByteStringBuilder::append_u16(value);
+        return *this;
+    }
+
+    Utf8StringBuilder& append_u32(uint32_t value)
+    {
+        ByteStringBuilder::append_u32(value);
+        return *this;
+    }
+
+    Utf8StringBuilder& append_hex(uint8_t value)
+    {
+        ByteStringBuilder::append_hex(value);
+        return *this;
+    }
+
+    Utf8StringBuilder& append_utf16_str(const Utf16Char* utf16_str, size_t utf16_len);
+
+    void sure_utf8_null_terminator_but_not_append()
+    {
+        sure_null_terminator_but_not_append();
+    }
+
+    const char* as_utf8_cstr() const
+    {
+        return as_cstr();
+    }
+};
+
+class AnsiStringBuilder : public ByteStringBuilder
+{
+  public:
+    using ByteStringBuilder::ByteStringBuilder;
+
+    AnsiStringBuilder& append_utf16_str(const Utf16Char* utf16_str, size_t utf16_len);
+
+    NativeChar* as_ansi_chars() const
+    {
+        return reinterpret_cast<NativeChar*>(_buf);
+    }
+
+    size_t get_ansi_chars_length() const
+    {
+        return _length;
+    }
+
+    void sure_ansi_null_terminator_but_not_append()
+    {
+        sure_null_terminator_but_not_append();
+    }
+
+    NativeChar* dup_to_zero_end_ansi_chars() const;
+};
+
+class Utf16StringBuilder : public ByteStringBuilder
+{
+  public:
+    using ByteStringBuilder::ByteStringBuilder;
+
+    Utf16StringBuilder& append_utf8_str(const char* utf8_str, size_t utf8_len);
+    Utf16StringBuilder& append_utf8_str(const char* utf8_str);
+    Utf16StringBuilder& append_ansi_str(const NativeChar* ansi_str, size_t ansi_len);
+    Utf16StringBuilder& append_ansi_str(const NativeChar* ansi_str);
+
+    Utf16Char* as_utf16chars() const
+    {
+        return reinterpret_cast<Utf16Char*>(_buf);
+    }
+
+    size_t get_utf16chars_length() const
+    {
+        return _length / sizeof(Utf16Char);
+    }
+
+    void sure_utf16_null_terminator_but_not_append()
+    {
+        reserve(sizeof(Utf16Char));
+        assert(_length % sizeof(Utf16Char) == 0);
+        _buf[_length] = 0;
+        _buf[_length + 1] = 0;
+    }
+
+    Utf16Char* dup_to_zero_end_utf16chars() const;
 };
 
 } // namespace utils

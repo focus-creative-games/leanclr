@@ -83,11 +83,11 @@ static int compare_directory_entry_by_name(const void* a, const void* b)
     return std::strcmp(e1->Name, e2->Name);
 }
 
-static void rt_string_to_utf8_path(vm::RtString* str, utils::StringBuilder& sb)
+static void rt_string_to_utf8_path(vm::RtString* str, utils::Utf8StringBuilder& sb)
 {
     if (str)
     {
-        utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)), sb);
+        sb.append_utf16_str(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
     }
     sb.sure_null_terminator_but_not_append();
 }
@@ -179,7 +179,7 @@ int32_t RtSys::double_to_string(double value, const char* format, char* buffer, 
 int32_t RtSys::ch_mod(vm::RtString* path, int32_t mode)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     int32_t result = 0;
     while ((result = ::chmod(path_utf8.as_cstr(), static_cast<mode_t>(mode))) < 0 && errno == EINTR)
@@ -195,7 +195,7 @@ int32_t RtSys::ch_mod(vm::RtString* path, int32_t mode)
 int32_t RtSys::mk_dir(vm::RtString* path, int32_t mode)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     int32_t result = 0;
     while ((result = ::mkdir(path_utf8.as_cstr(), static_cast<mode_t>(mode))) < 0 && errno == EINTR)
@@ -211,8 +211,8 @@ int32_t RtSys::mk_dir(vm::RtString* path, int32_t mode)
 int32_t RtSys::rename(vm::RtString* old_path, vm::RtString* new_path)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    utils::StringBuilder old_path_utf8;
-    utils::StringBuilder new_path_utf8;
+    utils::Utf8StringBuilder old_path_utf8;
+    utils::Utf8StringBuilder new_path_utf8;
     rt_string_to_utf8_path(old_path, old_path_utf8);
     rt_string_to_utf8_path(new_path, new_path_utf8);
     int32_t result = 0;
@@ -229,7 +229,7 @@ int32_t RtSys::rename(vm::RtString* old_path, vm::RtString* new_path)
 int32_t RtSys::rm_dir(vm::RtString* path)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     int32_t result = 0;
     while ((result = ::rmdir(path_utf8.as_cstr())) < 0 && errno == EINTR)
@@ -244,7 +244,7 @@ int32_t RtSys::rm_dir(vm::RtString* path)
 int32_t RtSys::unlink(vm::RtString* path)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     int32_t result = 0;
     while ((result = ::unlink(path_utf8.as_cstr())) < 0 && errno == EINTR)
@@ -259,7 +259,7 @@ int32_t RtSys::unlink(vm::RtString* path)
 intptr_t RtSys::open_dir(vm::RtString* path)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     DIR* dir = ::opendir(path_utf8.as_cstr());
     if (dir == nullptr)
@@ -412,7 +412,7 @@ int32_t RtSys::read_link(vm::RtString* path, vm::RtArray* buffer, int32_t buffer
         return -1;
     }
 
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     uint8_t* raw = vm::Array::get_array_data_start_as<uint8_t>(buffer);
     ssize_t count = ::readlink(path_utf8.as_cstr(), reinterpret_cast<char*>(raw), static_cast<size_t>(buffer_size));
@@ -428,8 +428,8 @@ int32_t RtSys::read_link(vm::RtString* path, vm::RtArray* buffer, int32_t buffer
 int32_t RtSys::link(vm::RtString* source, vm::RtString* target)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    utils::StringBuilder source_utf8;
-    utils::StringBuilder target_utf8;
+    utils::Utf8StringBuilder source_utf8;
+    utils::Utf8StringBuilder target_utf8;
     rt_string_to_utf8_path(source, source_utf8);
     rt_string_to_utf8_path(target, target_utf8);
     int32_t result = 0;
@@ -446,8 +446,8 @@ int32_t RtSys::link(vm::RtString* source, vm::RtString* target)
 int32_t RtSys::symlink(vm::RtString* target, vm::RtString* link_path)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    utils::StringBuilder target_utf8;
-    utils::StringBuilder link_path_utf8;
+    utils::Utf8StringBuilder target_utf8;
+    utils::Utf8StringBuilder link_path_utf8;
     rt_string_to_utf8_path(target, target_utf8);
     rt_string_to_utf8_path(link_path, link_path_utf8);
     return ::symlink(target_utf8.as_cstr(), link_path_utf8.as_cstr());
@@ -512,7 +512,7 @@ int32_t RtSys::stat_string(vm::RtString* path, void* output)
         errno = EINVAL;
         return -1;
     }
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     struct stat st{};
     int32_t ret = 0;
@@ -558,7 +558,7 @@ int32_t RtSys::lstat_string(vm::RtString* path, void* output)
         errno = EINVAL;
         return -1;
     }
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     struct stat st{};
     int32_t ret = ::lstat(path_utf8.as_cstr(), &st);
@@ -741,7 +741,7 @@ int32_t RtSys::lchflags(vm::RtString* path, uint32_t flags)
     (void)path;
     (void)flags;
 #if defined(__APPLE__)
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     int32_t result = 0;
     while ((result = ::lchflags(path_utf8.as_cstr(), flags)) < 0 && errno == EINTR)
@@ -772,7 +772,7 @@ int32_t RtSys::utime(vm::RtString* path, void* time_buffer)
 #ifdef LEANCLR_PLATFORM_POSIX
     (void)time_buffer;
     // IL2CPP PAL currently treats this as unsupported path.
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     (void)path_utf8;
     errno = ENOTSUP;
@@ -792,7 +792,7 @@ int32_t RtSys::utimes(vm::RtString* path, void* time_value_pair)
         errno = EINVAL;
         return -1;
     }
-    utils::StringBuilder path_utf8;
+    utils::Utf8StringBuilder path_utf8;
     rt_string_to_utf8_path(path, path_utf8);
     timeval* times = reinterpret_cast<timeval*>(time_value_pair);
     int32_t result = 0;

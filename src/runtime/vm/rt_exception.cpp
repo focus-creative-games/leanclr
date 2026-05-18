@@ -206,7 +206,7 @@ RtResultVoid Exception::report_unhandled_exception(RtException* exception)
     RET_VOID_OK();
 }
 
-void Exception::format_exception(RtException* ex, utils::StringBuilder& sb)
+void Exception::format_exception(RtException* ex, utils::Utf8StringBuilder& sb)
 {
     const metadata::RtClass* klass = ex->klass;
     if (klass->namespaze && klass->namespaze[0] != 0)

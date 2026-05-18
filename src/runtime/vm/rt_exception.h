@@ -33,7 +33,7 @@ class Exception
 
     static RtResultVoid report_unhandled_exception(RtException* exception);
 
-    static void format_exception(RtException* ex, utils::StringBuilder& sb);
+    static void format_exception(RtException* ex, utils::Utf8StringBuilder& sb);
 
     // Additional exception handling functions
     // static RtResult<RtException*> raise_native_error_exception_with_message(RtErr err, const uint8_t* msg, size_t msg_len);

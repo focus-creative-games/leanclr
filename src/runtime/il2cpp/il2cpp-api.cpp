@@ -44,7 +44,7 @@ int il2cpp_init(const char* domain_name)
 
 int il2cpp_init_utf16(const Il2CppChar* domain_name)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     sb.append_utf16_str(domain_name, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(domain_name)));
     return il2cpp_init(sb.as_cstr());
 }
@@ -86,7 +86,7 @@ void il2cpp_set_memory_callbacks(Il2CppMemoryCallbacks* callbacks)
 
 void il2cpp_set_config_utf16(const Il2CppChar* executablePath)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     sb.append_utf16_str(executablePath, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(executablePath)));
     vm::Settings::set_config(sb.as_cstr());
 }
@@ -767,7 +767,7 @@ Il2CppException* il2cpp_get_exception_argument_null(const char* arg)
 
 void il2cpp_format_exception(const Il2CppException* ex, char* message, int message_size)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     vm::Exception::format_exception(const_cast<vm::RtException*>(ex), sb);
     size_t copy_size = std::min(sb.length(), static_cast<size_t>(message_size) - 1);
     std::memcpy(message, sb.as_cstr(), copy_size);
@@ -776,7 +776,7 @@ void il2cpp_format_exception(const Il2CppException* ex, char* message, int messa
 
 void il2cpp_format_stack_trace(const Il2CppException* ex, char* output, int output_size)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     if (ex->stack_trace)
     {
         sb.append_utf16_str(vm::String::get_chars_ptr(ex->stack_trace), static_cast<size_t>(vm::String::get_length(ex->stack_trace)));
@@ -1618,7 +1618,7 @@ Il2CppClass* il2cpp_type_get_class_or_element_class(const Il2CppType* type)
 
 char* il2cpp_type_get_name(const Il2CppType* type)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     vm::TypeNameFormat format = vm::TypeNameFormat::IL;
     auto ret = vm::Type::append_type_full_name(sb, type, format, false);
     if (ret.is_err())
@@ -1630,7 +1630,7 @@ char* il2cpp_type_get_name(const Il2CppType* type)
 
 char* il2cpp_type_get_assembly_qualified_name(const Il2CppType* type)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     vm::TypeNameFormat format = vm::TypeNameFormat::AssemblyQualified;
     auto ret = vm::Type::append_type_full_name(sb, type, format, false);
     if (ret.is_err())
@@ -1642,7 +1642,7 @@ char* il2cpp_type_get_assembly_qualified_name(const Il2CppType* type)
 
 char* il2cpp_type_get_reflection_name(const Il2CppType* type)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     vm::TypeNameFormat format = vm::TypeNameFormat::Reflection;
     auto ret = vm::Type::append_type_full_name(sb, type, format, false);
     if (ret.is_err())
@@ -1916,7 +1916,7 @@ void il2cpp_custom_attrs_free(Il2CppCustomAttrInfo* ainfo)
 
 void il2cpp_type_get_name_chunked(const Il2CppType* type, void (*chunkReportFunc)(void* data, void* userData), void* userData)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     vm::TypeNameFormat format = vm::TypeNameFormat::IL;
     auto ret = vm::Type::append_type_full_name(sb, type, format, false);
     if (ret.is_err())

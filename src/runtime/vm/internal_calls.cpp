@@ -39,7 +39,7 @@ Il2CppMethodPointer InternalCalls::get_lite_internal_call(const char* name)
     const char* params_start = std::strchr(name, '(');
     if (params_start != nullptr && params_start > name)
     {
-        utils::StringBuilder short_name;
+        utils::Utf8StringBuilder short_name;
         short_name.append_cstr(reinterpret_cast<const uint8_t*>(name), static_cast<size_t>(params_start - name));
         short_name.sure_null_terminator_but_not_append();
 
@@ -71,7 +71,7 @@ const InternalCallRegistry* InternalCalls::get_internal_call(const char* name)
 RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method(const metadata::RtMethodInfo* method)
 {
     // Try with full method name (including parameters)
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method));
         auto it = g_internalCallMap.find(sb.as_cstr());
@@ -110,7 +110,7 @@ InternalCallInvoker InternalCalls::get_newobj_internal_call(const char* name)
 // Get newobj internal call by method info
 RtResult<InternalCallInvoker> InternalCalls::get_newobj_internal_call_by_method(const metadata::RtMethodInfo* method)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
     // Try with full method name (including parameters)
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method));

@@ -47,8 +47,8 @@ RtResult<vm::RtReflectionType*> SystemReflectionAssembly::internal_get_type(vm::
                                                                             vm::RtString* name, bool throw_on_error, bool ignore_case) noexcept
 {
     (void)module; // unused
-    utils::StringBuilder name_buf;
-    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)), name_buf);
+    utils::Utf8StringBuilder name_buf;
+    name_buf.append_utf16_str(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)));
     name_buf.sure_null_terminator_but_not_append();
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
@@ -95,8 +95,8 @@ RtResultVoid SystemReflectionAssembly::internal_get_assembly_name(vm::RtString* 
 
 RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_from(vm::RtString* path, bool ref_only, int32_t* mark) noexcept
 {
-    utils::StringBuilder name_buf;
-    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(path), static_cast<size_t>(vm::String::get_length(path)), name_buf);
+    utils::Utf8StringBuilder name_buf;
+    name_buf.append_utf16_str(vm::String::get_chars_ptr(path), static_cast<size_t>(vm::String::get_length(path)));
     vm::RtAppDomain* current_app_domain = vm::AppDomain::get_default_appdomain();
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
         metadata::RtAssembly*, loaded_ass, vm::Assembly::load_by_name(current_app_domain, name_buf.as_cstr(), nullptr, ref_only, *(vm::RtStackCrawlMark*)mark));
@@ -106,8 +106,8 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_from(vm::RtSt
 RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_file_internal(vm::RtString* path, int32_t* mark) noexcept
 {
     (void)mark;
-    utils::StringBuilder name_buf;
-    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(path), static_cast<size_t>(vm::String::get_length(path)), name_buf);
+    utils::Utf8StringBuilder name_buf;
+    name_buf.append_utf16_str(vm::String::get_chars_ptr(path), static_cast<size_t>(vm::String::get_length(path)));
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, loaded_ass, vm::Assembly::load_by_name(name_buf.as_cstr()));
     return vm::Reflection::get_assembly_reflection_object(loaded_ass);
@@ -116,8 +116,8 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_file_internal
 RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_with_partial_name(vm::RtString* name, vm::RtObject* evidence) noexcept
 {
     (void)evidence;
-    utils::StringBuilder name_buf;
-    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)), name_buf);
+    utils::Utf8StringBuilder name_buf;
+    name_buf.append_utf16_str(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)));
     name_buf.sure_null_terminator_but_not_append();
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, loaded_ass, vm::Assembly::load_by_name(name_buf.as_cstr()));

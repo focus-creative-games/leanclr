@@ -96,12 +96,12 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
     std::cerr << std::endl;
     std::cerr << std::endl;
 
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
 
     metadata::MetadataName::append_klass_full_name(sb, ex->klass).is_ok();
     sb.append_cstr(": ");
     sb.sure_null_terminator_but_not_append();
-    std::cerr << sb.as_cstr();
+    std::cerr << sb.as_utf8_cstr();
 
     sb.clear();
     vm::RtString* message = ex->message;
@@ -113,12 +113,12 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
     {
         sb.sure_null_terminator_but_not_append();
     }
-    std::cerr << sb.as_cstr() << std::endl << std::endl;
+    std::cerr << sb.as_utf8_cstr() << std::endl << std::endl;
 
     sb.clear();
     vm::RtString* stack_trace_str = reinterpret_cast<vm::RtString*>(ret.unwrap());
     sb.append_utf16_str(&stack_trace_str->first_char, stack_trace_str->length);
-    std::cerr << sb.as_cstr() << std::endl << std::endl;
+    std::cerr << sb.as_utf8_cstr() << std::endl << std::endl;
 
     std::exit(-1);
 }

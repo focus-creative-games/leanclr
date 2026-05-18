@@ -16,8 +16,6 @@ namespace utils
     std::memcpy(local_temp_str, str, static_cast<size_t>(str_len));         \
     local_temp_str[static_cast<size_t>(str_len)] = '\0';
 
-class StringBuilder;
-
 class StringUtil
 {
   public:
@@ -66,7 +64,6 @@ class StringUtil
         return length;
     }
 
-    static void utf16_to_utf8(const Utf16Char* utf16_str, size_t utf16_len, StringBuilder& out_utf8_str);
 };
 
 struct CStrCompare

@@ -10,7 +10,7 @@ namespace metadata
 {
 
 // Helper to append class full name recursively (namespace + name, handling nested types)
-RtResultVoid MetadataName::append_klass_full_name(utils::StringBuilder& sb, const RtClass* klass)
+RtResultVoid MetadataName::append_klass_full_name(utils::Utf8StringBuilder& sb, const RtClass* klass)
 {
     // Check for enclosing type (nested class)
     if (klass->image)
@@ -37,7 +37,7 @@ RtResultVoid MetadataName::append_klass_full_name(utils::StringBuilder& sb, cons
 }
 
 // Helper to append type signature name based on element type
-RtResultVoid MetadataName::append_type_sig_name(utils::StringBuilder& sb, const RtTypeSig* type_sig)
+RtResultVoid MetadataName::append_type_sig_name(utils::Utf8StringBuilder& sb, const RtTypeSig* type_sig)
 {
     if (!type_sig)
     {
@@ -208,7 +208,7 @@ const char* MetadataName::get_call_convention_name(RtSigType call_conv)
     }
 }
 
-RtResultVoid MetadataName::append_method_sig_name(utils::StringBuilder& sb, const RtMethodSig* method_sig)
+RtResultVoid MetadataName::append_method_sig_name(utils::Utf8StringBuilder& sb, const RtMethodSig* method_sig)
 {
     sb.append_cstr("delegate* unmanaged");
     assert(method_sig->generic_param_count == 0 && "Generic parameters are not supported for function pointers");
@@ -226,7 +226,7 @@ RtResultVoid MetadataName::append_method_sig_name(utils::StringBuilder& sb, cons
     RET_VOID_OK();
 }
 
-RtResultVoid MetadataName::append_method_full_name_without_params(utils::StringBuilder& sb, const RtMethodInfo* method)
+RtResultVoid MetadataName::append_method_full_name_without_params(utils::Utf8StringBuilder& sb, const RtMethodInfo* method)
 {
     const metadata::RtClass* klass = method->parent;
 
@@ -249,7 +249,7 @@ RtResultVoid MetadataName::append_method_full_name_without_params(utils::StringB
     RET_VOID_OK();
 }
 
-RtResultVoid MetadataName::append_method_full_name_with_params(utils::StringBuilder& sb, const RtMethodInfo* method)
+RtResultVoid MetadataName::append_method_full_name_with_params(utils::Utf8StringBuilder& sb, const RtMethodInfo* method)
 {
     RET_ERR_ON_FAIL(append_method_full_name_without_params(sb, method));
 
@@ -272,21 +272,21 @@ RtResultVoid MetadataName::append_method_full_name_with_params(utils::StringBuil
 
 // RtResult<const char*> MetadataName::build_class_full_name(const RtClass* klass)
 // {
-//     utils::StringBuilder sb;
+//     utils::Utf8StringBuilder sb;
 //     RET_ERR_ON_FAIL(append_klass_full_name(sb, const_cast<RtClass*>(klass)));
 //     RET_OK(sb.dup_to_zero_end_cstr());
 // }
 
 // RtResult<const char*> MetadataName::build_method_full_name_with_params(const RtMethodInfo* method)
 // {
-//     utils::StringBuilder sb;
+//     utils::Utf8StringBuilder sb;
 //     RET_ERR_ON_FAIL(append_method_full_name_with_params(sb, const_cast<RtMethodInfo*>(method)));
 //     RET_OK(sb.dup_to_zero_end_cstr());
 // }
 
 // RtResult<const char*> MetadataName::build_method_full_name_without_params(const RtMethodInfo* method)
 // {
-//     utils::StringBuilder sb;
+//     utils::Utf8StringBuilder sb;
 //     RET_ERR_ON_FAIL(append_method_full_name_without_params(sb, const_cast<RtMethodInfo*>(method)));
 //     RET_OK(sb.dup_to_zero_end_cstr());
 // }

@@ -37,7 +37,7 @@ const IntrinsicRegistry* Intrinsics::get_intrinsic(const char* name)
 // Get intrinsic by method info (builds full method name with params)
 RtResult<const IntrinsicRegistry*> Intrinsics::get_intrinsic_by_method(const metadata::RtMethodInfo* method)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
 
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method));
@@ -75,7 +75,7 @@ IntrinsicInvoker Intrinsics::get_newobj_intrinsic(const char* name)
 // Get newobj intrinsic by method info
 RtResult<IntrinsicInvoker> Intrinsics::get_newobj_intrinsic_by_method(const metadata::RtMethodInfo* method)
 {
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
 
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method));

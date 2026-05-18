@@ -1,13 +1,7 @@
 #include "string_builder.h"
 
-#include "3rd/utf8/utf8.h"
-#include "string_util.h"
+#include "encode_conv.h"
 
-#if LEANCLR_PLATFORM_WIN
-#include <windows.h>
-#endif
-
-#include <climits>
 #include <cstring>
 
 namespace leanclr
@@ -15,85 +9,109 @@ namespace leanclr
 namespace utils
 {
 
-namespace
+Utf8StringBuilder& Utf8StringBuilder::append_utf16_str(const Utf16Char* utf16_str, size_t utf16_len)
 {
-int clamp_size_t_to_int(size_t n)
-{
-    return n > static_cast<size_t>(INT_MAX) ? INT_MAX : static_cast<int>(n);
-}
-} // namespace
+    if (utf16_str == nullptr || utf16_len == 0)
+    {
+        sure_utf8_null_terminator_but_not_append();
+        return *this;
+    }
 
-StringBuilder& StringBuilder::append_ansi_to_utf16_str(const NativeChar* ansi_str, size_t ansi_len)
-{
-    if (ansi_str == nullptr || ansi_len == 0)
-    {
-        sure_utf16_null_terminator_but_not_append();
-        return *this;
-    }
-#if LEANCLR_PLATFORM_WIN
-    // NativeChar* is passed from interop; ANSI (CP_ACP) payload is interpreted as char octets.
-    const char* const src = reinterpret_cast<const char*>(ansi_str);
-    const int cb = clamp_size_t_to_int(ansi_len);
-    const DWORD flags = MB_PRECOMPOSED;
-    const int cch = MultiByteToWideChar(CP_ACP, flags, src, cb, nullptr, 0);
-    if (cch == 0)
-    {
-        sure_utf16_null_terminator_but_not_append();
-        return *this;
-    }
-    const size_t old_len = length();
-    reserve(static_cast<size_t>(cch) * sizeof(Utf16Char));
-    Utf16Char* const dst = reinterpret_cast<Utf16Char*>(get_current_write_ptr());
-    if (MultiByteToWideChar(CP_ACP, flags, src, cb, reinterpret_cast<wchar_t*>(dst), cch) == 0)
-    {
-        sure_utf16_null_terminator_but_not_append();
-        return *this;
-    }
-    resize(old_len + static_cast<size_t>(cch) * sizeof(Utf16Char));
-#else
-    const size_t old_len = length();
-    const auto* u8 = reinterpret_cast<const unsigned char*>(ansi_str);
-    const auto* u8end = u8 + ansi_len;
-    reserve(ansi_len * 2 + sizeof(Utf16Char));
-    Utf16Char* const dst = reinterpret_cast<Utf16Char*>(get_current_write_ptr());
-    Utf16Char* const end16 = utf8::unchecked::utf8to16(u8, u8end, dst);
-    const size_t utf16_units = static_cast<size_t>(end16 - dst);
-    resize(old_len + utf16_units * sizeof(Utf16Char));
-#endif
-    sure_utf16_null_terminator_but_not_append();
+    size_t utf8_len = 0;
+    reserve(EncodeConv::get_preserved_utf16_to_utf8_length(utf16_str, utf16_len));
+    EncodeConv::utf16_to_utf8(utf16_str, utf16_len, get_current_write_ptr(), utf8_len);
+    _length += utf8_len;
+    assert(_length <= _capacity);
+    sure_utf8_null_terminator_but_not_append();
     return *this;
 }
 
-StringBuilder& StringBuilder::append_utf16_to_ansi_str(const Utf16Char* utf16_str, size_t utf16_len)
+AnsiStringBuilder& AnsiStringBuilder::append_utf16_str(const Utf16Char* utf16_str, size_t utf16_len)
 {
     if (utf16_str == nullptr || utf16_len == 0)
     {
         sure_ansi_null_terminator_but_not_append();
         return *this;
     }
-#if LEANCLR_PLATFORM_WIN
-    const int cch = clamp_size_t_to_int(utf16_len);
-    const LPCWCH wch = reinterpret_cast<LPCWCH>(utf16_str);
-    const int cb = WideCharToMultiByte(CP_ACP, 0, wch, cch, nullptr, 0, nullptr, nullptr);
-    if (cb == 0)
-    {
-        sure_ansi_null_terminator_but_not_append();
-        return *this;
-    }
-    const size_t old_len = length();
-    reserve(static_cast<size_t>(cb));
-    char* const dst = get_current_write_ptr();
-    if (WideCharToMultiByte(CP_ACP, 0, wch, cch, dst, cb, nullptr, nullptr) == 0)
-    {
-        sure_ansi_null_terminator_but_not_append();
-        return *this;
-    }
-    resize(old_len + static_cast<size_t>(cb));
-#else
-    StringUtil::utf16_to_utf8(utf16_str, utf16_len, *this);
-#endif
+
+    size_t ansi_len = 0;
+    reserve(EncodeConv::get_preserved_utf16_to_ansi_length(utf16_str, utf16_len));
+    EncodeConv::utf16_to_ansi(utf16_str, utf16_len, as_ansi_chars(), ansi_len);
+    _length += ansi_len;
+    assert(_length <= _capacity);
     sure_ansi_null_terminator_but_not_append();
     return *this;
+}
+
+NativeChar* AnsiStringBuilder::dup_to_zero_end_ansi_chars() const
+{
+    char* bytes = static_cast<char*>(alloc::GeneralAllocation::malloc(_length + 1));
+    if (_length > 0)
+    {
+        std::memcpy(bytes, _buf, _length);
+    }
+    bytes[_length] = 0;
+    return reinterpret_cast<NativeChar*>(bytes);
+}
+
+Utf16StringBuilder& Utf16StringBuilder::append_utf8_str(const char* utf8_str, size_t utf8_len)
+{
+    if (utf8_str == nullptr || utf8_len == 0)
+    {
+        sure_utf16_null_terminator_but_not_append();
+        return *this;
+    }
+
+    size_t utf16_len = 0;
+    reserve(EncodeConv::get_preserved_utf8_to_utf16_length(utf8_str, utf8_len));
+    EncodeConv::utf8_to_utf16(utf8_str, utf8_len, reinterpret_cast<Utf16Char*>(get_current_write_ptr()), utf16_len);
+    _length += utf16_len * sizeof(Utf16Char);
+    assert(_length <= _capacity);
+    sure_utf16_null_terminator_but_not_append();
+    return *this;
+}
+
+Utf16StringBuilder& Utf16StringBuilder::append_utf8_str(const char* utf8_str)
+{
+    return append_utf8_str(utf8_str, std::strlen(utf8_str));
+}
+
+Utf16StringBuilder& Utf16StringBuilder::append_ansi_str(const NativeChar* ansi_str, size_t ansi_len)
+{
+    if (ansi_str == nullptr || ansi_len == 0)
+    {
+        sure_utf16_null_terminator_but_not_append();
+        return *this;
+    }
+
+    size_t utf16_len = 0;
+    reserve(EncodeConv::get_preserved_ansi_to_utf16_length(ansi_str, ansi_len));
+    EncodeConv::ansi_to_utf16(ansi_str, ansi_len, reinterpret_cast<Utf16Char*>(get_current_write_ptr()), utf16_len);
+    _length += utf16_len * sizeof(Utf16Char);
+    assert(_length <= _capacity);
+    sure_utf16_null_terminator_but_not_append();
+    return *this;
+}
+
+Utf16StringBuilder& Utf16StringBuilder::append_ansi_str(const NativeChar* ansi_str)
+{
+#if LEANCLR_PLATFORM_WIN
+    size_t ansi_len = std::wcslen(ansi_str);
+#else
+    size_t ansi_len = std::strlen(ansi_str);
+#endif
+    return append_ansi_str(ansi_str, ansi_len);
+}
+
+Utf16Char* Utf16StringBuilder::dup_to_zero_end_utf16chars() const
+{
+    assert(_length % sizeof(Utf16Char) == 0);
+    Utf16Char* result = static_cast<Utf16Char*>(alloc::GeneralAllocation::calloc(_length / sizeof(Utf16Char) + 1, sizeof(Utf16Char)));
+    if (_length > 0)
+    {
+        std::memcpy(result, _buf, _length);
+    }
+    return result;
 }
 
 } // namespace utils

@@ -44,7 +44,7 @@ static HashMap<const RtMethodInfo*, const RtMethodInfo*> g_arrayGenericMethodCac
 // Helper function to create array type name
 static const char* make_array_name(const char* ele_class_name, uint8_t rank, bool bound)
 {
-    StringBuilder sb;
+    Utf8StringBuilder sb;
     sb.append_cstr(ele_class_name);
     sb.append_char('[');
     sb.append_chars(',', rank - 1);
@@ -159,7 +159,7 @@ RtResultVoid ArrayClass::initialize_array_interface_methods()
     const CorLibTypes& corlib = Class::get_corlib_types();
     RET_ERR_ON_FAIL(Class::initialize_methods(corlib.cls_array));
 
-    StringBuilder sb(128);
+    Utf8StringBuilder sb(128);
     for (size_t i = 0; i < corlib.cls_array->method_count; ++i)
     {
         const metadata::RtMethodInfo* method = corlib.cls_array->methods[i];

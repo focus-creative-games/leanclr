@@ -159,8 +159,8 @@ static RtResultVoid set_data_invoker(metadata::RtManagedMethodPointer, const met
 RtResult<vm::RtReflectionAssembly*> SystemAppDomain::load_assembly(vm::RtAppDomain* this_domain, vm::RtString* name, vm::RtObject* evidence, bool ref_only,
                                                                    vm::RtStackCrawlMark* stack_crawl_mark) noexcept
 {
-    utils::StringBuilder name_buf;
-    utils::StringUtil::utf16_to_utf8(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)), name_buf);
+    utils::Utf8StringBuilder name_buf;
+    name_buf.append_utf16_str(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, loaded_ass,
                                             vm::Assembly::load_by_name(this_domain, name_buf.as_cstr(), evidence, ref_only, *stack_crawl_mark));
     return vm::Reflection::get_assembly_reflection_object(loaded_ass);

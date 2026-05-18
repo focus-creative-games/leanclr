@@ -117,8 +117,8 @@ RtResult<RtString*> Environment::get_environment_variable(const char* variable_n
 
 RtResultVoid Environment::set_environment_variable(const Utf16Char* variable_name, int32_t variable_name_length, const Utf16Char* value, int32_t value_length)
 {
-    utils::StringBuilder sb;
-    utils::StringUtil::utf16_to_utf8(variable_name, static_cast<size_t>(variable_name_length), sb);
+    utils::Utf8StringBuilder sb;
+    sb.append_utf16_str(variable_name, static_cast<size_t>(variable_name_length));
     const char* key = sb.as_cstr();
     auto it = s_environment_variables_map.find(key);
     if (it != s_environment_variables_map.end())
@@ -130,8 +130,8 @@ RtResultVoid Environment::set_environment_variable(const Utf16Char* variable_nam
         }
         else
         {
-            utils::StringBuilder val_sb;
-            utils::StringUtil::utf16_to_utf8(value, static_cast<size_t>(value_length), val_sb);
+            utils::Utf8StringBuilder val_sb;
+            val_sb.append_utf16_str(value, static_cast<size_t>(value_length));
             RtString* val_str = String::create_string_from_utf8chars(val_sb.as_cstr(), static_cast<int32_t>(val_sb.length()));
             it->second = val_str;
             RET_VOID_OK();
@@ -143,9 +143,9 @@ RtResultVoid Environment::set_environment_variable(const Utf16Char* variable_nam
         {
             RET_VOID_OK();
         }
-        utils::StringBuilder val_sb;
-        utils::StringUtil::utf16_to_utf8(value, static_cast<size_t>(value_length), val_sb);
-        const char* new_key = utils::StringUtil::strdup(key);
+        utils::Utf8StringBuilder val_sb;
+        val_sb.append_utf16_str(value, static_cast<size_t>(value_length));
+        const char* new_key = sb.dup_to_zero_end_cstr();
         RtString* val_str = String::create_string_from_utf8chars(val_sb.as_cstr(), static_cast<int32_t>(val_sb.length()));
         s_environment_variables_map.insert({new_key, val_str});
         RET_VOID_OK();

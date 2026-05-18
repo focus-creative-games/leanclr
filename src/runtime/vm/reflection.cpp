@@ -414,7 +414,7 @@ RtResult<RtReflectionModule*> Reflection::get_module_reflection_object(metadata:
     ref_obj->image = mod;
     UNWRAP_OR_RET_ERR_ON_FAIL(ref_obj->assembly, get_assembly_reflection_object(mod->get_assembly()));
 
-    utils::StringBuilder fqname_buf;
+    utils::Utf8StringBuilder fqname_buf;
     Type::append_assembly_name(fqname_buf, mod->get_assembly_name());
 
     auto name_no_ext = mod->get_name_no_ext();

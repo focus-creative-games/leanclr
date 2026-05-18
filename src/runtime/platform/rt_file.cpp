@@ -192,8 +192,8 @@ intptr_t File::open(const Utf16Char* filename, int32_t mode, int32_t access, int
     int32_t u16_len = 0;
     while (filename[u16_len] != 0)
         ++u16_len;
-    utils::StringBuilder sb;
-    utils::StringUtil::utf16_to_utf8(filename, static_cast<size_t>(u16_len), sb);
+    utils::Utf8StringBuilder sb;
+    sb.append_utf16_str(filename, static_cast<size_t>(u16_len));
     sb.sure_null_terminator_but_not_append();
 
     int flags = 0;

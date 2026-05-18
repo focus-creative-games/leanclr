@@ -129,7 +129,7 @@ RtResult<const PdbImage::SymbolDocumentData*> PdbImage::GetDocument(metadata::En
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
 
-    utils::StringBuilder sourceFileNames;
+    utils::Utf8StringBuilder sourceFileNames;
     bool first = true;
     while (reader.not_empty())
     {
