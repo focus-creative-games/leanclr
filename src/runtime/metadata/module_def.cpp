@@ -1677,15 +1677,16 @@ RtResult<RtMethodBody> RtModuleDef::read_method_body_from_rva(uint32_t rva)
                 else
                 {
                     auto ehHeader = (const RtILEHSectionHeaderFat*)reader.get_current_ptr();
-                    if (ehHeader->data_size % 24 != 4)
+                    uint32_t data_size = (uint32_t)ehHeader->data_size | ((uint32_t)ehHeader->data_size1 << 8) | ((uint32_t)ehHeader->data_size2 << 16);
+                    if (data_size % 24 != 4)
                     {
                         RET_ASSERT_ERR(RtErr::BadImageFormat);
                     }
-                    if (!reader.try_advance(ehHeader->data_size))
+                    if (!reader.try_advance(data_size))
                     {
                         RET_ASSERT_ERR(RtErr::BadImageFormat);
                     }
-                    size_t clauseCount = (ehHeader->data_size - 4) / 24;
+                    size_t clauseCount = (data_size - 4) / 24;
                     body.exception_clauses.reserve(clauseCount);
                     for (size_t i = 0; i < clauseCount; ++i)
                     {
