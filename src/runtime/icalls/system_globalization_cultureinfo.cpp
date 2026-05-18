@@ -1,6 +1,8 @@
 #include "system_globalization_cultureinfo.h"
 #include "icall_base.h"
 
+#include "utils/string_builder.h"
+#include "utils/string_util.h"
 #include "vm/rt_string.h"
 
 namespace leanclr
@@ -8,9 +10,116 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_lcid(vm::RtCultureInfo* _this, int32_t /*culture_lcid*/) noexcept
+namespace
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+
+// Layout must match System.Globalization.CultureInfo/Data in corlib.
+struct CultureTextInfoData
+{
+    int32_t ansi;
+    int32_t ebcdic;
+    int32_t mac;
+    int32_t oem;
+    bool right_to_left;
+    uint8_t list_sep;
+};
+
+struct KnownCulture
+{
+    const char* match_name;
+    const char* canonical_name;
+    int32_t lcid;
+    int32_t parent_lcid;
+    int32_t datetime_index;
+    int32_t number_index;
+    int32_t default_calendar_type;
+    const char* english_name;
+    const char* native_name;
+    const char* iso2;
+    const char* iso3;
+    const char* win3;
+    const char* territory;
+    const CultureTextInfoData* text_info;
+};
+
+static const CultureTextInfoData s_text_info_en = {1252, 37, 10000, 437, false, ','};
+static const CultureTextInfoData s_text_info_en_us = {1252, 37, 10000, 437, false, ','};
+static const CultureTextInfoData s_text_info_zh = {936, 500, 10008, 936, false, ','};
+static const CultureTextInfoData s_text_info_zh_cn = {936, 500, 10008, 936, false, ','};
+
+// Indices and LCIDs aligned with mono/metadata/culture-info-tables.h (culture_entries).
+static const KnownCulture s_known_cultures[] = {
+    {"en", "en", 0x0009, 0x007F, 9, 9, 257, "English", "English", "en", "eng", "ENU", "", &s_text_info_en},
+    {"en-us", "en-US", 0x0409, 0x0009, 105, 105, 257, "English (United States)", "English (United States)", "en", "eng", "ENU", "US",
+     &s_text_info_en_us},
+    {"zh", "zh", 0x7804, 0x007F, 268, 268, 257, "Chinese", "Chinese", "zh", "zho", "CHS", "", &s_text_info_zh},
+    {"zh-cn", "zh-CN", 0x0804, 0x0004, 187, 187, 257, "Chinese (Simplified)", "Chinese (Simplified)", "zh", "zho", "CHS", "CN", &s_text_info_zh_cn},
+};
+
+static void assign_known_culture(vm::RtCultureInfo* ci, const KnownCulture& culture)
+{
+    ci->lcid = culture.lcid;
+    ci->parent_lcid = culture.parent_lcid;
+    ci->datetime_index = culture.datetime_index;
+    ci->number_index = culture.number_index;
+    ci->default_calendar_type = culture.default_calendar_type;
+    ci->text_info_data = reinterpret_cast<const char*>(culture.text_info);
+
+    ci->name = vm::String::create_string_from_utf8cstr(culture.canonical_name);
+    ci->englishname = vm::String::create_string_from_utf8cstr(culture.english_name);
+    ci->nativename = vm::String::create_string_from_utf8cstr(culture.native_name);
+    ci->iso2lang = vm::String::create_string_from_utf8cstr(culture.iso2);
+    ci->iso3lang = vm::String::create_string_from_utf8cstr(culture.iso3);
+    ci->win3lang = vm::String::create_string_from_utf8cstr(culture.win3);
+    ci->territory = culture.territory[0] != '\0' ? vm::String::create_string_from_utf8cstr(culture.territory) : nullptr;
+}
+
+static const KnownCulture* find_known_culture_by_name(const char* name)
+{
+    if (name == nullptr || name[0] == '\0')
+    {
+        return nullptr;
+    }
+
+    for (const KnownCulture& culture : s_known_cultures)
+    {
+        if (utils::StringUtil::equals_ignorecase(name, culture.match_name))
+        {
+            return &culture;
+        }
+    }
+    return nullptr;
+}
+
+static const KnownCulture* find_known_culture_by_lcid(int32_t lcid)
+{
+    for (const KnownCulture& culture : s_known_cultures)
+    {
+        if (culture.lcid == lcid)
+        {
+            return &culture;
+        }
+    }
+    return nullptr;
+}
+
+} // namespace
+
+RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_lcid(vm::RtCultureInfo* _this, int32_t culture_lcid) noexcept
+{
+    if (_this == nullptr)
+    {
+        RET_OK(false);
+    }
+
+    const KnownCulture* culture = find_known_culture_by_lcid(culture_lcid);
+    if (culture == nullptr)
+    {
+        RET_OK(false);
+    }
+
+    assign_known_culture(_this, *culture);
+    RET_OK(true);
 }
 
 /// @icall: System.Globalization.CultureInfo::construct_internal_locale_from_lcid(System.Int32)
@@ -24,9 +133,22 @@ static RtResultVoid construct_internal_locale_from_lcid_invoker(metadata::RtMana
     RET_VOID_OK();
 }
 
-RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_name(vm::RtCultureInfo* _this, vm::RtString* /*name*/) noexcept
+RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_name(vm::RtCultureInfo* _this, vm::RtString* name) noexcept
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    if (_this == nullptr || name == nullptr)
+    {
+        RET_OK(false);
+    }
+
+    utils::Utf8StringBuilder name_utf8(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)));
+    const KnownCulture* culture = find_known_culture_by_name(name_utf8.get_const_chars());
+    if (culture == nullptr)
+    {
+        RET_OK(false);
+    }
+
+    assign_known_culture(_this, *culture);
+    RET_OK(true);
 }
 
 /// @icall: System.Globalization.CultureInfo::construct_internal_locale_from_name(System.String)
