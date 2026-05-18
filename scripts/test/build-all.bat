@@ -12,14 +12,11 @@ if "%ARCH%"=="" set "ARCH=x64"
 echo === Config: %CONFIG% ^| Arch: %ARCH% ===
 
 echo build basic_test_runner
-pushd "%REPO_ROOT%\src\tests\basic_test_runner"
-call build.bat %CONFIG% %ARCH%
+call "%REPO_ROOT%\scripts\test\basic_test_runner\build.bat" %CONFIG% %ARCH%
 if errorlevel 1 (
     echo ERROR: basic_test_runner build failed.
-    popd
     exit /b 1
 )
-popd
 
 echo build managed tests
 pushd "%REPO_ROOT%\src\tests\managed"

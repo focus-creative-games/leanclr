@@ -51,6 +51,7 @@ scripts/
 |--------|-------------|
 | `ci.sh` | CI entry: `test/build-all` + `test/run` |
 | `test/build-all.*` | Build C++ runner + managed test DLLs → copy DLLs to `src/tests/managed/MiscDlls/` |
+| `test/basic_test_runner/build.*` | Build C++ test runner executable |
 | `test/run.*` | Run `out/cmake/tests/basic_test_runner/<Config>-<Arch>/bin/.../test` |
 | `runtime/build.*` | Build `leanclr` → `out/cmake/runtime/<Config>-<Arch>/` (Windows: optional `sln`, `shared`) |
 | `leanaot/aot-runner/build.bat` | Build native `aot-runner` executable |
@@ -72,6 +73,5 @@ These invoke CMake/dotnet but write outputs only under `out/`:
 - `src/runtime/build.*` — forward to `scripts/runtime/`
 - `src/samples/*/build.*` — platform samples
 - `src/leanaot/aot-runner/*.bat` — forward to `scripts/leanaot/aot-runner/` (generated `cpp/` still under aot-runner until phase 3)
-- `src/tests/basic_test_runner/build.*` — test runner executable
+- `src/tests/basic_test_runner/build.*` — forward to `scripts/test/basic_test_runner/`
 - `src/tools/lean/build.*` — lean tool
-

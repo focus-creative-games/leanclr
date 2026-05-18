@@ -10,14 +10,12 @@ TESTS_DIR="$REPO_ROOT/src/tests"
 source "$SCRIPT_DIR/../lib/out-dir.sh"
 
 CONFIG="${1:-Debug}"
-ARCH="${2:-x64}"
+ARCH="${2:-}"
 
 echo "=== Config: $CONFIG | Arch: $ARCH ==="
 
 echo "build basic_test_runner"
-pushd "$TESTS_DIR/basic_test_runner" >/dev/null
-./build.sh "$CONFIG"
-popd >/dev/null
+"$SCRIPT_DIR/basic_test_runner/build.sh" "$CONFIG" "$ARCH"
 
 echo "build managed tests"
 pushd "$TESTS_DIR/managed" >/dev/null
@@ -26,7 +24,11 @@ cp -f "$(leanclr_dotnet_out_dir CoreTests "$CONFIG")/CoreTests.dll" MiscDlls/
 cp -f "$(leanclr_dotnet_out_dir CorlibTests "$CONFIG")/CorlibTests.dll" MiscDlls/
 popd >/dev/null
 
-CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic_test_runner "$CONFIG")"
+if [[ -n "$ARCH" ]]; then
+    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic_test_runner "$CONFIG" "$ARCH")"
+else
+    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic_test_runner "$CONFIG")"
+fi
 if [[ -f "$CMAKE_BUILD_DIR/bin/$CONFIG/test" ]]; then
     EXE_DIR="$CMAKE_BUILD_DIR/bin/$CONFIG"
 elif [[ -f "$CMAKE_BUILD_DIR/bin/test" ]]; then
