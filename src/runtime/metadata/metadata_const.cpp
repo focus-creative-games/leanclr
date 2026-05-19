@@ -39,13 +39,13 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
     {
         if (is_default_value)
         {
-            return LEANCLR_VM_NEW_OBJECT(fieldClass, "MetadataConst::decode_const_object");
+            return LEANCLR_NEWOBJ_INTERNAL(fieldClass, "MetadataConst::decode_const_object");
         }
         if (raw_data.type != typeSig->ele_type)
         {
             RET_ASSERT_ERR(RtErr::BadImageFormat);
         }
-        return vm::Object::box_object(fieldClass, dataPtr);
+        return LEANCLR_BOX_OBJECT_INTERNAL(fieldClass, dataPtr, "MetadataConst::decode_const_object");
     }
     case RtElementType::String:
     {
@@ -79,7 +79,7 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
     {
         if (is_default_value)
         {
-            return LEANCLR_VM_NEW_OBJECT(fieldClass, "MetadataConst::decode_const_object");
+            return LEANCLR_NEWOBJ_INTERNAL(fieldClass, "MetadataConst::decode_const_object");
         }
         if (vm::Class::is_enum_type(fieldClass))
         {
@@ -87,7 +87,7 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
             {
                 RET_ASSERT_ERR(RtErr::BadImageFormat);
             }
-            return vm::Object::box_object(fieldClass, dataPtr);
+            return LEANCLR_BOX_OBJECT_INTERNAL(fieldClass, dataPtr, "MetadataConst::decode_const_object");
         }
         else
         {
@@ -119,15 +119,15 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
                     RET_ASSERT_ERR(RtErr::BadImageFormat);
                 }
             }
-            return vm::Object::box_object(element_class, dataPtr);
+            return LEANCLR_BOX_OBJECT_INTERNAL(element_class, dataPtr, "MetadataConst::decode_const_object");
         }
         if (is_default_value)
         {
-            return LEANCLR_VM_NEW_OBJECT(fieldClass, "MetadataConst::decode_const_object");
+            return LEANCLR_NEWOBJ_INTERNAL(fieldClass, "MetadataConst::decode_const_object");
         }
         if (vm::Class::is_enum_type(fieldClass) && raw_data.type == element_class->by_val->ele_type)
         {
-            return vm::Object::box_object(fieldClass, dataPtr);
+            return LEANCLR_BOX_OBJECT_INTERNAL(fieldClass, dataPtr, "MetadataConst::decode_const_object");
         }
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }

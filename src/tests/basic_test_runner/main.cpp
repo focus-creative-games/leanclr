@@ -380,7 +380,7 @@ RtResultVoid run_tests(metadata::RtModuleDef* mod)
                 continue;
             }
             set_current_test_context("run_tests", klass, method);
-            auto ret1 = vm::Object::new_object(klass);
+            auto ret1 = LEANCLR_NEWOBJ_INTERNAL(klass, "run_tests");
             if (ret1.is_err())
             {
                 std::cout << "  Failed to create test object, error: " << method_index << " run unittest : " << klass->namespaze << "." << klass->name

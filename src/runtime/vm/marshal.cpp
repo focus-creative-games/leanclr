@@ -163,7 +163,7 @@ RtResultVoid Marshal::ptr_to_structure(void* ptr, vm::RtObject* obj)
 RtResult<vm::RtObject*> Marshal::ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, Class::get_class_from_typesig(ref_type->type_handle));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, LEANCLR_VM_NEW_OBJECT(klass, "Marshal::ptr_to_structure_type"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, LEANCLR_NEWOBJ_INTERNAL(klass, "Marshal::ptr_to_structure_type"));
     RET_ERR_ON_FAIL(ptr_to_structure_impl(ptr, obj));
     RET_OK(obj);
 }

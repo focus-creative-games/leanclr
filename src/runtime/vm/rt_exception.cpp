@@ -110,7 +110,7 @@ RtException* Exception::raise_error_as_exception(RtErr err, interp::InterpFrame*
         return internal_get_current_exception();
     }
     metadata::RtClass* ex_class = get_exception_klass_of_runtime_error(err);
-    auto ex_ret = LEANCLR_VM_NEW_OBJECT(ex_class, "Exception::raise_error_as_exception");
+    auto ex_ret = LEANCLR_NEWOBJ_INTERNAL(ex_class, "Exception::raise_error_as_exception");
     if (ex_ret.is_ok())
     {
         RtException* ex = reinterpret_cast<RtException*>(ex_ret.unwrap());
@@ -118,7 +118,7 @@ RtException* Exception::raise_error_as_exception(RtErr err, interp::InterpFrame*
     }
     else
     {
-        auto ex_ret2 = LEANCLR_VM_NEW_OBJECT(Class::get_corlib_types().cls_execution_engine_exception, "Exception::raise_error_as_exception");
+        auto ex_ret2 = LEANCLR_NEWOBJ_INTERNAL(Class::get_corlib_types().cls_execution_engine_exception, "Exception::raise_error_as_exception");
         if (ex_ret2.is_ok())
         {
             return raise_exception(reinterpret_cast<RtException*>(ex_ret2.unwrap()), frame, ip);
@@ -168,7 +168,7 @@ RtException* Exception::raise_internal_runtime_exception(metadata::RtClass* ex_c
 {
     const CorLibTypes& types = Class::get_corlib_types();
     assert(Class::is_exception_sub_class(ex_class));
-    auto ex_ret = LEANCLR_VM_NEW_OBJECT(ex_class, "Exception::raise_internal_runtime_exception");
+    auto ex_ret = LEANCLR_NEWOBJ_INTERNAL(ex_class, "Exception::raise_internal_runtime_exception");
     if (ex_ret.is_ok())
     {
         RtException* ex = reinterpret_cast<RtException*>(ex_ret.unwrap());
@@ -176,7 +176,7 @@ RtException* Exception::raise_internal_runtime_exception(metadata::RtClass* ex_c
     }
     else
     {
-        auto ex_ret2 = LEANCLR_VM_NEW_OBJECT(Class::get_corlib_types().cls_execution_engine_exception, "Exception::raise_internal_runtime_exception");
+        auto ex_ret2 = LEANCLR_NEWOBJ_INTERNAL(Class::get_corlib_types().cls_execution_engine_exception, "Exception::raise_internal_runtime_exception");
         if (ex_ret2.is_ok())
         {
             return reinterpret_cast<RtException*>(ex_ret2.unwrap());

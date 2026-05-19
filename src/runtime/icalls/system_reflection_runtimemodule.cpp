@@ -496,7 +496,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeModule::resolve_signature(metadata
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(utils::BinaryReader, blob_reader, module->get_decoded_blob_reader(signature));
     metadata::RtClass* byte_klass = vm::Class::get_corlib_types().cls_byte;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, byte_arr,
-                                            vm::Array::new_szarray_from_ele_klass(byte_klass, static_cast<int32_t>(blob_reader.length())));
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(byte_klass, static_cast<int32_t>(blob_reader.length()), "icalls::SystemReflectionRuntimeModule::resolve_signature"));
     std::memcpy(vm::Array::get_array_data_start_as<uint8_t>(byte_arr), blob_reader.data(), blob_reader.length());
     RET_OK(byte_arr);
 }

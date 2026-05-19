@@ -25,7 +25,7 @@ utils::HashMap<utils::Utf16StrWithLen, RtObject*, utils::Utf16StrHasher, utils::
 RtResult<RtObject*> create_appdomain_setup()
 {
     auto appdomain_setup_class = Class::get_corlib_types().cls_appdomain_setup;
-    return LEANCLR_VM_NEW_OBJECT(appdomain_setup_class, "AppDomain::create_appdomain_setup");
+    return LEANCLR_NEWOBJ_INTERNAL(appdomain_setup_class, "AppDomain::create_appdomain_setup");
 }
 } // namespace
 
@@ -37,7 +37,7 @@ RtResult<RtAppDomain*> AppDomain::init_default_app_domain()
     auto& corlib_types = Class::get_corlib_types();
     auto appdomain_class = corlib_types.cls_appdomain;
 
-    auto default_appdomain_res = LEANCLR_VM_NEW_OBJECT(appdomain_class, "AppDomain::init_default_app_domain");
+    auto default_appdomain_res = LEANCLR_NEWOBJ_INTERNAL(appdomain_class, "AppDomain::init_default_app_domain");
     if (default_appdomain_res.is_err())
     {
         return RtResult<RtAppDomain*>::Err(default_appdomain_res.unwrap_err());
@@ -57,7 +57,7 @@ RtResult<RtAppDomain*> AppDomain::init_default_app_domain()
     mono_app_domain->friendly_name = domain_name != nullptr ? domain_name : utils::StringUtil::strdup("LeanCLR-Domain");
     mono_app_domain->appdomain = default_appdomain;
 
-    auto ephemeron_res = LEANCLR_VM_NEW_OBJECT(corlib_types.cls_object, "AppDomain::ephemeron_tombstone");
+    auto ephemeron_res = LEANCLR_NEWOBJ_INTERNAL(corlib_types.cls_object, "AppDomain::ephemeron_tombstone");
     if (ephemeron_res.is_err())
     {
         return RtResult<RtAppDomain*>::Err(ephemeron_res.unwrap_err());
@@ -78,7 +78,7 @@ RtResultVoid AppDomain::initialize_context()
     auto& corlib_types = Class::get_corlib_types();
     auto appcontext_class = corlib_types.cls_appcontext;
 
-    auto context_res = LEANCLR_VM_NEW_OBJECT(appcontext_class, "AppDomain::initialize_context");
+    auto context_res = LEANCLR_NEWOBJ_INTERNAL(appcontext_class, "AppDomain::initialize_context");
     RET_ERR_ON_FAIL(context_res);
     auto context = reinterpret_cast<RtAppContext*>(context_res.unwrap());
 

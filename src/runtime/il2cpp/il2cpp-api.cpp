@@ -154,14 +154,14 @@ uint32_t il2cpp_array_get_byte_length(Il2CppArray* array)
 
 Il2CppArray* il2cpp_array_new(Il2CppClass* elementTypeInfo, il2cpp_array_size_t length)
 {
-    auto result = vm::Array::new_szarray_from_ele_klass(elementTypeInfo, static_cast<int32_t>(length));
+    auto result = LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(elementTypeInfo, static_cast<int32_t>(length), "il2cpp_array_new");
     assert(result.is_ok());
     return result.is_ok() ? result.unwrap() : nullptr;
 }
 
 Il2CppArray* il2cpp_array_new_specific(Il2CppClass* arrayTypeInfo, il2cpp_array_size_t length)
 {
-    auto result = vm::Array::new_szarray_from_array_klass(arrayTypeInfo, static_cast<int32_t>(length));
+    auto result = LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS_INTERNAL(arrayTypeInfo, static_cast<int32_t>(length), "il2cpp_array_new_specific");
     return result.is_ok() ? result.unwrap() : nullptr;
 }
 
@@ -171,14 +171,14 @@ Il2CppArray* il2cpp_array_new_full(Il2CppClass* array_class, il2cpp_array_size_t
     {
     case metadata::RtElementType::SZArray:
     {
-        auto result = vm::Array::new_szarray_from_ele_klass(array_class, static_cast<int32_t>(lengths[0]));
+        auto result = LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(array_class, static_cast<int32_t>(lengths[0]), "il2cpp_array_new_full");
         assert(result.is_ok());
         return result.is_ok() ? result.unwrap() : nullptr;
     }
     case metadata::RtElementType::Array:
     {
         auto result =
-            vm::Array::new_mdarray_from_array_klass(array_class, reinterpret_cast<const int32_t*>(lengths), reinterpret_cast<const int32_t*>(lower_bounds));
+            LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(array_class, reinterpret_cast<const int32_t*>(lengths), reinterpret_cast<const int32_t*>(lower_bounds), "il2cpp_array_new_full");
         assert(result.is_ok());
         return result.is_ok() ? result.unwrap() : nullptr;
     }
@@ -741,7 +741,7 @@ Il2CppException* il2cpp_exception_from_name_msg(const Il2CppImage* image, const 
         return nullptr;
     }
     metadata::RtClass* klass = ret.unwrap();
-    auto ex_ret = LEANCLR_VM_NEW_OBJECT(klass, "il2cpp::il2cpp_exception_from_name_msg");
+    auto ex_ret = LEANCLR_NEWOBJ_INTERNAL(klass, "il2cpp::il2cpp_exception_from_name_msg");
     if (ex_ret.is_err())
     {
         return nullptr;
@@ -754,7 +754,7 @@ Il2CppException* il2cpp_exception_from_name_msg(const Il2CppImage* image, const 
 Il2CppException* il2cpp_get_exception_argument_null(const char* arg)
 {
     metadata::RtClass* ex_class = vm::Class::get_corlib_types().cls_argument_null_exception;
-    auto ex_ret = LEANCLR_VM_NEW_OBJECT(ex_class, "il2cpp::il2cpp_get_exception_argument_null");
+    auto ex_ret = LEANCLR_NEWOBJ_INTERNAL(ex_class, "il2cpp::il2cpp_get_exception_argument_null");
     if (ex_ret.is_err())
     {
         return nullptr;
@@ -1304,7 +1304,7 @@ const MethodInfo* il2cpp_object_get_virtual_method(Il2CppObject* obj, const Meth
 
 Il2CppObject* il2cpp_object_new(const Il2CppClass* klass)
 {
-    auto result = LEANCLR_VM_NEW_OBJECT(klass, "il2cpp::object_new");
+    auto result = LEANCLR_NEWOBJ_INTERNAL(klass, "il2cpp::object_new");
     return result.is_ok() ? result.unwrap() : nullptr;
 }
 
@@ -1315,7 +1315,7 @@ void* il2cpp_object_unbox(Il2CppObject* obj)
 
 Il2CppObject* il2cpp_value_box(Il2CppClass* klass, void* data)
 {
-    auto result = vm::Object::box_object(klass, data);
+    auto result = LEANCLR_BOX_OBJECT_INTERNAL(klass, data, "il2cpp::value_box");
     return result.is_ok() ? result.unwrap() : nullptr;
 }
 

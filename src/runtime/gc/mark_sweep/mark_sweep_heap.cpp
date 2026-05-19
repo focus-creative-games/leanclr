@@ -356,15 +356,32 @@ vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, siz
     return alloc_object_impl(klass, size, site, has_refs);
 }
 
+vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, size_t size)
+{
+    const bool has_refs = vm::Class::get_has_references(klass);
+    return alloc_object_impl(klass, size, GcAllocSite::none(), has_refs);
+}
+
 vm::RtObject* MarkSweepHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
 {
     return alloc_object_impl(klass, size, site, false);
+}
+
+vm::RtObject* MarkSweepHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size)
+{
+    return alloc_object_impl(klass, size, GcAllocSite::none(), false);
 }
 
 vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site)
 {
     const bool has_refs = arrClass->element_class != nullptr && vm::Class::get_has_references(arrClass->element_class);
     return alloc_object_impl(arrClass, totalBytes, site, has_refs);
+}
+
+vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
+{
+    const bool has_refs = arrClass->element_class != nullptr && vm::Class::get_has_references(arrClass->element_class);
+    return alloc_object_impl(arrClass, totalBytes, GcAllocSite::none(), has_refs);
 }
 
 void MarkSweepHeap::write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)

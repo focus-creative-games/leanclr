@@ -49,7 +49,7 @@ RtResult<vm::RtObject*> SystemRuntimeCompilerServicesRuntimeHelpers::get_object_
     }
     else
     {
-        return vm::Object::clone(obj);
+        return LEANCLR_CLONE_INTERNAL(obj, "SystemRuntimeCompilerServicesRuntimeHelpers::get_object_value");
     }
 }
 

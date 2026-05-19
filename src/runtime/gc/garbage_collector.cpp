@@ -85,34 +85,29 @@ vm::RtObject** GarbageCollector::allocate_fixed_reference_array(size_t length)
     return arr;
 }
 
-vm::RtObject* GarbageCollector::allocate_object_with_site(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
+vm::RtObject* GarbageCollector::allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
 {
     return GcHeapImpl::allocate_object(klass, size, site);
 }
 
-vm::RtObject* GarbageCollector::allocate_object_not_contains_references_with_site(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
+vm::RtObject* GarbageCollector::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
 {
     return GcHeapImpl::allocate_object_not_contains_references(klass, size, site);
 }
 
-vm::RtObject* GarbageCollector::allocate_array_with_site(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site)
-{
-    return GcHeapImpl::allocate_array(arrClass, totalBytes, site);
-}
-
 vm::RtObject* GarbageCollector::allocate_object(const metadata::RtClass* klass, size_t size)
 {
-    return allocate_object_with_site(klass, size, GcAllocSite::none());
+    return GcHeapImpl::allocate_object(klass, size);
 }
 
 vm::RtObject* GarbageCollector::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size)
 {
-    return allocate_object_not_contains_references_with_site(klass, size, GcAllocSite::none());
+    return GcHeapImpl::allocate_object_not_contains_references(klass, size);
 }
 
 vm::RtObject* GarbageCollector::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
 {
-    return allocate_array_with_site(arrClass, totalBytes, GcAllocSite::none());
+    return GcHeapImpl::allocate_array(arrClass, totalBytes);
 }
 
 void GarbageCollector::write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)

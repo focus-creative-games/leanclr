@@ -110,7 +110,7 @@ RtResult<vm::RtObject*> SystemArray::get_value_impl(vm::RtArray* arr, int32_t gl
         // Box value type
         size_t ele_size = vm::Array::get_array_element_size(arr);
         const void* ele_ptr = static_cast<const uint8_t*>(vm::Array::get_array_data_start_as_ptr_void(arr)) + static_cast<size_t>(global_index) * ele_size;
-        return vm::Object::box_object(ele_klass, ele_ptr);
+        return LEANCLR_BOX_OBJECT_INTERNAL(ele_klass, ele_ptr, "SystemArray::get_value_impl");
     }
     else
     {
@@ -282,12 +282,12 @@ RtResult<vm::RtArray*> SystemArray::create_instance_impl(vm::RtReflectionType* e
     // Single-dimensional zero-based array
     if (dimension == 1 && (lower_bounds == nullptr || vm::Array::get_array_data_at<int32_t>(lower_bounds, 0) == 0))
     {
-        return vm::Array::new_szarray_from_ele_klass(ele_klass, *length_indices);
+        return LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(ele_klass, *length_indices, "SystemArray::create_instance_impl");
     }
     else
     {
         // Multi-dimensional or non-zero-based array
-        return vm::Array::new_mdarray_from_ele_klass(ele_klass, static_cast<uint8_t>(dimension), length_indices, lower_bound_indices);
+        return LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS_INTERNAL(ele_klass, static_cast<uint8_t>(dimension), length_indices, lower_bound_indices, "SystemArray::create_instance_impl");
     }
 }
 

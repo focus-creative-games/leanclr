@@ -204,7 +204,7 @@ RtResult<RtArray*> Assembly::get_types(metadata::RtAssembly* ass, bool exported_
     RET_ERR_ON_FAIL(ass->mod->get_types(exported_only, types));
 
     metadata::RtClass* cls_type = Class::get_corlib_types().cls_systemtype;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, types_arr, Array::new_szarray_from_ele_klass(cls_type, static_cast<int32_t>(types.size())));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, types_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_type, static_cast<int32_t>(types.size()), "Assembly::get_types"));
 
     for (size_t i = 0; i < types.size(); ++i)
     {

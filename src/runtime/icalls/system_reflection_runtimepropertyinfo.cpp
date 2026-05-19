@@ -109,7 +109,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimePropertyInfo::get_type_modifiers(v
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
         vm::RtArray*, modifier_type_arr,
-        vm::Array::new_szarray_from_ele_klass(vm::Class::get_corlib_types().cls_systemtype, static_cast<int32_t>(modifiers.size())));
+        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_systemtype, static_cast<int32_t>(modifiers.size()), "icalls::SystemReflectionRuntimePropertyInfo::get_type_modifiers"));
 
     for (size_t i = 0; i < modifiers.size(); ++i)
     {

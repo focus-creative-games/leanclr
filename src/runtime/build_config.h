@@ -183,6 +183,19 @@ typedef double float64_t;
 #ifndef LEANCLR_USE_SHIPPING_ZLIB
 #define LEANCLR_USE_SHIPPING_ZLIB 0
 #endif
+
+#ifndef LEANCLR_GC_DEBUG
+#define LEANCLR_GC_DEBUG 0
+#endif
+
+#if LEANCLR_GC_DEBUG
+#define LEANCLR_GC_DECLARE_CALL_SITE_PARAM , const ::leanclr::gc::GcAllocSite& site
+#define LEANCLR_GC_CALL_SITE_PARAM , site
+#else
+#define LEANCLR_GC_DECLARE_CALL_SITE_PARAM
+#define LEANCLR_GC_CALL_SITE_PARAM
+#endif
+
 // UNITY_VERSION (and optionally UNITY_TUANJIE_ENGINE) must be supplied as
 // C preprocessor defines for the libil2cpp compile, via IL2CPP additional
 // arguments (--compiler-flags). LeanCLR's editor preprocess applies this

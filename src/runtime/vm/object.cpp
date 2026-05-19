@@ -10,56 +10,38 @@ namespace leanclr
 namespace vm
 {
 
-// Helper: Create a new boxed object for internal use
-static RtResult<RtObject*> box_object_internal(const metadata::RtClass* klass, const void* value)
+RtResult<RtObject*> Object::__new_object(const metadata::RtClass* klass LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, obj, LEANCLR_VM_NEW_OBJECT(klass, "Object::box_object_internal"));
+    if (LEANCLR_UNLIKELY(Class::is_cctor_not_finished(klass)))
+    {
+        RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
+        RET_ERR_ON_FAIL(Runtime::run_class_static_constructor(klass));
+    }
+
+    const size_t total_size = sizeof(RtObject) + klass->instance_size_without_header;
+    RtObject* ptr = gc::GarbageCollector::allocate_object(klass, total_size LEANCLR_GC_CALL_SITE_PARAM);
+    if (ptr == nullptr)
+    {
+        RET_ERR(RtErr::OutOfMemory);
+    }
+    assert(ptr->klass == klass);
+    RET_OK(ptr);
+}
+
+// Helper: Create a new boxed object for internal use
+static RtResult<RtObject*> box_object_internal(const metadata::RtClass* klass, const void* value LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, obj, Object::__new_object(klass LEANCLR_GC_CALL_SITE_PARAM));
     // Value may be unaligned, so use memcpy for safe copy
     std::memcpy(reinterpret_cast<uint8_t*>(obj) + sizeof(RtObject), value, klass->instance_size_without_header);
     RET_OK(obj);
 }
 
-RtResult<RtObject*> Object::new_object_native(const metadata::RtClass* klass, const char* native_runtime_method, const char* file, uint32_t line)
-{
-    RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
-    RET_ERR_ON_FAIL(Runtime::run_class_static_constructor(klass));
-
-    const size_t total_size = sizeof(RtObject) + klass->instance_size_without_header;
-    RtObject* ptr = LEANCLR_NEWOBJ_INTERNAL_SIZE(klass, total_size, file, line, native_runtime_method);
-    if (ptr == nullptr)
-    {
-        RET_ERR(RtErr::OutOfMemory);
-    }
-    assert(ptr->klass == klass);
-    RET_OK(ptr);
-}
-
-// Create new instance of a class
-RtResult<RtObject*> Object::new_object(const metadata::RtClass* klass)
-{
-    return new_object_native(klass, "Object::new_object", __FILE__, __LINE__);
-}
-
-RtResult<RtObject*> Object::new_object_interp(const metadata::RtClass* klass, const metadata::RtMethodInfo* method, uint32_t il_offset)
-{
-    RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
-    RET_ERR_ON_FAIL(Runtime::run_class_static_constructor(klass));
-
-    RtObject* ptr = LEANCLR_NEWOBJ_INTERP(klass, method, il_offset);
-    if (ptr == nullptr)
-    {
-        RET_ERR(RtErr::OutOfMemory);
-    }
-    assert(ptr->klass == klass);
-    RET_OK(ptr);
-}
-
-// Box a value type into an object
-RtResult<RtObject*> Object::box_object(const metadata::RtClass* klass, const void* value)
+RtResult<RtObject*> Object::__box_object(const metadata::RtClass* klass, const void* value LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
     if (!Class::is_nullable_type(klass))
     {
-        return box_object_internal(klass, value);
+        return box_object_internal(klass, value LEANCLR_GC_CALL_SITE_PARAM);
     }
 
     // Handle nullable types
@@ -80,7 +62,7 @@ RtResult<RtObject*> Object::box_object(const metadata::RtClass* klass, const voi
     uint32_t value_field_offset = value_field->offset;
 
     metadata::RtClass* data_class = Class::get_nullable_underlying_class(klass);
-    return box_object_internal(data_class, value_ptr + value_field_offset);
+    return box_object_internal(data_class, value_ptr + value_field_offset LEANCLR_GC_CALL_SITE_PARAM);
 }
 
 // Get pointer to boxed value data
@@ -334,7 +316,7 @@ RtObject* Object::cast_class(RtObject* obj, const metadata::RtClass* klass)
 }
 
 // Clone an object
-RtResult<RtObject*> Object::clone(RtObject* obj)
+RtResult<RtObject*> Object::__clone(RtObject* obj LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
     assert(obj);
     const metadata::RtClass* klass = obj->klass;
@@ -344,12 +326,14 @@ RtResult<RtObject*> Object::clone(RtObject* obj)
 
     if (Class::is_szarray_class(klass))
     {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, array_clone, Array::clone(reinterpret_cast<RtArray*>(obj)));
+        auto ret_clone = Array::__clone(reinterpret_cast<RtArray*>(obj) LEANCLR_GC_CALL_SITE_PARAM);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, array_clone, ret_clone);
         result = reinterpret_cast<RtObject*>(array_clone);
     }
     else
     {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, new_obj, new_object(klass));
+        auto ret_new_obj = Object::__new_object(klass LEANCLR_GC_CALL_SITE_PARAM);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, new_obj, ret_new_obj);
         const void* src = reinterpret_cast<const uint8_t*>(obj) + sizeof(RtObject);
         void* dst = reinterpret_cast<uint8_t*>(new_obj) + sizeof(RtObject);
         std::memcpy(dst, src, klass->instance_size_without_header);

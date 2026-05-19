@@ -311,32 +311,14 @@ inline metadata::RtModuleDef* get_module(const char* module_name)
     return metadata::RtModuleDef::find_module(module_name);
 }
 
-inline RtResult<vm::RtObject*> new_object(const metadata::RtClass* klass)
-{
-    return vm::Object::new_object(klass);
-}
+#define LEANCLR_CODEGEN_NEWOBJ(klass, managed_method) LEANCLR_NEWOBJ(klass, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_BOX_OBJECT(klass, value, managed_method) LEANCLR_BOX_OBJECT(klass, value, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
 
-#if LEANCLR_GC_DEBUG
-inline RtResult<vm::RtObject*> new_object_with_site(const metadata::RtClass* klass, const char* file, uint32_t line, const char* managed_method)
-{
-    RET_ERR_ON_FAIL(vm::Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
-    RET_ERR_ON_FAIL(vm::Runtime::run_class_static_constructor(klass));
-    vm::RtObject* ptr = LEANCLR_CODEGEN_NEWOBJ(klass, file, line, managed_method);
-    if (ptr == nullptr)
-    {
-        RET_ERR(RtErr::OutOfMemory);
-    }
-    RET_OK(ptr);
-}
-#endif
-
-// LeanAOT newobj: selects site-aware or release path; unused site args are not referenced when LEANCLR_GC_DEBUG is off.
-#if LEANCLR_GC_DEBUG
-#define LEANCLR_CODEGEN_NEW_OBJECT(klass, file, line, managed_method)                                                  \
-    ::leanclr::codegen::new_object_with_site((klass), (file), (line), (managed_method))
-#else
-#define LEANCLR_CODEGEN_NEW_OBJECT(klass, file, line, managed_method) ::leanclr::codegen::new_object((klass))
-#endif
+#define LEANCLR_CODEGEN_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, managed_method) LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, managed_method) LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, managed_method) LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, managed_method) LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, managed_method) LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
 
 void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const metadata::RtMethodInfo* generic_method_info);
 void resolve_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, void** resolved_metadatas);
@@ -468,11 +450,6 @@ inline vm::RtObject* cast_class(vm::RtObject* obj, const metadata::RtClass* klas
     return vm::Object::cast_class(obj, klass);
 }
 
-inline RtResult<vm::RtObject*> box_object(const metadata::RtClass* klass, const void* value) noexcept
-{
-    return vm::Object::box_object(klass, value);
-}
-
 inline RtResultVoid unbox_any(const vm::RtObject* obj, const metadata::RtClass* klass, void* dst, bool extend_to_stack) noexcept
 {
     return vm::Object::unbox_any(obj, klass, dst, extend_to_stack);
@@ -487,27 +464,6 @@ inline RtResult<const void*> unbox_ex(const vm::RtObject* obj, const metadata::R
 inline bool is_value_type(const metadata::RtClass* klass) noexcept
 {
     return vm::Class::is_value_type(klass);
-}
-
-inline RtResult<vm::RtArray*> new_szarray_from_ele_class(const metadata::RtClass* ele_class, int32_t length) noexcept
-{
-    return vm::Array::new_szarray_from_ele_klass(const_cast<metadata::RtClass*>(ele_class), length);
-}
-
-inline RtResult<vm::RtArray*> new_szarray_from_array_class(const metadata::RtClass* klass, int32_t length) noexcept
-{
-    return vm::Array::new_szarray_from_array_klass(const_cast<metadata::RtClass*>(klass), length);
-}
-
-inline RtResult<vm::RtArray*> new_mdarray_from_array_class(const metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds) noexcept
-{
-    return vm::Array::new_mdarray_from_array_klass(const_cast<metadata::RtClass*>(arr_klass), lengths, lower_bounds);
-}
-
-inline RtResult<vm::RtArray*> new_mdarray_from_ele_class(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths,
-                                                         const int32_t* lower_bounds) noexcept
-{
-    return vm::Array::new_mdarray_from_ele_klass(const_cast<metadata::RtClass*>(ele_klass), rank, lengths, lower_bounds);
 }
 
 inline int32_t get_array_length(const vm::RtArray* array) noexcept

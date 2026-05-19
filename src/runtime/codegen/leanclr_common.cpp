@@ -376,7 +376,7 @@ RtResult<vm::RtObject*> marshal_handle_to_safe_handle(RtMarshalHandle handle, co
     assert(fi);
     assert(fi->offset == 0);
 #endif
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, LEANCLR_VM_NEW_OBJECT(klass, "codegen::marshal_handle_to_safe_handle"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, LEANCLR_CODEGEN_NEWOBJ(klass, "codegen::marshal_handle_to_safe_handle"));
     RtMarshalHandle* field_addr = reinterpret_cast<RtMarshalHandle*>(obj + 1);
     *field_addr = handle;
     RET_OK(obj);
@@ -401,7 +401,7 @@ RtResult<vm::RtArray*> marshal_native_array_to_managed_array(const metadata::RtT
     {
         RET_ERR(RtErr::NotSupported);
     }
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, new_szarray_from_array_class(arr_klass, length));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, "codegen::marshal_native_array_to_managed_array"));
     const size_t ele_size = vm::Array::get_array_element_size(arr);
     std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_element_data, static_cast<size_t>(length) * ele_size);
     RET_OK(arr);
@@ -431,7 +431,7 @@ RtResult<vm::RtArray*> marshal_native_array_to_managed_array(void* native_array,
     }
     assert(array_param_typesig->ele_type == metadata::RtElementType::SZArray);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, arr_klass, vm::Class::get_class_from_typesig(array_param_typesig));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, new_szarray_from_array_class(arr_klass, static_cast<int32_t>(native_element_count)));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, static_cast<int32_t>(native_element_count), "codegen::marshal_native_array_to_managed_array"));
     const size_t ele_size = vm::Array::get_array_element_size(arr);
     std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_array, native_element_count * ele_size);
     RET_OK(arr);
@@ -462,7 +462,7 @@ RtResult<vm::RtArray*> marshal_native_val_array_to_managed_array(void* native_ar
     assert(array_typesig != nullptr);
     assert(array_typesig->ele_type == metadata::RtElementType::SZArray);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, arr_klass, vm::Class::get_class_from_typesig(array_typesig));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, new_szarray_from_array_class(arr_klass, static_cast<int32_t>(native_element_count)));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, static_cast<int32_t>(native_element_count), "codegen::marshal_native_val_array_to_managed_array"));
     const size_t ele_size = vm::Array::get_array_element_size(arr);
     std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_array, native_element_count * ele_size);
     RET_OK(arr);

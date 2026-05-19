@@ -42,8 +42,8 @@ RtResult<std::tuple<bool, RtArray*, RtArray*>> Enum::get_enum_values_and_names(m
 
     // Create arrays for values and names
     const auto& corlib_types = Class::get_corlib_types();
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, values, Array::new_szarray_from_ele_klass(corlib_types.cls_uint64, enum_item_count));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, names, Array::new_szarray_from_ele_klass(corlib_types.cls_string, enum_item_count));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, values, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_uint64, enum_item_count, "Enum::get_enum_values_and_names"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, names, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_string, enum_item_count, "Enum::get_enum_values_and_names"));
 
     // Fill arrays
     int32_t index = 0;

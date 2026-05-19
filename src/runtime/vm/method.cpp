@@ -594,7 +594,7 @@ static RtResult<RtReflectionExceptionHandlingClause*> create_reflection_exceptio
                                                                                                 const metadata::RtExceptionClause& clause)
 {
     metadata::RtClass* cls_exceptionhandlingclause = Class::get_corlib_types().cls_reflection_exceptionhandlingclause;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, clause_obj_base, LEANCLR_VM_NEW_OBJECT(cls_exceptionhandlingclause, "Method::create_reflection_exceptionhandlingclause"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, clause_obj_base, LEANCLR_NEWOBJ_INTERNAL(cls_exceptionhandlingclause, "Method::create_reflection_exceptionhandlingclause"));
     RtReflectionExceptionHandlingClause* clause_obj = static_cast<RtReflectionExceptionHandlingClause*>(clause_obj_base);
 
     if (clause.flags == metadata::RtILExceptionClauseType::Exception)
@@ -624,7 +624,7 @@ static RtResult<RtReflectionExceptionHandlingClause*> create_reflection_exceptio
 static RtResult<RtReflectionLocalVariableInfo*> create_reflection_localvariableinfo(const metadata::RtTypeSig* local_var_type_sig, uint16_t position)
 {
     metadata::RtClass* cls_localvarinfo = Class::get_corlib_types().cls_reflection_localvariableinfo;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, var_obj_base, LEANCLR_VM_NEW_OBJECT(cls_localvarinfo, "Method::create_reflection_localvariableinfo"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, var_obj_base, LEANCLR_NEWOBJ_INTERNAL(cls_localvarinfo, "Method::create_reflection_localvariableinfo"));
     RtReflectionLocalVariableInfo* var_obj = static_cast<RtReflectionLocalVariableInfo*>(var_obj_base);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, type_obj, Reflection::get_type_reflection_object(local_var_type_sig));
@@ -648,7 +648,7 @@ RtResult<RtReflectionMethodBody*> Method::create_reflection_method_body(const Rt
     const metadata::RtMethodBody& raw_method_body = raw_method_body_opt.value();
     const vm::CorLibTypes& corlib_types = Class::get_corlib_types();
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, method_body_obj_base,
-                                            LEANCLR_VM_NEW_OBJECT(corlib_types.cls_reflection_methodbody, "Method::create_reflection_method_body"));
+                                            LEANCLR_NEWOBJ_INTERNAL(corlib_types.cls_reflection_methodbody, "Method::create_reflection_method_body"));
     RtReflectionMethodBody* method_body_obj = static_cast<RtReflectionMethodBody*>(method_body_obj_base);
 
     // Setup generic context
@@ -664,7 +664,7 @@ RtResult<RtReflectionMethodBody*> Method::create_reflection_method_body(const Rt
     const utils::Vector<metadata::RtExceptionClause>& raw_exception_clauses = raw_method_body.exception_clauses;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
         RtArray*, clause_arr,
-        Array::new_szarray_from_ele_klass(corlib_types.cls_reflection_exceptionhandlingclause, static_cast<int32_t>(raw_exception_clauses.size())));
+        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_reflection_exceptionhandlingclause, static_cast<int32_t>(raw_exception_clauses.size()), "Method::create_reflection_method_body"));
     for (size_t i = 0; i < raw_exception_clauses.size(); ++i)
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
@@ -682,7 +682,7 @@ RtResult<RtReflectionMethodBody*> Method::create_reflection_method_body(const Rt
         RET_ERR_ON_FAIL(mod->read_local_var_sig(raw_method_body.local_var_sig_token, generic_container_context, generic_context, local_var_sigs));
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
             RtArray*, localvar_arr,
-            Array::new_szarray_from_ele_klass(corlib_types.cls_reflection_localvariableinfo, static_cast<int32_t>(local_var_sigs.size())));
+            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_reflection_localvariableinfo, static_cast<int32_t>(local_var_sigs.size()), "Method::create_reflection_method_body"));
         for (size_t i = 0; i < local_var_sigs.size(); ++i)
         {
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionLocalVariableInfo*, local_var_obj,
@@ -694,7 +694,7 @@ RtResult<RtReflectionMethodBody*> Method::create_reflection_method_body(const Rt
     else
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, empty_locals_arr,
-                                                Array::new_empty_szarray_by_ele_klass(corlib_types.cls_reflection_localvariableinfo));
+                                                LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(corlib_types.cls_reflection_localvariableinfo, "Method::create_reflection_method_body"));
         locals_arr = empty_locals_arr;
     }
     method_body_obj->locals = locals_arr;

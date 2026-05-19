@@ -269,12 +269,12 @@ class Class
 
     static bool is_cctor_not_finished(const metadata::RtClass* klass)
     {
-        return (klass->init_flags & (uint32_t)metadata::RtClassInitPart::RuntimeClassInit) == 0;
+        return !klass->has_init_cctor;
     }
 
     static void set_cctor_finished(metadata::RtClass* klass)
     {
-        klass->init_flags |= (uint32_t)metadata::RtClassInitPart::RuntimeClassInit;
+        klass->has_init_cctor = true;
     }
 
     static const metadata::RtTypeSig* get_by_val_type_sig(const metadata::RtClass* klass)

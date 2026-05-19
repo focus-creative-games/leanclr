@@ -3,6 +3,7 @@
 #include "rt_managed_types.h"
 #include "metadata/rt_metadata.h"
 #include "interp/interp_defs.h"
+#include "gc/garbage_collector.h"
 #include "class.h"
 
 namespace leanclr
@@ -15,15 +16,17 @@ class Array
     // Array creation methods
     static size_t get_array_allocation_size(const metadata::RtClass* klass, int32_t length);
 
-    static RtResult<RtArray*> new_empty_szarray_by_ele_klass(const metadata::RtClass* ele_class)
+    static RtResult<RtArray*> __new_empty_szarray_by_ele_klass(const metadata::RtClass* ele_class LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
     {
-        return new_szarray_from_ele_klass(ele_class, 0);
+        return __new_szarray_from_ele_klass(ele_class, 0 LEANCLR_GC_CALL_SITE_PARAM);
     }
 
-    static RtResult<RtArray*> new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length);
-    static RtResult<RtArray*> new_szarray_from_ele_klass(const metadata::RtClass* ele_class, int32_t length);
-    static RtResult<RtArray*> new_mdarray_from_array_klass(const metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds);
-    static RtResult<RtArray*> new_mdarray_from_ele_klass(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds);
+    static RtResult<RtArray*> __new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length LEANCLR_GC_DECLARE_CALL_SITE_PARAM);
+    static RtResult<RtArray*> __new_szarray_from_ele_klass(const metadata::RtClass* ele_class, int32_t length LEANCLR_GC_DECLARE_CALL_SITE_PARAM);
+    static RtResult<RtArray*> __new_mdarray_from_array_klass(const metadata::RtClass* arr_klass, const int32_t* lengths,
+                                                             const int32_t* lower_bounds LEANCLR_GC_DECLARE_CALL_SITE_PARAM);
+    static RtResult<RtArray*> __new_mdarray_from_ele_klass(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths,
+                                                           const int32_t* lower_bounds LEANCLR_GC_DECLARE_CALL_SITE_PARAM);
 
     // Array information methods
     static int32_t get_array_length(const RtArray* array)
@@ -157,7 +160,39 @@ class Array
                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
 
     // Array cloning
-    static RtResult<RtArray*> clone(RtArray* old_arr) noexcept;
+    static RtResult<RtArray*> __clone(RtArray* old_arr LEANCLR_GC_DECLARE_CALL_SITE_PARAM) noexcept;
 };
+
+#if LEANCLR_GC_DEBUG
+#define LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, site) ::leanclr::vm::Array::__new_empty_szarray_by_ele_klass(arr_klass, site)
+#define LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, site) ::leanclr::vm::Array::__new_szarray_from_array_klass(arr_klass, length, site)
+#define LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, site) ::leanclr::vm::Array::__new_szarray_from_ele_klass(ele_class, length, site)
+#define LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, site) \
+    ::leanclr::vm::Array::__new_mdarray_from_array_klass(arr_klass, lengths, lower_bounds, site)
+#define LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, site) \
+    ::leanclr::vm::Array::__new_mdarray_from_ele_klass(ele_klass, rank, lengths, lower_bounds, site)
+#define LEANCLR_ARRAY_CLONE(arr, site) ::leanclr::vm::Array::__clone(arr, site)
+#else
+#define LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, site) ::leanclr::vm::Array::__new_empty_szarray_by_ele_klass(arr_klass)
+#define LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, site) ::leanclr::vm::Array::__new_szarray_from_array_klass(arr_klass, length)
+#define LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, site) ::leanclr::vm::Array::__new_szarray_from_ele_klass(ele_class, length)
+#define LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, site) \
+    ::leanclr::vm::Array::__new_mdarray_from_array_klass(arr_klass, lengths, lower_bounds)
+#define LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, site) \
+    ::leanclr::vm::Array::__new_mdarray_from_ele_klass(ele_klass, rank, lengths, lower_bounds)
+#define LEANCLR_ARRAY_CLONE(arr, site) ::leanclr::vm::Array::__clone(arr)
+#endif
+
+#define LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(arr_klass, native_method) \
+    LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, native_method))
+#define LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS_INTERNAL(arr_klass, length, native_method) \
+    LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, native_method))
+#define LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(ele_class, length, native_method) \
+    LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, native_method))
+#define LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(arr_klass, lengths, lower_bounds, native_method) \
+    LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, native_method))
+#define LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS_INTERNAL(ele_klass, rank, lengths, lower_bounds, native_method) \
+    LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, native_method))
+#define LEANCLR_ARRAY_CLONE_INTERNAL(arr, native_method) LEANCLR_ARRAY_CLONE(arr, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, native_method))
 } // namespace vm
 } // namespace leanclr

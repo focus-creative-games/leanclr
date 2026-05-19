@@ -40,7 +40,7 @@ void Thread::setup_internal_thread(RtThread* thread)
     assert(internal_thread_class != nullptr);
 
     // Create internal thread object
-    auto internal_thread_obj = static_cast<RtInternalThread*>(LEANCLR_VM_NEW_OBJECT(internal_thread_class, "Thread::setup_internal_thread").unwrap());
+    auto internal_thread_obj = static_cast<RtInternalThread*>(LEANCLR_NEWOBJ_INTERNAL(internal_thread_class, "Thread::setup_internal_thread").unwrap());
 
     internal_thread_obj->state = RtThreadState::Running;
     internal_thread_obj->handle = nullptr;
@@ -58,7 +58,7 @@ RtThread* Thread::attach_current_thread(RtAppDomain* app_domain)
     assert(thread_class != nullptr);
 
     // Create thread object
-    auto thread_obj = static_cast<RtThread*>(LEANCLR_VM_NEW_OBJECT(thread_class, "Thread::attach_current_thread").unwrap());
+    auto thread_obj = static_cast<RtThread*>(LEANCLR_NEWOBJ_INTERNAL(thread_class, "Thread::attach_current_thread").unwrap());
 
     setup_internal_thread(thread_obj);
     g_current_thread = thread_obj;
@@ -85,7 +85,7 @@ RtResultVoid Thread::construct_internal_thread(RtThread* thread)
     auto internal_thread_class = Class::get_corlib_types().cls_internal_thread;
 
     // Create internal thread object
-    auto internal_thread_obj = static_cast<RtInternalThread*>(LEANCLR_VM_NEW_OBJECT(internal_thread_class, "Thread::construct_internal_thread").unwrap());
+    auto internal_thread_obj = static_cast<RtInternalThread*>(LEANCLR_NEWOBJ_INTERNAL(internal_thread_class, "Thread::construct_internal_thread").unwrap());
 
     // Allocate native thread handle
     auto native_handle = alloc::GeneralAllocation::malloc_any_zeroed<RtNativeThread>();

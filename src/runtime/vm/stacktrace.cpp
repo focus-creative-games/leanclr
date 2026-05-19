@@ -44,10 +44,10 @@ RtResultVoid StackTrace::setup_trace_ips(RtException* ex)
         }
     }
     metadata::RtClass* cls_stackframe = Class::get_corlib_types().cls_stackframe;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, trace_ips, Array::new_szarray_from_ele_klass(cls_stackframe, static_cast<int32_t>(trace_frames.size())));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, trace_ips, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_stackframe, static_cast<int32_t>(trace_frames.size()), "StackTrace::setup_trace_ips"));
     for (size_t i = 0, frame_count = trace_frames.size(); i < frame_count; ++i)
     {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, stackframe_obj, LEANCLR_VM_NEW_OBJECT(cls_stackframe, "StackTrace::setup_trace_ips"));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, stackframe_obj, LEANCLR_NEWOBJ_INTERNAL(cls_stackframe, "StackTrace::setup_trace_ips"));
         RtStackFrame* stackframe = static_cast<RtStackFrame*>(stackframe_obj);
 
         const interp::InterpFrame* frame = trace_frames[i];
@@ -127,17 +127,17 @@ RtResult<RtArray*> StackTrace::get_stack_trace(RtException* ex, int32_t skip_fra
     metadata::RtClass* cls_stackframe = Class::get_corlib_types().cls_stackframe;
     if (ex->trace_ips == nullptr)
     {
-        return Array::new_empty_szarray_by_ele_klass(cls_stackframe);
+        return LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(cls_stackframe, "StackTrace::get_stack_trace");
     }
 
     int32_t stack_count = Array::get_array_length(ex->trace_ips);
     assert(skip_frames >= 0);
     if (skip_frames >= stack_count)
     {
-        return Array::new_empty_szarray_by_ele_klass(cls_stackframe);
+        return LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(cls_stackframe, "StackTrace::get_stack_trace");
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, result_array, Array::new_szarray_from_ele_klass(cls_stackframe, stack_count - skip_frames));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, result_array, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_stackframe, stack_count - skip_frames, "StackTrace::get_stack_trace"));
     for (int32_t i = skip_frames; i < stack_count; ++i)
     {
         RtObject* frame_obj = Array::get_array_data_at<RtObject*>(ex->trace_ips, i);

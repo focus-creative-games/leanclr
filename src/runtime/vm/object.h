@@ -2,10 +2,8 @@
 
 #include "core/rt_base.h"
 #include "rt_managed_types.h"
+#include "gc/garbage_collector.h"
 
-// Runtime-native allocation with optional GC allocation site (see gc/gc_newobj_macros.h).
-#define LEANCLR_VM_NEW_OBJECT(klass, native_runtime_method)                                                            \
-    (::leanclr::vm::Object::new_object_native((klass), (native_runtime_method), __FILE__, __LINE__))
 
 namespace leanclr
 {
@@ -16,16 +14,11 @@ class Object
 {
   public:
     // Create new instance of a class
-    static RtResult<RtObject*> new_object(const metadata::RtClass* klass);
-
-    static RtResult<RtObject*> new_object_native(const metadata::RtClass* klass, const char* native_runtime_method, const char* file,
-                                                 uint32_t line);
-
-    // Create instance after .cctor; records interpreter allocation site (IL offset).
-    static RtResult<RtObject*> new_object_interp(const metadata::RtClass* klass, const metadata::RtMethodInfo* method, uint32_t il_offset);
+    // please don't use this method directly, use LEANCLR_NEWOBJ instead
+    static RtResult<RtObject*> __new_object(const metadata::RtClass* klass LEANCLR_GC_DECLARE_CALL_SITE_PARAM);
 
     // Box a value type into an object
-    static RtResult<RtObject*> box_object(const metadata::RtClass* klass, const void* value);
+    static RtResult<RtObject*> __box_object(const metadata::RtClass* klass, const void* value LEANCLR_GC_DECLARE_CALL_SITE_PARAM);
 
     // Get pointer to boxed value data
     static const void* get_box_value_type_data_ptr(const RtObject* obj);
@@ -44,11 +37,34 @@ class Object
     static RtObject* cast_class(RtObject* obj, const metadata::RtClass* klass);
 
     // Clone an object
-    static RtResult<RtObject*> clone(RtObject* obj);
+    static RtResult<RtObject*> __clone(RtObject* obj LEANCLR_GC_DECLARE_CALL_SITE_PARAM);
 
     // Extend small integer to i32 on stack
     static void extends_to_eval_stack(const void* src, interp::RtStackObject* dst, const metadata::RtClass* ele_klass);
 };
 
+#if LEANCLR_GC_DEBUG
+#define LEANCLR_NEWOBJ(klass, call_site)                                                              \
+      ::leanclr::vm::Object::__new_object(klass, call_site)
+#define LEANCLR_BOX_OBJECT(klass, value, call_site)                                                              \
+      ::leanclr::vm::Object::__box_object(klass, value, call_site)
+#define LEANCLR_CLONE(obj, call_site)                                                              \
+      ::leanclr::vm::Object::__clone(obj, call_site)
+#else
+#define LEANCLR_NEWOBJ(klass, call_site)                                                              \
+      ::leanclr::vm::Object::__new_object(klass)
+#define LEANCLR_BOX_OBJECT(klass, value, call_site)                                                              \
+      ::leanclr::vm::Object::__box_object(klass, value)
+#define LEANCLR_CLONE(obj, call_site)                                                              \
+      ::leanclr::vm::Object::__clone(obj)
+#endif
+
+// Runtime-native allocation with optional GC allocation site (see gc/gc_newobj_macros.h).
+#define LEANCLR_NEWOBJ_INTERNAL(klass, native_runtime_method)                                                            \
+  LEANCLR_NEWOBJ(klass, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, native_runtime_method))
+#define LEANCLR_BOX_OBJECT_INTERNAL(klass, value, native_runtime_method)                                                            \
+  LEANCLR_BOX_OBJECT(klass, value, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, native_runtime_method))
+#define LEANCLR_CLONE_INTERNAL(obj, native_runtime_method)                                                            \
+  LEANCLR_CLONE(obj, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, native_runtime_method))
 } // namespace vm
 } // namespace leanclr

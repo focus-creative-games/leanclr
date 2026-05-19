@@ -214,8 +214,8 @@ RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject
                 else
                 {
                     // Box value types and compare
-                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, boxed1, vm::Object::box_object(field_klass, field_data_ptr1));
-                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, boxed2, vm::Object::box_object(field_klass, field_data_ptr2));
+                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, boxed1, LEANCLR_BOX_OBJECT_INTERNAL(field_klass, field_data_ptr1, "icalls::SystemValueType::internal_equals"));
+                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, boxed2, LEANCLR_BOX_OBJECT_INTERNAL(field_klass, field_data_ptr2, "icalls::SystemValueType::internal_equals"));
                     uncompared_fields.push_back(boxed1);
                     uncompared_fields.push_back(boxed2);
                 }
@@ -243,7 +243,7 @@ RtResult<bool> SystemValueType::internal_equals(vm::RtObject* obj1, vm::RtObject
     {
         // Create array from uncompared fields
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
-            vm::RtArray*, arr, vm::Array::new_szarray_from_ele_klass(vm::Class::get_corlib_types().cls_object, static_cast<int32_t>(uncompared_fields.size())));
+            vm::RtArray*, arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_object, static_cast<int32_t>(uncompared_fields.size()), "icalls::SystemValueType::internal_equals"));
 
         vm::RtObject** arr_data = vm::Array::get_array_data_start_as<vm::RtObject*>(arr);
         for (size_t i = 0; i < uncompared_fields.size(); ++i)
@@ -410,7 +410,7 @@ RtResult<int32_t> SystemValueType::internal_get_hash_code(vm::RtObject* obj, vm:
                 else
                 {
                     // Box value types and include in uncomputed
-                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, boxed, vm::Object::box_object(field_klass, field_data_ptr));
+                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, boxed, LEANCLR_BOX_OBJECT_INTERNAL(field_klass, field_data_ptr, "icalls::SystemValueType::internal_get_hash_code"));
                     uncomputed_fields.push_back(boxed);
                     continue;
                 }
@@ -439,7 +439,7 @@ RtResult<int32_t> SystemValueType::internal_get_hash_code(vm::RtObject* obj, vm:
     {
         // Create array from uncomputed fields
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
-            vm::RtArray*, arr, vm::Array::new_szarray_from_ele_klass(vm::Class::get_corlib_types().cls_object, static_cast<int32_t>(uncomputed_fields.size())));
+            vm::RtArray*, arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_object, static_cast<int32_t>(uncomputed_fields.size()), "icalls::SystemValueType::internal_get_hash_code"));
 
         vm::RtObject** arr_data = vm::Array::get_array_data_start_as<vm::RtObject*>(arr);
         for (size_t i = 0; i < uncomputed_fields.size(); ++i)

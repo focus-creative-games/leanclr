@@ -135,15 +135,32 @@ vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t
     return alloc_impl(klass, size, site, flags);
 }
 
+vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t size)
+{
+    uint16_t flags = vm::Class::get_has_references(klass) ? GC_BLOCK_HAS_REFERENCES : 0;
+    return alloc_impl(klass, size, GcAllocSite::none(), flags);
+}
+
 vm::RtObject* ZeroGcHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
 {
     return alloc_impl(klass, size, site, 0);
+}
+
+vm::RtObject* ZeroGcHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size)
+{
+    return alloc_impl(klass, size, GcAllocSite::none(), 0);
 }
 
 vm::RtObject* ZeroGcHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site)
 {
     const bool has_refs = arrClass->element_class != nullptr && vm::Class::get_has_references(arrClass->element_class);
     return alloc_impl(arrClass, totalBytes, site, has_refs ? GC_BLOCK_HAS_REFERENCES : 0);
+}
+
+vm::RtObject* ZeroGcHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
+{
+    const bool has_refs = arrClass->element_class != nullptr && vm::Class::get_has_references(arrClass->element_class);
+    return alloc_impl(arrClass, totalBytes, GcAllocSite::none(), has_refs ? GC_BLOCK_HAS_REFERENCES : 0);
 }
 
 void ZeroGcHeap::write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)

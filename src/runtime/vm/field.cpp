@@ -179,7 +179,7 @@ RtResult<RtObject*> Field::get_value_object(const metadata::RtFieldInfo* field, 
 
     if (Class::is_value_type(fieldClass))
     {
-        return Object::box_object(fieldClass, fieldDataPtr);
+        return LEANCLR_BOX_OBJECT_INTERNAL(fieldClass, fieldDataPtr, "Field::get_value_object");
     }
     else
     {

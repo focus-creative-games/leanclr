@@ -37,9 +37,9 @@ class GarbageCollector
     static void free_fixed(void* address);
     static vm::RtObject** allocate_fixed_reference_array(size_t length);
 
-    static vm::RtObject* allocate_object_with_site(const metadata::RtClass* klass, size_t size, const GcAllocSite& site);
-    static vm::RtObject* allocate_object_not_contains_references_with_site(const metadata::RtClass* klass, size_t size, const GcAllocSite& site);
-    static vm::RtObject* allocate_array_with_site(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site);
+    static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site);
+    static vm::RtObject* allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size, const GcAllocSite& site);
+    static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site);
 
     // Legacy entry points (no allocation site).
     static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size);

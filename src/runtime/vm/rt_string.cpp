@@ -176,8 +176,13 @@ RtString* String::fast_allocate_string(int32_t length)
     // String::GetLegacyNonRandomizedHashCode need zero terminated string, so we allocate one extra character.
     // TODO: can we optimize it out? we have redirected String::GetHashCode and String::GetLegacyNonRandomizedHashCode to
     // the intrinsic implementation which does not require zero-termination.
-    RtString* newString = (RtString*)LEANCLR_NEWOBJ_INTERNAL_NOREF(g_stringClass, static_cast<size_t>(get_string_allocation_size(length)), __FILE__, __LINE__,
-                                                                  "String::fast_allocate_string");
+    size_t allocation_size = get_string_allocation_size(length);
+    #if LEANCLR_GC_DEBUG
+    RtString* newString = (RtString*)gc::GarbageCollector::allocate_object(g_stringClass, allocation_size,
+                                                                  ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, "String::fast_allocate_string"));
+    #else
+    RtString* newString = (RtString*)gc::GarbageCollector::allocate_object(g_stringClass, allocation_size);
+    #endif
     newString->length = static_cast<int32_t>(length);
     return newString;
 }

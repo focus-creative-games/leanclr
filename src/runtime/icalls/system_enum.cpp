@@ -123,7 +123,7 @@ RtResult<vm::RtObject*> SystemEnum::internal_box_enum(vm::RtReflectionRuntimeTyp
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
     assert(vm::Class::is_enum_type(klass));
-    return vm::Object::box_object(klass, &value);
+    return LEANCLR_BOX_OBJECT_INTERNAL(klass, &value, "icalls::SystemEnum::internal_box_enum");
 }
 
 RtResult<vm::RtObject*> SystemEnum::get_value(vm::RtObject* obj) noexcept
@@ -135,7 +135,7 @@ RtResult<vm::RtObject*> SystemEnum::get_value(vm::RtObject* obj) noexcept
 
     const void* data_ptr = vm::Object::get_boxed_enum_data_ptr(obj);
     const metadata::RtClass* element_class = obj->klass->element_class;
-    return vm::Object::box_object(element_class, data_ptr);
+    return LEANCLR_BOX_OBJECT_INTERNAL(element_class, data_ptr, "icalls::SystemEnum::get_value");
 }
 
 RtResult<bool> SystemEnum::internal_has_flag(vm::RtObject* obj, vm::RtObject* flag) noexcept

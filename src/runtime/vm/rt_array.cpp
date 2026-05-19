@@ -24,14 +24,14 @@ size_t Array::get_array_allocation_size(const metadata::RtClass* klass, int32_t 
 
 // Array creation methods
 
-RtResult<RtArray*> Array::new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length)
+RtResult<RtArray*> Array::__new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
     assert(klass);
 
     RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
 
     size_t arr_length = get_array_allocation_size(klass, length);
-    RtArray* arr_obj = reinterpret_cast<RtArray*>(LEANCLR_NEWARRAY_INTERNAL(klass, arr_length, __FILE__, __LINE__, "Array::new_szarray_from_array_klass"));
+    RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length LEANCLR_GC_CALL_SITE_PARAM));
 
     if (!arr_obj)
     {
@@ -42,7 +42,7 @@ RtResult<RtArray*> Array::new_szarray_from_array_klass(const metadata::RtClass* 
     RET_OK(arr_obj);
 }
 
-RtResult<RtArray*> Array::new_szarray_from_ele_klass(const metadata::RtClass* ele_class, int32_t length)
+RtResult<RtArray*> Array::__new_szarray_from_ele_klass(const metadata::RtClass* ele_class, int32_t length LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
     assert(ele_class);
     if (length < 0)
@@ -54,7 +54,7 @@ RtResult<RtArray*> Array::new_szarray_from_ele_klass(const metadata::RtClass* el
     RET_ERR_ON_FAIL(Class::initialize_all(klass));
 
     size_t arr_length = get_array_allocation_size(klass, length);
-    RtArray* arr_obj = reinterpret_cast<RtArray*>(LEANCLR_NEWARRAY_INTERNAL(klass, arr_length, __FILE__, __LINE__, "Array::new_szarray_from_ele_klass"));
+    RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length LEANCLR_GC_CALL_SITE_PARAM));
 
     if (!arr_obj)
     {
@@ -65,7 +65,7 @@ RtResult<RtArray*> Array::new_szarray_from_ele_klass(const metadata::RtClass* el
     RET_OK(arr_obj);
 }
 
-RtResult<RtArray*> Array::new_mdarray_from_array_klass(const metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds)
+RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
     assert(arr_klass && lengths);
 
@@ -106,7 +106,7 @@ RtResult<RtArray*> Array::new_mdarray_from_array_klass(const metadata::RtClass* 
     size_t bounds_start_index = utils::MemOp::align_up(arr_total_bytes_without_bounds, 8);
     size_t total_array_bytes = bounds_start_index + sizeof(ArrayBounds) * rank;
 
-    RtArray* arr_obj = reinterpret_cast<RtArray*>(LEANCLR_NEWARRAY_INTERNAL(arr_klass, total_array_bytes, __FILE__, __LINE__, "Array::new_mdarray_from_array_klass"));
+    RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(arr_klass, total_array_bytes LEANCLR_GC_CALL_SITE_PARAM));
 
     // Set up bounds
     ArrayBounds* bounds = reinterpret_cast<ArrayBounds*>(reinterpret_cast<uint8_t*>(arr_obj) + bounds_start_index);
@@ -122,7 +122,7 @@ RtResult<RtArray*> Array::new_mdarray_from_array_klass(const metadata::RtClass* 
     RET_OK(arr_obj);
 }
 
-RtResult<RtArray*> Array::new_mdarray_from_ele_klass(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds)
+RtResult<RtArray*> Array::__new_mdarray_from_ele_klass(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
     assert(ele_klass && lengths);
     if (rank < 1 || rank > RT_MAX_ARRAY_RANK)
@@ -130,7 +130,7 @@ RtResult<RtArray*> Array::new_mdarray_from_ele_klass(const metadata::RtClass* el
         RET_ERR(RtErr::Overflow);
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, arr_klass, ArrayClass::get_array_class_from_element_klass(ele_klass, (uint8_t)rank));
-    return new_mdarray_from_array_klass(arr_klass, lengths, lower_bounds);
+    return __new_mdarray_from_array_klass(arr_klass, lengths, lower_bounds LEANCLR_GC_CALL_SITE_PARAM);
 }
 
 // Array information methods
@@ -343,7 +343,7 @@ RtResultVoid Array::szarray_new_invoker(metadata::RtManagedMethodPointer method_
     int32_t length = interp::EvalStackOp::get_param<int32_t>(params, 0);
     metadata::RtClass* klass = const_cast<metadata::RtClass*>(method->parent);
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr, new_szarray_from_array_klass(klass, length));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr, LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS(klass, length, "Array::szarray_new_invoker"));
     interp::EvalStackOp::set_return(ret, arr);
     RET_VOID_OK();
 }
@@ -421,7 +421,7 @@ RtResultVoid Array::newmdarray_lengths_invoker(metadata::RtManagedMethodPointer 
         i32_lengths[i] = interp::EvalStackOp::get_param<int32_t>(params, i);
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr, new_mdarray_from_array_klass(const_cast<metadata::RtClass*>(method->parent), i32_lengths, nullptr));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr, LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(const_cast<metadata::RtClass*>(method->parent), i32_lengths, nullptr, "Array::newmdarray_lengths_invoker"));
     interp::EvalStackOp::set_return(ret, arr);
     RET_VOID_OK();
 }
@@ -443,7 +443,7 @@ RtResultVoid Array::newmdarray_lengths_lower_bounds_invoker(metadata::RtManagedM
     }
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr,
-                                            new_mdarray_from_array_klass(const_cast<metadata::RtClass*>(method->parent), i32_lengths, i32_lower_bounds));
+                                            LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(const_cast<metadata::RtClass*>(method->parent), i32_lengths, i32_lower_bounds, "Array::newmdarray_lengths_lower_bounds_invoker"));
     interp::EvalStackOp::set_return(ret, arr);
 
     RET_VOID_OK();
@@ -497,12 +497,12 @@ RtResultVoid Array::mdarray_address_invoker(metadata::RtManagedMethodPointer met
 
 // Array cloning
 
-RtResult<RtArray*> Array::clone(RtArray* old_arr) noexcept
+RtResult<RtArray*> Array::__clone(RtArray* old_arr LEANCLR_GC_DECLARE_CALL_SITE_PARAM) noexcept
 {
     assert(old_arr);
 
     size_t total_bytes = get_array_allocation_size(old_arr->klass, old_arr->length);
-    RtArray* new_arr = reinterpret_cast<RtArray*>(LEANCLR_NEWARRAY_INTERNAL(old_arr->klass, total_bytes, __FILE__, __LINE__, "Array::clone"));
+    RtArray* new_arr = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(old_arr->klass, total_bytes LEANCLR_GC_CALL_SITE_PARAM));
 
     if (!new_arr)
     {

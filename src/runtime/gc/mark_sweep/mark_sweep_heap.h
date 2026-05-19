@@ -28,6 +28,10 @@ class MarkSweepHeap
     static vm::RtObject* allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size, const GcAllocSite& site);
     static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site);
 
+    static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size);
+    static vm::RtObject* allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size);
+    static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes);
+
     static void write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj);
 
     static int64_t get_used_size();

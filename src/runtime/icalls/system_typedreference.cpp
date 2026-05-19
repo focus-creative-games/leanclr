@@ -57,7 +57,7 @@ RtResult<vm::RtObject*> SystemTypedReference::internal_to_object(const vm::RtTyp
     else
     {
         // For value types, we need to box the value
-        return vm::Object::box_object(typed_ref->klass, typed_ref->value);
+        return LEANCLR_BOX_OBJECT_INTERNAL(typed_ref->klass, typed_ref->value, "icalls::SystemTypedReference::internal_to_object");
     }
 }
 

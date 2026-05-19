@@ -171,7 +171,7 @@ static RtResult<RtArray*> invoke_new_array(const metadata::RtMethodInfo* method,
         {
             auto length_obj = Array::get_array_data_at<RtObject*>(params, 0);
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, length, unbox_i32(length_obj, corlib_types.cls_int32));
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr_obj, Array::new_szarray_from_array_klass(klass, length));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr_obj, LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS_INTERNAL(klass, length, "invoke_new_array"));
             RET_OK(arr_obj);
         }
         else
@@ -183,7 +183,7 @@ static RtResult<RtArray*> invoke_new_array(const metadata::RtMethodInfo* method,
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, length, unbox_i32(length_obj, corlib_types.cls_int32));
                 lengths[static_cast<size_t>(i)] = length;
             }
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr_obj, Array::new_mdarray_from_array_klass(klass, lengths.data(), nullptr));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr_obj, LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(klass, lengths.data(), nullptr, "invoke_new_array"));
             RET_OK(arr_obj);
         }
     }
@@ -203,7 +203,7 @@ static RtResult<RtArray*> invoke_new_array(const metadata::RtMethodInfo* method,
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, lower_bound, unbox_i32(lower_bound_obj, corlib_types.cls_int32));
             lower_bounds[static_cast<size_t>(i)] = lower_bound;
         }
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr_obj, Array::new_mdarray_from_array_klass(klass, lengths.data(), lower_bounds.data()));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr_obj, LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(klass, lengths.data(), lower_bounds.data(), "invoke_new_array"));
         RET_OK(arr_obj);
     }
     else
@@ -226,7 +226,7 @@ RtResult<RtReflectionType*> Reflection::get_type_reflection_object(const metadat
     }
 
     auto runtime_type_klass = Class::get_corlib_types().cls_runtimetype;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_type_klass, "Reflection::get_type_reflection_object"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_NEWOBJ_INTERNAL(runtime_type_klass, "Reflection::get_type_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionType*>(ref_obj_raw);
 
     s_class_reflection_type_map.emplace(pooled_type_sig, ref_obj);
@@ -250,7 +250,7 @@ RtResult<RtReflectionMethod*> Reflection::get_method_reflection_object(const met
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_method_klass = Method::is_ctor_or_cctor(method) ? corlib_types.cls_reflection_constructor : corlib_types.cls_reflection_method;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_method_klass, "Reflection::get_method_reflection_object"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_NEWOBJ_INTERNAL(runtime_method_klass, "Reflection::get_method_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionMethod*>(ref_obj_raw);
     ref_obj->method = method;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, ref_type, get_klass_reflection_object(reflection_at_klass));
@@ -271,13 +271,13 @@ RtResult<RtArray*> Reflection::get_param_objects(const metadata::RtMethodInfo* m
     size_t param_count = method->parameter_count;
     auto param_info_klass = Class::get_corlib_types().cls_reflection_parameter;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, param_info_array_obj,
-                                            Array::new_szarray_from_ele_klass(param_info_klass, static_cast<int32_t>(param_count)));
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(param_info_klass, static_cast<int32_t>(param_count), "Reflection::get_param_objects"));
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionMethod*, ref_member, get_method_reflection_object(method, reflection_at_klass));
     auto ass = method->parent->image;
     for (size_t i = 0; i < param_count; ++i)
     {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, param_obj_base, LEANCLR_VM_NEW_OBJECT(param_info_klass, "Reflection::get_param_objects"));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, param_obj_base, LEANCLR_NEWOBJ_INTERNAL(param_info_klass, "Reflection::get_param_objects"));
         auto param_info_obj = reinterpret_cast<RtReflectionParameter*>(param_obj_base);
 
         const metadata::RtTypeSig* param_type_sig = method->parameters[i];
@@ -317,7 +317,7 @@ RtResult<RtReflectionField*> Reflection::get_field_reflection_object(const metad
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_field_klass = corlib_types.cls_reflection_field;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_field_klass, "Reflection::get_field_reflection_object"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_NEWOBJ_INTERNAL(runtime_field_klass, "Reflection::get_field_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionField*>(ref_obj_raw);
     ref_obj->field = field;
     ref_obj->klass = reflection_at_klass;
@@ -340,7 +340,7 @@ RtResult<RtReflectionProperty*> Reflection::get_property_reflection_object(const
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_prop_klass = corlib_types.cls_reflection_property;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_prop_klass, "Reflection::get_property_reflection_object"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_NEWOBJ_INTERNAL(runtime_prop_klass, "Reflection::get_property_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionProperty*>(ref_obj_raw);
     ref_obj->property = prop;
     ref_obj->klass = reflection_at_klass;
@@ -359,7 +359,7 @@ RtResult<RtReflectionEventInfo*> Reflection::get_event_reflection_object(metadat
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_event_klass = corlib_types.cls_reflection_event;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_event_klass, "Reflection::get_event_reflection_object"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_NEWOBJ_INTERNAL(runtime_event_klass, "Reflection::get_event_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionEventInfo*>(ref_obj_raw);
     ref_obj->event = event_info;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, ref_type, get_klass_reflection_object(reflection_at_klass));
@@ -378,7 +378,7 @@ RtResult<RtReflectionAssembly*> Reflection::get_assembly_reflection_object(metad
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_assembly_klass = corlib_types.cls_reflection_assembly;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_assembly_klass, "Reflection::get_assembly_reflection_object"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_NEWOBJ_INTERNAL(runtime_assembly_klass, "Reflection::get_assembly_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionAssembly*>(ref_obj_raw);
     ref_obj->assembly = assembly;
     s_assembly_reflection_map.emplace(assembly, ref_obj);
@@ -409,7 +409,7 @@ RtResult<RtReflectionModule*> Reflection::get_module_reflection_object(metadata:
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_module_klass = corlib_types.cls_reflection_module;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_module_klass, "Reflection::get_module_reflection_object"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_NEWOBJ_INTERNAL(runtime_module_klass, "Reflection::get_module_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionModule*>(ref_obj_raw);
 
     ref_obj->image = mod;
@@ -468,7 +468,7 @@ RtResult<RtObject*> Reflection::invoke_method(const metadata::RtMethodInfo* meth
                         RtObject* param_obj = Array::get_array_data_at<RtObject*>(params, 0);
                         metadata::RtClass* ele_klass = Class::get_array_element_class(klass);
                         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const void*, ele_data_ptr, Object::unbox_ex(param_obj, ele_klass));
-                        return Object::box_object(ele_klass, ele_data_ptr);
+                        return LEANCLR_BOX_OBJECT_INTERNAL(ele_klass, ele_data_ptr, "Reflection::invoke_method");
                     }
                 }
             }

@@ -55,6 +55,20 @@ RtResult<const RtInterpMethodInfo*> Interpreter::init_interpreter_method(const m
     RET_OK(interp_method);
 }
 
+#define MAKE_INTERP_CALL_SITE() ::leanclr::gc::GcAllocSite::make_interp(frame->method, static_cast<uint32_t>(ip - imi->codes))
+
+#define LEANCLR_NEWOBJ_INTERP(klass) LEANCLR_NEWOBJ(klass, MAKE_INTERP_CALL_SITE())
+
+#define LEANCLR_BOX_OBJECT_INTERP(klass, value) LEANCLR_BOX_OBJECT(klass, value, MAKE_INTERP_CALL_SITE())
+
+#define LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERP(arr_klass) LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, MAKE_INTERP_CALL_SITE())
+#define LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS_INTERP(arr_klass, length) LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, MAKE_INTERP_CALL_SITE())
+#define LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERP(ele_class, length) LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, MAKE_INTERP_CALL_SITE())
+#define LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERP(arr_klass, lengths, lower_bounds) \
+    LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, MAKE_INTERP_CALL_SITE())
+#define LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS_INTERP(ele_klass, rank, lengths, lower_bounds) \
+    LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, MAKE_INTERP_CALL_SITE())
+
 template <typename T>
 inline T get_stack_value_at(RtStackObject* base, size_t index)
 {
@@ -119,6 +133,7 @@ struct LeaveFlow
 struct ExceptionFlow
 {
     bool throw_flow;
+
     union
     {
         ThrowFlow throw_data;
@@ -2457,7 +2472,7 @@ method_start:
             {
                 RtStackObject* src = eval_stack_base + ir->src;
                 metadata::RtClass* to_class = get_resolved_data<metadata::RtClass>(imi, ir->klass_idx);
-                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, boxed_obj, vm::Object::box_object(to_class, src));
+                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, boxed_obj, LEANCLR_BOX_OBJECT_INTERP(to_class, src));
                 set_stack_value_at<vm::RtObject*>(eval_stack_base, ir->dst, boxed_obj);
             }
             LEANCLR_CASE_END0()
@@ -2485,7 +2500,7 @@ method_start:
             {
                 int32_t length = get_stack_value_at<int32_t>(eval_stack_base, ir->length);
                 metadata::RtClass* element_class = get_resolved_data<metadata::RtClass>(imi, ir->arr_klass_idx);
-                HANDLE_RAISE_RUNTIME_ERROR(vm::RtArray*, new_array, vm::Array::new_szarray_from_array_klass(element_class, length));
+                HANDLE_RAISE_RUNTIME_ERROR(vm::RtArray*, new_array, LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS_INTERP(element_class, length));
                 set_stack_value_at<vm::RtArray*>(eval_stack_base, ir->dst, new_array);
             }
             LEANCLR_CASE_END0()
@@ -3440,7 +3455,7 @@ method_start:
             {
                 const void* src_ptr = get_stack_value_at<const void*>(eval_stack_base, ir->src);
                 metadata::RtClass* to_klass = get_resolved_data<metadata::RtClass>(imi, ir->klass_idx);
-                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, boxed_obj, vm::Object::box_object(to_klass, src_ptr));
+                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, boxed_obj, LEANCLR_BOX_OBJECT_INTERP(to_klass, src_ptr));
                 set_stack_value_at<vm::RtObject*>(eval_stack_base, ir->dst, boxed_obj);
             }
             LEANCLR_CASE_END0()
@@ -3450,7 +3465,7 @@ method_start:
                 const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                 const metadata::RtClass* klass = ctor->parent;
                 TRY_RUN_CLASS_STATIC_CCTOR(klass);
-                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object_interp(klass, ctor, static_cast<uint32_t>(ip - imi->codes)));
+                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, LEANCLR_NEWOBJ_INTERP(klass));
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                 std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                 frame_base->obj = obj;
@@ -3494,7 +3509,7 @@ method_start:
                 const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                 const metadata::RtClass* klass = ctor->parent;
                 TRY_RUN_CLASS_STATIC_CCTOR(klass);
-                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object_interp(klass, ctor, static_cast<uint32_t>(ip - imi->codes)));
+                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, LEANCLR_NEWOBJ_INTERP(klass));
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                 std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                 frame_base->obj = obj;
@@ -5250,7 +5265,7 @@ method_start:
                     {
                         RtStackObject* src = eval_stack_base + ir->src;
                         metadata::RtClass* to_class = get_resolved_data<metadata::RtClass>(imi, ir->klass_idx);
-                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, boxed_obj, vm::Object::box_object(to_class, src));
+                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, boxed_obj, LEANCLR_BOX_OBJECT_INTERP(to_class, src));
                         set_stack_value_at<vm::RtObject*>(eval_stack_base, ir->dst, boxed_obj);
                     }
                     LEANCLR_CASE_END1()
@@ -5278,7 +5293,7 @@ method_start:
                     {
                         int32_t length = get_stack_value_at<int32_t>(eval_stack_base, ir->length);
                         metadata::RtClass* element_class = get_resolved_data<metadata::RtClass>(imi, ir->arr_klass_idx);
-                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtArray*, new_array, vm::Array::new_szarray_from_array_klass(element_class, length));
+                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtArray*, new_array, LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS_INTERP(element_class, length));
                         set_stack_value_at<vm::RtArray*>(eval_stack_base, ir->dst, new_array);
                     }
                     LEANCLR_CASE_END1()
@@ -6295,7 +6310,7 @@ method_start:
                     {
                         const void* src_ptr = get_stack_value_at<const void*>(eval_stack_base, ir->src);
                         metadata::RtClass* to_klass = get_resolved_data<metadata::RtClass>(imi, ir->klass_idx);
-                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, boxed_obj, vm::Object::box_object(to_klass, src_ptr));
+                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, boxed_obj, LEANCLR_BOX_OBJECT_INTERP(to_klass, src_ptr));
                         set_stack_value_at<vm::RtObject*>(eval_stack_base, ir->dst, boxed_obj);
                     }
                     LEANCLR_CASE_END1()
@@ -6305,7 +6320,7 @@ method_start:
                         const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                         const metadata::RtClass* klass = ctor->parent;
                         TRY_RUN_CLASS_STATIC_CCTOR(klass);
-                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object_interp(klass, ctor, static_cast<uint32_t>(ip - imi->codes)));
+                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, LEANCLR_NEWOBJ_INTERP(klass));
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                         std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                         frame_base->obj = obj;
@@ -6350,7 +6365,7 @@ method_start:
                         const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                         const metadata::RtClass* klass = ctor->parent;
                         TRY_RUN_CLASS_STATIC_CCTOR(klass);
-                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object_interp(klass, ctor, static_cast<uint32_t>(ip - imi->codes)));
+                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, LEANCLR_NEWOBJ_INTERP(klass));
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                         std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                         frame_base->obj = obj;

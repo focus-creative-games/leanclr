@@ -53,7 +53,7 @@ RtResult<vm::RtObject*> SystemObject::memberwise_clone(vm::RtObject* obj) noexce
         RET_ERR(RtErr::NullReference);
 
     // Clone the object using VM's clone function
-    return vm::Object::clone(obj);
+    return LEANCLR_CLONE_INTERNAL(obj, "SystemObject::memberwise_clone");
 }
 
 static RtResultVoid memberwise_clone_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,

@@ -156,7 +156,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeMethodInfo::get_generic_arguments(
     {
         const metadata::RtGenericContainer* gc = m->generic_container;
         uint8_t count = gc->generic_param_count;
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, vm::Array::new_szarray_from_ele_klass(elem_klass, count));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(elem_klass, count, "icalls::SystemReflectionRuntimeMethodInfo::get_generic_arguments"));
         for (uint8_t i = 0; i < count; ++i)
         {
             const metadata::RtGenericParam& gp = gc->generic_params[i];
@@ -172,7 +172,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeMethodInfo::get_generic_arguments(
     {
         const metadata::RtGenericInst* inst = m->generic_method->generic_context.method_inst;
         uint8_t count = inst->generic_arg_count;
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, vm::Array::new_szarray_from_ele_klass(elem_klass, count));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(elem_klass, count, "icalls::SystemReflectionRuntimeMethodInfo::get_generic_arguments"));
         for (uint8_t i = 0; i < count; ++i)
         {
             const metadata::RtTypeSig* arg = inst->generic_args[i];
@@ -182,7 +182,7 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeMethodInfo::get_generic_arguments(
         RET_OK(arr);
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, empty, vm::Array::new_empty_szarray_by_ele_klass(elem_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, empty, LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(elem_klass, "icalls::SystemReflectionRuntimeMethodInfo::get_generic_arguments"));
     RET_OK(empty);
 }
 

@@ -281,7 +281,6 @@ enum class RtClassInitPart : uint32_t
     InterfaceTypes = 0x40,
     NestedClasses = 0x80,
     All = 0x10000,
-    RuntimeClassInit = 0x20000,
 };
 
 // Class family enumeration
@@ -716,6 +715,7 @@ struct RtClass
     uint16_t vtable_count;
     uint8_t hierarchy_depth;
     uint8_t alignment;
+    bool has_init_cctor;
 };
 
 struct RtCustomAttributeRidRange
