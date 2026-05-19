@@ -25,19 +25,19 @@ namespace LeanAOT.ToCpp
 
         public const string IsCctorNotFinishied = "leanclr::codegen::is_cctor_not_finished";
         public const string RunClassStaticConstructor = "leanclr::codegen::run_class_static_constructor";
-        public const string NewObj = "LEANCLR_CODEGEN_NEW_OBJECT";
+        public const string NewObj = "LEANCLR_CODEGEN_NEWOBJ";
         public const string GetVirtualMethodOnObj = "leanclr::codegen::get_virtual_method_impl";
         public const string IsInst = "leanclr::codegen::is_inst";
         public const string CastClass = "leanclr::codegen::cast_class";
         public const string IsAssignableFrom = "leanclr::codegen::is_assignable_from";
-        public const string Box = "leanclr::codegen::box_object";
+        public const string Box = "LEANCLR_CODEGEN_BOX_OBJECT";
         public const string Unbox = "leanclr::codegen::unbox_ex";
         public const string UnboxAny = "leanclr::codegen::unbox_any";
         public const string IsValueType = "leanclr::codegen::is_value_type";
-        public const string NewSZArrayFromEleKlass = "leanclr::codegen::new_szarray_from_ele_class";
-        public const string NewSZArrayFromArrayKlass = "leanclr::codegen::new_szarray_from_array_class";
-        public const string NewMdArrayFromEleKlass = "leanclr::codegen::new_mdarray_from_ele_class";
-        public const string NewMdArrayFromArrayKlass = "leanclr::codegen::new_mdarray_from_array_class";
+        public const string NewSZArrayFromEleKlass = "LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ELE_KLASS";
+        public const string NewSZArrayFromArrayKlass = "LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS";
+        public const string NewMdArrayFromEleKlass = "LEANCLR_CODEGEN_NEW_MDARRAY_FROM_ELE_KLASS";
+        public const string NewMdArrayFromArrayKlass = "LEANCLR_CODEGEN_NEW_MDARRAY_FROM_ARRAY_KLASS";
         public const string GetArrayLength = "leanclr::codegen::get_array_length";
         public const string GetArrayElementKlass = "leanclr::codegen::get_array_element_class";
         public const string IsPointerElementCompatibleWith = "leanclr::codegen::is_pointer_element_compatible_with";

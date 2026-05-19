@@ -318,7 +318,7 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine("{");
             _bodyWriter.IncreaseIndent();
             DefineLengthsAndBoundsVar(args, rank);
-            EmitAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewMdArrayFromArrayKlass}({GetParentFromFullReferenceMethodVariable(methodVarName)}, __lengths, __lowerBounds)");
+            EmitAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewMdArrayFromArrayKlass}({GetParentFromFullReferenceMethodVariable(methodVarName)}, __lengths, __lowerBounds, \"{_method.UniqueName}\")");
             _bodyWriter.DecreaseIndent();
             _bodyWriter.AddLine("}");
             EmitAssumeNotNull(retVar);

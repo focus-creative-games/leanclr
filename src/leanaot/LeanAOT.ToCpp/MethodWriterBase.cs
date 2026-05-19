@@ -2274,7 +2274,7 @@ namespace LeanAOT.ToCpp
                         var actualThisVar = PushStack(_corlibTypes.Object);
                         TypeDetail typeDetail = _metadataService.GetTypeDetail(constaintedType);
                         RuntimeResolvedVariable constrainedTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(constaintedType, typeDetail);
-                        EmitDeclaringAssignOrThrow(inst, actualThisVar, $"{VmFunctionNames.Box}({constrainedTypeVar.GetFullReferenceVariableName()}, {GetEvalVariableExprWithCast(originalThisVar, "void*")})");
+                        EmitDeclaringAssignOrThrow(inst, actualThisVar, $"{VmFunctionNames.Box}({constrainedTypeVar.GetFullReferenceVariableName()}, {GetEvalVariableExprWithCast(originalThisVar, "void*")}, \"{_method.UniqueName}\")");
                         if (!MayBoxToNullReference(constaintedType.ToTypeSig()))
                         {
                             EmitAssumeNotNull(actualThisVar);
@@ -2424,7 +2424,7 @@ namespace LeanAOT.ToCpp
             {
                 args.Insert(0, retVar); // insert this as the first argument
                 EmitDeclaringAssignOrThrow(inst, retVar,
-                    $"{VmFunctionNames.NewObj}({GetParentFromFullReferenceMethodVariable(methodVarNameProvider())}, __FILE__, (uint32_t)__LINE__, \"{_method.FullName}\")");
+                    $"{VmFunctionNames.NewObj}({GetParentFromFullReferenceMethodVariable(methodVarNameProvider())}, \"{_method.FullName}\")");
             }
             EmitCallCommon(inst, methodDetail, methodVarNameProvider, args, retVar);
             if (!declaringTypeDetail.IsValueType)
@@ -2502,7 +2502,7 @@ namespace LeanAOT.ToCpp
             var dstObj = PushStack(_corlibTypes.Object);
             TypeDetail typeDetail = _metadataService.GetTypeDetail(targetType);
             RuntimeResolvedVariable targetTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(targetType, typeDetail);
-            EmitDeclaringAssignOrThrow(inst, dstObj, $"{VmFunctionNames.Box}({targetTypeVar.GetFullReferenceVariableName()}, &{GetEvalVariableName(srcObj)})");
+            EmitDeclaringAssignOrThrow(inst, dstObj, $"{VmFunctionNames.Box}({targetTypeVar.GetFullReferenceVariableName()}, &{GetEvalVariableName(srcObj)}, \"{_method.FullName}\")");
             if (!MayBoxToNullReference(targetType.ToTypeSig()))
             {
                 EmitAssumeNotNull(dstObj);
@@ -2763,7 +2763,7 @@ namespace LeanAOT.ToCpp
             TypeDetail typeDetail = _metadataService.GetTypeDetail(operand);
             RuntimeResolvedVariable elementKlassVar = _runtimeResolvedMetadatas.GetTypeVariable(operand, typeDetail);
             string sizeVarExpr = GetVariableMayCast(indexVar, "int32_t");
-            EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewSZArrayFromEleKlass}({elementKlassVar.GetFullReferenceVariableName()}, {sizeVarExpr})");
+            EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewSZArrayFromEleKlass}({elementKlassVar.GetFullReferenceVariableName()}, {sizeVarExpr}, \"{_method.FullName}\")");
             EmitAssumeCondition($"({sizeVarExpr}) >= 0");
             string arrVarExpr = GetVariableMayCast(retVar, ConstStrings.ArrayPtrTypeName);
             EmitAssumeCondition($"({sizeVarExpr}) == ({arrVarExpr})->length");
