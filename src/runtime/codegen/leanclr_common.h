@@ -8,6 +8,9 @@
 #include "vm/method.h"
 #include "vm/class.h"
 #include "vm/object.h"
+#include "gc/garbage_collector.h"
+#include "gc/gc_config.h"
+#include "gc/gc_newobj_macros.h"
 #include "vm/field.h"
 #include "vm/runtime.h"
 #include "vm/rt_array.h"
@@ -312,6 +315,28 @@ inline RtResult<vm::RtObject*> new_object(const metadata::RtClass* klass)
 {
     return vm::Object::new_object(klass);
 }
+
+#if LEANCLR_GC_DEBUG
+inline RtResult<vm::RtObject*> new_object_with_site(const metadata::RtClass* klass, const char* file, uint32_t line, const char* managed_method)
+{
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
+    RET_ERR_ON_FAIL(vm::Runtime::run_class_static_constructor(klass));
+    vm::RtObject* ptr = LEANCLR_CODEGEN_NEWOBJ(klass, file, line, managed_method);
+    if (ptr == nullptr)
+    {
+        RET_ERR(RtErr::OutOfMemory);
+    }
+    RET_OK(ptr);
+}
+#endif
+
+// LeanAOT newobj: selects site-aware or release path; unused site args are not referenced when LEANCLR_GC_DEBUG is off.
+#if LEANCLR_GC_DEBUG
+#define LEANCLR_CODEGEN_NEW_OBJECT(klass, file, line, managed_method)                                                  \
+    ::leanclr::codegen::new_object_with_site((klass), (file), (line), (managed_method))
+#else
+#define LEANCLR_CODEGEN_NEW_OBJECT(klass, file, line, managed_method) ::leanclr::codegen::new_object((klass))
+#endif
 
 void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const metadata::RtMethodInfo* generic_method_info);
 void resolve_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, void** resolved_metadatas);

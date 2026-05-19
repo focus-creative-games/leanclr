@@ -376,7 +376,7 @@ RtResult<vm::RtObject*> marshal_handle_to_safe_handle(RtMarshalHandle handle, co
     assert(fi);
     assert(fi->offset == 0);
 #endif
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, vm::Object::new_object(klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, LEANCLR_VM_NEW_OBJECT(klass, "codegen::marshal_handle_to_safe_handle"));
     RtMarshalHandle* field_addr = reinterpret_cast<RtMarshalHandle*>(obj + 1);
     *field_addr = handle;
     RET_OK(obj);

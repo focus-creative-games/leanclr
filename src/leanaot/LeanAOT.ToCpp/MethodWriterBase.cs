@@ -2423,7 +2423,8 @@ namespace LeanAOT.ToCpp
             else
             {
                 args.Insert(0, retVar); // insert this as the first argument
-                EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewObj}({GetParentFromFullReferenceMethodVariable(methodVarNameProvider())})");
+                EmitDeclaringAssignOrThrow(inst, retVar,
+                    $"{VmFunctionNames.NewObj}({GetParentFromFullReferenceMethodVariable(methodVarNameProvider())}, __FILE__, (uint32_t)__LINE__, \"{_method.FullName}\")");
             }
             EmitCallCommon(inst, methodDetail, methodVarNameProvider, args, retVar);
             if (!declaringTypeDetail.IsValueType)

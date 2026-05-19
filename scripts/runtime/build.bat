@@ -101,5 +101,8 @@ echo ================================
 echo Build completed successfully!
 echo Output: %CMAKE_BUILD_DIR%
 echo ================================
+echo.
+echo IDE tip: for Cursor/VS Code IntelliSense, run:
+echo   scripts\runtime\gen-compile-commands.bat
 
 endlocal

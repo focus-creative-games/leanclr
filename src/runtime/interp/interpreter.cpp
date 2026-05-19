@@ -3450,7 +3450,7 @@ method_start:
                 const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                 const metadata::RtClass* klass = ctor->parent;
                 TRY_RUN_CLASS_STATIC_CCTOR(klass);
-                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object(klass));
+                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object_interp(klass, ctor, static_cast<uint32_t>(ip - imi->codes)));
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                 std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                 frame_base->obj = obj;
@@ -3494,7 +3494,7 @@ method_start:
                 const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                 const metadata::RtClass* klass = ctor->parent;
                 TRY_RUN_CLASS_STATIC_CCTOR(klass);
-                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object(klass));
+                HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object_interp(klass, ctor, static_cast<uint32_t>(ip - imi->codes)));
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                 std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                 frame_base->obj = obj;
@@ -6305,7 +6305,7 @@ method_start:
                         const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                         const metadata::RtClass* klass = ctor->parent;
                         TRY_RUN_CLASS_STATIC_CCTOR(klass);
-                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object(klass));
+                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object_interp(klass, ctor, static_cast<uint32_t>(ip - imi->codes)));
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                         std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                         frame_base->obj = obj;
@@ -6350,7 +6350,7 @@ method_start:
                         const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                         const metadata::RtClass* klass = ctor->parent;
                         TRY_RUN_CLASS_STATIC_CCTOR(klass);
-                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object(klass));
+                        HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, vm::Object::new_object_interp(klass, ctor, static_cast<uint32_t>(ip - imi->codes)));
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                         std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                         frame_base->obj = obj;

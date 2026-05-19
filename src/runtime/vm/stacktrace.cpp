@@ -47,7 +47,7 @@ RtResultVoid StackTrace::setup_trace_ips(RtException* ex)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, trace_ips, Array::new_szarray_from_ele_klass(cls_stackframe, static_cast<int32_t>(trace_frames.size())));
     for (size_t i = 0, frame_count = trace_frames.size(); i < frame_count; ++i)
     {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, stackframe_obj, Object::new_object(cls_stackframe));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, stackframe_obj, LEANCLR_VM_NEW_OBJECT(cls_stackframe, "StackTrace::setup_trace_ips"));
         RtStackFrame* stackframe = static_cast<RtStackFrame*>(stackframe_obj);
 
         const interp::InterpFrame* frame = trace_frames[i];

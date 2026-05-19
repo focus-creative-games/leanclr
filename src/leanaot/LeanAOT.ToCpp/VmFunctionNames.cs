@@ -25,7 +25,7 @@ namespace LeanAOT.ToCpp
 
         public const string IsCctorNotFinishied = "leanclr::codegen::is_cctor_not_finished";
         public const string RunClassStaticConstructor = "leanclr::codegen::run_class_static_constructor";
-        public const string NewObj = "leanclr::codegen::new_object";
+        public const string NewObj = "LEANCLR_CODEGEN_NEW_OBJECT";
         public const string GetVirtualMethodOnObj = "leanclr::codegen::get_virtual_method_impl";
         public const string IsInst = "leanclr::codegen::is_inst";
         public const string CastClass = "leanclr::codegen::cast_class";

@@ -741,7 +741,7 @@ Il2CppException* il2cpp_exception_from_name_msg(const Il2CppImage* image, const 
         return nullptr;
     }
     metadata::RtClass* klass = ret.unwrap();
-    auto ex_ret = vm::Object::new_object(klass);
+    auto ex_ret = LEANCLR_VM_NEW_OBJECT(klass, "il2cpp::il2cpp_exception_from_name_msg");
     if (ex_ret.is_err())
     {
         return nullptr;
@@ -754,7 +754,7 @@ Il2CppException* il2cpp_exception_from_name_msg(const Il2CppImage* image, const 
 Il2CppException* il2cpp_get_exception_argument_null(const char* arg)
 {
     metadata::RtClass* ex_class = vm::Class::get_corlib_types().cls_argument_null_exception;
-    auto ex_ret = vm::Object::new_object(ex_class);
+    auto ex_ret = LEANCLR_VM_NEW_OBJECT(ex_class, "il2cpp::il2cpp_get_exception_argument_null");
     if (ex_ret.is_err())
     {
         return nullptr;
@@ -1304,7 +1304,7 @@ const MethodInfo* il2cpp_object_get_virtual_method(Il2CppObject* obj, const Meth
 
 Il2CppObject* il2cpp_object_new(const Il2CppClass* klass)
 {
-    auto result = vm::Object::new_object(klass);
+    auto result = LEANCLR_VM_NEW_OBJECT(klass, "il2cpp::object_new");
     return result.is_ok() ? result.unwrap() : nullptr;
 }
 

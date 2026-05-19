@@ -3,165 +3,78 @@
 #include "rt_array.h"
 #include "class.h"
 #include "metadata/metadata_cache.h"
-#include "alloc/general_allocation.h"
-#include "utils/hashmap.h"
+#include "gc/handles/gc_handle_table.h"
 
 namespace leanclr
 {
 namespace vm
 {
-enum class GCHandleType : int32_t
-{
-    Weak = 0,
-    WeakTrackResurrection = 1,
-    Normal = 2,
-    Pinned = 3,
-};
 
-// HandleInfo struct for managing GC handles
-struct HandleInfo
-{
-    RtObject* obj;
-    HandleInfo* next;
-    GCHandleType type_;
-    uint32_t id;
-};
-
-// Head of the freed handle list
-static HandleInfo* s_freed_handle_head = nullptr;
-static uint32_t s_last_handle_id = 0;
-
-// TODO: optimize this
-static utils::HashMap<uint32_t, HandleInfo*> s_handle_map;
-// Allocate a new handle or reuse a freed one
-static HandleInfo* alloc_handle()
-{
-    if (s_freed_handle_head == nullptr)
-    {
-        // Allocate a new handle
-        HandleInfo* h = alloc::GeneralAllocation::malloc_any_zeroed<HandleInfo>();
-        assert(s_last_handle_id < UINT32_MAX);
-        h->id = ++s_last_handle_id;
-        s_handle_map[h->id] = h;
-        return h;
-    }
-    else
-    {
-        // Reuse a freed handle
-        HandleInfo* h = s_freed_handle_head;
-        s_freed_handle_head = h->next;
-        assert(h->id == 0);
-        h->id = ++s_last_handle_id;
-        s_handle_map[h->id] = h;
-        return h;
-    }
-}
-
-// Free a handle implementation
-static void free_handle_impl(HandleInfo* handle)
-{
-    if (handle == nullptr)
-    {
-        return;
-    }
-    assert(handle->obj != nullptr);
-    // Reset handle and add to freed list
-    handle->obj = nullptr;
-    handle->type_ = GCHandleType::Normal;
-    handle->next = s_freed_handle_head;
-    assert(s_handle_map.find(handle->id) != s_handle_map.end());
-    s_handle_map.erase(handle->id);
-    handle->id = 0;
-    s_freed_handle_head = handle;
-}
-
-// Public API implementations
+using gc::GcHandleKind;
+using gc::GcHandleSlot;
 
 #if !LEANCLR_USE_VOID_PTR_GCHANDLE
 uint32_t GCHandle::get_handle_id(void* handle)
 {
-    HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
-    return h->id;
+    return gc::GcHandleTable::get_slot_index(reinterpret_cast<GcHandleSlot*>(handle));
 }
 
 void* GCHandle::get_handle_by_id(uint32_t id)
 {
-    auto it = s_handle_map.find(id);
-    if (it != s_handle_map.end())
-    {
-        return it->second;
-    }
-    return nullptr;
+    return gc::GcHandleTable::get_slot_by_index(id);
 }
 #endif
 
 void* GCHandle::new_handle(RtObject* obj, bool pinned)
 {
-    return get_target_handle(obj, nullptr, (int32_t)(pinned ? GCHandleType::Pinned : GCHandleType::Normal));
+    return get_target_handle(obj, nullptr, (int32_t)(pinned ? GcHandleKind::Pinned : GcHandleKind::Strong));
 }
 
 void* GCHandle::new_weakref_handle(RtObject* obj, bool track_resurrection)
 {
-    return get_target_handle(obj, nullptr, (int32_t)(track_resurrection ? GCHandleType::WeakTrackResurrection : GCHandleType::Weak));
+    return get_target_handle(obj, nullptr, (int32_t)(track_resurrection ? GcHandleKind::WeakTrackResurrection : GcHandleKind::Weak));
 }
 
 void GCHandle::free_handle(void* handle)
 {
-    HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
-    free_handle_impl(h);
+    gc::GcHandleTable::free_slot(reinterpret_cast<GcHandleSlot*>(handle));
 }
 
 RtObject* GCHandle::get_target(void* handle)
 {
-    HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
-    if (h == nullptr)
-    {
-        return nullptr;
-    }
-    return h->obj;
+    return gc::GcHandleTable::get_target(reinterpret_cast<GcHandleSlot*>(handle));
 }
 
 void* GCHandle::get_target_handle(RtObject* obj, void* handle, int32_t type_)
 {
-    HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
+    GcHandleSlot* slot = reinterpret_cast<GcHandleSlot*>(handle);
 
     if (type_ == -1)
     {
-        // Update object
-        assert(handle != 0);
-        h->obj = obj;
+        assert(handle != nullptr);
+        gc::GcHandleTable::set_target(slot, obj, slot->kind);
         return handle;
     }
 
-    if (h == nullptr)
+    if (slot == nullptr)
     {
-        // Allocate new handle
-        HandleInfo* new_handle = alloc_handle();
-        new_handle->obj = obj;
-        new_handle->type_ = static_cast<GCHandleType>(type_);
-        new_handle->next = nullptr;
-        return new_handle;
+        return gc::GcHandleTable::alloc(static_cast<GcHandleKind>(type_), obj);
     }
-    else
-    {
-        // Update existing handle
-        h->obj = obj;
-        h->type_ = static_cast<GCHandleType>(type_);
-        return handle;
-    }
+
+    gc::GcHandleTable::set_target(slot, obj, static_cast<GcHandleKind>(type_));
+    return slot;
 }
 
 void* GCHandle::get_addr_of_pinned_object(void* handle)
 {
-    HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
+    GcHandleSlot* slot = reinterpret_cast<GcHandleSlot*>(handle);
 
-    if (h->type_ != GCHandleType::Pinned)
+    if (slot->kind != GcHandleKind::Pinned)
     {
-        // Not a pinned handle
         return reinterpret_cast<void*>(-2);
     }
 
-    RtObject* obj = h->obj;
+    RtObject* obj = slot->target;
     if (obj == nullptr)
     {
         return nullptr;
@@ -171,19 +84,16 @@ void* GCHandle::get_addr_of_pinned_object(void* handle)
 
     if (Class::is_array_or_szarray(klass))
     {
-        // For arrays, return pointer to array data
         RtArray* arr = reinterpret_cast<RtArray*>(obj);
         return vm::Array::get_array_data_start_as_ptr_void(arr);
     }
 
     if (Class::is_string_class(klass))
     {
-        // For strings, return pointer to character data
         RtString* str = reinterpret_cast<RtString*>(obj);
         return const_cast<Utf16Char*>(vm::String::get_chars_ptr(str));
     }
 
-    // For objects, return pointer to first field (skip object header)
     return obj + 1;
 }
 
@@ -204,18 +114,22 @@ bool GCHandle::is_type_pinned(const metadata::RtClass* klass)
 
 void GCHandle::foreach_strong_handles(void (*callback)(void*, void*), void* userData)
 {
-    for (auto it = s_handle_map.begin(); it != s_handle_map.end(); ++it)
+    struct ForeachCtx
     {
-        HandleInfo* hi = it->second;
-        if (hi->type_ == GCHandleType::Weak || hi->type_ == GCHandleType::WeakTrackResurrection)
+        void (*callback)(void*, void*);
+        void* userData;
+    };
+    ForeachCtx ctx = {callback, userData};
+    gc::GcHandleTable::foreach_strong_and_pinned(
+        [](vm::RtObject** slot, void* ud)
         {
-            continue;
-        }
-        if (hi->obj != nullptr)
-        {
-            callback(hi->obj, userData);
-        }
-    }
+            ForeachCtx* c = static_cast<ForeachCtx*>(ud);
+            if (*slot != nullptr)
+            {
+                c->callback(*slot, c->userData);
+            }
+        },
+        &ctx);
 }
 
 } // namespace vm

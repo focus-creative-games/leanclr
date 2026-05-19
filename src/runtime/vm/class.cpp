@@ -12,6 +12,8 @@
 #include "utils/hashmap.h"
 #include "utils/hashset.h"
 #include "gc/garbage_collector.h"
+#include "gc/gc_bitmap.h"
+#include "gc/roots/gc_roots.h"
 #include "array_class.h"
 #include "generic_class.h"
 #include "field.h"
@@ -886,6 +888,7 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
     {
         RET_ERR_ON_FAIL(setup_fields_typedef(klass));
         RET_ERR_ON_FAIL(setup_field_layout(klass));
+        gc::setup_class_gc_bitmap(klass);
         RET_ERR_ON_FAIL(setup_static_field_data(klass));
         break;
     }
@@ -893,6 +896,7 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
     {
         RET_ERR_ON_FAIL(GenericClass::setup_fields(klass));
         RET_ERR_ON_FAIL(setup_field_layout(klass));
+        gc::setup_class_gc_bitmap(klass);
         RET_ERR_ON_FAIL(setup_static_field_data(klass));
         break;
     }
@@ -1083,6 +1087,7 @@ RtResultVoid Class::setup_static_field_data(metadata::RtClass* klass)
     if (klass->static_size > 0)
     {
         klass->static_fields_data = (uint8_t*)gc::GarbageCollector::allocate_fixed(klass->static_size);
+        gc::GcRoots::register_static_fields(klass, klass->static_fields_data, klass->static_size);
     }
     RET_VOID_OK();
 }

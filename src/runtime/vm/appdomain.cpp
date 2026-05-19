@@ -8,6 +8,7 @@
 #include "utils/string_util.h"
 #include "metadata/module_def.h"
 #include "settings.h"
+#include "gc/roots/gc_roots.h"
 
 namespace leanclr
 {
@@ -18,26 +19,25 @@ namespace
 {
 
 RtAppDomain* g_default_appdomain = nullptr;
-RtMonoAppDomain* g_default_mono_domain = nullptr;
+RtMonoAppDomain g_default_mono_domain = {};
 utils::HashMap<utils::Utf16StrWithLen, RtObject*, utils::Utf16StrHasher, utils::Utf16StrCompare> g_appdomain_private_data;
 
 RtResult<RtObject*> create_appdomain_setup()
 {
     auto appdomain_setup_class = Class::get_corlib_types().cls_appdomain_setup;
-    return Object::new_object(appdomain_setup_class);
+    return LEANCLR_VM_NEW_OBJECT(appdomain_setup_class, "AppDomain::create_appdomain_setup");
 }
 } // namespace
 
 RtResult<RtAppDomain*> AppDomain::init_default_app_domain()
 {
     assert(g_default_appdomain == nullptr);
-    assert(g_default_mono_domain == nullptr);
-    auto mono_app_domain = new RtMonoAppDomain();
+    auto mono_app_domain = &g_default_mono_domain;
 
     auto& corlib_types = Class::get_corlib_types();
     auto appdomain_class = corlib_types.cls_appdomain;
 
-    auto default_appdomain_res = Object::new_object(appdomain_class);
+    auto default_appdomain_res = LEANCLR_VM_NEW_OBJECT(appdomain_class, "AppDomain::init_default_app_domain");
     if (default_appdomain_res.is_err())
     {
         return RtResult<RtAppDomain*>::Err(default_appdomain_res.unwrap_err());
@@ -57,7 +57,7 @@ RtResult<RtAppDomain*> AppDomain::init_default_app_domain()
     mono_app_domain->friendly_name = domain_name != nullptr ? domain_name : utils::StringUtil::strdup("LeanCLR-Domain");
     mono_app_domain->appdomain = default_appdomain;
 
-    auto ephemeron_res = Object::new_object(corlib_types.cls_object);
+    auto ephemeron_res = LEANCLR_VM_NEW_OBJECT(corlib_types.cls_object, "AppDomain::ephemeron_tombstone");
     if (ephemeron_res.is_err())
     {
         return RtResult<RtAppDomain*>::Err(ephemeron_res.unwrap_err());
@@ -68,7 +68,6 @@ RtResult<RtAppDomain*> AppDomain::init_default_app_domain()
 
     default_appdomain->mono_app_domain = mono_app_domain;
 
-    g_default_mono_domain = mono_app_domain;
     g_default_appdomain = default_appdomain;
 
     return RtResult<RtAppDomain*>::Ok(default_appdomain);
@@ -76,18 +75,16 @@ RtResult<RtAppDomain*> AppDomain::init_default_app_domain()
 
 RtResultVoid AppDomain::initialize_context()
 {
-    assert(g_default_mono_domain != nullptr);
-
     auto& corlib_types = Class::get_corlib_types();
     auto appcontext_class = corlib_types.cls_appcontext;
 
-    auto context_res = Object::new_object(appcontext_class);
+    auto context_res = LEANCLR_VM_NEW_OBJECT(appcontext_class, "AppDomain::initialize_context");
     RET_ERR_ON_FAIL(context_res);
     auto context = reinterpret_cast<RtAppContext*>(context_res.unwrap());
 
-    context->domain_id = g_default_mono_domain->domain_id;
+    context->domain_id = g_default_mono_domain.domain_id;
     context->context_id = 0;
-    g_default_mono_domain->context = context;
+    g_default_mono_domain.context = context;
 
     auto current_thread = Thread::get_current_thread();
     current_thread->internal_thread->current_appcontext = reinterpret_cast<RtObject*>(context);
@@ -103,32 +100,27 @@ RtAppDomain* AppDomain::get_default_appdomain()
 
 RtMonoAppDomain* AppDomain::get_default_mono_appdomain()
 {
-    assert(g_default_mono_domain != nullptr);
-    return g_default_mono_domain;
+    return &g_default_mono_domain;
 }
 
 RtAppContext* AppDomain::get_default_appcontext()
 {
-    assert(g_default_mono_domain != nullptr);
-    return g_default_mono_domain->context;
+    return g_default_mono_domain.context;
 }
 
 RtObject* AppDomain::get_ephemeron_tombstone()
 {
-    assert(g_default_mono_domain != nullptr);
-    return g_default_mono_domain->ephemeron_tombstone;
+    return g_default_mono_domain.ephemeron_tombstone;
 }
 
 RtObject* AppDomain::get_setup()
 {
-    assert(g_default_mono_domain != nullptr);
-    return g_default_mono_domain->setup;
+    return g_default_mono_domain.setup;
 }
 
 const char* AppDomain::get_friendly_name()
 {
-    assert(g_default_mono_domain != nullptr);
-    return g_default_mono_domain->friendly_name;
+    return g_default_mono_domain.friendly_name;
 }
 
 RtObject* AppDomain::get_domain_data(RtString* name)
@@ -160,14 +152,37 @@ void AppDomain::set_domain_data(RtString* name, RtObject* data)
 
 int32_t AppDomain::get_appdomain_id()
 {
-    assert(g_default_mono_domain != nullptr);
-    return g_default_mono_domain->domain_id;
+    return g_default_mono_domain.domain_id;
 }
 
 void AppDomain::get_modules(RtAppDomain* this_domain, utils::Vector<metadata::RtModuleDef*>& modules)
 {
     (void)this_domain;
     metadata::RtModuleDef::get_registered_modules(modules);
+}
+
+static void visit_appdomain_private_data(gc::GcVisitObjectRoot visit, void* userdata)
+{
+    for (utils::HashMap<utils::Utf16StrWithLen, RtObject*, utils::Utf16StrHasher, utils::Utf16StrCompare>::const_iterator it = g_appdomain_private_data.begin();
+         it != g_appdomain_private_data.end(); ++it)
+    {
+        if (it->second != nullptr)
+        {
+            visit(it->second, userdata);
+        }
+    }
+}
+
+void register_appdomain_gc_roots()
+{
+    gc::GcRoots::register_slot(reinterpret_cast<RtObject**>(&g_default_appdomain));
+
+    gc::GcRoots::register_slot(reinterpret_cast<RtObject**>(&g_default_mono_domain.appdomain));
+    gc::GcRoots::register_slot(reinterpret_cast<RtObject**>(&g_default_mono_domain.setup));
+    gc::GcRoots::register_slot(reinterpret_cast<RtObject**>(&g_default_mono_domain.ephemeron_tombstone));
+    gc::GcRoots::register_slot(reinterpret_cast<RtObject**>(&g_default_mono_domain.context));
+
+    gc::GcRoots::register_visit_object_roots(visit_appdomain_private_data);
 }
 } // namespace vm
 } // namespace leanclr

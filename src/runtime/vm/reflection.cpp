@@ -12,6 +12,7 @@
 #include "class.h"
 #include "method.h"
 #include "object.h"
+#include "gc/roots/gc_roots.h"
 #include "runtime.h"
 #include "type.h"
 #include "rt_string.h"
@@ -225,7 +226,7 @@ RtResult<RtReflectionType*> Reflection::get_type_reflection_object(const metadat
     }
 
     auto runtime_type_klass = Class::get_corlib_types().cls_runtimetype;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, Object::new_object(runtime_type_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_type_klass, "Reflection::get_type_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionType*>(ref_obj_raw);
 
     s_class_reflection_type_map.emplace(pooled_type_sig, ref_obj);
@@ -249,7 +250,7 @@ RtResult<RtReflectionMethod*> Reflection::get_method_reflection_object(const met
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_method_klass = Method::is_ctor_or_cctor(method) ? corlib_types.cls_reflection_constructor : corlib_types.cls_reflection_method;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, Object::new_object(runtime_method_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_method_klass, "Reflection::get_method_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionMethod*>(ref_obj_raw);
     ref_obj->method = method;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, ref_type, get_klass_reflection_object(reflection_at_klass));
@@ -276,7 +277,7 @@ RtResult<RtArray*> Reflection::get_param_objects(const metadata::RtMethodInfo* m
     auto ass = method->parent->image;
     for (size_t i = 0; i < param_count; ++i)
     {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, param_obj_base, Object::new_object(param_info_klass));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, param_obj_base, LEANCLR_VM_NEW_OBJECT(param_info_klass, "Reflection::get_param_objects"));
         auto param_info_obj = reinterpret_cast<RtReflectionParameter*>(param_obj_base);
 
         const metadata::RtTypeSig* param_type_sig = method->parameters[i];
@@ -316,7 +317,7 @@ RtResult<RtReflectionField*> Reflection::get_field_reflection_object(const metad
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_field_klass = corlib_types.cls_reflection_field;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, Object::new_object(runtime_field_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_field_klass, "Reflection::get_field_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionField*>(ref_obj_raw);
     ref_obj->field = field;
     ref_obj->klass = reflection_at_klass;
@@ -339,7 +340,7 @@ RtResult<RtReflectionProperty*> Reflection::get_property_reflection_object(const
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_prop_klass = corlib_types.cls_reflection_property;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, Object::new_object(runtime_prop_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_prop_klass, "Reflection::get_property_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionProperty*>(ref_obj_raw);
     ref_obj->property = prop;
     ref_obj->klass = reflection_at_klass;
@@ -358,7 +359,7 @@ RtResult<RtReflectionEventInfo*> Reflection::get_event_reflection_object(metadat
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_event_klass = corlib_types.cls_reflection_event;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, Object::new_object(runtime_event_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_event_klass, "Reflection::get_event_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionEventInfo*>(ref_obj_raw);
     ref_obj->event = event_info;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, ref_type, get_klass_reflection_object(reflection_at_klass));
@@ -377,7 +378,7 @@ RtResult<RtReflectionAssembly*> Reflection::get_assembly_reflection_object(metad
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_assembly_klass = corlib_types.cls_reflection_assembly;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, Object::new_object(runtime_assembly_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_assembly_klass, "Reflection::get_assembly_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionAssembly*>(ref_obj_raw);
     ref_obj->assembly = assembly;
     s_assembly_reflection_map.emplace(assembly, ref_obj);
@@ -408,7 +409,7 @@ RtResult<RtReflectionModule*> Reflection::get_module_reflection_object(metadata:
 
     auto corlib_types = Class::get_corlib_types();
     auto runtime_module_klass = corlib_types.cls_reflection_module;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, Object::new_object(runtime_module_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_VM_NEW_OBJECT(runtime_module_klass, "Reflection::get_module_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionModule*>(ref_obj_raw);
 
     ref_obj->image = mod;
@@ -487,6 +488,35 @@ RtResult<RtObject*> Reflection::invoke_method(const metadata::RtMethodInfo* meth
     }
 
     return Runtime::invoke_array_arguments_with_run_cctor(method, obj, params);
+}
+
+template <typename TKey, typename TValue, typename THash, typename TEqual>
+static void visit_object_hashmap(const utils::HashMap<TKey, TValue, THash, TEqual>& map, gc::GcVisitObjectRoot visit, void* userdata)
+{
+    for (typename utils::HashMap<TKey, TValue, THash, TEqual>::const_iterator it = map.begin(); it != map.end(); ++it)
+    {
+        if (it->second != nullptr)
+        {
+            visit(reinterpret_cast<RtObject*>(it->second), userdata);
+        }
+    }
+}
+
+static void visit_reflection_object_roots(gc::GcVisitObjectRoot visit, void* userdata)
+{
+    visit_object_hashmap(s_class_reflection_type_map, visit, userdata);
+    visit_object_hashmap(s_method_reflection_map, visit, userdata);
+    visit_object_hashmap(s_method_params_map, visit, userdata);
+    visit_object_hashmap(s_field_reflection_map, visit, userdata);
+    visit_object_hashmap(s_property_reflection_map, visit, userdata);
+    visit_object_hashmap(s_event_reflection_map, visit, userdata);
+    visit_object_hashmap(s_assembly_reflection_map, visit, userdata);
+    visit_object_hashmap(s_module_reflection_map, visit, userdata);
+}
+
+void register_reflection_gc_roots()
+{
+    gc::GcRoots::register_visit_object_roots(visit_reflection_object_roots);
 }
 
 } // namespace vm

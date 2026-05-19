@@ -68,7 +68,7 @@ RtResult<vm::RtMulticastDelegate*> SystemDelegate::alloc_delegate_like_internal(
     const metadata::RtClass* del_klass = source->klass;
 
     // Allocate a new object of the same class
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, new_obj, vm::Object::new_object(del_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, new_obj, LEANCLR_VM_NEW_OBJECT(del_klass, "SystemDelegate::alloc_delegate_like_internal"));
     vm::RtMulticastDelegate* new_del = reinterpret_cast<vm::RtMulticastDelegate*>(new_obj);
 
     // Copy the delegate fields from source

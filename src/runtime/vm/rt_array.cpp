@@ -2,7 +2,7 @@
 #include "class.h"
 #include "object.h"
 #include "array_class.h"
-#include "gc/garbage_collector.h"
+#include "gc/gc_newobj_macros.h"
 #include "utils/mem_op.h"
 #include "rt_managed_types.h"
 #include "interp/eval_stack_op.h"
@@ -31,7 +31,7 @@ RtResult<RtArray*> Array::new_szarray_from_array_klass(const metadata::RtClass* 
     RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
 
     size_t arr_length = get_array_allocation_size(klass, length);
-    RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length));
+    RtArray* arr_obj = reinterpret_cast<RtArray*>(LEANCLR_NEWARRAY_INTERNAL(klass, arr_length, __FILE__, __LINE__, "Array::new_szarray_from_array_klass"));
 
     if (!arr_obj)
     {
@@ -54,7 +54,7 @@ RtResult<RtArray*> Array::new_szarray_from_ele_klass(const metadata::RtClass* el
     RET_ERR_ON_FAIL(Class::initialize_all(klass));
 
     size_t arr_length = get_array_allocation_size(klass, length);
-    RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length));
+    RtArray* arr_obj = reinterpret_cast<RtArray*>(LEANCLR_NEWARRAY_INTERNAL(klass, arr_length, __FILE__, __LINE__, "Array::new_szarray_from_ele_klass"));
 
     if (!arr_obj)
     {
@@ -106,7 +106,7 @@ RtResult<RtArray*> Array::new_mdarray_from_array_klass(const metadata::RtClass* 
     size_t bounds_start_index = utils::MemOp::align_up(arr_total_bytes_without_bounds, 8);
     size_t total_array_bytes = bounds_start_index + sizeof(ArrayBounds) * rank;
 
-    RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(arr_klass, total_array_bytes));
+    RtArray* arr_obj = reinterpret_cast<RtArray*>(LEANCLR_NEWARRAY_INTERNAL(arr_klass, total_array_bytes, __FILE__, __LINE__, "Array::new_mdarray_from_array_klass"));
 
     // Set up bounds
     ArrayBounds* bounds = reinterpret_cast<ArrayBounds*>(reinterpret_cast<uint8_t*>(arr_obj) + bounds_start_index);
@@ -502,7 +502,7 @@ RtResult<RtArray*> Array::clone(RtArray* old_arr) noexcept
     assert(old_arr);
 
     size_t total_bytes = get_array_allocation_size(old_arr->klass, old_arr->length);
-    RtArray* new_arr = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(old_arr->klass, total_bytes));
+    RtArray* new_arr = reinterpret_cast<RtArray*>(LEANCLR_NEWARRAY_INTERNAL(old_arr->klass, total_bytes, __FILE__, __LINE__, "Array::clone"));
 
     if (!new_arr)
     {

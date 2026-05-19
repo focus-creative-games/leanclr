@@ -20,7 +20,7 @@ RtResult<RtMulticastDelegate*> Delegate::create_delegate_from_reflection(RtRefle
 {
     const metadata::RtTypeSig* type_sig = delegate_type->type_handle;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, delegate_klass, vm::Class::get_class_from_typesig(type_sig));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, del_obj, Object::new_object(delegate_klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, del_obj, LEANCLR_VM_NEW_OBJECT(delegate_klass, "Delegate::create_delegate_from_reflection"));
     RtDelegate& sub_del = reinterpret_cast<RtMulticastDelegate*>(del_obj)->dele;
 
     sub_del.target = target;
@@ -51,7 +51,7 @@ RtResultVoid Delegate::constructor_delegate(RtMulticastDelegate* del, RtObject* 
 
 RtResult<RtMulticastDelegate*> Delegate::new_delegate(const metadata::RtClass* delelgate_type, RtObject* target, const metadata::RtMethodInfo* method) noexcept
 {
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, del_obj, Object::new_object(delelgate_type));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, del_obj, LEANCLR_VM_NEW_OBJECT(delelgate_type, "Delegate::new_delegate"));
     RtMulticastDelegate* del = reinterpret_cast<RtMulticastDelegate*>(del_obj);
     RET_ERR_ON_FAIL(constructor_delegate(del, target, method));
     RET_OK(del);

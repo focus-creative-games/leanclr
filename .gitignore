@@ -396,13 +396,17 @@ MigrationBackup/
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
 
-# VS Code files for those working on multiple tools
+# VS Code / Cursor IDE (committed editor config)
 .vscode/*
 !.vscode/settings.json
+!.vscode/c_cpp_properties.json
 !.vscode/tasks.json
 !.vscode/launch.json
 !.vscode/extensions.json
 !.vscode/*.code-snippets
+
+# Generated for clangd / C++ IntelliSense (scripts/runtime/gen-compile-commands.*)
+/compile_commands.json
 
 # Local History for Visual Studio Code
 .history/
@@ -428,12 +432,10 @@ ___*
 *.wasm
 /src/leanaot/output/cpp
 /src/leanaot/aot-runner/cpp
-/.vscode
 /src/tools/leanaot
 /src/leanaot/aot-runner/ManagedStripped
 /src/tools/exportextern/libraries
 launchSettings.json
-.vscode/
 /src/leanaot/sync.bat
 /src/runtime/*.bat
 /src/tools/exportextern/Properties/launchSettings.json

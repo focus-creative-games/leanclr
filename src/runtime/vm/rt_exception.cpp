@@ -1,10 +1,9 @@
 #include "rt_exception.h"
 #include <cstdlib>
 #include "gc/garbage_collector.h"
-#include "assembly.h"
+#include "gc/roots/gc_roots.h"
 #include "class.h"
 #include "object.h"
-#include "method.h"
 #include "rt_string.h"
 #include "stacktrace.h"
 #include "interp/machine_state.h"
@@ -15,29 +14,33 @@ namespace leanclr
 namespace vm
 {
 
-static RtException** s_ref_exceptions = nullptr;
+static RtException* s_ref_exception = nullptr;
 
 RtResultVoid Exception::initialize()
 {
-    s_ref_exceptions = reinterpret_cast<RtException**>(gc::GarbageCollector::allocate_fixed_reference_array(1));
     RET_VOID_OK();
+}
+
+void register_exception_gc_roots()
+{
+    gc::GcRoots::register_slot(reinterpret_cast<RtObject**>(&s_ref_exception));
 }
 
 void Exception::set_current_exception(RtException* ex)
 {
-    s_ref_exceptions[0] = ex;
+    s_ref_exception = ex;
 }
 
 RtException* Exception::get_and_clear_current_exception()
 {
-    RtException* ex = s_ref_exceptions[0];
-    s_ref_exceptions[0] = nullptr;
+    RtException* ex = s_ref_exception;
+    s_ref_exception = nullptr;
     return ex;
 }
 
 static RtException* internal_get_current_exception()
 {
-    return s_ref_exceptions[0];
+    return s_ref_exception;
 }
 
 static metadata::RtClass* get_exception_klass_of_runtime_error(RtErr err)
@@ -107,7 +110,7 @@ RtException* Exception::raise_error_as_exception(RtErr err, interp::InterpFrame*
         return internal_get_current_exception();
     }
     metadata::RtClass* ex_class = get_exception_klass_of_runtime_error(err);
-    auto ex_ret = vm::Object::new_object(ex_class);
+    auto ex_ret = LEANCLR_VM_NEW_OBJECT(ex_class, "Exception::raise_error_as_exception");
     if (ex_ret.is_ok())
     {
         RtException* ex = reinterpret_cast<RtException*>(ex_ret.unwrap());
@@ -115,7 +118,7 @@ RtException* Exception::raise_error_as_exception(RtErr err, interp::InterpFrame*
     }
     else
     {
-        auto ex_ret2 = vm::Object::new_object(Class::get_corlib_types().cls_execution_engine_exception);
+        auto ex_ret2 = LEANCLR_VM_NEW_OBJECT(Class::get_corlib_types().cls_execution_engine_exception, "Exception::raise_error_as_exception");
         if (ex_ret2.is_ok())
         {
             return raise_exception(reinterpret_cast<RtException*>(ex_ret2.unwrap()), frame, ip);
@@ -165,7 +168,7 @@ RtException* Exception::raise_internal_runtime_exception(metadata::RtClass* ex_c
 {
     const CorLibTypes& types = Class::get_corlib_types();
     assert(Class::is_exception_sub_class(ex_class));
-    auto ex_ret = vm::Object::new_object(ex_class);
+    auto ex_ret = LEANCLR_VM_NEW_OBJECT(ex_class, "Exception::raise_internal_runtime_exception");
     if (ex_ret.is_ok())
     {
         RtException* ex = reinterpret_cast<RtException*>(ex_ret.unwrap());
@@ -173,7 +176,7 @@ RtException* Exception::raise_internal_runtime_exception(metadata::RtClass* ex_c
     }
     else
     {
-        auto ex_ret2 = vm::Object::new_object(Class::get_corlib_types().cls_execution_engine_exception);
+        auto ex_ret2 = LEANCLR_VM_NEW_OBJECT(Class::get_corlib_types().cls_execution_engine_exception, "Exception::raise_internal_runtime_exception");
         if (ex_ret2.is_ok())
         {
             return reinterpret_cast<RtException*>(ex_ret2.unwrap());

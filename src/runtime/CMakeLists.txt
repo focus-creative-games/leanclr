@@ -8,11 +8,13 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE BOOL "Generate compile_commands.json 
 option(BUILD_SHARED_LEANCLR "Build leanclr as a shared (dynamic) library" OFF)
 option(LEANCLR_ENABLE_CPP_EXCEPTIONS "Enable C++ exceptions for runtime target" OFF)
 
+set(LEANCLR_GC_ALGORITHM "MARK_SWEEP" CACHE STRING "GC algorithm: MARK_SWEEP or ZERO_GC")
+option(LEANCLR_GC_DEBUG "Enable GC debug (quarantine, allocation sites)" OFF)
+
 set(RUNTIME_DIRS
     alloc
     codegen
     core
-    gc
     icalls
     il2cpp
     interp
@@ -41,6 +43,9 @@ if(EMSCRIPTEN)
 endif()
 list(APPEND RUNTIME_SOURCES ${dir_c_sources})
 
+file(GLOB_RECURSE gc_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/gc/*.cpp")
+list(APPEND RUNTIME_SOURCES ${gc_sources})
+
 if(BUILD_SHARED_LEANCLR)
     add_library(leanclr SHARED ${RUNTIME_SOURCES})
 else()
@@ -49,6 +54,17 @@ endif()
 
 target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS LEANCLR_USE_SHIPPING_ZLIB=1)
 target_compile_definitions(leanclr PUBLIC UNITY_VERSION=60000400)
+
+if(LEANCLR_GC_ALGORITHM STREQUAL "MARK_SWEEP")
+    target_compile_definitions(leanclr PRIVATE LEANCLR_GC_MARK_SWEEP=1)
+elseif(LEANCLR_GC_ALGORITHM STREQUAL "ZERO_GC")
+    target_compile_definitions(leanclr PRIVATE LEANCLR_GC_ZERO_GC=1)
+else()
+    message(FATAL_ERROR "Unknown LEANCLR_GC_ALGORITHM: ${LEANCLR_GC_ALGORITHM} (use MARK_SWEEP or ZERO_GC)")
+endif()
+if(LEANCLR_GC_DEBUG)
+    target_compile_definitions(leanclr PRIVATE LEANCLR_GC_DEBUG=1)
+endif()
 
 target_include_directories(leanclr PUBLIC
     ${CMAKE_CURRENT_LIST_DIR}

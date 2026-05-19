@@ -711,7 +711,7 @@ RtResult<vm::RtObject*> SystemRuntimeType::create_instance_internal(vm::RtReflec
         RET_ERR(RtErr::MissingMethod);
 
     // Create default instance
-    return vm::Object::new_object(klass);
+    return LEANCLR_VM_NEW_OBJECT(klass, "SystemRuntimeType::create_instance_internal");
 }
 
 RtResult<vm::RtReflectionMethod*> SystemRuntimeType::get_declaring_method(vm::RtReflectionRuntimeType* runtime_type) noexcept

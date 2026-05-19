@@ -1,6 +1,8 @@
 
 #include "rt_string.h"
 #include "gc/garbage_collector.h"
+#include "gc/gc_newobj_macros.h"
+#include "gc/roots/gc_roots.h"
 #include "class.h"
 #include "field.h"
 #include "3rd/utf8/utf8.h"
@@ -16,7 +18,7 @@ namespace vm
 {
 
 static metadata::RtClass* g_stringClass = nullptr;
-static RtString** g_emptyString_ptr = nullptr;
+static RtString* g_empty_string = nullptr;
 static const metadata::RtMethodInfo* g_redirectedCtorMethod = nullptr;
 namespace
 {
@@ -47,16 +49,6 @@ static utils::HashSet<RtString*, RtStringHash, RtStringEqual> g_internTable;
 
 // Removed key builder; Hash/Eq operate directly on RtString contents
 
-static RtResultVoid init_empty_string(metadata::RtClass* stringClass)
-{
-    assert(g_emptyString_ptr == nullptr);
-    g_emptyString_ptr = (RtString**)gc::GarbageCollector::allocate_fixed_reference_array(1);
-    RtString* emptyString = String::fast_allocate_string(0);
-
-    *g_emptyString_ptr = emptyString;
-    RET_VOID_OK();
-}
-
 static RtResultVoid init_static_empty_string(metadata::RtClass* stringClass)
 {
     const metadata::RtFieldInfo* emptyField = Class::get_field_for_name(stringClass, "Empty", false);
@@ -65,11 +57,10 @@ static RtResultVoid init_static_empty_string(metadata::RtClass* stringClass)
         assert(false && "String.Empty field not found");
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
-    assert(*g_emptyString_ptr);
-    assert((*g_emptyString_ptr)->length == 0);
-    RET_ERR_ON_FAIL(Field::set_static_value(emptyField, g_emptyString_ptr));
+    g_empty_string = String::fast_allocate_string(0);
+    RET_ERR_ON_FAIL(Field::set_static_value(emptyField, &g_empty_string));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, empty_str, Field::get_value_object(emptyField, nullptr));
-    assert(empty_str == *g_emptyString_ptr);
+    assert(empty_str == g_empty_string);
     RET_VOID_OK();
 }
 
@@ -97,17 +88,33 @@ RtResultVoid String::initialize()
 {
     metadata::RtClass* stringClass = Class::get_corlib_types().cls_string;
     g_stringClass = stringClass;
-    RET_ERR_ON_FAIL(init_empty_string(stringClass));
     RET_ERR_ON_FAIL(init_static_empty_string(stringClass));
     RET_ERR_ON_FAIL(init_redirected_ctor_method(stringClass));
     RET_VOID_OK();
+}
+
+static void visit_intern_string_roots(gc::GcVisitObjectRoot visit, void* userdata)
+{
+    for (utils::HashSet<RtString*>::const_iterator it = g_internTable.begin(); it != g_internTable.end(); ++it)
+    {
+        RtString* str = *it;
+        if (str != nullptr)
+        {
+            visit(reinterpret_cast<vm::RtObject*>(str), userdata);
+        }
+    }
+}
+
+void register_string_gc_roots()
+{
+    gc::GcRoots::register_visit_object_roots(visit_intern_string_roots);
 }
 
 constexpr size_t OVER_SIZE_OF_STRING = 4;
 
 RtString* String::get_empty_string()
 {
-    return *g_emptyString_ptr;
+    return g_empty_string;
 }
 
 const metadata::RtMethodInfo* String::get_redirected_ctor_method()
@@ -169,8 +176,8 @@ RtString* String::fast_allocate_string(int32_t length)
     // String::GetLegacyNonRandomizedHashCode need zero terminated string, so we allocate one extra character.
     // TODO: can we optimize it out? we have redirected String::GetHashCode and String::GetLegacyNonRandomizedHashCode to
     // the intrinsic implementation which does not require zero-termination.
-    RtString* newString =
-        (RtString*)gc::GarbageCollector::allocate_object_not_contains_references(g_stringClass, static_cast<size_t>(get_string_allocation_size(length)));
+    RtString* newString = (RtString*)LEANCLR_NEWOBJ_INTERNAL_NOREF(g_stringClass, static_cast<size_t>(get_string_allocation_size(length)), __FILE__, __LINE__,
+                                                                  "String::fast_allocate_string");
     newString->length = static_cast<int32_t>(length);
     return newString;
 }

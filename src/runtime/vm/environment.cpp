@@ -6,6 +6,7 @@
 #include "utils/hashmap.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
+#include "gc/roots/gc_roots.h"
 
 namespace leanclr
 {
@@ -103,6 +104,28 @@ RtResultVoid Environment::init_cmdline_args(const char** argv, int32_t argc)
 
     g_cmdline_args = args_array;
     RET_VOID_OK();
+}
+
+static void visit_environment_roots(gc::GcVisitObjectRoot visit, void* userdata)
+{
+    if (g_cmdline_args != nullptr)
+    {
+        visit(reinterpret_cast<vm::RtObject*>(g_cmdline_args), userdata);
+    }
+    for (utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>::const_iterator it = s_environment_variables_map.begin();
+         it != s_environment_variables_map.end(); ++it)
+    {
+        if (it->second != nullptr)
+        {
+            visit(reinterpret_cast<vm::RtObject*>(it->second), userdata);
+        }
+    }
+}
+
+void register_environment_gc_roots()
+{
+    gc::GcRoots::register_slot(reinterpret_cast<vm::RtObject**>(&g_cmdline_args));
+    gc::GcRoots::register_visit_object_roots(visit_environment_roots);
 }
 
 RtResult<RtString*> Environment::get_environment_variable(const char* variable_name)

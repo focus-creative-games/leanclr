@@ -170,6 +170,24 @@ The LeanCLR CMakeLists.txt provides the following configuration:
 | Library Type | STATIC | Builds as static library |
 | Exceptions | Disabled | C++ exceptions disabled for smaller binary |
 
+## IDE support (Cursor / VS Code)
+
+Windows builds use the **Visual Studio** CMake generator, which does **not** emit `compile_commands.json`. Without it, `#include` squiggles and go-to-definition fail even when `build.bat` succeeds.
+
+From the repo root (or `scripts/runtime`):
+
+```cmd
+scripts\runtime\gen-compile-commands.bat
+```
+
+This configures a small **Ninja** tree under `out/cmake/runtime/compile-db-x64/`, copies `compile_commands.json` to the repo root, and enables C/C++ IntelliSense and **clangd** (see `.vscode/settings.json` and `.clangd`).
+
+Re-run after adding/removing `.cpp` files or changing CMake options (`shared`, GC algorithm, etc.). Then **Reload Window** in Cursor if diagnostics do not refresh.
+
+On Linux/macOS, a normal `build.sh` also produces `compile_commands.json`; you can run `scripts/runtime/gen-compile-commands.sh` to refresh the root copy.
+
+If both **C/C++** and **clangd** extensions are installed, disable one engine to avoid duplicate diagnostics (clangd: set `"C_Cpp.intelliSenseEngine": "disabled"` in `.vscode/settings.json`).
+
 ## Troubleshooting
 
 ### Common Issues
@@ -192,6 +210,11 @@ The LeanCLR CMakeLists.txt provides the following configuration:
 4. **Emscripten build fails**
    - Ensure `emsdk_env.bat` was run in the current terminal
    - Verify Emscripten installation: `emcc --version`
+
+5. **Cursor/VS Code: `#include` errors or no go-to-definition**
+   - Run `scripts\runtime\gen-compile-commands.bat` (Windows) or `scripts/runtime/gen-compile-commands.sh` (Unix)
+   - Open the **repository root** (`leanclr-private`), not only `src/runtime`, as the workspace folder
+   - Reload the editor window
 
 ## Next Steps
 

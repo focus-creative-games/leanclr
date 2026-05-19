@@ -3,6 +3,10 @@
 #include "core/rt_base.h"
 #include "rt_managed_types.h"
 
+// Runtime-native allocation with optional GC allocation site (see gc/gc_newobj_macros.h).
+#define LEANCLR_VM_NEW_OBJECT(klass, native_runtime_method)                                                            \
+    (::leanclr::vm::Object::new_object_native((klass), (native_runtime_method), __FILE__, __LINE__))
+
 namespace leanclr
 {
 namespace vm
@@ -13,6 +17,12 @@ class Object
   public:
     // Create new instance of a class
     static RtResult<RtObject*> new_object(const metadata::RtClass* klass);
+
+    static RtResult<RtObject*> new_object_native(const metadata::RtClass* klass, const char* native_runtime_method, const char* file,
+                                                 uint32_t line);
+
+    // Create instance after .cctor; records interpreter allocation site (IL offset).
+    static RtResult<RtObject*> new_object_interp(const metadata::RtClass* klass, const metadata::RtMethodInfo* method, uint32_t il_offset);
 
     // Box a value type into an object
     static RtResult<RtObject*> box_object(const metadata::RtClass* klass, const void* value);

@@ -24,6 +24,7 @@
 #include "alloc/general_allocation.h"
 #include "alloc/metadata_allocation.h"
 #include "gc/garbage_collector.h"
+#include "gc_roots_register.h"
 #include "interp/machine_state.h"
 #include "utils/rt_vector.h"
 
@@ -395,6 +396,8 @@ RtResultVoid Runtime::initialize()
     Settings::get_command_line_arguments(argc, argv);
     RET_ERR_ON_FAIL(Environment::init_cmdline_args(argv, argc));
 
+    register_all_gc_roots();
+
     metadata::RtModuleDef* corlib_mod = Assembly::get_corlib()->mod;
     auto corlib_aot_module_data = corlib_mod->get_aot_module_data();
     if (corlib_aot_module_data != nullptr && corlib_aot_module_data->deferred_initializer)
@@ -485,7 +488,7 @@ RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const met
     if (return_instance)
     {
         assert(!Class::is_nullable_type(method->parent));
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, new_obj, Object::new_object(method->parent));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, new_obj, LEANCLR_VM_NEW_OBJECT(method->parent, "Runtime::invoke_object_arguments_without_run_cctor"));
         actual_obj = new_obj;
     }
 

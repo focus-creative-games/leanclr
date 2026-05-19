@@ -39,7 +39,7 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
     {
         if (is_default_value)
         {
-            return vm::Object::new_object(fieldClass);
+            return LEANCLR_VM_NEW_OBJECT(fieldClass, "MetadataConst::decode_const_object");
         }
         if (raw_data.type != typeSig->ele_type)
         {
@@ -79,7 +79,7 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
     {
         if (is_default_value)
         {
-            return vm::Object::new_object(fieldClass);
+            return LEANCLR_VM_NEW_OBJECT(fieldClass, "MetadataConst::decode_const_object");
         }
         if (vm::Class::is_enum_type(fieldClass))
         {
@@ -123,7 +123,7 @@ RtResult<vm::RtObject*> MetadataConst::decode_const_object(RtModuleDef* mod, Enc
         }
         if (is_default_value)
         {
-            return vm::Object::new_object(fieldClass);
+            return LEANCLR_VM_NEW_OBJECT(fieldClass, "MetadataConst::decode_const_object");
         }
         if (vm::Class::is_enum_type(fieldClass) && raw_data.type == element_class->by_val->ele_type)
         {

@@ -710,7 +710,7 @@ RtResult<RtObject*> CustomAttribute::read_custom_attribute(metadata::RtModuleDef
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca_obj, Object::new_object(klass));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca_obj, LEANCLR_VM_NEW_OBJECT(klass, "CustomAttribute::read_custom_attribute"));
 
     uint32_t param_count = ctor_method->parameter_count;
 
@@ -823,7 +823,7 @@ static RtResult<RtObject*> new_custom_attribute_typed_argument(const metadata::R
     {
         invoke_args[1] = *(const void**)data;
     }
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, typed_arg_obj, Object::new_object(ctor->parent));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, typed_arg_obj, LEANCLR_VM_NEW_OBJECT(ctor->parent, "CustomAttribute::new_custom_attribute_typed_argument"));
     RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(ctor, typed_arg_obj, invoke_args));
     RET_OK(typed_arg_obj);
 }
@@ -831,7 +831,7 @@ static RtResult<RtObject*> new_custom_attribute_typed_argument(const metadata::R
 static RtResult<RtObject*> new_custom_attribute_named_argument(const metadata::RtMethodInfo* ctor, RtObject* member_info, RtObject* typed_arg)
 {
     const void* invoke_args[2] = {member_info, typed_arg + 1}; // typed_arg + 1 to skip the RtObject header
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, named_arg_obj, Object::new_object(ctor->parent));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, named_arg_obj, LEANCLR_VM_NEW_OBJECT(ctor->parent, "CustomAttribute::new_custom_attribute_typed_argument"));
     RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(ctor, named_arg_obj, invoke_args));
     RET_OK(named_arg_obj);
 }
@@ -1202,7 +1202,7 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(me
         ctor_args[2] = &data_ptr;
         ctor_args[3] = &data_len;
 
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca_data_obj, Object::new_object(ca_data_ctor->parent));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca_data_obj, LEANCLR_VM_NEW_OBJECT(ca_data_ctor->parent, "CustomAttribute::get_customattributes_data_on_target_token"));
         RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(ca_data_ctor, ca_data_obj, ctor_args));
 
         // gc::GarbageCollector::write_barrier((RtObject**)Array::get_array_data_start_as<RtObject*>(ca_data_arr) + i, ca_data_obj);
@@ -1318,7 +1318,7 @@ RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::R
     init_marshal_as_fields();
 
     const CorLibTypes& corlib_types = Class::get_corlib_types();
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, marshal_as_obj, Object::new_object(corlib_types.cls_marshal_as));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, marshal_as_obj, LEANCLR_VM_NEW_OBJECT(corlib_types.cls_marshal_as, "CustomAttribute::get_marshal_info"));
     const void* ctor_args[1] = {&spec.native_type};
     RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(s_marshal_as_metadatas.ctor_int16, marshal_as_obj, ctor_args));
 

@@ -22,7 +22,7 @@ RtResultVoid ctor_invoker(metadata::RtManagedMethodPointer methodPtr, const meta
 
 RtResult<vm::RtObject*> SystemObject::newobj_ctor() noexcept
 {
-    return vm::Object::new_object(vm::Class::get_corlib_types().cls_object);
+    return LEANCLR_VM_NEW_OBJECT(vm::Class::get_corlib_types().cls_object, "SystemObject::newobj_ctor");
 }
 
 /// @newobj: System.Object::.ctor()

@@ -10,12 +10,6 @@ namespace vm
 static GCMode s_mode = GCMode::ENABLED;
 static bool s_is_incremental = false;
 static int64_t s_max_time_slice_ns = 0;
-static int64_t s_used_size = 0;
-static int64_t s_heap_size = 0;
-static void* s_heap_start = nullptr;
-static void* s_heap_end = nullptr;
-static void* s_heap_top = nullptr;
-static void* s_heap_bottom = nullptr;
 
 vm::RtObject* GC::get_ephemeron_tombstone()
 {
@@ -30,7 +24,7 @@ void GC::register_ephemeron_array(vm::RtObject* arr)
 int32_t GC::get_collection_count(int32_t generation)
 {
     (void)generation;
-    return 0;
+    return gc::GarbageCollector::get_collection_count();
 }
 
 int32_t GC::get_max_generation()
@@ -41,11 +35,19 @@ int32_t GC::get_max_generation()
 void GC::collect(int32_t generation)
 {
     (void)generation;
+    if (s_mode != GCMode::DISABLED)
+    {
+        gc::GarbageCollector::collect();
+    }
 }
 
 int32_t GC::collect_a_little()
 {
-    return 0;
+    if (s_mode == GCMode::DISABLED)
+    {
+        return 0;
+    }
+    return gc::GarbageCollector::maybe_collect() ? 1 : 0;
 }
 
 void GC::internal_collect(int32_t generation)
@@ -55,12 +57,12 @@ void GC::internal_collect(int32_t generation)
 
 void GC::record_pressure(int64_t bytes)
 {
-    (void)bytes;
+    gc::GarbageCollector::record_pressure(bytes);
 }
 
 int64_t GC::get_allocated_bytes_for_current_thread()
 {
-    return 0;
+    return gc::GarbageCollector::get_used_size();
 }
 
 int32_t GC::get_generation(vm::RtObject* obj)
@@ -85,8 +87,11 @@ void GC::reregister_for_finalize(vm::RtObject* obj)
 
 int64_t GC::get_total_memory(bool force_full_collection)
 {
-    (void)force_full_collection;
-    return 0;
+    if (force_full_collection && s_mode != GCMode::DISABLED)
+    {
+        gc::GarbageCollector::collect();
+    }
+    return gc::GarbageCollector::get_used_size();
 }
 
 void GC::start_incremental_collection()
@@ -130,12 +135,12 @@ int64_t GC::get_max_time_slice_ns()
 
 int64_t GC::get_used_size()
 {
-    return s_used_size;
+    return gc::GarbageCollector::get_used_size();
 }
 
 int64_t GC::get_heap_size()
 {
-    return s_heap_size;
+    return gc::GarbageCollector::get_heap_size();
 }
 
 void GC::foreach_heap(void (*func)(void* data, void* context), void* userData)

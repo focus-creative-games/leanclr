@@ -1,0 +1,30 @@
+{
+  "configurations": [
+    {
+      "name": "leanclr (compile_commands)",
+      "compileCommands": "${workspaceFolder}/compile_commands.json",
+      "cppStandard": "c++11",
+      "intelliSenseMode": "windows-msvc-x64"
+    },
+    {
+      "name": "leanclr (fallback, run gen-compile-commands)",
+      "includePath": [
+        "${workspaceFolder}/src/runtime",
+        "${workspaceFolder}/src/runtime/**"
+      ],
+      "defines": [
+        "LEANCLR_DLL_EXPORTS",
+        "LEANCLR_USE_SHIPPING_ZLIB=1",
+        "UNITY_VERSION=60000400",
+        "LEANCLR_GC_MARK_SWEEP=1",
+        "_DEBUG",
+        "UNICODE",
+        "_UNICODE"
+      ],
+      "cppStandard": "c++11",
+      "intelliSenseMode": "windows-msvc-x64",
+      "compilerPath": "${default}"
+    }
+  ],
+  "version": 4
+}
