@@ -172,21 +172,13 @@ The LeanCLR CMakeLists.txt provides the following configuration:
 
 ## IDE support (Cursor / VS Code)
 
-Windows builds use the **Visual Studio** CMake generator, which does **not** emit `compile_commands.json`. Without it, `#include` squiggles and go-to-definition fail even when `build.bat` succeeds.
+**Cursor** ships a C/C++ extension backed by **clangd** (not Microsoft cpptools). Workspace settings disable the legacy `C_Cpp.*` IntelliSense engine and enable clangd. Compile flags for `src/runtime/**` live in `src/runtime/compile_flags.txt` (`-I.` = runtime include root). No `compile_commands.json` is required.
 
-From the repo root (or `scripts/runtime`):
+Open the **repository root** (`leanclr-private`) as the workspace folder, then reload the window if IntelliSense does not pick up changes.
 
-```cmd
-scripts\runtime\gen-compile-commands.bat
-```
+If you change CMake options that affect defines (for example `LEANCLR_GC_ALGORITHM` or `shared`), update the matching `-D` lines in `src/runtime/compile_flags.txt`.
 
-This configures a small **Ninja** tree under `out/cmake/runtime/compile-db-x64/`, copies `compile_commands.json` to the repo root, and enables C/C++ IntelliSense and **clangd** (see `.vscode/settings.json` and `.clangd`).
-
-Re-run after adding/removing `.cpp` files or changing CMake options (`shared`, GC algorithm, etc.). Then **Reload Window** in Cursor if diagnostics do not refresh.
-
-On Linux/macOS, a normal `build.sh` also produces `compile_commands.json`; you can run `scripts/runtime/gen-compile-commands.sh` to refresh the root copy.
-
-If both **C/C++** and **clangd** extensions are installed, disable one engine to avoid duplicate diagnostics (clangd: set `"C_Cpp.intelliSenseEngine": "disabled"` in `.vscode/settings.json`).
+Do not install **ms-vscode.cpptools** alongside Cursor's C/C++ extension; keep `"clangd.enable": true` and `"C_Cpp.intelliSenseEngine": "disabled"`.
 
 ## Troubleshooting
 
@@ -212,8 +204,9 @@ If both **C/C++** and **clangd** extensions are installed, disable one engine to
    - Verify Emscripten installation: `emcc --version`
 
 5. **Cursor/VS Code: `#include` errors or no go-to-definition**
-   - Run `scripts\runtime\gen-compile-commands.bat` (Windows) or `scripts/runtime/gen-compile-commands.sh` (Unix)
-   - Open the **repository root** (`leanclr-private`), not only `src/runtime`, as the workspace folder
+   - Open the **repository root** (`leanclr-private`), not only `src/runtime`
+   - Confirm `src/runtime/compile_flags.txt` macros match your CMake options
+   - Ensure `"clangd.enable": true` and Cursor's C/C++ extension is enabled
    - Reload the editor window
 
 ## Next Steps

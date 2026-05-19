@@ -1,8 +1,8 @@
 {
   "recommendations": [
-    "ms-vscode.cpptools",
-    "llvm-vs-code-extensions.vscode-clangd",
     "xaver.clang-format"
   ],
-  "unwantedRecommendations": []
+  "unwantedRecommendations": [
+    "ms-vscode.cpptools"
+  ]
 }

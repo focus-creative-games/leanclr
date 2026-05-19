@@ -1,17 +1,22 @@
 {
   "editor.formatOnSave": true,
   "editor.formatOnSaveMode": "file",
-  "C_Cpp.default.compileCommands": "${workspaceFolder}/compile_commands.json",
-  "C_Cpp.default.cppStandard": "c++11",
-  "C_Cpp.default.intelliSenseMode": "windows-msvc-x64",
-  "C_Cpp.errorSquiggles": "enabled",
+
+  "C_Cpp.intelliSenseEngine": "disabled",
+  "C_Cpp.autocomplete": "disabled",
+  "C_Cpp.errorSquiggles": "disabled",
+
+  "clangd.enable": true,
+  "clangd.checkUpdates": false,
+  "clangd.arguments": [
+    "--background-index",
+    "--clang-tidy=false",
+    "--header-insertion=never"
+  ],
+
   "clang-format.executable": "${workspaceRoot}/tools/clang-format/clang-format.exe",
   "clang-format.style": "file",
-  "clangd.arguments": [
-    "--compile-commands-dir=${workspaceFolder}",
-    "--background-index",
-    "--clang-tidy=false"
-  ],
+
   "[cpp]": {
     "editor.defaultFormatter": "xaver.clang-format",
     "editor.formatOnSave": true
@@ -20,10 +25,12 @@
     "editor.defaultFormatter": "xaver.clang-format",
     "editor.formatOnSave": true
   },
+
   "files.associations": {
     "*.h": "cpp",
     "build_config.h": "cpp"
   },
+
   "cmake.sourceDirectory": "${workspaceFolder}/src/runtime",
   "dotnet.defaultSolution": "src/leanaot/LeanAOT.sln"
 }

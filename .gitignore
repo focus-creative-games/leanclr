@@ -405,9 +405,6 @@ FodyWeavers.xsd
 !.vscode/extensions.json
 !.vscode/*.code-snippets
 
-# Generated for clangd / C++ IntelliSense (scripts/runtime/gen-compile-commands.*)
-/compile_commands.json
-
 # Local History for Visual Studio Code
 .history/
 

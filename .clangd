@@ -1,2 +1,9 @@
-CompileFlags:
-  CompilationDatabase: .
+# Cursor C/C++ (clangd). Open the repository root as the workspace folder.
+# Compile flags for src/runtime/** are in src/runtime/compile_flags.txt (-I. = runtime root).
+
+Diagnostics:
+  UnusedIncludes: None
+  MissingIncludes: None
+
+Index:
+  Background: Build
