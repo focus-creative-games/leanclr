@@ -20,6 +20,11 @@
     "header": "intrinsics/system_array.h"
   },
   {
+    "name": "System.MathF::Round(System.Single)",
+    "func": "SystemMathF::round",
+    "header": "intrinsics/system_mathf.h"
+  },
+  {
     "name": "System.Numerics.Vector::get_IsHardwareAccelerated",
     "func": "SystemNumericsVector::get_is_hardware_accelerated",
     "header": "intrinsics/system_numerics_vector.h"

@@ -7,20 +7,6 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<float> SystemMathF::round(float value) noexcept
-{
-    RET_OK(static_cast<float>(std::round(static_cast<double>(value))));
-}
-/// @icall: System.MathF::Round(System.Single)
-static RtResultVoid round_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                  interp::RtStackObject* ret) noexcept
-{
-    auto value = EvalStackOp::get_param<float>(params, 0);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(float, result, SystemMathF::round(value));
-    EvalStackOp::set_return(ret, result);
-    RET_VOID_OK();
-}
-
 RtResult<float> SystemMathF::acos(float value) noexcept
 {
     RET_OK(std::acos(value));
@@ -353,7 +339,6 @@ static RtResultVoid modf_invoker(metadata::RtManagedMethodPointer, const metadat
 }
 
 static vm::InternalCallEntry s_internal_call_entries_system_mathf[] = {
-    {"System.MathF::Round(System.Single)", (vm::InternalCallFunction)&SystemMathF::round, round_invoker},
     {"System.MathF::Acos(System.Single)", (vm::InternalCallFunction)&SystemMathF::acos, acos_invoker_mathf},
     {"System.MathF::Acosh(System.Single)", (vm::InternalCallFunction)&SystemMathF::acosh, acosh_invoker},
     {"System.MathF::Asin(System.Single)", (vm::InternalCallFunction)&SystemMathF::asin, asin_invoker},

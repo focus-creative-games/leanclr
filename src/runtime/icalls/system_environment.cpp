@@ -308,7 +308,7 @@ RtResult<bool> SystemEnvironment::get_is_64bit_operating_system() noexcept
     RET_OK(sizeof(void*) == 8);
 }
 
-/// @icall: System.Environment::get_Is64BitOperatingSystem
+/// @icall: System.Environment::GetIs64BitOperatingSystem()
 static RtResultVoid get_is_64bit_operating_system_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                           const interp::RtStackObject* /*params*/, interp::RtStackObject* ret) noexcept
 {
@@ -370,7 +370,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_environment[] = {
     {"System.Environment::get_bundled_machine_config", (vm::InternalCallFunction)SystemEnvironment::get_bundled_machine_config,
      get_bundled_machine_config_invoker},
     {"System.Environment::FailFast", (vm::InternalCallFunction)SystemEnvironment::fail_fast, fail_fast_invoker},
-    {"System.Environment::get_Is64BitOperatingSystem", (vm::InternalCallFunction)SystemEnvironment::get_is_64bit_operating_system,
+    {"System.Environment::GetIs64BitOperatingSystem()", (vm::InternalCallFunction)SystemEnvironment::get_is_64bit_operating_system,
      get_is_64bit_operating_system_invoker},
     {"System.Environment::get_ProcessorCount", (vm::InternalCallFunction)SystemEnvironment::get_processor_count, get_processor_count_invoker},
     {"System.Environment::GetPageSize", (vm::InternalCallFunction)SystemEnvironment::get_page_size, get_page_size_invoker},

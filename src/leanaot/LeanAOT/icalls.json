@@ -615,11 +615,6 @@
     "header": "icalls/system_environment.h"
   },
   {
-    "name": "System.Environment::get_Is64BitOperatingSystem",
-    "func": "SystemEnvironment::get_is_64bit_operating_system",
-    "header": "icalls/system_environment.h"
-  },
-  {
     "name": "System.Environment::get_MachineName",
     "func": "SystemEnvironment::get_machine_name",
     "header": "icalls/system_environment.h"
@@ -652,6 +647,11 @@
   {
     "name": "System.Environment::GetEnvironmentVariableNames",
     "func": "SystemEnvironment::get_environment_variable_names",
+    "header": "icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::GetIs64BitOperatingSystem()",
+    "func": "SystemEnvironment::get_is_64bit_operating_system",
     "header": "icalls/system_environment.h"
   },
   {
@@ -1122,11 +1122,6 @@
   {
     "name": "System.MathF::Pow(System.Single,System.Single)",
     "func": "SystemMathF::pow",
-    "header": "icalls/system_mathf.h"
-  },
-  {
-    "name": "System.MathF::Round(System.Single)",
-    "func": "SystemMathF::round",
     "header": "icalls/system_mathf.h"
   },
   {
@@ -2285,13 +2280,13 @@
     "header": "icalls/system_threading_monitor.h"
   },
   {
-    "name": "System.Threading.Monitor::Monitor_try_enter_with_atomic_var",
-    "func": "SystemThreadingMonitor::monitor_try_enter_with_atomic_var",
+    "name": "System.Threading.Monitor::Monitor_wait",
+    "func": "SystemThreadingMonitor::monitor_wait",
     "header": "icalls/system_threading_monitor.h"
   },
   {
-    "name": "System.Threading.Monitor::Monitor_wait",
-    "func": "SystemThreadingMonitor::monitor_wait",
+    "name": "System.Threading.Monitor::try_enter_with_atomic_var",
+    "func": "SystemThreadingMonitor::monitor_try_enter_with_atomic_var",
     "header": "icalls/system_threading_monitor.h"
   },
   {

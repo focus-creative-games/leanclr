@@ -100,7 +100,7 @@ RtResultVoid SystemThreadingMonitor::monitor_try_enter_with_atomic_var(vm::RtObj
     RET_VOID_OK();
 }
 
-/// @icall: System.Threading.Monitor::Monitor_try_enter_with_atomic_var
+/// @icall: System.Threading.Monitor::try_enter_with_atomic_var
 static RtResultVoid monitor_try_enter_with_atomic_var_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                               const interp::RtStackObject* params, interp::RtStackObject*) noexcept
 {
@@ -133,7 +133,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_threading_monitor[] 
     {"System.Threading.Monitor::Monitor_pulse", (vm::InternalCallFunction)&SystemThreadingMonitor::monitor_pulse, monitor_pulse_invoker},
     {"System.Threading.Monitor::Monitor_pulse_all", (vm::InternalCallFunction)&SystemThreadingMonitor::monitor_pulse_all, monitor_pulse_all_invoker},
     {"System.Threading.Monitor::Monitor_wait", (vm::InternalCallFunction)&SystemThreadingMonitor::monitor_wait, monitor_wait_invoker},
-    {"System.Threading.Monitor::Monitor_try_enter_with_atomic_var", (vm::InternalCallFunction)&SystemThreadingMonitor::monitor_try_enter_with_atomic_var,
+    {"System.Threading.Monitor::try_enter_with_atomic_var", (vm::InternalCallFunction)&SystemThreadingMonitor::monitor_try_enter_with_atomic_var,
      monitor_try_enter_with_atomic_var_invoker},
     {"System.Threading.Monitor::Monitor_test_owner", (vm::InternalCallFunction)&SystemThreadingMonitor::monitor_test_owner, monitor_test_owner_invoker},
 };

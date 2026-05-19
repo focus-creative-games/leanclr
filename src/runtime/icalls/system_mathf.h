@@ -12,7 +12,6 @@ class SystemMathF
   public:
     static utils::Span<vm::InternalCallEntry> get_internal_call_entries() noexcept;
 
-    static RtResult<float> round(float value) noexcept;
     static RtResult<float> acos(float value) noexcept;
     static RtResult<float> acosh(float value) noexcept;
     static RtResult<float> asin(float value) noexcept;
