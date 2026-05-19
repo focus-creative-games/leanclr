@@ -343,7 +343,7 @@ RtResultVoid Array::szarray_new_invoker(metadata::RtManagedMethodPointer method_
     int32_t length = interp::EvalStackOp::get_param<int32_t>(params, 0);
     metadata::RtClass* klass = const_cast<metadata::RtClass*>(method->parent);
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr, LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS(klass, length, "Array::szarray_new_invoker"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr, LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS_INTERNAL(klass, length, "Array::szarray_new_invoker"));
     interp::EvalStackOp::set_return(ret, arr);
     RET_VOID_OK();
 }
@@ -421,7 +421,7 @@ RtResultVoid Array::newmdarray_lengths_invoker(metadata::RtManagedMethodPointer 
         i32_lengths[i] = interp::EvalStackOp::get_param<int32_t>(params, i);
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr, LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(const_cast<metadata::RtClass*>(method->parent), i32_lengths, nullptr, "Array::newmdarray_lengths_invoker"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr, LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(const_cast<metadata::RtClass*>(method->parent), i32_lengths, nullptr, "Array::newmdarray_lengths_invoker"));
     interp::EvalStackOp::set_return(ret, arr);
     RET_VOID_OK();
 }
@@ -443,7 +443,7 @@ RtResultVoid Array::newmdarray_lengths_lower_bounds_invoker(metadata::RtManagedM
     }
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr,
-                                            LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(const_cast<metadata::RtClass*>(method->parent), i32_lengths, i32_lower_bounds, "Array::newmdarray_lengths_lower_bounds_invoker"));
+                                            LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(const_cast<metadata::RtClass*>(method->parent), i32_lengths, i32_lower_bounds, "Array::newmdarray_lengths_lower_bounds_invoker"));
     interp::EvalStackOp::set_return(ret, arr);
 
     RET_VOID_OK();

@@ -88,7 +88,7 @@ uint32_t GcAllocSite::intern_site_id() const
             break;
         case GcAllocSiteKind::Internal:
             if (e.site.u.internal.file == u.internal.file && e.site.u.internal.line == u.internal.line &&
-                e.site.u.internal.native_method == u.internal_method)
+                e.site.u.internal.native_method == u.internal.native_method)
             {
                 return static_cast<uint32_t>(i + 1);
             }
