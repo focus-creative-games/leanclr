@@ -6,7 +6,7 @@ option(BUILD_SHARED_LEANCLR "Build leanclr as a shared (dynamic) library" OFF)
 option(LEANCLR_ENABLE_CPP_EXCEPTIONS "Enable C++ exceptions for runtime target" OFF)
 
 set(LEANCLR_GC_ALGORITHM "MARK_SWEEP" CACHE STRING "GC algorithm: MARK_SWEEP or ZERO_GC")
-option(LEANCLR_GC_DEBUG "Enable GC debug (quarantine, allocation sites)" OFF)
+option(LEANCLR_GC_DEBUG "Enable GC debug (quarantine, allocation sites)" ON)
 
 set(RUNTIME_DIRS
     alloc
@@ -60,7 +60,7 @@ else()
     message(FATAL_ERROR "Unknown LEANCLR_GC_ALGORITHM: ${LEANCLR_GC_ALGORITHM} (use MARK_SWEEP or ZERO_GC)")
 endif()
 if(LEANCLR_GC_DEBUG)
-    target_compile_definitions(leanclr PRIVATE LEANCLR_GC_DEBUG=1)
+    target_compile_definitions(leanclr PUBLIC LEANCLR_GC_DEBUG=1)
 endif()
 
 target_include_directories(leanclr PUBLIC
