@@ -86,12 +86,14 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::make_array_type(vm::RtReflect
 
     // Create array class
     metadata::RtClass* arr_class = nullptr;
-    if (rank <= 1)
+    if (rank == 0)
     {
         UNWRAP_OR_RET_ERR_ON_FAIL(arr_class, vm::ArrayClass::get_szarray_class_from_element_typesig(ele_type_sig));
     }
     else
     {
+        // when rank == 1, it is a 1-d bound array
+        // when rank > 1, it is a multi-dimensional array
         UNWRAP_OR_RET_ERR_ON_FAIL(arr_class, vm::ArrayClass::get_array_class_from_element_type(ele_type_sig, static_cast<uint8_t>(rank)));
     }
 
