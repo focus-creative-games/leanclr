@@ -554,5 +554,22 @@ namespace Tests.CSharp.CustomeAttrites
                 Assert.Null(pa);
             }
         }
+
+
+
+
+        [FT_Enum(AOT_Enum_int.A)]
+        private string  field_string;
+
+
+        [UnitTest]
+        public void FieldGetAllCustomAttributes()
+        {
+            var field = GetType().GetField("field_string", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field);
+            var attrs = field.GetCustomAttributes(false);
+            Assert.NotNull(attrs);
+            Assert.Equal(1, attrs.Length);
+        }
     }
 }
