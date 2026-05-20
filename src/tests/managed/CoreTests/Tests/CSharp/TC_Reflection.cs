@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using CoreTests;
 
 namespace Tests.CSharp
 {
@@ -195,6 +196,27 @@ namespace Tests.CSharp
         public void GetNotCtorCCtorMethods()
         {
             var m = typeof(A).GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static | BindingFlags.Instance | BindingFlags.DeclaredOnly);
+            Assert.Equal(1, m.Length);
+        }
+
+        public class B
+        {
+            public static int x;
+            public B()
+            {
+
+            }
+
+            static B()
+            {
+                x = 10;
+            }
+        }
+
+        [UnitTest]
+        public void GetCCtorMethod()
+        {
+            var m = typeof(A).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.DeclaredOnly);
             Assert.Equal(1, m.Length);
         }
     }
