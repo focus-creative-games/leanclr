@@ -33,6 +33,8 @@ namespace detail
 using GcHeapImpl = MarkSweepHeap;
 #elif defined(LEANCLR_GC_ZERO_GC)
 using GcHeapImpl = ZeroGcHeap;
+#else
+#error "Define LEANCLR_GC_MARK_SWEEP or LEANCLR_GC_ZERO_GC for the leanclr target"
 #endif
 } // namespace detail
 
