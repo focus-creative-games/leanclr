@@ -89,12 +89,16 @@ RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_element_type
         switch (ele_type)
         {
         case metadata::RtElementType::Array:
+        {
+            UNWRAP_OR_RET_ERR_ON_FAIL(ref_type, vm::Reflection::get_type_reflection_object(type_sig->data.array_type->ele_type));
+            break;
+        }
         case metadata::RtElementType::SZArray:
         case metadata::RtElementType::Ptr:
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, temp_ref_type,
-                                                    vm::Reflection::get_type_reflection_object(type_sig->data.element_type));
-            ref_type = temp_ref_type;
+        {
+            UNWRAP_OR_RET_ERR_ON_FAIL(ref_type, vm::Reflection::get_type_reflection_object(type_sig->data.element_type));
             break;
+        }
         default:
             ref_type = nullptr;
             break;
