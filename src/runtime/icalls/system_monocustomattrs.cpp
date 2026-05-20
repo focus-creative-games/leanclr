@@ -23,9 +23,11 @@ RtResult<bool> SystemMonoCustomAttrs::is_defined_internal(RtObject* obj, RtRefle
 
 RtResult<RtArray*> SystemMonoCustomAttrs::get_custom_attributes_internal(RtObject* obj, RtReflectionType* attribute_type, bool pseudo_attrs) noexcept
 {
-    // TODO: Handle pseudo attributes
-    (void)pseudo_attrs; // Suppress unused parameter warning
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, attr_klass, Class::get_class_from_typesig(attribute_type->type_handle));
+    metadata::RtClass* attr_klass = nullptr;
+    if (attribute_type != nullptr)
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(attr_klass, Class::get_class_from_typesig(attribute_type->type_handle));
+    }
     return CustomAttribute::get_customattributes_on_target_object(obj, attr_klass);
 }
 
