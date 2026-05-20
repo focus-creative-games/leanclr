@@ -708,11 +708,8 @@ RtResult<int32_t> SystemRuntimeType::get_type_code_impl_internal(vm::RtReflectio
 
 RtResult<vm::RtObject*> SystemRuntimeType::create_instance_internal(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
-    if (runtime_type == nullptr)
-        RET_OK(nullptr);
-
+    assert(runtime_type != nullptr);
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
-
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
 
     // Check if type is nullable - return null
