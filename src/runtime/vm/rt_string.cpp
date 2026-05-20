@@ -1,7 +1,6 @@
 
 #include "rt_string.h"
 #include "gc/garbage_collector.h"
-#include "gc/gc_newobj_macros.h"
 #include "gc/roots/gc_roots.h"
 #include "class.h"
 #include "field.h"

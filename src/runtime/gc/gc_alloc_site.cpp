@@ -111,26 +111,19 @@ uint32_t GcAllocSite::intern_site_id() const
 #endif
 }
 
-uint32_t gc_alloc_id_next()
-{
-#if LEANCLR_GC_DEBUG
-    return s_next_alloc_id++;
-#else
-    return 0;
-#endif
-}
-
-const char* GcSiteRegistry::get_site_description(uint32_t site_id)
+void GcAllocSite::get_site_description(uint32_t site_id, utils::Utf8StringBuilder& sb)
 {
 #if LEANCLR_GC_DEBUG
     if (site_id == 0 || site_id > s_sites.size())
     {
-        return "<unknown>";
+        sb.append_cstr("<unknown>");
+        return;
     }
     SiteEntry& e = s_sites[site_id - 1];
     if (e.description != nullptr)
     {
-        return e.description;
+        sb.append_cstr(e.description);
+        return;
     }
     // Build a short description on first use (stored in fixed heap via malloc).
     char buf[512];
@@ -159,16 +152,10 @@ const char* GcSiteRegistry::get_site_description(uint32_t site_id)
         std::snprintf(buf, sizeof(buf), "<none>");
         break;
     }
-    size_t len = std::strlen(buf) + 1;
-    e.description = static_cast<char*>(alloc::GeneralAllocation::malloc(len));
-    if (e.description)
-    {
-        std::memcpy(e.description, buf, len);
-    }
-    return e.description ? e.description : buf;
+    sb.append_cstr(buf);
 #else
     (void)site_id;
-    return "";
+    (void)sb;
 #endif
 }
 

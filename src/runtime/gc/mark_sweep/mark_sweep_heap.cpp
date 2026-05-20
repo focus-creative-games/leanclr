@@ -135,6 +135,13 @@ static GcBlockHeader* alloc_block(size_t block_size, uint16_t size_class, uint16
     return header;
 }
 
+static int64_t s_alloc_id_last = 0;
+
+static int64_t alloc_id_next()
+{
+    return ++s_alloc_id_last;
+}
+
 static vm::RtObject* alloc_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite& site, bool has_references)
 {
     const size_t block_size = gc_align_size(sizeof(GcBlockHeader) + size);
@@ -150,7 +157,7 @@ static vm::RtObject* alloc_object_impl(const metadata::RtClass* klass, size_t si
         return nullptr;
     }
 #if LEANCLR_GC_DEBUG
-    header->alloc_id = gc_alloc_id_next();
+    header->alloc_id = alloc_id_next();
     header->site_id = site.intern_site_id();
 #else
     (void)site;
@@ -223,6 +230,7 @@ static void move_to_quarantine(GcBlockHeader* header)
 
 static void verify_quarantine()
 {
+    utils::Utf8StringBuilder sb(512);
     for (QuarantineEntry* entry = s_quarantine_head; entry != nullptr; entry = entry->next)
     {
         if (entry->mirror == nullptr)
@@ -234,8 +242,10 @@ static void verify_quarantine()
             const GcBlockHeader* h = entry->header;
 #if LEANCLR_GC_DEBUG
             const vm::RtObject* obj = gc_object_from_header(const_cast<GcBlockHeader*>(h));
-            const char* site = GcSiteRegistry::get_site_description(h->site_id);
-            (void)site;
+            GcAllocSite::get_site_description(h->site_id, sb);
+            sb.sure_null_terminator_but_not_append();
+            assert(false && "Quarantine entry mismatch");
+            sb.clear();
             (void)obj;
             // TODO: route to leanclr log when available
 #endif
@@ -305,6 +315,8 @@ bool MarkSweepHeap::is_object_marked(const vm::RtObject* obj)
 
 void MarkSweepHeap::collect()
 {
+    // TODO
+    return;
     s_mark_stack.clear();
     GcRoots::foreach_root(mark_root_slot, nullptr);
     GcRoots::foreach_object_root(mark_object_root, nullptr);
@@ -362,15 +374,15 @@ vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, siz
     return alloc_object_impl(klass, size, GcAllocSite::none(), has_refs);
 }
 
-vm::RtObject* MarkSweepHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
-{
-    return alloc_object_impl(klass, size, site, false);
-}
+// vm::RtObject* MarkSweepHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
+// {
+//     return alloc_object_impl(klass, size, site, false);
+// }
 
-vm::RtObject* MarkSweepHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size)
-{
-    return alloc_object_impl(klass, size, GcAllocSite::none(), false);
-}
+// vm::RtObject* MarkSweepHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size)
+// {
+//     return alloc_object_impl(klass, size, GcAllocSite::none(), false);
+// }
 
 vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site)
 {
@@ -382,14 +394,6 @@ vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, s
 {
     const bool has_refs = arrClass->element_class != nullptr && vm::Class::get_has_references(arrClass->element_class);
     return alloc_object_impl(arrClass, totalBytes, GcAllocSite::none(), has_refs);
-}
-
-void MarkSweepHeap::write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)
-{
-    if (obj_ref_location != nullptr)
-    {
-        *obj_ref_location = new_obj;
-    }
 }
 
 int64_t MarkSweepHeap::get_used_size()

@@ -2,7 +2,6 @@
 #include "class.h"
 #include "object.h"
 #include "array_class.h"
-#include "gc/gc_newobj_macros.h"
 #include "utils/mem_op.h"
 #include "rt_managed_types.h"
 #include "interp/eval_stack_op.h"

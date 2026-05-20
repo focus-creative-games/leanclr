@@ -32,7 +32,6 @@ constexpr size_t PTR_ALIGN = PTR_SIZE;
 RtErr fatal_on_not_implemented_error();
 
 #if LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR
-
 #define RETURN_NOT_IMPLEMENTED_ERROR() RET_ERR(fatal_on_not_implemented_error())
 #else
 #define RETURN_NOT_IMPLEMENTED_ERROR() RET_ERR(RtErr::NotImplemented)

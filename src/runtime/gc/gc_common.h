@@ -20,8 +20,8 @@ struct GcBlockHeader
     uint16_t flags;
     uint16_t size_class;
 #if LEANCLR_GC_DEBUG
-    uint32_t alloc_id;
     uint32_t site_id;
+    int64_t alloc_id;
 #endif
 };
 

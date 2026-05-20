@@ -53,9 +53,9 @@ target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS LEANCLR_USE_SHIPP
 target_compile_definitions(leanclr PUBLIC UNITY_VERSION=60000400)
 
 if(LEANCLR_GC_ALGORITHM STREQUAL "MARK_SWEEP")
-    target_compile_definitions(leanclr PRIVATE LEANCLR_GC_MARK_SWEEP=1)
+    target_compile_definitions(leanclr PUBLIC LEANCLR_GC_MARK_SWEEP=1)
 elseif(LEANCLR_GC_ALGORITHM STREQUAL "ZERO_GC")
-    target_compile_definitions(leanclr PRIVATE LEANCLR_GC_ZERO_GC=1)
+    target_compile_definitions(leanclr PUBLIC LEANCLR_GC_ZERO_GC=1)
 else()
     message(FATAL_ERROR "Unknown LEANCLR_GC_ALGORITHM: ${LEANCLR_GC_ALGORITHM} (use MARK_SWEEP or ZERO_GC)")
 endif()

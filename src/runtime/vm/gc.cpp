@@ -147,6 +147,7 @@ void GC::foreach_heap(void (*func)(void* data, void* context), void* userData)
 {
     (void)func;
     (void)userData;
+    fatal_on_not_implemented_error();
 }
 
 void GC::start_gc_world()
@@ -174,17 +175,17 @@ void GC::write_barrier(RtObject** obj_ref_location, RtObject* new_obj)
 
 bool GC::has_strict_wbarriers()
 {
-    return false;
+    return gc::GarbageCollector::has_strict_wbarriers();
 }
 
 void GC::set_external_allocation_tracker(void (*func)(void*, size_t, int))
 {
-    (void)func;
+    //gc::GarbageCollector::set_external_allocation_tracker(func);
 }
 
 void GC::set_external_wbarrier_tracker(void (*func)(void**))
 {
-    (void)func;
+    //gc::GarbageCollector::set_external_wbarrier_tracker(func);
 }
 } // namespace vm
 } // namespace leanclr

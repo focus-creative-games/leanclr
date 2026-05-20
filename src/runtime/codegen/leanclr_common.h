@@ -10,7 +10,6 @@
 #include "vm/object.h"
 #include "gc/garbage_collector.h"
 #include "gc/gc_config.h"
-#include "gc/gc_newobj_macros.h"
 #include "vm/field.h"
 #include "vm/runtime.h"
 #include "vm/rt_array.h"

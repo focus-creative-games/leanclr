@@ -141,15 +141,15 @@ vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t
     return alloc_impl(klass, size, GcAllocSite::none(), flags);
 }
 
-vm::RtObject* ZeroGcHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
-{
-    return alloc_impl(klass, size, site, 0);
-}
+// vm::RtObject* ZeroGcHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
+// {
+//     return alloc_impl(klass, size, site, 0);
+// }
 
-vm::RtObject* ZeroGcHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size)
-{
-    return alloc_impl(klass, size, GcAllocSite::none(), 0);
-}
+// vm::RtObject* ZeroGcHeap::allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size)
+// {
+//     return alloc_impl(klass, size, GcAllocSite::none(), 0);
+// }
 
 vm::RtObject* ZeroGcHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site)
 {
@@ -169,6 +169,11 @@ void ZeroGcHeap::write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* ne
     {
         *obj_ref_location = new_obj;
     }
+}
+
+bool ZeroGcHeap::has_strict_wbarriers()
+{
+    return false;
 }
 
 int64_t ZeroGcHeap::get_used_size()
