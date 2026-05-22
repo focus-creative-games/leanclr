@@ -1,11 +1,11 @@
 #pragma once
 
-#if LEANCLR_GC_MARK_SWEEP
-
 #include "gc/gc_alloc_site.h"
 #include "gc/gc_pressure.h"
 #include "metadata/rt_metadata.h"
 #include "vm/rt_managed_types.h"
+
+#if LEANCLR_GC_MARK_SWEEP
 
 namespace leanclr
 {

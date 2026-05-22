@@ -1,6 +1,6 @@
-#if LEANCLR_GC_MARK_SWEEP
-
 #include "gc/mark_sweep/mark_sweep_heap.h"
+
+#if LEANCLR_GC_MARK_SWEEP
 
 #include <cstring>
 
