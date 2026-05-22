@@ -1864,7 +1864,7 @@ RtResult<const RtMethodInfo*> RtModuleDef::get_method_by_rid(uint32_t rid)
     }
     uint32_t typeDefRid = opt_typeDefRid.value();
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, klass, get_class_by_type_def_rid(typeDefRid));
-    RET_ERR_ON_FAIL(vm::Class::initialize_methods(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_vtables(klass));
     assert(klass->method_count > 0);
     uint32_t firstMethodRid = RtToken::decode_rid(klass->methods[0]->token);
     assert(rid >= firstMethodRid && rid < firstMethodRid + klass->method_count);
