@@ -292,7 +292,17 @@ bool il2cpp_class_has_parent(Il2CppClass* klass, Il2CppClass* klassc)
 Il2CppClass* il2cpp_class_from_il2cpp_type(const Il2CppType* type)
 {
     auto result = vm::Class::get_class_from_typesig(type);
-    return result.is_ok() ? result.unwrap() : nullptr;
+    if (result.is_ok())
+    {
+        Il2CppClass* klass = result.unwrap();
+        assert(klass);
+        auto ret = vm::Class::initialize_all(klass);
+        if (ret.is_ok())
+        {
+            return klass;
+        }
+    }
+    return nullptr;
 }
 
 Il2CppClass* il2cpp_class_from_name(const Il2CppImage* image, const char* namespaze, const char* name)
@@ -300,7 +310,16 @@ Il2CppClass* il2cpp_class_from_name(const Il2CppImage* image, const char* namesp
     auto result = const_cast<Il2CppImage*>(image)->get_class_by_name2(namespaze, name, false, false);
     if (result.is_ok())
     {
-        return result.unwrap();
+        Il2CppClass* klass = result.unwrap();
+        if (!klass)
+        {
+            return nullptr;
+        }
+        auto ret = vm::Class::initialize_all(klass);
+        if (ret.is_ok())
+        {
+            return klass;
+        }
     }
     return nullptr;
 }
