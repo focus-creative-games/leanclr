@@ -1,5 +1,3 @@
-#if LEANCLR_GC_ZERO_GC
-
 #include "gc/zero_gc/zero_gc_heap.h"
 
 #include <cstring>
@@ -7,6 +5,9 @@
 #include "alloc/general_allocation.h"
 #include "gc/gc_common.h"
 #include "gc/gc_config.h"
+#include "vm/class.h"
+
+#if LEANCLR_GC_ZERO_GC
 
 namespace leanclr
 {

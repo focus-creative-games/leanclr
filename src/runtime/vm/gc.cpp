@@ -4,188 +4,182 @@
 
 namespace leanclr
 {
-namespace vm
-{
-
-static GCMode s_mode = GCMode::ENABLED;
-static bool s_is_incremental = false;
-static int64_t s_max_time_slice_ns = 0;
-
-vm::RtObject* GC::get_ephemeron_tombstone()
-{
-    return AppDomain::get_ephemeron_tombstone();
-}
-
-void GC::register_ephemeron_array(vm::RtObject* arr)
-{
-    (void)arr;
-}
-
-int32_t GC::get_collection_count(int32_t generation)
-{
-    (void)generation;
-    return gc::GarbageCollector::get_collection_count();
-}
-
-int32_t GC::get_max_generation()
-{
-    return 0;
-}
-
-void GC::collect(int32_t generation)
-{
-    (void)generation;
-    if (s_mode != GCMode::DISABLED)
+    namespace vm
     {
-        gc::GarbageCollector::collect();
-    }
-}
 
-int32_t GC::collect_a_little()
-{
-    if (s_mode == GCMode::DISABLED)
-    {
-        return 0;
-    }
-    return gc::GarbageCollector::maybe_collect() ? 1 : 0;
-}
+        static GCMode s_mode = GCMode::ENABLED;
+        static bool s_is_incremental = false;
+        static int64_t s_max_time_slice_ns = 0;
+        static int64_t s_used_size = 0;
+        static int64_t s_heap_size = 0;
+        static void* s_heap_start = nullptr;
+        static void* s_heap_end = nullptr;
+        static void* s_heap_top = nullptr;
+        static void* s_heap_bottom = nullptr;
 
-void GC::internal_collect(int32_t generation)
-{
-    collect(generation);
-}
+        vm::RtObject* GC::get_ephemeron_tombstone()
+        {
+            return AppDomain::get_ephemeron_tombstone();
+        }
 
-void GC::record_pressure(int64_t bytes)
-{
-    gc::GarbageCollector::record_pressure(bytes);
-}
+        void GC::register_ephemeron_array(vm::RtObject* arr)
+        {
+            (void)arr;
+        }
 
-int64_t GC::get_allocated_bytes_for_current_thread()
-{
-    return gc::GarbageCollector::get_used_size();
-}
+        int32_t GC::get_collection_count(int32_t generation)
+        {
+            (void)generation;
+            return 0;
+        }
 
-int32_t GC::get_generation(vm::RtObject* obj)
-{
-    (void)obj;
-    return 0;
-}
+        int32_t GC::get_max_generation()
+        {
+            return 0;
+        }
 
-void GC::wait_for_pending_finalizers()
-{
-}
+        void GC::collect(int32_t generation)
+        {
+            (void)generation;
+        }
 
-void GC::suppress_finalize(vm::RtObject* obj)
-{
-    (void)obj;
-}
+        int32_t GC::collect_a_little()
+        {
+            return 0;
+        }
 
-void GC::reregister_for_finalize(vm::RtObject* obj)
-{
-    (void)obj;
-}
+        void GC::internal_collect(int32_t generation)
+        {
+            collect(generation);
+        }
 
-int64_t GC::get_total_memory(bool force_full_collection)
-{
-    if (force_full_collection && s_mode != GCMode::DISABLED)
-    {
-        gc::GarbageCollector::collect();
-    }
-    return gc::GarbageCollector::get_used_size();
-}
+        void GC::record_pressure(int64_t bytes)
+        {
+            (void)bytes;
+        }
 
-void GC::start_incremental_collection()
-{
-}
+        int64_t GC::get_allocated_bytes_for_current_thread()
+        {
+            return 0;
+        }
 
-void GC::enable()
-{
-    s_mode = GCMode::ENABLED;
-}
+        int32_t GC::get_generation(vm::RtObject* obj)
+        {
+            (void)obj;
+            return 0;
+        }
 
-void GC::disable()
-{
-    s_mode = GCMode::DISABLED;
-}
+        void GC::wait_for_pending_finalizers()
+        {
+        }
 
-bool GC::is_disabled()
-{
-    return s_mode == GCMode::DISABLED;
-}
+        void GC::suppress_finalize(vm::RtObject* obj)
+        {
+            (void)obj;
+        }
 
-void GC::set_mode(GCMode mode)
-{
-    s_mode = mode;
-}
+        void GC::reregister_for_finalize(vm::RtObject* obj)
+        {
+            (void)obj;
+        }
 
-bool GC::is_incremental()
-{
-    return s_is_incremental;
-}
+        int64_t GC::get_total_memory(bool force_full_collection)
+        {
+            (void)force_full_collection;
+            return 0;
+        }
 
-void GC::set_max_time_slice_ns(int64_t maxTimeSlice)
-{
-    s_max_time_slice_ns = maxTimeSlice;
-}
+        void GC::start_incremental_collection()
+        {
+        }
 
-int64_t GC::get_max_time_slice_ns()
-{
-    return s_max_time_slice_ns;
-}
+        void GC::enable()
+        {
+            s_mode = GCMode::ENABLED;
+        }
 
-int64_t GC::get_used_size()
-{
-    return gc::GarbageCollector::get_used_size();
-}
+        void GC::disable()
+        {
+            s_mode = GCMode::DISABLED;
+        }
 
-int64_t GC::get_heap_size()
-{
-    return gc::GarbageCollector::get_heap_size();
-}
+        bool GC::is_disabled()
+        {
+            return s_mode == GCMode::DISABLED;
+        }
 
-void GC::foreach_heap(void (*func)(void* data, void* context), void* userData)
-{
-    (void)func;
-    (void)userData;
-    fatal_on_not_implemented_error();
-}
+        void GC::set_mode(GCMode mode)
+        {
+            s_mode = mode;
+        }
 
-void GC::start_gc_world()
-{
-}
+        bool GC::is_incremental()
+        {
+            return s_is_incremental;
+        }
 
-void GC::stop_gc_world()
-{
-}
+        void GC::set_max_time_slice_ns(int64_t maxTimeSlice)
+        {
+            s_max_time_slice_ns = maxTimeSlice;
+        }
 
-void* GC::alloc_fixed(size_t size)
-{
-    return gc::GarbageCollector::allocate_fixed(size);
-}
+        int64_t GC::get_max_time_slice_ns()
+        {
+            return s_max_time_slice_ns;
+        }
 
-void GC::free_fixed(void* address)
-{
-    gc::GarbageCollector::free_fixed(address);
-}
+        int64_t GC::get_used_size()
+        {
+            return s_used_size;
+        }
 
-void GC::write_barrier(RtObject** obj_ref_location, RtObject* new_obj)
-{
-    gc::GarbageCollector::write_barrier(obj_ref_location, new_obj);
-}
+        int64_t GC::get_heap_size()
+        {
+            return s_heap_size;
+        }
 
-bool GC::has_strict_wbarriers()
-{
-    return gc::GarbageCollector::has_strict_wbarriers();
-}
+        void GC::foreach_heap(void (*func)(void* data, void* context), void* userData)
+        {
+            (void)func;
+            (void)userData;
+        }
 
-void GC::set_external_allocation_tracker(void (*func)(void*, size_t, int))
-{
-    //gc::GarbageCollector::set_external_allocation_tracker(func);
-}
+        void GC::start_gc_world()
+        {
+        }
 
-void GC::set_external_wbarrier_tracker(void (*func)(void**))
-{
-    //gc::GarbageCollector::set_external_wbarrier_tracker(func);
-}
-} // namespace vm
+        void GC::stop_gc_world()
+        {
+        }
+
+        void* GC::alloc_fixed(size_t size)
+        {
+            return gc::GarbageCollector::allocate_fixed(size);
+        }
+
+        void GC::free_fixed(void* address)
+        {
+            gc::GarbageCollector::free_fixed(address);
+        }
+
+        void GC::write_barrier(RtObject** obj_ref_location, RtObject* new_obj)
+        {
+            gc::GarbageCollector::write_barrier(obj_ref_location, new_obj);
+        }
+
+        bool GC::has_strict_wbarriers()
+        {
+            return false;
+        }
+
+        void GC::set_external_allocation_tracker(void (*func)(void*, size_t, int))
+        {
+            (void)func;
+        }
+
+        void GC::set_external_wbarrier_tracker(void (*func)(void**))
+        {
+            (void)func;
+        }
+    } // namespace vm
 } // namespace leanclr

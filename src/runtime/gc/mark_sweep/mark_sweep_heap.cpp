@@ -317,6 +317,7 @@ void MarkSweepHeap::collect()
 {
     // TODO
     return;
+    /*
     s_mark_stack.clear();
     GcRoots::foreach_root(mark_root_slot, nullptr);
     GcRoots::foreach_object_root(mark_object_root, nullptr);
@@ -335,6 +336,7 @@ void MarkSweepHeap::collect()
     GcPressure::on_collect();
     gc_pressure_set_used_size(s_used_bytes);
     s_collection_count++;
+    */
 }
 
 bool MarkSweepHeap::should_collect(bool force)

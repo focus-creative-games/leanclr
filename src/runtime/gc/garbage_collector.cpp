@@ -1,24 +1,40 @@
 #include "garbage_collector.h"
+#include "alloc/general_allocation.h"
+#include "metadata/rt_metadata.h"
+#include "vm/rt_managed_types.h"
 
 namespace leanclr
 {
-namespace gc
-{
+    namespace gc
+    {
+        void GarbageCollector::initialize()
+        {
+            // Initialization logic for the garbage collector goes here
+        }
 
-void GarbageCollector::record_pressure(int64_t bytes)
-{
-    GcPressure::record_external(bytes);
-}
+        void* GarbageCollector::allocate_fixed(size_t size)
+        {
+            // TODO: Implement fixed-size allocation logic
+            return alloc::GeneralAllocation::malloc_zeroed(size);
+        }
 
-uint64_t GarbageCollector::get_effective_pressure()
-{
-    return GcPressure::get_effective_pressure();
-}
+        void GarbageCollector::free_fixed(void* address)
+        {
+            alloc::GeneralAllocation::free(address);
+        }
 
-uint64_t GarbageCollector::get_bytes_allocated_since_last_gc()
-{
-    return GcPressure::get_bytes_allocated_since_last_gc();
-}
+        vm::RtObject* GarbageCollector::allocate_object(const metadata::RtClass* klass, size_t size)
+        {
+            // TODO: Implement object allocation logic
+            assert(size >= sizeof(vm::RtObject));
+            auto obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(size);
+            obj->klass = const_cast<metadata::RtClass*>(klass);
+            return obj;
+        }
 
-} // namespace gc
+        vm::RtObject* GarbageCollector::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
+        {
+            return allocate_object(arrClass, totalBytes);
+        }
+    } // namespace gc
 } // namespace leanclr

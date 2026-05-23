@@ -196,9 +196,9 @@ typedef double float64_t;
 #define LEANCLR_GC_CALL_SITE_PARAM
 #endif
 
-#if !defined (LEANCLR_GC_MARK_SWEEP) && !defined (LEANCLR_GC_ZERO_GC)
-#define LEANCLR_GC_MARK_SWEEP 1 
-#endif
+// #if !defined (LEANCLR_GC_MARK_SWEEP) && !defined (LEANCLR_GC_ZERO_GC)
+// #define LEANCLR_GC_ZERO_GC 1 
+// #endif
 
 // UNITY_VERSION (and optionally UNITY_TUANJIE_ENGINE) must be supplied as
 // C preprocessor defines for the libil2cpp compile, via IL2CPP additional
