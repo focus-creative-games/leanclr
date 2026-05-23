@@ -34,6 +34,7 @@ class MarkSweepHeap
 
     static void write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)
     {
+        *obj_ref_location = new_obj;
     }
 
     static bool has_strict_wbarriers()

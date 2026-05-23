@@ -5,36 +5,8 @@
 
 namespace leanclr
 {
-    namespace gc
-    {
-        void GarbageCollector::initialize()
-        {
-            // Initialization logic for the garbage collector goes here
-        }
+namespace gc
+{
 
-        void* GarbageCollector::allocate_fixed(size_t size)
-        {
-            // TODO: Implement fixed-size allocation logic
-            return alloc::GeneralAllocation::malloc_zeroed(size);
-        }
-
-        void GarbageCollector::free_fixed(void* address)
-        {
-            alloc::GeneralAllocation::free(address);
-        }
-
-        vm::RtObject* GarbageCollector::allocate_object(const metadata::RtClass* klass, size_t size)
-        {
-            // TODO: Implement object allocation logic
-            assert(size >= sizeof(vm::RtObject));
-            auto obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(size);
-            obj->klass = const_cast<metadata::RtClass*>(klass);
-            return obj;
-        }
-
-        vm::RtObject* GarbageCollector::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
-        {
-            return allocate_object(arrClass, totalBytes);
-        }
-    } // namespace gc
+} // namespace gc
 } // namespace leanclr
