@@ -20,7 +20,7 @@ if errorlevel 1 (
 
 echo build managed tests
 pushd "%REPO_ROOT%\src\tests\managed"
-call dotnet build -c %CONFIG%
+call dotnet build -c %CONFIG% -p:LeanClrIl2CppOnly=true
 if errorlevel 1 (
     echo ERROR: managed tests build failed.
     popd

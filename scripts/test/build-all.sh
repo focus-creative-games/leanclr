@@ -19,7 +19,7 @@ echo "build basic_test_runner"
 
 echo "build managed tests"
 pushd "$TESTS_DIR/managed" >/dev/null
-dotnet build -c "$CONFIG"
+dotnet build -c "$CONFIG" -p:LeanClrIl2CppOnly=true
 cp -f "$(leanclr_dotnet_out_dir CoreTests "$CONFIG")/CoreTests.dll" MiscDlls/
 cp -f "$(leanclr_dotnet_out_dir CorlibTests "$CONFIG")/CorlibTests.dll" MiscDlls/
 popd >/dev/null

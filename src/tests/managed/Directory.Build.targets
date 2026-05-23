@@ -1,0 +1,6 @@
+<Project>
+  <!-- Appended after each .csproj loads. Enabled by scripts/test/build-all.* via -p:LeanClrIl2CppOnly=true -->
+  <PropertyGroup Condition="'$(LeanClrIl2CppOnly)' == 'true'">
+    <DefineConstants>$(DefineConstants);IL2CPP_ONLY</DefineConstants>
+  </PropertyGroup>
+</Project>
