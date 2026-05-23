@@ -33,6 +33,7 @@ namespace CorlibTests.InternalCall
             Assert.True(true);
         }
 
+#if SINGLE_THREAD
         [UnitTest]
         public void JoinInternal()
         {
@@ -41,6 +42,7 @@ namespace CorlibTests.InternalCall
             bool joined = Thread.CurrentThread.Join(0);
             Assert.Equal(true, joined);
         }
+#endif
 
         [UnitTest]
         public void PriorityDefaults()

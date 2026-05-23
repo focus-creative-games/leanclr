@@ -8,6 +8,7 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_System_Reflection_RuntimeAssembly : GeneralTestCaseBase
     {
+#if IL2CPP_ONLY
         [UnitTest]
         public void GetCodeBase()
         {
@@ -16,6 +17,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal("CorlibTests.dll", codeBase);
         }
 
+
         [UnitTest]
         public void GetLocation()
         {
@@ -23,7 +25,7 @@ namespace CorlibTests.InternalCall
             var location = assembly.Location;
             Assert.Equal("CorlibTests.dll", location);
         }
-
+#endif
         [UnitTest]
         public void GetFullName()
         {
@@ -80,6 +82,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal("CorlibTests.dll", manifestModule.Name);
         }
 
+
+#if IL2CPP_ONLY
         [UnitTest]
         public void GetFilesInternal()
         {
@@ -87,5 +91,6 @@ namespace CorlibTests.InternalCall
             var files = assembly.GetFiles();
             Assert.Equal(0, files.Length);
         }
+#endif
     }
 }

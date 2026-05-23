@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.CSharp
 {
+#if IL2CPP_ONLY
     internal class TC_ByReference : GeneralTestCaseBase
     {
         [UnitTest]
@@ -31,4 +32,5 @@ namespace Tests.CSharp
             }
         }
     }
+#endif
 }

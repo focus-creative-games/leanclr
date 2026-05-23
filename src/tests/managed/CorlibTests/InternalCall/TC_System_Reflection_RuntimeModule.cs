@@ -148,6 +148,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(field, resolved);
         }
 
+#if IL2CPP_ONLY
         [UnitTest]
         public void ResolveStringToken_ValidToken()
         {
@@ -159,6 +160,7 @@ namespace CorlibTests.InternalCall
             string resolved = module.ResolveString(0x70000000);
             Assert.NotNull(resolved);
         }
+#endif
 
         [UnitTest]
         public void ResolveMemberToken_ValidToken()

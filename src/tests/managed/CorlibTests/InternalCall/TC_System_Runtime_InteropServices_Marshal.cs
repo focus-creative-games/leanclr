@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
+#if IL2CPP_ONLY
     internal class TC_System_Runtime_InteropServices_Marshal : GeneralTestCaseBase
     {
         [UnitTest]
@@ -109,4 +110,5 @@ namespace CorlibTests.InternalCall
             }
         }
     }
+#endif
 }

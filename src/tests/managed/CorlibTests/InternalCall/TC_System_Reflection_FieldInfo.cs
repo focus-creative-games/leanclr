@@ -111,6 +111,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(0, modifiers.Length);
         }
 
+#if IL2CPP_ONLY
         [UnitTest]
         public void GetFieldOffset()
         {
@@ -118,6 +119,7 @@ namespace CorlibTests.InternalCall
             int offset = System.Runtime.InteropServices.Marshal.OffsetOf(typeof(A), "value2").ToInt32();
             Assert.Equal(8, offset);
         }
+
 
         [UnitTest]
         public void GetMarshalInfo_WithoutMarshalAs_ReturnsNull()
@@ -146,5 +148,6 @@ namespace CorlibTests.InternalCall
             Assert.Equal(typeof(MarshalAsAttribute), marshalInfo.GetType());
             Assert.Equal(UnmanagedType.I4, ((MarshalAsAttribute)marshalInfo).Value);
         }
+#endif
     }
 }

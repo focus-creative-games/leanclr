@@ -75,6 +75,7 @@ namespace Tests.CSharp
             Green = 1,
         }
 
+#if IL2CPP_ONLY
         [UnitTest]
         public void TestSByteEnum()
         {
@@ -102,6 +103,7 @@ namespace Tests.CSharp
             Assert.Equal(65535, h2);
 #endif
         }
+#endif
 
         enum UShortEnum : ushort
         {

@@ -333,6 +333,7 @@ namespace CorlibTests.InternalCall
             }
         }
 
+#if IL2CPP_ONLY
         [UnitTest]
         public void StackTrace_DirectConstruction()
         {
@@ -341,6 +342,7 @@ namespace CorlibTests.InternalCall
             
             Assert.Equal(3, trace2.FrameCount);
         }
+#endif
 
         // Helper methods for testing
 

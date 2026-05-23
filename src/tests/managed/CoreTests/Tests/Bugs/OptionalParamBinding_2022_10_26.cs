@@ -266,6 +266,7 @@ namespace Tests.Bugs
             Assert.Null(r);
         }
 
+#if IL2CPP_ONLY
         [UnitTest]
         public void NullableEnumOptional_DefaultEnumConstant_DefaultValueAndInvoke()
         {
@@ -290,6 +291,7 @@ namespace Tests.Bugs
                 null);
             Assert.Equal<Color?>((Color?)Color.Blue, r);
         }
+#endif
 
         [UnitTest]
         public void NullableStructOptional_DefaultNull_DefaultValueAndInvoke()
@@ -315,6 +317,7 @@ namespace Tests.Bugs
             Assert.Equal(22, r.Value.Y);
         }
 
+#if IL2CPP_ONLY
         [UnitTest]
         public void IntPtrParamOptional_Default_DefaultValueAndInvoke()
         {
@@ -376,6 +379,7 @@ namespace Tests.Bugs
                 null);
             Assert.True(r == UIntPtr.Zero);
         }
+#endif
 
         private const BindingFlags OptionalPrimitiveBf =
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;

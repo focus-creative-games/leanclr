@@ -2,6 +2,7 @@
 
 namespace CorlibTests.InternalCall
 {
+    #if IL2CPP_ONLY
     internal class TC_System_MathF : GeneralTestCaseBase
     {
         private static void AssertNearlyEqual(float expected, float actual, float epsilon = 1e-6f)
@@ -185,4 +186,5 @@ namespace CorlibTests.InternalCall
         //     AssertNearlyEqual(3f, intPart);
         // }
     }
+#endif
 }

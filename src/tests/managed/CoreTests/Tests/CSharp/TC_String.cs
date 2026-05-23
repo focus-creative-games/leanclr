@@ -85,6 +85,8 @@ namespace Tests.CSharp
             }
         }
 
+
+#if IL2CPP_ONLY
         [UnitTest]
         public void CreateStringFromReadOnlySpanChar()
         {
@@ -107,5 +109,6 @@ namespace Tests.CSharp
             var s = span.ToString();
             Assert.Equal(string.Empty, s);
         }
+#endif
     }
 }

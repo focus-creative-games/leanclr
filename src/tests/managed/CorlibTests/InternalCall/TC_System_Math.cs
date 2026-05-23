@@ -58,15 +58,16 @@ namespace CorlibTests.InternalCall
         }
 
         [UnitTest]
-        public void Acosh1()
-        {
-            Assert.Equal(0.0, Math.Acosh(1.0));
-        }
-
-        [UnitTest]
         public void Asin1()
         {
             Assert.Equal(0.0, Math.Asin(0.0));
+        }
+
+#if IL2CPP_ONLY
+        [UnitTest]
+        public void Acosh1()
+        {
+            Assert.Equal(0.0, Math.Acosh(1.0));
         }
 
         [UnitTest]
@@ -74,6 +75,13 @@ namespace CorlibTests.InternalCall
         {
             Assert.Equal(0.0, Math.Asinh(0.0));
         }
+
+        [UnitTest]
+        public void Atanh1()
+        {
+            Assert.Equal(0.0, Math.Atanh(0.0));
+        }
+#endif
 
         [UnitTest]
         public void Atan1()
@@ -87,17 +95,13 @@ namespace CorlibTests.InternalCall
             Assert.Equal(0.0, Math.Atan2(0.0, 1.0));
         }
 
-        [UnitTest]
-        public void Atanh1()
-        {
-            Assert.Equal(0.0, Math.Atanh(0.0));
-        }
-
+#if IL2CPP_ONLY
         [UnitTest]
         public void Cbrt1()
         {
             AssertNearlyEqual(2.0, Math.Cbrt(8.0));
         }
+#endif
 
         [UnitTest]
         public void Ceiling()

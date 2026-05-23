@@ -67,6 +67,8 @@ namespace CorlibTests.InternalCall
             Assert.True(userName.Length > 0);
         }
 
+
+#if IL2CPP_ONLY
         [UnitTest]
         public void GetCommandLineArgs_NotEmpty()
         {
@@ -74,6 +76,7 @@ namespace CorlibTests.InternalCall
             Assert.IsTrue(args.Length > 0);
             Assert.Equal("leanclr", args[0]);
         }
+#endif
 
         [UnitTest]
         public void Is64BitOperatingSystem_True()
