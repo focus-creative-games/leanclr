@@ -13,7 +13,6 @@ RtResult<RtObject*> Object::__new_object(const metadata::RtClass* klass LEANCLR_
 {
     if (LEANCLR_UNLIKELY(Class::is_cctor_not_finished(klass)))
     {
-        RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
         RET_ERR_ON_FAIL(Runtime::run_class_static_constructor(klass));
     }
 
