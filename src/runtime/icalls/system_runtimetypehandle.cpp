@@ -44,6 +44,10 @@ RtResult<metadata::RtElementType> SystemRuntimeTypeHandle::get_cor_element_type(
 RtResult<bool> SystemRuntimeTypeHandle::has_instantiation(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     auto type_sig = runtime_type->reflection_type.type_handle;
+    if (type_sig->is_by_ref())
+    {
+        RET_OK(false);
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
     RET_OK(vm::Class::is_generic(klass) || vm::Class::is_generic_inst(klass));
 }
