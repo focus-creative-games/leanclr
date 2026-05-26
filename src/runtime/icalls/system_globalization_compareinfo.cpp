@@ -107,19 +107,21 @@ RtResult<int32_t> SystemGlobalizationCompareInfo::internal_index_icall(const cha
     {
         for (int32_t i = 0; i <= source_count - value_length; i++)
         {
-            if (std::memcmp(source + source_start_index + i, value, static_cast<size_t>(value_length) * sizeof(char16_t)) == 0)
+            int32_t index = source_start_index + i;
+            if (std::memcmp(source + index, value, static_cast<size_t>(value_length) * sizeof(char16_t)) == 0)
             {
-                RET_OK(source_start_index + i);
+                RET_OK(index);
             }
         }
     }
     else
     {
-        for (int32_t i = source_count - value_length; i >= 0; i--)
+        for (int32_t i = 0; i <= source_count - value_length; i++)
         {
-            if (std::memcmp(source + source_start_index + i, value, static_cast<size_t>(value_length) * sizeof(char16_t)) == 0)
+            int32_t index = source_start_index + 1 - i - value_length;
+            if (std::memcmp(source + index, value, static_cast<size_t>(value_length) * sizeof(char16_t)) == 0)
             {
-                RET_OK(source_start_index + i);
+                RET_OK(index);
             }
         }
     }
