@@ -23,15 +23,19 @@ RtResult<vm::RtObject*> SystemRuntimeFieldHandle::get_value_direct(vm::RtReflect
 
     const metadata::RtFieldInfo* field_info = field->field;
     const metadata::RtClass* parent_klass = field_info->parent;
-    if (!vm::Class::is_value_type(parent_klass))
-    {
-        RET_ERR(RtErr::NotSupported);
-    }
+    //if (!vm::Class::is_value_type(parent_klass))
+    //{
+    //    RET_ERR(RtErr::NotSupported);
+    //}
     // may be used in unsafe context which type is not the same as the field's parent type, so we don't check it
     // if (parent_klass != typed_ref->klass)
     // {
     //     RET_ERR(RtErr::Argument);
     // }
+    if (vm::Class::is_reference_type(parent_klass))
+    {
+        return vm::Field::get_value_object(field_info, *(vm::RtObject**)typed_ref->value);
+    }
     return vm::Field::get_value_direct(field_info, const_cast<void*>(typed_ref->value));
 }
 
@@ -44,18 +48,22 @@ RtResultVoid SystemRuntimeFieldHandle::set_value_direct(vm::RtReflectionField* f
 
     const metadata::RtFieldInfo* field_info = field->field;
     const metadata::RtClass* parent_klass = field_info->parent;
-    if (!vm::Class::is_value_type(parent_klass))
-    {
-        RET_ERR(RtErr::NotSupported);
-    }
+    //if (!vm::Class::is_value_type(parent_klass))
+    //{
+    //    RET_ERR(RtErr::NotSupported);
+    //}
     // may be used in unsafe context which type is not the same as the field's parent type, so we don't check it
     // if (parent_klass != typed_ref->klass)
     // {
     //     RET_ERR(RtErr::Argument);
     // }
+    if (vm::Class::is_reference_type(parent_klass))
+    {
+        return vm::Field::set_value_object(field_info, *(vm::RtObject**)typed_ref->value, value);
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, is_reference_type, vm::Type::is_reference_type(field_info->type_sig));
     void* ptr_field_value = is_reference_type ? (void*)&value : (void*)(value ? value + 1 : nullptr);
-    return vm::Field::set_value_direct(field_info, const_cast<void*>(typed_ref->value), value);
+    return vm::Field::set_value_direct(field_info, const_cast<void*>(typed_ref->value), ptr_field_value);
 }
 
 RtResultVoid SystemRuntimeFieldHandle::set_value_internal(vm::RtReflectionField* field, vm::RtObject* obj, vm::RtObject* value) noexcept
