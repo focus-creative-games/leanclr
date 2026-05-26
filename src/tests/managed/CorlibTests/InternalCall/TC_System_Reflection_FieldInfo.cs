@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Reflection;
 using System.Runtime.InteropServices;
@@ -291,6 +292,161 @@ namespace CorlibTests.InternalCall
             Assert.NotNull(Array.Find(fields, f => f.Name == "l"));
             Assert.NotNull(Array.Find(fields, f => f.Name == "b"));
             Assert.NotNull(Array.Find(fields, f => f.Name == "s"));
+        }
+
+        [UnitTest]
+        public void ClassField_GetValue_Object()
+        {
+            var a = new A { value = 5, value2 = 6L };
+            FieldInfo valueField = typeof(A).GetField("value");
+            FieldInfo value2Field = typeof(A).GetField("value2");
+
+            Assert.Equal(5, valueField.GetValue(a));
+            Assert.Equal(6L, value2Field.GetValue(a));
+        }
+
+        [UnitTest]
+        public void ClassField_SetValue_WithInvokeAttrBinderCulture()
+        {
+            var a = new A();
+            FieldInfo field = typeof(A).GetField("value");
+
+            field.SetValue(a, 42, BindingFlags.Default, null, CultureInfo.InvariantCulture);
+            Assert.Equal(42, a.value);
+
+            field.SetValue(a, 7, BindingFlags.SetField, null, null);
+            Assert.Equal(7, a.value);
+        }
+
+        [UnitTest]
+        public void StructField_SetValue_WithInvokeAttrBinderCulture_ViaBoxing()
+        {
+            var s = new StructWithFields(1, 2L, false, "a", 0);
+            object boxed = s;
+            FieldInfo field = typeof(StructWithFields).GetField("i");
+
+            field.SetValue(boxed, 33, BindingFlags.Default, null, CultureInfo.InvariantCulture);
+            s = (StructWithFields)boxed;
+            Assert.Equal(33, s.i);
+        }
+
+        [UnitTest]
+        public unsafe void StructField_GetValueDirect_Int()
+        {
+            var s = new StructWithFields(77, 0L, false, null, 0);
+            FieldInfo field = typeof(StructWithFields).GetField("i");
+            TypedReference tr = __makeref(s);
+
+            Assert.Equal(77, field.GetValueDirect(tr));
+        }
+
+        [UnitTest]
+        public unsafe void StructField_GetValueDirect_AllPrimitivePublicFields()
+        {
+            var s = new StructWithFields(1, 2L, true, "hello", 0);
+            TypedReference tr = __makeref(s);
+
+            Assert.Equal(1, typeof(StructWithFields).GetField("i").GetValueDirect(tr));
+            Assert.Equal(2L, typeof(StructWithFields).GetField("l").GetValueDirect(tr));
+            Assert.Equal(true, typeof(StructWithFields).GetField("b").GetValueDirect(tr));
+            Assert.Equal("hello", typeof(StructWithFields).GetField("s").GetValueDirect(tr));
+        }
+
+        [UnitTest]
+        public unsafe void StructField_GetValueDirect_PrivateField()
+        {
+            var s = new StructWithFields(0, 0L, false, null, 99);
+            FieldInfo field = typeof(StructWithFields).GetField("_privateField", BindingFlags.Instance | BindingFlags.NonPublic);
+            TypedReference tr = __makeref(s);
+
+            Assert.Equal(99, field.GetValueDirect(tr));
+        }
+
+        [UnitTest]
+        public unsafe void StructField_SetValueDirect_Int_MutatesUnboxedStruct()
+        {
+            var s = new StructWithFields(1, 0L, false, null, 0);
+            FieldInfo field = typeof(StructWithFields).GetField("i");
+            TypedReference tr = __makeref(s);
+
+            field.SetValueDirect(tr, 88);
+
+            Assert.Equal(88, s.i);
+        }
+
+        [UnitTest]
+        public unsafe void StructField_SetValueDirect_String_MutatesUnboxedStruct()
+        {
+            var s = new StructWithFields(0, 0L, false, "old", 0);
+            FieldInfo field = typeof(StructWithFields).GetField("s");
+            TypedReference tr = __makeref(s);
+
+            field.SetValueDirect(tr, "new");
+
+            Assert.Equal("new", s.s);
+        }
+
+        [UnitTest]
+        public unsafe void StructField_SetValueDirect_MultipleFields()
+        {
+            var s = new StructWithFields(0, 0L, false, "a", 0);
+            TypedReference tr = __makeref(s);
+
+            typeof(StructWithFields).GetField("i").SetValueDirect(tr, 10);
+            typeof(StructWithFields).GetField("l").SetValueDirect(tr, 20L);
+            typeof(StructWithFields).GetField("b").SetValueDirect(tr, true);
+            typeof(StructWithFields).GetField("s").SetValueDirect(tr, "updated");
+
+            Assert.Equal(10, s.i);
+            Assert.Equal(20L, s.l);
+            Assert.IsTrue(s.b);
+            Assert.Equal("updated", s.s);
+        }
+
+        [UnitTest]
+        public unsafe void StructField_SetValueDirect_PrivateField()
+        {
+            var s = new StructWithFields(0, 0L, false, null, 1);
+            FieldInfo field = typeof(StructWithFields).GetField("_privateField", BindingFlags.Instance | BindingFlags.NonPublic);
+            TypedReference tr = __makeref(s);
+
+            field.SetValueDirect(tr, 55);
+
+            Assert.Equal(55, s.PrivateField);
+        }
+
+        [UnitTest]
+        public unsafe void StructField_SetValueDirect_DiffersFromSetValueOnUnboxedCopy()
+        {
+            var s = new StructWithFields(10, 0L, false, null, 0);
+            FieldInfo field = typeof(StructWithFields).GetField("i");
+
+            field.SetValue(s, 99);
+            Assert.Equal(10, s.i);
+
+            TypedReference tr = __makeref(s);
+            field.SetValueDirect(tr, 99);
+            Assert.Equal(99, s.i);
+        }
+
+        [UnitTest]
+        public unsafe void ClassField_GetValueDirect()
+        {
+            var a = new A { value = 1 };
+            FieldInfo field = typeof(A).GetField("value");
+            TypedReference tr = __makeref(a);
+            object value = field.GetValueDirect(tr);
+            Assert.Equal(1, value);
+        }
+
+        [UnitTest]
+        public unsafe void ClassField_SetValueDirect()
+        {
+            var a = new A { value = 1 };
+            FieldInfo field = typeof(A).GetField("value");
+            TypedReference tr = __makeref(a);
+            field.SetValueDirect(tr, 2);
+            Assert.Equal(2, a.value);
         }
 
 #if IL2CPP_ONLY
