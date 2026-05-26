@@ -16,6 +16,8 @@ class Object
     // Create new instance of a class
     // please don't use this method directly, use LEANCLR_NEWOBJ instead
     static RtResult<RtObject*> __new_object(const metadata::RtClass* klass LEANCLR_GC_DECLARE_CALL_SITE_PARAM);
+    
+    static RtResult<RtObject*> internal_create_instance(const metadata::RtTypeSig* type_sig LEANCLR_GC_DECLARE_CALL_SITE_PARAM);
 
     // Box a value type into an object
     static RtResult<RtObject*> __box_object(const metadata::RtClass* klass, const void* value LEANCLR_GC_DECLARE_CALL_SITE_PARAM);

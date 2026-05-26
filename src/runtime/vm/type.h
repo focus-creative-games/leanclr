@@ -136,6 +136,7 @@ class Type
 {
   public:
     static RtResult<bool> is_value_type(const metadata::RtTypeSig* typeSig);
+    static RtResult<bool> is_reference_type(const metadata::RtTypeSig* typeSig);
     static RtResult<size_t> get_size_of_type(const metadata::RtTypeSig* typeSig);
     static bool is_generic_param(const metadata::RtTypeSig* typeSig);
     static bool contains_generic_param(const metadata::RtTypeSig* typeSig);

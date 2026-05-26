@@ -144,6 +144,28 @@ class Field
     // Set field value from object (unboxing for value types)
     static RtResultVoid set_value_object(const metadata::RtFieldInfo* field, RtObject* obj, RtObject* value);
 
+    static RtResult<RtObject*> get_value_direct(const metadata::RtFieldInfo* field, void* ptr_struct_data);
+    static RtResultVoid set_value_direct(const metadata::RtFieldInfo* field, void* ptr_struct_data, void* ptr_field_value);
+
+    static const metadata::RtFieldInfo* get_nullable_has_value_field(const metadata::RtClass* klass)
+    {
+        // The first field is the "HasValue" boolean
+        assert(strcmp(klass->name, "Nullable`1") == 0);
+        assert(klass->field_count == 2);
+        const metadata::RtFieldInfo* has_value_field = klass->fields;
+        assert(strcmp(has_value_field->name, "hasValue") == 0);
+        return has_value_field;
+    }
+    static const metadata::RtFieldInfo* get_nullable_value_field(const metadata::RtClass* klass)
+    {
+        // The second field is the actual value
+        assert(strcmp(klass->name, "Nullable`1") == 0);
+        assert(klass->field_count == 2);
+        const metadata::RtFieldInfo* value_field = klass->fields + 1;
+        assert(strcmp(value_field->name, "value") == 0);
+        return value_field;
+    }
+
     // Find field by name in class
     static RtResult<const metadata::RtFieldInfo*> find_field_by_name(metadata::RtClass* klass, const char* fieldName);
 

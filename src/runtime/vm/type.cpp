@@ -57,6 +57,33 @@ RtResult<bool> Type::is_value_type(const metadata::RtTypeSig* typeSig)
     }
 }
 
+RtResult<bool> Type::is_reference_type(const metadata::RtTypeSig* typeSig)
+{
+    if (typeSig->by_ref)
+    {
+        RET_OK(false);
+    }
+    switch (typeSig->ele_type)
+    {
+    case metadata::RtElementType::Object:
+    case metadata::RtElementType::String:
+    case metadata::RtElementType::Class:
+    case metadata::RtElementType::Array:
+    case metadata::RtElementType::SZArray:
+        RET_OK(true);
+    case metadata::RtElementType::GenericInst:
+    {
+        uint32_t typeGid = typeSig->data.generic_class->base_type_def_gid;
+        uint32_t modId = metadata::RtMetadata::decode_module_id_from_gid(typeGid);
+        metadata::RtModuleDef* mod = metadata::RtModuleDef::get_module_by_id(modId);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, baseTypeSig,
+                                                mod->get_type_def_by_val_typesig(metadata::RtMetadata::decode_rid_from_gid(typeGid)));
+        return baseTypeSig->ele_type == metadata::RtElementType::Class;
+    }
+    default:
+        RET_OK(false);
+    }
+}
 RtResult<size_t> Type::get_size_of_type(const metadata::RtTypeSig* typeSig)
 {
     if (typeSig->by_ref)

@@ -177,14 +177,14 @@ RtResult<RtObject*> Field::get_value_object(const metadata::RtFieldInfo* field, 
     // Get the type class for the field
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, fieldClass, Class::get_class_from_typesig(field->type_sig));
 
-    if (Class::is_value_type(fieldClass))
-    {
-        return LEANCLR_BOX_OBJECT_INTERNAL(fieldClass, fieldDataPtr, "Field::get_value_object");
-    }
-    else
+    if (Class::is_reference_type(fieldClass))
     {
         // Return reference type directly
         RET_OK(*reinterpret_cast<RtObject**>(fieldDataPtr));
+    }
+    else
+    {
+        return LEANCLR_BOX_OBJECT_INTERNAL(fieldClass, fieldDataPtr, "Field::get_value_object");
     }
 }
 
@@ -225,23 +225,100 @@ RtResultVoid Field::set_value_object(const metadata::RtFieldInfo* field, RtObjec
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, field_klass, Class::get_class_from_typesig(field->type_sig));
 
     // FIXME: handle gc write barrier
-    if (Class::is_value_type(field_klass))
-    {
-        if (value == nullptr)
-        {
-            RET_ERR(RtErr::ArgumentNull);
-        }
-        // Unbox: copy from boxed object to field
-        uint8_t* value_data_ptr = reinterpret_cast<uint8_t*>(value) + vm::RT_OBJECT_HEADER_SIZE;
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(size_t, size, get_field_size(field));
-        std::memcpy(fieldDataPtr, value_data_ptr, size);
-    }
-    else
+    if (Class::is_reference_type(field_klass))
     {
         // Reference type: direct assignment
         *reinterpret_cast<void**>(fieldDataPtr) = value;
     }
+    else
+    {
+        if (Class::is_nullable_type(field_klass))
+        {
+            if (value == nullptr)
+            {
+                std::memset(fieldDataPtr, 0, klass->instance_size_without_header);
+            }
+            else
+            {
+                size_t has_value_field_offset = get_nullable_has_value_field(field_klass)->offset;
+                size_t value_field_offset = get_nullable_value_field(field_klass)->offset;
+                fieldDataPtr[has_value_field_offset] = 1;
+                std::memcpy(fieldDataPtr + value_field_offset, value, field_klass->element_class->instance_size_without_header);
+            }
+        }
+        else
+        {
+            if (value == nullptr)
+            {
+                RET_ERR(RtErr::ArgumentNull);
+            }
+            std::memcpy(fieldDataPtr, value + 1, field_klass->instance_size_without_header);
+        }
+    }
 
+    RET_VOID_OK();
+}
+
+RtResult<RtObject*> Field::get_value_direct(const metadata::RtFieldInfo* field, void* ptr_struct_data)
+{
+    assert(field != nullptr);
+    assert(ptr_struct_data != nullptr);
+    assert(Class::is_value_type(field->parent));
+    if (!is_instance(field))
+    {
+        RET_ERR(RtErr::Argument);
+    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, fieldClass, Class::get_class_from_typesig(field->type_sig));
+    void* field_data_ptr = reinterpret_cast<uint8_t*>(ptr_struct_data) + get_field_offset_excludes_object_header_for_all_type(field);
+    if (Class::is_reference_type(fieldClass))
+    {
+        // Return reference type directly
+        RET_OK(*reinterpret_cast<RtObject**>(field_data_ptr));
+    }
+    else
+    {
+        return LEANCLR_BOX_OBJECT_INTERNAL(fieldClass, field_data_ptr, "Field::get_value_direct");
+    }
+}
+
+RtResultVoid Field::set_value_direct(const metadata::RtFieldInfo* field, void* ptr_struct_data, void* ptr_field_value)
+{
+    assert(field != nullptr);
+    assert(ptr_struct_data != nullptr);
+    assert(ptr_field_value != nullptr);
+    assert(Class::is_value_type(field->parent));
+    if (!is_instance(field))
+    {
+        RET_ERR(RtErr::Argument);
+    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, fieldClass, Class::get_class_from_typesig(field->type_sig));
+    uint8_t* field_data_ptr = reinterpret_cast<uint8_t*>(ptr_struct_data) + get_field_offset_excludes_object_header_for_all_type(field);
+    if (Class::is_reference_type(fieldClass))
+    {
+        // Return reference type directly
+        *reinterpret_cast<RtObject**>(field_data_ptr) = *reinterpret_cast<RtObject**>(ptr_field_value);
+    }
+    else
+    {
+        if (Class::is_nullable_type(fieldClass))
+        {
+            if (ptr_field_value == nullptr)
+            {
+                std::memset(field_data_ptr, 0, fieldClass->instance_size_without_header);
+            }
+            else
+            {
+                size_t has_value_field_offset = get_nullable_has_value_field(fieldClass)->offset;
+                size_t value_field_offset = get_nullable_value_field(fieldClass)->offset;
+                field_data_ptr[has_value_field_offset] = 1;
+                std::memcpy(field_data_ptr + value_field_offset, ptr_field_value, fieldClass->element_class->instance_size_without_header);
+            }
+        }
+        else
+        {
+            std::memcpy(field_data_ptr, ptr_field_value, fieldClass->instance_size_without_header);
+        }
+    }
     RET_VOID_OK();
 }
 

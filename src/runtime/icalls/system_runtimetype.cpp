@@ -710,18 +710,7 @@ RtResult<vm::RtObject*> SystemRuntimeType::create_instance_internal(vm::RtReflec
 {
     assert(runtime_type != nullptr);
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
-
-    // Check if type is nullable - return null
-    if (vm::Class::is_nullable_type(klass))
-        RET_OK(nullptr);
-
-    // Check if type is array or SZArray - cannot create without specifying length
-    if (vm::Class::is_array_or_szarray(klass))
-        RET_ERR(RtErr::MissingMethod);
-
-    // Create default instance
-    return LEANCLR_NEWOBJ_INTERNAL(klass, "icalls::SystemRuntimeType::create_instance_internal");
+    return vm::Object::internal_create_instance(type_sig, gc::GcAllocSite::make_internal(__FILE__, __LINE__, "SystemRuntimeType::create_instance_internal"));
 }
 
 RtResult<vm::RtReflectionMethod*> SystemRuntimeType::get_declaring_method(vm::RtReflectionRuntimeType* runtime_type) noexcept
