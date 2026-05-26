@@ -710,7 +710,7 @@ RtResult<vm::RtObject*> SystemRuntimeType::create_instance_internal(vm::RtReflec
 {
     assert(runtime_type != nullptr);
     const metadata::RtTypeSig* type_sig = runtime_type->reflection_type.type_handle;
-    return vm::Object::internal_create_instance(type_sig, gc::GcAllocSite::make_internal(__FILE__, __LINE__, "SystemRuntimeType::create_instance_internal"));
+    return LEANCLR_CREATE_INSTANCE_INTERNAL(type_sig, "SystemRuntimeType::create_instance_internal");
 }
 
 RtResult<vm::RtReflectionMethod*> SystemRuntimeType::get_declaring_method(vm::RtReflectionRuntimeType* runtime_type) noexcept

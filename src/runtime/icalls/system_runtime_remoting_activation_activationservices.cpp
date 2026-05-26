@@ -16,8 +16,7 @@ RtResult<vm::RtObject*> SystemRuntimeRemotingActivationActivationServices::alloc
     }
 
     const metadata::RtTypeSig* type_sig = type->reflection_type.type_handle;
-    return vm::Object::internal_create_instance(type_sig,
-                                                gc::GcAllocSite::make_internal(__FILE__, __LINE__, "ActivationServices::AllocateUninitializedClassInstance"));
+    return LEANCLR_CREATE_INSTANCE_INTERNAL(type_sig, "ActivationServices::AllocateUninitializedClassInstance");
 }
 
 /// @icall: System.Runtime.Remoting.Activation.ActivationServices::AllocateUninitializedClassInstance(System.Type)
