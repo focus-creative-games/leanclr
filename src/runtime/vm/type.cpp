@@ -593,37 +593,44 @@ RtResult<const metadata::RtMethodInfo*> Type::get_declaring_method_of_mvar(const
     RET_OK(nullptr);
 }
 
-// Helper functions for parse_assembly_name
-static const char* trim_spaces(const char* start, const char* end)
+const char* FullyQualifiedAssemblyName::trim_spaces(const char* start, const char* end)
 {
-    while (start < end && std::isspace(*start))
+    while (start < end && std::isspace(static_cast<unsigned char>(*start)))
+    {
         start++;
+    }
     return start;
 }
 
-static const char* trim_spaces_end(const char* start, const char* end)
+const char* FullyQualifiedAssemblyName::trim_spaces_end(const char* start, const char* end)
 {
-    while (end > start && std::isspace(*(end - 1)))
+    while (end > start && std::isspace(static_cast<unsigned char>(*(end - 1))))
+    {
         end--;
+    }
     return end;
 }
 
-static bool case_insensitive_compare(const char* str, size_t str_len, const char* prefix)
+bool FullyQualifiedAssemblyName::case_insensitive_starts_with(const char* str, size_t str_len, const char* prefix)
 {
     size_t prefix_len = std::strlen(prefix);
     if (str_len < prefix_len)
+    {
         return false;
+    }
     for (size_t i = 0; i < prefix_len; i++)
     {
-        if (std::tolower(str[i]) != std::tolower(static_cast<uint8_t>(prefix[i])))
+        if (std::tolower(static_cast<unsigned char>(str[i])) != std::tolower(static_cast<unsigned char>(prefix[i])))
+        {
             return false;
+        }
     }
     return true;
 }
 
-static RtResultVoid parse_assembly_version(const char* start, const char* end, metadata::RtMonoAssemblyName* assembly_name_info)
+RtResultVoid FullyQualifiedAssemblyName::parse_version(const char* start, const char* end, uint16_t* major, uint16_t* minor, uint16_t* build,
+                                                       uint16_t* revision)
 {
-    // Parse version string like "1.0.0.0"
     const char* p = start;
     uint16_t parts[4] = {0, 0, 0, 0};
     int part_idx = 0;
@@ -646,39 +653,41 @@ static RtResultVoid parse_assembly_version(const char* start, const char* end, m
         }
     }
 
-    assembly_name_info->version_major = parts[0];
-    assembly_name_info->version_minor = parts[1];
-    assembly_name_info->version_build = parts[2];
-    assembly_name_info->version_revision = parts[3];
-
+    *major = parts[0];
+    *minor = parts[1];
+    *build = parts[2];
+    *revision = parts[3];
     RET_VOID_OK();
 }
 
-RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info, bool* is_version_defined,
-                                       bool* is_token_defined)
+RtResultVoid FullyQualifiedAssemblyName::parse()
 {
-    *is_version_defined = false;
-    *is_token_defined = false;
+    _is_version_defined = false;
+    _is_public_key_token_defined = false;
+    _is_culture_neutral = false;
+    _name = nullptr;
+    _name_length = 0;
+    _culture = nullptr;
+    _culture_length = 0;
+    _public_key_token = nullptr;
+    _public_key_token_length = 0;
 
-    const char* p = input;
-    const char* end = input + input_len;
+    const char* p = _input;
+    const char* end = _input + _input_len;
 
-    // Find first comma to get assembly name
     const char* comma = p;
     while (comma < end && *comma != ',')
+    {
         comma++;
+    }
 
-    // Extract assembly name
     const char* name_start = trim_spaces(p, comma);
     const char* name_end = trim_spaces_end(name_start, comma);
-    size_t name_len = static_cast<size_t>(name_end - name_start);
-
-    if (name_len > 0)
+    _name = name_start;
+    _name_length = static_cast<size_t>(name_end - name_start);
+    if (_name_length == 0)
     {
-        char* name_copy = static_cast<char*>(alloc::GeneralAllocation::malloc(name_len + 1));
-        std::memcpy(name_copy, name_start, name_len);
-        name_copy[name_len] = '\0';
-        assembly_name_info->name = name_copy;
+        RET_ERR(RtErr::Argument);
     }
 
     p = comma;
@@ -687,63 +696,62 @@ RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, meta
         RET_VOID_OK();
     }
 
-    // Parse additional parts
     while (p < end)
     {
         if (*p == ',')
+        {
             p++;
+        }
 
         const char* seg_start = trim_spaces(p, end);
-
-        // Find next comma
         const char* next_comma = seg_start;
         while (next_comma < end && *next_comma != ',')
+        {
             next_comma++;
+        }
 
         const char* seg_end = trim_spaces_end(seg_start, next_comma);
         size_t seg_len = static_cast<size_t>(seg_end - seg_start);
 
         if (seg_len > 0)
         {
-            if (case_insensitive_compare(seg_start, seg_len, "Version="))
+            if (case_insensitive_starts_with(seg_start, seg_len, "Version="))
             {
-                *is_version_defined = true;
-                const char* value_start = seg_start + 8; // strlen("Version=")
+                _is_version_defined = true;
+                const char* value_start = seg_start + 8;
                 value_start = trim_spaces(value_start, seg_end);
-                RET_ERR_ON_FAIL(parse_assembly_version(value_start, seg_end, assembly_name_info));
+                RET_ERR_ON_FAIL(parse_version(value_start, seg_end, &_version_major, &_version_minor, &_version_build, &_version_revision));
             }
-            else if (case_insensitive_compare(seg_start, seg_len, "Culture="))
+            else if (case_insensitive_starts_with(seg_start, seg_len, "Culture="))
             {
-                const char* value_start = seg_start + 8; // strlen("Culture=")
+                const char* value_start = seg_start + 8;
                 value_start = trim_spaces(value_start, seg_end);
                 size_t value_len = static_cast<size_t>(seg_end - value_start);
 
                 if (value_len == 7 && std::memcmp(value_start, "neutral", 7) == 0)
                 {
-                    assembly_name_info->culture = nullptr;
+                    _is_culture_neutral = true;
+                    _culture = nullptr;
+                    _culture_length = 0;
                 }
                 else
                 {
-                    char* culture_copy = static_cast<char*>(alloc::GeneralAllocation::malloc(value_len + 1));
-                    std::memcpy(culture_copy, value_start, value_len);
-                    culture_copy[value_len] = '\0';
-                    assembly_name_info->culture = culture_copy;
+                    _culture = value_start;
+                    _culture_length = value_len;
                 }
             }
-            else if (case_insensitive_compare(seg_start, seg_len, "PublicKeyToken="))
+            else if (case_insensitive_starts_with(seg_start, seg_len, "PublicKeyToken="))
             {
-                *is_token_defined = true;
-                const char* value_start = seg_start + 15; // strlen("PublicKeyToken=")
+                _is_public_key_token_defined = true;
+                const char* value_start = seg_start + 15;
                 value_start = trim_spaces(value_start, seg_end);
-                size_t value_len = static_cast<size_t>(seg_end - value_start);
+                _public_key_token = value_start;
+                _public_key_token_length = static_cast<size_t>(seg_end - value_start);
 
-                if (value_len != RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH - 1)
+                if (_public_key_token_length > RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH - 1)
                 {
                     RET_ERR(RtErr::Argument);
                 }
-
-                std::memcpy(assembly_name_info->public_key_token, value_start, RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH - 1);
-                assembly_name_info->public_key_token[RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH - 1] = '\0';
             }
         }
 
@@ -751,6 +759,59 @@ RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, meta
     }
 
     RET_VOID_OK();
+}
+
+RtResultVoid FullyQualifiedAssemblyName::write_to(metadata::RtMonoAssemblyName* assembly_name_info) const
+{
+    if (_name_length > 0)
+    {
+        char* name_copy = static_cast<char*>(alloc::GeneralAllocation::malloc(_name_length + 1));
+        std::memcpy(name_copy, _name, _name_length);
+        name_copy[_name_length] = '\0';
+        assembly_name_info->name = name_copy;
+    }
+
+    assembly_name_info->version_major = _version_major;
+    assembly_name_info->version_minor = _version_minor;
+    assembly_name_info->version_build = _version_build;
+    assembly_name_info->version_revision = _version_revision;
+
+    if (_is_culture_neutral)
+    {
+        assembly_name_info->culture = nullptr;
+    }
+    else if (_culture_length > 0)
+    {
+        char* culture_copy = static_cast<char*>(alloc::GeneralAllocation::malloc(_culture_length + 1));
+        std::memcpy(culture_copy, _culture, _culture_length);
+        culture_copy[_culture_length] = '\0';
+        assembly_name_info->culture = culture_copy;
+    }
+
+    if (_is_public_key_token_defined)
+    {
+        std::memcpy(assembly_name_info->public_key_token, _public_key_token, RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH - 1);
+        assembly_name_info->public_key_token[RT_PUBLIC_KEY_TOKEN_HEX_STRING_WITH_NULL_TERMINATOR_LENGTH - 1] = '\0';
+    }
+
+    RET_VOID_OK();
+}
+
+RtResultVoid FullyQualifiedAssemblyName::parse_into(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info,
+                                                    bool* is_version_defined, bool* is_token_defined)
+{
+    FullyQualifiedAssemblyName parser(input, input_len);
+    RET_ERR_ON_FAIL(parser.parse());
+    *is_version_defined = parser.is_version_defined();
+    *is_token_defined = parser.is_public_key_token_defined();
+    RET_ERR_ON_FAIL(parser.write_to(assembly_name_info));
+    RET_VOID_OK();
+}
+
+RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info, bool* is_version_defined,
+                                       bool* is_token_defined)
+{
+    return FullyQualifiedAssemblyName::parse_into(input, input_len, assembly_name_info, is_version_defined, is_token_defined);
 }
 
 RtResult<const metadata::RtTypeSig*> Type::parse_assembly_qualified_type(metadata::RtModuleDef* default_mod, const char* assembly_qualified_type_name,

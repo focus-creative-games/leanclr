@@ -11,6 +11,7 @@
 #include "rt_array.h"
 #include "class.h"
 #include "reflection.h"
+#include "type.h"
 #include "log/internal_logger.h"
 
 namespace leanclr
@@ -38,16 +39,14 @@ metadata::RtAssembly* Assembly::find_by_name(const char* name_no_ext)
 
 RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
 {
-    metadata::RtModuleDef* mod = metadata::RtModuleDef::find_module(name);
+    FullyQualifiedAssemblyName qn(name, std::strlen(name));
+    RET_ERR_ON_FAIL(qn.parse());
+    std::string assembly_anme(qn.name(), qn.name_length());
+    metadata::RtModuleDef* mod = metadata::RtModuleDef::find_module(assembly_anme.c_str());
     if (mod)
     {
         RET_OK(mod->get_assembly());
     }
-    if (strcmp(name, "Assembly-CSharp-firstpass") == 0)
-    {
-        int a = 0;
-    }
-
     auto file_loader = vm::Settings::get_file_loader();
     if (!file_loader)
     {
