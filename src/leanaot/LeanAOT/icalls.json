@@ -1855,6 +1855,11 @@
     "header": "icalls/system_runtime_interopservices_runtimeinformation.h"
   },
   {
+    "name": "System.Runtime.Remoting.Activation.ActivationServices::AllocateUninitializedClassInstance(System.Type)",
+    "func": "SystemRuntimeRemotingActivationActivationServices::allocate_uninitialized_class_instance",
+    "header": "icalls/system_runtime_remoting_activation_activationservices.h"
+  },
+  {
     "name": "System.Runtime.RuntimeImports::_ecvt_s",
     "func": "SystemRuntimeRuntimeImports::ecvt_s",
     "header": "icalls/system_runtime_runtimeimports.h"
@@ -1873,6 +1878,26 @@
     "name": "System.Runtime.RuntimeImports::ZeroMemory",
     "func": "SystemRuntimeRuntimeImports::zero_memory",
     "header": "icalls/system_runtime_runtimeimports.h"
+  },
+  {
+    "name": "System.RuntimeFieldHandle::GetValueDirect(System.Reflection.RuntimeFieldInfo,System.RuntimeType,System.Void*,System.RuntimeType)",
+    "func": "SystemRuntimeFieldHandle::get_value_direct",
+    "header": "icalls/system_runtimefieldhandle.h"
+  },
+  {
+    "name": "System.RuntimeFieldHandle::SetValueDirect(System.Reflection.RuntimeFieldInfo,System.RuntimeType,System.Void*,System.Object,System.RuntimeType)",
+    "func": "SystemRuntimeFieldHandle::set_value_direct",
+    "header": "icalls/system_runtimefieldhandle.h"
+  },
+  {
+    "name": "System.RuntimeFieldHandle::SetValueInternal(System.Reflection.FieldInfo,System.Object,System.Object)",
+    "func": "SystemRuntimeFieldHandle::set_value_internal",
+    "header": "icalls/system_runtimefieldhandle.h"
+  },
+  {
+    "name": "System.RuntimeMethodHandle::GetFunctionPointer(System.IntPtr)",
+    "func": "SystemRuntimeMethodHandle::get_function_pointer",
+    "header": "icalls/system_runtimemethodhandle.h"
   },
   {
     "name": "System.RuntimeType::CreateInstanceInternal",
