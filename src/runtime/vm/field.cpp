@@ -171,7 +171,7 @@ RtResult<RtObject*> Field::get_value_object(const metadata::RtFieldInfo* field, 
         {
             RET_ERR(RtErr::NullReference);
         }
-        fieldDataPtr = reinterpret_cast<uint8_t*>(obj) + get_field_offset_includes_object_header_for_reference_type(field);
+        fieldDataPtr = reinterpret_cast<uint8_t*>(obj) + get_field_offset_includes_object_header_for_all_type(field);
     }
 
     // Get the type class for the field
@@ -218,7 +218,7 @@ RtResultVoid Field::set_value_object(const metadata::RtFieldInfo* field, RtObjec
         {
             RET_ERR(RtErr::NullReference);
         }
-        fieldDataPtr = reinterpret_cast<uint8_t*>(obj) + get_field_offset_includes_object_header_for_reference_type(field);
+        fieldDataPtr = reinterpret_cast<uint8_t*>(obj) + get_field_offset_includes_object_header_for_all_type(field);
     }
 
     // Get the type class for the field
