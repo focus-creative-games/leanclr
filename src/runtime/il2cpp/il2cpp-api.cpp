@@ -137,7 +137,7 @@ void il2cpp_free(void* ptr)
 
 Il2CppClass* il2cpp_array_class_get(Il2CppClass* element_class, uint32_t rank)
 {
-    auto result = vm::ArrayClass::get_array_class_from_element_klass(element_class, static_cast<uint8_t>(rank));
+    auto result = rank > 1 ? vm::ArrayClass::get_array_class_from_element_klass(element_class, static_cast<uint8_t>(rank)) : vm::ArrayClass::get_szarray_class_from_element_class(element_class);
     assert(result.is_ok());
     return result.is_ok() ? result.unwrap() : nullptr;
 }
