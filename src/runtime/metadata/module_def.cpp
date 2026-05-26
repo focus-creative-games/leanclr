@@ -238,7 +238,6 @@ RtResultVoid RtModuleDef::setup_generic_params_and_containers()
         RtGenericParam& gp = _genericParams[i];
         auto row_gp = _cliImage.read_generic_param(rid).value();
         gp.gid = RtMetadata::encode_gid_by_rid(*this, rid);
-        int a = 5;
         UNWRAP_OR_RET_ERR_ON_FAIL(gp.name, get_string(row_gp.name));
         gp.flags = row_gp.flags;
         gp.index = row_gp.number;
