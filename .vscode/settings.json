@@ -16,6 +16,7 @@
 
   "clang-format.executable": "${workspaceRoot}/tools/clang-format/clang-format.exe",
   "clang-format.style": "file",
+  "clang-format.language.csharp.enable": false,
 
   "[cpp]": {
     "editor.defaultFormatter": "xaver.clang-format",
@@ -25,12 +26,18 @@
     "editor.defaultFormatter": "xaver.clang-format",
     "editor.formatOnSave": true
   },
+  "[csharp]": {
+    "editor.defaultFormatter": "anysphere.csharp",
+    "editor.formatOnSave": true
+  },
+
+  "csharp.format.enable": true,
+  "dotnet.defaultSolution": "src/tests/managed/managed.sln",
 
   "files.associations": {
     "*.h": "cpp",
     "build_config.h": "cpp"
   },
 
-  "cmake.sourceDirectory": "${workspaceFolder}/src/runtime",
-  "dotnet.defaultSolution": "src/leanaot/LeanAOT.sln"
+  "cmake.sourceDirectory": "${workspaceFolder}/src/runtime"
 }

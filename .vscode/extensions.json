@@ -1,6 +1,7 @@
 {
   "recommendations": [
-    "xaver.clang-format"
+    "xaver.clang-format",
+    "anysphere.csharp"
   ],
   "unwantedRecommendations": [
     "ms-vscode.cpptools"
