@@ -42,6 +42,40 @@ namespace CorlibTests.InternalCall
             }
         }
 
+        public struct StructWithFields
+        {
+            public int i;
+            public long l;
+            public bool b;
+            public string s;
+            public static int staticField;
+            private int _privateField;
+
+            public StructWithFields(int i, long l, bool b, string s, int privateField)
+            {
+                this.i = i;
+                this.l = l;
+                this.b = b;
+                this.s = s;
+                _privateField = privateField;
+            }
+
+            public int PrivateField
+            {
+                get { return _privateField; }
+            }
+        }
+
+        public struct NestedStructContainer
+        {
+            public StructWithFields inner;
+
+            public NestedStructContainer(int value)
+            {
+                inner = new StructWithFields(value, value * 2L, value % 2 == 0, value.ToString(), value + 100);
+            }
+        }
+
         [UnitTest]
         public void FieldInfo_Name_ok()
         {
@@ -109,6 +143,154 @@ namespace CorlibTests.InternalCall
             Assert.Equal(0, modifiers.Length);
             modifiers = f.GetRequiredCustomModifiers();
             Assert.Equal(0, modifiers.Length);
+        }
+
+        [UnitTest]
+        public void StructField_DeclaringType_IsValueType()
+        {
+            FieldInfo field = typeof(StructWithFields).GetField("i");
+            Assert.NotNull(field);
+            Assert.IsTrue(field.DeclaringType.IsValueType);
+            Assert.Equal(typeof(StructWithFields), field.DeclaringType);
+        }
+
+        [UnitTest]
+        public void StructField_FieldType()
+        {
+            Assert.Equal(typeof(int), typeof(StructWithFields).GetField("i").FieldType);
+            Assert.Equal(typeof(long), typeof(StructWithFields).GetField("l").FieldType);
+            Assert.Equal(typeof(bool), typeof(StructWithFields).GetField("b").FieldType);
+            Assert.Equal(typeof(string), typeof(StructWithFields).GetField("s").FieldType);
+        }
+
+        [UnitTest]
+        public void StructField_GetValue_Int()
+        {
+            var s = new StructWithFields(42, 100L, true, "hello", 7);
+            FieldInfo field = typeof(StructWithFields).GetField("i");
+            Assert.Equal(42, field.GetValue(s));
+        }
+
+        [UnitTest]
+        public void StructField_GetValue_AllPublicFields()
+        {
+            var s = new StructWithFields(1, 2L, false, "x", 3);
+            Assert.Equal(1, typeof(StructWithFields).GetField("i").GetValue(s));
+            Assert.Equal(2L, typeof(StructWithFields).GetField("l").GetValue(s));
+            Assert.Equal(false, typeof(StructWithFields).GetField("b").GetValue(s));
+            Assert.Equal("x", typeof(StructWithFields).GetField("s").GetValue(s));
+        }
+
+        [UnitTest]
+        public void StructField_GetValue_PrivateField()
+        {
+            var s = new StructWithFields(0, 0L, false, null, 99);
+            FieldInfo field = typeof(StructWithFields).GetField("_privateField", BindingFlags.Instance | BindingFlags.NonPublic);
+            Assert.NotNull(field);
+            Assert.Equal(99, field.GetValue(s));
+        }
+
+        [UnitTest]
+        public void StructField_SetValue_RequiresBoxedTarget()
+        {
+            var s = new StructWithFields(10, 20L, false, "before", 1);
+            FieldInfo field = typeof(StructWithFields).GetField("i");
+
+            // SetValue on an unboxed struct does not mutate the caller's copy.
+            field.SetValue(s, 99);
+            Assert.Equal(10, s.i);
+
+            object boxed = s;
+            field.SetValue(boxed, 99);
+            s = (StructWithFields)boxed;
+            Assert.Equal(99, s.i);
+        }
+
+        [UnitTest]
+        public void StructField_SetValue_MultipleFields_ViaBoxing()
+        {
+            var s = new StructWithFields(1, 2L, false, "a", 0);
+            object boxed = s;
+
+            typeof(StructWithFields).GetField("i").SetValue(boxed, 10);
+            typeof(StructWithFields).GetField("l").SetValue(boxed, 20L);
+            typeof(StructWithFields).GetField("b").SetValue(boxed, true);
+            typeof(StructWithFields).GetField("s").SetValue(boxed, "updated");
+
+            s = (StructWithFields)boxed;
+            Assert.Equal(10, s.i);
+            Assert.Equal(20L, s.l);
+            Assert.IsTrue(s.b);
+            Assert.Equal("updated", s.s);
+        }
+
+        [UnitTest]
+        public void StructField_SetValue_PrivateField_ViaBoxing()
+        {
+            var s = new StructWithFields(0, 0L, false, null, 1);
+            FieldInfo field = typeof(StructWithFields).GetField("_privateField", BindingFlags.Instance | BindingFlags.NonPublic);
+            object boxed = s;
+            field.SetValue(boxed, 55);
+            s = (StructWithFields)boxed;
+            Assert.Equal(55, s.PrivateField);
+        }
+
+        [UnitTest]
+        public void StructField_Static_GetSet()
+        {
+            StructWithFields.staticField = 0;
+            FieldInfo field = typeof(StructWithFields).GetField("staticField", BindingFlags.Public | BindingFlags.Static);
+            Assert.NotNull(field);
+            Assert.Equal(0, field.GetValue(null));
+
+            field.SetValue(null, 123);
+            Assert.Equal(123, StructWithFields.staticField);
+            Assert.Equal(123, field.GetValue(null));
+        }
+
+        [UnitTest]
+        public void StructField_NestedStructField_GetValue()
+        {
+            var container = new NestedStructContainer(5);
+            FieldInfo innerField = typeof(NestedStructContainer).GetField("inner");
+            Assert.NotNull(innerField);
+
+            object inner = innerField.GetValue(container);
+            Assert.NotNull(inner);
+            Assert.Equal(typeof(StructWithFields), inner.GetType());
+
+            var innerStruct = (StructWithFields)inner;
+            Assert.Equal(5, innerStruct.i);
+            Assert.Equal(10L, innerStruct.l);
+            Assert.Equal("5", innerStruct.s);
+        }
+
+        [UnitTest]
+        public void StructField_NestedStructField_SetValue_ViaBoxing()
+        {
+            var container = new NestedStructContainer(3);
+            FieldInfo innerField = typeof(NestedStructContainer).GetField("inner");
+            object boxedContainer = container;
+
+            var newInner = new StructWithFields(100, 200L, true, "nested", 0);
+            innerField.SetValue(boxedContainer, newInner);
+            container = (NestedStructContainer)boxedContainer;
+
+            Assert.Equal(100, container.inner.i);
+            Assert.Equal(200L, container.inner.l);
+            Assert.IsTrue(container.inner.b);
+            Assert.Equal("nested", container.inner.s);
+        }
+
+        [UnitTest]
+        public void StructField_GetFields_ReturnsInstanceFields()
+        {
+            FieldInfo[] fields = typeof(StructWithFields).GetFields(BindingFlags.Public | BindingFlags.Instance);
+            Assert.True(fields.Length >= 4);
+            Assert.NotNull(Array.Find(fields, f => f.Name == "i"));
+            Assert.NotNull(Array.Find(fields, f => f.Name == "l"));
+            Assert.NotNull(Array.Find(fields, f => f.Name == "b"));
+            Assert.NotNull(Array.Find(fields, f => f.Name == "s"));
         }
 
 #if IL2CPP_ONLY

@@ -238,11 +238,14 @@ public class Assert
             {
                 return;
             }
-            else
+            Exception innerEx = ex.InnerException;
+            if (innerEx != null && innerEx is T)
             {
-                Debugger.Log(0, "Assert", $"Assert.ExpectException failed: expected exception of type {typeof(T)}, but got {ex.GetType()}");
-                throw new AssertException($"Assert.ExpectException failed: expected exception of type {typeof(T)}, but got {ex.GetType()}");
+                return;
             }
+            ex = innerEx ?? ex;
+            Debugger.Log(0, "Assert", $"Assert.ExpectException failed: expected exception of type {typeof(T)}, but got {ex.GetType()}");
+            throw new AssertException($"Assert.ExpectException failed: expected exception of type {typeof(T)}, but got {ex.GetType()}");
         }
         Debugger.Log(0, "Assert", $"Assert.ExpectException failed: expected exception of type {typeof(T)}, but no exception was thrown");
         throw new AssertException($"Assert.ExpectException failed: expected exception of type {typeof(T)}, but no exception was thrown");

@@ -600,7 +600,7 @@ namespace CoreTests
                             a = 3;
                             throw;
                         }
-                        catch (InvalidCastException e2) when (a.GetHashCode() == 7)
+                        catch (InvalidCastException) when (a.GetHashCode() == 7)
                         {
                             throw;
                         }

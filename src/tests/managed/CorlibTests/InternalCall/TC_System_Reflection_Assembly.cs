@@ -1,7 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Permissions;
 using System.Text;
 using System.Threading.Tasks;
@@ -79,6 +81,39 @@ namespace CorlibTests.InternalCall
             var loaded_ass = Assembly.Load("CorlibTests");
             var self_ass = GetType().Assembly;
             Assert.Equal(self_ass, loaded_ass);
+        }
+
+        [UnitTest]
+        public void LoadAssemblyFullQualifiedName()
+        {
+            var loaded_ass = Assembly.Load("CorlibTests, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null");
+            Assert.NotNull(loaded_ass);
+        }
+
+        [Serializable]
+        public class LaunchOption
+        {
+            public string Path { get; set; }
+
+            public Dictionary<string, string> Extra { get; set; }
+
+            public LaunchOption GetClone()
+            {
+                BinaryFormatter binaryFormatter = new BinaryFormatter();
+                MemoryStream memoryStream = new MemoryStream();
+                binaryFormatter.Serialize(memoryStream, this);
+                memoryStream.Seek(0L, SeekOrigin.Begin);
+                return binaryFormatter.Deserialize(memoryStream) as LaunchOption;
+            }
+        }
+
+        [UnitTest]
+        public void Serialization_Call_Assembly_Load_Internal()
+        {
+            var option = new LaunchOption() { Path = "CorlibTests", Extra = new Dictionary<string, string>() { { "test", "test" } } };
+            var serialized = option.GetClone();
+            Assert.Equal(option.Path, serialized.Path);
+            Assert.Equal(option.Extra["test"], serialized.Extra["test"]);
         }
     }
 }
