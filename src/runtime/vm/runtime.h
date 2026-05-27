@@ -16,6 +16,7 @@ class Runtime
 
     // Static constructor runners
     static RtResultVoid run_class_static_constructor(const metadata::RtClass* klass);
+    static RtResultVoid run_class_static_constructor_hierarchy(const metadata::RtClass* klass);
     static RtResult<const metadata::RtMethodInfo*> get_module_constructor(metadata::RtModuleDef* module);
     static RtResultVoid run_module_static_constructor(metadata::RtModuleDef* module);
 

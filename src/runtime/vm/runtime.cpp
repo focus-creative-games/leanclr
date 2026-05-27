@@ -433,6 +433,25 @@ RtResultVoid Runtime::run_class_static_constructor(const metadata::RtClass* klas
     RET_VOID_OK();
 }
 
+RtResultVoid Runtime::run_class_static_constructor_hierarchy(const metadata::RtClass* klass)
+{
+    assert(klass);
+    if (Class::is_cctor_not_finished(klass))
+    {
+        RET_ERR_ON_FAIL(run_class_static_constructor(klass));
+    }
+    const metadata::RtClass* parent_klass = klass->parent;
+    if (parent_klass != nullptr && Class::is_cctor_not_finished_hierarchy(parent_klass))
+    {
+        RET_ERR_ON_FAIL(run_class_static_constructor_hierarchy(parent_klass));
+    }
+    if (!Class::is_cctor_not_finished_hierarchy(klass))
+    {
+        Class::set_cctor_finished_hierarchy(const_cast<metadata::RtClass*>(klass));
+    }
+    RET_VOID_OK();
+}
+
 RtResult<const metadata::RtMethodInfo*> Runtime::get_module_constructor(metadata::RtModuleDef* module)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, module_klass, module->get_global_type_def());

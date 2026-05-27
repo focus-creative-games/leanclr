@@ -512,7 +512,7 @@ using RtNativeMethodPointer = void (*)();
 #define CAST_AS_NOEXCEP_MANAGED_METHOD_POINTER(p) ((void (*)() noexcept)(p))
 #define CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(p)                                                                        \
     ((::leanclr::RtResultVoid(*)(::leanclr::metadata::RtManagedMethodPointer, const ::leanclr::metadata::RtMethodInfo*, \
-                                 const ::leanclr::interp::RtStackObject*, ::leanclr::interp::RtStackObject*) noexcept)(p))
+                                  const ::leanclr::interp::RtStackObject*, ::leanclr::interp::RtStackObject*) noexcept)(p))
 
 // Interface offset structure
 struct RtInterfaceOffset
@@ -673,6 +673,14 @@ struct TypedConstRawData
 struct RtAssembly;
 class RtModuleDef;
 
+enum class RtCCtorStatus : uint8_t
+{
+    NotInited,
+    Initing,
+    InitSelf,
+    InitHierarchy,
+};
+
 // Class structure
 struct RtClass
 {
@@ -715,7 +723,7 @@ struct RtClass
     uint16_t vtable_count;
     uint8_t hierarchy_depth;
     uint8_t alignment;
-    bool has_init_cctor;
+    RtCCtorStatus cctor_status;
 };
 
 struct RtCustomAttributeRidRange
@@ -790,6 +798,7 @@ enum class RtRuntimeHandleType : uint8_t
 struct RtRuntimeHandle
 {
     RtRuntimeHandleType type;
+
     union
     {
         const void* value;

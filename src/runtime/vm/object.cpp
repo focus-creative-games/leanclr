@@ -14,9 +14,9 @@ namespace vm
 
 RtResult<RtObject*> Object::__new_object(const metadata::RtClass* klass LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
-    if (LEANCLR_UNLIKELY(Class::is_cctor_not_finished(klass)))
+    if (LEANCLR_UNLIKELY(Class::is_cctor_not_finished_hierarchy(klass)))
     {
-        RET_ERR_ON_FAIL(Runtime::run_class_static_constructor(klass));
+        RET_ERR_ON_FAIL(Runtime::run_class_static_constructor_hierarchy(klass));
     }
 
     const size_t total_size = sizeof(RtObject) + klass->instance_size_without_header;

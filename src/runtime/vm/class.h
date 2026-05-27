@@ -269,12 +269,30 @@ class Class
 
     static bool is_cctor_not_finished(const metadata::RtClass* klass)
     {
-        return !klass->has_init_cctor;
+        return klass->cctor_status == metadata::RtCCtorStatus::NotInited;
+    }
+
+    static bool is_cctor_not_finished_hierarchy(const metadata::RtClass* klass)
+    {
+        return klass->cctor_status < metadata::RtCCtorStatus::InitHierarchy;
+    }
+
+    static void set_cctor_initing(metadata::RtClass* klass)
+    {
+        assert(klass->cctor_status == metadata::RtCCtorStatus::NotInited);
+        klass->cctor_status = metadata::RtCCtorStatus::Initing;
     }
 
     static void set_cctor_finished(metadata::RtClass* klass)
     {
-        klass->has_init_cctor = true;
+        assert(klass->cctor_status < metadata::RtCCtorStatus::InitSelf);
+        klass->cctor_status = metadata::RtCCtorStatus::InitSelf;
+    }
+
+    static void set_cctor_finished_hierarchy(metadata::RtClass* klass)
+    {
+        assert(klass->cctor_status < metadata::RtCCtorStatus::InitHierarchy);
+        klass->cctor_status = metadata::RtCCtorStatus::InitHierarchy;
     }
 
     static const metadata::RtTypeSig* get_by_val_type_sig(const metadata::RtClass* klass)
