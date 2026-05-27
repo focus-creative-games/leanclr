@@ -5,11 +5,14 @@ namespace Tests.CSharp
     public class TestCCtor
     {
 
+        [IgnoreTest]
         class Common
         {
             public static int x = 0;
+            public static int y = 0;
         }
 
+        [IgnoreTest]
         class A
         {
             public static int y;
@@ -31,26 +34,43 @@ namespace Tests.CSharp
             }
         }
 
+        [IgnoreTest]
         class B : A
         {
 
         }
 
         [UnitTest]
-        public void CCotrNotRunWhenNewChildObject()
+        public void CCotrRunWhenNewChildObject()
         {
             Assert.Equal(0, Common.x);
             new B();
-            Assert.Equal(0, Common.x);
+            Assert.Equal(1, Common.x);
+        }
+
+        class StaticA
+        {
+            static StaticA()
+            {
+                Common.y = 1;
+            }
+        }
+
+        class StaticB
+        {
+            public static int y;
+            static StaticB()
+            {
+                y = 1;
+            }
         }
 
         [UnitTest]
-        public void CCtorRunWhenCallMethodAccessStaticField()
+        public void ParentCCtorNotRunWhenAccessChildStaticField()
         {
-            Assert.Equal(0, Common.x);
-            var b = new B();
-            Assert.Equal(2, b.Run2());
-            Assert.Equal(1, Common.x);
+            Assert.Equal(0, Common.y);
+            Assert.Equal(1, StaticB.y);
+            Assert.Equal(0, Common.y);
         }
     }
 }

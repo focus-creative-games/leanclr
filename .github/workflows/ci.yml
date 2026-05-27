@@ -25,7 +25,7 @@ jobs:
           chmod +x scripts/ci.sh
           chmod +x scripts/test/build-all.sh
           chmod +x scripts/test/run.sh
-          chmod +x scripts/test/basic_test_runner/build.sh
+          chmod +x scripts/test/basic-tester/build.sh
 
       - name: Build and run tests
         run: ./scripts/ci.sh Release

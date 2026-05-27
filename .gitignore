@@ -429,6 +429,7 @@ ___*
 *.wasm
 /src/leanaot/output/cpp
 /src/leanaot/aot-runner/cpp
+/src/tests/aot-tester/cpp
 /src/tools/leanaot
 /src/leanaot/aot-runner/ManagedStripped
 /src/tools/exportextern/libraries
@@ -438,5 +439,6 @@ launchSettings.json
 /src/tools/exportextern/Properties/launchSettings.json
 /src/tools/exportextern/Properties/launchSettings.json
 /src/leanaot/aot-runner/cpp-posix
+/src/tests/aot-tester/cpp-posix
 /scripts/publish_runtime.bat
 /scripts/publish_leanaot.bat

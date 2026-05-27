@@ -9,7 +9,7 @@ if "%CONFIG%"=="" set "CONFIG=Debug"
 set "ARCH=%~2"
 if "%ARCH%"=="" set "ARCH=x64"
 
-call "%~dp0..\lib\cmake-dir.bat" "tests\basic_test_runner" "%CONFIG%" "%ARCH%"
+call "%~dp0..\lib\cmake-dir.bat" "tests\basic-tester" "%CONFIG%" "%ARCH%"
 set "RUNNER=%CMAKE_BUILD_DIR%\bin\%CONFIG%\test.exe"
 
 if not exist "%RUNNER%" (

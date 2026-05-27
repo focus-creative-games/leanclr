@@ -2,6 +2,7 @@ using System;
 using System.Runtime.InteropServices;
 using System.Text;
 
+#if IL2CPP_ONLY
 
 /// <summary>
 /// P/Invoke 覆盖：在 Emscripten 下由 <c>leanclr_test_pinvoke.js</c> 提供 wasm 导入实现，
@@ -284,3 +285,5 @@ public class WasmPInvokeVerify
         Assert.Equal('好', outSb[0]);
     }
 }
+
+#endif

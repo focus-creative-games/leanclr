@@ -16,7 +16,7 @@ namespace RunTests
             int passed = 0;
             int failed = 0;
 
-            var asses = new Assembly[] { typeof(CoreTests.App).Assembly, typeof(CorlibTests.App).Assembly };
+            var asses = new Assembly[] { typeof(CoreTests.App).Assembly, typeof(CorlibTests.App).Assembly, typeof(AotTests.App).Assembly };
 
             foreach (var asm in asses)
             {
@@ -24,6 +24,10 @@ namespace RunTests
                 for (int i = 0; i < types.Length; i++)
                 {
                     var type = types[i];
+                    if (type.GetCustomAttribute<IgnoreTestAttribute>() != null)
+                    {
+                        continue;
+                    }
                     var methods = type.GetMethods(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance | BindingFlags.Static);
                     for (int j = 0; j < methods.Length; j++)
                     {

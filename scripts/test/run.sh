@@ -11,10 +11,10 @@ CONFIG="${1:-Debug}"
 ARCH="${2:-}"
 
 if [[ -n "$ARCH" ]]; then
-    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic_test_runner "$CONFIG" "$ARCH")"
+    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic-tester "$CONFIG" "$ARCH")"
     RUNNER="$CMAKE_BUILD_DIR/bin/$CONFIG/test"
 else
-    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic_test_runner "$CONFIG")"
+    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic-tester "$CONFIG")"
     RUNNER="$CMAKE_BUILD_DIR/bin/test"
 fi
 

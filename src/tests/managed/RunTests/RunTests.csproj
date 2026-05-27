@@ -49,6 +49,14 @@
     <None Include="App.config" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\AotTests\AotTests.csproj">
+      <Project>{eb08ba83-6688-4d6e-9ce7-31af2b55a9f6}</Project>
+      <Name>AotTests</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{aa467143-bba4-4b54-95e5-1d0f1099f380}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
     <ProjectReference Include="..\CoreTests\CoreTests.csproj">
       <Project>{a098e4a9-8b0e-4612-a75e-0ae2061e70ff}</Project>
       <Name>CoreTests</Name>

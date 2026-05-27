@@ -51,14 +51,14 @@ scripts/
 |--------|-------------|
 | `ci.sh` | CI entry: `test/build-all` + `test/run` |
 | `test/build-all.*` | Build C++ runner + managed test DLLs → copy DLLs to `src/tests/managed/MiscDlls/` |
-| `test/basic_test_runner/build.*` | Build C++ test runner executable |
-| `test/run.*` | Run `out/cmake/tests/basic_test_runner/<Config>-<Arch>/bin/.../test` |
+| `test/basic-tester/build.*` | Build C++ test runner executable |
+| `test/run.*` | Run `out/cmake/tests/basic-tester/<Config>-<Arch>/bin/.../test` |
 | `runtime/build.*` | Build `leanclr` → `out/cmake/runtime/<Config>-<Arch>/` (Windows: optional `sln`, `shared`) |
-| `leanaot/aot-runner/build.bat` | Build native `aot-runner` executable |
-| `leanaot/aot-runner/gen_cpp.bat` | Run LeanAOT to generate C++ under `src/leanaot/aot-runner/cpp/` |
-| `leanaot/aot-runner/gen_cpp_posix.bat` | Generate C++ under `cpp-linux/` using POSIX BCL (`dotnetframework4.x-linux`) |
-| `leanaot/aot-runner/run.bat` | Build and run `aot-runner` with Test assembly |
-| `leanaot/aot-runner/build-wasm.bat` | Build `aot-runner` with Emscripten → `out/cmake/leanaot/aot-runner/<Config>-wasm/` |
+| `test/aot-runner/build.bat` | Build native `aot-tester` executable |
+| `test/aot-runner/gen_cpp.bat` | Run LeanAOT to generate C++ under `src/tests/aot-tester/cpp/` |
+| `test/aot-runner/gen_cpp_posix.bat` | Generate C++ under `src/tests/aot-tester/cpp-posix/` using POSIX BCL (`dotnetframework4.x-linux`) |
+| `test/aot-runner/run.bat` | Build and run `aot-tester` with `AotTests` assembly |
+| `test/aot-runner/build-wasm.bat` | Build `aot-tester` with Emscripten → `out/cmake/tests/aot-tester/<Config>-wasm/` |
 | `leanaot/build.*` | Build LeanAOT → `out/dotnet/LeanAOT/<Config>/net8.0/` |
 | `publish_leanaot.bat` | `dotnet publish` Release → `../leanclr4unity/LeanCLR~/leanaot/` (sibling repo) |
 | `publish_runtime.bat` | Mirror `src/runtime` → `../leanclr4unity/LeanCLR~/runtime/` (excludes scripts, CMakeLists.txt, `3rd/zlib`) |
@@ -72,6 +72,5 @@ These invoke CMake/dotnet but write outputs only under `out/`:
 
 - `src/runtime/build.*` — forward to `scripts/runtime/`
 - `src/samples/*/build.*` — platform samples
-- `src/leanaot/aot-runner/*.bat` — forward to `scripts/leanaot/aot-runner/` (generated `cpp/` still under aot-runner until phase 3)
-- `src/tests/basic_test_runner/build.*` — forward to `scripts/test/basic_test_runner/`
+- `src/tests/basic-tester/build.*` — forward to `scripts/test/basic-tester/`
 - `src/tools/lean/build.*` — lean tool

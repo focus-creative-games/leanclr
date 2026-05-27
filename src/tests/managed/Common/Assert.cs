@@ -1,16 +1,6 @@
 ﻿using System;
 using System.Diagnostics;
 
-[AttributeUsage(AttributeTargets.Method)]
-public class UnitTestAttribute : Attribute
-{
-}
-
-public abstract class GeneralTestCaseBase
-{
-
-}
-
 
 
 public class AssertException : Exception

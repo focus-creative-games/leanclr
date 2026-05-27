@@ -14,8 +14,8 @@ ARCH="${2:-}"
 
 echo "=== Config: $CONFIG | Arch: $ARCH ==="
 
-echo "build basic_test_runner"
-"$SCRIPT_DIR/basic_test_runner/build.sh" "$CONFIG" "$ARCH"
+echo "build basic-tester"
+"$SCRIPT_DIR/basic-tester/build.sh" "$CONFIG" "$ARCH"
 
 echo "build managed tests"
 pushd "$TESTS_DIR/managed" >/dev/null
@@ -25,9 +25,9 @@ cp -f "$(leanclr_dotnet_out_dir CorlibTests "$CONFIG")/CorlibTests.dll" MiscDlls
 popd >/dev/null
 
 if [[ -n "$ARCH" ]]; then
-    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic_test_runner "$CONFIG" "$ARCH")"
+    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic-tester "$CONFIG" "$ARCH")"
 else
-    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic_test_runner "$CONFIG")"
+    CMAKE_BUILD_DIR="$(leanclr_cmake_build_dir tests/basic-tester "$CONFIG")"
 fi
 if [[ -f "$CMAKE_BUILD_DIR/bin/$CONFIG/test" ]]; then
     EXE_DIR="$CMAKE_BUILD_DIR/bin/$CONFIG"
@@ -51,5 +51,11 @@ if [[ ! -f "$CORLIBTESTS_DLL" ]]; then
 fi
 cp -f "$CORETESTS_DLL" "$DLLS_DIR/"
 cp -f "$CORLIBTESTS_DLL" "$DLLS_DIR/"
+
+COMMON_DLL="$(leanclr_dotnet_out_dir Common "$CONFIG")/Common.dll"
+if [[ ! -f "$COMMON_DLL" ]]; then
+    COMMON_DLL="$(leanclr_dotnet_out_dir Common Debug)/Common.dll"
+fi
+cp -f "$COMMON_DLL" "$DLLS_DIR/"
 
 echo "All tests built successfully."

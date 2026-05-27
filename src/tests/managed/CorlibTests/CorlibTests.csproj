@@ -1,7 +1,7 @@
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <AssemblyName>CorlibTests</AssemblyName>
     <RootNamespace>CorlibTests</RootNamespace>
@@ -9,6 +9,7 @@
     <NoStandardLib>true</NoStandardLib>
     <NoConfig>true</NoConfig>
     <ProjectGuid>{B3C8B19B-F8AE-400E-946C-DE7AF2216FC0}</ProjectGuid>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Release'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
@@ -29,17 +30,15 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="App.cs" />
-    <Compile Include="Assert.cs" />
     <!-- Auto-include all tests under these folders -->
     <Compile Include="InternalCall\**\*.cs" />
     <Compile Include="Intrinsic\**\*.cs" />
     <Compile Include="PInvoke\**\*.cs" />
   </ItemGroup>
-  <ItemGroup />
   <ItemGroup>
-    <ProjectReference Include="..\CoreTests\CoreTests.csproj">
-      <Project>{a098e4a9-8b0e-4612-a75e-0ae2061e70ff}</Project>
-      <Name>CoreTests</Name>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{aa467143-bba4-4b54-95e5-1d0f1099f380}</Project>
+      <Name>Common</Name>
     </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

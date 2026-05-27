@@ -11,10 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanAOT.ToCpp", "LeanAOT.To
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "LeanAOT.GenerationPlan", "LeanAOT.GenerationPlan\LeanAOT.GenerationPlan.csproj", "{AEDE875F-9E56-4761-99E9-073DD852A635}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Test", "Test\Test.csproj", "{EB08BA83-6688-4D6E-9CE7-31AF2B55A9F6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RunTest", "RunTest\RunTest.csproj", "{37D75BA2-E8A0-468B-BD86-7D3F6CA383F8}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

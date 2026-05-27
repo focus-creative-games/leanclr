@@ -6,7 +6,7 @@ This directory contains the unit test framework and test cases for the LeanCLR r
 
 ```
 tests/
-├── basic_test_runner/     # C++ test runner (loads and executes managed test assemblies)
+├── basic-tester/          # C++ test runner (loads and executes managed test assemblies)
 ├── managed/               # C# managed test projects
 │   ├── CoreTests/         # Core functionality tests
 │   ├── CorlibTests/       # Base class library tests
@@ -138,7 +138,7 @@ scripts\test\build-all.bat Debug x86
 #### Build C++ Test Runner
 
 ```batch
-cd basic_test_runner
+cd basic-tester
 build.bat [Config] [Arch]
 
 # Examples
@@ -155,7 +155,7 @@ build.bat Release x64
 
 After building, the executable is located at:
 ```
-out/cmake/tests/basic_test_runner/<Config>-x64/bin/<Config>/test.exe
+out/cmake/tests/basic-tester/<Config>-x64/bin/<Config>/test.exe
 ```
 
 #### Build C# Managed Test Projects

@@ -11,10 +11,10 @@ if "%ARCH%"=="" set "ARCH=x64"
 
 echo === Config: %CONFIG% ^| Arch: %ARCH% ===
 
-echo build basic_test_runner
-call "%REPO_ROOT%\scripts\test\basic_test_runner\build.bat" %CONFIG% %ARCH%
+echo build basic-tester
+call "%REPO_ROOT%\scripts\test\basic-tester\build.bat" %CONFIG% %ARCH%
 if errorlevel 1 (
-    echo ERROR: basic_test_runner build failed.
+    echo ERROR: basic-tester build failed.
     exit /b 1
 )
 
@@ -28,7 +28,7 @@ if errorlevel 1 (
 )
 popd
 
-call "%~dp0..\lib\cmake-dir.bat" "tests\basic_test_runner" "%CONFIG%" "%ARCH%"
+call "%~dp0..\lib\cmake-dir.bat" "tests\basic-tester" "%CONFIG%" "%ARCH%"
 set "EXE_DIR=%CMAKE_BUILD_DIR%\bin\%CONFIG%"
 set "DLLS_DIR=%EXE_DIR%\dlls"
 
@@ -66,6 +66,15 @@ if errorlevel 1 (
 copy /Y "%CORLIBTESTS_DLL%" "%DLLS_DIR%\" >nul
 if errorlevel 1 (
     echo ERROR: failed to copy CorlibTests.dll from "%CORLIBTESTS_DLL%".
+    exit /b 1
+)
+
+set "COMMON_DLL=%OUT_ROOT%\dotnet\Common\%CONFIG%\Common.dll"
+if not exist "%COMMON_DLL%" set "COMMON_DLL=%OUT_ROOT%\dotnet\Common\Debug\Common.dll"
+
+copy /Y "%COMMON_DLL%" "%DLLS_DIR%\" >nul
+if errorlevel 1 (
+    echo ERROR: failed to copy Common.dll from "%COMMON_DLL%".
     exit /b 1
 )
 

@@ -1,7 +1,7 @@
 <Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <PropertyGroup>
     <OutputType>Library</OutputType>
-    <TargetFrameworkVersion>v4.7.2</TargetFrameworkVersion>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
     <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
     <AssemblyName>CoreTests</AssemblyName>
     <RootNamespace>CoreTests</RootNamespace>
@@ -9,9 +9,16 @@
     <NoStandardLib>true</NoStandardLib>
     <NoConfig>true</NoConfig>
     <ProjectGuid>{A098E4A9-8B0E-4612-A75E-0AE2061E70FF}</ProjectGuid>
+    <TargetFrameworkProfile />
   </PropertyGroup>
   <PropertyGroup>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+  </PropertyGroup>
+  <PropertyGroup>
+    <!-- CoreTests contains many intentionally "unreachable"/"unused" paths for instruction coverage.
+         Suppress noisy compiler warnings to keep CI/build output readable. -->
+    <NoWarn>CS0162;CS0219;CS0168;CS1522;CS0169;CS0649</NoWarn>
+    <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
     <DebugType>portable</DebugType>
@@ -19,7 +26,349 @@
     </DefineConstants>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="**\*.cs" />
+    <Compile Include="AOTDefs\AOTActivator.cs" />
+    <Compile Include="AOTDefs\AOTEnums.cs" />
+    <Compile Include="AOTDefs\AOTExplicitStruct.cs" />
+    <Compile Include="AOTDefs\AOTValueTypes.cs" />
+    <Compile Include="AOTDefs\ArmHFAStructs.cs" />
+    <Compile Include="AOTDefs\BaseImplNone.cs" />
+    <Compile Include="AOTDefs\CallDefs.cs" />
+    <Compile Include="AOTDefs\CallFromNatives.cs" />
+    <Compile Include="AOTDefs\CustomAttributes.cs" />
+    <Compile Include="AOTDefs\FullGenericClass.cs" />
+    <Compile Include="AOTDefs\FunctionPointers.cs" />
+    <Compile Include="AOTDefs\HierarchyGeneric.cs" />
+    <Compile Include="AOTDefs\IFoo.cs" />
+    <Compile Include="AOTDefs\InnerTypes.cs" />
+    <Compile Include="AOTDefs\InterfaceDefaultMethod.cs" />
+    <Compile Include="AOTDefs\InterfaceExplicitImplements.cs" />
+    <Compile Include="AOTDefs\LdftnDefs.cs" />
+    <Compile Include="AOTDefs\LdvirftnDefs.cs" />
+    <Compile Include="AOTDefs\MethodRefs.cs" />
+    <Compile Include="AOTDefs\NativeArrayParam.cs" />
+    <Compile Include="AOTDefs\NullableTypeUtil.cs" />
+    <Compile Include="AOTDefs\PreserveMethodBridges.cs" />
+    <Compile Include="AOTDefs\RefNetstandard.cs" />
+    <Compile Include="AOTDefs\RefTypes.cs" />
+    <Compile Include="AOTDefs\TC_Arg.cs" />
+    <Compile Include="AOTDefs\TC_Arg_In.cs" />
+    <Compile Include="AOTDefs\TC_Arg_Out.cs" />
+    <Compile Include="AOTDefs\TC_Arg_Ref.cs" />
+    <Compile Include="AOTDefs\TC_Ret.cs" />
+    <Compile Include="AOTDefs\Test.cs" />
+    <Compile Include="AOTDefs\TestAOTCtorParam.cs" />
+    <Compile Include="AOTDefs\TestAOTParam.cs" />
+    <Compile Include="AOTDefs\TestAOTReturn.cs" />
+    <Compile Include="AOTDefs\TestAOTVirtualReturn.cs" />
+    <Compile Include="AOTDefs\TestCase1.cs" />
+    <Compile Include="AOTDefs\TestCase2.cs" />
+    <Compile Include="AOTDefs\TestCase3.cs" />
+    <Compile Include="AOTDefs\TestDelegates.cs" />
+    <Compile Include="AOTDefs\TestNotInitedNullableType.cs" />
+    <Compile Include="AOTDefs\TypeFields.cs" />
+    <Compile Include="AOTDefs\TypeStaticFields.cs" />
+    <Compile Include="AOTDefs\TypeStaticFields2.cs" />
+    <Compile Include="AOTDefs\TypeThreadStaticFields.cs" />
+    <Compile Include="AOTDefs\TypeThreadStaticFields2.cs" />
+    <Compile Include="AOTDefs\VectorTypes.cs" />
+    <Compile Include="AOTDefs\VirtualGenericMethod.cs" />
+    <Compile Include="App.cs" />
+    <Compile Include="App2.cs" />
+    <Compile Include="BootstrapTests\TestCallMethod.cs" />
+    <Compile Include="BootstrapTests\TestPassArgument.cs" />
+    <Compile Include="BootstrapTests\TestReturnValue.cs" />
+    <Compile Include="CustomPInvoke.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Tests\Bugs\ArrayCustomArgumentType.cs" />
+    <Compile Include="Tests\Bugs\Bug20260129.cs" />
+    <Compile Include="Tests\Bugs\BugException.cs" />
+    <Compile Include="Tests\Bugs\BugSizeOf.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_6_17.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_7_11.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_7_14.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_7_14_array_IndexOutRange.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_7_24_GetExecutingAssembly.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_9_13.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_9_22.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_9_26.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_9_27.cs" />
+    <Compile Include="Tests\Bugs\Bug_2022_9_9.cs" />
+    <Compile Include="Tests\Bugs\Bug_2023_1_14_interface_default_method.cs" />
+    <Compile Include="Tests\Bugs\Bug_BoxNotInitializedClass.cs" />
+    <Compile Include="Tests\Bugs\Bug_decimal.cs" />
+    <Compile Include="Tests\Bugs\Bug_Delegate_2022_10_13.cs" />
+    <Compile Include="Tests\Bugs\Bug_GenericEnum.cs" />
+    <Compile Include="Tests\Bugs\Bug_GetParameterName.cs" />
+    <Compile Include="Tests\Bugs\Bug_HierarchyGeneric.cs" />
+    <Compile Include="Tests\Bugs\Bug_Interface.cs" />
+    <Compile Include="Tests\Bugs\Bug_InterpreterInvoke.cs" />
+    <Compile Include="Tests\Bugs\Bug_ValueTypeToString_2022_7_22.cs" />
+    <Compile Include="Tests\Bugs\CallbackOverrideStack.cs" />
+    <Compile Include="Tests\Bugs\CustomDelegate.cs" />
+    <Compile Include="Tests\Bugs\EnumValuesByReflection.cs" />
+    <Compile Include="Tests\Bugs\FieldLayout.cs" />
+    <Compile Include="Tests\Bugs\FieldValueByReflection.cs" />
+    <Compile Include="Tests\Bugs\FixedArraySize.cs" />
+    <Compile Include="Tests\Bugs\GenericStruct\TC_GenericStruct.cs" />
+    <Compile Include="Tests\Bugs\GenericTypeCompareWithNull.cs" />
+    <Compile Include="Tests\Bugs\GenericVirtualMethodReflection.cs" />
+    <Compile Include="Tests\Bugs\IncrementalGCMdArrayLeak.cs" />
+    <Compile Include="Tests\Bugs\InflateGenericClassVTable.cs" />
+    <Compile Include="Tests\Bugs\InterfaceExplicitImplements.cs" />
+    <Compile Include="Tests\Bugs\InterfaceWithStaticMethodInMiddle.cs" />
+    <Compile Include="Tests\Bugs\LoopCallInvoke.cs" />
+    <Compile Include="Tests\Bugs\MethodSignatureMatch.cs" />
+    <Compile Include="Tests\Bugs\OptionalParamBinding_2022_10_26.cs" />
+    <Compile Include="Tests\Bugs\ReadRuntimeHandleFromMemberRef.cs" />
+    <Compile Include="Tests\Bugs\StaticCctorOrder.cs" />
+    <Compile Include="Tests\Bugs\TC_CallUnmanagedDelegate.cs" />
+    <Compile Include="Tests\Bugs\TC_InterfaceStaticCtor.cs" />
+    <Compile Include="Tests\Bugs\TransformConcurrentQueueFail.cs" />
+    <Compile Include="Tests\Bugs\TupleBug.cs" />
+    <Compile Include="Tests\Bugs\UnmanagedAccess.cs" />
+    <Compile Include="Tests\Bugs\ValueTupleGeneric.cs" />
+    <Compile Include="Tests\Bugs\WebGLMethodBridge.cs" />
+    <Compile Include="Tests\Bugs\ZStringFormat.cs" />
+    <Compile Include="Tests\CSharp\MonoPInvokeWrapperPreserves.cs" />
+    <Compile Include="Tests\CSharp\TC_Activator.cs" />
+    <Compile Include="Tests\CSharp\TC_AOTGeneric.cs" />
+    <Compile Include="Tests\CSharp\TC_AOTStructLayout.cs" />
+    <Compile Include="Tests\CSharp\TC_AOTTypeImplInterpInterface.cs" />
+    <Compile Include="Tests\CSharp\TC_ArrayGenericInterface.cs" />
+    <Compile Include="Tests\CSharp\TC_Assembly.cs" />
+    <Compile Include="Tests\CSharp\TC_async.cs" />
+    <Compile Include="Tests\CSharp\TC_ByReference.cs" />
+    <Compile Include="Tests\CSharp\TC_CrashReport.cs" />
+    <Compile Include="Tests\CSharp\TC_CustomAttribute.cs" />
+    <Compile Include="Tests\CSharp\TC_Delegate_BeginEndInvoke.cs" />
+    <Compile Include="Tests\CSharp\TC_Delegate_DynamicInvoke.cs" />
+    <Compile Include="Tests\CSharp\TC_Delegate_OpenClose.cs" />
+    <Compile Include="Tests\CSharp\TC_dynamic.cs" />
+    <Compile Include="Tests\CSharp\TC_Enum.cs" />
+    <Compile Include="Tests\CSharp\TC_event.cs" />
+    <Compile Include="Tests\CSharp\TC_explicit_implement.cs" />
+    <Compile Include="Tests\CSharp\TC_ExternalCall.cs" />
+    <Compile Include="Tests\CSharp\TC_foreach.cs" />
+    <Compile Include="Tests\CSharp\TC_FunctionPointer.cs" />
+    <Compile Include="Tests\CSharp\TC_Instinct.cs" />
+    <Compile Include="Tests\CSharp\TC_InterfaceDefaultMethod.cs" />
+    <Compile Include="Tests\CSharp\TC_Interlocked.cs" />
+    <Compile Include="Tests\CSharp\TC_InterpStructLayout.cs" />
+    <Compile Include="Tests\CSharp\TC_Marshal.cs" />
+    <Compile Include="Tests\CSharp\TC_MonoPInvokeWrapper.cs" />
+    <Compile Include="Tests\CSharp\TC_MultiCastDelegate.cs" />
+    <Compile Include="Tests\CSharp\TC_Nullable.cs" />
+    <Compile Include="Tests\CSharp\TC_Reflection.cs" />
+    <Compile Include="Tests\CSharp\TC_String.cs" />
+    <Compile Include="Tests\CSharp\TC_using.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_add.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_add_ovf.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_and.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_ckfinite.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_div.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_div_un.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_mul.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_mul_ovf.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_neg.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_not.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_or.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_rem.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_rem_un.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_shl.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_shr.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_shr_un.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_sub.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_sub_ovf.cs" />
+    <Compile Include="Tests\Instruments\Ariths\TC_xor.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelema.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_any_i1.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_any_i2.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_any_i4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_any_i8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_any_ref.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_any_u1.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_any_u2.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_any_u4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_any_u8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_i.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_i1.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_i2.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_i4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_i8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_r4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_r8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_ref.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_u1.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_u2.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_u4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldelem_u8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_ldlen.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_any.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_i1.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_i2.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_i4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_i8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_interp_class.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_object.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_u1.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_u2.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_u4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_MdArray_u8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_newarr.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_any_i1.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_any_i2.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_any_i4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_any_i8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_any_ref.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_i.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_i1.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_i2.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_i4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_i8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_r4.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_r8.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_ref.cs" />
+    <Compile Include="Tests\Instruments\Arrays\TC_stelem_struct.cs" />
+    <Compile Include="Tests\Instruments\Boxs\TC_box.cs" />
+    <Compile Include="Tests\Instruments\Boxs\TC_unbox.cs" />
+    <Compile Include="Tests\Instruments\Boxs\TC_unbox_any.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Beq.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Bge.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Bge_un.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Bgt.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Bgt_un.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Ble.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Ble_un.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Blt.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Blt_un.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Bne_un.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Br.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_Brfalse.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_brtrue.cs" />
+    <Compile Include="Tests\Instruments\Branches\TC_switch.cs" />
+    <Compile Include="Tests\Instruments\Cmps\TC_Ceq.cs" />
+    <Compile Include="Tests\Instruments\Cmps\TC_Cgt.cs" />
+    <Compile Include="Tests\Instruments\Cmps\TC_Cgt_un.cs" />
+    <Compile Include="Tests\Instruments\Cmps\TC_Clt.cs" />
+    <Compile Include="Tests\Instruments\Cmps\TC_Clt_un.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_i.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_i1.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_i2.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_i4.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_i8.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_ovf_i1.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_ovf_i2.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_ovf_i4.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_ovf_i8.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_ovf_u1.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_ovf_u2.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_ovf_u4.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_ovf_u8.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_r4.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_r8.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_r_un.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_u.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_u1.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_u2.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_u4.cs" />
+    <Compile Include="Tests\Instruments\Converts\TC_conv_u8.cs" />
+    <Compile Include="Tests\Instruments\Exceptions\TC_endfilter.cs" />
+    <Compile Include="Tests\Instruments\Exceptions\TC_endfinally.cs" />
+    <Compile Include="Tests\Instruments\Exceptions\TC_fat_eh_section.cs" />
+    <Compile Include="Tests\Instruments\Exceptions\TC_leave.cs" />
+    <Compile Include="Tests\Instruments\Exceptions\TC_rethrow.cs" />
+    <Compile Include="Tests\Instruments\Exceptions\TC_throw.cs" />
+    <Compile Include="Tests\Instruments\Fields\ExplicitStruct.cs" />
+    <Compile Include="Tests\Instruments\Fields\InterpTypeFields.cs" />
+    <Compile Include="Tests\Instruments\Fields\InterpTypeStaticFields.cs" />
+    <Compile Include="Tests\Instruments\Fields\InterpTypeStaticFields2.cs" />
+    <Compile Include="Tests\Instruments\Fields\InterpTypeThreadStaticFields.cs" />
+    <Compile Include="Tests\Instruments\Fields\InterpTypeThreadStaticFields2.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_ExplicitLayout.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_FieldOffset.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_ldflda_aot.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_ldflda_interp.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_ldfld_aot.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_ldfld_interp.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_ldsfld_aot.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_ldsfld_aot_threadstatic.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_ldsfld_interp.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_ldsfld_interp_threadstatic.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_stfld_aot.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_stfld_interp.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_stsfld_aot.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_stsfld_aot_threadstatic.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_stsfld_i2_cctor.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_stsfld_interp.cs" />
+    <Compile Include="Tests\Instruments\Fields\TC_stsfld_interp_threadstatic.cs" />
+    <Compile Include="Tests\Instruments\Funcs\ForInhereAotClass.cs" />
+    <Compile Include="Tests\Instruments\Funcs\ForInhereAotValue.cs" />
+    <Compile Include="Tests\Instruments\Funcs\ForInhereInterpClass.cs" />
+    <Compile Include="Tests\Instruments\Funcs\ForInhereInterpValue.cs" />
+    <Compile Include="Tests\Instruments\Funcs\ForInherenGenericAotClass.cs" />
+    <Compile Include="Tests\Instruments\Funcs\ForInherenGenericAotValue.cs" />
+    <Compile Include="Tests\Instruments\Funcs\ForInherenGenericInterpClass.cs" />
+    <Compile Include="Tests\Instruments\Funcs\ForInherenGenericInterpValue.cs" />
+    <Compile Include="Tests\Instruments\Funcs\ForInterpCtorParam.cs" />
+    <Compile Include="Tests\Instruments\Funcs\IInterpBar.cs" />
+    <Compile Include="Tests\Instruments\Funcs\IInterpFoo.cs" />
+    <Compile Include="Tests\Instruments\Funcs\IInterpRun.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_calli.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_callvir_aot.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_callvir_interp.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_call_aot.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_call_aot_param.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_call_aot_return.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_call_interp.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_ldftn.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_ldvirftn.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_newobj_aot.cs" />
+    <Compile Include="Tests\Instruments\Funcs\TC_newobj_interp.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_cpblk.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_dup.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_initblk.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldarga.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldarg_in.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldarg_normal.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldarg_out.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldarg_ref.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldc.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldftn.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldind.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldloc.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldloca.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ldnull.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_localloc.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_ret.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_starg.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_stind.cs" />
+    <Compile Include="Tests\Instruments\Mems\TC_stloc.cs" />
+    <Compile Include="Tests\Instruments\Mics\TC_nop.cs" />
+    <Compile Include="Tests\Instruments\Mics\TC_pop.cs" />
+    <Compile Include="Tests\Instruments\NotImpls\TC_arglist.cs" />
+    <Compile Include="Tests\Instruments\NotImpls\TC_break.cs" />
+    <Compile Include="Tests\Instruments\NotImpls\TC_jmp.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_castclass.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_cpobj.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_initobj.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_isinst.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_ldobj.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_ldstr.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_ldtoken.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_makerefany_reftype_refvalue.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_sizeof.cs" />
+    <Compile Include="Tests\Instruments\Objs\TC_stobj.cs" />
+    <Compile Include="Tests\Mics\Any.cs" />
+    <Compile Include="Tests\Mics\TC_InnerType.cs" />
+    <Compile Include="Tests\Mics\TC_MethodBridge.cs" />
+    <Compile Include="Tests\Mics\TC_MethodBridgeAOTStruct.cs" />
+    <Compile Include="Tests\Mics\TC_MethodBridgeInterpStruct.cs" />
+    <Compile Include="Tests\Mics\TC_Netstandard.cs" />
+    <Compile Include="Tests\Mics\TC_PreJit.cs" />
+    <Compile Include="Tests\Mics\TC_RefOtherAssembly.cs" />
+    <Compile Include="Tests\Mics\TC_RuntimeApi.cs" />
+    <Compile Include="Tests\Mics\TC_Thread.cs" />
   </ItemGroup>
   <ItemGroup>
     <!-- <Reference Include="netstandard">
@@ -35,6 +384,12 @@
     <Reference Include="System">
       <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\System.dll</HintPath>
     </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{aa467143-bba4-4b54-95e5-1d0f1099f380}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

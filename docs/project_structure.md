@@ -104,7 +104,7 @@ Unit test framework and test cases for the LeanCLR runtime.
 
 | Directory | Description |
 |-----------|-------------|
-| **basic_test_runner** | C++ test runner (loads and executes managed test assemblies) |
+| **basic-tester** | C++ test runner (loads and executes managed test assemblies) |
 | **managed** | C# managed test projects |
 
 See [Test Framework Documentation](../src/tests/README.md) for details on how to add test cases.

@@ -17,8 +17,10 @@ Usage:
   scripts/build.sh test run [Config]
   scripts/build.sh runtime [Debug|Release]
   scripts/build.sh leanaot [Debug|Release]
+  scripts/build.sh aot-tester ...   (Windows wrapper: use scripts/build.bat)
 
-aot-runner commands (Windows): scripts/leanaot/aot-runner/*.bat
+aot-tester commands (Windows): scripts/test/aot-runner/*.bat
+(legacy alias: aot-runner)
 EOF
     exit 1
 }
@@ -42,6 +44,10 @@ case "$CMD" in
     leanaot)
         CONFIG="${1:-Release}"
         exec "$SCRIPT_DIR/leanaot/build.sh" "$CONFIG"
+        ;;
+    aot-tester|aot-runner)
+        echo "Use scripts/build.bat $CMD ... on Windows for aot-tester tooling." >&2
+        exit 1
         ;;
     *)
         usage

@@ -29,27 +29,51 @@ if /i "%~1"=="leanaot" if /i "%~2"=="Release" (
 )
 
 if /i "%~1"=="aot-runner" if /i "%~2"=="gen-cpp" (
-    call "%~dp0leanaot\aot-runner\gen_cpp.bat"
+    call "%~dp0test\aot-runner\gen_cpp.bat"
+    exit /b %ERRORLEVEL%
+)
+if /i "%~1"=="aot-tester" if /i "%~2"=="gen-cpp" (
+    call "%~dp0test\aot-runner\gen_cpp.bat"
     exit /b %ERRORLEVEL%
 )
 if /i "%~1"=="aot-runner" if /i "%~2"=="gen-cpp-posix" (
-    call "%~dp0leanaot\aot-runner\gen_cpp_posix.bat"
+    call "%~dp0test\aot-runner\gen_cpp_posix.bat"
+    exit /b %ERRORLEVEL%
+)
+if /i "%~1"=="aot-tester" if /i "%~2"=="gen-cpp-posix" (
+    call "%~dp0test\aot-runner\gen_cpp_posix.bat"
     exit /b %ERRORLEVEL%
 )
 if /i "%~1"=="aot-runner" if /i "%~2"=="run" (
-    call "%~dp0leanaot\aot-runner\run.bat" %~3 %~4 %~5 %~6 %~7 %~8 %~9
+    call "%~dp0test\aot-runner\run.bat" %~3 %~4 %~5 %~6 %~7 %~8 %~9
+    exit /b %ERRORLEVEL%
+)
+if /i "%~1"=="aot-tester" if /i "%~2"=="run" (
+    call "%~dp0test\aot-runner\run.bat" %~3 %~4 %~5 %~6 %~7 %~8 %~9
     exit /b %ERRORLEVEL%
 )
 if /i "%~1"=="aot-runner" if /i "%~2"=="build-wasm" (
-    call "%~dp0leanaot\aot-runner\build-wasm.bat" %~3 %~4 %~5 %~6 %~7 %~8 %~9
-    exit /b %ERRORLEVEL%
+    echo ERROR: build-wasm script has been removed.
+    exit /b 1
+)
+if /i "%~1"=="aot-tester" if /i "%~2"=="build-wasm" (
+    echo ERROR: build-wasm script has been removed.
+    exit /b 1
 )
 if /i "%~1"=="aot-runner" if /i "%~2"=="build" (
-    call "%~dp0leanaot\aot-runner\build.bat" %~3 %~4 %~5 %~6 %~7 %~8 %~9
+    call "%~dp0test\aot-runner\build.bat" %~3 %~4 %~5 %~6 %~7 %~8 %~9
+    exit /b %ERRORLEVEL%
+)
+if /i "%~1"=="aot-tester" if /i "%~2"=="build" (
+    call "%~dp0test\aot-runner\build.bat" %~3 %~4 %~5 %~6 %~7 %~8 %~9
     exit /b %ERRORLEVEL%
 )
 if /i "%~1"=="aot-runner" (
-    call "%~dp0leanaot\aot-runner\build.bat" %~2 %~3 %~4 %~5 %~6 %~7 %~8 %~9
+    call "%~dp0test\aot-runner\build.bat" %~2 %~3 %~4 %~5 %~6 %~7 %~8 %~9
+    exit /b %ERRORLEVEL%
+)
+if /i "%~1"=="aot-tester" (
+    call "%~dp0test\aot-runner\build.bat" %~2 %~3 %~4 %~5 %~6 %~7 %~8 %~9
     exit /b %ERRORLEVEL%
 )
 
@@ -59,9 +83,9 @@ echo   scripts\build.bat test build [Config] [Arch]
 echo   scripts\build.bat test run [Config]
 echo   scripts\build.bat runtime [Config] [Arch] [clean] [shared] [sln]
 echo   scripts\build.bat leanaot Debug^|Release
-echo   scripts\build.bat aot-runner [build] [Config] [Arch]
-echo   scripts\build.bat aot-runner gen-cpp
-echo   scripts\build.bat aot-runner gen-cpp-posix
-echo   scripts\build.bat aot-runner build-wasm [Config]
-echo   scripts\build.bat aot-runner run [Config] [Arch]
+echo   scripts\build.bat aot-tester [build] [Config] [Arch]
+echo   scripts\build.bat aot-tester gen-cpp
+echo   scripts\build.bat aot-tester gen-cpp-posix
+echo   scripts\build.bat aot-tester run [Config] [Arch]
+echo   (aot-runner alias remains supported)
 exit /b 1

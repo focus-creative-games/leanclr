@@ -4,16 +4,22 @@ setlocal
 call "%~dp0..\..\lib\repo-root.bat"
 call "%REPO_ROOT%\scripts\lib\out-dir-init.bat"
 
-set "AOT_RUNNER_SRC=%REPO_ROOT%\src\leanaot\aot-runner"
+set "AOT_TESTER_SRC=%REPO_ROOT%\src\tests\aot-tester"
 set "LEANAOT_EXE=%OUT_ROOT%\dotnet\LeanAOT\Debug\net8.0\LeanAOT.exe"
-set "TEST_DLL_DIR=%OUT_ROOT%\dotnet\Test\Debug"
-set "CPP_OUT=%AOT_RUNNER_SRC%\cpp-posix"
+set "AOTTEST_DLL_DIR=%OUT_ROOT%\dotnet\AotTests\Debug"
+set "COMMON_DLL=%OUT_ROOT%\dotnet\Common\Debug\Common.dll"
+set "CPP_OUT=%AOT_TESTER_SRC%\cpp-posix"
 
-echo [1/3] Building leanaot Test project (Debug)...
-dotnet build "%REPO_ROOT%\src\leanaot\Test\Test.csproj" -c Debug
+echo [1/3] Building managed AotTests project (Debug)...
+dotnet build "%REPO_ROOT%\src\tests\managed\AotTests\AotTests.csproj" -c Debug
 if errorlevel 1 (
-    echo Test build failed.
+    echo AotTests build failed.
     exit /b %ERRORLEVEL%
+)
+
+if exist "%COMMON_DLL%" (
+  copy /Y "%COMMON_DLL%" "%AOTTEST_DLL_DIR%\Common.dll" >nul
+  if errorlevel 1 exit /b %ERRORLEVEL%
 )
 
 echo [2/3] Building LeanAOT (Debug)...
@@ -29,15 +35,16 @@ echo [3/3] Running LeanAOT...
   --emit-null-checks ^
   --enable-array-bounds-check ^
   -d "%REPO_ROOT%\src\libraries\dotnetframework4.x-linux" ^
-  -d "%TEST_DLL_DIR%" ^
-  --leanaot-aot-rule-file "%AOT_RUNNER_SRC%\aot-rules-mscorlib.xml" ^
-  --leanaot-aot-rule-file "%AOT_RUNNER_SRC%\aot-rules-test.xml" ^
+  -d "%AOTTEST_DLL_DIR%" ^
+  --leanaot-aot-rule-file "%AOT_TESTER_SRC%\aot-rules-mscorlib.xml" ^
+  --leanaot-aot-rule-file "%AOT_TESTER_SRC%\aot-rules-test.xml" ^
   -a mscorlib ^
   -a System ^
   -a System.Core ^
-  -a Test
+  -a AotTests
 
 if errorlevel 1 exit /b %ERRORLEVEL%
 
 echo Done. Output: %CPP_OUT%
 endlocal
+

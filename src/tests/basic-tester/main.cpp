@@ -468,6 +468,18 @@ int main()
         std::cout << "CoreTests assembly loaded successfully." << coreTests << std::endl;
     }
 
+    metadata::RtAssembly* commonTests = nullptr;
+    {
+        auto ret = vm::Assembly::load_by_name("Common");
+        if (ret.is_err())
+        {
+            std::cout << "Failed to load Common assembly, error: " << static_cast<int>(ret.unwrap_err()) << std::endl;
+            return -1;
+        }
+        commonTests = ret.unwrap();
+        std::cout << "Common assembly loaded successfully." << commonTests << std::endl;
+    }
+
     if (is_run_bootstrap_tests)
     {
         auto ret2 = run_bootstrap_tests(coreTests->mod);
@@ -478,7 +490,7 @@ int main()
         }
     }
     {
-        auto ret3 = init_unittest_class(coreTests->mod);
+        auto ret3 = init_unittest_class(commonTests->mod);
         if (ret3.is_err())
         {
             std::cout << "Failed to init unittest class, error: " << static_cast<int>(ret3.unwrap_err()) << std::endl;
