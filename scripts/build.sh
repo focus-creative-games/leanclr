@@ -5,6 +5,11 @@
 #   ./scripts/build.sh test run [Config]
 #   ./scripts/build.sh runtime [Debug|Release]
 #   ./scripts/build.sh leanaot [Debug|Release]
+#   ./scripts/build.sh aot-tester [build] [Config] [Arch]
+#   ./scripts/build.sh aot-tester gen-cpp
+#   ./scripts/build.sh aot-tester gen-cpp-posix
+#   ./scripts/build.sh aot-tester run [Config] [Arch]
+#   ./scripts/build.sh aot-tester build-wasm [Config]
 set -e
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
@@ -17,10 +22,12 @@ Usage:
   scripts/build.sh test run [Config]
   scripts/build.sh runtime [Debug|Release]
   scripts/build.sh leanaot [Debug|Release]
-  scripts/build.sh aot-tester ...   (Windows wrapper: use scripts/build.bat)
-
-aot-tester commands (Windows): scripts/test/aot-runner/*.bat
-(legacy alias: aot-runner)
+  scripts/build.sh aot-tester [build] [Config] [Arch]
+  scripts/build.sh aot-tester gen-cpp
+  scripts/build.sh aot-tester gen-cpp-posix
+  scripts/build.sh aot-tester run [Config] [Arch]
+  scripts/build.sh aot-tester build-wasm [Config]
+  (aot-runner alias remains supported)
 EOF
     exit 1
 }
@@ -46,8 +53,17 @@ case "$CMD" in
         exec "$SCRIPT_DIR/leanaot/build.sh" "$CONFIG"
         ;;
     aot-tester|aot-runner)
-        echo "Use scripts/build.bat $CMD ... on Windows for aot-tester tooling." >&2
-        exit 1
+        SUB="${1:-}"
+        shift || true
+        case "$SUB" in
+            gen-cpp)       exec "$SCRIPT_DIR/test/aot-runner/gen_cpp.sh" ;;
+            gen-cpp-posix) exec "$SCRIPT_DIR/test/aot-runner/gen_cpp_posix.sh" ;;
+            run)           exec "$SCRIPT_DIR/test/aot-runner/run.sh" "$@" ;;
+            build-wasm)    exec "$SCRIPT_DIR/test/aot-runner/build-wasm.sh" "$@" ;;
+            build)         exec "$SCRIPT_DIR/test/aot-runner/build.sh" "$@" ;;
+            "")            exec "$SCRIPT_DIR/test/aot-runner/build.sh" "$@" ;;
+            *)             exec "$SCRIPT_DIR/test/aot-runner/build.sh" "$SUB" "$@" ;;
+        esac
         ;;
     *)
         usage

@@ -21,11 +21,11 @@ Clean all outputs: `scripts\dev\clean-out.bat` (Windows) or `./scripts/dev/clean
 | Run tests | `./scripts/build.sh test run Release` | `scripts\build.bat test run Release` |
 | Build runtime | `./scripts/build.sh runtime Release` | `scripts\build.bat runtime Release` |
 | Build LeanAOT | `./scripts/build.sh leanaot [Debug\|Release]` | `scripts\build.bat leanaot Debug` or `Release` |
-| Build aot-runner | — | `scripts\build.bat aot-runner [Config] [Arch]` |
-| Generate aot-runner C++ | — | `scripts\build.bat aot-runner gen-cpp` |
-| Generate aot-runner C++ (posix) | — | `scripts\build.bat aot-runner gen-cpp-posix` |
-| Run aot-runner | — | `scripts\build.bat aot-runner run [Config] [Arch]` |
-| Build aot-runner (wasm) | — | `scripts\build.bat aot-runner build-wasm [Config]` |
+| Build aot-tester | `./scripts/build.sh aot-tester [Config] [Arch]` | `scripts\build.bat aot-tester [Config] [Arch]` |
+| Generate aot-tester C++ | `./scripts/build.sh aot-tester gen-cpp` | `scripts\build.bat aot-tester gen-cpp` |
+| Generate aot-tester C++ (posix) | `./scripts/build.sh aot-tester gen-cpp-posix` | `scripts\build.bat aot-tester gen-cpp-posix` |
+| Run aot-tester | `./scripts/build.sh aot-tester run [Config] [Arch]` | `scripts\build.bat aot-tester run [Config] [Arch]` |
+| Build aot-tester (wasm) | `./scripts/build.sh aot-tester build-wasm [Config]` | `scripts\build.bat aot-tester build-wasm [Config]` |
 | Format runtime C++ | — | `scripts\dev\format-cpp-files.bat` |
 | Clean outputs | `./scripts/dev/clean-out.sh` | `scripts\dev\clean-out.bat` |
 
@@ -54,11 +54,11 @@ scripts/
 | `test/basic-tester/build.*` | Build C++ test runner executable |
 | `test/run.*` | Run `out/cmake/tests/basic-tester/<Config>-<Arch>/bin/.../test` |
 | `runtime/build.*` | Build `leanclr` → `out/cmake/runtime/<Config>-<Arch>/` (Windows: optional `sln`, `shared`) |
-| `test/aot-runner/build.bat` | Build native `aot-tester` executable |
-| `test/aot-runner/gen_cpp.bat` | Run LeanAOT to generate C++ under `src/tests/aot-tester/cpp/` |
-| `test/aot-runner/gen_cpp_posix.bat` | Generate C++ under `src/tests/aot-tester/cpp-posix/` using POSIX BCL (`dotnetframework4.x-linux`) |
-| `test/aot-runner/run.bat` | Build and run `aot-tester` with `AotTests` assembly |
-| `test/aot-runner/build-wasm.bat` | Build `aot-tester` with Emscripten → `out/cmake/tests/aot-tester/<Config>-wasm/` |
+| `test/aot-runner/build.*` | Build native `aot-tester` executable |
+| `test/aot-runner/gen_cpp.*` | Run LeanAOT to generate C++ under `src/tests/aot-tester/cpp/` |
+| `test/aot-runner/gen_cpp_posix.*` | Generate C++ under `src/tests/aot-tester/cpp-posix/` using POSIX BCL (`dotnetframework4.x-linux`) |
+| `test/aot-runner/run.*` | Build and run `aot-tester` with `AotTests` assembly |
+| `test/aot-runner/build-wasm.*` | Build `aot-tester` with Emscripten → `out/cmake/tests/aot-tester/<Config>-wasm/` |
 | `leanaot/build.*` | Build LeanAOT → `out/dotnet/LeanAOT/<Config>/net8.0/` |
 | `publish_leanaot.bat` | `dotnet publish` Release → `../leanclr4unity/LeanCLR~/leanaot/` (sibling repo) |
 | `publish_runtime.bat` | Mirror `src/runtime` → `../leanclr4unity/LeanCLR~/runtime/` (excludes scripts, CMakeLists.txt, `3rd/zlib`) |
