@@ -1,5 +1,7 @@
 #include "il2cpp-api.h"
 
+#include "vm/type.h"
+
 #include <clocale>
 
 #if IL2CPP_API_DYNAMIC_NO_DLSYM
@@ -1412,7 +1414,21 @@ void il2cpp_runtime_class_init(Il2CppClass* klass)
     auto ret = vm::Runtime::run_class_static_constructor(klass);
     if (ret.is_err())
     {
-        il2cpp_raise_exception(vm::Exception::raise_error_as_exception(ret.unwrap_err(), nullptr, nullptr));
+        vm::RtException* inner_ex = vm::Exception::raise_error_as_exception(ret.unwrap_err(), nullptr, nullptr);
+        utils::Utf8StringBuilder sb;
+        sb.append_cstr("Failed to initialize class: ");
+        auto ret = vm::Type::append_type_full_name(sb, klass->by_val, vm::TypeNameFormat::IL, false);
+        if (ret.is_err())
+        {
+            sb.clear();
+            sb.append_cstr("Failed to append type full name: ");
+            sb.append_cstr(klass->namespaze);
+            sb.append_char('.');
+            sb.append_cstr(klass->name);
+        }
+        vm::RtException* type_initialization_ex = vm::Exception::raise_internal_runtime_exception(vm::Class::get_corlib_types().cls_type_initialization_exception, sb.get_const_chars());
+        type_initialization_ex->inner_exception = inner_ex;
+        il2cpp_raise_exception(type_initialization_ex);
     }
 }
 
