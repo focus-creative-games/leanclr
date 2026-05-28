@@ -40,6 +40,26 @@ bool ZeroGcHeap::should_collect(bool /*force*/)
     return false;
 }
 
+int64_t ZeroGcHeap::get_used_size()
+{
+    return s_used_bytes;
+}
+
+int64_t ZeroGcHeap::get_heap_size()
+{
+    return s_heap_bytes;
+}
+
+int32_t ZeroGcHeap::get_collection_count()
+{
+    return 0;
+}
+
+void ZeroGcHeap::set_pressure_config(const GcPressureConfig& config)
+{
+    GcPressure::set_config(config);
+}
+
 void* ZeroGcHeap::allocate_fixed(size_t size)
 {
     return alloc::GeneralAllocation::malloc_zeroed(size);
@@ -73,29 +93,9 @@ vm::RtObject* ZeroGcHeap::allocate_array(const metadata::RtClass* arrClass, size
     return allocate_object(arrClass, totalBytes);
 }
 
-int64_t ZeroGcHeap::get_used_size()
-{
-    return s_used_bytes;
-}
-
-int64_t ZeroGcHeap::get_heap_size()
-{
-    return s_heap_bytes;
-}
-
-int32_t ZeroGcHeap::get_collection_count()
-{
-    return 0;
-}
-
 bool ZeroGcHeap::is_object_marked(const vm::RtObject* /*obj*/)
 {
     return true;
-}
-
-void ZeroGcHeap::set_pressure_config(const GcPressureConfig& config)
-{
-    GcPressure::set_config(config);
 }
 
 } // namespace gc

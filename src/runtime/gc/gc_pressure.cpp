@@ -42,7 +42,7 @@ void GcPressure::on_collect()
     s_state.objects_allocated_since_last_gc = 0;
 }
 
-void gc_pressure_set_used_size(int64_t used)
+void GcPressure::set_used_size(int64_t used)
 {
     s_used_size = used;
 }

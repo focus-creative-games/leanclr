@@ -32,10 +32,9 @@ class GcPressure
 
     static uint64_t get_effective_pressure();
     static uint64_t get_bytes_allocated_since_last_gc();
+    static void set_used_size(int64_t used);
     static bool should_collect(bool force);
 };
-
-void gc_pressure_set_used_size(int64_t used);
 
 } // namespace gc
 } // namespace leanclr

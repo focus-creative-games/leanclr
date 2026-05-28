@@ -2,6 +2,7 @@
 
 #include "core/rt_base.h"
 #include "gc/gc_alloc_site.h"
+#include "gc/mark_sweep/mark_sweep_heap.h"
 #include "gc/zero_gc/zero_gc_heap.h"
 
 namespace leanclr
@@ -18,52 +19,101 @@ struct RtObject;
 
 namespace gc
 {
-namespace detail
-{
-typedef ZeroGcHeap GcHeapImpl;
-}
 
 class GarbageCollector
 {
   public:
+#if LEANCLR_GC_MARK_SWEEP
+    typedef MarkSweepHeap GcHeapImpl;
+#elif LEANCLR_GC_ZERO_GC
+    typedef ZeroGcHeap GcHeapImpl;
+#else
+#error "No GC implementation selected"
+#endif
+
     static void initialize()
     {
-        detail::GcHeapImpl::initialize();
+        GcHeapImpl::initialize();
     }
 
-    static void* allocate_fixed(size_t size)
+    static void collect()
     {
-        return detail::GcHeapImpl::allocate_fixed(size);
+        GcHeapImpl::collect();
     }
 
-    static void free_fixed(void* address)
+    static bool maybe_collect()
     {
-        detail::GcHeapImpl::free_fixed(address);
+        return GcHeapImpl::maybe_collect();
     }
 
-    static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size)
+    static bool should_collect(bool force)
     {
-        return detail::GcHeapImpl::allocate_object(klass, size);
+        return GcHeapImpl::should_collect(force);
     }
 
-    static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
+    static int64_t get_used_size()
     {
-        return detail::GcHeapImpl::allocate_object(klass, size, site);
+        return GcHeapImpl::get_used_size();
     }
 
-    static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
+    static int64_t get_heap_size()
     {
-        return detail::GcHeapImpl::allocate_array(arrClass, totalBytes);
+        return GcHeapImpl::get_heap_size();
     }
 
-    static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site)
+    static int32_t get_collection_count()
     {
-        return detail::GcHeapImpl::allocate_array(arrClass, totalBytes, site);
+        return GcHeapImpl::get_collection_count();
+    }
+
+    static bool is_object_marked(const vm::RtObject* obj)
+    {
+        return GcHeapImpl::is_object_marked(obj);
+    }
+
+    static void set_pressure_config(const GcPressureConfig& config)
+    {
+        GcHeapImpl::set_pressure_config(config);
     }
 
     static void write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)
     {
-        detail::GcHeapImpl::write_barrier(obj_ref_location, new_obj);
+        GcHeapImpl::write_barrier(obj_ref_location, new_obj);
+    }
+
+    static bool has_strict_wbarriers()
+    {
+        return GcHeapImpl::has_strict_wbarriers();
+    }
+
+    static void* allocate_fixed(size_t size)
+    {
+        return GcHeapImpl::allocate_fixed(size);
+    }
+
+    static void free_fixed(void* address)
+    {
+        GcHeapImpl::free_fixed(address);
+    }
+
+    static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size)
+    {
+        return GcHeapImpl::allocate_object(klass, size);
+    }
+
+    static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
+    {
+        return GcHeapImpl::allocate_object(klass, size, site);
+    }
+
+    static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
+    {
+        return GcHeapImpl::allocate_array(arrClass, totalBytes);
+    }
+
+    static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site)
+    {
+        return GcHeapImpl::allocate_array(arrClass, totalBytes, site);
     }
 };
 } // namespace gc
