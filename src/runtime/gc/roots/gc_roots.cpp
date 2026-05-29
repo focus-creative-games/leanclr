@@ -12,13 +12,12 @@ namespace gc
 struct StaticFieldsRoot
 {
     metadata::RtClass* klass;
-    uint8_t* data;
-    size_t size;
 };
 
 static utils::Vector<vm::RtObject**> s_registered_slots;
 static utils::Vector<StaticFieldsRoot> s_static_fields;
 static utils::Vector<GcVisitObjectRootsScan> s_visit_object_roots;
+static utils::Vector<GcVisitUnknownBlocksScan> s_visit_unknown_blocks;
 
 void GcRoots::register_slot(vm::RtObject** slot)
 {
@@ -42,16 +41,10 @@ void GcRoots::unregister_slot(vm::RtObject** slot)
     }
 }
 
-void GcRoots::register_static_fields(metadata::RtClass* klass, uint8_t* data, size_t size)
+void GcRoots::register_static_fields(metadata::RtClass* klass)
 {
-    if (data == nullptr || size == 0)
-    {
-        return;
-    }
     StaticFieldsRoot root;
     root.klass = klass;
-    root.data = data;
-    root.size = size;
     s_static_fields.push_back(root);
 }
 
@@ -89,7 +82,7 @@ static void scan_static_fields(const StaticFieldsRoot& root, GcRootCallback call
         {
             continue;
         }
-        vm::RtObject** slot = reinterpret_cast<vm::RtObject**>(root.data + field->offset);
+        vm::RtObject** slot = reinterpret_cast<vm::RtObject**>(root.klass->static_fields_data + field->offset);
         callback(slot, userdata);
     }
 }
@@ -103,6 +96,15 @@ void GcRoots::register_visit_object_roots(GcVisitObjectRootsScan scan)
     s_visit_object_roots.push_back(scan);
 }
 
+void GcRoots::register_visit_unknown_blocks(GcVisitUnknownBlocksScan scan)
+{
+    if (scan == nullptr)
+    {
+        return;
+    }
+    s_visit_unknown_blocks.push_back(scan);
+}
+
 void GcRoots::foreach_root(GcRootCallback callback, void* userdata)
 {
     for (size_t i = 0; i < s_registered_slots.size(); ++i)
@@ -112,6 +114,11 @@ void GcRoots::foreach_root(GcRootCallback callback, void* userdata)
     for (size_t i = 0; i < s_static_fields.size(); ++i)
     {
         scan_static_fields(s_static_fields[i], callback, userdata);
+    }
+    for (size_t i = 0; i < s_visit_unknown_blocks.size(); ++i)
+    {
+        // TODO: implement this
+        //s_visit_unknown_blocks[i](callback, userdata);
     }
 }
 

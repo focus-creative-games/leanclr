@@ -1086,8 +1086,13 @@ RtResultVoid Class::setup_static_field_data(metadata::RtClass* klass)
 {
     if (klass->static_size > 0)
     {
-        klass->static_fields_data = (uint8_t*)gc::GarbageCollector::allocate_fixed(klass->static_size);
-        gc::GcRoots::register_static_fields(klass, klass->static_fields_data, klass->static_size);
+        uint8_t* static_fields_data = (uint8_t*)alloc::GeneralAllocation::malloc_zeroed(klass->static_size);
+        if (static_fields_data == nullptr)
+        {
+            RET_ASSERT_ERR(RtErr::OutOfMemory);
+        }
+        klass->static_fields_data = static_fields_data;
+        gc::GcRoots::register_static_fields(klass);
     }
     RET_VOID_OK();
 }

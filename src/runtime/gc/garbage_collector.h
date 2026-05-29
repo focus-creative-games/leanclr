@@ -1,9 +1,10 @@
 #pragma once
 
 #include "core/rt_base.h"
-#include "gc/gc_alloc_site.h"
-#include "gc/mark_sweep/mark_sweep_heap.h"
-#include "gc/zero_gc/zero_gc_heap.h"
+#include "gc_alloc_site.h"
+#include "gc_config.h"
+#include "mark_sweep/mark_sweep_heap.h"
+#include "zero_gc/zero_gc_heap.h"
 
 namespace leanclr
 {

@@ -3,6 +3,7 @@
 #if LEANCLR_GC_MARK_SWEEP
 
 #include <cstring>
+#include <unordered_map>
 
 #include "alloc/general_allocation.h"
 #include "gc/gc_config.h"
@@ -120,7 +121,7 @@ class ArenaAllocator<SmallHeapArena>
             return nullptr;
         }
         std::memset(arena_data_start, 0, _arena_size);
-        return new (arena_data_start)SmallHeapArena(_arena_size, _block_size, _block_alignment);
+        return new (arena_data_start) SmallHeapArena(_arena_size, _block_size, _block_alignment);
     }
 
     void free_arena(SmallHeapArena* arena)
@@ -183,6 +184,8 @@ constexpr size_t kSmallHeapArenaCount = (kMaxSmallHeapBlockSize - kMinSmallHeapB
 
 ArenaCollection<SmallHeapArena>* s_small_heap_arenas[kSmallHeapArenaCount] = {};
 
+std::unordered_map<void*, size_t> s_fixed_blocks;
+
 static int64_t s_used_bytes = 0;
 static int64_t s_heap_bytes = 0;
 
@@ -191,7 +194,16 @@ void initialize_small_heap_arenas()
     for (size_t i = 0; i < kSmallHeapArenaCount; i++)
     {
         s_small_heap_arenas[i] = new ArenaCollection<SmallHeapArena>(
-            ArenaAllocator<SmallHeapArena>(static_cast<uint16_t>(kSmallHeapArenaSize), static_cast<uint16_t>(kMinSmallHeapBlockSize + i * kSmallHeapBlockSizeIncrement), static_cast<uint16_t>(GC_ALIGN)));
+            ArenaAllocator<SmallHeapArena>(static_cast<uint16_t>(kSmallHeapArenaSize),
+                                           static_cast<uint16_t>(kMinSmallHeapBlockSize + i * kSmallHeapBlockSizeIncrement), static_cast<uint16_t>(GC_ALIGN)));
+    }
+}
+
+static void scan_fixed_blocks(GcVisitUnknownBlock visit, void* userdata)
+{
+    for (auto it = s_fixed_blocks.begin(); it != s_fixed_blocks.end(); ++it)
+    {
+        visit(it->first, it->second, userdata);
     }
 }
 
@@ -202,6 +214,7 @@ void MarkSweepHeap::initialize()
     s_used_bytes = 0;
     s_heap_bytes = 0;
     initialize_small_heap_arenas();
+    GcRoots::register_visit_unknown_blocks(scan_fixed_blocks);
 }
 
 void MarkSweepHeap::collect()
@@ -244,15 +257,38 @@ void MarkSweepHeap::set_pressure_config(const GcPressureConfig& config)
     GcPressure::set_config(config);
 }
 
+// this method is used by il2cpp. we don't use it in runtime.
+// we assume fixed memory count is small so we use unordered_map instead of vector
+// because we think unordered_map is more efficient than vector for small size.
 void* MarkSweepHeap::allocate_fixed(size_t size)
 {
-    return alloc::GeneralAllocation::malloc_zeroed(size);
+    void* block = alloc::GeneralAllocation::malloc_zeroed(size);
+    if (block == nullptr)
+    {
+        return nullptr;
+    }
+    s_fixed_blocks[block] = size;
+    s_used_bytes += size;
+    s_heap_bytes += size;
+    return block;
 }
 
 void MarkSweepHeap::free_fixed(void* address)
 {
+    auto it = s_fixed_blocks.find(address);
+    if (it == s_fixed_blocks.end())
+    {
+        assert(false && "Address not found in fixed blocks");
+        return;
+    }
+    size_t size = it->second;
+    s_used_bytes -= size;
+    s_heap_bytes -= size;
+    s_fixed_blocks.erase(it);
     alloc::GeneralAllocation::free(address);
 }
+
+
 
 vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
 {
