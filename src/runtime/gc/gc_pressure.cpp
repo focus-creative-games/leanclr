@@ -63,15 +63,16 @@ bool GcPressure::should_collect(bool force)
     {
         return true;
     }
-    if (get_effective_pressure() >= s_config.byte_threshold)
-    {
-        return true;
-    }
-    if (s_config.soft_heap_limit > 0 && static_cast<uint64_t>(s_used_size) >= s_config.soft_heap_limit)
-    {
-        return true;
-    }
-    return false;
+    return s_state.bytes_allocated_since_last_gc >= 1 * 1024 * 1024;
+    // if (get_effective_pressure() >= s_config.byte_threshold)
+    // {
+    //     return true;
+    // }
+    // if (s_config.soft_heap_limit > 0 && static_cast<uint64_t>(s_used_size) >= s_config.soft_heap_limit)
+    // {
+    //     return true;
+    // }
+    // return false;
 }
 
 } // namespace gc

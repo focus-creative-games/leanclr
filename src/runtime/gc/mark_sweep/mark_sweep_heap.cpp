@@ -11,6 +11,7 @@
 #include "gc/handles/gc_handle_table.h"
 #include "gc/roots/gc_roots.h"
 #include "utils/rt_vector.h"
+#include "utils/mem_op.h"
 #include "vm/class.h"
 
 namespace leanclr
@@ -87,8 +88,12 @@ vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, siz
 vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, size_t size)
 {
     assert(size >= sizeof(vm::RtObject));
-    auto obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(size);
+    size_t aligned_size = utils::MemOp::align_up(size, GC_ALIGN);
+    auto obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(aligned_size);
     obj->klass = const_cast<metadata::RtClass*>(klass);
+    s_used_bytes += aligned_size;
+    s_heap_bytes += aligned_size;
+    GcPressure::on_alloc(aligned_size);
     return obj;
 }
 
