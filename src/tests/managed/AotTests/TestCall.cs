@@ -1,4 +1,8 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.Linq;
+
 public class TestCall
 {
     class ClassFoo
@@ -58,6 +62,20 @@ public class TestCall
     {
         var o = new StructFoo() { x = 10 };
         Assert.Equal(13, o.SumInterp(1, 2));
+    }
+
+    public static (int, int)[] Init(IEnumerable<(int, int)> protoCollection)
+    {
+        return protoCollection.ToArray();
+    }
+
+    [UnitTest]
+    public void CallGetKeyValuePair()
+    {
+        var arr = new (int, int)[] { (1, 2) };
+        var arr2 = Init(arr);
+        Assert.Equal(1, arr2[0].Item1);
+        Assert.Equal(2, arr2[0].Item2);
     }
 }
 
