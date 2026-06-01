@@ -305,24 +305,10 @@ static RtResultVoid create_instance_impl_invoker(metadata::RtManagedMethodPointe
 /// @icall: System.Array::ClearInternal
 RtResultVoid SystemArray::clear_internal(vm::RtArray* arr, int32_t index, int32_t length) noexcept
 {
-    uint32_t arr_length = static_cast<uint32_t>(arr->length);
-    if (static_cast<uint32_t>(index) >= arr_length || static_cast<uint32_t>(length) > arr_length - static_cast<uint32_t>(index))
-    {
-        RET_ERR(RtErr::IndexOutOfRange);
-    }
-
     const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(arr);
     void* arr_data_ptr = vm::Array::get_array_data_start_as_ptr_void(arr);
-
-    if (vm::Class::is_value_type(ele_klass))
-    {
-        size_t ele_size = vm::Array::get_array_element_size(arr);
-        std::memset(static_cast<uint8_t*>(arr_data_ptr) + static_cast<size_t>(index) * ele_size, 0, static_cast<size_t>(length) * ele_size);
-    }
-    else
-    {
-        std::memset(static_cast<vm::RtObject**>(arr_data_ptr) + static_cast<size_t>(index), 0, static_cast<size_t>(length) * sizeof(vm::RtObject*));
-    }
+    size_t ele_size = vm::Array::get_array_element_size(arr);
+    std::memset(static_cast<uint8_t*>(arr_data_ptr) + static_cast<size_t>(index) * ele_size, 0, static_cast<size_t>(length) * ele_size);
 
     RET_VOID_OK();
 }
