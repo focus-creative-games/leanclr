@@ -4,6 +4,14 @@ using LeanAOT.GenerationPlan;
 
 namespace LeanAOT.ToCpp
 {
+    class MethodGenerationException : Exception
+    {
+        public MethodDef MethodDef { get; }
+        public MethodGenerationException(MethodDef methodDef, string message, Exception innerException) : base(message, innerException)
+        {
+            MethodDef = methodDef;
+        }
+    }
 
     class AssemblyGenerationContext
     {
@@ -103,8 +111,15 @@ namespace LeanAOT.ToCpp
         }
         public override void GenerateMethodDef(MethodDefPlan plan, object ctx)
         {
-            GenerateMethodDefSelf(plan.MethodDef, ctx);
-            GenerateVirtualMethodDefSelf(plan.MethodDef, ctx);
+            try
+            {
+                GenerateMethodDefSelf(plan.MethodDef, ctx);
+                GenerateVirtualMethodDefSelf(plan.MethodDef, ctx);
+            }
+            catch (Exception e)
+            {
+                throw new MethodGenerationException(plan.MethodDef, $"Error generating method {plan.MethodDef.FullName}", e);
+            }
         }
 
         private void GenerateMethodDefSelf(MethodDef methodDef, object ctx)
