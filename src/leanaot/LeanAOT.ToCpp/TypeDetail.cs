@@ -66,6 +66,50 @@ namespace LeanAOT.ToCpp
             //{
             //    throw new ArgumentException($"Unsupported type: {_typeSig}");
             //}
+            switch (_typeSig.ElementType)
+            {
+            case ElementType.Void:
+            case ElementType.Boolean:
+            case ElementType.Char:
+            case ElementType.I1:
+            case ElementType.U1:
+            case ElementType.I2:
+            case ElementType.U2:
+            case ElementType.I4:
+            case ElementType.U4:
+            case ElementType.I8:
+            case ElementType.U8:
+            case ElementType.R4:
+            case ElementType.R8:
+            case ElementType.String:
+            case ElementType.Object:
+            case ElementType.TypedByRef:
+            case ElementType.I:
+            case ElementType.U:
+            case ElementType.Class:
+            case ElementType.GenericInst:
+            case ElementType.ValueType:
+            {
+                break;
+            }
+            case ElementType.SZArray:
+            case ElementType.Array:
+            case ElementType.Ptr:
+            case ElementType.ByRef:
+            case ElementType.FnPtr:
+            {
+                _typeDef = null;
+                _gac = null;
+                _classBaseTypeSig = null;
+                _instanceFieldsExcludeParent = _instanceFieldsIncludeParent = _staticFields = _literalOrRvaFields = new List<FieldDetail>();
+                _staticFields = null;
+                return;
+            }
+            default:
+            {
+                throw new NotSupportedException($"Unsupported type: {_typeSig}");
+            }
+            }
             _typeDef = type.ResolveTypeDefThrow();
             _gac = MetaUtil.GetTypeGenericArgumentContext(type);
             _classBaseTypeSig = _typeDef.IsValueType || _typeDef.BaseType == null ? null : MetaUtil.Inflate(_typeDef.BaseType.ToTypeSig(), _gac);
