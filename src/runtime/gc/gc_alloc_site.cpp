@@ -6,6 +6,7 @@
 #include "alloc/general_allocation.h"
 #include "metadata/rt_metadata.h"
 #include "utils/rt_vector.h"
+#include "utils/hashset.h"
 
 namespace leanclr
 {
@@ -48,114 +49,72 @@ GcAllocSite GcAllocSite::make_internal(const char* file, uint32_t line, const ch
     return site;
 }
 
-struct SiteEntry
-{
-    GcAllocSite site;
-    char* description;
-};
-
-static utils::Vector<SiteEntry> s_sites;
-static uint32_t s_next_alloc_id = 1;
-
-uint32_t GcAllocSite::intern_site_id() const
-{
 #if LEANCLR_GC_DEBUG
-    if (kind == GcAllocSiteKind::None)
+struct GcAllocSiteHash
+{
+    size_t operator()(const GcAllocSite* site) const noexcept
     {
-        return 0;
-    }
-    for (size_t i = 0; i < s_sites.size(); ++i)
-    {
-        const SiteEntry& e = s_sites[i];
-        if (e.site.kind != kind)
-        {
-            continue;
-        }
-        switch (kind)
+        size_t h = std::hash<GcAllocSiteKind>()(site->kind);
+        switch (site->kind)
         {
         case GcAllocSiteKind::Codegen:
-            if (e.site.u.codegen.file == u.codegen.file && e.site.u.codegen.line == u.codegen.line &&
-                e.site.u.codegen.managed_method == u.codegen.managed_method)
-            {
-                return static_cast<uint32_t>(i + 1);
-            }
-            break;
+            return h ^ std::hash<const char*>()(site->u.codegen.file) ^ std::hash<uint32_t>()(site->u.codegen.line) ^
+                   std::hash<const char*>()(site->u.codegen.managed_method);
         case GcAllocSiteKind::Interp:
-            if (e.site.u.interp.method == u.interp.method && e.site.u.interp.il_offset == u.interp.il_offset)
-            {
-                return static_cast<uint32_t>(i + 1);
-            }
-            break;
+            return h ^ std::hash<const metadata::RtMethodInfo*>()(site->u.interp.method) ^ std::hash<uint32_t>()(site->u.interp.il_offset);
         case GcAllocSiteKind::Internal:
-            if (e.site.u.internal.file == u.internal.file && e.site.u.internal.line == u.internal.line &&
-                e.site.u.internal.native_method == u.internal.native_method)
-            {
-                return static_cast<uint32_t>(i + 1);
-            }
-            break;
+            return h ^ std::hash<const char*>()(site->u.internal.file) ^ std::hash<uint32_t>()(site->u.internal.line) ^
+                   std::hash<const char*>()(site->u.internal.native_method);
         default:
-            break;
+            assert(false && "Invalid GcAllocSiteKind");
+            return 0;
         }
     }
+};
 
-    SiteEntry entry;
-    entry.site = *this;
-    entry.description = nullptr;
-    s_sites.push_back(entry);
-    const uint32_t site_id = static_cast<uint32_t>(s_sites.size());
-    // Description built lazily in get_site_description.
-    return site_id;
-#else
-    (void)this;
-    return 0;
+struct GcAllocSiteEqual
+{
+    bool operator()(const GcAllocSite* a, const GcAllocSite* b) const noexcept
+    {
+        if (a->kind != b->kind)
+        {
+            return false;
+        }
+        switch (a->kind)
+        {
+        case GcAllocSiteKind::Codegen:
+            return a->u.codegen.file == b->u.codegen.file && a->u.codegen.line == b->u.codegen.line &&
+                   a->u.codegen.managed_method == b->u.codegen.managed_method;
+        case GcAllocSiteKind::Interp:
+            return a->u.interp.method == b->u.interp.method && a->u.interp.il_offset == b->u.interp.il_offset;
+        case GcAllocSiteKind::Internal:
+            return a->u.internal.file == b->u.internal.file && a->u.internal.line == b->u.internal.line &&
+                   a->u.internal.native_method == b->u.internal.native_method;
+        default:
+            assert(false && "Invalid GcAllocSiteKind");
+            return false;
+        }
+    }
+};
+
+static utils::HashSet<const GcAllocSite*, GcAllocSiteHash, GcAllocSiteEqual> s_sites;
 #endif
-}
 
-void GcAllocSite::get_site_description(uint32_t site_id, utils::Utf8StringBuilder& sb)
+const GcAllocSite* GcAllocSite::intern_site() const
 {
 #if LEANCLR_GC_DEBUG
-    if (site_id == 0 || site_id > s_sites.size())
+    assert(kind != GcAllocSiteKind::None);
+    auto it = s_sites.find(this);
+    if (it != s_sites.end())
     {
-        sb.append_cstr("<unknown>");
-        return;
+        return *it;
     }
-    SiteEntry& e = s_sites[site_id - 1];
-    if (e.description != nullptr)
-    {
-        sb.append_cstr(e.description);
-        return;
-    }
-    // Build a short description on first use (stored in fixed heap via malloc).
-    char buf[512];
-    switch (e.site.kind)
-    {
-    case GcAllocSiteKind::Codegen:
-        std::snprintf(buf, sizeof(buf), "%s:%u @ %s", e.site.u.codegen.file ? e.site.u.codegen.file : "?", e.site.u.codegen.line,
-                      e.site.u.codegen.managed_method ? e.site.u.codegen.managed_method : "?");
-        break;
-    case GcAllocSiteKind::Interp:
-        if (e.site.u.interp.method && e.site.u.interp.method->parent)
-        {
-            std::snprintf(buf, sizeof(buf), "%s::%s IL+%u", e.site.u.interp.method->parent->namespaze ? e.site.u.interp.method->parent->namespaze : "",
-                          e.site.u.interp.method->name ? e.site.u.interp.method->name : "?", e.site.u.interp.il_offset);
-        }
-        else
-        {
-            std::snprintf(buf, sizeof(buf), "interp IL+%u", e.site.u.interp.il_offset);
-        }
-        break;
-    case GcAllocSiteKind::Internal:
-        std::snprintf(buf, sizeof(buf), "%s:%u %s", e.site.u.internal.file ? e.site.u.internal.file : "?", e.site.u.internal.line,
-                      e.site.u.internal.native_method ? e.site.u.internal.native_method : "?");
-        break;
-    default:
-        std::snprintf(buf, sizeof(buf), "<none>");
-        break;
-    }
-    sb.append_cstr(buf);
+    const GcAllocSite* new_site = new GcAllocSite(*this);
+    s_sites.insert(new_site);
+    return new_site;
 #else
-    (void)site_id;
-    (void)sb;
+    (void)this;
+    return nullptr;
 #endif
 }
 

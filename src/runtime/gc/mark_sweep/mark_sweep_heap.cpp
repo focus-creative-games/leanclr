@@ -13,6 +13,7 @@
 #include "gc/roots/gc_roots.h"
 #include "utils/rt_vector.h"
 #include "utils/mem_op.h"
+#include "utils/hashset.h"
 #include "vm/class.h"
 
 namespace leanclr
@@ -183,12 +184,7 @@ struct ArenaCollectionInfo
 };
 
 static constexpr ArenaCollectionInfo s_arena_collection_infos[] = {
-    {256, 8, 16 * 1024},
-    {512, 16, 32 * 1024},
-    {1024, 32, 64 * 1024},
-    {2048, 64, 128 * 1024},
-    {4096, 128, 256 * 1024},
-    {8192, 256, 512 * 1024},
+    {256, 8, 16 * 1024}, {512, 16, 32 * 1024}, {1024, 32, 64 * 1024}, {2048, 64, 128 * 1024}, {4096, 128, 256 * 1024}, {8192, 256, 512 * 1024},
 };
 
 constexpr size_t kArenaCollectionInfoCount = sizeof(s_arena_collection_infos) / sizeof(s_arena_collection_infos[0]);
@@ -196,6 +192,7 @@ constexpr size_t kArenaCollectionCount = kArenaCollectionInfoCount * 16 + 16 /* 
 static ArenaCollection<SmallHeapArena>* s_small_heap_arenas[kArenaCollectionCount] = {};
 constexpr size_t kMaxSmallObejctSize = s_arena_collection_infos[kArenaCollectionInfoCount - 1].max_size;
 static ArenaCollection<SmallHeapArena>* s_map_div8_size_to_arena[kMaxSmallObejctSize / 8] = {};
+static utils::HashSet<void*> s_big_object_arenas;
 
 // constexpr size_t kMinSmallHeapBlockSize = 8;
 // constexpr size_t kMaxSmallHeapBlockSize = 256;
@@ -222,8 +219,7 @@ static void initialize_small_heap_arenas()
         for (size_t j = 1; j <= (max_size - last_arena_max_size) / size_increment; j++)
         {
             size_t current_arena_size = last_arena_max_size + size_increment * j;
-            auto new_arena = new ArenaCollection<SmallHeapArena>(
-                ArenaAllocator<SmallHeapArena>(arena_size, current_arena_size, GC_ALIGN));
+            auto new_arena = new ArenaCollection<SmallHeapArena>(ArenaAllocator<SmallHeapArena>(arena_size, current_arena_size, GC_ALIGN));
             for (; last_map_index < current_arena_size / 8; last_map_index++)
             {
                 s_map_div8_size_to_arena[last_map_index] = new_arena;
@@ -232,13 +228,13 @@ static void initialize_small_heap_arenas()
         }
         last_arena_max_size = max_size;
     }
-    assert (last_map_index == kMaxSmallObejctSize / 8);
-    assert (last_arena_index == kArenaCollectionCount);
+    assert(last_map_index == kMaxSmallObejctSize / 8);
+    assert(last_arena_index == kArenaCollectionCount);
 }
 
 static inline ArenaCollection<SmallHeapArena>* get_arena_collection(size_t size)
 {
-    assert (size > 0 && size % 8 == 0);
+    assert(size > 0 && size % 8 == 0);
     return s_map_div8_size_to_arena[size / 8 - 1];
 }
 
@@ -336,12 +332,7 @@ void MarkSweepHeap::free_fixed(void* address)
     alloc::GeneralAllocation::free(address);
 }
 
-vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
-{
-    return allocate_object(klass, size);
-}
-
-vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, size_t size)
+vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite* site)
 {
     assert(size >= sizeof(vm::RtObject));
     size_t aligned_size = utils::MemOp::align_up(size, GC_ALIGN);
@@ -349,20 +340,41 @@ vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, siz
     if (is_small_object(aligned_size))
     {
         obj = (vm::RtObject*)get_arena_collection(aligned_size)->allocate_block();
+        if (obj == nullptr)
+        {
+            return nullptr;
+        }
     }
     else
     {
         obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(aligned_size);
-    }
-    if (obj == nullptr)
-    {
-        return nullptr;
+        if (obj != nullptr)
+        {
+            s_big_object_arenas.insert(obj);
+        }
+        else
+        {
+            return nullptr;
+        }
     }
     obj->klass = const_cast<metadata::RtClass*>(klass);
+#if LEANCLR_GC_DEBUG
+    obj->__sync_block = site != nullptr ? const_cast<GcAllocSite*>(site->intern_site()) : nullptr;
+#endif
     s_used_bytes += aligned_size;
     s_heap_bytes += aligned_size;
     GcPressure::on_alloc(aligned_size);
     return obj;
+}
+
+vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
+{
+    return allocate_object_impl(klass, size, &site);
+}
+
+vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, size_t size)
+{
+    return allocate_object_impl(klass, size, nullptr);
 }
 
 vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site)
