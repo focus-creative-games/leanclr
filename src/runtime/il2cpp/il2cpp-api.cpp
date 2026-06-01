@@ -577,7 +577,7 @@ size_t il2cpp_class_num_fields(const Il2CppClass* klass)
 
 bool il2cpp_class_is_valuetype(const Il2CppClass* klass)
 {
-    return vm::Class::is_value_type(klass);
+    return vm::Class::is_value_typedef_or_generic_inst(klass);
 }
 
 bool il2cpp_class_is_blittable(const Il2CppClass* klass)

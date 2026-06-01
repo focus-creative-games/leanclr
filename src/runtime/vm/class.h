@@ -182,9 +182,15 @@ class Class
     static RtResult<metadata::RtClass*> get_class_by_type_def_gid(uint32_t gid);
 
     // Transliterated EEClass member functions
-    static bool is_value_type(const metadata::RtClass* klass)
+    static bool is_value_typedef_or_generic_inst(const metadata::RtClass* klass)
     {
         return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::ValueType) != 0;
+    }
+
+    static bool is_value_type(const metadata::RtClass* klass)
+    {
+        // fnptr, pointer are tried to be value type, but they are not.
+        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::ReferenceType) == 0;
     }
 
     static bool is_reference_type(const metadata::RtClass* klass)
