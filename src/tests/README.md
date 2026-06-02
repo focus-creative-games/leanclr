@@ -28,6 +28,7 @@ tests/
 ├── managed/
 │   ├── managed.sln
 │   ├── Common/            # Shared test infrastructure
+│   ├── SharedTests/       # Shared test sources (linked into CoreTests / AotTests)
 │   ├── CoreTests/         # CLR runtime tests
 │   ├── CorlibTests/       # BCL (mscorlib / System) tests
 │   ├── AotTests/          # LeanAOT tests

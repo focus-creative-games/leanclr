@@ -44,6 +44,9 @@
   <ItemGroup>
     <Compile Include=".\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="..\SharedTests\Instructions\Converts\*.cs">
+      <Link>Shared\Instructions\Converts\%(Filename)%(Extension)</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">

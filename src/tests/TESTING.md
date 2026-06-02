@@ -15,6 +15,7 @@ tests/
 ├── managed/
 │   ├── managed.sln        # 主 solution（不含 ILTests，见下文）
 │   ├── Common/            # 共享基础设施（Assert、UnitTest 等）
+│   ├── SharedTests/       # 跨项目共享测试源（编译进 CoreTests / AotTests）
 │   ├── CoreTests/         # CLR 运行时测试（解释器、IL 指令、C# 语义）
 │   ├── CorlibTests/       # BCL 测试（internalcall、intrinsic、P/Invoke）
 │   ├── AotTests/          # LeanAOT 测试（IL → C++ 正确性）
@@ -211,7 +212,7 @@ out\dotnet\RunTests\Debug\RunTests.exe
 | PR | 内容 | 状态 |
 |----|------|------|
 | PR1 | 文档、清理死代码、修复 sln Release 配置 | 已完成 |
-| PR2 | SharedTests + 迁移 conv 系列，消除 AotTests 重复 | 待做 |
+| PR2 | SharedTests + 迁移 conv 系列，消除 AotTests 重复 | 已完成 |
 | PR3 | AotTests 删除 Test* 镜像，保留 AOT 专有测 | 待做 |
 | PR4 | CoreTests 目录重组 + csproj glob | 待做 |
 | PR5 | ILTests 入 solution + wrapper + basic-tester 加载 | 待做 |
