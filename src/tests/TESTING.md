@@ -114,12 +114,44 @@ namespace Tests.CSharp
 
 | 场景 | 目标项目 | 目录建议 |
 |------|----------|----------|
-| IL 指令（C# 可写） | CoreTests | `Tests/Instruments/` |
-| C# 语言特性 | CoreTests | `Tests/CSharp/` |
-| 历史 Bug 回归 | CoreTests | `Tests/Bugs/`（计划重命名为 `Regression/`） |
+| IL 指令（C# 可写） | CoreTests | `Instructions/`（如 `Instructions/Arithmetic/`） |
+| C# 语言特性 | CoreTests | `Runtime/` |
+| 杂项运行时测 | CoreTests | `Runtime/Misc/` |
+| 历史 Bug 回归 | CoreTests | `Regression/` |
+| 测试辅助类型 / fixture | CoreTests | `Shared/Fixtures/`（`namespace AOTDefs`） |
+| C++ 引导测 | CoreTests | `Bootstrap/`（`namespace BootstrapTests`） |
 | BCL internalcall | CorlibTests | `InternalCall/` |
 | 纯 IL asm | ILTests | `*.il` |
+| 跨解释器 + AOT 共享 | SharedTests | `SharedTests/Instructions/` 或 `Runtime/` |
 | AOT 编译/链接特有 | AotTests | 项目根目录 |
+
+### CoreTests 目录结构（PR4 后）
+
+```
+CoreTests/
+├── Runtime/                 # C# 语言特性（原 Tests/CSharp）
+│   └── Misc/                # 杂项（原 Tests/Mics）
+├── Instructions/            # IL 指令（原 Tests/Instruments）
+│   ├── Arithmetic/          # 原 Ariths
+│   ├── Arrays/
+│   ├── Boxing/              # 原 Boxs
+│   ├── Branches/
+│   ├── Compare/             # 原 Cmps
+│   ├── Exceptions/
+│   ├── Fields/
+│   ├── Funcs/
+│   ├── Memory/              # 原 Mems
+│   ├── Misc/
+│   ├── NotImpls/
+│   └── Objects/             # 原 Objs
+├── Regression/              # Bug 回归（原 Tests/Bugs）
+├── Shared/Fixtures/         # 辅助类型（原 AOTDefs，namespace 仍为 AOTDefs）
+├── Bootstrap/               # C++ 硬编码引导测（namespace 仍为 BootstrapTests）
+├── App.cs, App2.cs, CustomPInvoke.cs
+└── Properties/
+```
+
+命名空间（`Tests.CSharp`、`Tests.Instruments.*`、`AOTDefs` 等）暂未变更，仅调整物理目录。
 
 ---
 
@@ -218,7 +250,7 @@ out\dotnet\RunTests\Debug\RunTests.exe
 | `TC_MonoPInvokeCallback.cs` | MonoPInvokeCallback 回调 |
 | `TC_System_Diagnostics_StopWatch.cs` | Stopwatch 冒烟测试 |
 
-依赖 `AOTDefs` 或 `CoreTests.App` 的测试（委托、反射、CustomAttribute 等）保留在 **CoreTests**，仅由解释器路径执行。
+依赖 `AOTDefs` 或 `CoreTests.App` 的测试（委托、反射、CustomAttribute 等）保留在 **CoreTests**（`Shared/Fixtures/`、`Runtime/`），仅由解释器路径执行。
 
 ---
 
@@ -229,7 +261,7 @@ out\dotnet\RunTests\Debug\RunTests.exe
 | PR1 | 文档、清理死代码、修复 sln Release 配置 | 已完成 |
 | PR2 | SharedTests + 迁移 conv 系列，消除 AotTests 重复 | 已完成 |
 | PR3 | AotTests 删除 Test* 镜像，保留 AOT 专有测 | 已完成 |
-| PR4 | CoreTests 目录重组 + csproj glob | 待做 |
+| PR4 | CoreTests 目录重组 | 已完成 |
 | PR5 | ILTests 入 solution + wrapper + basic-tester 加载 | 待做 |
 
 ---

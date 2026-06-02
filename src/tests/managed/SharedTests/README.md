@@ -26,7 +26,7 @@ SharedTests/
 - Tests that are **self-contained** (no `AOTDefs`, no `CoreTests.App` helpers).
 - Tests that must run in **both** the interpreter (`CoreTests`) and AOT (`AotTests`) pipelines.
 
-Tests that depend on `CoreTests/AOTDefs/` or other CoreTests-only fixtures stay under `CoreTests/` until fixtures are shared separately.
+Tests that depend on `CoreTests/Shared/Fixtures/`（`namespace AOTDefs`）或 `CoreTests.App` helpers stay under `CoreTests/` until fixtures are shared separately.
 
 ## Adding shared tests
 
