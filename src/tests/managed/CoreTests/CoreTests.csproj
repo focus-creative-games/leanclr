@@ -28,6 +28,9 @@
   <ItemGroup>
     <!-- Auto-include all C# sources under this project directory (MSBuild 15.8+ / VS 2017 15.8+) -->
     <Compile Include="**\*.cs" />
+    <Compile Include="..\SharedTests\**\*.cs">
+      <Link>Shared\%(RecursiveDir)%(Filename)%(Extension)</Link>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <!-- <Reference Include="netstandard">

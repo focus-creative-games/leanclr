@@ -32,8 +32,6 @@
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="System" />
-    <Reference Include="System.Core" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -41,11 +39,26 @@
     <Reference Include="System.Net.Http" />
     <Reference Include="System.Xml" />
   </ItemGroup>
+    <ItemGroup>
+    <!-- <Reference Include="netstandard">
+      <HintPath>$(ProjectDir)\..\..\..\..\..\netframework\NetStandard\ref\2.1.0\netstandard.dll</HintPath>
+        <Aliases>global</Aliases>
+    </Reference> -->
+    <Reference Include="mscorlib">
+      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\System.dll</HintPath>
+    </Reference>
+  </ItemGroup>
   <ItemGroup>
     <Compile Include=".\*.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="..\SharedTests\Instructions\Converts\*.cs">
-      <Link>Shared\Instructions\Converts\%(Filename)%(Extension)</Link>
+    <Compile Include="..\SharedTests\**\*.cs">
+      <Link>Shared\%(RecursiveDir)%(Filename)%(Extension)</Link>
     </Compile>
   </ItemGroup>
   <ItemGroup>

@@ -203,7 +203,22 @@ out\dotnet\RunTests\Debug\RunTests.exe
 | Helper / Fixture | 无 `TC_` 前缀 | `TypeStaticFields` |
 | Interp / AOT 对照 | 后缀 `_interp` / `_aot` | `TC_call_interp.cs` |
 
-避免在同一语义上同时使用 `Test*` 与 `TC_*` 两套命名（AotTests 中的历史 `Test*.cs` 计划逐步合并）。
+避免在同一语义上同时使用 `Test*` 与 `TC_*` 两套命名（PR3 已完成 AotTests 侧 `Test*` 清理）。
+
+### AotTests 保留的 AOT 专有用例（PR3 后）
+
+| 文件 | 说明 |
+|------|------|
+| `TC_PInvoke.cs` + `leanclr_test_pinvoke.js` | Wasm `__Internal` P/Invoke（`#if IL2CPP_ONLY`） |
+| `TC_EvalStackNotEmpty.cs` | HL 转换 eval stack |
+| `TC_StaticCtorOrder.cs` | 静态构造器继承顺序 |
+| `TC_Call_AotInterp.cs` / `TC_CallVir_AotInterp.cs` | `[AotMethod(false)]` AOT/Interp 混编 |
+| `TC_ldsflda.cs` | `ldsflda` 指令 |
+| `TC_NewMdArray.cs` | 多维数组创建 overflow |
+| `TC_MonoPInvokeCallback.cs` | MonoPInvokeCallback 回调 |
+| `TC_System_Diagnostics_StopWatch.cs` | Stopwatch 冒烟测试 |
+
+依赖 `AOTDefs` 或 `CoreTests.App` 的测试（委托、反射、CustomAttribute 等）保留在 **CoreTests**，仅由解释器路径执行。
 
 ---
 
@@ -213,7 +228,7 @@ out\dotnet\RunTests\Debug\RunTests.exe
 |----|------|------|
 | PR1 | 文档、清理死代码、修复 sln Release 配置 | 已完成 |
 | PR2 | SharedTests + 迁移 conv 系列，消除 AotTests 重复 | 已完成 |
-| PR3 | AotTests 删除 Test* 镜像，保留 AOT 专有测 | 待做 |
+| PR3 | AotTests 删除 Test* 镜像，保留 AOT 专有测 | 已完成 |
 | PR4 | CoreTests 目录重组 + csproj glob | 待做 |
 | PR5 | ILTests 入 solution + wrapper + basic-tester 加载 | 待做 |
 
