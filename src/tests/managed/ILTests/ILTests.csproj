@@ -1,34 +1,71 @@
-<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
   <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{8BF44FE7-FAD8-4796-DFA8-45CB512CA4CD}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AssemblyName>ILTests</AssemblyName>
-    <ProjectGuid>{8BF44FE7-FAD8-4796-DFA8-45CB512CA4CD}</ProjectGuid>
-    <NuGetPackageImportStamp>
-    </NuGetPackageImportStamp>
-  </PropertyGroup>
-  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
-    <CodeAnalysisRuleSet>MinimumRecommendedRules.ruleset</CodeAnalysisRuleSet>
-  </PropertyGroup>
-  <PropertyGroup>
     <RootNamespace>ILTests</RootNamespace>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <NoStandardLib>true</NoStandardLib>
+    <NoConfig>true</NoConfig>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <IlNativeAssemblyName>ILTests.Native</IlNativeAssemblyName>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>portable</DebugType>
+    <Optimize>false</Optimize>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <DefineConstants>TRACE</DefineConstants>
+    <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <ILFile Include="*.il" />
+    <IlFile Include="Instructions\*.il" />
+    <Compile Include="ILTestsEntry.cs" />
+    <Compile Include="Wrappers\**\*.cs" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <Reference Include="mscorlib">
+      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\mscorlib.dll</HintPath>
+    </Reference>
   </ItemGroup>
-  <Target Name="Build">
-    <Exec Command="$(ILAsm_W64Bin)ilasm.exe /dll /output:$(OutputPath)$(AssemblyName).dll @(ILFile, ' ')" />
+  <ItemGroup>
+    <ProjectReference Include="..\Common\Common.csproj">
+      <Project>{aa467143-bba4-4b54-95e5-1d0f1099f380}</Project>
+      <Name>Common</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ILAsm" Version="9.4.0" GeneratePathProperty="true" />
+  </ItemGroup>
+  <Target Name="EnsureILAsmRestored" BeforeTargets="BuildIlAssembly">
+    <Error Condition="'$(PkgILAsm)' == '' Or !Exists('$(PkgILAsm)\build\net\ILAsm.targets')"
+           Text="ILAsm NuGet package is missing. Run 'dotnet restore' on managed.sln." />
   </Target>
-  <Target Name="Clean">
-    <Delete Files="$(OutputPath)$(AssemblyName).dll" />
-  </Target>
-  <Import Project="..\packages\ILAsm.9.4.0\build\net\ILAsm.targets" Condition="Exists('..\packages\ILAsm.9.4.0\build\net\ILAsm.targets')" />
-  <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
+  <Target Name="BuildIlAssembly" BeforeTargets="ResolveAssemblyReferences">
     <PropertyGroup>
-      <ErrorText>This project references NuGet package(s) that are missing on this computer. Use NuGet Package Restore to download them.  For more information, see http://go.microsoft.com/fwlink/?LinkID=322105. The missing file is {0}.</ErrorText>
+      <IlNativeOutput>$(OutputPath)$(IlNativeAssemblyName).dll</IlNativeOutput>
+      <_IlAsmExe Condition="'$(Platform)' == 'x86'">$(PkgILAsm)\bin\Win.x86\ilasm.exe</_IlAsmExe>
+      <_IlAsmExe Condition="'$(_IlAsmExe)' == ''">$(PkgILAsm)\bin\Win.x64\ilasm.exe</_IlAsmExe>
+      <_IlSources>@(IlFile->'&quot;$(ProjectDir)%(Identity)&quot;', ' ')</_IlSources>
     </PropertyGroup>
-    <Error Condition="!Exists('..\packages\ILAsm.9.4.0\build\net\ILAsm.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\ILAsm.9.4.0\build\net\ILAsm.targets'))" />
+    <MakeDir Directories="$(OutputPath)" />
+    <Exec Command="&quot;$(_IlAsmExe)&quot; /dll /output:&quot;$(IlNativeOutput)&quot; /quiet $(_IlSources)" />
+    <ItemGroup>
+      <Reference Include="$(IlNativeAssemblyName)">
+        <HintPath>$(IlNativeOutput)</HintPath>
+        <Private>true</Private>
+      </Reference>
+    </ItemGroup>
   </Target>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

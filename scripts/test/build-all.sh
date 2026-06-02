@@ -56,6 +56,15 @@ COMMON_DLL="$(leanclr_dotnet_out_dir Common "$CONFIG")/Common.dll"
 if [[ ! -f "$COMMON_DLL" ]]; then
     COMMON_DLL="$(leanclr_dotnet_out_dir Common Debug)/Common.dll"
 fi
-cp -f "$COMMON_DLL" "$DLLS_DIR/"
+ILTESTS_DLL="$(leanclr_dotnet_out_dir ILTests "$CONFIG")/ILTests.dll"
+ILTESTS_NATIVE_DLL="$(leanclr_dotnet_out_dir ILTests "$CONFIG")/ILTests.Native.dll"
+if [[ ! -f "$ILTESTS_DLL" ]]; then
+    ILTESTS_DLL="$(leanclr_dotnet_out_dir ILTests Debug)/ILTests.dll"
+fi
+if [[ ! -f "$ILTESTS_NATIVE_DLL" ]]; then
+    ILTESTS_NATIVE_DLL="$(leanclr_dotnet_out_dir ILTests Debug)/ILTests.Native.dll"
+fi
+cp -f "$ILTESTS_DLL" "$DLLS_DIR/"
+cp -f "$ILTESTS_NATIVE_DLL" "$DLLS_DIR/"
 
 echo "All tests built successfully."

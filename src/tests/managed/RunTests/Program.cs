@@ -16,7 +16,12 @@ namespace RunTests
             int passed = 0;
             int failed = 0;
 
-            var asses = new Assembly[] { typeof(CoreTests.App).Assembly, typeof(CorlibTests.App).Assembly, typeof(AotTests.App).Assembly };
+            var asses = new Assembly[] {
+                typeof(CoreTests.App).Assembly,
+                typeof(CorlibTests.App).Assembly,
+                typeof(AotTests.App).Assembly,
+                typeof(ILTests.ILTestsEntry).Assembly,
+            };
 
             foreach (var asm in asses)
             {

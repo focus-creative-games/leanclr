@@ -7,6 +7,10 @@ This directory contains the unit test framework and test cases for the LeanCLR r
 ## Quick Start
 
 ```batch
+rem 1. Build runner + managed tests + stage DLLs (recommended)
+scripts\test\build-all.bat Debug x64
+
+rem Or manually:
 rem 1. Build the C++ test runner
 scripts\test\basic-tester\build.bat Debug x64
 
@@ -23,7 +27,7 @@ On Linux/macOS, use the corresponding `.sh` scripts under `scripts/test/`.
 
 ```
 tests/
-├── basic-tester/          # C++ test runner (CI: CoreTests + CorlibTests)
+├── basic-tester/          # C++ test runner (CI: CoreTests + CorlibTests + ILTests)
 ├── aot-tester/            # AOT test runner (AotTests)
 ├── managed/
 │   ├── managed.sln
@@ -32,7 +36,7 @@ tests/
 │   ├── CoreTests/         # CLR runtime tests
 │   ├── CorlibTests/       # BCL (mscorlib / System) tests
 │   ├── AotTests/          # LeanAOT tests
-│   ├── ILTests/           # IL asm tests (not yet in solution)
+│   ├── ILTests/           # IL asm tests (in solution; see ILTests/README.md)
 │   └── RunTests/          # C# reflection runner (local dev)
 └── TESTING.md
 ```

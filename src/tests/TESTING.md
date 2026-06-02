@@ -10,16 +10,16 @@
 
 ```
 tests/
-├── basic-tester/          # C++ 测试 runner（CI 主路径，加载 CoreTests + CorlibTests）
+├── basic-tester/          # C++ 测试 runner（CI 主路径，加载 CoreTests + CorlibTests + ILTests）
 ├── aot-tester/            # AOT 测试 runner（加载 AotTests）
 ├── managed/
-│   ├── managed.sln        # 主 solution（不含 ILTests，见下文）
+│   ├── managed.sln        # 主 solution（含 CoreTests、CorlibTests、AotTests、ILTests 等）
 │   ├── Common/            # 共享基础设施（Assert、UnitTest 等）
 │   ├── SharedTests/       # 跨项目共享测试源（编译进 CoreTests / AotTests）
 │   ├── CoreTests/         # CLR 运行时测试（解释器、IL 指令、C# 语义）
 │   ├── CorlibTests/       # BCL 测试（internalcall、intrinsic、P/Invoke）
 │   ├── AotTests/          # LeanAOT 测试（IL → C++ 正确性）
-│   ├── ILTests/           # IL asm 测试（尚未接入 solution / CI）
+│   ├── ILTests/           # IL asm 测试（.il + C# wrapper，见 ILTests/README.md）
 │   └── RunTests/          # C# 反射 runner（本地调试用）
 └── TESTING.md             # 本文件
 ```
@@ -42,8 +42,8 @@ tests/
 
 | Runner | 加载的程序集 | 用途 |
 |--------|-------------|------|
-| **basic-tester** (`test.exe`) | CoreTests, CorlibTests, Common | **CI 主路径** |
-| **RunTests.exe** | CoreTests, CorlibTests, AotTests | 本地一次性跑三套 managed 测试 |
+| **basic-tester** (`test.exe`) | CoreTests, CorlibTests, Common, ILTests.Native, ILTests | **CI 主路径** |
+| **RunTests.exe** | CoreTests, CorlibTests, AotTests, ILTests | 本地一次性跑四套 managed 测试 |
 | **aot-tester** | AotTests | AOT 流水线（`scripts/test/aot-runner/`） |
 | **AotTests.App.Main** | AotTests（自扫描） | AOT 生成 C++ 时的入口 |
 
@@ -121,7 +121,7 @@ namespace Tests.CSharp
 | 测试辅助类型 / fixture | CoreTests | `Shared/Fixtures/`（`namespace AOTDefs`） |
 | C++ 引导测 | CoreTests | `Bootstrap/`（`namespace BootstrapTests`） |
 | BCL internalcall | CorlibTests | `InternalCall/` |
-| 纯 IL asm | ILTests | `*.il` |
+| 纯 IL asm | ILTests | `Instructions/*.il` + `Wrappers/TC_*.cs` |
 | 跨解释器 + AOT 共享 | SharedTests | `SharedTests/Instructions/` 或 `Runtime/` |
 | AOT 编译/链接特有 | AotTests | 项目根目录 |
 
@@ -152,6 +152,20 @@ CoreTests/
 ```
 
 命名空间（`Tests.CSharp`、`Tests.Instruments.*`、`AOTDefs` 等）暂未变更，仅调整物理目录。
+
+### ILTests 目录结构（PR5 后）
+
+```
+ILTests/
+├── Instructions/          # .il 源文件（ilasm 编译为 ILTests.Native.dll）
+│   └── conv.ovf.il
+├── Wrappers/              # C# [UnitTest] 包装，调用 IL 方法
+│   └── TC_conv_ovf.cs
+├── ILTestsEntry.cs        # RunTests 程序集标记
+└── ILTests.csproj         # BuildIlAssembly target + ILAsm NuGet
+```
+
+构建产出两个程序集：`ILTests.Native.dll`（纯 IL）与 `ILTests.dll`（wrapper）。详见 [`managed/ILTests/README.md`](managed/ILTests/README.md)。
 
 ---
 
@@ -185,13 +199,27 @@ out/dotnet/<ProjectName>/<Config>/
 
 ### 部署 DLL 到 runner
 
-basic-tester 从可执行文件旁的 `dlls/` 目录加载程序集。构建 managed 项目后，需将以下 DLL 复制到 runner 输出目录的 `dlls/` 下：
+basic-tester 从可执行文件旁的 `dlls/` 目录加载程序集。一键构建与部署：
+
+```batch
+scripts\test\build-all.bat [Config] [Arch]
+rem 例：scripts\test\build-all.bat Debug x64
+```
+
+该脚本会构建 basic-tester、managed solution，并将以下 DLL 复制到 runner 的 `dlls/` 下：
 
 - `Common.dll`
 - `CoreTests.dll`
 - `CorlibTests.dll`
+- `ILTests.dll`
+- `ILTests.Native.dll`
 
-> **注意**：`scripts/test/build-all.bat` 在文档中有引用，但尚未实现。当前请分别构建 basic-tester 与 managed solution，并手动或通过 CI 脚本复制 DLL。后续 PR 会补齐一键构建脚本。
+也可分别构建后手动复制：
+
+```batch
+scripts\test\basic-tester\build.bat Debug x64
+dotnet build src\tests\managed\managed.sln -c Debug
+```
 
 ### AOT 测试
 
@@ -262,7 +290,7 @@ out\dotnet\RunTests\Debug\RunTests.exe
 | PR2 | SharedTests + 迁移 conv 系列，消除 AotTests 重复 | 已完成 |
 | PR3 | AotTests 删除 Test* 镜像，保留 AOT 专有测 | 已完成 |
 | PR4 | CoreTests 目录重组 | 已完成 |
-| PR5 | ILTests 入 solution + wrapper + basic-tester 加载 | 待做 |
+| PR5 | ILTests 入 solution + wrapper + basic-tester 加载 | 已完成 |
 
 ---
 
@@ -276,9 +304,11 @@ out\dotnet\RunTests\Debug\RunTests.exe
 
 当前 runner 不支持过滤，所有带 `[UnitTest]` 的方法都会执行。
 
-### ILTests 为什么不在 solution 里？
+### ILTests 如何添加用例？
 
-ILTests 尚未接入构建与 runner，计划在 PR5 集成。在此之前，请手动用 ilasm 编译并自行加载。
+1. 在 `ILTests/Instructions/` 添加 `.il` 文件，程序集名须为 `ILTests.Native`。
+2. 在 `ILTests/Wrappers/` 添加 `TC_*.cs`，用 `[UnitTest]` 调用 IL 方法并断言。
+3. `dotnet build managed.sln` 会自动通过 ILAsm NuGet 编译 `.il` 并链接 wrapper。
 
 ### Assert 应该写在哪里？
 

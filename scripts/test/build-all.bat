@@ -78,5 +78,22 @@ if errorlevel 1 (
     exit /b 1
 )
 
+set "ILTESTS_DLL=%OUT_ROOT%\dotnet\ILTests\%CONFIG%\ILTests.dll"
+set "ILTESTS_NATIVE_DLL=%OUT_ROOT%\dotnet\ILTests\%CONFIG%\ILTests.Native.dll"
+if not exist "%ILTESTS_DLL%" set "ILTESTS_DLL=%OUT_ROOT%\dotnet\ILTests\Debug\ILTests.dll"
+if not exist "%ILTESTS_NATIVE_DLL%" set "ILTESTS_NATIVE_DLL=%OUT_ROOT%\dotnet\ILTests\Debug\ILTests.Native.dll"
+
+copy /Y "%ILTESTS_DLL%" "%DLLS_DIR%\" >nul
+if errorlevel 1 (
+    echo ERROR: failed to copy ILTests.dll from "%ILTESTS_DLL%".
+    exit /b 1
+)
+
+copy /Y "%ILTESTS_NATIVE_DLL%" "%DLLS_DIR%\" >nul
+if errorlevel 1 (
+    echo ERROR: failed to copy ILTests.Native.dll from "%ILTESTS_NATIVE_DLL%".
+    exit /b 1
+)
+
 echo All tests built successfully.
 endlocal

@@ -1,5 +1,5 @@
 .assembly extern mscorlib { }
-//.assembly TestConvOvf { }
+.assembly ILTests.Native { }
 
 .class public auto ansi TestConvOvf
 {
@@ -7,7 +7,7 @@
     {
         .maxstack 1
         ldarg.0
-        conv.ovf.i1    // 有溢出检查的转换
+        conv.ovf.i1
         ret
     }
 
@@ -15,7 +15,7 @@
     {
         .maxstack 1
         ldarg.0
-        conv.ovf.u1.un // 无符号溢出检查转换
+        conv.ovf.u1.un
         ret
     }
 }

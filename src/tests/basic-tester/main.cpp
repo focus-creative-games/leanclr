@@ -436,6 +436,7 @@ int main()
     bool is_run_core_tests = is_run_all || false;
     bool is_load_corlib_customattributes = is_run_all || false;
     bool is_run_corlib_tests = is_run_all || false;
+    bool is_run_il_tests = is_run_all || false;
 
     auto corlib = vm::Assembly::get_corlib();
     std::cout << "Corlib assembly loaded successfully." << corlib << std::endl;
@@ -561,6 +562,35 @@ int main()
         if (ret2.is_err())
         {
             std::cout << "Failed to run tests, error: " << static_cast<int>(ret2.unwrap_err()) << std::endl;
+            return -1;
+        }
+    }
+
+    metadata::RtAssembly* ilTests = nullptr;
+    {
+        auto retNative = vm::Assembly::load_by_name("ILTests.Native");
+        if (retNative.is_err())
+        {
+            std::cout << "Failed to load ILTests.Native assembly, error: " << static_cast<int>(retNative.unwrap_err()) << std::endl;
+            return -1;
+        }
+        std::cout << "ILTests.Native assembly loaded successfully." << retNative.unwrap() << std::endl;
+
+        auto ret = vm::Assembly::load_by_name("ILTests");
+        if (ret.is_err())
+        {
+            std::cout << "Failed to load ILTests assembly, error: " << static_cast<int>(ret.unwrap_err()) << std::endl;
+            return -1;
+        }
+        ilTests = ret.unwrap();
+        std::cout << "ILTests assembly loaded successfully." << ilTests << std::endl;
+    }
+    if (is_run_il_tests)
+    {
+        auto ret2 = run_tests(ilTests->mod);
+        if (ret2.is_err())
+        {
+            std::cout << "Failed to run ILTests, error: " << static_cast<int>(ret2.unwrap_err()) << std::endl;
             return -1;
         }
     }

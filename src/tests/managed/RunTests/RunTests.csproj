@@ -65,6 +65,10 @@
       <Project>{b3c8b19b-f8ae-400e-946c-de7af2216fc0}</Project>
       <Name>CorlibTests</Name>
     </ProjectReference>
+    <ProjectReference Include="..\ILTests\ILTests.csproj">
+      <Project>{8bf44fe7-fad8-4796-dfa8-45cb512ca4cd}</Project>
+      <Name>ILTests</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
