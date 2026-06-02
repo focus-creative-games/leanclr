@@ -34,7 +34,7 @@ tests/
 | **CorlibTests** | mscorlib / System / System.Core：internalcall、intrinsic、P/Invoke | 纯 CLR 指令语义（应在 CoreTests） |
 | **ILTests** | C# 无法或难以稳定构造的 IL 用例（`.il` + ilasm） | 能用 C# 表达的测试 |
 | **AotTests** | LeanAOT 将 IL 翻译为 C++ 后的正确性 | 与 CoreTests 完全重复的指令测（计划合并到 SharedTests，见重构路线图） |
-| **Common** | `Assert`、`[UnitTest]`、`GeneralTestCaseBase` 等 | 测试用例本身 |
+| **Common** | `Assert`、`[UnitTest]`、`TestCaseBase` 等 | 测试用例本身 |
 
 ---
 
@@ -55,7 +55,7 @@ tests/
 | 签名 | `void`，无参 | `void`，无参 | `void`，无参 |
 | static 方法 | 不支持（总是 `new` 实例） | 支持 | 支持 |
 | 跳过 | 无 | `[IgnoreTest]` 类级 | 无 |
-| 推荐基类 | `GeneralTestCaseBase` | 同左 | 多数类未继承（待统一） |
+| 推荐基类 | `TestCaseBase` | 同左 | 多数类未继承（待统一） |
 
 ---
 
@@ -63,14 +63,14 @@ tests/
 
 ### 测试类
 
-- 推荐继承 `GeneralTestCaseBase`（位于 Common 项目）
+- 推荐继承 `TestCaseBase`（位于 Common 项目）
 - 需要无参构造函数（隐式默认构造即可）
 - 测试类文件名推荐 `TC_{主题}.cs`
 
 ```csharp
 namespace Tests.CSharp
 {
-    class TC_MyFeature : GeneralTestCaseBase
+    class TC_MyFeature : TestCaseBase
     {
         [UnitTest]
         public void Addition()
