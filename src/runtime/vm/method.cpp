@@ -541,7 +541,10 @@ RtResult<std::optional<uint32_t>> Method::get_parameter_token(const RtMethodInfo
     {
         RET_ERR(RtErr::Argument);
     }
-
+    if (method->token == 0)
+    {
+        RET_OK(std::optional<uint32_t>{});
+    }
     RtModuleDef* mod = method->parent->image;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, token, mod->get_parameter_token(method->token, index));
     if (token == 0)
