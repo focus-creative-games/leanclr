@@ -20,8 +20,6 @@ echo "build basic-tester"
 echo "build managed tests"
 pushd "$TESTS_DIR/managed" >/dev/null
 dotnet build -c "$CONFIG" -p:LeanClrIl2CppOnly=true
-cp -f "$(leanclr_dotnet_out_dir CoreTests "$CONFIG")/CoreTests.dll" MiscDlls/
-cp -f "$(leanclr_dotnet_out_dir CorlibTests "$CONFIG")/CorlibTests.dll" MiscDlls/
 popd >/dev/null
 
 if [[ -n "$ARCH" ]]; then
@@ -43,7 +41,6 @@ rm -rf "$DLLS_DIR"
 mkdir -p "$DLLS_DIR"
 
 cp -a "$REPO_ROOT/src/libraries/dotnetframework4.x" "$DLLS_DIR/"
-cp -f "$REPO_ROOT/src/tests/managed/MiscDlls/"*.dll "$DLLS_DIR/" 2>/dev/null || true
 CORETESTS_DLL="$(leanclr_dotnet_out_dir CoreTests "$CONFIG")/CoreTests.dll"
 CORLIBTESTS_DLL="$(leanclr_dotnet_out_dir CorlibTests "$CONFIG")/CorlibTests.dll"
 if [[ ! -f "$CORLIBTESTS_DLL" ]]; then
@@ -56,6 +53,14 @@ COMMON_DLL="$(leanclr_dotnet_out_dir Common "$CONFIG")/Common.dll"
 if [[ ! -f "$COMMON_DLL" ]]; then
     COMMON_DLL="$(leanclr_dotnet_out_dir Common Debug)/Common.dll"
 fi
+cp -f "$COMMON_DLL" "$DLLS_DIR/"
+
+REFNETSTANDARD_DLL="$(leanclr_dotnet_out_dir RefNetstandard "$CONFIG")/RefNetstandard.dll"
+if [[ ! -f "$REFNETSTANDARD_DLL" ]]; then
+    REFNETSTANDARD_DLL="$(leanclr_dotnet_out_dir RefNetstandard Debug)/RefNetstandard.dll"
+fi
+cp -f "$REFNETSTANDARD_DLL" "$DLLS_DIR/"
+
 ILTESTS_DLL="$(leanclr_dotnet_out_dir ILTests "$CONFIG")/ILTests.dll"
 ILTESTS_NATIVE_DLL="$(leanclr_dotnet_out_dir ILTests "$CONFIG")/ILTests.Native.dll"
 if [[ ! -f "$ILTESTS_DLL" ]]; then

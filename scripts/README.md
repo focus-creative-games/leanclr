@@ -50,7 +50,7 @@ scripts/
 | Script | Description |
 |--------|-------------|
 | `ci.sh` | CI entry: `test/build-all` + `test/run` |
-| `test/build-all.*` | Build C++ runner + managed test DLLs → copy DLLs to `src/tests/managed/MiscDlls/` |
+| `test/build-all.*` | Build C++ runner + managed test DLLs → stage to runner `dlls/` |
 | `test/basic-tester/build.*` | Build C++ test runner executable |
 | `test/run.*` | Run `out/cmake/tests/basic-tester/<Config>-<Arch>/bin/.../test` |
 | `runtime/build.*` | Build `leanclr` → `out/cmake/runtime/<Config>-<Arch>/` (Windows: optional `sln`, `shared`) |

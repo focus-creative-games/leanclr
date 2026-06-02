@@ -47,9 +47,12 @@ if %RC% GEQ 8 (
     exit /b %RC%
 )
 
-xcopy /Y /Q "%REPO_ROOT%\src\tests\managed\MiscDlls\*" "%DLLS_DIR%\" >nul
+set "REFNETSTANDARD_DLL=%OUT_ROOT%\dotnet\RefNetstandard\%CONFIG%\RefNetstandard.dll"
+if not exist "%REFNETSTANDARD_DLL%" set "REFNETSTANDARD_DLL=%OUT_ROOT%\dotnet\RefNetstandard\Debug\RefNetstandard.dll"
+
+copy /Y "%REFNETSTANDARD_DLL%" "%DLLS_DIR%\" >nul
 if errorlevel 1 (
-    echo ERROR: failed to copy MiscDlls.
+    echo ERROR: failed to copy RefNetstandard.dll from "%REFNETSTANDARD_DLL%".
     exit /b 1
 )
 
