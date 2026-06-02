@@ -1045,8 +1045,26 @@ RtResultVoid Transformer::add_conv(OpCodeEnum opcode, RtEvalStackDataType data_t
     // If the source is already of the target type, just push it back
     if (src->data_type == data_type)
     {
-        internal_push_eval_stack_var_and_update_max(src);
-        RET_VOID_OK();
+        switch (opcode)
+        {
+            case OpCodeEnum::ConvI4:
+            case OpCodeEnum::ConvI8:
+            case OpCodeEnum::ConvU4:
+            case OpCodeEnum::ConvU8:
+            case OpCodeEnum::ConvR4:
+            case OpCodeEnum::ConvR8:
+            case OpCodeEnum::ConvI:
+            case OpCodeEnum::ConvU:
+            case OpCodeEnum::ConvOvfI4:
+            case OpCodeEnum::ConvOvfI8:
+            case OpCodeEnum::ConvOvfI:
+            case OpCodeEnum::ConvOvfU:
+            {
+                internal_push_eval_stack_var_and_update_max(src);
+                RET_VOID_OK();
+            }
+            default: break;
+        }
     }
     if (!src->is_primitive())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
