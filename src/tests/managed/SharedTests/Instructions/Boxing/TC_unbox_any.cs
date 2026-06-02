@@ -16,7 +16,7 @@ namespace Tests.Instruments.Boxs
         public T Value => (T)_value;
     }
 
-    internal class TC_unbox_any : GeneralTestCaseBase
+    internal class TC_unbox_any : TestCaseBase
     {
         [UnitTest]
         public void byte_1()

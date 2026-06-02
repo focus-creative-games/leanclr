@@ -1,7 +1,7 @@
 
 namespace Tests.Instruments.Ariths
 {
-    public class TC_add : GeneralTestCaseBase
+    public class TC_add : TestCaseBase
     {
 
         [UnitTest]

@@ -11,7 +11,7 @@ namespace Tests.Bugs.Bug2022_7_14
     {
     }
 
-    internal class Bug_2022_7_14 : GeneralTestCaseBase
+    internal class Bug_2022_7_14 : TestCaseBase
     {
         [UnitTest]
         public void generic_type_name()

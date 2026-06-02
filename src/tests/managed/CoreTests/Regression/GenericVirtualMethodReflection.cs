@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    internal class GenericVirtualMethodReflection : GeneralTestCaseBase
+    internal class GenericVirtualMethodReflection : TestCaseBase
     {
         interface IGvmr
         {

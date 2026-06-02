@@ -8,7 +8,7 @@ using Tests.Fixtures;
 
 namespace Tests.CSharp
 {
-    internal class TC_AOTTypeImplInterpInterface : GeneralTestCaseBase
+    internal class TC_AOTTypeImplInterpInterface : TestCaseBase
     {
         public interface ISum
         {

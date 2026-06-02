@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    internal class GenericTypeCompareWithNull : GeneralTestCaseBase
+    internal class GenericTypeCompareWithNull : TestCaseBase
     {
         private static void CompareValueTypeWithNull<T>()
         {

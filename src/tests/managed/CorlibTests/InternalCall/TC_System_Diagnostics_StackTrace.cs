@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Diagnostics_StackTrace : GeneralTestCaseBase
+    internal class TC_System_Diagnostics_StackTrace : TestCaseBase
     {
         [UnitTest]
         public void StackTrace_Creation_DefaultConstructor()

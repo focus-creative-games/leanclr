@@ -23,7 +23,7 @@ namespace Tests.Instruments.Fields
         }
     }
 
-    internal class TC_stsfld_i2_cctor : GeneralTestCaseBase
+    internal class TC_stsfld_i2_cctor : TestCaseBase
     {
         [UnitTest]
         public void stsfld_i2_triggers_cctor()

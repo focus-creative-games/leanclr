@@ -2,7 +2,7 @@
 
 namespace Tests.Instruments.Converts
 {
-    class TC_conv_u : GeneralTestCaseBase
+    class TC_conv_u : TestCaseBase
     {
         //[UnitTest]
         //public unsafe void byte_1()

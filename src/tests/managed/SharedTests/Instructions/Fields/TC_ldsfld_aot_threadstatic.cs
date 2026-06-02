@@ -10,7 +10,7 @@
 
 //namespace Tests.Instruments.Fields
 //{
-//    internal class TC_ldsfld_aot_threadstatic : GeneralTestCaseBase
+//    internal class TC_ldsfld_aot_threadstatic : TestCaseBase
 //    {
 //        public override void SetUp()
 //        {

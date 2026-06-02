@@ -2,7 +2,7 @@
 
 namespace Tests.Instruments.Converts
 {
-    class TC_conv_r_un : GeneralTestCaseBase
+    class TC_conv_r_un : TestCaseBase
     {
         [UnitTest]
         public void uint_1()

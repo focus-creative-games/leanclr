@@ -9,7 +9,7 @@
 
 //namespace Tests.Mics
 //{
-//    internal class TC_PreJit : GeneralTestCaseBase
+//    internal class TC_PreJit : TestCaseBase
 //    {
 //        interface IJitInterface
 //        {

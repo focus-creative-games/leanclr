@@ -83,7 +83,7 @@ namespace Tests.Bugs.Bug20220927
 
 
 
-    internal class Bug_2022_9_27 : GeneralTestCaseBase
+    internal class Bug_2022_9_27 : TestCaseBase
     {
         string Test1<T>(T obj)
         {

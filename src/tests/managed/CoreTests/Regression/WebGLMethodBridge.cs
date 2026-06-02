@@ -4,7 +4,7 @@
 
 //namespace Tests
 //{
-//    public class WebGLMethodBridge : GeneralTestCaseBase
+//    public class WebGLMethodBridge : TestCaseBase
 //    {
 
 //        [UnitTest]

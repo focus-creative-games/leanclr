@@ -8,7 +8,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Arrays
 {
-    internal class TC_MdArray_i2 : GeneralTestCaseBase
+    internal class TC_MdArray_i2 : TestCaseBase
     {
 
         [UnitTest]

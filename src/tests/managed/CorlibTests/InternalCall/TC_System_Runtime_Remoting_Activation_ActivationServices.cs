@@ -5,7 +5,7 @@ using System.Reflection;
 namespace CorlibTests.InternalCall
 {
     #if IL2CPP_ONLY
-    internal class TC_System_Runtime_Remoting_Activation_ActivationServices : GeneralTestCaseBase
+    internal class TC_System_Runtime_Remoting_Activation_ActivationServices : TestCaseBase
     {
         private class UninitializedClassInstanceTarget
         {

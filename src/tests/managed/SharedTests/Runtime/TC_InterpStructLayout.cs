@@ -7,7 +7,7 @@
 
 //namespace Tests.CSharp
 //{
-//    internal class TC_InterpStructLayout : GeneralTestCaseBase
+//    internal class TC_InterpStructLayout : TestCaseBase
 //    {
 
 //        [StructLayout(LayoutKind.Sequential)]

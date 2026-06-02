@@ -10,7 +10,7 @@ using System.Diagnostics;
 namespace Tests.Bugs
 {
 
-    internal class OptionalParamBinding_2022_10_26 : GeneralTestCaseBase
+    internal class OptionalParamBinding_2022_10_26 : TestCaseBase
     {
         public static int Hello(int x)
         {

@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Threading_Thread : GeneralTestCaseBase
+    internal class TC_System_Threading_Thread : TestCaseBase
     {
         [UnitTest]
         public void GetCurrentThread_icall()

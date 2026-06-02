@@ -10,7 +10,7 @@
 
 //namespace Tests.Instruments.Fields
 //{
-//    internal class TC_stsfld_interp_threadstatic : GeneralTestCaseBase
+//    internal class TC_stsfld_interp_threadstatic : TestCaseBase
 //    {
 //        public override void SetUp()
 //        {

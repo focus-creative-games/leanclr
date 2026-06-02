@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    public class LoopCallInvoke : GeneralTestCaseBase
+    public class LoopCallInvoke : TestCaseBase
     {
         private static int Foo()
         {

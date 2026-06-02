@@ -3,7 +3,7 @@ using System;
 
 namespace Tests.Instruments.Arrays
 {
-    internal class TC_stelem_any_ref : GeneralTestCaseBase
+    internal class TC_stelem_any_ref : TestCaseBase
     {
         class Animal { }
         class Dog : Animal { }

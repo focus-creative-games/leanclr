@@ -5,7 +5,7 @@ using Tests.Fixtures;
 
 namespace Tests.CSharp
 {
-    class TC_Activator : GeneralTestCaseBase
+    class TC_Activator : TestCaseBase
     {
 
         private T Create<T>() where T : new()

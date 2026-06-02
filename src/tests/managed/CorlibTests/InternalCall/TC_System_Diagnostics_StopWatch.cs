@@ -3,7 +3,7 @@ using System.Diagnostics;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_Stopwatch : GeneralTestCaseBase
+    internal class TC_Stopwatch : TestCaseBase
     {
         [UnitTest]
         public void ElapsedTicks_MethodExists_AndReturnTypeIsInt64()

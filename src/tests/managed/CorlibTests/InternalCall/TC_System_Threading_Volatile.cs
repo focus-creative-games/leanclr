@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Threading_Volatile : GeneralTestCaseBase
+    internal class TC_System_Threading_Volatile : TestCaseBase
     {
         [UnitTest]
         public void ReadWrite_Int64()

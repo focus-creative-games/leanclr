@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    internal class Bug_2022_9_13 : GeneralTestCaseBase
+    internal class Bug_2022_9_13 : TestCaseBase
     {
         private float Register(Dictionary<ushort, float> a, ushort key, float v)
         {

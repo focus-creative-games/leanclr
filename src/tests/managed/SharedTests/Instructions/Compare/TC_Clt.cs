@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Cmps
 {
-    internal class TC_Clt : GeneralTestCaseBase
+    internal class TC_Clt : TestCaseBase
     {
         [UnitTest]
         public void int_true()

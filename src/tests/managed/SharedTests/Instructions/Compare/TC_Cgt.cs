@@ -2,7 +2,7 @@ using System;
 
 namespace Tests.Instruments.Cmps
 {
-    internal class TC_Cgt : GeneralTestCaseBase
+    internal class TC_Cgt : TestCaseBase
     {
         [UnitTest]
         public void int_true()

@@ -2,7 +2,7 @@ using System;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Array : GeneralTestCaseBase
+    internal class TC_System_Array : TestCaseBase
     {
         [UnitTest]
         public void Clear_IntArray_AllElements()

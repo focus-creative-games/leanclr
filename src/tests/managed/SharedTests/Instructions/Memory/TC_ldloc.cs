@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Mems
 {
-    internal class TC_ldloc: GeneralTestCaseBase
+    internal class TC_ldloc: TestCaseBase
     {
         [UnitTest]
         public void byte_1()

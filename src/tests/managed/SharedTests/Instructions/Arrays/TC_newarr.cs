@@ -7,7 +7,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Arrays
 {
-    internal class TC_newarr : GeneralTestCaseBase
+    internal class TC_newarr : TestCaseBase
     {
 
         [UnitTest]

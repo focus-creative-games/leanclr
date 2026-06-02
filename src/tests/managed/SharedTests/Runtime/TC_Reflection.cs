@@ -41,7 +41,7 @@ namespace Tests.CSharp
         public int Value { get; set; }
     }
 
-    internal class TC_Reflection : GeneralTestCaseBase
+    internal class TC_Reflection : TestCaseBase
     {
         [UnitTest]
         public void const_string()

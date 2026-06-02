@@ -12,7 +12,7 @@
 
 //    }
 
-//    internal class Bug_2022_9_9 : GeneralTestCaseBase
+//    internal class Bug_2022_9_9 : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void method_match()

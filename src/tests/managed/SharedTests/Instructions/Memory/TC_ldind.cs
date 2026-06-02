@@ -9,7 +9,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Mems
 {
-    class TC_ldind : GeneralTestCaseBase
+    class TC_ldind : TestCaseBase
     {
         [UnitTest]
         public static void i1_1()

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Runtime_CompilerServices_RuntimeHelper : GeneralTestCaseBase
+    internal class TC_System_Runtime_CompilerServices_RuntimeHelper : TestCaseBase
     {
         [UnitTest]
         public void GetObjectValue_ok()

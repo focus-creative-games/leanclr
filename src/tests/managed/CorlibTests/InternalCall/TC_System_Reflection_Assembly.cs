@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Reflection_Assembly : GeneralTestCaseBase
+    internal class TC_System_Reflection_Assembly : TestCaseBase
     {
         //[UnitTest]
         //public void Assembly_FullName_ok()

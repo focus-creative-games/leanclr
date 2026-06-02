@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Mems
 {
-    internal class TC_ldloca: GeneralTestCaseBase
+    internal class TC_ldloca: TestCaseBase
     {
         [UnitTest]
         public static void loc_s()

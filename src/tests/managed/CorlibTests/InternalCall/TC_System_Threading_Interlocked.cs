@@ -3,7 +3,7 @@ using System.Threading;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Threading_Interlocked : GeneralTestCaseBase
+    internal class TC_System_Threading_Interlocked : TestCaseBase
     {
         [UnitTest]
         public void Add_Int32()

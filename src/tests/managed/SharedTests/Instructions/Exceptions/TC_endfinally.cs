@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Exceptions
 {
-    internal class TC_endfinally : GeneralTestCaseBase
+    internal class TC_endfinally : TestCaseBase
     {
     }
 }

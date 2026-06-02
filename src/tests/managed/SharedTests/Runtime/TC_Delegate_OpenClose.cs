@@ -119,7 +119,7 @@ namespace Tests.CSharp.Delegates
         }
     }
 
-    internal class TC_Delegate_OpenClose : GeneralTestCaseBase
+    internal class TC_Delegate_OpenClose : TestCaseBase
     {
         // CallDelegate_void
 

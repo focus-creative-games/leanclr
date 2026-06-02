@@ -10,7 +10,7 @@ namespace Tests.Bugs
 {
 
 
-    internal class Bug_GetParameterName : GeneralTestCaseBase
+    internal class Bug_GetParameterName : TestCaseBase
     {
         [UnitTest]
         public void param_name()

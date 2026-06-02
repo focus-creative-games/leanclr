@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Mems
 {
-    internal class TC_ldc : GeneralTestCaseBase
+    internal class TC_ldc : TestCaseBase
     {
         [UnitTest]
         public void ldc_i4_0()

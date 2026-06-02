@@ -9,7 +9,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Objs
 {
-    internal class TC_initobj : GeneralTestCaseBase
+    internal class TC_initobj : TestCaseBase
     {
 
         static void InitObj<T>(out T obj)

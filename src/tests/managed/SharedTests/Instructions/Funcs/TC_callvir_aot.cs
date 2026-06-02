@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Funcs
 {
-    internal class TC_callvir_aot : GeneralTestCaseBase
+    internal class TC_callvir_aot : TestCaseBase
     {
         static string GetType2<T>(T x)
         {

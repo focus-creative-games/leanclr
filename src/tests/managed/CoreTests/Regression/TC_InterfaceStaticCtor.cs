@@ -7,7 +7,7 @@
 
 //namespace Tests.Bugs
 //{
-//    internal class TC_InterfaceStaticCtor : GeneralTestCaseBase
+//    internal class TC_InterfaceStaticCtor : TestCaseBase
 //    {
 //        private void DeferCall3()
 //        {

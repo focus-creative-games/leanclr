@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Branches
 {
-    internal class TC_switch : GeneralTestCaseBase
+    internal class TC_switch : TestCaseBase
     {
         // 空测试，用于测试空switch跳转问题
         [UnitTest]

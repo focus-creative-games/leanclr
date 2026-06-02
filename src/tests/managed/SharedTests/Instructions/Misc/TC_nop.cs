@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Mics
 {
-    internal class TC_nop : GeneralTestCaseBase
+    internal class TC_nop : TestCaseBase
     {
     }
 }

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Tests.Bugs
 {
 
-    internal class Bug_2022_7_14_array_IndexOutRange : GeneralTestCaseBase
+    internal class Bug_2022_7_14_array_IndexOutRange : TestCaseBase
     {
         //[UnitTest]
         //public void test_1()

@@ -9,7 +9,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Objs
 {
-    internal class TC_cpobj : GeneralTestCaseBase
+    internal class TC_cpobj : TestCaseBase
     {
         // 不好构造
 

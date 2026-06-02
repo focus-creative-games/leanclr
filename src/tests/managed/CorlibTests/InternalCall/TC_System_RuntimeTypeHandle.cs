@@ -4,7 +4,7 @@ using System.Reflection;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_RuntimeTypeHandle : GeneralTestCaseBase
+    internal class TC_System_RuntimeTypeHandle : TestCaseBase
     {
 #if IL2CPP_ONLY
         [UnitTest]

@@ -9,7 +9,7 @@
 
 //namespace Tests.Bugs
 //{
-//    class EnumValuesByReflection : GeneralTestCaseBase
+//    class EnumValuesByReflection : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void AOTEnumValueByte()

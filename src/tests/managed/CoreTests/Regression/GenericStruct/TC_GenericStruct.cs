@@ -7,7 +7,7 @@ namespace Tests.Bugs
     /// <summary>
     /// 数值计算公式
     /// </summary>
-    public class TC_GenericStruct : GeneralTestCaseBase
+    public class TC_GenericStruct : TestCaseBase
     {
         public struct FixedArray8<T>
         {

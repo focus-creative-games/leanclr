@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_AppDomain : GeneralTestCaseBase
+    internal class TC_System_AppDomain : TestCaseBase
     {
         [UnitTest]
         public void CurrentDomain_NotNull()

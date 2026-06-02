@@ -5,7 +5,7 @@
 
 //namespace Tests.Instruments.Fields
 //{
-//    public class TC_ExplicitLayout : GeneralTestCaseBase
+//    public class TC_ExplicitLayout : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void SizeOf()

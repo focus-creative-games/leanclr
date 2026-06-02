@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.CSharp
 {
-    internal class TC_foreach : GeneralTestCaseBase
+    internal class TC_foreach : TestCaseBase
     {
         [UnitTest]
         public void sum()

@@ -8,7 +8,7 @@
 
 //namespace Tests.Bugs
 //{
-//    internal class IncrementalGCMdArrayLeak : GeneralTestCaseBase
+//    internal class IncrementalGCMdArrayLeak : TestCaseBase
 //    {
 //        public class Node
 //        {

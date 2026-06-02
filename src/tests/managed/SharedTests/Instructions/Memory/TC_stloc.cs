@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 /// </summary>
 namespace Tests.Instruments.Mems
 {
-    internal class TC_stloc : GeneralTestCaseBase
+    internal class TC_stloc : TestCaseBase
     {
         [UnitTest]
         public static void stloc_0()

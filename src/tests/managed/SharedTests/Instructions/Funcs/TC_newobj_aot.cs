@@ -14,7 +14,7 @@ namespace Tests.Instruments.Funcs
     /// 1. aot or interpreter
     /// 2. class与struct类型
     /// </summary>
-    internal class TC_newobj_aot : GeneralTestCaseBase
+    internal class TC_newobj_aot : TestCaseBase
     {
         [UnitTest]
         public void class_aot()

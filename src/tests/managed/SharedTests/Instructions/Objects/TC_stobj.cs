@@ -10,7 +10,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Objs
 {
-    internal class TC_stobj : GeneralTestCaseBase
+    internal class TC_stobj : TestCaseBase
     {
         public static void SetObj<T>(ref T a, T b)
         {

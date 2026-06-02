@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Buffer : GeneralTestCaseBase
+    internal class TC_System_Buffer : TestCaseBase
     {
         [UnitTest]
         public void ByteLength_ByteArray()

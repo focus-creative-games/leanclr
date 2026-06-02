@@ -63,7 +63,7 @@
 //        public string Name;
 //    }
 
-//    class Bug_Delegate_2022_10_13 : GeneralTestCaseBase
+//    class Bug_Delegate_2022_10_13 : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void static_action()

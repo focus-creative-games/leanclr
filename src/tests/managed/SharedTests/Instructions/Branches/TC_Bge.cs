@@ -2,7 +2,7 @@ using System;
 
 namespace Tests.Instruments.Branches
 {
-    internal class TC_Bge: GeneralTestCaseBase
+    internal class TC_Bge: TestCaseBase
     {
 
         [UnitTest]

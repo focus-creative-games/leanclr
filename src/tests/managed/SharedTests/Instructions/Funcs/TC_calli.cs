@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Funcs
 {
-    internal class TC_calli : GeneralTestCaseBase
+    internal class TC_calli : TestCaseBase
     {
         // TODO 不好构造测试用例
     }

@@ -16,7 +16,7 @@ namespace Tests.Instruments.Funcs
     /// 4. 静态与成员
     /// 5. 普通与泛型函数
     /// </summary>
-    internal class TC_call_aot : GeneralTestCaseBase
+    internal class TC_call_aot : TestCaseBase
     {
         //[UnitTest]
         //public void class_null_this()

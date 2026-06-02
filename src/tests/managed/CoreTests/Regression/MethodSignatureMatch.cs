@@ -9,7 +9,7 @@ using Tests.Fixtures;
 
 namespace Tests.Bugs
 {
-    internal class MethodSignatureMatch : GeneralTestCaseBase
+    internal class MethodSignatureMatch : TestCaseBase
     {
         public class OVMParent
         {

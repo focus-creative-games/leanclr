@@ -10,7 +10,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Fields
 {
-    internal class TC_ldfld_interp : GeneralTestCaseBase
+    internal class TC_ldfld_interp : TestCaseBase
     {
         [UnitTest]
         public void byte_1()

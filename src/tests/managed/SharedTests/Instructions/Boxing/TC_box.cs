@@ -9,7 +9,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Boxs
 {
-    internal class TC_box : GeneralTestCaseBase
+    internal class TC_box : TestCaseBase
     {
 
         public static object Box<T>(T a)

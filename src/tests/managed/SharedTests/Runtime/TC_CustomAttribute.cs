@@ -162,7 +162,7 @@ namespace Tests.CSharp.CustomeAttrites
     }
 
     [FT_ushort(1234)]
-    internal class TC_CustomAttribute : GeneralTestCaseBase
+    internal class TC_CustomAttribute : TestCaseBase
     {
         [UnitTest]
         [FT_ushort(1122)]

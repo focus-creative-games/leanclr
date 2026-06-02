@@ -9,7 +9,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Mems
 {
-    class TC_starg : GeneralTestCaseBase
+    class TC_starg : TestCaseBase
     {
         private static void s_bool_1(bool a)
         {

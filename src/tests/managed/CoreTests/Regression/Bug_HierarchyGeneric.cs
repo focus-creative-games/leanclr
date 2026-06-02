@@ -8,7 +8,7 @@
 
 //namespace Tests.Bugs
 //{
-//    internal class Bug_HierarchyGeneric : GeneralTestCaseBase
+//    internal class Bug_HierarchyGeneric : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void Test()

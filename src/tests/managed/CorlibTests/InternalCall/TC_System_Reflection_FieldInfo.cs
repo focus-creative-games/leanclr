@@ -10,7 +10,7 @@ using System.Threading.Tasks.Sources;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Reflection_FieldInfo : GeneralTestCaseBase
+    internal class TC_System_Reflection_FieldInfo : TestCaseBase
     {
         public class A
         {

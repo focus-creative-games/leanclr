@@ -10,7 +10,7 @@ namespace Tests.Instruments.Funcs
 {
 
 
-    internal class TC_ldvirftn : GeneralTestCaseBase
+    internal class TC_ldvirftn : TestCaseBase
     {
         interface IMath
         {

@@ -8,7 +8,7 @@
 
 //namespace Tests.CSharp
 //{
-//    internal class TC_async : GeneralTestCaseBase
+//    internal class TC_async : TestCaseBase
 //    {
 
 //        private async Task<string> Sum0()

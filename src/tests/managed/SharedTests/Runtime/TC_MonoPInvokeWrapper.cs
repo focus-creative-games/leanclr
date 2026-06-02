@@ -12,7 +12,7 @@
 
 //namespace Tests.CSharp
 //{
-//    public class TC_MonoPInvokeWrapper : GeneralTestCaseBase
+//    public class TC_MonoPInvokeWrapper : TestCaseBase
 //    {
 
 //        /*

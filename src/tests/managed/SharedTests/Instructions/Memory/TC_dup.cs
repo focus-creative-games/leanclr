@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 /// </summary>
 namespace Tests.Instruments.Mems
 {
-    internal class TC_dup : GeneralTestCaseBase
+    internal class TC_dup : TestCaseBase
     {
         // 不好构造dup的例子，暂时算了
     }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Reflection_AssemblyName : GeneralTestCaseBase
+    internal class TC_System_Reflection_AssemblyName : TestCaseBase
     {
         [UnitTest]
         public void ParseAssemblyName()

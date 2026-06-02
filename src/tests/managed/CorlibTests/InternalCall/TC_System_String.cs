@@ -6,7 +6,7 @@ namespace CorlibTests.InternalCall
     /// Comprehensive tests for System.String instance and static methods.
     /// Targets .NET Framework 4.7.2 / mscorlib semantics.
     /// </summary>
-    internal class TC_System_String : GeneralTestCaseBase
+    internal class TC_System_String : TestCaseBase
     {
         public static int GetSceneName(string sceneName)
         {

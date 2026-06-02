@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Objs
 {
-    internal class TC_isinst : GeneralTestCaseBase
+    internal class TC_isinst : TestCaseBase
     {
         private enum SampleEnum
         {

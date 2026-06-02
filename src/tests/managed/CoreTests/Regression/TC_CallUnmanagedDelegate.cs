@@ -9,7 +9,7 @@ namespace Tests.Bugs
 {
 
 
-    internal class TC_CallUnmanagedDelegate : GeneralTestCaseBase
+    internal class TC_CallUnmanagedDelegate : TestCaseBase
     {
         class TestClass
         {

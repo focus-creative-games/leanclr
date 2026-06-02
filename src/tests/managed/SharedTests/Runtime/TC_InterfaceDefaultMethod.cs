@@ -51,7 +51,7 @@ namespace Tests.CSharp
 #endif
     }
     
-    internal class TC_InterfaceDefaultMethod : GeneralTestCaseBase
+    internal class TC_InterfaceDefaultMethod : TestCaseBase
     {
         [UnitTest]
         public void test()

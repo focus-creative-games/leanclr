@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    internal class ArrayCustomArgumentType : GeneralTestCaseBase
+    internal class ArrayCustomArgumentType : TestCaseBase
     {
         class TestAttr : Attribute
         {

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    public class ReadRuntimeHandleFromMemberRef : GeneralTestCaseBase
+    public class ReadRuntimeHandleFromMemberRef : TestCaseBase
     {
 
         [UnitTest]

@@ -25,7 +25,7 @@ namespace Tests.Bugs
         }
     }
 
-    class Bug20260129 : GeneralTestCaseBase
+    class Bug20260129 : TestCaseBase
     {
         [UnitTest]
         public void TestExplicitInterfaceImplementationWithSameName()

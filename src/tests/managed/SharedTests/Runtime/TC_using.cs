@@ -16,7 +16,7 @@ namespace Tests.CSharp
         }
     }
 
-    internal class TC_using : GeneralTestCaseBase
+    internal class TC_using : TestCaseBase
     {
         [UnitTest]
         public void disposed()

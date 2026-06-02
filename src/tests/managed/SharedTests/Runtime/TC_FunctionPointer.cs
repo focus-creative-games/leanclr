@@ -11,7 +11,7 @@
 
 //namespace Tests.CSharp
 //{
-//    internal class TC_FunctionPointer : GeneralTestCaseBase
+//    internal class TC_FunctionPointer : TestCaseBase
 //    {
 //#if UNITY_2021_1_OR_NEWER
 //        public unsafe static int UnsafeFunc(int* x)

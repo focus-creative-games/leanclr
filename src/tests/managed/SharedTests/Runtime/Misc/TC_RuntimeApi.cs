@@ -3,7 +3,7 @@
 
 //namespace Tests.Mics
 //{
-//    public class TC_RuntimeApi : GeneralTestCaseBase
+//    public class TC_RuntimeApi : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void Test()

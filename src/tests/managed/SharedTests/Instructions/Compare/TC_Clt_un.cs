@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Cmps
 {
-    internal class TC_Clt_un : GeneralTestCaseBase
+    internal class TC_Clt_un : TestCaseBase
     {
         [UnitTest]
         public void uint_false()

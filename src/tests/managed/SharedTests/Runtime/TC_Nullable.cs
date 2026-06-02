@@ -13,7 +13,7 @@ namespace Tests.CSharp
         public T Value { get; set; }
     }
 
-    internal class TC_Nullable : GeneralTestCaseBase
+    internal class TC_Nullable : TestCaseBase
     {
         [UnitTest]
         public void int_1()

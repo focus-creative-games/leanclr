@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Reflection_RuntimeMethodInfo : GeneralTestCaseBase
+    internal class TC_System_Reflection_RuntimeMethodInfo : TestCaseBase
     {
         [UnitTest]
         public void GetName_ReturnsCorrectName()

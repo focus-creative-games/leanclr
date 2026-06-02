@@ -2,7 +2,7 @@
 
 namespace Tests.Instruments.Cmps
 {
-    internal class TC_Cgt_un: GeneralTestCaseBase
+    internal class TC_Cgt_un: TestCaseBase
     {
         [UnitTest]
         public void uint_false()

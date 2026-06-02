@@ -2,7 +2,7 @@
 
 namespace Tests.Instruments.Converts
 {
-    class TC_conv_u2 : GeneralTestCaseBase
+    class TC_conv_u2 : TestCaseBase
     {
         [UnitTest]
         public void byte_1()

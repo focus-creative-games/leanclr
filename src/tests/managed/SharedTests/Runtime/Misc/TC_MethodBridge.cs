@@ -12,7 +12,7 @@
 
 //namespace Tests.Mics
 //{
-//    public class TC_MethodBridge : GeneralTestCaseBase
+//    public class TC_MethodBridge : TestCaseBase
 //    {
 //        [UnitTest]
 //        public unsafe void TestAll()

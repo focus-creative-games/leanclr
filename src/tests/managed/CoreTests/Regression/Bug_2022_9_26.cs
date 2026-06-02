@@ -16,7 +16,7 @@ namespace Tests.Bugs
         B,
     }
 
-    internal class Bug_2022_9_26 : GeneralTestCaseBase
+    internal class Bug_2022_9_26 : TestCaseBase
     {
         [UnitTest]
         public void list_enum_byte()

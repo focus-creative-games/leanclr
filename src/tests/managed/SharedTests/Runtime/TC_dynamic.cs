@@ -19,7 +19,7 @@ namespace Tests.CSharp.Dynamics
         }
     }
 
-    internal class TC_dynamic : GeneralTestCaseBase
+    internal class TC_dynamic : TestCaseBase
     {
         [UnitTest]
         public void test()

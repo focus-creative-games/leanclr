@@ -88,7 +88,7 @@
 //    }
 
 
-//    internal class TC_explicit_implement : GeneralTestCaseBase
+//    internal class TC_explicit_implement : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void same_name()

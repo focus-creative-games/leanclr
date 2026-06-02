@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Intrinsic
 {
-    internal class TC_String : GeneralTestCaseBase
+    internal class TC_String : TestCaseBase
     {
         [UnitTest]
         public void GetChars1()

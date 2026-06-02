@@ -7,7 +7,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Arrays
 {
-    internal class TC_ldlen : GeneralTestCaseBase
+    internal class TC_ldlen : TestCaseBase
     {
 
         [UnitTest]

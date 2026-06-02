@@ -14,7 +14,7 @@ namespace Tests.Instruments.Objs
         [FieldOffset(919812)] public byte bCampNum;
     }
 
-    internal class TC_sizeof : GeneralTestCaseBase
+    internal class TC_sizeof : TestCaseBase
     {
 
         [UnitTest]

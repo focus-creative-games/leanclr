@@ -8,7 +8,7 @@ using Tests.Fixtures;
 
 namespace Tests.Mics
 {
-    public class TC_InnerType : GeneralTestCaseBase
+    public class TC_InnerType : TestCaseBase
     {
         [UnitTest]
         public void Test1()

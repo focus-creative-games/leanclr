@@ -7,7 +7,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Boxs
 {
-    internal class TC_unbox : GeneralTestCaseBase
+    internal class TC_unbox : TestCaseBase
     {
         // 无法构造
     }

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Environment : GeneralTestCaseBase
+    internal class TC_System_Environment : TestCaseBase
     {
         [UnitTest]
         public void GetExitCode_Zero()

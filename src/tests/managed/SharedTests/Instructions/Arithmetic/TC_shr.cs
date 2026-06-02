@@ -3,7 +3,7 @@ using System;
 
 namespace Tests.Instruments.Ariths
 {
-    internal class TC_shr : GeneralTestCaseBase
+    internal class TC_shr : TestCaseBase
     {
         [UnitTest]
         public void int_1()

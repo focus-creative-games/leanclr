@@ -8,7 +8,7 @@
 
 //namespace Tests.Instruments.Funcs
 //{
-//    internal class TC_callvir_interp : GeneralTestCaseBase
+//    internal class TC_callvir_interp : TestCaseBase
 //    {
 //        static string GetType2<T>(T x)
 //        {

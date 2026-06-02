@@ -2,7 +2,7 @@ using System;
 
 namespace Tests.Instruments.Converts
 {
-    class TC_conv_ovf_i8 : GeneralTestCaseBase
+    class TC_conv_ovf_i8 : TestCaseBase
     {
     [UnitTest]
     public void ulong_1()

@@ -24,7 +24,7 @@
 //        public int ff = 1;
 //    }
 
-//    public class FieldLayout : GeneralTestCaseBase
+//    public class FieldLayout : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void Test1()

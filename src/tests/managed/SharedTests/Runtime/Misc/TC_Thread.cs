@@ -8,7 +8,7 @@
 
 //namespace Tests.Mics
 //{
-//    public class TC_Thread : GeneralTestCaseBase
+//    public class TC_Thread : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void CreateAndFreeThread()

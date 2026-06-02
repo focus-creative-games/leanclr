@@ -54,7 +54,7 @@
 //#endif
 //    }
 
-//    internal class TC_ExternalCall : GeneralTestCaseBase
+//    internal class TC_ExternalCall : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void TestIntArgument()

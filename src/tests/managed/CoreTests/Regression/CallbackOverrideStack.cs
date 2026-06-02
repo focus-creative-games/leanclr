@@ -9,7 +9,7 @@
 
 //namespace Tests.Bugs
 //{
-//    internal class CallbackOverrideStack : GeneralTestCaseBase
+//    internal class CallbackOverrideStack : TestCaseBase
 //    {
 //        static class ForTest101
 //        {

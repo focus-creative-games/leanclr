@@ -11,7 +11,7 @@
 
 //    delegate int InterpDele(int a, float b, string c, Vector3 d);
 
-//    class TC_Delegate_BeginEndInvoke : GeneralTestCaseBase
+//    class TC_Delegate_BeginEndInvoke : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void aot_begin_invoke()

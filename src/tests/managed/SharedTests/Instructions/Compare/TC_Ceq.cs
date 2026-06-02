@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Cmps
 {
-    internal class TC_Ceq : GeneralTestCaseBase
+    internal class TC_Ceq : TestCaseBase
     {
         [UnitTest]
         public void int_1()

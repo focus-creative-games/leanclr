@@ -11,7 +11,7 @@
 
 //namespace Tests.Mics
 //{
-//    public class TC_MethodBridgeAOTStruct : GeneralTestCaseBase
+//    public class TC_MethodBridgeAOTStruct : TestCaseBase
 //    {
 
 //        [UnitTest]

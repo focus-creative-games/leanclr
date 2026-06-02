@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Tests.Instruments.Branches
 {
-    class TC_Br : GeneralTestCaseBase
+    class TC_Br : TestCaseBase
     {
 
         [UnitTest]

@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Reflection_RuntimeModule : GeneralTestCaseBase
+    internal class TC_System_Reflection_RuntimeModule : TestCaseBase
     {
         [UnitTest]
         public void GetMetadataToken_ReturnsNonZero()

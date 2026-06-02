@@ -11,7 +11,7 @@
 //namespace Tests.CSharp
 //{
 
-//    internal class TC_AOTStructLayout : GeneralTestCaseBase
+//    internal class TC_AOTStructLayout : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void SizeofSeqP0()

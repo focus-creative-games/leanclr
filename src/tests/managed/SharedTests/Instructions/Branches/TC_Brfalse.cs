@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Branches
 {
-    internal class TC_Brfalse : GeneralTestCaseBase
+    internal class TC_Brfalse : TestCaseBase
     {
         [UnitTest]
         public static void s_blank()

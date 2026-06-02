@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Arrays
 {
-    internal class TC_ldelem_i4 : GeneralTestCaseBase
+    internal class TC_ldelem_i4 : TestCaseBase
     {
 
         [UnitTest]

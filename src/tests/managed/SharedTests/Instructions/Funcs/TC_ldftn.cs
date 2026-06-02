@@ -9,7 +9,7 @@ using Tests.Fixtures;
 namespace Tests.Instruments.Funcs
 {
 
-    internal class TC_ldftn : GeneralTestCaseBase
+    internal class TC_ldftn : TestCaseBase
     {
         class A
         {

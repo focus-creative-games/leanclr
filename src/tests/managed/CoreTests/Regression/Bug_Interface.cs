@@ -9,7 +9,7 @@ namespace Tests.Bugs
 {
 
 
-    internal class Bug_Interface : GeneralTestCaseBase
+    internal class Bug_Interface : TestCaseBase
     {
         interface IA
         {

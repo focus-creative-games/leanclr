@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Reflection_MonoMethodInfo : GeneralTestCaseBase
+    internal class TC_System_Reflection_MonoMethodInfo : TestCaseBase
     {
         [AttributeUsage(AttributeTargets.ReturnValue)]
         class MyParameterAttribute : Attribute

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Ariths
 {
-    internal class TC_ckfinite : GeneralTestCaseBase
+    internal class TC_ckfinite : TestCaseBase
     {
     }
 }

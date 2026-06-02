@@ -25,7 +25,7 @@ namespace Tests.Instruments.Mems
         }
     }
 
-    internal class TC_ldftn : GeneralTestCaseBase
+    internal class TC_ldftn : TestCaseBase
     {
         [UnitTest]
         public static void static_1()

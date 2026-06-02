@@ -9,7 +9,7 @@
 
 //namespace Tests.Instruments.Fields
 //{
-//    public class TC_FieldOffset : GeneralTestCaseBase
+//    public class TC_FieldOffset : TestCaseBase
 //    {
 //        [StructLayout(LayoutKind.Sequential, Pack = 1, Size = 60)]
 //        public struct ExplicitStruct

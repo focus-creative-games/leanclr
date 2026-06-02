@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Runtime_InteropServices_GCHandle : GeneralTestCaseBase
+    internal class TC_System_Runtime_InteropServices_GCHandle : TestCaseBase
     {
         [UnitTest]
         public void Alloc_Normal()

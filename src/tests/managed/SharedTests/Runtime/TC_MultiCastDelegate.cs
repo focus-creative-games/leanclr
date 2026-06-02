@@ -30,7 +30,7 @@
 //        }
 //    }
 
-//    public class TC_MultiCastDelegate : GeneralTestCaseBase
+//    public class TC_MultiCastDelegate : TestCaseBase
 //    {
 
 //        [UnitTest]

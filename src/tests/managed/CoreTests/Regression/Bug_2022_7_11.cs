@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 namespace Tests.Bugs
 {
 
-    internal class Bug_2022_7_11 : GeneralTestCaseBase
+    internal class Bug_2022_7_11 : TestCaseBase
     {
 
         [UnitTest]

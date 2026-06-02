@@ -7,7 +7,7 @@ using System.Diagnostics;
 
 namespace Tests.Instruments.Objs
 {
-    internal class TC_castclass : GeneralTestCaseBase
+    internal class TC_castclass : TestCaseBase
     {
         private enum SampleEnum
         {

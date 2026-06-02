@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    internal class Bug_2022_9_22 : GeneralTestCaseBase
+    internal class Bug_2022_9_22 : TestCaseBase
     {
         /// <summary>
         /// i2与u2的桥接签名并不等效，在release编译情况下，如果将u2的参数传递给int变量，

@@ -2,7 +2,7 @@ using System;
 
 namespace Tests.Instruments.Converts
 {
-    class TC_conv_ovf_i2 : GeneralTestCaseBase
+    class TC_conv_ovf_i2 : TestCaseBase
     {
     [UnitTest]
     public void int_1()

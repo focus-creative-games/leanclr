@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace Tests.CSharp
 {
 #if IL2CPP_ONLY
-    internal class TC_ByReference : GeneralTestCaseBase
+    internal class TC_ByReference : TestCaseBase
     {
         [UnitTest]
         public void SpanValue()

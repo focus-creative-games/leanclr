@@ -7,7 +7,7 @@ using Tests.Fixtures;
 
 namespace Tests.Bugs
 {
-    internal class Bug_2022_6_17 : GeneralTestCaseBase
+    internal class Bug_2022_6_17 : TestCaseBase
     {
     }
 }

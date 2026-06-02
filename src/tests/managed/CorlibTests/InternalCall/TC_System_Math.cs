@@ -2,7 +2,7 @@
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Math : GeneralTestCaseBase
+    internal class TC_System_Math : TestCaseBase
     {
         private static void AssertNearlyEqual(double expected, double actual, double epsilon = 1e-12)
         {

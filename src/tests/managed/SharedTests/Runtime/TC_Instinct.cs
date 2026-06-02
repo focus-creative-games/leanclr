@@ -9,7 +9,7 @@
 //namespace Tests.CSharp
 //{
 
-//    internal class TC_Instinct : GeneralTestCaseBase
+//    internal class TC_Instinct : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void NewString()

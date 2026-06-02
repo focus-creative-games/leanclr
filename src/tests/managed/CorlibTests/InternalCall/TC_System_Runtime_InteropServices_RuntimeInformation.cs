@@ -3,7 +3,7 @@ using System.Runtime.InteropServices;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Runtime_InteropServices_RuntimeInformation : GeneralTestCaseBase
+    internal class TC_System_Runtime_InteropServices_RuntimeInformation : TestCaseBase
     {
         [UnitTest]
         public void GetRuntimeArchitecture_ReturnsWasm32()

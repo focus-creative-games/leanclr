@@ -9,7 +9,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Mems
 {
-    class TC_ldarg_out : GeneralTestCaseBase
+    class TC_ldarg_out : TestCaseBase
     {
         private static void s_bool_1(out bool a)
         {

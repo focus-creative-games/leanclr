@@ -7,7 +7,7 @@
 
 //namespace Tests.Mics
 //{
-//    internal class TC_RefOtherAssembly : GeneralTestCaseBase
+//    internal class TC_RefOtherAssembly : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void Ref1()

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.CSharp
 {
-    public class TC_event : GeneralTestCaseBase
+    public class TC_event : TestCaseBase
     {
         class TestEvent1
         {

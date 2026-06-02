@@ -2,7 +2,7 @@
 
 namespace Tests.Bugs
 {
-    class TransformConcurrentQueueFail : GeneralTestCaseBase
+    class TransformConcurrentQueueFail : TestCaseBase
     {
         [UnitTest]
         public void Test()

@@ -9,7 +9,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Arrays
 {
-    internal class TC_stelem_struct : GeneralTestCaseBase
+    internal class TC_stelem_struct : TestCaseBase
     {
 
         [UnitTest]

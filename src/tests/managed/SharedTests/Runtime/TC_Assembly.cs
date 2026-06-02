@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.CSharp
 {
-    internal class TC_Assembly : GeneralTestCaseBase
+    internal class TC_Assembly : TestCaseBase
     {
     }
 }

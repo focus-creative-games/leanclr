@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.CSharp
 {
-    internal class TC_Interlocked : GeneralTestCaseBase
+    internal class TC_Interlocked : TestCaseBase
     {
 
         [UnitTest]

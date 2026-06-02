@@ -7,7 +7,7 @@
 
 //namespace Tests.CSharp
 //{
-//    internal class TC_CrashReport : GeneralTestCaseBase
+//    internal class TC_CrashReport : TestCaseBase
 //    {
 //        private unsafe void Sub1(int* p)
 //        {

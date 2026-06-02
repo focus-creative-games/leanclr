@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    public class StaticCctorOrder : GeneralTestCaseBase
+    public class StaticCctorOrder : TestCaseBase
     {
         class Common
         {

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Reflection_RuntimeAssembly : GeneralTestCaseBase
+    internal class TC_System_Reflection_RuntimeAssembly : TestCaseBase
     {
 #if IL2CPP_ONLY
         [UnitTest]

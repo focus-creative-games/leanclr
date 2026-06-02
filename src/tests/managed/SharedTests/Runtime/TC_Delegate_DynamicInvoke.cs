@@ -28,7 +28,7 @@ namespace Tests.CSharp.Delegates
     public delegate int AOTClassShow2(FT_AOT_Class a, int b);
     public delegate sbyte AOTClassFoo2(FT_AOT_Class a, int b);
 
-    public class TC_Delegate_DynamicInvoke : GeneralTestCaseBase
+    public class TC_Delegate_DynamicInvoke : TestCaseBase
     {
 
         /// <summary>

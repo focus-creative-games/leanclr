@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Mems
 {
-    internal class TC_cpblk : GeneralTestCaseBase
+    internal class TC_cpblk : TestCaseBase
     {
         [UnitTest]
         public unsafe void init_array_from_localloc()

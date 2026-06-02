@@ -9,7 +9,7 @@
 
 //namespace Tests.Bugs
 //{
-//    public class Bug_InterpreterInvoke : GeneralTestCaseBase
+//    public class Bug_InterpreterInvoke : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void TestValueType()

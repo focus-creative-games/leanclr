@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Mems
 {
-    internal class TC_localloc: GeneralTestCaseBase
+    internal class TC_localloc: TestCaseBase
     {
         [UnitTest]
         public unsafe void alloc_0()

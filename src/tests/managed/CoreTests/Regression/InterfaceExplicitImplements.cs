@@ -121,7 +121,7 @@ namespace Tests.Bugs
 #endif
     }
 
-    public class InterfaceExplicitImplements : GeneralTestCaseBase
+    public class InterfaceExplicitImplements : TestCaseBase
     {
 
         //[UnitTest]

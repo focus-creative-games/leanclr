@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Mics
 {
-    internal class Any : GeneralTestCaseBase
+    internal class Any : TestCaseBase
     {
 
     }

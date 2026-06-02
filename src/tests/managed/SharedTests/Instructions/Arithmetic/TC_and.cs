@@ -2,7 +2,7 @@ using System;
 
 namespace Tests.Instruments.Ariths
 {
-    internal class TC_and : GeneralTestCaseBase
+    internal class TC_and : TestCaseBase
     {
         [UnitTest]
         public void bool_true()

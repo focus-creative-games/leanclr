@@ -12,7 +12,7 @@
 
 //namespace Tests.Mics
 //{
-//    public class TC_MethodBridgeInterpStruct : GeneralTestCaseBase
+//    public class TC_MethodBridgeInterpStruct : TestCaseBase
 //    {
 
 //        [UnitTest]

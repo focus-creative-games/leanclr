@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_Interop_Sys : GeneralTestCaseBase
+    internal class TC_Interop_Sys : TestCaseBase
     {
         // DoubleToString
         [UnitTest]

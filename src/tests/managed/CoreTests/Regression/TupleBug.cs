@@ -5,7 +5,7 @@ using System.Collections.Generic;
 
 namespace Tests.Bugs
 {
-    public class TupleBug : GeneralTestCaseBase
+    public class TupleBug : TestCaseBase
     {
 
         public  static T Ldind<T>(T v)

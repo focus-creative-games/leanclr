@@ -57,7 +57,7 @@
 //        }
 //    }
 
-//    internal class TC_AOTGeneric : GeneralTestCaseBase
+//    internal class TC_AOTGeneric : TestCaseBase
 //    {
 //        [UnitTest]
 //        public void test_1()

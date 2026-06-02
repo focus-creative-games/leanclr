@@ -3,7 +3,7 @@ using System.Text;
 
 namespace Tests.CSharp
 {
-    class TC_String : GeneralTestCaseBase
+    class TC_String : TestCaseBase
     {
         [UnitTest]
         public void EmptyString()

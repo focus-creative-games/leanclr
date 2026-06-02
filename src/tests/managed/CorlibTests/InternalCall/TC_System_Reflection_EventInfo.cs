@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Reflection_EventInfo : GeneralTestCaseBase
+    internal class TC_System_Reflection_EventInfo : TestCaseBase
     {
         class A
         {

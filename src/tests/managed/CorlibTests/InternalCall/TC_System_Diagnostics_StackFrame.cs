@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Diagnostics_StackFrame : GeneralTestCaseBase
+    internal class TC_System_Diagnostics_StackFrame : TestCaseBase
     {
         [UnitTest]
         public void StackFrame_Creation_NoFileInfo()

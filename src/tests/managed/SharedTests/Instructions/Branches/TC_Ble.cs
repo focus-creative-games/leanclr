@@ -2,7 +2,7 @@
 
 namespace Tests.Instruments.Branches
 {
-    internal class TC_Ble : GeneralTestCaseBase
+    internal class TC_Ble : TestCaseBase
     {
         [UnitTest]
         public static void s_blank()

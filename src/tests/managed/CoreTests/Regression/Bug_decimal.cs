@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    internal class Bug_decimal : GeneralTestCaseBase
+    internal class Bug_decimal : TestCaseBase
     {
         [UnitTest]
         public void RoundOfDecimal()

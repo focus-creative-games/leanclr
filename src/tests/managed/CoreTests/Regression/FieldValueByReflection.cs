@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    class FieldValueByReflection : GeneralTestCaseBase
+    class FieldValueByReflection : TestCaseBase
     {
         public const int X = 1000;
         public const uint Y = 1000;

@@ -2,7 +2,7 @@ using System;
 
 namespace Tests.Instruments.Branches
 {
-    internal class TC_Beq: GeneralTestCaseBase
+    internal class TC_Beq: TestCaseBase
     {
         [UnitTest]
         public static void s_blank()

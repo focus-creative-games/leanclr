@@ -5,7 +5,7 @@ using System.Runtime.InteropServices;
 
 namespace Tests.Bugs
 {
-    public class FixedArraySize : GeneralTestCaseBase
+    public class FixedArraySize : TestCaseBase
     {
         unsafe struct FixedBuffer
         {

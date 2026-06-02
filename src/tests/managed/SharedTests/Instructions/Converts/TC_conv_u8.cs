@@ -3,7 +3,7 @@
 
 namespace Tests.Instruments.Converts
 {
-    class TC_conv_u8 : GeneralTestCaseBase
+    class TC_conv_u8 : TestCaseBase
     {
         [UnitTest]
         public void byte_1()

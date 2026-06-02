@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    internal class BugException : GeneralTestCaseBase
+    internal class BugException : TestCaseBase
     {
         [UnitTest]
         public void finally_try_throw_catch()

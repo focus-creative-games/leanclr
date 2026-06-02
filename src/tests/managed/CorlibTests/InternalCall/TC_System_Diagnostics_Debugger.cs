@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_Diagnostics_Debugger : GeneralTestCaseBase
+    internal class TC_System_Diagnostics_Debugger : TestCaseBase
     {
 #if IL2CPP_ONLY
         [UnitTest]

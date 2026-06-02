@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Ariths
 {
-    internal class TC_div_un : GeneralTestCaseBase
+    internal class TC_div_un : TestCaseBase
     {
         [UnitTest]
         public static void uint_1()

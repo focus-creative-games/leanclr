@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    internal class ZStringFormat : GeneralTestCaseBase
+    internal class ZStringFormat : TestCaseBase
     {
         [UnitTest]
         public void Test4()

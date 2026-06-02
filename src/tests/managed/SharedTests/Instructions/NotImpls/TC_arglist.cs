@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.NotImpls
 {
-    internal class TC_arglist : GeneralTestCaseBase
+    internal class TC_arglist : TestCaseBase
     {
     }
 }

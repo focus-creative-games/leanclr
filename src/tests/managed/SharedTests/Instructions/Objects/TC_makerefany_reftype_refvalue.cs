@@ -7,7 +7,7 @@ using Tests.Fixtures;
 
 namespace Tests.Instruments.Objs
 {
-    internal class TC_makerefany_reftype_refvalue : GeneralTestCaseBase
+    internal class TC_makerefany_reftype_refvalue : TestCaseBase
     {
 
         [UnitTest]

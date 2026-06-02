@@ -9,7 +9,7 @@ namespace Tests.CSharp
         blue = 8,
         yellow,
     }
-    internal class TC_Enum : GeneralTestCaseBase
+    internal class TC_Enum : TestCaseBase
     {
         enum Color
         {

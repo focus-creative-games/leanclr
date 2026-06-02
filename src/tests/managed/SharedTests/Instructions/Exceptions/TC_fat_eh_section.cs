@@ -6,7 +6,7 @@ namespace Tests.Instruments.Exceptions
     /// <summary>
     /// Exercises fat-format EH sections whose Data Size exceeds 255 bytes (24-bit size in the header).
     /// </summary>
-    internal class TC_fat_eh_section : GeneralTestCaseBase
+    internal class TC_fat_eh_section : TestCaseBase
     {
         private const int ClauseCount = 12;
 

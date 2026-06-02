@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    public class BugSizeOf : GeneralTestCaseBase
+    public class BugSizeOf : TestCaseBase
     {
         public enum GraphicsFormat
         {

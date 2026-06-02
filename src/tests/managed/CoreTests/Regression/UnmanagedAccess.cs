@@ -23,7 +23,7 @@ namespace Tests.Bugs
         }
     }
 
-    internal unsafe class UnmanagedAccess : GeneralTestCaseBase
+    internal unsafe class UnmanagedAccess : TestCaseBase
     {
         [UnitTest]
         public void FalseReturnTrue()

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CorlibTests.InternalCall
 {
-    internal class TC_System_TypedReference : GeneralTestCaseBase
+    internal class TC_System_TypedReference : TestCaseBase
     {
         [UnitTest]
         public void MakeTypedReference_Test()

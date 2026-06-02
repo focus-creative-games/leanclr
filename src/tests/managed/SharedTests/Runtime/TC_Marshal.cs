@@ -35,7 +35,7 @@ namespace Tests.CSharp
         string a;
     }
 
-    public class TC_Marshal : GeneralTestCaseBase
+    public class TC_Marshal : TestCaseBase
     {
 
         [UnitTest]

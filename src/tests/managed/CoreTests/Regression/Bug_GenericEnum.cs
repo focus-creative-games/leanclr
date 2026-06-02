@@ -29,7 +29,7 @@ namespace Tests.Bugs
         }
     }
 
-    internal class Bug_GenericEnum : GeneralTestCaseBase
+    internal class Bug_GenericEnum : TestCaseBase
     {
         [UnitTest]
         public void compare_booktype()

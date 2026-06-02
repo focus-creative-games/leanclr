@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Arrays
 {
-    internal class TC_stelem_any_i4 : GeneralTestCaseBase
+    internal class TC_stelem_any_i4 : TestCaseBase
     {
         public static T GetEle<T>(T[] arr, int index)
         {

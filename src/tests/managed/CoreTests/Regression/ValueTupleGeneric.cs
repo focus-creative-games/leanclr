@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Tests.Bugs
 {
-    internal class ValueTupleGeneric : GeneralTestCaseBase
+    internal class ValueTupleGeneric : TestCaseBase
     {
         class BaseRunner<T>
         {

@@ -58,7 +58,7 @@ namespace Tests.Instruments.Objs
         }
     }
 
-    internal class TC_ldtoken : GeneralTestCaseBase
+    internal class TC_ldtoken : TestCaseBase
     {
 
         [UnitTest]

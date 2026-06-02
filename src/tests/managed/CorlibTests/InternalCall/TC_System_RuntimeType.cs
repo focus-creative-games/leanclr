@@ -7,7 +7,7 @@ namespace CorlibTests.InternalCall
     /// Convention: parameterless MakeArrayType() passes rank 0 to native (SZArray T[]);
     /// MakeArrayType(rank) with rank >= 1 creates a bounded multi-dimensional array.
     /// </summary>
-    internal class TC_System_RuntimeType : GeneralTestCaseBase
+    internal class TC_System_RuntimeType : TestCaseBase
     {
         [UnitTest]
         public void MakeArrayType_NoArgs_ReturnsSZArray()
