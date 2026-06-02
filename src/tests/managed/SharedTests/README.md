@@ -14,22 +14,36 @@ Each consumer links these files with MSBuild:
 
 ```
 SharedTests/
+├── Fixtures/           # AOTDefs namespace helpers (fields, calls, delegates, …)
 ├── Instructions/
-│   ├── Ariths/       # div, rem, ckfinite (5 files)
-│   └── Converts/     # conv / conv.ovf (21 files)
+│   ├── Arithmetic/
+│   ├── Arrays/
+│   ├── Boxing/
+│   ├── Branches/
+│   ├── Compare/
+│   ├── Exceptions/
+│   ├── Fields/
+│   ├── Funcs/
+│   ├── Memory/
+│   ├── Misc/
+│   ├── NotImpls/
+│   ├── Objects/
+│   ├── Ariths/         # div, rem, ckfinite
+│   └── Converts/       # conv / conv.ovf
 └── Runtime/
-    └── TC_String.cs
+    ├── Misc/
+    └── TC_*.cs         # runtime / C# language tests
 ```
 
 ## What belongs here
 
-- Tests that are **self-contained** (no `AOTDefs`, no `CoreTests.App` helpers).
 - Tests that must run in **both** the interpreter (`CoreTests`) and AOT (`AotTests`) pipelines.
+- Shared fixture types under `Fixtures/` (`namespace AOTDefs` and global helpers used by instruction tests).
 
-Tests that depend on `CoreTests/Shared/Fixtures/`（`namespace AOTDefs`）或 `CoreTests.App` helpers stay under `CoreTests/` until fixtures are shared separately.
+Tests that depend on `CoreTests.App`, `Bootstrap/`, or `Regression/` stay under `CoreTests/`.
 
 ## Adding shared tests
 
 1. Add the `.cs` file under the appropriate subdirectory.
-2. Use namespace `Tests.Instruments.*` or `Tests.CSharp`, and inherit `GeneralTestCaseBase`.
+2. Use namespace `Tests.Instruments.*`, `Tests.CSharp`, or `Tests.Mics`, and inherit `GeneralTestCaseBase`.
 3. Ensure both `CoreTests.csproj` and `AotTests.csproj` include the `SharedTests` glob (already configured).
