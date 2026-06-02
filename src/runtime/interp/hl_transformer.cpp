@@ -1048,8 +1048,8 @@ RtResultVoid Transformer::add_conv(OpCodeEnum opcode, RtEvalStackDataType data_t
         switch (opcode)
         {
             case OpCodeEnum::ConvI4:
-            case OpCodeEnum::ConvI8:
             case OpCodeEnum::ConvU4:
+            case OpCodeEnum::ConvI8:
             case OpCodeEnum::ConvU8:
             case OpCodeEnum::ConvR4:
             case OpCodeEnum::ConvR8:
@@ -1058,7 +1058,6 @@ RtResultVoid Transformer::add_conv(OpCodeEnum opcode, RtEvalStackDataType data_t
             case OpCodeEnum::ConvOvfI4:
             case OpCodeEnum::ConvOvfI8:
             case OpCodeEnum::ConvOvfI:
-            case OpCodeEnum::ConvOvfU:
             {
                 internal_push_eval_stack_var_and_update_max(src);
                 RET_VOID_OK();
