@@ -218,4 +218,12 @@ class TC_conv_u2
         ushort y = (ushort)x;
         Assert.Equal(0xFFFF, y);
     }
+
+    [UnitTest]
+    public void ConvI4ToU2()
+    {
+        int u = 65537;
+        int i = (ushort)u;
+        Assert.Equal(1, i);
+    }
 }

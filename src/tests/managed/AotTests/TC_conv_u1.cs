@@ -242,4 +242,12 @@ class TC_conv_u1
         byte y = (byte)x;
         Assert.Equal(0xFF, y);
     }
+
+    [UnitTest]
+    public void ConvI4ToU1()
+    {
+        int u = 257;
+        int i = (byte)u;
+        Assert.Equal(1, i);
+    }
 }

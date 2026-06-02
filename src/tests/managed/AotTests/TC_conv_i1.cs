@@ -243,5 +243,13 @@ class TC_conv_i1
         sbyte y = (sbyte)x;
         Assert.Equal(-1, y);
     }
+
+    [UnitTest]
+    public void ConvI4ToI1()
+    {
+        int u = 257;
+        int i = (sbyte)u;
+        Assert.Equal(1, i);
+    }
 }
 
