@@ -6,9 +6,9 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
-using Test;
+using Tests.Fixtures;
 using Tests.Instruments.Objs;
-using AOTDefs;
+using Tests.Fixtures;
 
 namespace Tests.Instruments.Fields
 {

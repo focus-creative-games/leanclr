@@ -1,7 +1,7 @@
 //using System;
 //using System.Reflection;
 
-//using test;
+//using Tests.Fixtures;
 
 //namespace Tests.Instruments.Fields
 //{

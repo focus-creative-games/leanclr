@@ -5,8 +5,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Test;
-using AOTDefs;
+using Tests.Fixtures;
+using Tests.Fixtures;
 
 
 namespace Tests.Instruments.Fields

@@ -1,3 +1,4 @@
+using Tests.Fixtures;
 
 using System;
 using System.Collections.Generic;

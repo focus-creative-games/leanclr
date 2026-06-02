@@ -1,6 +1,6 @@
 
 
-namespace AOTDefs
+namespace Tests.Fixtures
 {
     public enum MyNotInitedEnum
     {

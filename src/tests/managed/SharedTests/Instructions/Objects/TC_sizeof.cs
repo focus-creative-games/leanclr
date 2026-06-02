@@ -1,6 +1,6 @@
 
 using System.Runtime.InteropServices;
-using AOTDefs;
+using Tests.Fixtures;
 
 namespace Tests.Instruments.Objs
 {

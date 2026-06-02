@@ -1,5 +1,5 @@
 
-using test;
+using Tests.Fixtures;
 
 
 
@@ -231,14 +231,14 @@ namespace Tests.Bugs
         [UnitTest]
         public void AOTMultipleExplicitImpls1()
         {
-            AOTDefs.ITestBase c = new AOTDefs.TestImpl();
+            Tests.Fixtures.ITestBase c = new Tests.Fixtures.TestImpl();
             Assert.Equals(c.Value, 3);
         }
 
         [UnitTest]
         public void AOTMultipleExplicitImpls2()
         {
-            var c = new AOTDefs.TestImpl();
+            var c = new Tests.Fixtures.TestImpl();
             Assert.Equals(3, c.GetBaseValue());
         }
 #endif

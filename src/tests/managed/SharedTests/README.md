@@ -14,7 +14,7 @@ Each consumer links these files with MSBuild:
 
 ```
 SharedTests/
-├── Fixtures/           # AOTDefs namespace helpers (fields, calls, delegates, …)
+├── Fixtures/           # shared helper types (`Tests.Fixtures`)
 ├── Instructions/
 │   ├── Arithmetic/
 │   ├── Arrays/
@@ -38,7 +38,7 @@ SharedTests/
 ## What belongs here
 
 - Tests that must run in **both** the interpreter (`CoreTests`) and AOT (`AotTests`) pipelines.
-- Shared fixture types under `Fixtures/` (`namespace AOTDefs` and global helpers used by instruction tests).
+- Shared fixture types under `Fixtures/` (`namespace Tests.Fixtures`).
 
 Tests that depend on `CoreTests.App`, `Bootstrap/`, or `Regression/` stay under `CoreTests/`.
 

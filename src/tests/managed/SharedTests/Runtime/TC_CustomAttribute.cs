@@ -6,7 +6,7 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
-using AOTDefs;
+using Tests.Fixtures;
 using System.Diagnostics;
 
 
@@ -321,14 +321,14 @@ namespace Tests.CSharp.CustomeAttrites
         }
 
         [UnitTest]
-        [AOTDefs.EnumField(AOTDefs.AOT_Enum_int.A)]
+        [EnumFieldAttribute(AOT_Enum_int.A)]
         public void AOTEnumAttriteField()
         {
             var method = GetType().GetMethod(nameof(AOTEnumAttriteField));
-            var attrs = method.GetCustomAttributes(typeof(AOTDefs.EnumFieldAttribute), false);
+            var attrs = method.GetCustomAttributes(typeof(EnumFieldAttribute), false);
             Assert.NotNull(attrs);
             Assert.Equal(1, attrs.Length);
-            var attr = (AOTDefs.EnumFieldAttribute)attrs[0];
+            var attr = (EnumFieldAttribute)attrs[0];
             Assert.Equal(AOT_Enum_int.A, attr.X);
         }
 

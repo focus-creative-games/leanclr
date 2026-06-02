@@ -1,7 +1,7 @@
 using System;
 using System.Runtime.InteropServices;
 
-namespace AOTDefs
+namespace Tests.Fixtures
 {
     [StructLayout(LayoutKind.Explicit)]
     public struct AOTExplicitStruct

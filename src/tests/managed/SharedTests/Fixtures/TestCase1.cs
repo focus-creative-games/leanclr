@@ -1,15 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Threading.Tasks;
 
-public interface IStateOwner
+namespace Tests.Fixtures
 {
-    Task TranslateState<TState>(object[] args);
-}
-public abstract class State<TOwner> where TOwner : IStateOwner
-{
-    public abstract Task OnEnter();
+    public interface IStateOwner
+    {
+        Task TranslateState<TState>(object[] args);
+    }
 
+    public abstract class State<TOwner> where TOwner : IStateOwner
+    {
+        public abstract Task OnEnter();
+    }
 }

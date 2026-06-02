@@ -1,6 +1,8 @@
 using System;
 using System.Collections.Generic;
 
+using Tests.Fixtures;
+
 namespace Tests.CSharp
 {
     class TC_Activator : GeneralTestCaseBase
@@ -59,7 +61,7 @@ namespace Tests.CSharp
         [UnitTest]
         public void AOTActivatorCreateInstanceClass()
         {
-            var instance = AOTDefs.AOTActivator.Create<AOTDefs.AOTActivator.ClassA>();
+            var instance = AOTActivator.Create<AOTActivator.ClassA>();
             Assert.NotNull(instance);
             Assert.Equal("ClassA", instance.GetType().Name);
         }
@@ -67,7 +69,7 @@ namespace Tests.CSharp
         [UnitTest]
         public void AOTActivatorCreateInstanceStruct()
         {
-            var instance = AOTDefs.AOTActivator.Create<AOTDefs.AOTActivator.StructA>();
+            var instance = AOTActivator.Create<AOTActivator.StructA>();
             Assert.Equal(0, instance.x);
         }
 

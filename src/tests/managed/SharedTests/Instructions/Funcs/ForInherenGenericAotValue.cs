@@ -1,4 +1,5 @@
-﻿namespace Tests.Instruments.Funcs
+using Tests.Fixtures;
+namespace Tests.Instruments.Funcs
 {
     public struct ForInherenGenericAotValue : IBar<object>, IRun<string>
     {

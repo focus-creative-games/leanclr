@@ -1,48 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-
-
-public class TestAotRef
+namespace Tests.Fixtures
 {
-    public void CallRef(ref int a)
+    public class TestAotRef
     {
-        a = 5;
+        public void CallRef(ref int a)
+        {
+            a = 5;
+        }
+
+        public void CallIn(in int b)
+        {
+
+        }
+
+        public void CallOut(out int b)
+        {
+            b = 15;
+        }
     }
 
-    public void CallIn(in int b)
+    public class MainT
     {
+        public virtual void Log()
+        {
+        }
 
+        public static void Foo<T>()
+        {
+            T[,] arr = new T[2, 3];
+            T x = arr[0, 0];
+            arr[0, 0] = default;
+            ref T y = ref arr[1, 1];
+            y = default;
+        }
+
+        public static void Show()
+        {
+            Foo<float>();
+            var arr = new List<sbyte>();
+        }
     }
 
-    public void CallOut(out int b)
-    {
-        b = 15;
-    }
 }
-
-public class MainT
-{
-    public virtual void Log()
-    {
-    }
-
-    public static void Foo<T>()
-    {
-        T[,] arr = new T[2, 3];
-        T x = arr[0, 0];
-        arr[0, 0] = default;
-        ref T y = ref arr[1, 1];
-        y = default;
-    }
-
-    public static void Show()
-    {
-        Foo<float>();
-        var arr = new List<sbyte>();
-    }
-}
-

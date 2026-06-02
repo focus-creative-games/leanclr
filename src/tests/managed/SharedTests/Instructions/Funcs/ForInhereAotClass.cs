@@ -1,3 +1,4 @@
+using Tests.Fixtures;
 namespace Tests.Instruments.Funcs
 {
     public class ForInhereAotClass : IFoo

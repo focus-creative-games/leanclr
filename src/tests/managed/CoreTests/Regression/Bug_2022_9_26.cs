@@ -1,11 +1,11 @@
-﻿
-using test;
+
+using Tests.Fixtures;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using AOTDefs;
+using Tests.Fixtures;
 
 
 namespace Tests.Bugs

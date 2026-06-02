@@ -1,5 +1,5 @@
 
-//using test;
+//using Tests.Fixtures;
 
 
 //namespace Tests.Bugs

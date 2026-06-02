@@ -1,12 +1,10 @@
-﻿using AOTDefs;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Test;
 
-namespace AOTDefs
+namespace Tests.Fixtures
 {
     /// <summary>
     /// TC 是 TestClass的缩写

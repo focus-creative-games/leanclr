@@ -1,6 +1,6 @@
 using System.Runtime.InteropServices;
 
-namespace test
+namespace CoreTests
 {
     public class CustomPInvoke
     {

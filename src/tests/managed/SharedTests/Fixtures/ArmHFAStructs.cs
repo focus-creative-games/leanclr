@@ -4,49 +4,50 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-public struct Vector2
+namespace Tests.Fixtures
 {
-    public float x;
-    public float y;
-
-    public Vector2(float x, float y)
+    public struct Vector2
     {
-        this.x = x;
-        this.y = y;
+        public float x;
+        public float y;
+
+        public Vector2(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+        }
     }
-}
 
-public struct Vector3
-{     public float x;
-    public float y;
-    public float z;
-
-    public Vector3(float x, float y, float z)
+    public struct Vector3
     {
-        this.x = x;
-        this.y = y;
-        this.z = z;
+        public float x;
+        public float y;
+        public float z;
+
+        public Vector3(float x, float y, float z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+        }
     }
-}
 
-public struct Vector4
-{
-    public float x;
-    public float y;
-    public float z;
-    public float w;
-
-    public Vector4(float x, float y, float z, float w)
+    public struct Vector4
     {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-        this.w = w;
-    }
-}
+        public float x;
+        public float y;
+        public float z;
+        public float w;
 
-namespace AOTDefs
-{
+        public Vector4(float x, float y, float z, float w)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.w = w;
+        }
+    }
+
     public struct NotHFA
     {
         public float x;

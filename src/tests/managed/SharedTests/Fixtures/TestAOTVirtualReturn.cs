@@ -1,7 +1,6 @@
-﻿using AOTDefs;
 
 
-namespace Test
+namespace Tests.Fixtures
 {
     public class TestAOTVirtualReturn
     {

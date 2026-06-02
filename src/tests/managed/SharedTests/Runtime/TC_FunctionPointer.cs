@@ -1,5 +1,5 @@
-﻿//using AOT;
-//using test;
+//using AOT;
+//using Tests.Fixtures;
 //using System;
 //using System.Collections.Generic;
 //using System.Linq;
@@ -40,7 +40,7 @@
 //        public unsafe void CallRef()
 //        {
 //#if UNITY_2021_1_OR_NEWER
-//            Assert.Equal(2, AOTDefs.FunctionPointer.UnsafeFuncPointer(&UnsafeFunc));
+//            Assert.Equal(2, Tests.Fixtures.FunctionPointer.UnsafeFuncPointer(&UnsafeFunc));
 //#endif
 //        }
 
