@@ -72,5 +72,10 @@ namespace LeanAOT.ToCpp
         public List<string> AssembliesExcludedFromGlobalMetadata { get; set; } = new List<string>();
 
         public bool MayThrowExceptionInIcall { get; set; }
+
+        /// <summary>
+        /// LeanAOT-only: Unity editor version from <c>--leanaot-unity-version</c>; null when unset.
+        /// </summary>
+        public string UnityVersion { get; set; }
     }
 }
