@@ -54,7 +54,7 @@ struct GcAllocSiteHash
 {
     size_t operator()(const GcAllocSite* site) const noexcept
     {
-        size_t h = std::hash<GcAllocSiteKind>()(site->kind);
+        size_t h = std::hash<size_t>()((size_t)site->kind);
         switch (site->kind)
         {
         case GcAllocSiteKind::Codegen:
