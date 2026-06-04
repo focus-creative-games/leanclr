@@ -770,6 +770,11 @@
     "header": "icalls/system_gc.h"
   },
   {
+    "name": "System.Globalization.CalendarData::fill_calendar_data(System.String,System.Int32)",
+    "func": "SystemGlobalizationCalendarData::fill_calendar_data",
+    "header": "icalls/system_globalization_calendardata.h"
+  },
+  {
     "name": "System.Globalization.CompareInfo::internal_compare_icall",
     "func": "SystemGlobalizationCompareInfo::internal_compare_icall",
     "header": "icalls/system_globalization_compareinfo.h"
@@ -778,6 +783,16 @@
     "name": "System.Globalization.CompareInfo::internal_index_icall(System.Char*,System.Int32,System.Int32,System.Char*,System.Int32,System.Boolean)",
     "func": "SystemGlobalizationCompareInfo::internal_index_icall",
     "header": "icalls/system_globalization_compareinfo.h"
+  },
+  {
+    "name": "System.Globalization.CultureData::fill_culture_data(System.Int32)",
+    "func": "SystemGlobalizationCultureInfo::fill_culture_data",
+    "header": "icalls/system_globalization_cultureinfo.h"
+  },
+  {
+    "name": "System.Globalization.CultureData::fill_number_data(System.Int32,System.Globalization.CultureData/NumberFormatEntryManaged&)",
+    "func": "SystemGlobalizationCultureInfo::fill_number_data",
+    "header": "icalls/system_globalization_cultureinfo.h"
   },
   {
     "name": "System.Globalization.CultureInfo::construct_internal_locale_from_lcid(System.Int32)",
