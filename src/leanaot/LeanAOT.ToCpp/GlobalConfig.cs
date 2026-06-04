@@ -70,5 +70,7 @@ namespace LeanAOT.ToCpp
         /// LeanAOT-only: assembly short names (same as <c>-a</c>) omitted from <c>global-metadata.dat</c> COPH only; case-insensitive keys, stored as first-seen spelling.
         /// </summary>
         public List<string> AssembliesExcludedFromGlobalMetadata { get; set; } = new List<string>();
+
+        public bool MayThrowExceptionInIcall { get; set; }
     }
 }

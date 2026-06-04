@@ -22,6 +22,11 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine($"{VmFunctionNames.RET_ERROR}({ConstStrings.CodegenNamespace}::raise_internal_call_entry_not_found_error(\"{NameUtil.GetICallFullMethodName(_method.MethodDef)}\"));");
             _bodyWriter.EndBlock();
             _bodyWriter.EndBlock();
+            bool mayThrowExceptionInIcall = GlobalServices.Inst.Config.MayThrowExceptionInIcall;
+            if (mayThrowExceptionInIcall)
+            {
+                _bodyWriter.AddLine($"LEANCLR_CODEGEN_ICALL_TRY_BEGIN();");
+            }
             if (_method.IsVoidReturn)
             {
                 _bodyWriter.AddLine($"(({icallMethodType})__icall_method_pointer)({MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(_method)});");
@@ -30,6 +35,10 @@ namespace LeanAOT.ToCpp
             else
             {
                 _bodyWriter.AddLine($"{VmFunctionNames.RET_VALUE}((({icallMethodType})__icall_method_pointer)({MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(_method)}));");
+            }
+            if (mayThrowExceptionInIcall)
+            {
+                _bodyWriter.AddLine($"LEANCLR_CODEGEN_ICALL_TRY_END_AND_CATCH();");
             }
         }
     }

@@ -114,6 +114,9 @@ internal class Program
 
         [Option("leanaot-enable-layout-validation", Required = false, HelpText = "LeanAOT-only: enable managed type layout validation in codegen (default off).")]
         public bool LeanAotEnableLayoutValidation { get; set; }
+
+        [Option("leanaot-may-throw-exception-in-icall", Required = false, HelpText = "LeanAOT-only: enable may throw exception in icall (default off).")]
+        public bool LeanAotMayThrowExceptionInIcall { get; set; }
     }
 
     private static Logger s_logger;
@@ -511,6 +514,7 @@ internal class Program
         {
             s_logger.Info("LeanAOT layout validation enabled (--leanaot-enable-layout-validation).");
         }
+        config.MayThrowExceptionInIcall = options.LeanAotMayThrowExceptionInIcall;
 
         config.AotMethodRuleFiles = (options.AotMethodRuleFiles ?? Enumerable.Empty<string>())
             .Where(s => !string.IsNullOrWhiteSpace(s))
