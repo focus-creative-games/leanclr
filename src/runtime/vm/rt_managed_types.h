@@ -361,7 +361,7 @@ struct RtCalendarData : public RtObject
     RtArray* short_date_patterns;
     RtArray* year_month_patterns;
     RtArray* long_date_patterns;
-    RtArray* month_day_patterns;
+    RtString* month_day;
     RtArray* era_names;
     RtArray* abbreviated_era_names;
     RtArray* abbreviated_english_era_names;

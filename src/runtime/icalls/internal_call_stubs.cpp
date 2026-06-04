@@ -13,6 +13,7 @@
 #include "system_runtimetypehandle.h"
 #include "icalls/system_string.h"
 #include "system_globalization_cultureinfo.h"
+#include "system_globalization_calendardata.h"
 #include "system_globalization_compareinfo.h"
 #include "system_threading_interlocked.h"
 #include "system_threading_thread.h"
@@ -98,6 +99,7 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemRuntimeTypeHandle::get_internal_call_entries());
     Append(entries, SystemString::get_internal_call_entries());
     Append(entries, SystemGlobalizationCultureInfo::get_internal_call_entries());
+    Append(entries, SystemGlobalizationCalendarData::get_internal_call_entries());
     Append(entries, SystemGlobalizationCompareInfo::get_internal_call_entries());
     Append(entries, SystemEnvironment::get_internal_call_entries());
     Append(entries, SystemThreadingInterlocked::get_internal_call_entries());
