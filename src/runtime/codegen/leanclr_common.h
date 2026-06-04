@@ -288,6 +288,23 @@
         retVar = (retType)__result.unwrap();                                                              \
     } while (0)
 
+#define LEANCLR_CODEGEN_ICALL_TRY_BEGIN() \
+    try                                   \
+    {
+#define LEANCLR_CODEGEN_ICALL_TRY_END_AND_CATCH()   \
+    }                                               \
+    catch (leanclr::vm::AotExceptionWrapper & __ex) \
+    {                                               \
+        return leanclr::RtErr::ManagedException;    \
+    }
+
+#define LEANCLR_CODEGEN_TRY_RETURN(value) \
+    LEANCLR_CODEGEN_TRY() LEANCLR_CODEGEN_RETURN(value) LEANCLR_CODEGEN_CATCH() LEANCLR_CODEGEN_FINALLY() LEANCLR_CODEGEN_ENDTRY()
+#define LEANCLR_CODEGEN_TRY_RETURN_ERR(err) \
+    LEANCLR_CODEGEN_TRY() LEANCLR_CODEGEN_RETURN_ERR(err) LEANCLR_CODEGEN_CATCH() LEANCLR_CODEGEN_FINALLY() LEANCLR_CODEGEN_ENDTRY()
+#define LEANCLR_CODEGEN_TRY_RETURN_VOID() \
+    LEANCLR_CODEGEN_TRY() LEANCLR_CODEGEN_RETURN_VOID() LEANCLR_CODEGEN_CATCH() LEANCLR_CODEGEN_FINALLY() LEANCLR_CODEGEN_ENDTRY()
+
 namespace leanclr
 {
 namespace codegen
@@ -311,13 +328,19 @@ inline metadata::RtModuleDef* get_module(const char* module_name)
 }
 
 #define LEANCLR_CODEGEN_NEWOBJ(klass, managed_method) LEANCLR_NEWOBJ(klass, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
-#define LEANCLR_CODEGEN_BOX_OBJECT(klass, value, managed_method) LEANCLR_BOX_OBJECT(klass, value, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_BOX_OBJECT(klass, value, managed_method) \
+    LEANCLR_BOX_OBJECT(klass, value, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
 
-#define LEANCLR_CODEGEN_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, managed_method) LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
-#define LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, managed_method) LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
-#define LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, managed_method) LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
-#define LEANCLR_CODEGEN_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, managed_method) LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
-#define LEANCLR_CODEGEN_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, managed_method) LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, managed_method) \
+    LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS(arr_klass, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, managed_method) \
+    LEANCLR_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, managed_method) \
+    LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS(ele_class, length, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, managed_method) \
+    LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(arr_klass, lengths, lower_bounds, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#define LEANCLR_CODEGEN_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, managed_method) \
+    LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
 
 void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const metadata::RtMethodInfo* generic_method_info);
 void resolve_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, void** resolved_metadatas);
