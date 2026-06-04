@@ -1,17 +1,10 @@
 #include "fileloader.h"
 
-#include <algorithm>
 #include <cctype>
 #include <cstdint>
+#include <cstdio>
 #include <cstring>
-#ifdef _MSC_VER
-#pragma warning(push)
-#pragma warning(disable : 4530)
-#endif
-#include <fstream>
-#ifdef _MSC_VER
-#pragma warning(pop)
-#endif
+#include <vector>
 
 namespace leanclr
 {
@@ -62,6 +55,108 @@ static std::string build_global_metadata_path()
     return base + "Metadata/global-metadata.dat";
 }
 
+static FILE* open_file_read_binary(const char* path)
+{
+#if defined(_MSC_VER)
+    FILE* file = nullptr;
+    if (fopen_s(&file, path, "rb") != 0)
+    {
+        return nullptr;
+    }
+    return file;
+#else
+    return std::fopen(path, "rb");
+#endif
+}
+
+static bool seek_to_end_and_get_size(FILE* file, int64_t& size_out)
+{
+#if defined(_MSC_VER)
+    if (_fseeki64(file, 0, SEEK_END) != 0)
+    {
+        return false;
+    }
+    const __int64 file_size = _ftelli64(file);
+    if (file_size < 0)
+    {
+        return false;
+    }
+    size_out = static_cast<int64_t>(file_size);
+    return _fseeki64(file, 0, SEEK_SET) == 0;
+#else
+    if (std::fseek(file, 0, SEEK_END) != 0)
+    {
+        return false;
+    }
+    const long file_size = std::ftell(file);
+    if (file_size < 0)
+    {
+        return false;
+    }
+    size_out = file_size;
+    return std::fseek(file, 0, SEEK_SET) == 0;
+#endif
+}
+
+static bool read_file_bytes(FILE* file, uint8_t* buffer, size_t size)
+{
+#if defined(_MSC_VER)
+    return fread_s(buffer, size, 1, size, file) == size;
+#else
+    return std::fread(buffer, 1, size, file) == size;
+#endif
+}
+
+static RtResultVoid read_entire_file(const char* path, std::vector<uint8_t>& out)
+{
+    out.clear();
+    if (path == nullptr || path[0] == '\0')
+    {
+        return RtErr::ArgumentNull;
+    }
+
+    FILE* file = open_file_read_binary(path);
+    if (file == nullptr)
+    {
+        return RtErr::FileNotFound;
+    }
+
+    int64_t file_size = 0;
+    if (!seek_to_end_and_get_size(file, file_size))
+    {
+        std::fclose(file);
+        return RtErr::FileNotFound;
+    }
+    if (file_size < 8)
+    {
+        std::fclose(file);
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    }
+
+    out.resize(static_cast<size_t>(file_size));
+    if (!read_file_bytes(file, out.data(), out.size()))
+    {
+        std::fclose(file);
+        out.clear();
+        return RtErr::FileNotFound;
+    }
+
+    std::fclose(file);
+    RET_VOID_OK();
+}
+
+static bool extension_equals_ignore_case(const char* extension, const char* expected)
+{
+    for (; *extension != '\0' && *expected != '\0'; ++extension, ++expected)
+    {
+        if (std::tolower(static_cast<unsigned char>(*extension)) != std::tolower(static_cast<unsigned char>(*expected)))
+        {
+            return false;
+        }
+    }
+    return *extension == '\0' && *expected == '\0';
+}
+
 static RtResultVoid load_global_metadata_bundle_once()
 {
     s_cached_bundle_data.clear();
@@ -75,29 +170,14 @@ static RtResultVoid load_global_metadata_bundle_once()
         return RtErr::ArgumentNull;
     }
 
-    std::ifstream file(dat_path, std::ios::binary | std::ios::ate);
-    if (!file.is_open())
+    auto read_ret = read_entire_file(dat_path.c_str(), s_cached_bundle_data);
+    if (read_ret.is_err())
     {
         assert(false && "global-metadata.dat not found");
         printf("global-metadata.dat not found, data_path='%s'\n", dat_path.c_str());
-        return RtErr::FileNotFound;
+        return read_ret.unwrap_err();
     }
     printf("global-metadata.dat found, data_path='%s'\n", dat_path.c_str());
-
-    const std::streamoff file_size = file.tellg();
-    if (file_size < 8)
-    {
-        assert(false && "global-metadata.dat is too small");
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
-    }
-    file.seekg(0, std::ios::beg);
-
-    s_cached_bundle_data.resize(static_cast<size_t>(file_size));
-    if (!file.read(reinterpret_cast<char*>(s_cached_bundle_data.data()), static_cast<std::streamsize>(file_size)))
-    {
-        assert(false && "failed to read global-metadata.dat");
-        return RtErr::FileNotFound;
-    }
 
     if (!(s_cached_bundle_data[0] == 'C' && s_cached_bundle_data[1] == 'O' && s_cached_bundle_data[2] == 'P' && s_cached_bundle_data[3] == 'H'))
     {
@@ -177,10 +257,8 @@ static RtResultVoid load_global_metadata_bundle_once()
 
 RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const char* extension)
 {
-    if (assembly_name == nullptr || extension == nullptr)
-    {
-        return RtErr::ArgumentNull;
-    }
+    assert (assembly_name);
+    assert (extension);
 
     if (!s_bundle_load_attempted)
     {
@@ -197,9 +275,7 @@ RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const cha
         return RtErr::FileNotFound;
     }
 
-    std::string ext(extension);
-    std::transform(ext.begin(), ext.end(), ext.begin(), [](unsigned char c) { return static_cast<char>(std::tolower(c)); });
-    if (ext != "dll")
+    if (!extension_equals_ignore_case(extension, "dll"))
     {
         // global-metadata.dat bundle currently stores managed assemblies only.
         return RtErr::FileNotFound;
