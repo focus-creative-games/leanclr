@@ -501,9 +501,9 @@ internal class Program
         config.ProfilerReport = options.ProfilerReport;
         config.ProfilerOutputFile = options.ProfilerOutputFile;
         config.PrintCommandLine = options.PrintCommandLine;
-        config.SymbolsFolder = options.SymbolsFolder;
+        config.SymbolsFolder = options.SymbolsFolder ?? (!string.IsNullOrWhiteSpace(options.GeneratedCppDir) ? Path.Combine(options.GeneratedCppDir, "Symbols") : null);
         // in unity 2019 and 2021, the data folder is under generated cpp dir.
-        config.DataFolder = options.DataFolder ?? (!string.IsNullOrWhiteSpace(options.Directory) ? Path.Combine(options.GeneratedCppDir, "Data") : null);
+        config.DataFolder = options.DataFolder ?? (!string.IsNullOrWhiteSpace(options.GeneratedCppDir) ? Path.Combine(options.GeneratedCppDir, "Data") : null);
         config.MapFileParser = options.MapFileParser;
         config.BaseLibDirectory = options.BaseLibDirectory;
         config.AvoidDynamicLibraryCopy = options.AvoidDynamicLibraryCopy;
