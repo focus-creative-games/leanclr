@@ -259,7 +259,7 @@ namespace LeanAOT.ToCpp
             return CreateMethodFunctionTypeDefine("");
         }
 
-        public string CreateNativeMethodFunctionTypeDefine(string cppTypedefName)
+        public string CreateNativeMethodFunctionTypeDefine(string cppTypedefName, bool noexcept)
         {
             StringBuilder sb = new StringBuilder();
             sb.Append(MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(_retType, TypeNameRelaxLevel.AbiRelaxed));
@@ -276,7 +276,10 @@ namespace LeanAOT.ToCpp
                 sb.Append(MethodGenerationUtil.GetExactTypeName(param.Type));
             }
             sb.Append(')');
-            sb.Append(ConstStrings.CppFunctionNoexcept);
+            if (noexcept)
+            {
+                sb.Append(ConstStrings.CppFunctionNoexcept);
+            }
             return sb.ToString();
         }
 

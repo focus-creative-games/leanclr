@@ -12,7 +12,8 @@ namespace LeanAOT.ToCpp
 
         protected override void WriteMethodBody()
         {
-            string icallMethodType = _method.CreateNativeMethodFunctionTypeDefine("");
+            bool mayThrowExceptionInIcall = GlobalServices.Inst.Config.MayThrowExceptionInIcall;
+            string icallMethodType = _method.CreateNativeMethodFunctionTypeDefine("", !mayThrowExceptionInIcall);
             _bodyWriter.AddLine($"static leanclr::vm::InternalCallFunction __icall_method_pointer = nullptr;");
             _bodyWriter.AddLine("if (__icall_method_pointer == nullptr)");
             _bodyWriter.BeginBlock();
@@ -22,7 +23,6 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine($"{VmFunctionNames.RET_ERROR}({ConstStrings.CodegenNamespace}::raise_internal_call_entry_not_found_error(\"{NameUtil.GetICallFullMethodName(_method.MethodDef)}\"));");
             _bodyWriter.EndBlock();
             _bodyWriter.EndBlock();
-            bool mayThrowExceptionInIcall = GlobalServices.Inst.Config.MayThrowExceptionInIcall;
             if (mayThrowExceptionInIcall)
             {
                 _bodyWriter.AddLine($"LEANCLR_CODEGEN_ICALL_TRY_BEGIN();");
