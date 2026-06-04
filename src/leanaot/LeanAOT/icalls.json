@@ -786,13 +786,13 @@
   },
   {
     "name": "System.Globalization.CultureData::fill_culture_data(System.Int32)",
-    "func": "SystemGlobalizationCultureInfo::fill_culture_data",
-    "header": "icalls/system_globalization_cultureinfo.h"
+    "func": "SystemGlobalizationCultureData::fill_culture_data",
+    "header": "icalls/system_globalization_culturedata.h"
   },
   {
     "name": "System.Globalization.CultureData::fill_number_data(System.Int32,System.Globalization.CultureData/NumberFormatEntryManaged&)",
-    "func": "SystemGlobalizationCultureInfo::fill_number_data",
-    "header": "icalls/system_globalization_cultureinfo.h"
+    "func": "SystemGlobalizationCultureData::fill_number_data",
+    "header": "icalls/system_globalization_culturedata.h"
   },
   {
     "name": "System.Globalization.CultureInfo::construct_internal_locale_from_lcid(System.Int32)",
