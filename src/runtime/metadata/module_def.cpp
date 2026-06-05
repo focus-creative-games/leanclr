@@ -379,9 +379,14 @@ RtResult<RtAssembly*> RtModuleDef::get_reference_assembly(uint32_t rid)
         case AssemblyResolveStatus::NotResolvedYet:
         {
             RowAssemblyRef rowRefAss = _cliImage.read_assembly_ref(rid).value();
-            const char* ref_name;
-            UNWRAP_OR_RET_ERR_ON_FAIL(ref_name, get_string(rowRefAss.name));
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtAssembly*, ref_assembly, vm::Assembly::load_by_name(ref_name));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const char*, ref_name, get_string(rowRefAss.name));
+            auto ret_ref_assembly = vm::Assembly::load_by_name(ref_name);
+            if (ret_ref_assembly.is_err())
+            {
+                printf("Failed to load reference assembly %s, error: %d\n", ref_name, static_cast<int>(ret_ref_assembly.unwrap_err()));
+                RET_ERR(ret_ref_assembly.unwrap_err());
+            }
+            RtAssembly* ref_assembly = ret_ref_assembly.unwrap();
             ref_asm.assembly = ref_assembly;
             ref_asm.status = AssemblyResolveStatus::Success;
             RET_OK(ref_assembly);

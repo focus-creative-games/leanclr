@@ -53,7 +53,12 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
         RET_ERR(RtErr::FileNotFound);
     }
     auto result = file_loader(name, "dll");
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL2(FileData, dllFileData, result);
+    if (result.is_err())
+    {
+        std::printf("Failed to load assembly from file loader for %s, error: %d\n", name, static_cast<int>(result.unwrap_err()));
+        RET_ERR(result.unwrap_err());
+    }
+    FileData& dllFileData = result.unwrap();
 
     AssemblyData dllData{dllFileData.data, dllFileData.length, dllFileData.shared};
 
@@ -63,7 +68,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
     if (pdb_ret.is_ok())
     {
         FileData& pdb_file_data = pdb_ret.unwrap();
-        pdb_data = AssemblyData{ pdb_file_data.data, pdb_file_data.length, pdb_file_data.shared };
+        pdb_data = AssemblyData{pdb_file_data.data, pdb_file_data.length, pdb_file_data.shared};
         pdb_data_ptr = &pdb_data;
     }
     else
@@ -148,11 +153,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
         RET_ERR(RtErr::ModuleAlreadyLoaded);
     }
     metadata::RtModuleDef::register_module_def(mod);
-    cleanup_guard.register_cleanup(
-        [mod]()
-        {
-            panic("Failed to load reference assemblies");
-        });
+    cleanup_guard.register_cleanup([mod]() { std::printf("Failed to load reference assemblies of module %s\n", mod->get_name_no_ext()); });
     utils::Vector<metadata::RtAssembly*> ref_assemblies;
     RET_ERR_ON_FAIL(mod->get_reference_assemblies(ref_assemblies));
     const metadata::RtAotModuleData* aotModuleData = metadata::AotModule::find_aot_module_by_name(mod->get_name_no_ext());
@@ -203,7 +204,8 @@ RtResult<RtArray*> Assembly::get_types(metadata::RtAssembly* ass, bool exported_
     RET_ERR_ON_FAIL(ass->mod->get_types(exported_only, types));
 
     metadata::RtClass* cls_type = Class::get_corlib_types().cls_systemtype;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, types_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_type, static_cast<int32_t>(types.size()), "Assembly::get_types"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, types_arr,
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_type, static_cast<int32_t>(types.size()), "Assembly::get_types"));
 
     for (size_t i = 0; i < types.size(); ++i)
     {
