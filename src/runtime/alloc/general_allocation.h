@@ -128,5 +128,22 @@ class GeneralAllocation
         }
     }
 };
+
+class ScopeFreeGuard
+{
+  private:
+    void* ptr;
+
+  public:
+    ScopeFreeGuard(void* ptr) : ptr(ptr)
+    {
+        assert(ptr != nullptr);
+    }
+
+    ~ScopeFreeGuard()
+    {
+        GeneralAllocation::free(ptr);
+    }
+};
 } // namespace alloc
 } // namespace leanclr
