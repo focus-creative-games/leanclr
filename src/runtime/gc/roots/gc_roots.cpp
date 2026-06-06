@@ -9,13 +9,7 @@ namespace leanclr
 namespace gc
 {
 
-struct StaticFieldsRoot
-{
-    metadata::RtClass* klass;
-};
-
 static utils::Vector<vm::RtObject**> s_registered_slots;
-static utils::Vector<StaticFieldsRoot> s_static_fields;
 static utils::Vector<GcVisitObjectRootsScan> s_visit_object_roots;
 static utils::Vector<GcVisitUnknownBlocksScan> s_visit_unknown_blocks;
 
@@ -41,19 +35,12 @@ void GcRoots::unregister_slot(vm::RtObject** slot)
     }
 }
 
-void GcRoots::register_static_fields(metadata::RtClass* klass)
-{
-    StaticFieldsRoot root;
-    root.klass = klass;
-    s_static_fields.push_back(root);
-}
-
-static void scan_static_fields(const StaticFieldsRoot& root, GcRootCallback callback, void* userdata)
+static void scan_static_fields(const metadata::RtClass* klass, GcRootCallback callback, void* userdata)
 {
     utils::Vector<const metadata::RtFieldInfo*> static_fields;
-    for (uint16_t i = 0; i < root.klass->field_count; ++i)
+    for (uint16_t i = 0; i < klass->field_count; ++i)
     {
-        const metadata::RtFieldInfo* field = root.klass->fields + i;
+        const metadata::RtFieldInfo* field = klass->fields + i;
         if (vm::Field::is_static_excluded_literal_and_rva(field))
         {
             static_fields.push_back(field);
@@ -82,7 +69,7 @@ static void scan_static_fields(const StaticFieldsRoot& root, GcRootCallback call
         {
             continue;
         }
-        vm::RtObject** slot = reinterpret_cast<vm::RtObject**>(root.klass->static_fields_data + field->offset);
+        vm::RtObject** slot = reinterpret_cast<vm::RtObject**>(klass->static_fields_data + field->offset);
         callback(slot, userdata);
     }
 }
@@ -111,9 +98,10 @@ void GcRoots::foreach_root(GcRootCallback callback, void* userdata)
     {
         callback(s_registered_slots[i], userdata);
     }
-    for (size_t i = 0; i < s_static_fields.size(); ++i)
+    auto& all_classes_with_static_data = vm::Class::get_all_classes_with_static_data();
+    for (const metadata::RtClass* klass : all_classes_with_static_data)
     {
-        scan_static_fields(s_static_fields[i], callback, userdata);
+        scan_static_fields(klass, callback, userdata);
     }
     for (size_t i = 0; i < s_visit_unknown_blocks.size(); ++i)
     {

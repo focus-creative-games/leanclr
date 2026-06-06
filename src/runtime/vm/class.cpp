@@ -1083,6 +1083,13 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
     RET_VOID_OK();
 }
 
+static utils::Vector<const metadata::RtClass*> s_all_classes_with_static_data;
+
+const utils::Vector<const metadata::RtClass*>& Class::get_all_classes_with_static_data()
+{
+    return s_all_classes_with_static_data;
+}
+
 RtResultVoid Class::setup_static_field_data(metadata::RtClass* klass)
 {
     if (klass->static_size > 0)
@@ -1093,28 +1100,18 @@ RtResultVoid Class::setup_static_field_data(metadata::RtClass* klass)
             RET_ASSERT_ERR(RtErr::OutOfMemory);
         }
         klass->static_fields_data = static_fields_data;
-        gc::GcRoots::register_static_fields(klass);
+        s_all_classes_with_static_data.push_back(klass);
     }
     RET_VOID_OK();
 }
 
 static size_t s_empty_gc_bitmap = 0;
 
-static inline bool get_gc_bitmap_bit(const size_t* bitmap, size_t bit_index)
-{
-    return bitmap[bit_index / Class::kBitsPerWord] & (static_cast<size_t>(1) << (bit_index % Class::kBitsPerWord));
-}
-
-static inline void set_gc_bitmap_bit(size_t* bitmap, size_t bit_index)
-{
-    bitmap[bit_index / Class::kBitsPerWord] |= static_cast<size_t>(1) << (bit_index % Class::kBitsPerWord);
-}
-
-static RtResultVoid setup_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitmap, size_t& max_bitmap_index)
+RtResultVoid Class::setup_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitmap, size_t& max_bitmap_index)
 {
     for (const metadata::RtClass* cur_klass = klass; cur_klass != nullptr; cur_klass = cur_klass->parent)
     {
-        if (!Class::get_has_references(cur_klass))
+        if (!get_has_references(cur_klass))
         {
             break;
         }
@@ -1177,9 +1174,9 @@ static RtResultVoid setup_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitma
                 }
                 case metadata::RtElementType::ValueType:
                 {
-                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, field_class, Class::get_class_from_typesig(type_sig));
-                    assert (Class::has_initialized_part(field_class, metadata::RtClassInitPart::Field));
-                    if (!Class::get_has_references(field_class))
+                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, field_class, get_class_from_typesig(type_sig));
+                    assert (has_initialized_part(field_class, metadata::RtClassInitPart::Field));
+                    if (!get_has_references(field_class))
                     {
                         break;
                     }
@@ -1187,7 +1184,7 @@ static RtResultVoid setup_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitma
                     size_t cur_field_bitmap_offset = cur_field->offset / sizeof(void*);
                     // TODO: optimize this, it's not efficient to iterate over the whole bitmap,
                     // a better way is assign by word
-                    for (size_t i = Class::kFirstGCBitmapBitIndex; i < field_class->gc_bitmap_bit_count; ++i)
+                    for (size_t i = kFirstGCBitmapBitIndex; i < field_class->gc_bitmap_bit_count; ++i)
                     {
                         size_t bit_index = cur_field_bitmap_offset + i;
                         if (get_gc_bitmap_bit(field_class->gc_bitmap, i))

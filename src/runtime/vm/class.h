@@ -491,14 +491,39 @@ class Class
         std::memcpy(bitmaps, klass->gc_bitmap, bitmaps_size);
     }
 
+    static bool has_reference_at_offset_includes_object_header(const metadata::RtClass* klass, size_t offset_includes_object_header)
+    {
+        assert(offset_includes_object_header % sizeof(void*) == 0);
+        size_t bit_index = offset_includes_object_header / sizeof(void*);
+        return get_gc_bitmap_bit(klass->gc_bitmap, bit_index);
+    }
+
+    static bool has_reference_at_bitmap_bit_index(const metadata::RtClass* klass, size_t bitmap_bit_index)
+    {
+        return get_gc_bitmap_bit(klass->gc_bitmap, bitmap_bit_index);
+    }
+
     static void walk_ptr_classes(metadata::ClassWalkCallback callback, void* userData);
 
+    static const utils::Vector<const metadata::RtClass*>& get_all_classes_with_static_data();
+
   private:
+    static bool get_gc_bitmap_bit(const size_t* bitmap, size_t bit_index)
+    {
+        return bitmap[bit_index / Class::kBitsPerWord] & (static_cast<size_t>(1) << (bit_index % Class::kBitsPerWord));
+    }
+
+    static void set_gc_bitmap_bit(size_t* bitmap, size_t bit_index)
+    {
+        bitmap[bit_index / Class::kBitsPerWord] |= static_cast<size_t>(1) << (bit_index % Class::kBitsPerWord);
+    }
+
     static RtResultVoid setup_interfaces_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_nested_classes_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_fields_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_field_layout(metadata::RtClass* klass);
     static RtResultVoid setup_gc_bitmap(metadata::RtClass* klass);
+    static RtResultVoid setup_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitmap, size_t& max_bitmap_index);
     static RtResultVoid setup_static_field_data(metadata::RtClass* klass);
     static RtResultVoid setup_methods_typedef(metadata::RtClass* klass);
     static RtResultVoid build_methods_arg_descs(metadata::RtClass* klass);

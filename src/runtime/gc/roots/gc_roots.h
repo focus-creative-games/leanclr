@@ -23,7 +23,6 @@ class GcRoots
   public:
     static void register_slot(vm::RtObject** slot);
     static void unregister_slot(vm::RtObject** slot);
-    static void register_static_fields(metadata::RtClass* klass);
     static void register_visit_object_roots(GcVisitObjectRootsScan scan);
     static void register_visit_unknown_blocks(GcVisitUnknownBlocksScan scan);
     static void foreach_root(GcRootCallback callback, void* userdata);
