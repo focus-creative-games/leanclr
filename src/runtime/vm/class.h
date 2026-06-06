@@ -3,6 +3,7 @@
 #include <cassert>
 
 #include "rt_managed_types.h"
+#include "utils/mem_op.h"
 
 namespace leanclr
 {
@@ -474,22 +475,20 @@ class Class
         return from_class->cast_class == to_class->cast_class;
     }
 
+    static constexpr size_t kFirstGCBitmapBitIndex = RT_OBJECT_HEADER_SIZE / sizeof(void*);
+    static constexpr size_t kBitsPerWord = sizeof(size_t) * 8;
+
     static size_t get_gc_bitmap_size(const metadata::RtClass* klass)
     {
-        return klass->gc_bitmap_word_count;
+        // bitmap_size is byte count aligned with size_t
+        size_t word_count = (klass->gc_bitmap_bit_count + kBitsPerWord - 1) / kBitsPerWord;
+        return word_count * sizeof(size_t);
     }
 
     static void get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size)
     {
-        bitmaps_size = klass->gc_bitmap_word_count;
-        if (bitmaps == nullptr || bitmaps_size == 0 || klass->gc_bitmap == nullptr)
-        {
-            return;
-        }
-        for (size_t i = 0; i < bitmaps_size; ++i)
-        {
-            bitmaps[i] = static_cast<size_t>(klass->gc_bitmap[i]);
-        }
+        bitmaps_size = get_gc_bitmap_size(klass);
+        std::memcpy(bitmaps, klass->gc_bitmap, bitmaps_size);
     }
 
     static void walk_ptr_classes(metadata::ClassWalkCallback callback, void* userData);
@@ -499,6 +498,7 @@ class Class
     static RtResultVoid setup_nested_classes_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_fields_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_field_layout(metadata::RtClass* klass);
+    static RtResultVoid setup_gc_bitmap(metadata::RtClass* klass);
     static RtResultVoid setup_static_field_data(metadata::RtClass* klass);
     static RtResultVoid setup_methods_typedef(metadata::RtClass* klass);
     static RtResultVoid build_methods_arg_descs(metadata::RtClass* klass);

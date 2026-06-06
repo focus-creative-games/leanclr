@@ -705,8 +705,8 @@ struct RtClass
     const RtInterfaceOffset* interface_vtable_offsets;
     uint8_t* static_fields_data;
     void* unity_user_data;
-    uintptr_t* gc_bitmap;
-    uint16_t gc_bitmap_word_count;
+    size_t* gc_bitmap;
+    uint16_t gc_bitmap_bit_count;
     EncodedTokenId token;
     uint32_t instance_size_without_header;
     uint32_t static_size;

@@ -22,6 +22,7 @@
 #include "shim.h"
 #include "customattribute.h"
 #include "assembly.h"
+#include "type.h"
 
 namespace leanclr
 {
@@ -888,7 +889,7 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
     {
         RET_ERR_ON_FAIL(setup_fields_typedef(klass));
         RET_ERR_ON_FAIL(setup_field_layout(klass));
-        gc::setup_class_gc_bitmap(klass);
+        RET_ERR_ON_FAIL(setup_gc_bitmap(klass));
         RET_ERR_ON_FAIL(setup_static_field_data(klass));
         break;
     }
@@ -896,7 +897,7 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
     {
         RET_ERR_ON_FAIL(GenericClass::setup_fields(klass));
         RET_ERR_ON_FAIL(setup_field_layout(klass));
-        gc::setup_class_gc_bitmap(klass);
+        RET_ERR_ON_FAIL(setup_gc_bitmap(klass));
         RET_ERR_ON_FAIL(setup_static_field_data(klass));
         break;
     }
@@ -1094,6 +1095,157 @@ RtResultVoid Class::setup_static_field_data(metadata::RtClass* klass)
         klass->static_fields_data = static_fields_data;
         gc::GcRoots::register_static_fields(klass);
     }
+    RET_VOID_OK();
+}
+
+static size_t s_empty_gc_bitmap = 0;
+
+static inline bool get_gc_bitmap_bit(const size_t* bitmap, size_t bit_index)
+{
+    return bitmap[bit_index / Class::kBitsPerWord] & (static_cast<size_t>(1) << (bit_index % Class::kBitsPerWord));
+}
+
+static inline void set_gc_bitmap_bit(size_t* bitmap, size_t bit_index)
+{
+    bitmap[bit_index / Class::kBitsPerWord] |= static_cast<size_t>(1) << (bit_index % Class::kBitsPerWord);
+}
+
+static RtResultVoid setup_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitmap, size_t& max_bitmap_index)
+{
+    for (const metadata::RtClass* cur_klass = klass; cur_klass != nullptr; cur_klass = cur_klass->parent)
+    {
+        if (!Class::get_has_references(cur_klass))
+        {
+            break;
+        }
+        for (const metadata::RtFieldInfo* cur_field = cur_klass->fields, *last_field = cur_klass->fields + cur_klass->field_count; cur_field != last_field; ++cur_field)
+        {
+            if (!Field::is_instance(cur_field))
+            {
+                continue;
+            }
+            const metadata::RtTypeSig* type_sig = cur_field->type_sig;
+            if (type_sig->is_by_ref())
+            {
+                continue;
+            }
+            switch (type_sig->ele_type)
+            {
+                case metadata::RtElementType::Boolean:
+                case metadata::RtElementType::Char:
+                case metadata::RtElementType::I1:
+                case metadata::RtElementType::U1:
+                case metadata::RtElementType::I2:
+                case metadata::RtElementType::U2:
+                case metadata::RtElementType::I4:
+                case metadata::RtElementType::U4:
+                case metadata::RtElementType::I8:
+                case metadata::RtElementType::U8:
+                case metadata::RtElementType::R4:
+                case metadata::RtElementType::R8:
+                case metadata::RtElementType::I:
+                case metadata::RtElementType::U:
+                case metadata::RtElementType::Ptr:
+                case metadata::RtElementType::FnPtr:
+                case metadata::RtElementType::TypedByRef:
+                case metadata::RtElementType::Var:
+                case metadata::RtElementType::MVar:
+                {
+                    break;
+                }
+                case metadata::RtElementType::Object:
+                case metadata::RtElementType::String:
+                case metadata::RtElementType::Class:
+                case metadata::RtElementType::SZArray:
+                case metadata::RtElementType::Array:
+                handle_reference_type_field:
+                {
+                    assert (cur_field->offset % sizeof(void*) == 0);
+                    size_t bit_index = Field::get_instance_field_offset_includes_object_header_for_all_type(cur_field) / sizeof(void*);
+                    set_gc_bitmap_bit(bitmap, bit_index);
+                    max_bitmap_index = std::max(max_bitmap_index, bit_index);
+                    break;
+                }
+                case metadata::RtElementType::GenericInst:
+                {
+                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, is_ref_type, Type::is_reference_type(type_sig));
+                    if (is_ref_type)
+                    {
+                        goto handle_reference_type_field;
+                    }
+                    // fall through
+                }
+                case metadata::RtElementType::ValueType:
+                {
+                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, field_class, Class::get_class_from_typesig(type_sig));
+                    assert (Class::has_initialized_part(field_class, metadata::RtClassInitPart::Field));
+                    if (!Class::get_has_references(field_class))
+                    {
+                        break;
+                    }
+                    assert (cur_field->offset % sizeof(void*) == 0);
+                    size_t cur_field_bitmap_offset = cur_field->offset / sizeof(void*);
+                    // TODO: optimize this, it's not efficient to iterate over the whole bitmap,
+                    // a better way is assign by word
+                    for (size_t i = Class::kFirstGCBitmapBitIndex; i < field_class->gc_bitmap_bit_count; ++i)
+                    {
+                        size_t bit_index = cur_field_bitmap_offset + i;
+                        if (get_gc_bitmap_bit(field_class->gc_bitmap, i))
+                        {
+                            set_gc_bitmap_bit(bitmap, bit_index);
+                            max_bitmap_index = std::max(max_bitmap_index, bit_index);
+                        }
+                    }
+                    break;
+                }
+                default:
+                {
+                    assert (false && "invalid element type");
+                    RET_ASSERT_ERR(RtErr::BadImageFormat);
+                }
+            }
+        }
+    }
+    RET_VOID_OK();
+}
+
+RtResultVoid Class::setup_gc_bitmap(metadata::RtClass* klass)
+{
+    assert(klass->gc_bitmap == nullptr);
+    if (!get_has_references(klass) || is_array_or_szarray(klass))
+    {
+        klass->gc_bitmap = &s_empty_gc_bitmap;
+        klass->gc_bitmap_bit_count = 0;
+        RET_VOID_OK();
+    }
+    
+    size_t max_bitmap_bit_count = get_instance_size_with_object_header(klass) / sizeof(void*);
+    size_t bitmap_word_count = (max_bitmap_bit_count + Class::kBitsPerWord - 1) / Class::kBitsPerWord;
+    size_t* gc_bitmap = (size_t*)alloc::GeneralAllocation::calloc_any<size_t>(bitmap_word_count);
+    if (gc_bitmap == nullptr)
+    {
+        RET_ASSERT_ERR(RtErr::OutOfMemory);
+    }
+    alloc::ScopeFreeGuard free_guard(gc_bitmap);
+    size_t max_bitmap_index = 0;
+    RET_ERR_ON_FAIL(setup_gc_bitmap_impl(klass, gc_bitmap, max_bitmap_index));
+    assert (max_bitmap_index != 0);
+    assert (max_bitmap_index < max_bitmap_bit_count);
+    size_t final_bitmap_bit_count = max_bitmap_index + 1;
+    // the bitmap bit count is limited to UINT16_MAX
+    if (final_bitmap_bit_count >= (size_t)UINT16_MAX)
+    {
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    }
+    size_t final_bitmap_word_count = (final_bitmap_bit_count + Class::kBitsPerWord - 1) / Class::kBitsPerWord;
+    size_t* final_bitmap = (size_t*)alloc::GeneralAllocation::calloc_any<size_t>(final_bitmap_word_count);
+    if (final_bitmap == nullptr)
+    {
+        RET_ASSERT_ERR(RtErr::OutOfMemory);
+    }
+    std::memcpy(final_bitmap, gc_bitmap, final_bitmap_word_count * sizeof(size_t));
+    klass->gc_bitmap = final_bitmap;
+    klass->gc_bitmap_bit_count = static_cast<uint16_t>(final_bitmap_bit_count);
     RET_VOID_OK();
 }
 

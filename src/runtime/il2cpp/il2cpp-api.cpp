@@ -683,13 +683,25 @@ void* il2cpp_class_get_static_field_data(const Il2CppClass* klass)
 // testing only
 size_t il2cpp_class_get_bitmap_size(const Il2CppClass* klass)
 {
+    auto ret = vm::Class::initialize_fields(const_cast<metadata::RtClass*>(klass));
+    if (ret.is_err())
+    {
+        assert(false && "Failed to initialize fields for gc bitmap");
+        return 0;
+    }
     return vm::Class::get_gc_bitmap_size(klass);
 }
 
 void il2cpp_class_get_bitmap(Il2CppClass* klass, size_t* bitmap)
 {
-    size_t bitmap_size = 0;
-    vm::Class::get_gc_bitmap(klass, bitmap, bitmap_size);
+    auto ret = vm::Class::initialize_fields(const_cast<metadata::RtClass*>(klass));
+    if (ret.is_err())
+    {
+        assert(false && "Failed to initialize fields for gc bitmap");
+        return;
+    }
+    size_t bitmap_size = vm::Class::get_gc_bitmap_size(const_cast<metadata::RtClass*>(klass));
+    vm::Class::get_gc_bitmap(const_cast<metadata::RtClass*>(klass), bitmap, bitmap_size);
 }
 
 // -- stats ----------------------------------------------------------------
