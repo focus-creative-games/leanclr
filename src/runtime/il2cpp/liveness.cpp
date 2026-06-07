@@ -1,10 +1,8 @@
 #include "liveness.h"
 
-#include <cstdint>
-
-#include "alloc/general_allocation.h"
-#include "utils/hashmap.h"
+#include "core/rt_base.h"
 #include "utils/mem_op.h"
+#include "utils/segmented_address_bitmap.h"
 #include "vm/class.h"
 #include "vm/field.h"
 #include "vm/object.h"
@@ -16,65 +14,7 @@ namespace leanclr
 namespace il2cpp
 {
 
-template <size_t MIN_OBJECT_SIZE, size_t SEGMENT_SIZE_BYTE_COUNT>
-class AddressMarker
-{
-  private:
-    static_assert((MIN_OBJECT_SIZE & (MIN_OBJECT_SIZE - 1)) == 0, "MIN_OBJECT_SIZE must be a power of two");
-    static_assert((SEGMENT_SIZE_BYTE_COUNT & (SEGMENT_SIZE_BYTE_COUNT - 1)) == 0, "SEGMENT_SIZE_BYTE_COUNT must be a power of two");
-    static_assert(SEGMENT_SIZE_BYTE_COUNT % sizeof(size_t) == 0, "SEGMENT_SIZE_BYTE_COUNT must be a multiple of sizeof(size_t)");
-
-    static constexpr size_t kBitsPerWord = sizeof(size_t) * 8;
-    static constexpr size_t kSegmentWordCount = SEGMENT_SIZE_BYTE_COUNT / sizeof(size_t);
-    static constexpr size_t kSegmentBitCount = kSegmentWordCount * kBitsPerWord;
-    static constexpr size_t kInvalidSegmentIndex = static_cast<size_t>(-1);
-
-    utils::HashMap<size_t, size_t*> _segment_map;
-    mutable size_t _cached_segment_index = kInvalidSegmentIndex;
-    mutable size_t* _cached_segment = nullptr;
-
-    size_t* get_or_create_segment_slow(size_t segment_index)
-    {
-        auto it = _segment_map.find(segment_index);
-        if (it == _segment_map.end())
-        {
-            size_t* segment = alloc::GeneralAllocation::calloc_any<size_t>(kSegmentWordCount);
-            it = _segment_map.emplace(segment_index, segment).first;
-        }
-        _cached_segment_index = segment_index;
-        _cached_segment = it->second;
-        return _cached_segment;
-    }
-
-  public:
-    ~AddressMarker()
-    {
-        for (auto it = _segment_map.begin(); it != _segment_map.end(); ++it)
-        {
-            alloc::GeneralAllocation::free(it->second);
-        }
-    }
-
-    bool mark(void* address)
-    {
-        const size_t obj_index = reinterpret_cast<uintptr_t>(address) / MIN_OBJECT_SIZE;
-        const size_t segment_index = obj_index / kSegmentBitCount;
-        // kInvalidSegmentIndex is SIZE_MAX; no real segment_index can collide with it.
-        size_t* segment = segment_index == _cached_segment_index ? _cached_segment : get_or_create_segment_slow(segment_index);
-        const size_t bit_index_in_segment = obj_index % kSegmentBitCount;
-        const size_t word_index = bit_index_in_segment / kBitsPerWord;
-        const size_t bit_in_word = bit_index_in_segment % kBitsPerWord;
-        const size_t mask = static_cast<size_t>(1) << bit_in_word;
-        if (segment[word_index] & mask)
-        {
-            return false;
-        }
-        segment[word_index] |= mask;
-        return true;
-    }
-};
-
-using AddressMarkerImpl = AddressMarker<PTR_SIZE * 2, 4 * 1024>;
+using VisitedObjectBitmap = utils::SegmentedAddressBitmap<PTR_SIZE * 2, 4 * 1024>;
 
 struct LivenessState
 {
@@ -82,7 +22,7 @@ struct LivenessState
     il2cpp_register_object_callback callback;
     void* userdata;
     il2cpp_liveness_reallocate_callback reallocate;
-    AddressMarkerImpl visited_objects;
+    VisitedObjectBitmap visited_objects;
 
     static constexpr size_t PENDING_CALLBACK_BATCH_SIZE = 256;
     vm::RtObject* pending_callback_batch[PENDING_CALLBACK_BATCH_SIZE];
