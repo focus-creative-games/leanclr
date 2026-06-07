@@ -4,7 +4,12 @@
 #include <cassert>
 #include <cstring>
 
+#include "build_config.h"
 #include "alloc/general_allocation.h"
+
+#if defined(_MSC_VER) && !defined(__clang__)
+#include <intrin.h>
+#endif
 
 namespace leanclr
 {
@@ -207,6 +212,35 @@ class MemOp
             bits >>= 1;
         }
         return count;
+    }
+
+    // word must be non-zero
+    static size_t count_trailing_zeros_nonzero(size_t word)
+    {
+        assert(word != 0);
+#if defined(__GNUC__) || defined(__clang__)
+#if LEANCLR_ARCH_64BIT
+        return static_cast<size_t>(__builtin_ctzll(static_cast<unsigned long long>(word)));
+#else
+        return static_cast<size_t>(__builtin_ctzl(word));
+#endif
+#elif defined(_MSC_VER)
+        unsigned long index;
+#if LEANCLR_ARCH_64BIT
+        _BitScanForward64(&index, word);
+#else
+        _BitScanForward(&index, static_cast<unsigned long>(word));
+#endif
+        return static_cast<size_t>(index);
+#else
+        size_t n = 0;
+        while ((word & static_cast<size_t>(1)) == 0)
+        {
+            word >>= 1;
+            ++n;
+        }
+        return n;
+#endif
     }
 
     static void* dup_mem(const void* src, size_t size)

@@ -1,7 +1,10 @@
 #include "liveness.h"
 
+#include <cstdint>
+
 #include "alloc/general_allocation.h"
 #include "utils/hashmap.h"
+#include "utils/mem_op.h"
 #include "vm/class.h"
 #include "vm/field.h"
 #include "vm/object.h"
@@ -150,32 +153,42 @@ void Liveness::free_struct(void* state)
 
 static void process_object(vm::RtObject* obj, LivenessState* state);
 
-static void visit_normal_object(vm::RtObject* obj, LivenessState* state)
+static void visit_gc_bitmap(const metadata::RtClass* klass, uint8_t* slot_base, LivenessState* state)
 {
-    const metadata::RtClass* klass = obj->klass;
-    for (size_t i = vm::Class::kFirstGCBitmapBitIndex; i < klass->gc_bitmap_bit_count; ++i)
+    const size_t bit_count = klass->gc_bitmap_bit_count;
+    const size_t start_bit = vm::Class::kFirstGCBitmapBitIndex;
+    if (bit_count <= start_bit)
     {
-        if (vm::Class::has_reference_at_bitmap_bit_index(klass, i))
+        return;
+    }
+
+    const size_t* bitmap = klass->gc_bitmap;
+    const size_t kBitsPerWord = vm::Class::kBitsPerWord;
+    const size_t start_word = start_bit / kBitsPerWord;
+    const size_t end_word = (bit_count + kBitsPerWord - 1) / kBitsPerWord;
+
+    for (size_t w = start_word; w < end_word; ++w)
+    {
+        size_t word = bitmap[w];
+        while (word != 0)
         {
-            uint8_t* field_address = reinterpret_cast<uint8_t*>(obj) + i * sizeof(void*);
-            vm::RtObject* field_obj = *reinterpret_cast<vm::RtObject**>(field_address);
-            process_object(field_obj, state);
+            const size_t bit_in_word = utils::MemOp::count_trailing_zeros_nonzero(word);
+            const size_t bit_index = w * kBitsPerWord + bit_in_word;
+            vm::RtObject** slot = reinterpret_cast<vm::RtObject**>(slot_base + bit_index * sizeof(void*));
+            process_object(*slot, state);
+            word &= word - 1;
         }
     }
 }
 
+static void visit_normal_object(vm::RtObject* obj, LivenessState* state)
+{
+    visit_gc_bitmap(obj->klass, reinterpret_cast<uint8_t*>(obj), state);
+}
+
 static void visit_value_type(uint8_t* data, LivenessState* state, const metadata::RtClass* value_type_class)
 {
-    // TODO: optimize this, it's not efficient to iterate over the whole bitmap,
-    // a better way is assign by word
-    for (size_t i = vm::Class::kFirstGCBitmapBitIndex; i < value_type_class->gc_bitmap_bit_count; ++i)
-    {
-        if (vm::Class::has_reference_at_bitmap_bit_index(value_type_class, i))
-        {
-            vm::RtObject* obj = *reinterpret_cast<vm::RtObject**>(data - sizeof(vm::RtObject) + i * sizeof(void*));
-            process_object(obj, state);
-        }
-    }
+    visit_gc_bitmap(value_type_class, data - vm::RT_OBJECT_HEADER_SIZE, state);
 }
 
 static void visit_array_object(vm::RtArray* obj, LivenessState* state)
