@@ -150,7 +150,7 @@ void Liveness::free_struct(void* state)
     delete reinterpret_cast<LivenessState*>(state);
 }
 
-void process_object(vm::RtObject* obj, LivenessState* state);
+static void process_object(vm::RtObject* obj, LivenessState* state);
 
 static void visit_normal_object(vm::RtObject* obj, LivenessState* state)
 {
@@ -199,7 +199,7 @@ static void visit_array_object(vm::RtArray* obj, LivenessState* state)
     {
         size_t element_size = vm::Array::get_array_element_size(obj);
         void* elements_start_address = vm::Array::get_array_data_start_as_ptr_void(obj);
-        for (int32_t i = 0; i < obj->length; ++i)
+        for (size_t i = 0, n = static_cast<size_t>(obj->length); i < n; ++i)
         {
             uint8_t* element_address = reinterpret_cast<uint8_t*>(elements_start_address) + i * element_size;
             visit_value_type(element_address, state, element_class);
