@@ -88,6 +88,9 @@ class SmallHeapArena
         }
         FreeBlockHeader* free_block = _header.free_list;
         _header.free_list = (FreeBlockHeader*)free_block->next_free;
+        LEANCLR_ASSUME((uintptr_t)free_block % GC_ALIGN == 0);
+        LEANCLR_ASSUME(_header.block_size % GC_ALIGN == 0);
+        std::memset(free_block, 0, _header.block_size);
         return free_block;
     }
 
