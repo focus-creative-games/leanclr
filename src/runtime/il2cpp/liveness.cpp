@@ -14,7 +14,7 @@ namespace leanclr
 namespace il2cpp
 {
 
-using VisitedObjectBitmap = utils::SegmentedAddressBitmap<PTR_SIZE * 2, 4 * 1024>;
+using VisitedObjectBitmap = utils::SegmentedAddressBitmap<PTR_SIZE * 2, 4 * 1024, 64>;
 
 struct LivenessState
 {
