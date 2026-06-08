@@ -6,7 +6,7 @@
 #include "utils/hashmap.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
-#include "gc/roots/gc_roots.h"
+#include "gc/gc_roots.h"
 
 namespace leanclr
 {
@@ -94,7 +94,8 @@ RtResultVoid Environment::init_cmdline_args(const char** argv, int32_t argc)
     assert(!g_cmdline_args && "Command line arguments have already been initialized");
     // Create string array for command line arguments
     metadata::RtClass* string_class = vm::Class::get_corlib_types().cls_string;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, args_array, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(string_class, argc, "Environment::init_cmdline_args"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, args_array,
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(string_class, argc, "Environment::init_cmdline_args"));
 
     for (int32_t i = 0; i < argc; ++i)
     {
@@ -179,7 +180,8 @@ RtResult<RtArray*> Environment::get_environment_variable_names()
 {
     metadata::RtClass* string_class = vm::Class::get_corlib_types().cls_string;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, names_array,
-                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(string_class, static_cast<int32_t>(s_environment_variables_map.size()), "Environment::get_environment_variable_names"));
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(string_class, static_cast<int32_t>(s_environment_variables_map.size()),
+                                                                                        "Environment::get_environment_variable_names"));
     size_t index = 0;
     for (utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>::const_iterator it = s_environment_variables_map.begin();
          it != s_environment_variables_map.end(); ++it)

@@ -202,7 +202,7 @@ namespace leanclr
             return Class::is_string_class(klass) || Class::is_blittable(klass);
         }
 
-        void GCHandle::foreach_strong_handles(void (*callback)(void*, void*), void* userData)
+        void GCHandle::foreach_strong_handles(void (*callback)(vm::RtObject*, void*), void* userData)
         {
             for (auto it = s_handle_map.begin(); it != s_handle_map.end(); ++it)
             {

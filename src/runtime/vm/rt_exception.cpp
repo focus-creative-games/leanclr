@@ -1,7 +1,7 @@
 #include "rt_exception.h"
 #include <cstdlib>
 #include "gc/garbage_collector.h"
-#include "gc/roots/gc_roots.h"
+#include "gc/gc_roots.h"
 #include "class.h"
 #include "object.h"
 #include "rt_string.h"

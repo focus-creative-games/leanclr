@@ -1,4 +1,4 @@
-#include "gc/handles/gc_handle_table.h"
+#include "gc_handle_table.h"
 
 #include "gc/garbage_collector.h"
 #include "utils/rt_vector.h"

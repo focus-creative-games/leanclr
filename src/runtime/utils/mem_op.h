@@ -24,6 +24,12 @@ class MemOp
         return (value + alignment - 1) & ~(alignment - 1);
     }
 
+    static size_t align_down(size_t value, size_t alignment)
+    {
+        assert((alignment & (alignment - 1)) == 0 && "Alignment must be a power of two");
+        return value & ~(alignment - 1);
+    }
+
     template <typename T>
     static void copy_obj_nonoverlapping(T* dst, const T* src)
     {

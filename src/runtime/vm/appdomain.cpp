@@ -8,7 +8,7 @@
 #include "utils/string_util.h"
 #include "metadata/module_def.h"
 #include "settings.h"
-#include "gc/roots/gc_roots.h"
+#include "gc/gc_roots.h"
 
 namespace leanclr
 {

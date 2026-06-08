@@ -1,7 +1,7 @@
 
 #include "rt_string.h"
 #include "gc/garbage_collector.h"
-#include "gc/roots/gc_roots.h"
+#include "gc/gc_roots.h"
 #include "class.h"
 #include "field.h"
 #include "3rd/utf8/utf8.h"
@@ -19,6 +19,7 @@ namespace vm
 static metadata::RtClass* g_stringClass = nullptr;
 static RtString* g_empty_string = nullptr;
 static const metadata::RtMethodInfo* g_redirectedCtorMethod = nullptr;
+
 namespace
 {
 struct RtStringHash
@@ -176,12 +177,12 @@ RtString* String::fast_allocate_string(int32_t length)
     // TODO: can we optimize it out? we have redirected String::GetHashCode and String::GetLegacyNonRandomizedHashCode to
     // the intrinsic implementation which does not require zero-termination.
     size_t allocation_size = static_cast<size_t>(get_string_allocation_size(length));
-    #if LEANCLR_GC_DEBUG
-    RtString* newString = (RtString*)gc::GarbageCollector::allocate_object(g_stringClass, allocation_size,
-                                                                  ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, "String::fast_allocate_string"));
-    #else
+#if LEANCLR_GC_DEBUG
+    RtString* newString = (RtString*)gc::GarbageCollector::allocate_object(
+        g_stringClass, allocation_size, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, "String::fast_allocate_string"));
+#else
     RtString* newString = (RtString*)gc::GarbageCollector::allocate_object(g_stringClass, allocation_size);
-    #endif
+#endif
     newString->length = static_cast<int32_t>(length);
     return newString;
 }
