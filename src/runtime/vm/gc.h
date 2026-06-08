@@ -1,22 +1,17 @@
 #pragma once
 
 #include "rt_managed_types.h"
+#include "gc/gc_common.h"
 
 namespace leanclr
 {
 namespace vm
 {
 
-enum class GCMode : int32_t
-{
-    DISABLED = 0,
-    ENABLED = 1,
-    MANUAL = 2
-};
-
 class GC
 {
   public:
+    static void initialize();
     static vm::RtObject* get_ephemeron_tombstone();
     static void register_ephemeron_array(vm::RtObject* arr);
     static int32_t get_collection_count(int32_t generation);
@@ -36,7 +31,7 @@ class GC
     static void enable();
     static void disable();
     static bool is_disabled();
-    static void set_mode(GCMode mode);
+    static void set_mode(gc::GCMode mode);
     static bool is_incremental();
     static int64_t get_max_time_slice_ns();
     static void set_max_time_slice_ns(int64_t maxTimeSlice);

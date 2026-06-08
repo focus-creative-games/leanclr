@@ -70,7 +70,7 @@ extern "C"
 
 using namespace leanclr::il2cpp;
 
-typedef vm::GCMode Il2CppGCMode;
+typedef gc::GCMode Il2CppGCMode;
 typedef vm::AotExceptionWrapper Il2CppExceptionWrapper;
 typedef il2cpp::Il2CppStat Il2CppStat;
 typedef alloc::MemoryCallbacks Il2CppMemoryCallbacks;

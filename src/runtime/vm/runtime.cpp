@@ -17,14 +17,13 @@
 #include "object.h"
 #include "environment.h"
 #include "settings.h"
+#include "gc.h"
 
 #include "metadata/metadata_cache.h"
 #include "metadata/module_def.h"
 #include "metadata/aot_module.h"
 #include "alloc/general_allocation.h"
 #include "alloc/metadata_allocation.h"
-#include "gc/garbage_collector.h"
-#include "gc_roots_register.h"
 #include "interp/machine_state.h"
 #include "utils/rt_vector.h"
 
@@ -378,7 +377,7 @@ RtResultVoid Runtime::initialize()
 
     metadata::MetadataCache::initialize();
     interp::MachineState::initialize();
-    gc::GarbageCollector::initialize();
+    GC::initialize();
 
     RET_ERR_ON_FAIL(Assembly::load_corlib());
     RET_ERR_ON_FAIL(Class::initialize());
@@ -395,8 +394,6 @@ RtResultVoid Runtime::initialize()
     const char** argv;
     Settings::get_command_line_arguments(argc, argv);
     RET_ERR_ON_FAIL(Environment::init_cmdline_args(argv, argc));
-
-    register_all_gc_roots();
 
     metadata::RtModuleDef* corlib_mod = Assembly::get_corlib()->mod;
     auto corlib_aot_module_data = corlib_mod->get_aot_module_data();

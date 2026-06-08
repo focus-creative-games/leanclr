@@ -32,9 +32,9 @@ class GarbageCollector
 #error "No GC implementation selected"
 #endif
 
-    static void initialize()
+    static void initialize(const GcHeapImpl::Config& config)
     {
-        GcHeapImpl::initialize();
+        GcHeapImpl::initialize(config);
     }
 
     static void collect()
@@ -67,9 +67,9 @@ class GarbageCollector
         return GcHeapImpl::get_collection_count();
     }
 
-    static void set_pressure_config(const GcPressureConfig& config)
+    static void set_gc_mode(GCMode mode)
     {
-        GcHeapImpl::set_pressure_config(config);
+        GcHeapImpl::set_gc_mode(mode);
     }
 
     static void write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)

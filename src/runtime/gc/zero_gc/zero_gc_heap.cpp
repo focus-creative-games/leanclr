@@ -17,10 +17,10 @@ namespace gc
 static int64_t s_used_bytes = 0;
 static int64_t s_heap_bytes = 0;
 
-void ZeroGcHeap::initialize()
+void ZeroGcHeap::initialize(const Config& config)
 {
-    GcPressureConfig cfg = {GC_DEFAULT_BYTE_THRESHOLD, GC_DEFAULT_SOFT_HEAP_LIMIT};
-    GcPressure::initialize(cfg);
+    s_gc_mode = config.mode;
+    GcPressure::initialize(config.pressure_config);
     s_used_bytes = 0;
     s_heap_bytes = 0;
 }
@@ -55,11 +55,6 @@ int32_t ZeroGcHeap::get_collection_count()
     return 0;
 }
 
-void ZeroGcHeap::set_pressure_config(const GcPressureConfig& config)
-{
-    GcPressure::set_config(config);
-}
-
 vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
 {
     return allocate_object(klass, size);
@@ -70,6 +65,9 @@ vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t
     assert(size >= sizeof(vm::RtObject));
     auto obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(size);
     obj->klass = const_cast<metadata::RtClass*>(klass);
+    s_used_bytes += size;
+    s_heap_bytes += size;
+    GcPressure::on_alloc(size);
     return obj;
 }
 

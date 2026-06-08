@@ -3,6 +3,7 @@
 #include "core/rt_base.h"
 #include "utils/rt_span.h"
 #include "rt_managed_types.h"
+#include "gc/gc_common.h"
 
 namespace leanclr
 {
@@ -64,6 +65,9 @@ class Settings
 
     static const metadata::RtAotModulesData* get_aot_modules_data();
     static void set_aot_modules_data(const metadata::RtAotModulesData* modules_data);
+
+    static void set_gc_mode(gc::GCMode mode);
+    static gc::GCMode get_gc_mode();
 };
 } // namespace vm
 } // namespace leanclr

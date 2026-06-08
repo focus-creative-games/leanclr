@@ -30,6 +30,8 @@ static ReportUnhandledExceptionFunc g_report_unhandled_exception_function = null
 
 static const metadata::RtAotModulesData* g_aot_modules_data = nullptr;
 
+static gc::GCMode g_gc_mode = gc::GCMode::ENABLED;
+
 static utils::Utf8StringBuilder g_debugger_log_buffer;
 
 static void default_debugger_log_function(int32_t level, const uint16_t* category, size_t category_len, const uint16_t* message, size_t message_len)
@@ -212,5 +214,14 @@ void Settings::set_default_frame_stack_size(size_t size)
     g_default_frame_stack_size = size;
 }
 
+void Settings::set_gc_mode(gc::GCMode mode)
+{
+    g_gc_mode = mode;
+}
+
+gc::GCMode Settings::get_gc_mode()
+{
+    return g_gc_mode;
+}
 } // namespace vm
 } // namespace leanclr

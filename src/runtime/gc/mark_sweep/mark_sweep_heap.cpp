@@ -294,6 +294,7 @@ static utils::HashSet<void*> s_big_object_arenas;
 static int64_t s_used_bytes = 0;
 static int64_t s_heap_bytes = 0;
 static int32_t s_collection_count = 0;
+static GCMode s_gc_mode;
 
 static bool is_object_alive(vm::RtObject* obj, void* ctx)
 {
@@ -388,10 +389,10 @@ static inline bool is_small_object(size_t size)
     return size <= kMaxSmallObejctSize;
 }
 
-void MarkSweepHeap::initialize()
+void MarkSweepHeap::initialize(const Config& config)
 {
-    GcPressureConfig cfg = {GC_DEFAULT_BYTE_THRESHOLD, GC_DEFAULT_SOFT_HEAP_LIMIT};
-    GcPressure::initialize(cfg);
+    s_gc_mode = config.mode;
+    GcPressure::initialize(config.pressure_config);
     s_used_bytes = 0;
     s_heap_bytes = 0;
     initialize_small_heap_arenas();
@@ -399,8 +400,13 @@ void MarkSweepHeap::initialize()
 
 void MarkSweepHeap::collect()
 {
+    if (s_gc_mode == GCMode::DISABLED)
+    {
+        return;
+    }
     printf("MarkSweepHeap::collect begin\n");
     GcPressure::on_collect();
+    //return;
     GCAliveObjectBitmap alive_object_bitmap;
     GcRoots::foreach_root(alive_object_bitmap);
 
@@ -419,6 +425,10 @@ void MarkSweepHeap::collect()
 
 bool MarkSweepHeap::should_collect(bool force)
 {
+    if (s_gc_mode == GCMode::DISABLED)
+    {
+        return false;
+    }
     return GcPressure::should_collect(force);
 }
 
@@ -447,9 +457,9 @@ int32_t MarkSweepHeap::get_collection_count()
     return s_collection_count;
 }
 
-void MarkSweepHeap::set_pressure_config(const GcPressureConfig& config)
+void MarkSweepHeap::set_gc_mode(GCMode mode)
 {
-    GcPressure::set_config(config);
+    s_gc_mode = mode;
 }
 
 vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite* site)

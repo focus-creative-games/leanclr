@@ -1,5 +1,6 @@
 #include "gc.h"
 #include "appdomain.h"
+#include "settings.h"
 #include "gc/garbage_collector.h"
 
 namespace leanclr
@@ -7,7 +8,7 @@ namespace leanclr
 namespace vm
 {
 
-static GCMode s_mode = GCMode::ENABLED;
+static gc::GCMode s_mode = gc::GCMode::ENABLED;
 static int64_t s_max_time_slice_ns = 0;
 static int64_t s_used_size = 0;
 static int64_t s_heap_size = 0;
@@ -15,6 +16,29 @@ static void* s_heap_start = nullptr;
 static void* s_heap_end = nullptr;
 static void* s_heap_top = nullptr;
 static void* s_heap_bottom = nullptr;
+
+void register_exception_gc_roots();
+void register_string_gc_roots();
+void register_appdomain_gc_roots();
+void register_environment_gc_roots();
+void register_reflection_gc_roots();
+
+void register_all_gc_roots()
+{
+    register_exception_gc_roots();
+    register_string_gc_roots();
+    register_appdomain_gc_roots();
+    register_environment_gc_roots();
+    register_reflection_gc_roots();
+}
+
+void GC::initialize()
+{
+    s_mode = Settings::get_gc_mode();
+    auto config = gc::GarbageCollector::GcHeapImpl::Config{s_mode, {gc::GC_DEFAULT_BYTE_THRESHOLD, gc::GC_DEFAULT_SOFT_HEAP_LIMIT}};
+    gc::GarbageCollector::initialize(config);
+    register_all_gc_roots();
+}
 
 vm::RtObject* GC::get_ephemeron_tombstone()
 {
@@ -100,22 +124,26 @@ void GC::start_incremental_collection()
 
 void GC::enable()
 {
-    s_mode = GCMode::ENABLED;
+    printf("GC::enable\n");
+    set_mode(gc::GCMode::ENABLED);
 }
 
 void GC::disable()
 {
-    s_mode = GCMode::DISABLED;
+    printf("GC::disable\n");
+    set_mode(gc::GCMode::DISABLED);
 }
 
 bool GC::is_disabled()
 {
-    return s_mode == GCMode::DISABLED;
+    return s_mode == gc::GCMode::DISABLED;
 }
 
-void GC::set_mode(GCMode mode)
+void GC::set_mode(gc::GCMode mode)
 {
+    printf("GC::set_mode: %d\n", mode);
     s_mode = mode;
+    gc::GarbageCollector::set_gc_mode(mode);
 }
 
 bool GC::is_incremental()

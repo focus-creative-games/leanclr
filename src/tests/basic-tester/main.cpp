@@ -472,6 +472,7 @@ int main()
         "leanclr",
     };
     vm::Settings::set_command_line_arguments(sizeof(argv) / sizeof(const char*), argv);
+    vm::Settings::set_gc_mode(gc::GCMode::DISABLED);
     auto result = vm::Runtime::initialize();
     if (result.is_err())
     {

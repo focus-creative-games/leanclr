@@ -6,6 +6,13 @@ namespace leanclr
 {
 namespace gc
 {
+    
+enum class GCMode : int32_t
+{
+    DISABLED = 0,
+    ENABLED = 1,
+    MANUAL = 2
+};
 
 enum GcBlockFlags : uint16_t
 {

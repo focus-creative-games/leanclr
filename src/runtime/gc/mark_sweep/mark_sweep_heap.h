@@ -1,6 +1,7 @@
 #pragma once
 
 #include "gc/gc_alloc_site.h"
+#include "gc/gc_common.h"
 #include "gc/gc_pressure.h"
 #include "metadata/rt_metadata.h"
 #include "vm/rt_managed_types.h"
@@ -16,7 +17,13 @@ namespace gc
 class MarkSweepHeap
 {
   public:
-    static void initialize();
+    struct Config
+    {
+        GCMode mode;
+        GcPressureConfig pressure_config;
+    };
+
+    static void initialize(const Config& config);
     static void collect();
     static bool maybe_collect();
     static bool should_collect(bool force);
@@ -25,7 +32,7 @@ class MarkSweepHeap
     static int64_t get_heap_size();
     static int32_t get_collection_count();
 
-    static void set_pressure_config(const GcPressureConfig& config);
+    static void set_gc_mode(GCMode mode);
 
     static void write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)
     {
