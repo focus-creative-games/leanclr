@@ -132,13 +132,13 @@ void GC::start_incremental_collection()
 
 void GC::enable()
 {
-    printf("GC::enable\n");
+    // printf("GC::enable\n");
     set_mode(gc::GCMode::ENABLED);
 }
 
 void GC::disable()
 {
-    printf("GC::disable\n");
+    // printf("GC::disable\n");
     set_mode(gc::GCMode::DISABLED);
 }
 
@@ -149,7 +149,7 @@ bool GC::is_disabled()
 
 void GC::set_mode(gc::GCMode mode)
 {
-    printf("GC::set_mode: %d\n", mode);
+    // printf("GC::set_mode: %d\n", mode);
     s_mode = mode;
     gc::GarbageCollector::set_gc_mode(mode);
 }
