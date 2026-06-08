@@ -60,7 +60,7 @@ LeanCLR already supports Unity and will support more engines/platforms soon.
 | **Delegates** | ✅ Complete | Unicast/multicast, generic delegates |
 | **Internal Calls** | ✅ Complete | Currently focused on Core edition icalls |
 | **P/Invoke** | ✅ Complete | Supports manual registration and LeanAOT-generated P/Invoke wrappers |
-| **Garbage Collection** | 📋 In development | Partially complete |
+| **Garbage Collection** | ✅ Complete | mark-sweep precise full GC |
 | **AOT Compiler** | ✅ Complete | IL → C++ transpilation supported |
 | **Multi-threading** | 📋 Planned | Threads and synchronization primitives (Standard edition) |
 
