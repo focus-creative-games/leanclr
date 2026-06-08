@@ -2350,6 +2350,11 @@
     "header": "icalls/system_threading_nativeeventcalls.h"
   },
   {
+    "name": "System.Threading.OSSpecificSynchronizationContext::GetOSContext()",
+    "func": "SystemThreadingOSSpecificSynchronizationContext::get_os_context",
+    "header": "icalls/system_threading_osspecificsynchronizationcontext.h"
+  },
+  {
     "name": "System.Threading.Thread::Abort_internal(System.Threading.InternalThread,System.Object)",
     "func": "SystemThreadingThread::abort_internal",
     "header": "icalls/system_threading_thread.h"
