@@ -22,7 +22,7 @@ if /i "%~1"=="Debug" set BUILD_TYPE=Debug
 if /i "%~1"=="Release" set BUILD_TYPE=Release
 if /i "%~1"=="clean" set CLEAN=1
 if /i "%~1"=="-clean" set CLEAN=1
-if /i "%~1"=="x86" set ARCH=Win32
+if /i "%~1"=="x86" set ARCH=x86
 if /i "%~1"=="x64" set ARCH=x64
 if /i "%~1"=="shared" set BUILD_SHARED=1
 shift
@@ -58,6 +58,8 @@ if %CLEAN%==1 (
 
 if not exist "%CMAKE_BUILD_DIR%" mkdir "%CMAKE_BUILD_DIR%"
 
+call "%REPO_ROOT%\scripts\lib\cmake-ensure-platform.bat"
+
 echo.
 if %GENERATE_SLN%==1 (
     echo CMake configure ^(generate .sln^)...
@@ -65,9 +67,9 @@ if %GENERATE_SLN%==1 (
     echo [1/2] CMake configure...
 )
 if %BUILD_SHARED%==1 (
-    cmake -S "%RUNTIME_SRC%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio %VS_VERSION%" -A %ARCH% -DBUILD_SHARED_LEANCLR=ON
+    cmake -S "%RUNTIME_SRC%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio %VS_VERSION%" -A %CMAKE_GENERATOR_ARCH% -DBUILD_SHARED_LEANCLR=ON
 ) else (
-    cmake -S "%RUNTIME_SRC%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio %VS_VERSION%" -A %ARCH%
+    cmake -S "%RUNTIME_SRC%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio %VS_VERSION%" -A %CMAKE_GENERATOR_ARCH%
 )
 if errorlevel 1 (
     echo ERROR: CMake generation failed.

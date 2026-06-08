@@ -20,8 +20,10 @@ echo Build dir: %CMAKE_BUILD_DIR%
 if not exist "%CMAKE_BUILD_DIR%" mkdir "%CMAKE_BUILD_DIR%"
 if errorlevel 1 goto :error
 
+call "%REPO_ROOT%\scripts\lib\cmake-ensure-platform.bat"
+
 echo [1/2] CMake configure...
-cmake -S "%RUNNER_SRC_DIR%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio 17 2022" -A %ARCH%
+cmake -S "%RUNNER_SRC_DIR%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio 17 2022" -A %CMAKE_GENERATOR_ARCH%
 if errorlevel 1 goto :error
 
 echo [2/2] Build target 'test'...

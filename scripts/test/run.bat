@@ -13,7 +13,8 @@ call "%~dp0..\lib\cmake-dir.bat" "tests\basic-tester" "%CONFIG%" "%ARCH%"
 set "RUNNER=%CMAKE_BUILD_DIR%\bin\%CONFIG%\test.exe"
 
 if not exist "%RUNNER%" (
-    echo ERROR: Test runner not found at "%RUNNER%". Run 'scripts\test\build-all.bat' first.
+    echo ERROR: Test runner not found at "%RUNNER%".
+    echo Run: scripts\build.bat test build %CONFIG% %ARCH%
     endlocal & exit /b 1
 )
 
