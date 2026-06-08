@@ -55,11 +55,11 @@ static void visit_value_type(uint8_t* data, GcVisitObjectFn visit, void* userdat
 
 static void visit_array_object(vm::RtArray* obj, GcVisitObjectFn visit, void* userdata)
 {
-    const metadata::RtClass* element_class = obj->klass->element_class;
-    if (!vm::Class::get_has_references(element_class))
+    if (!vm::Class::get_has_references(obj->klass))
     {
         return;
     }
+    const metadata::RtClass* element_class = obj->klass->element_class;
     if (vm::Class::is_reference_type(element_class))
     {
         vm::RtObject** elements = vm::Array::get_array_data_start_as<vm::RtObject*>(obj);
