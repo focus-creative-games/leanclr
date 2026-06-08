@@ -20,6 +20,7 @@
 #include "vm/object.h"
 #include "vm/customattribute.h"
 #include "interp/interpreter.h"
+#include "gc/garbage_collector.h"
 
 #define LEANCLR_ENABLE_LIVENESS_TEST 1
 
@@ -652,5 +653,6 @@ int main()
 #if LEANCLR_ENABLE_LIVENESS_TEST
     test_liveness();
 #endif
+    gc::GarbageCollector::collect();
     return 0;
 }
