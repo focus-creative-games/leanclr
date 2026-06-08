@@ -8,7 +8,6 @@ namespace vm
 {
 
 static GCMode s_mode = GCMode::ENABLED;
-static bool s_is_incremental = false;
 static int64_t s_max_time_slice_ns = 0;
 static int64_t s_used_size = 0;
 static int64_t s_heap_size = 0;
@@ -40,12 +39,12 @@ int32_t GC::get_max_generation()
 
 void GC::collect(int32_t generation)
 {
-    (void)generation;
+    gc::GarbageCollector::collect();
 }
 
 int32_t GC::collect_a_little()
 {
-    return 0;
+    return gc::GarbageCollector::maybe_collect() ? 1 : 0;
 }
 
 void GC::internal_collect(int32_t generation)
@@ -55,12 +54,12 @@ void GC::internal_collect(int32_t generation)
 
 void GC::record_pressure(int64_t bytes)
 {
-    (void)bytes;
+    gc::GcPressure::record_external(bytes);
 }
 
 int64_t GC::get_allocated_bytes_for_current_thread()
 {
-    return 0;
+    return gc::GcPressure::get_bytes_allocated_since_last_gc();
 }
 
 int32_t GC::get_generation(vm::RtObject* obj)
@@ -75,18 +74,24 @@ void GC::wait_for_pending_finalizers()
 
 void GC::suppress_finalize(vm::RtObject* obj)
 {
+    // DOTO
     (void)obj;
 }
 
 void GC::reregister_for_finalize(vm::RtObject* obj)
 {
+    // DOTO
     (void)obj;
 }
 
 int64_t GC::get_total_memory(bool force_full_collection)
 {
-    (void)force_full_collection;
-    return 0;
+    // don't support collection when managed code is running
+    // if (force_full_collection)
+    // {
+    //     gc::GarbageCollector::collect();
+    // }
+    return gc::GarbageCollector::get_heap_size();
 }
 
 void GC::start_incremental_collection()
@@ -115,7 +120,7 @@ void GC::set_mode(GCMode mode)
 
 bool GC::is_incremental()
 {
-    return s_is_incremental;
+    return false;
 }
 
 void GC::set_max_time_slice_ns(int64_t maxTimeSlice)
