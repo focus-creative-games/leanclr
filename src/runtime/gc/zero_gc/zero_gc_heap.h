@@ -24,7 +24,6 @@ class ZeroGcHeap
     static int64_t get_used_size();
     static int64_t get_heap_size();
     static int32_t get_collection_count();
-    static bool is_object_marked(const vm::RtObject* obj);
 
     static void set_pressure_config(const GcPressureConfig& config);
 

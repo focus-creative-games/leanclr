@@ -83,11 +83,6 @@ vm::RtObject* ZeroGcHeap::allocate_array(const metadata::RtClass* arrClass, size
     return allocate_object(arrClass, totalBytes);
 }
 
-bool ZeroGcHeap::is_object_marked(const vm::RtObject* /*obj*/)
-{
-    return true;
-}
-
 } // namespace gc
 } // namespace leanclr
 

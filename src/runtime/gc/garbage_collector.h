@@ -67,11 +67,6 @@ class GarbageCollector
         return GcHeapImpl::get_collection_count();
     }
 
-    static bool is_object_marked(const vm::RtObject* obj)
-    {
-        return GcHeapImpl::is_object_marked(obj);
-    }
-
     static void set_pressure_config(const GcPressureConfig& config)
     {
         GcHeapImpl::set_pressure_config(config);

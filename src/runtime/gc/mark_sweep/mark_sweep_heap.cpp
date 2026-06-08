@@ -14,6 +14,9 @@
 #include "utils/mem_op.h"
 #include "utils/hashset.h"
 #include "vm/class.h"
+#include "vm/gchandle.h"
+#include "vm/rt_array.h"
+#include "vm/rt_string.h"
 
 namespace leanclr
 {
@@ -91,6 +94,51 @@ class SmallHeapArena
     bool is_full()
     {
         return _header.free_list == nullptr;
+    }
+
+    size_t get_block_size() const
+    {
+        return _header.block_size;
+    }
+
+    size_t sweep(const GCAliveObjectBitmap& alive_object_bitmap)
+    {
+        utils::HashSet<void*> free_blocks;
+        for (FreeBlockHeader* cur = _header.free_list; cur != nullptr; cur = cur->next_free)
+        {
+            free_blocks.insert(cur);
+        }
+
+        size_t first_block_offset = utils::MemOp::align_up(sizeof(ArenaHeader), GC_ALIGN);
+        uint8_t* arena_data_start = (uint8_t*)this;
+        FreeBlockHeader* new_free_list = nullptr;
+        size_t freed_count = 0;
+
+        for (size_t i = 0; i < _header.block_count; i++)
+        {
+            void* block_ptr = arena_data_start + first_block_offset + i * _header.block_size;
+            if (free_blocks.find(block_ptr) != free_blocks.end())
+            {
+                FreeBlockHeader* free_block = (FreeBlockHeader*)block_ptr;
+                free_block->next_free = new_free_list;
+                new_free_list = free_block;
+                continue;
+            }
+
+            vm::RtObject* obj = (vm::RtObject*)block_ptr;
+            if (alive_object_bitmap.is_marked(obj))
+            {
+                continue;
+            }
+
+            FreeBlockHeader* free_block = (FreeBlockHeader*)block_ptr;
+            free_block->next_free = new_free_list;
+            new_free_list = free_block;
+            freed_count++;
+        }
+
+        _header.free_list = new_free_list;
+        return freed_count;
     }
 };
 
@@ -173,6 +221,46 @@ class ArenaCollection
         }
         return _current_arena->allocate_block();
     }
+
+    void sweep(const GCAliveObjectBitmap& alive_object_bitmap, int64_t& freed_bytes)
+    {
+        utils::Vector<SmallHeapArena*> all_arenas;
+        if (_current_arena != nullptr)
+        {
+            all_arenas.push_back(_current_arena);
+        }
+        for (size_t i = 0; i < _not_full_arenas.size(); ++i)
+        {
+            all_arenas.push_back(_not_full_arenas[i]);
+        }
+        for (size_t i = 0; i < _full_arenas.size(); ++i)
+        {
+            all_arenas.push_back(_full_arenas[i]);
+        }
+
+        _not_full_arenas.clear();
+        _full_arenas.clear();
+        _current_arena = nullptr;
+
+        for (size_t i = 0; i < all_arenas.size(); ++i)
+        {
+            SmallHeapArena* arena = all_arenas[i];
+            size_t freed_count = arena->sweep(alive_object_bitmap);
+            freed_bytes += static_cast<int64_t>(freed_count * arena->get_block_size());
+            if (arena->is_full())
+            {
+                _full_arenas.push_back(arena);
+            }
+            else if (_current_arena == nullptr)
+            {
+                _current_arena = arena;
+            }
+            else
+            {
+                _not_full_arenas.push_back(arena);
+            }
+        }
+    }
 };
 
 struct ArenaCollectionInfo
@@ -202,6 +290,63 @@ static utils::HashSet<void*> s_big_object_arenas;
 
 static int64_t s_used_bytes = 0;
 static int64_t s_heap_bytes = 0;
+static int32_t s_collection_count = 0;
+
+static bool is_object_alive(vm::RtObject* obj, void* ctx)
+{
+    GCAliveObjectBitmap* alive_object_bitmap = reinterpret_cast<GCAliveObjectBitmap*>(ctx);
+    return alive_object_bitmap->is_marked(obj);
+}
+
+static size_t get_object_allocated_size(vm::RtObject* obj)
+{
+    const metadata::RtClass* klass = obj->klass;
+    if (vm::Class::is_string_class(klass))
+    {
+        auto* str = reinterpret_cast<vm::RtString*>(obj);
+        return static_cast<size_t>(vm::String::get_string_allocation_size(str->length));
+    }
+    if (vm::Class::is_array_or_szarray(klass))
+    {
+        auto* arr = reinterpret_cast<vm::RtArray*>(obj);
+        return vm::Array::get_array_allocation_size(arr->klass, vm::Array::get_array_length(arr));
+    }
+    return vm::Class::get_instance_size_with_object_header(klass);
+}
+
+static void sweep_small_objects(const GCAliveObjectBitmap& alive_object_bitmap, int64_t& freed_bytes)
+{
+    for (size_t i = 0; i < kArenaCollectionCount; ++i)
+    {
+        ArenaCollection<SmallHeapArena>* collection = s_small_heap_arenas[i];
+        if (collection != nullptr)
+        {
+            collection->sweep(alive_object_bitmap, freed_bytes);
+        }
+    }
+}
+
+static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, int64_t& freed_bytes)
+{
+    utils::Vector<void*> dead_objects;
+    for (auto it = s_big_object_arenas.begin(); it != s_big_object_arenas.end(); ++it)
+    {
+        vm::RtObject* obj = reinterpret_cast<vm::RtObject*>(*it);
+        if (!alive_object_bitmap.is_marked(obj))
+        {
+            dead_objects.push_back(*it);
+        }
+    }
+
+    for (size_t i = 0; i < dead_objects.size(); ++i)
+    {
+        vm::RtObject* obj = reinterpret_cast<vm::RtObject*>(dead_objects[i]);
+        size_t aligned_size = utils::MemOp::align_up(get_object_allocated_size(obj), GC_ALIGN);
+        alloc::GeneralAllocation::free(dead_objects[i]);
+        s_big_object_arenas.erase(dead_objects[i]);
+        freed_bytes += static_cast<int64_t>(aligned_size);
+    }
+}
 
 static void initialize_small_heap_arenas()
 {
@@ -251,7 +396,22 @@ void MarkSweepHeap::initialize()
 
 void MarkSweepHeap::collect()
 {
+    printf("MarkSweepHeap::collect begin\n");
     GcPressure::on_collect();
+    GCAliveObjectBitmap alive_object_bitmap;
+    GcRoots::foreach_root(alive_object_bitmap);
+
+    int64_t freed_bytes = 0;
+    sweep_small_objects(alive_object_bitmap, freed_bytes);
+    sweep_big_objects(alive_object_bitmap, freed_bytes);
+    vm::GCHandle::sweep_weak_handles(is_object_alive, &alive_object_bitmap);
+    // TODO: Run finalizers for collected objects.
+
+    int64_t old_heap_bytes = s_heap_bytes;
+    s_used_bytes -= freed_bytes;
+    s_heap_bytes -= freed_bytes;
+    s_collection_count++;
+    printf("MarkSweepHeap::collect end, old_heap_bytes: %lld, new_heap_bytes: %lld, freed_bytes: %lld\n", old_heap_bytes, s_heap_bytes, freed_bytes);
 }
 
 bool MarkSweepHeap::should_collect(bool force)
@@ -281,7 +441,7 @@ int64_t MarkSweepHeap::get_heap_size()
 
 int32_t MarkSweepHeap::get_collection_count()
 {
-    return 0;
+    return s_collection_count;
 }
 
 void MarkSweepHeap::set_pressure_config(const GcPressureConfig& config)
@@ -342,11 +502,6 @@ vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, s
 vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
 {
     return allocate_object(arrClass, totalBytes);
-}
-
-bool MarkSweepHeap::is_object_marked(const vm::RtObject* /*obj*/)
-{
-    return true;
 }
 
 } // namespace gc

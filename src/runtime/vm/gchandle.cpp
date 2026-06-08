@@ -218,5 +218,21 @@ namespace leanclr
             }
         }
 
+        void GCHandle::sweep_weak_handles(bool (*is_object_marked)(vm::RtObject*, void* ctx), void* ctx)
+        {
+            for (auto it = s_handle_map.begin(); it != s_handle_map.end(); ++it)
+            {
+                HandleInfo* hi = it->second;
+                if (hi->type_ != GCHandleType::Weak && hi->type_ != GCHandleType::WeakTrackResurrection)
+                {
+                    continue;
+                }
+                if (hi->obj != nullptr && !is_object_marked(hi->obj, ctx))
+                {
+                    hi->obj = nullptr;
+                }
+            }
+        }
+
     } // namespace vm
 } // namespace leanclr

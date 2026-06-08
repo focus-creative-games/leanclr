@@ -83,6 +83,22 @@ class SegmentedAddressBitmap
         segment[word_index] |= mask;
         return true;
     }
+
+    bool is_marked(const void* address) const
+    {
+        const size_t slot_index = reinterpret_cast<uintptr_t>(address) / SLOT_GRANULARITY;
+        const size_t segment_index = slot_index / kSegmentBitCount;
+        auto it = _segment_map.find(segment_index);
+        if (it == _segment_map.end())
+        {
+            return false;
+        }
+        const size_t bit_index_in_segment = slot_index % kSegmentBitCount;
+        const size_t word_index = bit_index_in_segment / kBitsPerWord;
+        const size_t bit_in_word = bit_index_in_segment % kBitsPerWord;
+        const size_t mask = static_cast<size_t>(1) << bit_in_word;
+        return (it->second[word_index] & mask) != 0;
+    }
 };
 
 } // namespace utils
