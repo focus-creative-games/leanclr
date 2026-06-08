@@ -5,7 +5,7 @@
 #include "class.h"
 #include "appdomain.h"
 #include "alloc/general_allocation.h"
-#include "gc/garbage_collector.h"
+#include "gc/gc_roots.h"
 
 namespace leanclr
 {
@@ -13,6 +13,11 @@ namespace vm
 {
 static RtThread* g_current_thread = nullptr;
 static int32_t g_priority = static_cast<int32_t>(ThreadPriority::Normal);
+
+void register_threading_gc_roots()
+{
+    gc::GcRoots::register_slot(reinterpret_cast<RtObject**>(&g_current_thread));
+}
 
 RtThread* Thread::get_current_thread()
 {
