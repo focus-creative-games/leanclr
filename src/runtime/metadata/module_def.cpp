@@ -11,6 +11,7 @@
 #include "vm/assembly.h"
 #include "vm/class.h"
 #include "vm/method.h"
+#include "gc/gc_roots.h"
 
 namespace leanclr
 {
@@ -34,6 +35,23 @@ static uint32_t allocate_image_id()
 
 static utils::Vector<RtModuleDef*> g_loadedModuleDefs;
 static RtModuleDef* g_corlibModule = nullptr;
+
+static void visit_reflection_object_roots(gc::GcVisitObjectRoot visit, void* userdata)
+{
+    for (RtModuleDef* mod : g_loadedModuleDefs)
+    {
+        if (!mod)
+        {
+            continue;
+        }
+        mod->visit_user_strings(visit, userdata);
+    }
+}
+
+void register_modules_gc_roots()
+{
+    gc::GcRoots::register_visit_object_roots(visit_reflection_object_roots);
+}
 
 void RtModuleDef::register_module_def(RtModuleDef* moduleDef)
 {
@@ -151,6 +169,14 @@ RtResult<vm::RtString*> RtModuleDef::get_user_string(uint32_t index)
         RET_OK(newStr);
     }
     RET_ASSERT_ERR(RtErr::BadImageFormat);
+}
+
+void RtModuleDef::visit_user_strings(gc::GcVisitObjectRoot visit, void* userdata) const
+{
+    for (const auto& pair : _userStringMap)
+    {
+        visit(pair.second, userdata);
+    }
 }
 
 RtResultVoid RtModuleDef::load()

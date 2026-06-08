@@ -5,6 +5,11 @@
 
 namespace leanclr
 {
+namespace metadata
+{
+void register_modules_gc_roots();
+}
+
 namespace vm
 {
 
@@ -32,6 +37,7 @@ void register_all_gc_roots()
     register_environment_gc_roots();
     register_reflection_gc_roots();
     register_threading_gc_roots();
+    metadata::register_modules_gc_roots();
 }
 
 void GC::initialize()

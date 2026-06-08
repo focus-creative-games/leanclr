@@ -11,6 +11,7 @@
 #include "utils/hashmap.h"
 #include "utils/string_util.h"
 #include "utils/rt_vector.h"
+#include "gc/gc_roots.h"
 
 namespace leanclr
 {
@@ -79,6 +80,7 @@ struct RtILEHFat
     uint32_t handler_length;
     uint32_t class_token_or_filter_offset;
 };
+
 static_assert(sizeof(RtILEHFat) == 24, "RtILEHFat size must be 24 bytes");
 
 // Small EH section header; followed by a variable-length array of RtILEHSmall
@@ -213,6 +215,7 @@ class RtModuleDef
     {
         return _classCount;
     }
+
     uint32_t get_method_count() const
     {
         return _methodCount;
@@ -232,7 +235,9 @@ class RtModuleDef
     {
         return _cliImage.get_decoded_blob_reader(index);
     }
+
     RtResult<vm::RtString*> get_user_string(uint32_t index);
+    void visit_user_strings(gc::GcVisitObjectRoot visit, void* userdata) const;
 
     RtResultVoid load();
     RtResultVoid setup_assembly_name();
@@ -320,6 +325,7 @@ class RtModuleDef
         const RtTypeSig** constraints;
         uint32_t count;
     };
+
     RtResult<RtGenericParamConstraint> read_generic_param_constraints(uint32_t genericParamRid, const RtGenericContainerContext& gcc);
 
     RtResultVoid read_type_modifier(utils::BinaryReader& reader, bool optional, const RtGenericContainerContext& gcc, const RtGenericContext* gc,
@@ -332,6 +338,7 @@ class RtModuleDef
                                          const RtGenericContext* gc, utils::Vector<metadata::RtClass*>& outParamMods);
 
     RtResult<const RtTypeSig*> read_field_sig(utils::BinaryReader& reader, const RtGenericContainerContext& gcc, const RtGenericContext* gc);
+
     RtResult<const RtTypeSig*> read_field_sig(uint32_t signature, const RtGenericContainerContext& gcc, const RtGenericContext* gc)
     {
         auto ret = get_decoded_blob_reader(signature);
@@ -340,6 +347,7 @@ class RtModuleDef
     }
 
     RtResult<RtPropertySig> read_property_sig(utils::BinaryReader& reader, const RtGenericContainerContext& gcc, const RtGenericContext* gc);
+
     RtResult<RtPropertySig> read_property_sig(uint32_t signature, const RtGenericContainerContext& gcc, const RtGenericContext* gc)
     {
         auto ret = get_decoded_blob_reader(signature);
@@ -348,12 +356,14 @@ class RtModuleDef
     }
 
     RtResult<RtMethodSig> read_method_sig(utils::BinaryReader& reader, const RtGenericContainerContext& gcc, const RtGenericContext* gc);
+
     RtResult<RtMethodSig> read_method_sig(uint32_t signature, const RtGenericContainerContext& gcc, const RtGenericContext* gc)
     {
         auto ret = get_decoded_blob_reader(signature);
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL2(utils::BinaryReader, reader, ret);
         return read_method_sig(reader, gcc, gc);
     }
+
     RtResult<RtMethodSig> read_method_sig_skip_prologue(uint8_t sigType, utils::BinaryReader& reader, const RtGenericContainerContext& gcc,
                                                         const RtGenericContext* gc);
     RtResult<RtMethodSig> read_stadalone_method_sig(EncodedTokenId standaloneSigToken, const RtGenericContainerContext& gcc, const RtGenericContext* gc);
@@ -426,6 +436,7 @@ class RtModuleDef
         uint32_t* nested_type_def_rids;
         uint32_t count;
     };
+
     utils::HashMap<uint32_t, EnclosingTypeInfo> _enclosingTypeDefRid2StartRidMap;
     utils::HashMap<uint32_t, uint32_t> _nestedTypeDefRid2EnclosingTypeDefRidMap;
     utils::HashMap<uint32_t, uint32_t> _fieldRid2OffsetMap;
