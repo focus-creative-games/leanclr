@@ -60,16 +60,6 @@ void ZeroGcHeap::set_pressure_config(const GcPressureConfig& config)
     GcPressure::set_config(config);
 }
 
-void* ZeroGcHeap::allocate_fixed(size_t size)
-{
-    return alloc::GeneralAllocation::malloc_zeroed(size);
-}
-
-void ZeroGcHeap::free_fixed(void* address)
-{
-    alloc::GeneralAllocation::free(address);
-}
-
 vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
 {
     return allocate_object(klass, size);

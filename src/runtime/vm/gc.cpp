@@ -152,20 +152,6 @@ void GC::stop_gc_world()
 {
 }
 
-// we don't use this method in runtime.
-// this method is used by il2cpp
-void* GC::alloc_fixed(size_t size)
-{
-    return gc::GarbageCollector::allocate_fixed(size);
-}
-
-// we don't use this method in runtime.
-// this method is used by il2cpp
-void GC::free_fixed(void* address)
-{
-    gc::GarbageCollector::free_fixed(address);
-}
-
 void GC::write_barrier(RtObject** obj_ref_location, RtObject* new_obj)
 {
     gc::GarbageCollector::write_barrier(obj_ref_location, new_obj);

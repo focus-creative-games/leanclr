@@ -199,12 +199,12 @@ bool Thread::start_thread(RtThread* thread, vm::RtMulticastDelegate* start)
     {
         return internal_thread->handle != nullptr;
     }
-    StartData* start_data = (StartData*)gc::GarbageCollector::allocate_fixed(sizeof(StartData));
-    start_data->m_Thread = thread;
-    start_data->m_Domain = AppDomain::get_default_appdomain();
-    start_data->m_Delegate = start;
-    start_data->m_StartArg = thread->thread_start_arg;
-    start_data->m_Semaphore = nullptr;
+    // StartData* start_data = (StartData*)gc::GarbageCollector::allocate_fixed(sizeof(StartData));
+    // start_data->m_Thread = thread;
+    // start_data->m_Domain = AppDomain::get_default_appdomain();
+    // start_data->m_Delegate = start;
+    // start_data->m_StartArg = thread->thread_start_arg;
+    // start_data->m_Semaphore = nullptr;
 
     RtNativeThread* native_thread = internal_thread->handle;
     // TODO

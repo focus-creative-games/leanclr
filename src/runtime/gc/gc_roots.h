@@ -14,13 +14,10 @@ namespace gc
 {
 
   typedef utils::SegmentedAddressBitmap<PTR_SIZE * 2, 4 * 1024, 1024> GCAliveObjectBitmap;
-  typedef utils::SegmentedAddressBitmap<PTR_SIZE * 2, 16, 16> GCUnknownObjectBitmap; // unknown blocks are small, so we can use a smaller bitmap
 
 typedef void (*GcRootCallback)(vm::RtObject** slot, void* userdata);
 typedef void (*GcVisitObjectRoot)(vm::RtObject* obj, void* userdata);
 typedef void (*GcVisitObjectRootsScan)(GcVisitObjectRoot visit, void* userdata);
-typedef void (*GcVisitUnknownBlock)(void* address, size_t size, void* userdata);
-typedef void (*GcVisitUnknownBlocksScan)(GcVisitUnknownBlock visit, void* userdata);
 
 class GcRoots
 {
@@ -28,8 +25,7 @@ class GcRoots
     static void register_slot(vm::RtObject** slot);
     static void unregister_slot(vm::RtObject** slot);
     static void register_visit_object_roots(GcVisitObjectRootsScan scan);
-    static void register_visit_unknown_blocks(GcVisitUnknownBlocksScan scan);
-    static void foreach_root(GCAliveObjectBitmap& alive_object_bitmap, GCUnknownObjectBitmap& unknown_object_bitmap);
+    static void foreach_root(GCAliveObjectBitmap& alive_object_bitmap);
 };
 
 } // namespace gc

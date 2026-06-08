@@ -3,7 +3,6 @@
 #if LEANCLR_GC_MARK_SWEEP
 
 #include <cstring>
-#include <unordered_map>
 
 #include "alloc/general_allocation.h"
 #include "gc/gc_config.h"
@@ -201,8 +200,6 @@ static utils::HashSet<void*> s_big_object_arenas;
 // static_assert(kSmallHeapArenaSize <= (1 << 16), "kSmallHeapArenaSize must be less than or equal to 64KB");
 // constexpr size_t kSmallHeapArenaCount = (kMaxSmallHeapBlockSize - kMinSmallHeapBlockSize) / kSmallHeapBlockSizeIncrement + 1;
 
-std::unordered_map<void*, size_t> s_fixed_blocks;
-
 static int64_t s_used_bytes = 0;
 static int64_t s_heap_bytes = 0;
 
@@ -243,14 +240,6 @@ static inline bool is_small_object(size_t size)
     return size <= kMaxSmallObejctSize;
 }
 
-static void scan_fixed_blocks(GcVisitUnknownBlock visit, void* userdata)
-{
-    for (auto it = s_fixed_blocks.begin(); it != s_fixed_blocks.end(); ++it)
-    {
-        visit(it->first, it->second, userdata);
-    }
-}
-
 void MarkSweepHeap::initialize()
 {
     GcPressureConfig cfg = {GC_DEFAULT_BYTE_THRESHOLD, GC_DEFAULT_SOFT_HEAP_LIMIT};
@@ -258,7 +247,6 @@ void MarkSweepHeap::initialize()
     s_used_bytes = 0;
     s_heap_bytes = 0;
     initialize_small_heap_arenas();
-    GcRoots::register_visit_unknown_blocks(scan_fixed_blocks);
 }
 
 void MarkSweepHeap::collect()
@@ -299,37 +287,6 @@ int32_t MarkSweepHeap::get_collection_count()
 void MarkSweepHeap::set_pressure_config(const GcPressureConfig& config)
 {
     GcPressure::set_config(config);
-}
-
-// this method is used by il2cpp. we don't use it in runtime.
-// we assume fixed memory count is small so we use unordered_map instead of vector
-// because we think unordered_map is more efficient than vector for small size.
-void* MarkSweepHeap::allocate_fixed(size_t size)
-{
-    void* block = alloc::GeneralAllocation::malloc_zeroed(size);
-    if (block == nullptr)
-    {
-        return nullptr;
-    }
-    s_fixed_blocks[block] = size;
-    s_used_bytes += size;
-    s_heap_bytes += size;
-    return block;
-}
-
-void MarkSweepHeap::free_fixed(void* address)
-{
-    auto it = s_fixed_blocks.find(address);
-    if (it == s_fixed_blocks.end())
-    {
-        assert(false && "Address not found in fixed blocks");
-        return;
-    }
-    size_t size = it->second;
-    s_used_bytes -= size;
-    s_heap_bytes -= size;
-    s_fixed_blocks.erase(it);
-    alloc::GeneralAllocation::free(address);
 }
 
 vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite* site)

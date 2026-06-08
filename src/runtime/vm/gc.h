@@ -45,8 +45,6 @@ class GC
     static void foreach_heap(void (*func)(void* data, void* context), void* userData);
     static void start_gc_world();
     static void stop_gc_world();
-    static void* alloc_fixed(size_t size);
-    static void free_fixed(void* address);
     static void write_barrier(RtObject** obj_ref_location, RtObject* new_obj);
     static bool has_strict_wbarriers();
     static void set_external_allocation_tracker(void (*func)(void*, size_t, int));

@@ -16,8 +16,6 @@ struct GcHeapConcept
     // static void collect();
     // static bool maybe_collect();
     // static bool should_collect(bool force);
-    // static void* allocate_fixed(size_t size);
-    // static void free_fixed(void* address);
     // static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site);
     // static vm::RtObject* allocate_array(...);
     // static void write_barrier(vm::RtObject** loc, vm::RtObject* obj);

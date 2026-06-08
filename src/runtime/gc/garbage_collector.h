@@ -87,16 +87,6 @@ class GarbageCollector
         return GcHeapImpl::has_strict_wbarriers();
     }
 
-    static void* allocate_fixed(size_t size)
-    {
-        return GcHeapImpl::allocate_fixed(size);
-    }
-
-    static void free_fixed(void* address)
-    {
-        GcHeapImpl::free_fixed(address);
-    }
-
     static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size)
     {
         return GcHeapImpl::allocate_object(klass, size);
