@@ -12,7 +12,6 @@
 #include "utils/hashmap.h"
 #include "utils/hashset.h"
 #include "gc/garbage_collector.h"
-#include "gc/gc_bitmap.h"
 #include "gc/roots/gc_roots.h"
 #include "array_class.h"
 #include "generic_class.h"
