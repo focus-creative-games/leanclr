@@ -481,8 +481,7 @@ class Class
     static size_t get_gc_bitmap_size(const metadata::RtClass* klass)
     {
         // bitmap_size is byte count aligned with size_t
-        size_t word_count = (klass->gc_bitmap_bit_count + kBitsPerWord - 1) / kBitsPerWord;
-        return word_count * sizeof(size_t);
+        return static_cast<size_t>(klass->gc_bitmap_word_count) * sizeof(size_t);
     }
 
     static void get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size)

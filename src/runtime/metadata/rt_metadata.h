@@ -720,7 +720,7 @@ struct RtClass
     uint16_t property_count;
     uint16_t event_count;
     uint16_t vtable_count;
-    uint16_t gc_bitmap_bit_count;
+    uint16_t gc_bitmap_word_count;
     uint8_t hierarchy_depth;
     uint8_t alignment;
     RtCCtorStatus cctor_status;

@@ -181,19 +181,16 @@ private:
     template<typename VisitContext>
     static void visit_gc_bitmap(const metadata::RtClass* klass, uint8_t* slot_base, VisitContext& ctx)
     {
-        const size_t bit_count = klass->gc_bitmap_bit_count;
-        const size_t start_bit = vm::Class::kFirstGCBitmapBitIndex;
-        if (bit_count <= start_bit)
+        const size_t word_count = klass->gc_bitmap_word_count;
+        if (word_count == 0)
         {
             return;
         }
 
         const size_t* bitmap = klass->gc_bitmap;
         const size_t kBitsPerWord = vm::Class::kBitsPerWord;
-        const size_t start_word = start_bit / kBitsPerWord;
-        const size_t end_word = (bit_count + kBitsPerWord - 1) / kBitsPerWord;
 
-        for (size_t w = start_word; w < end_word; ++w)
+        for (size_t w = 0; w < word_count; ++w)
         {
             size_t word = bitmap[w];
             while (word != 0)

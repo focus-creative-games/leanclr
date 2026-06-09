@@ -1184,7 +1184,8 @@ RtResultVoid Class::setup_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitma
                 size_t cur_field_bitmap_offset = cur_field->offset / sizeof(void*);
                 // TODO: optimize this, it's not efficient to iterate over the whole bitmap,
                 // a better way is assign by word
-                for (size_t i = kFirstGCBitmapBitIndex; i < field_class->gc_bitmap_bit_count; ++i)
+                const size_t field_bitmap_bit_count = static_cast<size_t>(field_class->gc_bitmap_word_count) * kBitsPerWord;
+                for (size_t i = kFirstGCBitmapBitIndex; i < field_bitmap_bit_count; ++i)
                 {
                     size_t bit_index = cur_field_bitmap_offset + i;
                     if (get_gc_bitmap_bit(field_class->gc_bitmap, i))
@@ -1212,7 +1213,7 @@ RtResultVoid Class::setup_gc_bitmap(metadata::RtClass* klass)
     if (!get_has_references(klass) || is_array_or_szarray(klass))
     {
         klass->gc_bitmap = &s_empty_gc_bitmap;
-        klass->gc_bitmap_bit_count = 0;
+        klass->gc_bitmap_word_count = 0;
         RET_VOID_OK();
     }
 
@@ -1229,12 +1230,12 @@ RtResultVoid Class::setup_gc_bitmap(metadata::RtClass* klass)
     assert(max_bitmap_index != 0);
     assert(max_bitmap_index < max_bitmap_bit_count);
     size_t final_bitmap_bit_count = max_bitmap_index + 1;
-    // the bitmap bit count is limited to UINT16_MAX
-    if (final_bitmap_bit_count >= (size_t)UINT16_MAX)
+    size_t final_bitmap_word_count = (final_bitmap_bit_count + Class::kBitsPerWord - 1) / Class::kBitsPerWord;
+    // the bitmap word count is limited to UINT16_MAX
+    if (final_bitmap_word_count > static_cast<size_t>(UINT16_MAX))
     {
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
-    size_t final_bitmap_word_count = (final_bitmap_bit_count + Class::kBitsPerWord - 1) / Class::kBitsPerWord;
     size_t* final_bitmap = (size_t*)alloc::GeneralAllocation::calloc_any<size_t>(final_bitmap_word_count);
     if (final_bitmap == nullptr)
     {
@@ -1242,7 +1243,7 @@ RtResultVoid Class::setup_gc_bitmap(metadata::RtClass* klass)
     }
     std::memcpy(final_bitmap, gc_bitmap, final_bitmap_word_count * sizeof(size_t));
     klass->gc_bitmap = final_bitmap;
-    klass->gc_bitmap_bit_count = static_cast<uint16_t>(final_bitmap_bit_count);
+    klass->gc_bitmap_word_count = static_cast<uint16_t>(final_bitmap_word_count);
     RET_VOID_OK();
 }
 
