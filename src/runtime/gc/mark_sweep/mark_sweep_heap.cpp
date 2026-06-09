@@ -7,6 +7,7 @@
 #include "alloc/general_allocation.h"
 #include "gc/gc_config.h"
 #include "gc/gc_common.h"
+#include "gc/gc_debug.h"
 #include "gc/gc_scan.h"
 #include "gc/gc_handle_table.h"
 #include "gc/gc_roots.h"
@@ -80,6 +81,21 @@ class SmallHeapArena
         initialize_free_list(fist_block_offset);
     }
 
+#if LEANCLR_GC_DEBUG
+    bool is_zeroed(void* block, size_t size) const
+    {
+        uint8_t* block_data = reinterpret_cast<uint8_t*>(block);
+        for (size_t i = 0; i < size; i++)
+        {
+            if (block_data[i] != 0)
+            {
+                return false;
+            }
+        }
+        return true;
+    }
+#endif
+
     void* allocate_block()
     {
         if (_header.free_list == nullptr)
@@ -88,9 +104,10 @@ class SmallHeapArena
         }
         FreeBlockHeader* free_block = _header.free_list;
         _header.free_list = (FreeBlockHeader*)free_block->next_free;
-        LEANCLR_ASSUME((uintptr_t)free_block % GC_ALIGN == 0);
-        LEANCLR_ASSUME(_header.block_size % GC_ALIGN == 0);
-        std::memset(free_block, 0, _header.block_size);
+        free_block->next_free = nullptr;
+#if LEANCLR_GC_DEBUG
+        LEANCLR_GC_ASSERT(is_zeroed(free_block, _header.block_size), "free_block is not zeroed");
+#endif
         return free_block;
     }
 
@@ -134,9 +151,23 @@ class SmallHeapArena
                 continue;
             }
 
+#if LEANCLR_GC_DEBUG
+            if (gc_debug_is_quarantined_tombstone(obj))
+            {
+                continue;
+            }
+#endif
+
             FreeBlockHeader* free_block = (FreeBlockHeader*)block_ptr;
+            LEANCLR_ASSUME((uintptr_t)free_block % GC_ALIGN == 0);
+            LEANCLR_ASSUME(_header.block_size % GC_ALIGN == 0);
+#if LEANCLR_GC_DEBUG
+            gc_debug_quarantine_object((vm::RtObject*)free_block, _header.block_size);
+#else
+            std::memset(free_block, 0, _header.block_size);
             free_block->next_free = new_free_list;
             new_free_list = free_block;
+#endif
             freed_count++;
         }
 
@@ -346,7 +377,11 @@ static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, in
     {
         vm::RtObject* obj = reinterpret_cast<vm::RtObject*>(dead_objects[i]);
         size_t aligned_size = utils::MemOp::align_up(get_object_allocated_size(obj), GC_ALIGN);
+#if LEANCLR_GC_DEBUG
+        gc_debug_quarantine_object(obj, aligned_size);
+#else
         alloc::GeneralAllocation::free(dead_objects[i]);
+#endif
         s_big_object_arenas.erase(dead_objects[i]);
         freed_bytes += static_cast<int64_t>(aligned_size);
     }
@@ -406,7 +441,6 @@ void MarkSweepHeap::collect()
     }
     printf("MarkSweepHeap::collect begin\n");
     GcPressure::on_collect();
-    //return;
     GCAliveObjectBitmap alive_object_bitmap;
     GcRoots::foreach_root(alive_object_bitmap);
 
