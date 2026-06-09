@@ -1169,13 +1169,15 @@ RtResultVoid Class::setup_gc_bitmap_for_field(const metadata::RtFieldInfo* field
             break;
         }
         assert(field->offset % sizeof(void*) == 0);
-        size_t field_bitmap_offset = for_static ? field->offset / sizeof(void*) - kFirstGCBitmapBitIndex : field->offset / sizeof(void*);
+        const size_t field_ptr_offset = field->offset / sizeof(void*);
         // TODO: optimize this, it's not efficient to iterate over the whole bitmap,
         // a better way is assign by word
         const size_t field_bitmap_bit_count = static_cast<size_t>(field_class->gc_bitmap_word_count) * kBitsPerWord;
         for (size_t i = kFirstGCBitmapBitIndex; i < field_bitmap_bit_count; ++i)
         {
-            size_t bit_index = field_bitmap_offset + i;
+            // Instance bitmap indices are relative to object start (include header slots).
+            // Static bitmap indices are relative to static_fields_data (no object header).
+            size_t bit_index = for_static ? field_ptr_offset + i - kFirstGCBitmapBitIndex : field_ptr_offset + i;
             if (get_gc_bitmap_bit(field_class->gc_bitmap, i))
             {
                 set_gc_bitmap_bit(bitmap, bit_index);
