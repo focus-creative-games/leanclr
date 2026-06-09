@@ -706,7 +706,6 @@ struct RtClass
     uint8_t* static_fields_data;
     void* unity_user_data;
     size_t* gc_bitmap;
-    uint16_t gc_bitmap_bit_count;
     EncodedTokenId token;
     uint32_t instance_size_without_header;
     uint32_t static_size;
@@ -721,6 +720,7 @@ struct RtClass
     uint16_t property_count;
     uint16_t event_count;
     uint16_t vtable_count;
+    uint16_t gc_bitmap_bit_count;
     uint8_t hierarchy_depth;
     uint8_t alignment;
     RtCCtorStatus cctor_status;

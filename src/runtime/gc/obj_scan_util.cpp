@@ -11,6 +11,24 @@ namespace leanclr
 {
 namespace gc
 {
+
+static void visit_object_fields(vm::RtObject* obj, GcVisitObjectFn visit, void* userdata);
+static void visit_normal_object(vm::RtObject* obj, GcVisitObjectFn visit, void* userdata);
+static void visit_array_object(vm::RtArray* obj, GcVisitObjectFn visit, void* userdata);
+
+static void visit_child(vm::RtObject* obj, GcVisitObjectFn visit, void* userdata)
+{
+    if (obj == nullptr)
+    {
+        return;
+    }
+    if (!visit(obj, userdata))
+    {
+        return;
+    }
+    visit_object_fields(obj, visit, userdata);
+}
+
 static void visit_gc_bitmap(const metadata::RtClass* klass, uint8_t* slot_base, GcVisitObjectFn visit, void* userdata)
 {
     const size_t bit_count = klass->gc_bitmap_bit_count;
@@ -33,11 +51,7 @@ static void visit_gc_bitmap(const metadata::RtClass* klass, uint8_t* slot_base, 
             const size_t bit_in_word = utils::MemOp::count_trailing_zeros_nonzero(word);
             const size_t bit_index = w * kBitsPerWord + bit_in_word;
             vm::RtObject** slot = reinterpret_cast<vm::RtObject**>(slot_base + bit_index * sizeof(void*));
-            vm::RtObject* obj = *slot;
-            if (obj != nullptr)
-            {
-                ObjScanUtil::visit_object(obj, visit, userdata);
-            }
+            visit_child(*slot, visit, userdata);
             word &= word - 1;
         }
     }
@@ -45,6 +59,10 @@ static void visit_gc_bitmap(const metadata::RtClass* klass, uint8_t* slot_base, 
 
 static void visit_normal_object(vm::RtObject* obj, GcVisitObjectFn visit, void* userdata)
 {
+    if (!vm::Class::get_has_references(obj->klass))
+    {
+        return;
+    }
     visit_gc_bitmap(obj->klass, reinterpret_cast<uint8_t*>(obj), visit, userdata);
 }
 
@@ -65,7 +83,7 @@ static void visit_array_object(vm::RtArray* obj, GcVisitObjectFn visit, void* us
         vm::RtObject** elements = vm::Array::get_array_data_start_as<vm::RtObject*>(obj);
         for (int32_t i = 0; i < obj->length; ++i)
         {
-            ObjScanUtil::visit_object(elements[i], visit, userdata);
+            visit_child(elements[i], visit, userdata);
         }
     }
     else
@@ -80,16 +98,8 @@ static void visit_array_object(vm::RtArray* obj, GcVisitObjectFn visit, void* us
     }
 }
 
-void ObjScanUtil::visit_object(vm::RtObject* obj, GcVisitObjectFn visit, void* userdata)
+static void visit_object_fields(vm::RtObject* obj, GcVisitObjectFn visit, void* userdata)
 {
-    if (!obj)
-    {
-        return;
-    }
-    if (!visit(obj, userdata))
-    {
-        return;
-    }
     if (vm::Class::is_array_or_szarray(obj->klass))
     {
         visit_array_object(reinterpret_cast<vm::RtArray*>(obj), visit, userdata);
@@ -98,6 +108,11 @@ void ObjScanUtil::visit_object(vm::RtObject* obj, GcVisitObjectFn visit, void* u
     {
         visit_normal_object(obj, visit, userdata);
     }
+}
+
+void ObjScanUtil::visit_object(vm::RtObject* obj, GcVisitObjectFn visit, void* userdata)
+{
+    visit_child(obj, visit, userdata);
 }
 
 void ObjScanUtil::visit_class_static_data(const metadata::RtClass* klass, GcVisitObjectFn visit, void* userdata)
@@ -147,10 +162,7 @@ void ObjScanUtil::visit_class_static_data(const metadata::RtClass* klass, GcVisi
         {
             assert(field->offset % sizeof(void*) == 0);
             vm::RtObject* obj = *reinterpret_cast<vm::RtObject**>(reinterpret_cast<uint8_t*>(klass->static_fields_data) + field->offset);
-            if (obj != nullptr)
-            {
-                ObjScanUtil::visit_object(obj, visit, userdata);
-            }
+            visit_child(obj, visit, userdata);
             break;
         }
         case metadata::RtElementType::GenericInst:
