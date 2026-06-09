@@ -1,0 +1,82 @@
+using System;
+
+namespace GcTests.Fixtures
+{
+    internal class GcNode
+    {
+        public object data;
+        public GcNode next;
+    }
+
+    internal struct RefLeaf
+    {
+        public object payload;
+        public int tag;
+    }
+
+    internal struct NestedRefs
+    {
+        public RefLeaf leaf;
+        public int id;
+    }
+
+    internal struct DeepNestedRefs
+    {
+        public NestedRefs outer;
+        public long padding;
+    }
+
+    internal class RefContainer
+    {
+        public object field0;
+        public object field1;
+        public NestedRefs nested;
+        public string text;
+        public object[] arrayField;
+    }
+
+    internal class GcBaseWithRef
+    {
+        public object baseField;
+    }
+
+    internal class GcDerivedWithRef : GcBaseWithRef
+    {
+        public object derivedField;
+    }
+
+    internal struct PrimitiveOnlyStruct
+    {
+        public int a;
+        public long b;
+        public double c;
+    }
+
+    internal class PrimitiveOnlyContainer
+    {
+        public int a;
+        public long b;
+        public double c;
+    }
+
+    internal class SelfReferencingNode
+    {
+        public object payload;
+        public SelfReferencingNode self;
+    }
+
+    internal class DeepNestedHolder
+    {
+        public DeepNestedRefs deep;
+    }
+
+    internal static class GcStaticRoots
+    {
+        public static object root;
+        public static string staticString;
+        public static NestedRefs staticNested;
+        public static DeepNestedRefs staticDeepNested;
+        public static RefContainer staticContainer;
+        public static object[] staticArray;
+    }
+}

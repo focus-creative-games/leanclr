@@ -4,112 +4,171 @@ using GcTests.Fixtures;
 
 namespace GcTests.Roots
 {
-    internal struct RefNode
-    {
-        public object next;
-        public int id;
-    }
-
-    internal class StaticRootHolder
-    {
-        public static object static_ref;
-        public static RefNode static_value_node;
-    }
-
-    internal class InstanceRootContainer
-    {
-        public RefNode instance_value_node;
-        public object instance_ref;
-    }
-
     internal class TC_GC_Roots : GcTestCaseBase
     {
         [UnitTest]
         [GcUnitTest]
-        public void Static_field_root()
+        public void Static_object_field_is_a_gc_root()
         {
-            StaticRootHolder.static_ref = new object();
+            GcStaticRoots.root = new object();
             object local = new object();
-            GCHandle weak = GCHandle.Alloc(local, GCHandleType.Weak);
+            GCHandle weak = TrackWeak(local);
             try
             {
                 local = null;
                 FullCollect();
-                Assert.Null(weak.Target);
-                Assert.NotNull(StaticRootHolder.static_ref);
+                AssertCollected(weak);
+                Assert.NotNull(GcStaticRoots.root);
             }
             finally
             {
-                if (weak.IsAllocated)
-                {
-                    weak.Free();
-                }
-                StaticRootHolder.static_ref = null;
+                FreeHandle(ref weak);
+                GcStaticRoots.root = null;
             }
         }
 
         [UnitTest]
         [GcUnitTest]
-        public void Nested_value_type_instance_refs()
+        public void Static_string_field_is_a_gc_root()
         {
-            var container = new InstanceRootContainer();
-            container.instance_value_node.next = new object();
-            GCHandle weak = GCHandle.Alloc(container.instance_value_node.next, GCHandleType.Weak);
+            GcStaticRoots.staticString = "static-gc-root";
+            GCHandle weak = TrackWeak(GcStaticRoots.staticString);
             try
             {
-                container.instance_value_node.next = null;
                 FullCollect();
-                Assert.Null(weak.Target);
+                AssertSurvives(weak);
             }
             finally
             {
-                if (weak.IsAllocated)
-                {
-                    weak.Free();
-                }
+                GcStaticRoots.staticString = null;
+                FreeHandle(ref weak);
             }
         }
 
         [UnitTest]
         [GcUnitTest]
-        public void Nested_value_type_static_refs()
+        public void Static_nested_value_type_field_is_a_gc_root()
         {
-            StaticRootHolder.static_value_node.next = new object();
-            GCHandle weak = GCHandle.Alloc(StaticRootHolder.static_value_node.next, GCHandleType.Weak);
+            object child = new object();
+            GcStaticRoots.staticNested.leaf.payload = child;
+            GCHandle weak = TrackWeak(child);
             try
             {
-                StaticRootHolder.static_value_node.next = null;
+                child = null;
                 FullCollect();
-                Assert.Null(weak.Target);
+                AssertSurvives(weak);
             }
             finally
             {
-                if (weak.IsAllocated)
-                {
-                    weak.Free();
-                }
+                GcStaticRoots.staticNested = default(NestedRefs);
+                FreeHandle(ref weak);
             }
         }
 
         [UnitTest]
         [GcUnitTest]
-        public void Reference_array_elements()
+        public void Static_container_field_keeps_children()
         {
-            object[] array = new object[4];
-            array[0] = new object();
-            GCHandle weak = GCHandle.Alloc(array[0], GCHandleType.Weak);
+            var container = new RefContainer();
+            object child = new object();
+            container.field0 = child;
+            GcStaticRoots.staticContainer = container;
+            GCHandle weak = TrackWeak(child);
             try
             {
-                array[0] = null;
+                child = null;
+                container = null;
                 FullCollect();
-                Assert.Null(weak.Target);
+                AssertSurvives(weak);
             }
             finally
             {
-                if (weak.IsAllocated)
-                {
-                    weak.Free();
-                }
+                GcStaticRoots.staticContainer = null;
+                FreeHandle(ref weak);
+            }
+        }
+
+        [UnitTest]
+        [GcUnitTest]
+        public void Static_reference_array_field_is_a_gc_root()
+        {
+            object element = new object();
+            GcStaticRoots.staticArray = new object[] { element, null };
+            GCHandle weak = TrackWeak(element);
+            try
+            {
+                element = null;
+                FullCollect();
+                AssertSurvives(weak);
+            }
+            finally
+            {
+                GcStaticRoots.staticArray = null;
+                FreeHandle(ref weak);
+            }
+        }
+
+        [UnitTest]
+        [GcUnitTest]
+        public void Clearing_static_root_allows_reachability_to_drop()
+        {
+            object child = new object();
+            GcStaticRoots.root = child;
+            GCHandle weak = TrackWeak(child);
+            try
+            {
+                child = null;
+                GcStaticRoots.root = null;
+                FullCollect();
+                AssertCollected(weak);
+            }
+            finally
+            {
+                FreeHandle(ref weak);
+            }
+        }
+
+        [UnitTest]
+        [GcUnitTest]
+        public void Instance_field_chain_from_pinned_root()
+        {
+            var container = new RefContainer();
+            object child = new object();
+            container.field0 = child;
+            GCHandle containerPin = KeepAlive(container);
+            GCHandle weak = TrackWeak(child);
+            try
+            {
+                child = null;
+                FullCollect();
+                AssertSurvives(weak);
+            }
+            finally
+            {
+                FreeHandle(ref weak);
+                FreeHandle(ref containerPin);
+            }
+        }
+
+        [UnitTest]
+        [GcUnitTest]
+        public void Inherited_instance_field_reachable_from_pinned_derived_root()
+        {
+            var derived = new GcDerivedWithRef();
+            object baseChild = new object();
+            derived.baseField = baseChild;
+            GCHandle derivedPin = KeepAlive(derived);
+            GCHandle weak = TrackWeak(baseChild);
+            try
+            {
+                baseChild = null;
+                FullCollect();
+                AssertSurvives(weak);
+            }
+            finally
+            {
+                FreeHandle(ref weak);
+                FreeHandle(ref derivedPin);
             }
         }
     }

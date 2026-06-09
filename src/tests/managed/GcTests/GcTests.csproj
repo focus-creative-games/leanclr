@@ -12,7 +12,7 @@
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug' Or '$(Configuration)' == 'Release'">
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
-    <NoWarn>CS0649</NoWarn>
+    <NoWarn>CS0649;CS0414</NoWarn>
     <WarningLevel>0</WarningLevel>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
@@ -30,11 +30,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="App.cs" />
-    <Compile Include="Fixtures\GcTestCaseBase.cs" />
-    <Compile Include="Collection\TC_GC_Collection.cs" />
-    <Compile Include="Handles\TC_GC_Handles.cs" />
-    <Compile Include="Roots\TC_GC_Roots.cs" />
+    <Compile Include="**\*.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Common\Common.csproj">
