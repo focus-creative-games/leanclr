@@ -45,25 +45,25 @@ static void visit_object_roots(GcVisitObjectRoot visit, void* userdata)
     }
 }
 
-struct GcVisitContext
+struct GcMarkContext
 {
     GCAliveObjectBitmap& alive_object_bitmap;
-};
 
-static bool is_first_visit(vm::RtObject* obj, void* userdata)
-{
-    GcVisitContext* ctx = reinterpret_cast<GcVisitContext*>(userdata);
-    return ctx->alive_object_bitmap.mark(obj);
-}
+    bool visit(vm::RtObject* obj)
+    {
+        return alive_object_bitmap.mark(obj);
+    }
+};
 
 static void on_visit_object(vm::RtObject* obj, void* userdata)
 {
-    ObjScanUtil::visit_object(obj, is_first_visit, userdata);
+    auto* ctx = static_cast<GcMarkContext*>(userdata);
+    ObjScanUtil::visit_object(obj, *ctx);
 }
 
 void GcRoots::foreach_root(GCAliveObjectBitmap& alive_object_bitmap)
 {
-    GcVisitContext ctx = { alive_object_bitmap };
+    GcMarkContext ctx = { alive_object_bitmap };
     for (GcVisitObjectRootsScan visit : s_visit_object_roots)
     {
         visit(on_visit_object, &ctx);
@@ -77,7 +77,7 @@ void GcRoots::foreach_root(GCAliveObjectBitmap& alive_object_bitmap)
         }
     }
     vm::GCHandle::foreach_strong_handles(on_visit_object, &ctx);
-    ObjScanUtil::visit_all_classes_static_data(is_first_visit, &ctx);
+    ObjScanUtil::visit_all_classes_static_data(ctx);
 }
 
 } // namespace gc

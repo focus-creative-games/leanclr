@@ -69,18 +69,17 @@ struct LivenessState
     void finalize()
     {
     }
-};
 
-static bool is_first_visit(vm::RtObject* obj, void* userdata)
-{
-    auto liveness_state = reinterpret_cast<LivenessState*>(userdata);
-    if (liveness_state->add_visited_object(obj))
+    bool visit(vm::RtObject* obj)
     {
-        liveness_state->add_pending_callback(obj);
+        if (!add_visited_object(obj))
+        {
+            return false;
+        }
+        add_pending_callback(obj);
         return true;
     }
-    return false;
-}
+};
 
 void* Liveness::allocate_struct(metadata::RtClass* filter, uint32_t max_object_count, il2cpp_register_object_callback callback, void* userdata,
                                 il2cpp_liveness_reallocate_callback reallocate)
@@ -106,14 +105,14 @@ void Liveness::free_struct(void* state)
 void Liveness::calculation_from_root(vm::RtObject* root, void* state)
 {
     auto liveness_state = reinterpret_cast<LivenessState*>(state);
-    gc::ObjScanUtil::visit_object(root, is_first_visit, liveness_state);
+    gc::ObjScanUtil::visit_object(root, *liveness_state);
     liveness_state->call_final_callbacks();
 }
 
 void Liveness::calculation_from_statics(void* state)
 {
     auto liveness_state = reinterpret_cast<LivenessState*>(state);
-    gc::ObjScanUtil::visit_all_classes_static_data(is_first_visit, liveness_state);
+    gc::ObjScanUtil::visit_all_classes_static_data(*liveness_state);
     liveness_state->call_final_callbacks();
 }
 
