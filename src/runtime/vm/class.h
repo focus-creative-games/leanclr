@@ -522,7 +522,13 @@ class Class
     static RtResultVoid setup_fields_typedef(metadata::RtClass* klass);
     static RtResultVoid setup_field_layout(metadata::RtClass* klass);
     static RtResultVoid setup_gc_bitmap(metadata::RtClass* klass);
-    static RtResultVoid setup_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitmap, size_t& max_bitmap_index);
+    static RtResultVoid setup_instance_gc_bitmap(metadata::RtClass* klass);
+    static RtResultVoid setup_static_gc_bitmap(metadata::RtClass* klass);
+    static RtResultVoid setup_instance_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitmap, size_t& max_bitmap_index);
+    static RtResultVoid setup_static_gc_bitmap_impl(metadata::RtClass* klass, size_t* bitmap, size_t& max_bitmap_index);
+    static RtResultVoid setup_gc_bitmap_for_field(const metadata::RtFieldInfo* field, bool for_static, size_t* bitmap, size_t& max_bitmap_index);
+    static RtResultVoid finalize_gc_bitmap(size_t** dest_bitmap, uint16_t* dest_word_count, size_t* scratch_bitmap, size_t max_bitmap_index,
+                                           size_t max_bitmap_bit_count, bool require_nonempty);
     static RtResultVoid setup_static_field_data(metadata::RtClass* klass);
     static RtResultVoid setup_methods_typedef(metadata::RtClass* klass);
     static RtResultVoid build_methods_arg_descs(metadata::RtClass* klass);
