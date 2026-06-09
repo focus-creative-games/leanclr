@@ -17,6 +17,7 @@ namespace GcTests.Sweep
                 objects[i] = new RefContainer();
                 weaks[i] = TrackWeak(objects[i]);
             }
+            GCHandle weaksPin = KeepAlive(weaks);
             try
             {
                 objects = null;
@@ -32,6 +33,7 @@ namespace GcTests.Sweep
                 {
                     FreeHandle(ref weaks[i]);
                 }
+                FreeHandle(ref weaksPin);
             }
         }
 
@@ -47,6 +49,7 @@ namespace GcTests.Sweep
                 weaks[i] = TrackWeak(objects[i]);
             }
             GCHandle arrayPin = KeepAlive(objects);
+            GCHandle weaksPin = KeepAlive(weaks);
             try
             {
                 FullCollect();
@@ -61,6 +64,7 @@ namespace GcTests.Sweep
                 {
                     FreeHandle(ref weaks[i]);
                 }
+                FreeHandle(ref weaksPin);
                 FreeHandle(ref arrayPin);
             }
         }
@@ -121,6 +125,8 @@ namespace GcTests.Sweep
                 big[i] = new byte[BigByteArrayLength];
                 weakBig[i] = TrackWeak(big[i]);
             }
+            GCHandle weakSmallPin = KeepAlive(weakSmall);
+            GCHandle weakBigPin = KeepAlive(weakBig);
             try
             {
                 small = null;
@@ -145,6 +151,8 @@ namespace GcTests.Sweep
                 {
                     FreeHandle(ref weakBig[i]);
                 }
+                FreeHandle(ref weakSmallPin);
+                FreeHandle(ref weakBigPin);
             }
         }
 
