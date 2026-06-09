@@ -47,6 +47,7 @@
     <Compile Include="IgnoreTestAttribute.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="UnitTestAttribute.cs" />
+    <Compile Include="GcUnitTestAttribute.cs" />
     <Compile Include="MonoPInvokeCallbackAttribute.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

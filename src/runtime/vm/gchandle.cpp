@@ -64,7 +64,6 @@ namespace leanclr
             {
                 return;
             }
-            assert(handle->obj != nullptr);
             // Reset handle and add to freed list
             handle->obj = nullptr;
             handle->type_ = GCHandleType::Normal;

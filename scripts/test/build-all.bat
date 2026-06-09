@@ -2,7 +2,7 @@
 setlocal enabledelayedexpansion
 
 call "%~dp0..\lib\repo-root.bat"
-call "%~dp0..\lib\out-dir-init.bat"
+call "%REPO_ROOT%\scripts\lib\out-dir-init.bat"
 
 set "CONFIG=%~1"
 if "%CONFIG%"=="" set "CONFIG=Debug"
@@ -78,6 +78,15 @@ if not exist "%COMMON_DLL%" set "COMMON_DLL=%OUT_ROOT%\dotnet\Common\Debug\Commo
 copy /Y "%COMMON_DLL%" "%DLLS_DIR%\" >nul
 if errorlevel 1 (
     echo ERROR: failed to copy Common.dll from "%COMMON_DLL%".
+    exit /b 1
+)
+
+set "GCTESTS_DLL=%OUT_ROOT%\dotnet\GcTests\%CONFIG%\GcTests.dll"
+if not exist "%GCTESTS_DLL%" set "GCTESTS_DLL=%OUT_ROOT%\dotnet\GcTests\Debug\GcTests.dll"
+
+copy /Y "%GCTESTS_DLL%" "%DLLS_DIR%\" >nul
+if errorlevel 1 (
+    echo ERROR: failed to copy GcTests.dll from "%GCTESTS_DLL%".
     exit /b 1
 )
 

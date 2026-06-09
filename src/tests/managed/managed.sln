@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ILTests", "ILTests\ILTests.
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefNetstandard", "RefNetstandard\RefNetstandard.csproj", "{7E4A9C21-3B58-4F6D-9A01-2D8E5F47C630}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GcTests", "GcTests\GcTests.csproj", "{C4D5E6F7-8A9B-4CDE-90F1-23456789ABCD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{7E4A9C21-3B58-4F6D-9A01-2D8E5F47C630}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E4A9C21-3B58-4F6D-9A01-2D8E5F47C630}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E4A9C21-3B58-4F6D-9A01-2D8E5F47C630}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C4D5E6F7-8A9B-4CDE-90F1-23456789ABCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C4D5E6F7-8A9B-4CDE-90F1-23456789ABCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C4D5E6F7-8A9B-4CDE-90F1-23456789ABCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C4D5E6F7-8A9B-4CDE-90F1-23456789ABCD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

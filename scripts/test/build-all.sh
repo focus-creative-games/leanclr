@@ -61,6 +61,12 @@ if [[ ! -f "$REFNETSTANDARD_DLL" ]]; then
 fi
 cp -f "$REFNETSTANDARD_DLL" "$DLLS_DIR/"
 
+GCTESTS_DLL="$(leanclr_dotnet_out_dir GcTests "$CONFIG")/GcTests.dll"
+if [[ ! -f "$GCTESTS_DLL" ]]; then
+    GCTESTS_DLL="$(leanclr_dotnet_out_dir GcTests Debug)/GcTests.dll"
+fi
+cp -f "$GCTESTS_DLL" "$DLLS_DIR/"
+
 ILTESTS_DLL="$(leanclr_dotnet_out_dir ILTests "$CONFIG")/ILTests.dll"
 ILTESTS_NATIVE_DLL="$(leanclr_dotnet_out_dir ILTests "$CONFIG")/ILTests.Native.dll"
 if [[ ! -f "$ILTESTS_DLL" ]]; then

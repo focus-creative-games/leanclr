@@ -61,7 +61,7 @@ void GC::register_ephemeron_array(vm::RtObject* arr)
 int32_t GC::get_collection_count(int32_t generation)
 {
     (void)generation;
-    return 0;
+    return gc::GarbageCollector::get_collection_count();
 }
 
 int32_t GC::get_max_generation()

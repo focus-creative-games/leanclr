@@ -13,6 +13,7 @@
 #include "metadata/module_def.h"
 #include "vm/assembly.h"
 #include "vm/settings.h"
+#include "vm/gc.h"
 #include "vm/runtime.h"
 #include "vm/class.h"
 #include "vm/method.h"
@@ -276,19 +277,27 @@ RtResultVoid init_customattributes(metadata::RtModuleDef* mod)
 }
 
 static metadata::RtClass* cls_unittest = nullptr;
+static metadata::RtClass* cls_gc_unittest = nullptr;
 
-RtResultVoid init_unittest_class(metadata::RtModuleDef* mod)
+RtResultVoid init_test_attribute_classes(metadata::RtModuleDef* mod)
 {
-    std::cout << "Initializing UnitTestAttribute class..." << std::endl;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, mod->get_class_by_name("UnitTestAttribute", false, true));
-    RET_ERR_ON_FAIL(vm::Class::initialize_all(klass));
-    cls_unittest = klass;
+    std::cout << "Initializing test attribute classes..." << std::endl;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, unittest_klass, mod->get_class_by_name("UnitTestAttribute", false, true));
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(unittest_klass));
+    cls_unittest = unittest_klass;
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, gc_unittest_klass, mod->get_class_by_name("GcUnitTestAttribute", false, true));
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(gc_unittest_klass));
+    cls_gc_unittest = gc_unittest_klass;
     RET_VOID_OK();
 }
 
 static size_t g_failed_test_methods = 0;
 static size_t g_passed_test_methods = 0;
 static size_t g_skipped_test_methods = 0;
+static size_t g_gc_failed_test_methods = 0;
+static size_t g_gc_passed_test_methods = 0;
+static size_t g_gc_skipped_test_methods = 0;
 static std::string g_current_phase = "startup";
 static std::string g_current_test = "(none)";
 
@@ -352,14 +361,11 @@ static void install_crash_handlers()
 #endif
 }
 
-RtResultVoid run_tests(metadata::RtModuleDef* mod)
+RtResultVoid run_tests(metadata::RtModuleDef* mod, const char* phase_name, bool gc_tests_only, size_t& passed, size_t& failed, size_t& skipped)
 {
-    std::cout << "Running UnitTests of: " << mod->get_name_no_ext() << std::endl;
-    auto& cli_image = mod->get_cli_image();
+    std::cout << "Running " << (gc_tests_only ? "GcUnitTests" : "UnitTests") << " of: " << mod->get_name_no_ext() << std::endl;
     int method_index = 0;
     int skip_count = 0;
-    // 1719;
-    //  241;
     for (uint32_t rid = 1; rid <= mod->get_class_count(); rid++)
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, mod->get_class_by_type_def_rid(rid));
@@ -367,25 +373,40 @@ RtResultVoid run_tests(metadata::RtModuleDef* mod)
         for (uint32_t i = 0; i < klass->method_count; i++)
         {
             const metadata::RtMethodInfo* method = klass->methods[i];
-            // if (!method->arg_descs || method->invoker_type != metadata::RtInvokerType::Interpreter || !vm::Method::has_method_body(method))
-            // {
-            //     continue;
-            // }
 
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, has_attr, vm::CustomAttribute::has_customattribute_on_method(method, cls_unittest));
-            if (!has_attr)
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, has_unittest_attr, vm::CustomAttribute::has_customattribute_on_method(method, cls_unittest));
+            if (!has_unittest_attr)
             {
                 continue;
             }
+
+            bool has_gc_unittest_attr = false;
+            if (cls_gc_unittest != nullptr)
+            {
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, has_gc_attr, vm::CustomAttribute::has_customattribute_on_method(method, cls_gc_unittest));
+                has_gc_unittest_attr = has_gc_attr;
+            }
+
+            if (gc_tests_only)
+            {
+                if (!has_gc_unittest_attr)
+                {
+                    continue;
+                }
+            }
+            else if (has_gc_unittest_attr)
+            {
+                continue;
+            }
+
             method_index++;
             if (method_index < skip_count)
             {
-                ++g_skipped_test_methods;
-                // std::cout << "  Skipping..." << std::endl;
+                ++skipped;
                 continue;
             }
-            set_current_test_context("run_tests", klass, method);
-            auto ret1 = LEANCLR_NEWOBJ_INTERNAL(klass, "run_tests");
+            set_current_test_context(phase_name, klass, method);
+            auto ret1 = LEANCLR_NEWOBJ_INTERNAL(klass, phase_name);
             if (ret1.is_err())
             {
                 std::cout << "  Failed to create test object, error: " << method_index << " run unittest : " << klass->namespaze << "." << klass->name
@@ -398,13 +419,11 @@ RtResultVoid run_tests(metadata::RtModuleDef* mod)
             {
                 std::cout << "  Failed to run unittest, error: " << static_cast<int>(ret2.unwrap_err()) << " " << method_index
                           << " run unittest : " << klass->namespaze << "." << klass->name << "::" << method->name << " token: " << method->token << std::endl;
-                ++g_failed_test_methods;
+                ++failed;
             }
             else
             {
-                // std::cout << "  Passed unittest: " << method_index << " run unittest : " << klass->namespaze << "." << klass->name << "::" << method->name
-                //           << " token: " << method->token << std::endl;
-                ++g_passed_test_methods;
+                ++passed;
             }
         }
     }
@@ -480,7 +499,7 @@ int main()
         return -1;
     }
 
-    bool is_run_all = true;
+    const bool is_run_all = true;
     bool is_run_bootstrap_tests = is_run_all || false;
     bool is_run_core_tests = is_run_all || false;
     bool is_load_corlib_customattributes = is_run_all || false;
@@ -540,7 +559,7 @@ int main()
         }
     }
     {
-        auto ret3 = init_unittest_class(commonTests->mod);
+        auto ret3 = init_test_attribute_classes(commonTests->mod);
         if (ret3.is_err())
         {
             std::cout << "Failed to init unittest class, error: " << static_cast<int>(ret3.unwrap_err()) << std::endl;
@@ -550,7 +569,7 @@ int main()
 
     if (is_run_core_tests)
     {
-        auto ret4 = run_tests(coreTests->mod);
+        auto ret4 = run_tests(coreTests->mod, "core_tests", false, g_passed_test_methods, g_failed_test_methods, g_skipped_test_methods);
         if (ret4.is_err())
         {
             std::cout << "Failed to run tests, error: " << static_cast<int>(ret4.unwrap_err()) << std::endl;
@@ -607,7 +626,7 @@ int main()
     }
     if (is_run_corlib_tests)
     {
-        auto ret2 = run_tests(corelibTests->mod);
+        auto ret2 = run_tests(corelibTests->mod, "corlib_tests", false, g_passed_test_methods, g_failed_test_methods, g_skipped_test_methods);
         if (ret2.is_err())
         {
             std::cout << "Failed to run tests, error: " << static_cast<int>(ret2.unwrap_err()) << std::endl;
@@ -636,7 +655,7 @@ int main()
     }
     if (is_run_il_tests)
     {
-        auto ret2 = run_tests(ilTests->mod);
+        auto ret2 = run_tests(ilTests->mod, "il_tests", false, g_passed_test_methods, g_failed_test_methods, g_skipped_test_methods);
         if (ret2.is_err())
         {
             std::cout << "Failed to run ILTests, error: " << static_cast<int>(ret2.unwrap_err()) << std::endl;
@@ -644,16 +663,59 @@ int main()
         }
     }
 
+#if LEANCLR_GC_MARK_SWEEP
     std::cout << std::endl;
-    std::cout << "Total test methods: " << (g_passed_test_methods + g_failed_test_methods + g_skipped_test_methods) << std::endl;
-    std::cout << "  Passed: " << g_passed_test_methods << std::endl;
-    std::cout << "  Failed: " << g_failed_test_methods << std::endl;
-    std::cout << "  Skipped: " << g_skipped_test_methods << std::endl;
-    std::cout << "" << std::endl;
+    std::cout << "=== GC test phase (GC enabled) ===" << std::endl;
+    vm::Settings::set_gc_mode(gc::GCMode::ENABLED);
+    vm::GC::set_mode(gc::GCMode::ENABLED);
+
+    metadata::RtAssembly* gcTests = nullptr;
+    {
+        auto ret = vm::Assembly::load_by_name("GcTests");
+        if (ret.is_err())
+        {
+            std::cout << "Failed to load GcTests assembly, error: " << static_cast<int>(ret.unwrap_err()) << std::endl;
+            return -1;
+        }
+        gcTests = ret.unwrap();
+        std::cout << "GcTests assembly loaded successfully." << gcTests << std::endl;
+    }
+
+    {
+        auto ret = run_tests(gcTests->mod, "gc_tests", true, g_gc_passed_test_methods, g_gc_failed_test_methods, g_gc_skipped_test_methods);
+        if (ret.is_err())
+        {
+            std::cout << "Failed to run GcTests, error: " << static_cast<int>(ret.unwrap_err()) << std::endl;
+            return -1;
+        }
+    }
 
 #if LEANCLR_ENABLE_LIVENESS_TEST
     test_liveness();
 #endif
     gc::GarbageCollector::collect();
+#else
+    std::cout << std::endl;
+    std::cout << "GC tests skipped: leanclr built without LEANCLR_GC_MARK_SWEEP." << std::endl;
+#endif
+
+    std::cout << std::endl;
+    std::cout << "Unit test methods: " << (g_passed_test_methods + g_failed_test_methods + g_skipped_test_methods) << std::endl;
+    std::cout << "  Passed: " << g_passed_test_methods << std::endl;
+    std::cout << "  Failed: " << g_failed_test_methods << std::endl;
+    std::cout << "  Skipped: " << g_skipped_test_methods << std::endl;
+#if LEANCLR_GC_MARK_SWEEP
+    std::cout << "Gc test methods: " << (g_gc_passed_test_methods + g_gc_failed_test_methods + g_gc_skipped_test_methods) << std::endl;
+    std::cout << "  Passed: " << g_gc_passed_test_methods << std::endl;
+    std::cout << "  Failed: " << g_gc_failed_test_methods << std::endl;
+    std::cout << "  Skipped: " << g_gc_skipped_test_methods << std::endl;
+#endif
+    std::cout << "" << std::endl;
+
+    const size_t total_failed = g_failed_test_methods + g_gc_failed_test_methods;
+    if (total_failed > 0)
+    {
+        return 1;
+    }
     return 0;
 }
