@@ -19,7 +19,6 @@ static int64_t s_heap_bytes = 0;
 
 void ZeroGcHeap::initialize(const Config& config)
 {
-    s_gc_mode = config.mode;
     GcPressure::initialize(config.pressure_config);
     s_used_bytes = 0;
     s_heap_bytes = 0;
