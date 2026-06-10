@@ -1232,7 +1232,7 @@ RtResultVoid Class::setup_static_gc_bitmap_impl(metadata::RtClass* klass, size_t
 RtResultVoid Class::finalize_gc_bitmap(size_t** dest_bitmap, uint16_t* dest_word_count, size_t* scratch_bitmap, size_t max_bitmap_index,
                                       size_t max_bitmap_bit_count, bool require_nonempty)
 {
-    if (max_bitmap_index == 0)
+    if (max_bitmap_index == 0 && scratch_bitmap[0] == 0)
     {
         if (require_nonempty)
         {
@@ -1287,14 +1287,14 @@ RtResultVoid Class::setup_instance_gc_bitmap(metadata::RtClass* klass)
 
 RtResultVoid Class::setup_static_gc_bitmap(metadata::RtClass* klass)
 {
-    if (klass->static_size == 0)
+    size_t max_bitmap_bit_count = klass->static_size / sizeof(void*);
+    if (max_bitmap_bit_count == 0)
     {
         klass->static_gc_bitmap = &s_empty_gc_bitmap;
         klass->static_gc_bitmap_word_count = 0;
         RET_VOID_OK();
     }
 
-    size_t max_bitmap_bit_count = klass->static_size / sizeof(void*);
     size_t bitmap_word_count = (max_bitmap_bit_count + Class::kBitsPerWord - 1) / Class::kBitsPerWord;
     size_t* gc_bitmap = (size_t*)alloc::GeneralAllocation::calloc_any<size_t>(bitmap_word_count);
     if (gc_bitmap == nullptr)
