@@ -77,5 +77,10 @@ namespace LeanAOT.ToCpp
         /// LeanAOT-only: Unity editor version from <c>--leanaot-unity-version</c>; null when unset.
         /// </summary>
         public string UnityVersion { get; set; }
+
+        /// <summary>
+        /// LeanAOT-only: flat copy of managed assemblies for stripped duplicate staging (<c>--leanaot-managed-stripped-duplicate_path</c>).
+        /// </summary>
+        public string ManagedStrippedDuplicatePath { get; set; }
     }
 }

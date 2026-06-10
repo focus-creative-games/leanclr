@@ -120,6 +120,12 @@ internal class Program
 
         [Option("leanaot-unity-version", Required = false, HelpText = "LeanAOT-only: Unity editor version string (e.g. 6000.0.4f1).")]
         public string LeanAotUnityVersion { get; set; }
+
+        /// <summary>
+        /// LeanAOT-only: flat copy of managed assemblies (by assembly file name) for stripped duplicate staging.
+        /// </summary>
+        [Option("leanaot-managed-stripped-duplicate-path", Required = false, HelpText = "LeanAOT-only: copy -a/--assembly DLLs into this directory using only the assembly file name (ignore source path).")]
+        public string LeanAotManagedStrippedDuplicatePath { get; set; }
     }
 
     private static Logger s_logger;
@@ -248,6 +254,7 @@ internal class Program
             rawAssemblies.AddRange(System.IO.Directory.EnumerateFiles(managedDir, "*.dll", SearchOption.TopDirectoryOnly)
                 .Select(Path.GetFileName));
         }
+
         if (rawAssemblies.Count == 0)
         {
             errorMessage = "Missing required input: specify at least one assembly (-a / --assembly), or use --directory to auto-discover DLLs.";
@@ -546,6 +553,10 @@ internal class Program
 
         if (config.AssembliesExcludedFromGlobalMetadata.Count > 0)
             s_logger.Info("LeanAOT assemblies excluded from global-metadata.dat: {0}", string.Join(", ", config.AssembliesExcludedFromGlobalMetadata));
+
+        config.ManagedStrippedDuplicatePath = string.IsNullOrWhiteSpace(options.LeanAotManagedStrippedDuplicatePath)
+            ? null
+            : options.LeanAotManagedStrippedDuplicatePath.Trim();
     }
 
     private static string NormalizeCompilerFlags(IEnumerable<string> rawParts)

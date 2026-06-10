@@ -46,6 +46,40 @@ internal static class Il2CppCompatibilityOutputs
                 throw;
             }
         }
+
+        if (!string.IsNullOrWhiteSpace(config.ManagedStrippedDuplicatePath))
+        {
+            try
+            {
+                CopyManagedAssembliesToDuplicatePath(config.ManagedStrippedDuplicatePath.Trim(), dllSearchPaths, aotAssemblyNames);
+            }
+            catch (Exception ex)
+            {
+                s_logger.Error(ex, "Failed to copy managed assemblies to duplicate path.");
+                throw;
+            }
+        }
+    }
+
+    private static void CopyManagedAssembliesToDuplicatePath(
+        string duplicatePath,
+        List<string> dllSearchPaths,
+        List<string> aotAssemblyNames)
+    {
+        var destDir = Path.GetFullPath(duplicatePath);
+        if (Directory.Exists(destDir))
+        {
+            Directory.Delete(destDir, true);
+        }
+        Directory.CreateDirectory(destDir);
+
+        foreach (var assemblyName in aotAssemblyNames)
+        {
+            var srcPath = ResolveAssemblyDllPath(assemblyName, dllSearchPaths);
+            var destPath = Path.Combine(destDir, Path.GetFileName(srcPath));
+            File.Copy(srcPath, destPath, overwrite: true);
+            s_logger.Info("Copied managed assembly to duplicate path: {0} -> {1}", srcPath, destPath);
+        }
     }
 
     /// <summary>
