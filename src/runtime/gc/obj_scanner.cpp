@@ -44,7 +44,7 @@ void ObjScanner::visit_object(vm::RtObject* obj)
 
 void ObjScanner::visit_class_static_data(const metadata::RtClass* klass)
 {
-    if (klass->static_fields_data == nullptr || klass->static_gc_bitmap_word_count == 0)
+    if (klass->static_gc_bitmap_word_count == 0)
     {
         return;
     }
@@ -80,10 +80,7 @@ void ObjScanner::flush_deferred_field_scans()
 
 void ObjScanner::enqueue_deferred_field_scan(vm::RtObject* obj)
 {
-    if (obj == nullptr)
-    {
-        return;
-    }
+    assert(obj != nullptr);
     if (!visit(obj))
     {
         return;
@@ -125,31 +122,40 @@ void ObjScanner::scan_object_fields(vm::RtObject* obj)
 
 void ObjScanner::scan_normal_object(vm::RtObject* obj)
 {
-    if (!vm::Class::get_has_references(obj->klass))
-    {
-        return;
-    }
+    assert(vm::Class::get_has_references(obj->klass));
     visit_gc_bitmap(obj->klass, reinterpret_cast<uint8_t*>(obj));
 }
 
 void ObjScanner::scan_array_object(vm::RtArray* obj)
 {
-    if (!vm::Class::get_has_references(obj->klass))
-    {
-        return;
-    }
+    assert(vm::Class::get_has_references(obj->klass));
     const metadata::RtClass* element_class = obj->klass->element_class;
     if (vm::Class::is_reference_type(element_class))
     {
         vm::RtObject** elements = vm::Array::get_array_data_start_as<vm::RtObject*>(obj);
-        for (int32_t i = 0; i < obj->length; ++i)
+        if (vm::Class::is_sealed(element_class) && !vm::Class::get_has_references(element_class))
         {
-            vm::RtObject* elem = elements[i];
-            if (elem == nullptr)
+            for (int32_t i = 0; i < obj->length; ++i)
             {
-                continue;
+                vm::RtObject* elem = elements[i];
+                if (elem == nullptr)
+                {
+                    continue;
+                }
+                visit_object_self_only(elem);
             }
-            enqueue_deferred_field_scan(elem);
+        }
+        else
+        {
+            for (int32_t i = 0; i < obj->length; ++i)
+            {
+                vm::RtObject* elem = elements[i];
+                if (elem == nullptr)
+                {
+                    continue;
+                }
+                enqueue_deferred_field_scan(elem);
+            }
         }
     }
     else
@@ -186,7 +192,11 @@ void ObjScanner::visit_gc_bitmap_words(const size_t* bitmap, size_t word_count, 
             const size_t bit_in_word = utils::MemOp::count_trailing_zeros_nonzero(word);
             const size_t bit_index = w * kBitsPerWord + bit_in_word;
             vm::RtObject** slot = reinterpret_cast<vm::RtObject**>(slot_base + bit_index * sizeof(void*));
-            enqueue_deferred_field_scan(*slot);
+            vm::RtObject* child = *slot;
+            if (child)
+            {
+                enqueue_deferred_field_scan(child);
+            }
             word &= word - 1;
         }
     }
