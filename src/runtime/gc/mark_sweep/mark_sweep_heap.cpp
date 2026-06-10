@@ -165,7 +165,6 @@ void MarkSweepHeap::collect()
     {
         return;
     }
-    printf("MarkSweepHeap::collect begin\n");
     GcPressure::on_collect();
     GCAliveObjectBitmap alive_object_bitmap;
     GcRoots::foreach_root(alive_object_bitmap);
@@ -180,7 +179,7 @@ void MarkSweepHeap::collect()
     s_used_bytes -= freed_bytes;
     s_heap_bytes -= freed_bytes;
     s_collection_count++;
-    printf("MarkSweepHeap::collect end, old_heap_bytes: %lld, new_heap_bytes: %lld, freed_bytes: %lld\n", old_heap_bytes, s_heap_bytes, freed_bytes);
+    // printf("MarkSweepHeap::collect end, old_heap_bytes: %lld, new_heap_bytes: %lld, freed_bytes: %lld\n", old_heap_bytes, s_heap_bytes, freed_bytes);
 }
 
 bool MarkSweepHeap::should_collect(bool force)
