@@ -6,7 +6,7 @@
 #include "vm/class.h"
 #include "vm/field.h"
 #include "vm/gchandle.h"
-#include "obj_scan_util.h"
+#include "gc/obj_scanner.h"
 
 namespace leanclr
 {
@@ -42,30 +42,24 @@ void GcRoots::register_visit_object_roots(GcVisitObjectRootsScan scan)
 struct GcMarkContext
 {
     GCAliveObjectBitmap& alive_object_bitmap;
-    utils::Vector<vm::RtObject*> deferred_field_scan_queue;
-    int32_t deferred_scan_depth;
-    int32_t recursive_visit_depth;
+    ObjScanner scanner;
+
+    static bool visit(vm::RtObject* obj, void* userdata)
+    {
+        auto* ctx = static_cast<GcMarkContext*>(userdata);
+        return ctx->alive_object_bitmap.mark(obj);
+    }
 
     explicit GcMarkContext(GCAliveObjectBitmap& alive_object_bitmap)
-        : alive_object_bitmap(alive_object_bitmap), deferred_scan_depth(0), recursive_visit_depth(0)
+        : alive_object_bitmap(alive_object_bitmap), scanner(visit, this)
     {
-    }
-
-    ~GcMarkContext()
-    {
-        assert(deferred_field_scan_queue.empty());
-    }
-
-    bool visit(vm::RtObject* obj)
-    {
-        return alive_object_bitmap.mark(obj);
     }
 };
 
 static void on_visit_object(vm::RtObject* obj, void* userdata)
 {
     auto* ctx = static_cast<GcMarkContext*>(userdata);
-    ObjScanUtil::visit_object(obj, *ctx);
+    ctx->scanner.visit_object(obj);
 }
 
 void GcRoots::foreach_root(GCAliveObjectBitmap& alive_object_bitmap)
@@ -84,8 +78,8 @@ void GcRoots::foreach_root(GCAliveObjectBitmap& alive_object_bitmap)
         }
     }
     vm::GCHandle::foreach_strong_handles(on_visit_object, &ctx);
-    ObjScanUtil::visit_all_classes_static_data(ctx);
-    ObjScanUtil::finish_visit(ctx);
+    ctx.scanner.visit_all_classes_static_data();
+    ctx.scanner.finish_visit();
 }
 
 } // namespace gc
