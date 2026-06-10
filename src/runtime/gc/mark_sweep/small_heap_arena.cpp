@@ -204,7 +204,7 @@ size_t SmallHeapArena::sweep(const GCAliveObjectBitmap& alive_object_bitmap)
 }
 
 SizeClassPool::SizeClassPool(size_t arena_size, size_t block_size, size_t block_alignment)
-    : _arena_size(arena_size), _block_size(block_size), _block_alignment(block_alignment), _current_arena(nullptr)
+    : _arena_size(arena_size), _block_size(block_size), _block_alignment(block_alignment), _current_arena(nullptr), _next_find_not_full_start(0)
 {
 }
 
@@ -243,69 +243,60 @@ void* SizeClassPool::allocate_block()
         {
             return block;
         }
-        _full_arenas.push_back(_current_arena);
         _current_arena = nullptr;
     }
-    if (!_not_full_arenas.empty())
+
+    _current_arena = find_next_not_full_arena();
+    if (LEANCLR_LIKELY(_current_arena != nullptr))
     {
-        _current_arena = _not_full_arenas.back();
-        _not_full_arenas.pop_back();
+        return _current_arena->allocate_block();
     }
-    else
+
+    _current_arena = allocate_arena();
+    if (_current_arena == nullptr)
     {
-        SmallHeapArena* new_arena = allocate_arena();
-        if (new_arena == nullptr)
-        {
-            return nullptr;
-        }
-        _current_arena = new_arena;
+        return nullptr;
     }
+    _arenas.push_back(_current_arena);
+    _next_find_not_full_start = _arenas.size();
     return _current_arena->allocate_block();
+}
+
+SmallHeapArena* SizeClassPool::find_next_not_full_arena()
+{
+    for (size_t i = _next_find_not_full_start; i < _arenas.size(); ++i)
+    {
+        if (!_arenas[i]->is_full())
+        {
+            _next_find_not_full_start = i + 1;
+            return _arenas[i];
+        }
+    }
+    _next_find_not_full_start = _arenas.size();
+    return nullptr;
 }
 
 void SizeClassPool::sweep(const GCAliveObjectBitmap& alive_object_bitmap, int64_t& freed_bytes)
 {
-    utils::Vector<SmallHeapArena*> all_arenas;
-    if (_current_arena != nullptr)
+    for (size_t i = 0; i < _arenas.size();)
     {
-        all_arenas.push_back(_current_arena);
-    }
-    for (size_t i = 0; i < _not_full_arenas.size(); ++i)
-    {
-        all_arenas.push_back(_not_full_arenas[i]);
-    }
-    for (size_t i = 0; i < _full_arenas.size(); ++i)
-    {
-        all_arenas.push_back(_full_arenas[i]);
-    }
-
-    _not_full_arenas.clear();
-    _full_arenas.clear();
-    _current_arena = nullptr;
-
-    for (size_t i = 0; i < all_arenas.size(); ++i)
-    {
-        SmallHeapArena* arena = all_arenas[i];
+        SmallHeapArena* arena = _arenas[i];
         size_t freed_count = arena->sweep(alive_object_bitmap);
         freed_bytes += static_cast<int64_t>(freed_count * arena->get_block_size());
+
         if (arena->is_empty())
         {
             free_arena(arena);
+            _arenas[i] = _arenas[_arenas.size() - 1];
+            _arenas.pop_back();
             continue;
         }
-        if (arena->is_full())
-        {
-            _full_arenas.push_back(arena);
-        }
-        else if (_current_arena == nullptr)
-        {
-            _current_arena = arena;
-        }
-        else
-        {
-            _not_full_arenas.push_back(arena);
-        }
+
+        ++i;
     }
+
+    _next_find_not_full_start = 0;
+    _current_arena = find_next_not_full_arena();
 }
 
 } // namespace gc

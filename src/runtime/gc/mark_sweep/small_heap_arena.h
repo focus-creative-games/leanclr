@@ -70,11 +70,12 @@ class SizeClassPool
     size_t _block_size;
     size_t _block_alignment;
     SmallHeapArena* _current_arena;
-    utils::Vector<SmallHeapArena*> _not_full_arenas;
-    utils::Vector<SmallHeapArena*> _full_arenas;
+    utils::Vector<SmallHeapArena*> _arenas;
+    size_t _next_find_not_full_start;
 
     SmallHeapArena* allocate_arena();
     void free_arena(SmallHeapArena* arena);
+    SmallHeapArena* find_next_not_full_arena();
 
   public:
     SizeClassPool(size_t arena_size, size_t block_size, size_t block_alignment);
