@@ -34,28 +34,40 @@ class SegmentedAddressBitmap
     HashMap<size_t, size_t*> _segment_map;
     mutable SegmentCacheEntry _segment_cache[SEGMENT_CACHE_SIZE]{};
 
-    size_t* get_or_create_segment_slow(size_t segment_index, size_t cache_slot)
+    void update_cache_entry(size_t segment_index, size_t* segment) const
     {
-        auto it = _segment_map.find(segment_index);
-        if (it == _segment_map.end())
-        {
-            size_t* segment = alloc::GeneralAllocation::calloc_any<size_t>(kSegmentWordCount);
-            it = _segment_map.emplace(segment_index, segment).first;
-        }
-        _segment_cache[cache_slot].segment_index = segment_index;
-        _segment_cache[cache_slot].segment = it->second;
-        return it->second;
+        const size_t cache_slot = segment_index & (SEGMENT_CACHE_SIZE - 1);
+        SegmentCacheEntry& entry = _segment_cache[cache_slot];
+        entry.segment_index = segment_index;
+        entry.segment = segment;
     }
 
-    size_t* get_or_create_segment(size_t segment_index)
+    size_t* create_segment(size_t segment_index)
+    {
+        size_t* segment = alloc::GeneralAllocation::calloc_any<size_t>(kSegmentWordCount);
+        if (!segment)
+        {
+            panic("Failed to create segment");
+        }
+        update_cache_entry(segment_index, segment);
+        assert(_segment_map.find(segment_index) == _segment_map.end());
+        _segment_map[segment_index] = segment;
+        return segment;
+    }
+
+    size_t* get_segment_slow(size_t segment_index) const
+    {
+        auto it = _segment_map.find(segment_index);
+        size_t* segment = it != _segment_map.end() ? it->second : nullptr;
+        update_cache_entry(segment_index, segment);
+        return segment;
+    }
+
+    size_t* get_segment(size_t segment_index) const
     {
         const size_t cache_slot = segment_index & (SEGMENT_CACHE_SIZE - 1);
         const SegmentCacheEntry& entry = _segment_cache[cache_slot];
-        if (entry.segment_index == segment_index)
-        {
-            return entry.segment;
-        }
-        return get_or_create_segment_slow(segment_index, cache_slot);
+        return entry.segment_index == segment_index ? entry.segment : get_segment_slow(segment_index);
     }
 
   public:
@@ -69,9 +81,13 @@ class SegmentedAddressBitmap
 
     bool mark(void* address)
     {
-        const size_t slot_index = reinterpret_cast<uintptr_t>(address) / SLOT_GRANULARITY;
+        const size_t slot_index = reinterpret_cast<size_t>(address) / SLOT_GRANULARITY;
         const size_t segment_index = slot_index / kSegmentBitCount;
-        size_t* segment = get_or_create_segment(segment_index);
+        size_t* segment = get_segment(segment_index);
+        if (segment == nullptr)
+        {
+            segment = create_segment(segment_index);
+        }
         const size_t bit_index_in_segment = slot_index % kSegmentBitCount;
         const size_t word_index = bit_index_in_segment / kBitsPerWord;
         const size_t bit_in_word = bit_index_in_segment % kBitsPerWord;
@@ -86,10 +102,10 @@ class SegmentedAddressBitmap
 
     bool is_marked(const void* address) const
     {
-        const size_t slot_index = reinterpret_cast<uintptr_t>(address) / SLOT_GRANULARITY;
+        const size_t slot_index = reinterpret_cast<size_t>(address) / SLOT_GRANULARITY;
         const size_t segment_index = slot_index / kSegmentBitCount;
-        auto it = _segment_map.find(segment_index);
-        if (it == _segment_map.end())
+        size_t* segment = get_segment(segment_index);
+        if (segment == nullptr)
         {
             return false;
         }
@@ -97,7 +113,7 @@ class SegmentedAddressBitmap
         const size_t word_index = bit_index_in_segment / kBitsPerWord;
         const size_t bit_in_word = bit_index_in_segment % kBitsPerWord;
         const size_t mask = static_cast<size_t>(1) << bit_in_word;
-        return (it->second[word_index] & mask) != 0;
+        return (segment[word_index] & mask) != 0;
     }
 };
 
