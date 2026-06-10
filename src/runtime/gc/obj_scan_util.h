@@ -1,6 +1,10 @@
 #pragma once
 
+#include <cassert>
+#include <cstdint>
+
 #include "utils/mem_op.h"
+#include "utils/rt_vector.h"
 #include "vm/class.h"
 #include "vm/field.h"
 #include "vm/object.h"
@@ -15,10 +19,23 @@ namespace gc
 class ObjScanUtil
 {
   public:
+    static constexpr size_t kDeferredScanBatchThreshold = 256;
+
     template <typename VisitContext>
     static void visit_object(vm::RtObject* obj, VisitContext& ctx)
     {
-        visit_child(obj, ctx);
+        if (obj == nullptr)
+        {
+            return;
+        }
+        if (!ctx.visit(obj))
+        {
+            return;
+        }
+        if (vm::Class::get_has_references(obj->klass))
+        {
+            scan_object_fields(obj, ctx);
+        }
     }
 
     template <typename VisitContext>
@@ -41,9 +58,29 @@ class ObjScanUtil
         }
     }
 
+    template <typename VisitContext>
+    static void finish_visit(VisitContext& ctx)
+    {
+        flush_deferred_field_scans(ctx);
+        assert(ctx.deferred_field_scan_queue.empty());
+    }
+
+    template <typename VisitContext>
+    static void flush_deferred_field_scans(VisitContext& ctx)
+    {
+        ctx.deferred_scan_depth++;
+        while (!ctx.deferred_field_scan_queue.empty())
+        {
+            vm::RtObject* obj = ctx.deferred_field_scan_queue.back();
+            ctx.deferred_field_scan_queue.pop_back();
+            scan_object_fields(obj, ctx);
+        }
+        ctx.deferred_scan_depth--;
+    }
+
   private:
     template <typename VisitContext>
-    static void visit_child(vm::RtObject* obj, VisitContext& ctx)
+    static void enqueue_deferred_field_scan(vm::RtObject* obj, VisitContext& ctx)
     {
         if (obj == nullptr)
         {
@@ -53,7 +90,15 @@ class ObjScanUtil
         {
             return;
         }
-        visit_object_fields(obj, ctx);
+        if (!vm::Class::get_has_references(obj->klass))
+        {
+            return;
+        }
+        ctx.deferred_field_scan_queue.push_back(obj);
+        if (ctx.deferred_field_scan_queue.size() >= kDeferredScanBatchThreshold && ctx.deferred_scan_depth == 0)
+        {
+            flush_deferred_field_scans(ctx);
+        }
     }
 
     template <typename VisitContext>
@@ -67,20 +112,20 @@ class ObjScanUtil
     }
 
     template <typename VisitContext>
-    static void visit_object_fields(vm::RtObject* obj, VisitContext& ctx)
+    static void scan_object_fields(vm::RtObject* obj, VisitContext& ctx)
     {
         if (vm::Class::is_array_or_szarray(obj->klass))
         {
-            visit_array_object(reinterpret_cast<vm::RtArray*>(obj), ctx);
+            scan_array_object(reinterpret_cast<vm::RtArray*>(obj), ctx);
         }
         else
         {
-            visit_normal_object(obj, ctx);
+            scan_normal_object(obj, ctx);
         }
     }
 
     template <typename VisitContext>
-    static void visit_normal_object(vm::RtObject* obj, VisitContext& ctx)
+    static void scan_normal_object(vm::RtObject* obj, VisitContext& ctx)
     {
         if (!vm::Class::get_has_references(obj->klass))
         {
@@ -90,7 +135,7 @@ class ObjScanUtil
     }
 
     template <typename VisitContext>
-    static void visit_array_object(vm::RtArray* obj, VisitContext& ctx)
+    static void scan_array_object(vm::RtArray* obj, VisitContext& ctx)
     {
         if (!vm::Class::get_has_references(obj->klass))
         {
@@ -111,7 +156,7 @@ class ObjScanUtil
             {
                 for (int32_t i = 0; i < obj->length; ++i)
                 {
-                    visit_child(elements[i], ctx);
+                    enqueue_deferred_field_scan(elements[i], ctx);
                 }
             }
         }
@@ -151,7 +196,7 @@ class ObjScanUtil
                 const size_t bit_in_word = utils::MemOp::count_trailing_zeros_nonzero(word);
                 const size_t bit_index = w * kBitsPerWord + bit_in_word;
                 vm::RtObject** slot = reinterpret_cast<vm::RtObject**>(slot_base + bit_index * sizeof(void*));
-                visit_child(*slot, ctx);
+                enqueue_deferred_field_scan(*slot, ctx);
                 word &= word - 1;
             }
         }

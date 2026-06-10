@@ -1,5 +1,7 @@
 #include "liveness.h"
 
+#include <cassert>
+
 #include "core/rt_base.h"
 #include "utils/mem_op.h"
 #include "utils/segmented_address_bitmap.h"
@@ -9,6 +11,7 @@
 #include "vm/type.h"
 #include "vm/rt_array.h"
 #include "gc/obj_scan_util.h"
+#include "utils/rt_vector.h"
 
 namespace leanclr
 {
@@ -24,6 +27,8 @@ struct LivenessState
     void* userdata;
     il2cpp_liveness_reallocate_callback reallocate;
     VisitedObjectBitmap visited_objects;
+    utils::Vector<vm::RtObject*> deferred_field_scan_queue;
+    int32_t deferred_scan_depth;
 
     static constexpr size_t PENDING_CALLBACK_BATCH_SIZE = 256;
     vm::RtObject* pending_callback_batch[PENDING_CALLBACK_BATCH_SIZE];
@@ -31,10 +36,15 @@ struct LivenessState
 
     LivenessState(metadata::RtClass* filter, uint32_t max_object_count /* unused */, il2cpp_register_object_callback callback, void* userdata,
                   il2cpp_liveness_reallocate_callback reallocate)
-        : filter(filter), callback(callback), userdata(userdata), reallocate(reallocate), pending_callback_batch_size(0)
+        : filter(filter), callback(callback), userdata(userdata), reallocate(reallocate), deferred_scan_depth(0), pending_callback_batch_size(0)
     {
         (void)max_object_count;
         std::memset(pending_callback_batch, 0, sizeof(pending_callback_batch));
+    }
+
+    ~LivenessState()
+    {
+        assert(deferred_field_scan_queue.empty());
     }
 
     bool add_visited_object(vm::RtObject* obj)
@@ -106,6 +116,7 @@ void Liveness::calculation_from_root(vm::RtObject* root, void* state)
 {
     auto liveness_state = reinterpret_cast<LivenessState*>(state);
     gc::ObjScanUtil::visit_object(root, *liveness_state);
+    gc::ObjScanUtil::finish_visit(*liveness_state);
     liveness_state->call_final_callbacks();
 }
 
@@ -113,6 +124,7 @@ void Liveness::calculation_from_statics(void* state)
 {
     auto liveness_state = reinterpret_cast<LivenessState*>(state);
     gc::ObjScanUtil::visit_all_classes_static_data(*liveness_state);
+    gc::ObjScanUtil::finish_visit(*liveness_state);
     liveness_state->call_final_callbacks();
 }
 
