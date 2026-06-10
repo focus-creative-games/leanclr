@@ -249,6 +249,27 @@ class MemOp
 #endif
     }
 
+    // word must be non-zero
+    static size_t count_trailing_zeros_nonzero64(uint64_t word)
+    {
+        assert(word != 0);
+#if defined(__GNUC__) || defined(__clang__)
+        return static_cast<size_t>(__builtin_ctzll(word));
+#elif defined(_MSC_VER)
+        unsigned long index;
+        _BitScanForward64(&index, word);
+        return static_cast<size_t>(index);
+#else
+        size_t n = 0;
+        while ((word & static_cast<uint64_t>(1)) == 0)
+        {
+            word >>= 1;
+            ++n;
+        }
+        return n;
+#endif
+    }
+
     static void* dup_mem(const void* src, size_t size)
     {
         void* dst = alloc::GeneralAllocation::malloc(size);

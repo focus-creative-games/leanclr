@@ -3,6 +3,7 @@
 #if LEANCLR_GC_MARK_SWEEP
 
 #include <cstddef>
+#include <cstdint>
 #include <cstring>
 
 #include "alloc/general_allocation.h"
@@ -28,28 +29,30 @@ struct FreeBlockHeader
 class SmallHeapArena
 {
   private:
+    static constexpr size_t kMaxBlockCount = 2048;
     static constexpr size_t kBitsPerUseWord = sizeof(size_t) * 8;
+    static constexpr size_t kMaxUseChunkCount = kMaxBlockCount / kBitsPerUseWord;
+    static_assert(kMaxBlockCount % kBitsPerUseWord == 0, "kMaxBlockCount must be divisible by kBitsPerUseWord");
+    static_assert(kMaxUseChunkCount <= 64, "kMaxUseChunkCount must fit in uint64_t chunk mask");
 
     void* _data;
     FreeBlockHeader* _free_list;
     size_t _block_size;
     size_t _block_count;
+    size_t _use_bits[kMaxUseChunkCount];
+    uint64_t _chunk_in_use_mask;
 
-    static size_t use_bits_word_count(size_t block_count);
     bool is_block_in_use(size_t index) const;
     bool is_block_free(size_t index) const;
-    void set_block_in_use(size_t index, bool in_use);
+    void set_block_in_use(size_t index);
+    void clear_block_in_use(size_t index);
     void* block_at(size_t index) const;
     size_t slot_index(void* block_ptr) const;
+    void prepend_to_free_list(FreeBlockHeader* block);
     void rebuild_free_list();
     void release_data();
 
-    // Flexible trailing array: actual length is use_bits_word_count(_block_count).
-    size_t _use_bits[1];
-
   public:
-    static size_t allocation_size(size_t arena_size, size_t block_size);
-
     SmallHeapArena(void* arena_data, size_t arena_size, size_t block_size);
     ~SmallHeapArena();
 
