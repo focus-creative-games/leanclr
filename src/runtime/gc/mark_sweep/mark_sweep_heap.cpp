@@ -10,7 +10,6 @@
 #include "gc/gc_handle_table.h"
 #include "gc/gc_roots.h"
 #include "gc/mark_sweep/small_heap_arena.h"
-#include "utils/rt_vector.h"
 #include "utils/mem_op.h"
 #include "utils/hashset.h"
 #include "vm/class.h"
@@ -89,27 +88,22 @@ static void sweep_small_objects(const GCAliveObjectBitmap& alive_object_bitmap, 
 
 static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, int64_t& freed_bytes)
 {
-    utils::Vector<void*> dead_objects;
-    for (auto it = s_big_object_arenas.begin(); it != s_big_object_arenas.end(); ++it)
+    for (auto it = s_big_object_arenas.begin(); it != s_big_object_arenas.end();)
     {
         vm::RtObject* obj = reinterpret_cast<vm::RtObject*>(*it);
-        if (!alive_object_bitmap.is_marked(obj))
+        if (alive_object_bitmap.is_marked(obj))
         {
-            dead_objects.push_back(*it);
+            ++it;
+            continue;
         }
-    }
-
-    for (size_t i = 0; i < dead_objects.size(); ++i)
-    {
-        vm::RtObject* obj = reinterpret_cast<vm::RtObject*>(dead_objects[i]);
         size_t aligned_size = utils::MemOp::align_up(get_object_allocated_size(obj), GC_ALIGN);
 #if LEANCLR_GC_DEBUG
         gc_debug_quarantine_object(obj, aligned_size);
 #else
-        alloc::GeneralAllocation::free(dead_objects[i]);
+        alloc::GeneralAllocation::free(*it);
 #endif
-        s_big_object_arenas.erase(dead_objects[i]);
         freed_bytes += static_cast<int64_t>(aligned_size);
+        it = s_big_object_arenas.erase(it);
     }
 }
 
