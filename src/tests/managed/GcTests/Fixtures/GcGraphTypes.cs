@@ -45,6 +45,29 @@ namespace GcTests.Fixtures
         public object derivedField;
     }
 
+    /// Non-sealed base with no reference fields; derived type adds a reference field.
+    internal class GcNoRefOpenBase
+    {
+        public int marker;
+    }
+
+    internal class GcNoRefOpenDerived : GcNoRefOpenBase
+    {
+        public object payload;
+    }
+
+    /// Non-sealed interface with no reference fields on the interface itself.
+    internal interface IGcOpenMarker
+    {
+        int Marker { get; }
+    }
+
+    internal class GcOpenMarkerImpl : IGcOpenMarker
+    {
+        public int Marker { get; set; }
+        public object payload;
+    }
+
     internal struct PrimitiveOnlyStruct
     {
         public int a;
