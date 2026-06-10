@@ -20,6 +20,7 @@ class ObjScanUtil
 {
   public:
     static constexpr size_t kDeferredScanBatchThreshold = 256;
+    static constexpr int32_t kMaxRecursiveVisitDepth = 16;
 
     template <typename VisitContext>
     static void visit_object(vm::RtObject* obj, VisitContext& ctx)
@@ -84,6 +85,14 @@ class ObjScanUtil
     {
         if (obj == nullptr)
         {
+            return;
+        }
+        if (ctx.deferred_scan_depth == 0 && ctx.deferred_field_scan_queue.size() < kDeferredScanBatchThreshold &&
+            ctx.recursive_visit_depth < kMaxRecursiveVisitDepth)
+        {
+            ctx.recursive_visit_depth++;
+            visit_object(obj, ctx);
+            ctx.recursive_visit_depth--;
             return;
         }
         if (!ctx.visit(obj))

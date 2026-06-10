@@ -44,9 +44,10 @@ struct GcMarkContext
     GCAliveObjectBitmap& alive_object_bitmap;
     utils::Vector<vm::RtObject*> deferred_field_scan_queue;
     int32_t deferred_scan_depth;
+    int32_t recursive_visit_depth;
 
     explicit GcMarkContext(GCAliveObjectBitmap& alive_object_bitmap)
-        : alive_object_bitmap(alive_object_bitmap), deferred_scan_depth(0)
+        : alive_object_bitmap(alive_object_bitmap), deferred_scan_depth(0), recursive_visit_depth(0)
     {
     }
 
