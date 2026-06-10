@@ -14,14 +14,14 @@ namespace gc
 {
 class ObjScanUtil
 {
-public:
-    template<typename VisitContext>
+  public:
+    template <typename VisitContext>
     static void visit_object(vm::RtObject* obj, VisitContext& ctx)
     {
         visit_child(obj, ctx);
     }
 
-    template<typename VisitContext>
+    template <typename VisitContext>
     static void visit_class_static_data(const metadata::RtClass* klass, VisitContext& ctx)
     {
         if (klass->static_fields_data == nullptr || klass->static_gc_bitmap_word_count == 0)
@@ -31,7 +31,7 @@ public:
         visit_gc_bitmap_words(klass->static_gc_bitmap, klass->static_gc_bitmap_word_count, klass->static_fields_data, ctx);
     }
 
-    template<typename VisitContext>
+    template <typename VisitContext>
     static void visit_all_classes_static_data(VisitContext& ctx)
     {
         auto& all_classes_with_static_data = vm::Class::get_all_classes_with_static_data();
@@ -41,8 +41,8 @@ public:
         }
     }
 
-private:
-    template<typename VisitContext>
+  private:
+    template <typename VisitContext>
     static void visit_child(vm::RtObject* obj, VisitContext& ctx)
     {
         if (obj == nullptr)
@@ -56,7 +56,17 @@ private:
         visit_object_fields(obj, ctx);
     }
 
-    template<typename VisitContext>
+    template <typename VisitContext>
+    static void visit_object_self_only(vm::RtObject* obj, VisitContext& ctx)
+    {
+        if (obj == nullptr)
+        {
+            return;
+        }
+        ctx.visit(obj);
+    }
+
+    template <typename VisitContext>
     static void visit_object_fields(vm::RtObject* obj, VisitContext& ctx)
     {
         if (vm::Class::is_array_or_szarray(obj->klass))
@@ -69,7 +79,7 @@ private:
         }
     }
 
-    template<typename VisitContext>
+    template <typename VisitContext>
     static void visit_normal_object(vm::RtObject* obj, VisitContext& ctx)
     {
         if (!vm::Class::get_has_references(obj->klass))
@@ -79,7 +89,7 @@ private:
         visit_gc_bitmap(obj->klass, reinterpret_cast<uint8_t*>(obj), ctx);
     }
 
-    template<typename VisitContext>
+    template <typename VisitContext>
     static void visit_array_object(vm::RtArray* obj, VisitContext& ctx)
     {
         if (!vm::Class::get_has_references(obj->klass))
@@ -90,9 +100,19 @@ private:
         if (vm::Class::is_reference_type(element_class))
         {
             vm::RtObject** elements = vm::Array::get_array_data_start_as<vm::RtObject*>(obj);
-            for (int32_t i = 0; i < obj->length; ++i)
+            if (!vm::Class::get_has_references(element_class) && vm::Class::is_sealed(element_class) && !vm::Class::is_array_or_szarray(element_class))
             {
-                visit_child(elements[i], ctx);
+                for (int32_t i = 0; i < obj->length; ++i)
+                {
+                    visit_object_self_only(elements[i], ctx);
+                }
+            }
+            else
+            {
+                for (int32_t i = 0; i < obj->length; ++i)
+                {
+                    visit_child(elements[i], ctx);
+                }
             }
         }
         else
@@ -107,13 +127,13 @@ private:
         }
     }
 
-    template<typename VisitContext>
+    template <typename VisitContext>
     static void visit_gc_bitmap(const metadata::RtClass* klass, uint8_t* slot_base, VisitContext& ctx)
     {
         visit_gc_bitmap_words(klass->gc_bitmap, klass->gc_bitmap_word_count, slot_base, ctx);
     }
 
-    template<typename VisitContext>
+    template <typename VisitContext>
     static void visit_gc_bitmap_words(const size_t* bitmap, size_t word_count, uint8_t* slot_base, VisitContext& ctx)
     {
         if (word_count == 0)
@@ -137,7 +157,7 @@ private:
         }
     }
 
-    template<typename VisitContext>
+    template <typename VisitContext>
     static void visit_value_type(uint8_t* data, VisitContext& ctx, const metadata::RtClass* value_type_class)
     {
         visit_gc_bitmap(value_type_class, data - vm::RT_OBJECT_HEADER_SIZE, ctx);
