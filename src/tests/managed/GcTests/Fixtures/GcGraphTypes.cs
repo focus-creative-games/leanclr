@@ -102,4 +102,24 @@ namespace GcTests.Fixtures
         public static RefContainer staticContainer;
         public static object[] staticArray;
     }
+
+    /// <summary>
+    /// Types used to exercise static_gc_bitmap bit index 0 (max_bitmap_index == 0).
+    /// Each holder declares a single static field at layout offset 0 so finalize_gc_bitmap
+    /// must not treat the bitmap as empty when scratch word 0 has a set bit.
+    /// </summary>
+    internal static class GcStaticBitmapBitZeroRefHolder
+    {
+        public static object onlyReference;
+    }
+
+    internal struct StaticValueWithRefAtLayoutZero
+    {
+        public object payload;
+    }
+
+    internal static class GcStaticBitmapBitZeroValueHolder
+    {
+        public static StaticValueWithRefAtLayoutZero valueAtZero;
+    }
 }
