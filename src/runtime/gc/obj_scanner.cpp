@@ -12,8 +12,7 @@ namespace leanclr
 namespace gc
 {
 
-ObjScanner::ObjScanner(ObjVisitFn visit_fn, void* userdata)
-    : visit_fn_(visit_fn), userdata_(userdata), deferred_scan_depth_(0), recursive_visit_depth_(0)
+ObjScanner::ObjScanner(ObjVisitFn visit_fn, void* userdata) : visit_fn_(visit_fn), userdata_(userdata), deferred_scan_depth_(0), recursive_visit_depth_(0)
 {
 }
 
@@ -85,20 +84,19 @@ void ObjScanner::enqueue_deferred_field_scan(vm::RtObject* obj)
     {
         return;
     }
-    if (deferred_scan_depth_ == 0 && deferred_field_scan_queue_.size() < kDeferredScanBatchThreshold &&
-        recursive_visit_depth_ < kMaxRecursiveVisitDepth)
-    {
-        recursive_visit_depth_++;
-        visit_object(obj);
-        recursive_visit_depth_--;
-        return;
-    }
     if (!visit(obj))
     {
         return;
     }
     if (!vm::Class::get_has_references(obj->klass))
     {
+        return;
+    }
+    if (deferred_scan_depth_ == 0 && deferred_field_scan_queue_.size() < kDeferredScanBatchThreshold && recursive_visit_depth_ < kMaxRecursiveVisitDepth)
+    {
+        recursive_visit_depth_++;
+        scan_object_fields(obj);
+        recursive_visit_depth_--;
         return;
     }
     deferred_field_scan_queue_.push_back(obj);
@@ -110,10 +108,6 @@ void ObjScanner::enqueue_deferred_field_scan(vm::RtObject* obj)
 
 void ObjScanner::visit_object_self_only(vm::RtObject* obj)
 {
-    if (obj == nullptr)
-    {
-        return;
-    }
     visit(obj);
 }
 
@@ -148,19 +142,14 @@ void ObjScanner::scan_array_object(vm::RtArray* obj)
     if (vm::Class::is_reference_type(element_class))
     {
         vm::RtObject** elements = vm::Array::get_array_data_start_as<vm::RtObject*>(obj);
-        if (!vm::Class::get_has_references(element_class) && vm::Class::is_sealed(element_class) && !vm::Class::is_array_or_szarray(element_class))
+        for (int32_t i = 0; i < obj->length; ++i)
         {
-            for (int32_t i = 0; i < obj->length; ++i)
+            vm::RtObject* elem = elements[i];
+            if (elem == nullptr)
             {
-                visit_object_self_only(elements[i]);
+                continue;
             }
-        }
-        else
-        {
-            for (int32_t i = 0; i < obj->length; ++i)
-            {
-                enqueue_deferred_field_scan(elements[i]);
-            }
+            enqueue_deferred_field_scan(elem);
         }
     }
     else
