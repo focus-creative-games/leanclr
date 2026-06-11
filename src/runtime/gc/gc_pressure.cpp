@@ -31,7 +31,7 @@ void GcPressure::record_external(int64_t bytes)
 {
     if (bytes > 0)
     {
-        s_state.external_pressure += static_cast<uint64_t>(bytes);
+        s_state.external_pressure += bytes;
     }
 }
 
@@ -47,12 +47,12 @@ void GcPressure::set_used_size(int64_t used)
     s_used_size = used;
 }
 
-uint64_t GcPressure::get_effective_pressure()
+int64_t GcPressure::get_effective_pressure()
 {
     return s_state.bytes_allocated_since_last_gc + s_state.external_pressure;
 }
 
-uint64_t GcPressure::get_bytes_allocated_since_last_gc()
+int64_t GcPressure::get_bytes_allocated_since_last_gc()
 {
     return s_state.bytes_allocated_since_last_gc;
 }

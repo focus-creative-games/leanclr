@@ -9,15 +9,15 @@ namespace gc
 
 struct GcPressureConfig
 {
-    uint64_t byte_threshold;
-    uint64_t soft_heap_limit;
+    int64_t byte_threshold;
+    int64_t soft_heap_limit;
 };
 
 struct GcPressureState
 {
-    uint64_t bytes_allocated_since_last_gc;
-    uint64_t external_pressure;
-    uint32_t objects_allocated_since_last_gc;
+    int64_t bytes_allocated_since_last_gc;
+    int64_t external_pressure;
+    int32_t objects_allocated_since_last_gc;
 };
 
 class GcPressure
@@ -30,8 +30,8 @@ class GcPressure
     static void record_external(int64_t bytes);
     static void on_collect();
 
-    static uint64_t get_effective_pressure();
-    static uint64_t get_bytes_allocated_since_last_gc();
+    static int64_t get_effective_pressure();
+    static int64_t get_bytes_allocated_since_last_gc();
     static void set_used_size(int64_t used);
     static bool should_collect(bool force);
 };
