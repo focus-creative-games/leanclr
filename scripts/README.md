@@ -60,8 +60,8 @@ scripts/
 | `test/aot-runner/run.*` | Build and run `aot-tester` with `AotTests` assembly |
 | `test/aot-runner/build-wasm.*` | Build `aot-tester` with Emscripten → `out/cmake/tests/aot-tester/<Config>-wasm/` |
 | `leanaot/build.*` | Build LeanAOT → `out/dotnet/LeanAOT/<Config>/net8.0/` |
-| `publish_leanaot.bat` | `dotnet publish` Release → `../leanclr4unity/LeanCLR~/leanaot/` (sibling repo) |
-| `publish_runtime.bat` | Mirror `src/runtime` → `../leanclr4unity/LeanCLR~/runtime/` (excludes scripts, CMakeLists.txt, `3rd/zlib`) |
+| `publish_leanaot.bat` | `dotnet publish` Release → `../leanclr-unity/LeanCLR~/leanaot/` (sibling repo) |
+| `publish_runtime.bat` | Mirror `src/runtime` → `../leanclr-unity/LeanCLR~/runtime/` (excludes scripts, CMakeLists.txt, `3rd/zlib`) |
 | `generator/gen_*.bat` | Regenerate opcode headers and icall JSON |
 | `dev/format-cpp-files.bat` | clang-format `src/runtime` sources |
 | `dev/clean-out.*` | Remove entire `out/` directory |

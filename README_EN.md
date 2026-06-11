@@ -42,7 +42,7 @@ LeanCLR already supports Unity and will support more engines/platforms soon.
 
 | Platform | Status | Notes |
 |------|------|------|
-| **Unity / Unity China, WebGL and Mini-Game platforms** | Complete | [leanclr4unity](https://github.com/focus-creative-games/leanclr4unity): replace IL2CPP with LeanCLR when shipping games (not limited to WebGL/mini-game platforms) |
+| **Unity / Unity China, WebGL and Mini-Game platforms** | Complete | [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity): replace IL2CPP with LeanCLR when shipping games (not limited to WebGL/mini-game platforms) |
 | **Godot (all platforms)** | In development | Preview planned for 2026-10 |
 | **Unreal Engine (all platforms)** | In development | ETA TBD |
 
@@ -96,15 +96,15 @@ Main differences:
 | **win64** | Windows x64 demo; run `run.bat` |
 | **h5** | WebAssembly browser demo; open `index.html` via an HTTP server |
 
-### leanclr4unity-demo
+### leanclr-unity-demo
 
-[leanclr4unity-demo](https://github.com/focus-creative-games/leanclr4unity_demo) shows how to use `leanclr4unity` to replace IL2CPP with LeanCLR when shipping to WebGL, mini-game, and Win64 targets.
+[leanclr-unity-demo](https://github.com/focus-creative-games/leanclr-unity-demo) shows how to use `leanclr-unity` to replace IL2CPP with LeanCLR when shipping to WebGL, mini-game, and Win64 targets.
 
 ## Related Repositories
 
 | Repository | Description |
 |------|------|
-| [leanclr4unity](https://github.com/focus-creative-games/leanclr4unity) | Unity plugin for LeanCLR; replace IL2CPP on WebGL / mini-game targets to reduce package size and memory usage |
+| [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | Unity plugin for LeanCLR; replace IL2CPP on WebGL / mini-game targets to reduce package size and memory usage |
 | [leanclr-godot](https://github.com/maidopi-usagi/leanCLR-godot) | LeanCLR Godot plugin |
 | [hybridclr](https://github.com/focus-creative-games/hybridclr) | **HybridCLR**: full-featured, low-overhead, high-performance C# hot-update solution for Unity |
 
