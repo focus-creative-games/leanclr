@@ -52,22 +52,20 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
     {
         RET_ERR(RtErr::FileNotFound);
     }
-    auto result = file_loader(name, "dll");
-    if (result.is_err())
+    FileData dllFileData = {};
+    auto result = file_loader(name, "dll", dllFileData);
+    if (!file_loader(name, "dll", dllFileData))
     {
-        std::printf("Failed to load assembly from file loader for %s, error: %d\n", name, static_cast<int>(result.unwrap_err()));
-        RET_ERR(result.unwrap_err());
+        std::printf("Failed to load assembly from file loader for %s\n", name);
+        RET_ERR(RtErr::FileNotFound);
     }
-    FileData& dllFileData = result.unwrap();
-
     AssemblyData dllData{dllFileData.data, dllFileData.length, dllFileData.shared};
 
     AssemblyData* pdb_data_ptr = nullptr;
     AssemblyData pdb_data;
-    auto pdb_ret = file_loader(name, "pdb");
-    if (pdb_ret.is_ok())
+    FileData pdb_file_data = {};
+    if (file_loader(name, "pdb", pdb_file_data))
     {
-        FileData& pdb_file_data = pdb_ret.unwrap();
         pdb_data = AssemblyData{pdb_file_data.data, pdb_file_data.length, pdb_file_data.shared};
         pdb_data_ptr = &pdb_data;
     }

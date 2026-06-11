@@ -107,30 +107,30 @@ static bool read_file_bytes(FILE* file, uint8_t* buffer, size_t size)
 #endif
 }
 
-static RtResultVoid read_entire_file(const char* path, std::vector<uint8_t>& out)
+static bool read_entire_file(const char* path, std::vector<uint8_t>& out)
 {
     out.clear();
     if (path == nullptr || path[0] == '\0')
     {
-        return RtErr::ArgumentNull;
+        return false;
     }
 
     FILE* file = open_file_read_binary(path);
     if (file == nullptr)
     {
-        return RtErr::FileNotFound;
+        return false;
     }
 
     int64_t file_size = 0;
     if (!seek_to_end_and_get_size(file, file_size))
     {
         std::fclose(file);
-        return RtErr::FileNotFound;
+        return false;
     }
     if (file_size < 8)
     {
         std::fclose(file);
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        return false;
     }
 
     out.resize(static_cast<size_t>(file_size));
@@ -138,11 +138,11 @@ static RtResultVoid read_entire_file(const char* path, std::vector<uint8_t>& out
     {
         std::fclose(file);
         out.clear();
-        return RtErr::FileNotFound;
+        return false;
     }
 
     std::fclose(file);
-    RET_VOID_OK();
+    return true;
 }
 
 static bool extension_equals_ignore_case(const char* extension, const char* expected)
@@ -157,7 +157,7 @@ static bool extension_equals_ignore_case(const char* extension, const char* expe
     return *extension == '\0' && *expected == '\0';
 }
 
-static RtResultVoid load_global_metadata_bundle_once()
+static bool load_global_metadata_bundle_once()
 {
     s_cached_bundle_data.clear();
     s_cached_assembly_entries.clear();
@@ -167,15 +167,14 @@ static RtResultVoid load_global_metadata_bundle_once()
     if (dat_path.empty())
     {
         assert(false && "data_dir is not set; global-metadata.dat path is empty");
-        return RtErr::ArgumentNull;
+        return false;
     }
 
-    auto read_ret = read_entire_file(dat_path.c_str(), s_cached_bundle_data);
-    if (read_ret.is_err())
+    if (!read_entire_file(dat_path.c_str(), s_cached_bundle_data))
     {
         assert(false && "global-metadata.dat not found");
         printf("global-metadata.dat not found, data_path='%s'\n", dat_path.c_str());
-        return read_ret.unwrap_err();
+        return false;
     }
     printf("global-metadata.dat found, data_path='%s'\n", dat_path.c_str());
 
@@ -183,7 +182,7 @@ static RtResultVoid load_global_metadata_bundle_once()
     {
         assert(false && "invalid global-metadata.dat signature, expected COPH");
         printf("invalid global-metadata.dat signature, expected COPH, data_path='%s'\n", dat_path.c_str());
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        return false;
     }
 
     const uint32_t assembly_count = read_u32_le(s_cached_bundle_data.data() + 4);
@@ -198,7 +197,7 @@ static RtResultVoid load_global_metadata_bundle_once()
         {
             assert(false && "truncated global-metadata.dat while reading assembly entries");
             printf("truncated global-metadata.dat while reading assembly entries, data_path='%s'\n", dat_path.c_str());
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+            return false;
         }
 
         size_t name_end = cursor;
@@ -210,7 +209,7 @@ static RtResultVoid load_global_metadata_bundle_once()
         {
             assert(false && "assembly name in global-metadata.dat is not null-terminated");
             printf("assembly name in global-metadata.dat is not null-terminated, data_path='%s'\n", dat_path.c_str());
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+            return false;
         }
 
         const size_t name_len_with_null = (name_end - cursor) + 1;
@@ -219,7 +218,7 @@ static RtResultVoid load_global_metadata_bundle_once()
         {
             assert(false && "truncated assembly info record in global-metadata.dat");
             printf("truncated assembly info record in global-metadata.dat, data_path='%s'\n", dat_path.c_str());
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+            return false;
         }
 
         AssemblyEntry e;
@@ -245,17 +244,17 @@ static RtResultVoid load_global_metadata_bundle_once()
         {
             assert(false && "assembly byte range out of bounds in global-metadata.dat");
             printf("assembly byte range out of bounds in global-metadata.dat, data_path='%s'\n", dat_path.c_str());
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+            return false;
         }
         e.file_data = s_cached_bundle_data.data() + abs_offset;
     }
 
     s_bundle_loaded_ok = true;
-    RET_VOID_OK();
+    return true;
 }
 } // namespace
 
-RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const char* extension)
+bool assembly_file_loader(const char* assembly_name, const char* extension, vm::FileData& file_data)
 {
     assert (assembly_name);
     assert (extension);
@@ -263,22 +262,22 @@ RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const cha
     if (!s_bundle_load_attempted)
     {
         s_bundle_load_attempted = true;
-        auto load_ret = load_global_metadata_bundle_once();
-        assert(load_ret.is_ok() && "failed to load/parse global-metadata.dat");
-        if (load_ret.is_err())
+        if (!load_global_metadata_bundle_once())
         {
-            return load_ret.unwrap_err();
+            assert(false && "failed to load/parse global-metadata.dat");
+            return false;
         }
     }
     if (!s_bundle_loaded_ok)
     {
-        return RtErr::FileNotFound;
+        assert(false && "global-metadata.dat is not loaded");
+        return false;
     }
 
     if (!extension_equals_ignore_case(extension, "dll"))
     {
         // global-metadata.dat bundle currently stores managed assemblies only.
-        return RtErr::FileNotFound;
+        return false;
     }
 
     const AssemblyEntry* matched = nullptr;
@@ -292,9 +291,12 @@ RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const cha
     }
     if (!matched)
     {
-        return RtErr::FileNotFound;
+        return false;
     }
-    return vm::FileData{matched->file_data, matched->size, true};
+    file_data.data = matched->file_data;
+    file_data.length = matched->size;
+    file_data.shared = true;
+    return true;
 }
 
 } // namespace il2cpp

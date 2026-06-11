@@ -17,7 +17,7 @@ struct FileData
     bool shared;
 };
 
-typedef RtResult<FileData> (*FileLoader)(const char* assembly_name, const char* extension);
+typedef bool (*FileLoader)(const char* assembly_name, const char* extension, FileData& file_data);
 
 typedef void (*InternalFunctionInitializer)();
 typedef void (*DebuggerLogFunc)(int32_t level, const uint16_t* category, size_t category_len, const uint16_t* message, size_t message_len);

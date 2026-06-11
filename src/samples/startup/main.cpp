@@ -37,7 +37,7 @@ static std::string get_current_working_directory()
     return std::string(buffer);
 }
 
-static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const char* extension)
+static bool assembly_file_loader(const char* assembly_name, const char* extension, vm::FileData& file_data)
 {
     for (const auto& dir : g_lib_dirs)
     {
@@ -54,7 +54,7 @@ static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, co
         auto* dll_data = static_cast<uint8_t*>(alloc::GeneralAllocation::malloc(file_size));
         if (!dll_data)
         {
-            return RtErr::OutOfMemory;
+            return false;
         }
 
         if (!dll_file.read(reinterpret_cast<char*>(dll_data), file_size))
@@ -64,10 +64,13 @@ static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, co
         }
         dll_file.close();
 
-        return vm::FileData{dll_data, static_cast<size_t>(file_size)};
+        file_data.data = dll_data;
+        file_data.length = static_cast<size_t>(file_size);
+        file_data.shared = false;
+        return true;
     }
 
-    return RtErr::FileNotFound;
+    return false;
 }
 
 static void setup_default_lib_dirs()

@@ -28,7 +28,7 @@ using namespace leanclr;
 // Global library search directories
 static std::vector<std::string> g_lib_dirs;
 
-static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const char* extension)
+static bool assembly_file_loader(const char* assembly_name, const char* extension, vm::FileData& file_data)
 {
     for (const auto& dir : g_lib_dirs)
     {
@@ -45,7 +45,7 @@ static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, co
         auto* dll_data = static_cast<uint8_t*>(alloc::GeneralAllocation::malloc(file_size));
         if (!dll_data)
         {
-            return RtErr::OutOfMemory;
+            return false;
         }
 
         if (!dll_file.read(reinterpret_cast<char*>(dll_data), file_size))
@@ -55,10 +55,13 @@ static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, co
         }
         dll_file.close();
 
-        return vm::FileData{dll_data, static_cast<size_t>(file_size)};
+        file_data.data = dll_data;
+        file_data.length = static_cast<size_t>(file_size);
+        file_data.shared = false;
+        return true;
     }
 
-    return RtErr::FileNotFound;
+    return false;
 }
 
 static void print_usage(const char* program_name)
@@ -96,12 +99,12 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
     std::cerr << std::endl;
     std::cerr << std::endl;
 
-    utils::StringBuilder sb;
+    utils::Utf8StringBuilder sb;
 
-    metadata::MetadataName::append_klass_full_name(sb, ex->klass).unwrap();
+    metadata::MetadataName::append_klass_full_name(sb, ex->klass).is_ok();
     sb.append_cstr(": ");
     sb.sure_null_terminator_but_not_append();
-    std::cerr << sb.as_cstr();
+    std::cerr << sb.get_const_chars();
 
     sb.clear();
     vm::RtString* message = ex->message;
@@ -113,12 +116,12 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
     {
         sb.sure_null_terminator_but_not_append();
     }
-    std::cerr << sb.as_cstr() << std::endl << std::endl;
+    std::cerr << sb.get_const_chars() << std::endl << std::endl;
 
     sb.clear();
     vm::RtString* stack_trace_str = reinterpret_cast<vm::RtString*>(ret.unwrap());
     sb.append_utf16_str(&stack_trace_str->first_char, stack_trace_str->length);
-    std::cerr << sb.as_cstr() << std::endl << std::endl;
+    std::cerr << sb.get_const_chars() << std::endl << std::endl;
 
     std::exit(-1);
 }

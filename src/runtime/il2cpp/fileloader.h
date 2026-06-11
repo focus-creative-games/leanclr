@@ -12,7 +12,7 @@ namespace leanclr
 {
 namespace il2cpp
 {
-RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const char* extension);
+bool assembly_file_loader(const char* assembly_name, const char* extension, vm::FileData& file_data);
 }
 
 } // namespace leanclr

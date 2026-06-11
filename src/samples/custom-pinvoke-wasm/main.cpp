@@ -124,16 +124,19 @@ extern "C" EMSCRIPTEN_KEEPALIVE int32_t invoke_method(metadata::RtAssembly* asse
     return 0;
 }
 
-static leanclr::RtResult<vm::FileData> local_assembly_loader(const char* assembly_name, const char* extension)
+static bool local_assembly_loader(const char* assembly_name, const char* extension, vm::FileData& file_data)
 {
     byte* buf = nullptr;
     size_t size = 0;
     int32_t res = load_assembly_file(assembly_name, extension, &buf, &size);
     if (res != 0)
     {
-        RET_ERR(RtErr::FileNotFound);
+        return false;
     }
-    return vm::FileData{buf, size};
+    file_data.data = buf;
+    file_data.length = size;
+    file_data.shared = false;
+    return true;
 }
 
 // Runtime initialization flag
