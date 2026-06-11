@@ -68,6 +68,8 @@ class CliImage
     RtResultVoid load_streams();
     RtResultVoid load_tables(alloc::MemPool& pool);
 
+    RtResult<const char*> read_assembly_name_no_ext() const;
+
     void set_image_data(const uint8_t* data, size_t length)
     {
         image_data = data;

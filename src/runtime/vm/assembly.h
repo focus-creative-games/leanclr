@@ -20,6 +20,8 @@ struct AssemblyData
 class Assembly
 {
   public:
+    static RtResultVoid initialize();
+
     static RtResult<metadata::RtAssembly*> load_corlib();
     static metadata::RtAssembly* get_corlib();
     static metadata::RtAssembly* find_by_name(const char* name_no_ext);

@@ -150,6 +150,21 @@ class Vector
         ++size_;
     }
 
+    void erase(iterator it)
+    {
+        if (it < begin() || it >= end())
+        {
+            return;
+        }
+        size_t index = it - begin();
+        data_[index].~T();
+        for (size_t i = index; i < size_ - 1; ++i)
+        {
+            data_[i] = std::move(data_[i + 1]);
+        }
+        --size_;
+    }
+
     void pop_back()
     {
         if (size_ > 0)

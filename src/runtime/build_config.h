@@ -200,6 +200,9 @@ typedef double float64_t;
 #define LEANCLR_GC_MARK_SWEEP 1
 #endif
 
+#define LEANCLR_STRINGIFY(x) #x
+#define LEANCLR_TOSTRING(x) LEANCLR_STRINGIFY(x)
+
 // UNITY_VERSION (and optionally UNITY_TUANJIE_ENGINE) must be supplied as
 // C preprocessor defines for the libil2cpp compile, via IL2CPP additional
 // arguments (--compiler-flags). LeanCLR's editor preprocess applies this

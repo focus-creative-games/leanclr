@@ -379,6 +379,7 @@ RtResultVoid Runtime::initialize()
     interp::MachineState::initialize();
     GC::initialize();
 
+    RET_ERR_ON_FAIL(Assembly::initialize());
     RET_ERR_ON_FAIL(Assembly::load_corlib());
     RET_ERR_ON_FAIL(Class::initialize());
     RET_ERR_ON_FAIL(ArrayClass::initialize());

@@ -114,6 +114,30 @@ RtModuleDef* RtModuleDef::get_module_by_id(uint32_t id)
     return g_loadedModuleDefs[id - 1];
 }
 
+void RtModuleDef::init_as_placeholder_module(const char* name)
+{
+    _name = utils::StringUtil::concat(name, ".dll");
+    _nameNoExt = name;
+    _id = allocate_image_id();
+    _refOnly = false;
+    _corLib = false;
+    _moduleCctorFinished = false;
+}
+
+void RtModuleDef::destroy_placeholder_datas()
+{
+    alloc::GeneralAllocation::free(const_cast<CliImage*>(&_cliImage));
+    alloc::GeneralAllocation::delete_any(&_pool);
+    alloc::GeneralAllocation::free(const_cast<char*>(_name));
+    _name = nullptr;
+    alloc::GeneralAllocation::free(const_cast<char*>(_nameNoExt));
+    _nameNoExt = nullptr;
+    _id = 0;
+    _refOnly = false;
+    _corLib = false;
+    _moduleCctorFinished = false;
+}
+
 RtModuleDef* RtModuleDef::get_corlib_module()
 {
     return g_corlibModule;
@@ -179,12 +203,19 @@ void RtModuleDef::visit_user_strings(gc::GcVisitObjectRoot visit, void* userdata
     }
 }
 
-RtResultVoid RtModuleDef::load()
+RtResultVoid RtModuleDef::load(uint32_t module_id)
 {
-    _id = allocate_image_id();
-    if (_id == 0)
+    if (module_id != 0)
     {
-        return RtErr::ExceedMaxImageCount;
+        _id = module_id;
+    }
+    else
+    {
+        _id = allocate_image_id();
+        if (_id == 0)
+        {
+            return RtErr::ExceedMaxImageCount;
+        }
     }
 
     RET_ERR_ON_FAIL(setup_assembly_name());

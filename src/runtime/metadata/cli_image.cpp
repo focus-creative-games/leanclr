@@ -72,6 +72,23 @@ struct StreamHeader
     uint8_t name[1]; // Variable length
 };
 
+RtResult<const char*> CliImage::read_assembly_name_no_ext() const
+{
+    const auto opt_row = read_assembly(1);
+    if (!opt_row)
+    {
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    }
+
+    auto& row = opt_row.value();
+    int32_t index = row.name;
+    if (index < string_heap.size)
+    {
+        RET_OK(reinterpret_cast<const char*>(string_heap.data + index));
+    }
+    RET_ASSERT_ERR(RtErr::BadImageFormat);
+}
+
 RtResultVoid CliImage::load_streams()
 {
     if (metadata_offset >= image_length)

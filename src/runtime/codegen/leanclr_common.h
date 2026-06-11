@@ -291,11 +291,11 @@
 #define LEANCLR_CODEGEN_ICALL_TRY_BEGIN() \
     try                                   \
     {
-#define LEANCLR_CODEGEN_ICALL_TRY_END_AND_CATCH()   \
-    }                                               \
-    catch (leanclr::vm::AotExceptionWrapper & __ex) \
-    {                                               \
-        return leanclr::RtErr::ManagedException;    \
+#define LEANCLR_CODEGEN_ICALL_TRY_END_AND_CATCH() \
+    }                                             \
+    catch (leanclr::vm::AotExceptionWrapper&)     \
+    {                                             \
+        return leanclr::RtErr::ManagedException;  \
     }
 
 #define LEANCLR_CODEGEN_TRY_RETURN(value) \

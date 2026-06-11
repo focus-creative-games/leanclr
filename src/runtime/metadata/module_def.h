@@ -119,6 +119,9 @@ class RtModuleDef
     static RtModuleDef* get_module_by_id(uint32_t id);
     static RtModuleDef* get_corlib_module();
 
+    void init_as_placeholder_module(const char* name);
+    void destroy_placeholder_datas();
+
     RtAssembly* get_assembly() const
     {
         return _assembly;
@@ -239,7 +242,7 @@ class RtModuleDef
     RtResult<vm::RtString*> get_user_string(uint32_t index);
     void visit_user_strings(gc::GcVisitObjectRoot visit, void* userdata) const;
 
-    RtResultVoid load();
+    RtResultVoid load(uint32_t module_id = 0);
     RtResultVoid setup_assembly_name();
     RtResultVoid setup_generic_params_and_containers();
     RtResultVoid setup_nested_classes();
