@@ -122,7 +122,7 @@ namespace LeanAOT.GenerationPlan
                                 s_logger.Debug($"[Manifest] Skip method (AOT rules): {method.FullName} token: {method.MDToken}");
                                 continue;
                             }
-                            s_logger.Info($"[Manifest] PGO include overrides AOT rule exclusion: {method.FullName} token: {method.MDToken}");
+                            s_logger.Debug($"[Manifest] PGO include overrides AOT rule exclusion: {method.FullName} token: {method.MDToken}");
                         }
 
                         TryAddMethodPlan(methodPlans, methodsInAotPlan, method);
