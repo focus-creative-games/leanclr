@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aot>
+  <!--
+    PGO rule file example for aot-tester (assembly short name: AotTests).
+
+    Real workflows: runtime exports a profile, tooling emits this file, LeanAOT consumes it with
+      leanaot-pgo-rule-file=&lt;path&gt;   (repeatable; multiple files are merged)
+
+    Schema (differs from hand-written aot.xml):
+      - <assembly name="ShortName">  (not fullname= / aot=)
+      - <method signature="MethodDef.FullName"/>  (exact match only; no wildcards)
+
+    Semantics (additive only; PGO never reduces the AOT set):
+      - Methods listed here are force-included when aot.xml would otherwise exclude them.
+      - Methods already included by aot.xml / default policy are unchanged.
+      - Typical setup: aot.xml sets aot=0 for an assembly, PGO lists profiled hot paths to AOT.
+
+    Signatures below match dnlib MethodDef.FullName for AotTests.dll (TC_Call_AotInterp hot paths).
+  -->
+  <assembly name="mscorlib">
+    <method signature="System.Boolean System.Char::IsWhiteSpace(System.Char)"/>
+  </assembly>
+</aot>

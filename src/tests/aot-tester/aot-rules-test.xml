@@ -8,6 +8,6 @@
     - method name="IsTr*" matches IsTrue; exact "IsTrue" line runs later and sets aot=1 (document order: later wins).
     - method/@signature: glob on MethodDef.FullName; "*Assert*IsFalse*" then bare IsFalse aot=1 (later wins).
   -->
-  <assembly fullname="Test" aot="1">
+  <assembly fullname="AotTests" aot="1">
   </assembly>
 </aot>

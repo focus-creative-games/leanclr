@@ -33,6 +33,7 @@ echo "[3/3] Running LeanAOT..."
   -d "$AOTTEST_DLL_DIR" \
   --leanaot-aot-rule-file "$AOT_TESTER_SRC/aot-rules-mscorlib.xml" \
   --leanaot-aot-rule-file "$AOT_TESTER_SRC/aot-rules-test.xml" \
+  --leanaot-pgo-rule-file "$AOT_TESTER_SRC/pgo-aot.xml" \
   -a mscorlib \
   -a System \
   -a System.Core \
