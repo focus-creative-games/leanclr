@@ -16,6 +16,11 @@ namespace LeanAOT.GenerationPlan
         /// When non-null, method inclusion after attribute/intrinsic checks follows <c>aot.xml</c> rules (see design doc).
         /// </summary>
         public AotMethodRulesEvaluator AotRulesEvaluator;
+
+        /// <summary>
+        /// When non-null, profiled methods in PGO rule files are force-included even if <c>aot.xml</c> excluded them.
+        /// </summary>
+        public PgoMethodIncludeIndex PgoIncludeIndex;
     }
 
     public class Manifest
@@ -109,11 +114,15 @@ namespace LeanAOT.GenerationPlan
                             continue;
                         }
 
-                        // 8.3–8.4: rule files; no match => AOT (design)
+                        // 8.3–8.4: rule files; no match => AOT (design). PGO only adds hot paths on top.
                         if (args.AotRulesEvaluator != null && !args.AotRulesEvaluator.ShouldIncludeByRules(assName, method))
                         {
-                            s_logger.Debug($"[Manifest] Skip method (AOT rules): {method.FullName} token: {method.MDToken}");
-                            continue;
+                            if (args.PgoIncludeIndex == null || !args.PgoIncludeIndex.Contains(assName, method))
+                            {
+                                s_logger.Debug($"[Manifest] Skip method (AOT rules): {method.FullName} token: {method.MDToken}");
+                                continue;
+                            }
+                            s_logger.Info($"[Manifest] PGO include overrides AOT rule exclusion: {method.FullName} token: {method.MDToken}");
                         }
 
                         TryAddMethodPlan(methodPlans, methodsInAotPlan, method);

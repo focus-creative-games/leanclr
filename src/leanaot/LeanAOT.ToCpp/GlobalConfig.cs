@@ -67,6 +67,11 @@ namespace LeanAOT.ToCpp
         public List<string> AotMethodRuleFiles { get; set; } = new List<string>();
 
         /// <summary>
+        /// LeanAOT-only: paths to PGO exact-include rule files (CLI order). Empty when unset.
+        /// </summary>
+        public List<string> PgoRuleFiles { get; set; } = new List<string>();
+
+        /// <summary>
         /// LeanAOT-only: assembly short names (same as <c>-a</c>) omitted from <c>global-metadata.dat</c> COPH only; case-insensitive keys, stored as first-seen spelling.
         /// </summary>
         public List<string> AssembliesExcludedFromGlobalMetadata { get; set; } = new List<string>();

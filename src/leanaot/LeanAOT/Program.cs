@@ -107,6 +107,12 @@ internal class Program
         public IEnumerable<string> AotMethodRuleFiles { get; set; }
 
         /// <summary>
+        /// LeanAOT-only: PGO-generated exact include lists (repeat for multiple files).
+        /// </summary>
+        [Option("leanaot-pgo-rule-file", Required = false, HelpText = "LeanAOT-only: path to a PGO rule file with exact method signatures (repeat for multiple files).")]
+        public IEnumerable<string> PgoRuleFiles { get; set; }
+
+        /// <summary>
         /// LeanAOT-only: assembly short names (same as <c>-a</c> / <c>--assembly</c>, without .dll) to omit from <c>global-metadata.dat</c> only.
         /// </summary>
         [Option("leanaot-exclude-assembly-from-global-metadata", Required = false, HelpText = "LeanAOT-only: assembly short name to omit from global-metadata.dat only (repeat for multiple); must appear in -a/--assembly list.")]
@@ -305,6 +311,18 @@ internal class Program
             if (!File.Exists(rulePath))
             {
                 errorMessage = $"AOT rule file not found: {rulePath}";
+                return false;
+            }
+        }
+
+        foreach (var rawRule in options.PgoRuleFiles ?? Enumerable.Empty<string>())
+        {
+            if (string.IsNullOrWhiteSpace(rawRule))
+                continue;
+            var rulePath = Path.GetFullPath(rawRule.Trim());
+            if (!File.Exists(rulePath))
+            {
+                errorMessage = $"PGO rule file not found: {rulePath}";
                 return false;
             }
         }
@@ -540,6 +558,17 @@ internal class Program
                 s_logger.Info("LeanAOT AOT rule file: {0}", rulePath);
         }
 
+        config.PgoRuleFiles = (options.PgoRuleFiles ?? Enumerable.Empty<string>())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => Path.GetFullPath(s.Trim()))
+            .ToList();
+
+        if (config.PgoRuleFiles is { Count: > 0 })
+        {
+            foreach (var rulePath in config.PgoRuleFiles)
+                s_logger.Info("LeanAOT PGO rule file: {0}", rulePath);
+        }
+
         config.AssembliesExcludedFromGlobalMetadata = new List<string>();
         foreach (var raw in options.AssembliesExcludedFromGlobalMetadata ?? Enumerable.Empty<string>())
         {
@@ -603,11 +632,23 @@ internal class Program
         if (rulePaths.Count > 0)
             aotRules = new AotMethodRulesEvaluator(rulePaths, assemblyCache, aotAssemblyNames);
 
+        var pgoRulePaths = (il2CppOptions.PgoRuleFiles ?? Enumerable.Empty<string>())
+            .Where(s => !string.IsNullOrWhiteSpace(s))
+            .Select(s => Path.GetFullPath(s.Trim()))
+            .ToList();
+        PgoMethodIncludeIndex pgoIncludeIndex = PgoMethodIncludeIndex.Load(pgoRulePaths);
+        if (pgoIncludeIndex != null)
+        {
+            foreach (var ass in pgoIncludeIndex.RestrictedAssemblies)
+                s_logger.Info("LeanAOT PGO include assembly {0}: {1} method(s)", ass, pgoIncludeIndex.GetIncludeCount(ass));
+        }
+
         var manifestArgs = new ManifestArgs()
         {
             assemblyCache = assemblyCache,
             aotAssemblyNames = aotAssemblyNames,
             AotRulesEvaluator = aotRules,
+            PgoIncludeIndex = pgoIncludeIndex,
         };
         var manifest = new Manifest(manifestArgs);
 
