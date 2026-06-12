@@ -356,14 +356,52 @@ class Class
         return klass->by_val->by_ref;
     }
 
+    static bool is_not_public(const metadata::RtClass* klass)
+    {
+        uint32_t visibility = klass->flags & (uint32_t)metadata::RtTypeAttribute::VisibilityMask;
+        return visibility == (uint32_t)metadata::RtTypeAttribute::NotPublic;
+    }
+
     static bool is_public(const metadata::RtClass* klass)
     {
-        return (klass->flags & (uint32_t)metadata::RtTypeAttribute::Public) != 0;
+        uint32_t visibility = klass->flags & (uint32_t)metadata::RtTypeAttribute::VisibilityMask;
+        return visibility == (uint32_t)metadata::RtTypeAttribute::Public;
     }
 
     static bool is_nested_public(const metadata::RtClass* klass)
     {
-        return (klass->flags & (uint32_t)metadata::RtTypeAttribute::NestedPublic) != 0;
+        uint32_t visibility = klass->flags & (uint32_t)metadata::RtTypeAttribute::VisibilityMask;
+        return visibility == (uint32_t)metadata::RtTypeAttribute::NestedPublic;
+    }
+
+    static bool is_nested_private(const metadata::RtClass* klass)
+    {
+        uint32_t visibility = klass->flags & (uint32_t)metadata::RtTypeAttribute::VisibilityMask;
+        return visibility == (uint32_t)metadata::RtTypeAttribute::NestedPrivate;
+    }
+
+    static bool is_nested_family(const metadata::RtClass* klass)
+    {
+        uint32_t visibility = klass->flags & (uint32_t)metadata::RtTypeAttribute::VisibilityMask;
+        return visibility == (uint32_t)metadata::RtTypeAttribute::NestedFamily;
+    }
+
+    static bool is_nested_assembly(const metadata::RtClass* klass)
+    {
+        uint32_t visibility = klass->flags & (uint32_t)metadata::RtTypeAttribute::VisibilityMask;
+        return visibility == (uint32_t)metadata::RtTypeAttribute::NestedAssembly;
+    }
+
+    static bool is_nested_fam_and_assem(const metadata::RtClass* klass)
+    {
+        uint32_t visibility = klass->flags & (uint32_t)metadata::RtTypeAttribute::VisibilityMask;
+        return visibility == (uint32_t)metadata::RtTypeAttribute::NestedFamAndAssem;
+    }
+
+    static bool is_nested_fam_or_assem(const metadata::RtClass* klass)
+    {
+        uint32_t visibility = klass->flags & (uint32_t)metadata::RtTypeAttribute::VisibilityMask;
+        return visibility == (uint32_t)metadata::RtTypeAttribute::NestedFamOrAssem;
     }
 
     static bool is_initialized(const metadata::RtClass* klass)
