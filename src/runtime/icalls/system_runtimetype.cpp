@@ -812,8 +812,8 @@ RtResult<vm::RtReflectionType*> SystemRuntimeType::get_declaring_type(vm::RtRefl
     RET_OK(nullptr);
 }
 
-RtResult<utils::SafeGPtrArray<metadata::RtClass>*> SystemRuntimeType::get_nested_types_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
-                                                                                              int32_t bind_flags) noexcept
+RtResult<utils::SafeGPtrArray<metadata::RtTypeSig>*> SystemRuntimeType::get_nested_types_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
+                                                                                                int32_t bind_flags) noexcept
 {
     if (runtime_type == nullptr)
         RET_ERR(RtErr::ArgumentNull);
@@ -823,7 +823,7 @@ RtResult<utils::SafeGPtrArray<metadata::RtClass>*> SystemRuntimeType::get_nested
     // Only classes and value types can have nested types
     if (type_sig->by_ref || (type_sig->ele_type != metadata::RtElementType::Class && type_sig->ele_type != metadata::RtElementType::ValueType))
     {
-        auto empty = utils::SafeGPtrArray<metadata::RtClass>::create_empty();
+        auto empty = utils::SafeGPtrArray<metadata::RtTypeSig>::create_empty();
         RET_OK(empty);
     }
 
@@ -833,14 +833,13 @@ RtResult<utils::SafeGPtrArray<metadata::RtClass>*> SystemRuntimeType::get_nested
     RET_ERR_ON_FAIL(vm::Class::initialize_nested_classes(klass));
 
     // Build list of matching nested types
-    utils::Vector<const metadata::RtClass*> nested_types;
+    utils::Vector<const metadata::RtTypeSig*> nested_types;
     nested_types.reserve(klass->nested_class_count);
     bool case_insensitive = (bind_flags & BINDING_FLAGS_IGNORE_CASE) != 0;
 
     for (uint32_t i = 0; i < klass->nested_class_count; ++i)
     {
         const metadata::RtClass* nested_klass = klass->nested_classes[i];
-
         // Check name match
         if (!matches_member_name(nested_klass->name, name, case_insensitive))
             continue;
@@ -857,10 +856,10 @@ RtResult<utils::SafeGPtrArray<metadata::RtClass>*> SystemRuntimeType::get_nested
                 continue;
         }
 
-        nested_types.push_back(nested_klass);
+        nested_types.push_back(vm::Class::get_by_val_type_sig(nested_klass));
     }
 
-    auto result = utils::SafeGPtrArray<metadata::RtClass>::create_from_data(nested_types.data(), static_cast<int32_t>(nested_types.size()));
+    auto result = utils::SafeGPtrArray<metadata::RtTypeSig>::create_from_data(nested_types.data(), static_cast<int32_t>(nested_types.size()));
     RET_OK(result);
 }
 
@@ -1123,7 +1122,7 @@ static RtResultVoid get_nested_types_native_invoker(metadata::RtManagedMethodPoi
     auto runtime_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0);
     auto name = EvalStackOp::get_param<const char*>(params, 1);
     int32_t bind_flags = EvalStackOp::get_param<int32_t>(params, 2);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(utils::SafeGPtrArray<metadata::RtClass>*, result,
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(utils::SafeGPtrArray<metadata::RtTypeSig>*, result,
                                             SystemRuntimeType::get_nested_types_native(runtime_type, name, bind_flags));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();

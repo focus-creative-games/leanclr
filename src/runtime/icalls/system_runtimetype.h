@@ -30,7 +30,7 @@ class SystemRuntimeType
                                                                                     int32_t list_type) noexcept;
     static RtResult<utils::SafeGPtrArray<metadata::RtFieldInfo>*> get_fields_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
                                                                                     int32_t bind_flags, int32_t list_type) noexcept;
-    static RtResult<utils::SafeGPtrArray<metadata::RtClass>*> get_nested_types_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
+    static RtResult<utils::SafeGPtrArray<metadata::RtTypeSig>*> get_nested_types_native(vm::RtReflectionRuntimeType* runtime_type, const char* name,
                                                                                       int32_t bind_flags) noexcept;
 
     // Reflection helpers
