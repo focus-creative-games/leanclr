@@ -126,8 +126,8 @@ static RtResultVoid monitor_test_owner_invoker(metadata::RtManagedMethodPointer,
 }
 
 static vm::InternalCallEntry s_internal_call_entries_system_threading_monitor[] = {
-    {"System.Threading.Monitor::Enter", (vm::InternalCallFunction)&SystemThreadingMonitor::enter, enter_invoker},
-    {"System.Threading.Monitor::Exit", (vm::InternalCallFunction)&SystemThreadingMonitor::exit, exit_invoker},
+    {"System.Threading.Monitor::Enter(System.Object)", (vm::InternalCallFunction)&SystemThreadingMonitor::enter, enter_invoker},
+    {"System.Threading.Monitor::Exit(System.Object)", (vm::InternalCallFunction)&SystemThreadingMonitor::exit, exit_invoker},
     {"System.Threading.Monitor::Monitor_test_synchronised", (vm::InternalCallFunction)&SystemThreadingMonitor::monitor_test_synchronized,
      monitor_test_synchronized_invoker},
     {"System.Threading.Monitor::Monitor_pulse", (vm::InternalCallFunction)&SystemThreadingMonitor::monitor_pulse, monitor_pulse_invoker},
