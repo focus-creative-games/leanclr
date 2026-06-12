@@ -5,6 +5,8 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_System_Threading_Volatile : TestCaseBase
     {
+        [CoversIcall("System.Threading.Volatile::Read(System.Int64&)")]
+        [CoversIcall("System.Threading.Volatile::Write(System.Int64&,System.Int64)")]
         [UnitTest]
         public void ReadWrite_Int64()
         {
@@ -16,6 +18,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(-1234567890124L, r2);
         }
 
+        [CoversIcall("System.Threading.Volatile::Read(System.UInt64&)")]
+        [CoversIcall("System.Threading.Volatile::Write(System.UInt64&,System.UInt64)")]
         [UnitTest]
         public void ReadWrite_UInt64()
         {
@@ -27,6 +31,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(1234567890124UL, r2);
         }
 
+        [CoversIcall("System.Threading.Volatile::Read(System.Double&)")]
+        [CoversIcall("System.Threading.Volatile::Write(System.Double&,System.Double)")]
         [UnitTest]
         public void ReadWrite_Double()
         {

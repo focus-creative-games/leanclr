@@ -9,6 +9,7 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_System_Reflection_AssemblyName : TestCaseBase
     {
+        [CoversIcall("System.Reflection.AssemblyName::ParseAssemblyName(System.IntPtr,Mono.MonoAssemblyName&,System.Boolean&,System.Boolean&)")]
         [UnitTest]
         public void ParseAssemblyName()
         {
@@ -18,6 +19,7 @@ namespace CorlibTests.InternalCall
             Assert.Null(an.Version);
         }
 
+        [CoversIcall("System.Reflection.AssemblyName::GetNativeName(System.IntPtr)")]
         [UnitTest]
         public void GetNativeName()
         {
@@ -47,6 +49,7 @@ namespace CorlibTests.InternalCall
         {
         }
 
+        [CoversIcall("System.Reflection.CustomAttributeData::ResolveArgumentsInternal(System.Reflection.ConstructorInfo,System.Reflection.Assembly,System.IntPtr,System.UInt32,System.Object[]&,System.Object[]&)")]
         [UnitTest]
         public void ResolveArgumentsInternal()
         {

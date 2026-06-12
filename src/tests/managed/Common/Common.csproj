@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AotMethodAttribute.cs" />
+    <Compile Include="CoversIcallAttribute.cs" />
     <Compile Include="Assert.cs" />
     <Compile Include="TestCaseBase.cs" />
     <Compile Include="IgnoreTestAttribute.cs" />

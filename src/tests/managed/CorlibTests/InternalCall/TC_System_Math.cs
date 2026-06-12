@@ -19,6 +19,7 @@ namespace CorlibTests.InternalCall
             Assert.IsTrue(Math.Abs(expected - actual) <= epsilon);
         }
 
+        [CoversIcall("System.Math::Round(System.Double)")]
         [UnitTest]
         public void Round1()
         {
@@ -37,6 +38,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(4.0, Math.Round(3.5, 0, MidpointRounding.ToEven));
         }
 
+        [CoversIcall("System.Math::Abs(System.Single)")]
         [UnitTest]
         public void AbsF321()
         {
@@ -44,6 +46,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(5.5, Math.Abs(a));
         }
 
+        [CoversIcall("System.Math::Abs(System.Double)")]
         [UnitTest]
         public void AbsF641()
         {
@@ -51,12 +54,14 @@ namespace CorlibTests.InternalCall
             Assert.Equal(5.5, Math.Abs(a));
         }
 
+        [CoversIcall("System.Math::Acos(System.Double)")]
         [UnitTest]
         public void Acos1()
         {
             Assert.Equal(0.0, Math.Acos(1.0));
         }
 
+        [CoversIcall("System.Math::Asin(System.Double)")]
         [UnitTest]
         public void Asin1()
         {
@@ -64,18 +69,21 @@ namespace CorlibTests.InternalCall
         }
 
 #if IL2CPP_ONLY
+        [CoversIcall("System.Math::Acosh(System.Double)")]
         [UnitTest]
         public void Acosh1()
         {
             Assert.Equal(0.0, Math.Acosh(1.0));
         }
 
+        [CoversIcall("System.Math::Asinh(System.Double)")]
         [UnitTest]
         public void Asinh1()
         {
             Assert.Equal(0.0, Math.Asinh(0.0));
         }
 
+        [CoversIcall("System.Math::Atanh(System.Double)")]
         [UnitTest]
         public void Atanh1()
         {
@@ -83,12 +91,14 @@ namespace CorlibTests.InternalCall
         }
 #endif
 
+        [CoversIcall("System.Math::Atan(System.Double)")]
         [UnitTest]
         public void Atan1()
         {
             Assert.Equal(0.0, Math.Atan(0.0));
         }
 
+        [CoversIcall("System.Math::Atan2(System.Double,System.Double)")]
         [UnitTest]
         public void Atan21()
         {
@@ -96,6 +106,7 @@ namespace CorlibTests.InternalCall
         }
 
 #if IL2CPP_ONLY
+        [CoversIcall("System.Math::Cbrt(System.Double)")]
         [UnitTest]
         public void Cbrt1()
         {
@@ -103,30 +114,36 @@ namespace CorlibTests.InternalCall
         }
 #endif
 
+        [CoversIcall("System.Math::Ceiling(System.Double)")]
+        [CoversIcall("System.MathF::Ceiling(System.Single)")]
         [UnitTest]
         public void Ceiling()
         {
             Assert.Equal(2.0, Math.Ceiling(1.2));
         }
 
+        [CoversIcall("System.Math::Cos(System.Double)")]
         [UnitTest]
         public void Cos1()
         {
             Assert.Equal(1.0, Math.Cos(0.0));
         }
 
+        [CoversIcall("System.Math::Cosh(System.Double)")]
         [UnitTest]
         public void Cosh1()
         {
             Assert.Equal(1.0, Math.Cosh(0.0));
         }
 
+        [CoversIcall("System.Math::Exp(System.Double)")]
         [UnitTest]
         public void Exp1()
         {
             Assert.Equal(1.0, Math.Exp(0.0));
         }
 
+        [CoversIcall("System.Math::Floor(System.Double)")]
         [UnitTest]
         public void Floor1()
         {
@@ -140,48 +157,56 @@ namespace CorlibTests.InternalCall
             Assert.Equal(-1.0, Math.Truncate(-1.8));
         }
 
+        [CoversIcall("System.Math::Log(System.Double)")]
         [UnitTest]
         public void Log1()
         {
             Assert.Equal(0.0, Math.Log(1.0));
         }
 
+        [CoversIcall("System.Math::Log10(System.Double)")]
         [UnitTest]
         public void Log101()
         {
             AssertNearlyEqual(2.0, Math.Log10(100.0));
         }
 
+        [CoversIcall("System.Math::Pow(System.Double,System.Double)")]
         [UnitTest]
         public void Pow1()
         {
             Assert.Equal(8.0, Math.Pow(2.0, 3.0));
         }
 
+        [CoversIcall("System.Math::Sin(System.Double)")]
         [UnitTest]
         public void Sin1()
         {
             Assert.Equal(0.0, Math.Sin(0.0));
         }
 
+        [CoversIcall("System.Math::Sinh(System.Double)")]
         [UnitTest]
         public void Sinh1()
         {
             Assert.Equal(0.0, Math.Sinh(0.0));
         }
 
+        [CoversIcall("System.Math::Sqrt(System.Double)")]
         [UnitTest]
         public void Sqrt1()
         {
             Assert.Equal(3.0, Math.Sqrt(9.0));
         }
 
+        [CoversIcall("System.Math::Tan(System.Double)")]
         [UnitTest]
         public void Tan1()
         {
             Assert.Equal(0.0, Math.Tan(0.0));
         }
 
+        [CoversIcall("System.Math::Tanh(System.Double)")]
         [UnitTest]
         public void Tanh1()
         {

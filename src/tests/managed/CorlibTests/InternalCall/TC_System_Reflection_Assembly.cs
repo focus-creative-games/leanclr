@@ -75,6 +75,7 @@ namespace CorlibTests.InternalCall
             Assert.True(refs.Length >= 1);
         }
 
+        [CoversIcall("System.AppDomain::LoadAssembly(System.String,System.Security.Policy.Evidence,System.Boolean,System.Threading.StackCrawlMark&)")]
         [UnitTest]
         public void LoadAssembly()
         {

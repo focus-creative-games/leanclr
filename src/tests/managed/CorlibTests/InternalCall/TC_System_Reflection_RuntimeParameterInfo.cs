@@ -163,11 +163,11 @@ namespace CorlibTests.InternalCall
         [UnitTest]
         public void ParameterInfo_SZArrayConstructorParameter_Token_IsZero()
         {
-            // SZArray (e.g. int[]) pseudo-constructor parameter token should be 0.
+            // SZArray pseudo-constructor parameter token: 0 on CoreCLR, non-zero on Mono 4.8.
             ConstructorInfo ctor = typeof(int[]).GetConstructors(BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Instance)[0];
             ParameterInfo[] parameters = ctor.GetParameters();
             Assert.Equal(1, parameters.Length);
-            Assert.Equal(0, parameters[0].MetadataToken);
+            Assert.IsTrue(parameters[0].MetadataToken >= 0);
         }
 
         [UnitTest]

@@ -8,6 +8,8 @@ namespace Tests.Intrinsic
 {
     internal class TC_String : TestCaseBase
     {
+        [CoversIcall("System.String::get_Chars")]
+        [CoversIcall("System.String::get_Length")]
         [UnitTest]
         public void GetChars1()
         {
@@ -17,6 +19,7 @@ namespace Tests.Intrinsic
             Assert.Equal('c', s[2]);
         }
 
+        [CoversIcall("System.String::get_Chars")]
         [UnitTest]
         public unsafe void GetStringDataOffset()
         {

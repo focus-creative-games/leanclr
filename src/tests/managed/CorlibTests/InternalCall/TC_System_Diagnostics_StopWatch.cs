@@ -5,6 +5,7 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_Stopwatch : TestCaseBase
     {
+        [CoversIcall("System.Diagnostics.Stopwatch::GetTimestamp()")]
         [UnitTest]
         public void ElapsedTicks_MethodExists_AndReturnTypeIsInt64()
         {

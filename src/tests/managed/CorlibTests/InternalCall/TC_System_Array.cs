@@ -4,6 +4,7 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_System_Array : TestCaseBase
     {
+        [CoversIcall("System.Array::ClearInternal")]
         [UnitTest]
         public void Clear_IntArray_AllElements()
         {

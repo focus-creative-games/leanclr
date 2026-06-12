@@ -5,6 +5,7 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_System_Threading_Thread : TestCaseBase
     {
+        [CoversIcall("System.Threading.Thread::GetCurrentThread_icall")]
         [UnitTest]
         public void GetCurrentThread_icall()
         {
@@ -12,6 +13,7 @@ namespace CorlibTests.InternalCall
             Assert.NotNull(t);
         }
 
+        [CoversIcall("System.Threading.Thread::GetDomainID")]
         [UnitTest]
         public void DomainId()
         {
@@ -19,6 +21,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(1, id);
         }
 
+        [CoversIcall("System.Threading.Thread::YieldInternal")]
         [UnitTest]
         public void YieldInternal()
         {
@@ -26,6 +29,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(false, yielded);
         }
 
+        [CoversIcall("System.Threading.Thread::SleepInternal(System.Int32)")]
         [UnitTest]
         public void SleepInternal()
         {
@@ -34,6 +38,7 @@ namespace CorlibTests.InternalCall
         }
 
 #if SINGLE_THREAD
+        [CoversIcall("System.Threading.Thread::JoinInternal(System.Int32)")]
         [UnitTest]
         public void JoinInternal()
         {
@@ -44,6 +49,8 @@ namespace CorlibTests.InternalCall
         }
 #endif
 
+        [CoversIcall("System.Threading.Thread::GetPriorityNative")]
+        [CoversIcall("System.Threading.Thread::SetPriorityNative(System.Int32)")]
         [UnitTest]
         public void PriorityDefaults()
         {
@@ -51,6 +58,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(ThreadPriority.Normal, p);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.Int32&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.Int32&,System.Int32)")]
         [UnitTest]
         public void VolatileReadWrite_Int32()
         {
@@ -62,6 +71,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(2, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.Object&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.Object&,System.Object)")]
         [UnitTest]
         public void VolatileReadWrite_Object()
         {
@@ -74,6 +85,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(o2, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.Byte&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.Byte&,System.Byte)")]
         [UnitTest]
         public void VolatileReadWrite_Byte()
         {
@@ -85,6 +98,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal((byte)4, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.SByte&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.SByte&,System.SByte)")]
         [UnitTest]
         public void VolatileReadWrite_SByte()
         {
@@ -96,6 +111,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal((sbyte)-4, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.Int16&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.Int16&,System.Int16)")]
         [UnitTest]
         public void VolatileReadWrite_Int16()
         {
@@ -107,6 +124,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal((short)-11, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.UInt16&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.UInt16&,System.UInt16)")]
         [UnitTest]
         public void VolatileReadWrite_UInt16()
         {
@@ -118,6 +137,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal((ushort)11, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.UInt32&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.UInt32&,System.UInt32)")]
         [UnitTest]
         public void VolatileReadWrite_UInt32()
         {
@@ -129,6 +150,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(101u, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.Int64&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.Int64&,System.Int64)")]
         [UnitTest]
         public void VolatileReadWrite_Int64()
         {
@@ -140,6 +163,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(-1001L, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.UInt64&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.UInt64&,System.UInt64)")]
         [UnitTest]
         public void VolatileReadWrite_UInt64()
         {
@@ -151,6 +176,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(1001UL, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.Single&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.Single&,System.Single)")]
         [UnitTest]
         public void VolatileReadWrite_Single()
         {
@@ -162,6 +189,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(2.5f, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.Double&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.Double&,System.Double)")]
         [UnitTest]
         public void VolatileReadWrite_Double()
         {
@@ -173,6 +202,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(-3.5, r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.IntPtr&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.IntPtr&,System.IntPtr)")]
         [UnitTest]
         public void VolatileReadWrite_IntPtr()
         {
@@ -184,6 +215,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(new IntPtr(43), r2);
         }
 
+        [CoversIcall("System.Threading.Thread::VolatileRead(System.UIntPtr&)")]
+        [CoversIcall("System.Threading.Thread::VolatileWrite(System.UIntPtr&,System.UIntPtr)")]
         [UnitTest]
         public void VolatileReadWrite_UIntPtr()
         {

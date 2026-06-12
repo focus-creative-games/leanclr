@@ -28,6 +28,7 @@ namespace CorlibTests.InternalCall
         private static class EmptyNestedContainer
         {
         }
+        [CoversIcall("System.RuntimeType::make_array_type")]
         [UnitTest]
         public void MakeArrayType_NoArgs_ReturnsSZArray()
         {
@@ -50,6 +51,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(typeof(string), arrayType.GetElementType());
         }
 
+        [CoversIcall("System.RuntimeType::make_array_type")]
         [UnitTest]
         public void MakeArrayType_Rank1_NotSameAsSZArray()
         {
@@ -59,6 +61,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(typeof(int), boundRank1.GetElementType());
         }
 
+        [CoversIcall("System.RuntimeType::make_array_type")]
         [UnitTest]
         public void MakeArrayType_Rank2_ReturnsMultiDimensional()
         {
@@ -110,6 +113,7 @@ namespace CorlibTests.InternalCall
             Assert.ExpectException<TypeLoadException>(() => typeof(int).MakeArrayType(51));
         }
 
+        [CoversIcall("System.RuntimeType::make_byref_type")]
         [UnitTest]
         public void MakeArrayType_OnByRefElement_Throws()
         {
@@ -117,6 +121,7 @@ namespace CorlibTests.InternalCall
             Assert.ExpectException<TypeLoadException>(() => byRef.MakeArrayType());
         }
 
+        [CoversIcall("System.RuntimeType::GetNestedTypes_native")]
         [UnitTest]
         public void GetNestedTypes_Public_ReturnsPublicNestedTypesOnly()
         {
@@ -127,6 +132,7 @@ namespace CorlibTests.InternalCall
             Assert.IsFalse(nested.Any(t => t.Name == "PrivateNestedType"));
         }
 
+        [CoversIcall("System.RuntimeType::GetNestedTypes_native")]
         [UnitTest]
         public void GetNestedTypes_PublicAndNonPublic_ReturnsAllNestedTypes()
         {
@@ -154,6 +160,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(0, nested.Length);
         }
 
+        [CoversIcall("System.RuntimeType::GetNestedTypes_native")]
         [UnitTest]
         public void GetNestedType_ByName_ReturnsMatchingType()
         {

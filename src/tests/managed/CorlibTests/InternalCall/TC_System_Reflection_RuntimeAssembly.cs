@@ -9,6 +9,7 @@ namespace CorlibTests.InternalCall
     internal class TC_System_Reflection_RuntimeAssembly : TestCaseBase
     {
 #if IL2CPP_ONLY
+        [CoversIcall("System.Reflection.RuntimeAssembly::get_code_base(System.Reflection.Assembly,System.Boolean)")]
         [UnitTest]
         public void GetCodeBase()
         {
@@ -18,6 +19,7 @@ namespace CorlibTests.InternalCall
         }
 
 
+        [CoversIcall("System.Reflection.RuntimeAssembly::get_location")]
         [UnitTest]
         public void GetLocation()
         {
@@ -26,6 +28,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal("CorlibTests.dll", location);
         }
 #endif
+        [CoversIcall("System.Reflection.RuntimeAssembly::get_fullname(System.Reflection.Assembly)")]
+        [CoversIcall("System.RuntimeType::getFullName")]
         [UnitTest]
         public void GetFullName()
         {
@@ -42,6 +46,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal("v4.0.30319", runtimeVersion);
         }
 
+        [CoversIcall("System.Reflection.RuntimeAssembly::get_global_assembly_cache")]
         [UnitTest]
         public void GetGlobalAssemblyCache()
         {
@@ -50,6 +55,7 @@ namespace CorlibTests.InternalCall
             Assert.False(gac);
         }
 
+        [CoversIcall("System.Reflection.RuntimeAssembly::get_EntryPoint")]
         [UnitTest]
         public void GetEntryPoint()
         {
@@ -58,6 +64,7 @@ namespace CorlibTests.InternalCall
             Assert.Null(entryPoint);
         }
 
+        [CoversIcall("System.Reflection.RuntimeAssembly::get_ReflectionOnly")]
         [UnitTest]
         public void GetReflectionOnly()
         {
@@ -66,6 +73,7 @@ namespace CorlibTests.InternalCall
             Assert.False(reflectionOnly);
         }
 
+        [CoversIcall("System.Reflection.RuntimeAssembly::GetManifestResourceNames")]
         [UnitTest]
         public void GetManifestResourceNames()
         {
@@ -84,6 +92,7 @@ namespace CorlibTests.InternalCall
 
 
 #if IL2CPP_ONLY
+        [CoversIcall("System.Reflection.RuntimeAssembly::GetFilesInternal(System.String,System.Boolean)")]
         [UnitTest]
         public void GetFilesInternal()
         {

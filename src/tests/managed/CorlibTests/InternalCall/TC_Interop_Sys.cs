@@ -9,6 +9,8 @@ namespace CorlibTests.InternalCall
     internal class TC_Interop_Sys : TestCaseBase
     {
         // DoubleToString
+        [CoversIcall("Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)")]
+        [CoversIcall("Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Int32,System.Byte*)")]
         [UnitTest]
         public void DoubleToString1()
         {
@@ -18,6 +20,7 @@ namespace CorlibTests.InternalCall
         }
 
 
+        [CoversIcall("Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Int32,System.Byte*)")]
         [UnitTest]
         public void DoubleToString2()
         {

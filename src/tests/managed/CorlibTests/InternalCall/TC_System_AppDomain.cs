@@ -15,6 +15,7 @@ namespace CorlibTests.InternalCall
             Assert.NotNull(currentDomain);
         }
 
+        [CoversIcall("System.AppDomain::getSetup()")]
         [UnitTest]
         public void GetSetup()
         {

@@ -102,6 +102,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(typeof(A), parentType);
         }
 
+        [CoversIcall("System.Array::GetValue(System.Int32[])")]
         [UnitTest]
         public void GetValue()
         {
@@ -111,6 +112,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(2, v);
         }
 
+        [CoversIcall("System.Array::SetValue(System.Object,System.Int32[])")]
         [UnitTest]
         public void SetValue()
         {
@@ -128,6 +130,13 @@ namespace CorlibTests.InternalCall
             Assert.Equal(10, v);
         }
 
+        [CoversIcall("System.Reflection.RuntimeConstructorInfo::get_metadata_token")]
+        [CoversIcall("System.Reflection.RuntimeEventInfo::get_metadata_token(System.Reflection.RuntimeEventInfo)")]
+        [CoversIcall("System.Reflection.RuntimeMethodInfo::get_metadata_token(System.Reflection.RuntimeMethodInfo)")]
+        [CoversIcall("System.Reflection.RuntimeModule::get_MetadataToken(System.Reflection.Module)")]
+        [CoversIcall("System.Reflection.RuntimeParameterInfo::GetMetadataToken()")]
+        [CoversIcall("System.Reflection.RuntimePropertyInfo::get_metadata_token(System.Reflection.RuntimePropertyInfo)")]
+        [CoversIcall("System.RuntimeTypeHandle::GetMetadataToken(System.RuntimeType)")]
         [UnitTest]
         public void GetMetadataToken()
         {
@@ -136,6 +145,9 @@ namespace CorlibTests.InternalCall
             Assert.True(token != 0);
         }
 
+        [CoversIcall("System.Reflection.RuntimeFieldInfo::GetTypeModifiers(System.Boolean)")]
+        [CoversIcall("System.Reflection.RuntimeParameterInfo::GetTypeModifiers(System.Type,System.Reflection.MemberInfo,System.Int32,System.Boolean)")]
+        [CoversIcall("System.Reflection.RuntimePropertyInfo::GetTypeModifiers(System.Reflection.RuntimePropertyInfo,System.Boolean)")]
         [UnitTest]
         public void GetTypeModifiers()
         {
@@ -236,6 +248,8 @@ namespace CorlibTests.InternalCall
             Assert.Equal(55, s.PrivateField);
         }
 
+        [CoversIcall("Interop/Sys::Stat(System.Byte&,Interop/Sys/FileStatus&)")]
+        [CoversIcall("Interop/Sys::Stat(System.String,Interop/Sys/FileStatus&)")]
         [UnitTest]
         public void StructField_Static_GetSet()
         {

@@ -5,6 +5,7 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_System_Threading_Interlocked : TestCaseBase
     {
+        [CoversIcall("System.Threading.Interlocked::Add(System.Int32&,System.Int32)")]
         [UnitTest]
         public void Add_Int32()
         {
@@ -14,6 +15,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(15, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Add(System.Int64&,System.Int64)")]
         [UnitTest]
         public void Add_Int64()
         {
@@ -23,6 +25,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(15L, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Increment(System.Int32&)")]
         [UnitTest]
         public void Increment_Int32()
         {
@@ -32,6 +35,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(11, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Increment(System.Int64&)")]
         [UnitTest]
         public void Increment_Int64()
         {
@@ -41,6 +45,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(11L, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Decrement(System.Int32&)")]
         [UnitTest]
         public void Decrement_Int32()
         {
@@ -50,6 +55,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(9, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Decrement(System.Int64&)")]
         [UnitTest]
         public void Decrement_Int64()
         {
@@ -59,6 +65,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(9L, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Exchange(System.Int32&,System.Int32)")]
         [UnitTest]
         public void Exchange_Int32()
         {
@@ -68,6 +75,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(10, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Exchange(System.Int64&,System.Int64)")]
         [UnitTest]
         public void Exchange_Int64()
         {
@@ -77,6 +85,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(10L, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Exchange(System.Single&,System.Single)")]
         [UnitTest]
         public void Exchange_Float()
         {
@@ -86,6 +95,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(1.0f, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Exchange(System.Double&,System.Double)")]
         [UnitTest]
         public void Exchange_Double()
         {
@@ -95,6 +105,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(1.0, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Exchange(System.Object&,System.Object)")]
         [UnitTest]
         public void Exchange_Object()
         {
@@ -105,6 +116,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal("initial", result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::CompareExchange(System.Int32&,System.Int32,System.Int32)")]
         [UnitTest]
         public void CompareExchange_Int32()
         {
@@ -118,6 +130,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(20, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::CompareExchange(System.Int64&,System.Int64,System.Int64)")]
         [UnitTest]
         public void CompareExchange_Int64()
         {
@@ -131,6 +144,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(20L, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::CompareExchange(System.Single&,System.Single,System.Single)")]
         [UnitTest]
         public void CompareExchange_Float()
         {
@@ -144,6 +158,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(2.0f, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::CompareExchange(System.Double&,System.Double,System.Double)")]
         [UnitTest]
         public void CompareExchange_Double()
         {
@@ -157,6 +172,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(2.0, result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::CompareExchange(System.Object&,System.Object,System.Object)")]
         [UnitTest]
         public void CompareExchange_Object()
         {
@@ -172,6 +188,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal("new", result);
         }
 
+        [CoversIcall("System.Threading.Interlocked::Read(System.Int64&)")]
         [UnitTest]
         public void Read_Int64()
         {
@@ -181,6 +198,8 @@ namespace CorlibTests.InternalCall
         }
 
 #if IL2CPP_ONLY
+        [CoversIcall("System.Threading.Interlocked::MemoryBarrierProcessWide")]
+        [CoversIcall("System.Threading.Interlocked::MemoryBarrierProcessWide()")]
         [UnitTest]
         public void MemoryBarrierProcessWide()
         {
