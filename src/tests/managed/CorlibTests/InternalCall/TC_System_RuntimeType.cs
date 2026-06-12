@@ -1,14 +1,33 @@
 using System;
+using System.Linq;
+using System.Reflection;
 
 namespace CorlibTests.InternalCall
 {
     /// <summary>
-    /// Tests for System.RuntimeType::make_array_type (MakeArrayType / MakeArrayType(int)).
-    /// Convention: parameterless MakeArrayType() passes rank 0 to native (SZArray T[]);
-    /// MakeArrayType(rank) with rank >= 1 creates a bounded multi-dimensional array.
+    /// Tests for System.RuntimeType icalls (MakeArrayType, GetNestedTypes_native, etc.).
     /// </summary>
     internal class TC_System_RuntimeType : TestCaseBase
     {
+        public class PublicNestedType
+        {
+        }
+
+        private class PrivateNestedType
+        {
+        }
+
+        public struct PublicNestedStruct
+        {
+        }
+
+        private static class PrivateNestedStaticClass
+        {
+        }
+
+        private static class EmptyNestedContainer
+        {
+        }
         [UnitTest]
         public void MakeArrayType_NoArgs_ReturnsSZArray()
         {
@@ -96,6 +115,69 @@ namespace CorlibTests.InternalCall
         {
             Type byRef = typeof(int).MakeByRefType();
             Assert.ExpectException<TypeLoadException>(() => byRef.MakeArrayType());
+        }
+
+        [UnitTest]
+        public void GetNestedTypes_Public_ReturnsPublicNestedTypesOnly()
+        {
+            Type[] nested = typeof(TC_System_RuntimeType).GetNestedTypes(BindingFlags.Public);
+            Assert.Equal(2, nested.Length);
+            Assert.IsTrue(nested.Any(t => t.Name == "PublicNestedType"));
+            Assert.IsTrue(nested.Any(t => t.Name == "PublicNestedStruct"));
+            Assert.IsFalse(nested.Any(t => t.Name == "PrivateNestedType"));
+        }
+
+        [UnitTest]
+        public void GetNestedTypes_PublicAndNonPublic_ReturnsAllNestedTypes()
+        {
+            Type[] nested = typeof(TC_System_RuntimeType).GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.IsTrue(nested.Length >= 4);
+            Assert.IsTrue(nested.Any(t => t.Name == "PublicNestedType"));
+            Assert.IsTrue(nested.Any(t => t.Name == "PrivateNestedType"));
+            Assert.IsTrue(nested.Any(t => t.Name == "PublicNestedStruct"));
+            Assert.IsTrue(nested.Any(t => t.Name == "PrivateNestedStaticClass"));
+        }
+
+        [UnitTest]
+        public void GetNestedTypes_NoNestedTypes_ReturnsEmpty()
+        {
+            Type[] nested = typeof(EmptyNestedContainer).GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.NotNull(nested);
+            Assert.Equal(0, nested.Length);
+        }
+
+        [UnitTest]
+        public void GetNestedTypes_OnPrimitive_ReturnsEmpty()
+        {
+            Type[] nested = typeof(int).GetNestedTypes(BindingFlags.Public | BindingFlags.NonPublic);
+            Assert.NotNull(nested);
+            Assert.Equal(0, nested.Length);
+        }
+
+        [UnitTest]
+        public void GetNestedType_ByName_ReturnsMatchingType()
+        {
+            Type nested = typeof(TC_System_RuntimeType).GetNestedType("PrivateNestedType", BindingFlags.NonPublic);
+            Assert.NotNull(nested);
+            Assert.Equal("PrivateNestedType", nested.Name);
+            Assert.Equal(typeof(TC_System_RuntimeType), nested.DeclaringType);
+        }
+
+        [UnitTest]
+        public void GetNestedType_PrivateWithPublicFlagsOnly_ReturnsNull()
+        {
+            Type nested = typeof(TC_System_RuntimeType).GetNestedType("PrivateNestedType", BindingFlags.Public);
+            Assert.Null(nested);
+        }
+
+        [UnitTest]
+        public void GetNestedType_IgnoreCase_FindsPublicNestedType()
+        {
+            Type nested = typeof(TC_System_RuntimeType).GetNestedType(
+                "publicnestedtype",
+                BindingFlags.Public | BindingFlags.IgnoreCase);
+            Assert.NotNull(nested);
+            Assert.Equal("PublicNestedType", nested.Name);
         }
     }
 }
