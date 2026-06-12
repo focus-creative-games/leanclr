@@ -417,6 +417,21 @@ RtResultVoid run_tests(metadata::RtModuleDef* mod, const char* phase_name, bool 
                 RET_ERR(ret1.unwrap_err());
             }
             vm::RtObject* test_obj = ret1.unwrap();
+            const metadata::RtMethodInfo* ctor_method = vm::Class::get_method_for_name(klass, ".ctor", 0, false);
+            if (ctor_method)
+            {
+                auto ret2 = vm::Runtime::invoke_with_run_cctor(ctor_method, test_obj, nullptr);
+                if (ret2.is_err())
+                {
+                    std::cout << "  Failed to run ctor, error: " << static_cast<int>(ret2.unwrap_err()) << " " << method_index
+                              << " run unittest : " << klass->namespaze << "." << klass->name << "::" << method->name << " token: " << method->token << std::endl;
+                    ++failed;
+                }
+                else
+                {
+                    ++passed;
+                }
+            }
             auto ret2 = vm::Runtime::invoke_with_run_cctor(method, test_obj, nullptr);
             if (ret2.is_err())
             {
