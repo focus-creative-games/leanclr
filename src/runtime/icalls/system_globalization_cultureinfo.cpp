@@ -4,6 +4,8 @@
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
 #include "vm/class.h"
+#include "vm/object.h"
+#include "vm/rt_array.h"
 #include "vm/rt_string.h"
 
 namespace leanclr
@@ -104,6 +106,23 @@ static const KnownCulture* find_known_culture_by_lcid(int32_t lcid)
     return nullptr;
 }
 
+static bool culture_matches_filter(const KnownCulture& culture, bool neutral, bool specific, bool /*installed*/) noexcept
+{
+    const bool is_neutral = culture.territory[0] == '\0';
+    const bool is_specific = !is_neutral;
+    return (neutral && is_neutral) || (specific && is_specific);
+}
+
+static RtResult<vm::RtCultureInfo*> create_culture_from_known(const KnownCulture& culture) noexcept
+{
+    auto cls_cultureinfo = vm::Class::get_corlib_types().cls_cultureinfo;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, LEANCLR_NEWOBJ_INTERNAL(cls_cultureinfo, "internal_get_cultures"));
+    auto* ci = static_cast<vm::RtCultureInfo*>(obj);
+    assign_known_culture(ci, culture);
+    ci->constructed = true;
+    RET_OK(ci);
+}
+
 } // namespace
 
 RtResult<bool> SystemGlobalizationCultureInfo::construct_internal_locale_from_lcid(vm::RtCultureInfo* _this, int32_t culture_lcid) noexcept
@@ -177,9 +196,47 @@ static RtResultVoid get_current_locale_name_invoker(metadata::RtManagedMethodPoi
     RET_VOID_OK();
 }
 
-RtResult<vm::RtArray*> SystemGlobalizationCultureInfo::internal_get_cultures(bool /*neutral*/, bool /*specific*/, bool /*installed*/) noexcept
+RtResult<vm::RtArray*> SystemGlobalizationCultureInfo::internal_get_cultures(bool neutral, bool specific, bool installed) noexcept
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    int32_t count = 0;
+    for (const KnownCulture& culture : s_known_cultures)
+    {
+        if (!culture_matches_filter(culture, neutral, specific, installed))
+        {
+            continue;
+        }
+        ++count;
+    }
+
+    // InvariantCulture is not in the culture table; il2cpp/mono reserve the first slot when neutral is requested.
+    if (neutral)
+    {
+        ++count;
+    }
+
+    auto cls_cultureinfo = vm::Class::get_corlib_types().cls_cultureinfo;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, cultures,
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_cultureinfo, count, "internal_get_cultures"));
+
+    int32_t index = 0;
+    if (neutral)
+    {
+        vm::Array::set_array_data_at<vm::RtCultureInfo*>(cultures, index++, nullptr);
+    }
+
+    for (const KnownCulture& culture : s_known_cultures)
+    {
+        if (!culture_matches_filter(culture, neutral, specific, installed))
+        {
+            continue;
+        }
+
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtCultureInfo*, ci, create_culture_from_known(culture));
+        vm::Array::set_array_data_at<vm::RtCultureInfo*>(cultures, index, ci);
+        ++index;
+    }
+
+    RET_OK(cultures);
 }
 
 RtResultVoid SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_app_x(vm::RtCultureInfo* /*_this*/, vm::RtString* /*name*/) noexcept
