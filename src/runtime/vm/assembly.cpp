@@ -46,7 +46,7 @@ static RtResultVoid create_placeholder_assemblies()
     const char* cur = placeholder_assembly_names;
     while (*cur != '\0')
     {
-        const char* comma = std::strchr(cur, ',');
+        const char* comma = std::strchr(cur, '|');
         const char* token_end = comma != nullptr ? comma : cur + std::strlen(cur);
         size_t length = token_end - cur;
         char* name = (char*)alloc::GeneralAllocation::malloc(length + 1);
