@@ -14,6 +14,7 @@ enum class TypeNameFormat
     Reflection,
     FullName,
     AssemblyQualified,
+    InternalName,
     DnlibToString,
 };
 

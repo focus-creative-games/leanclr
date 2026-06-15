@@ -15,6 +15,7 @@ static char get_nested_type_separator(TypeNameFormat format)
     {
     case TypeNameFormat::IL:
         return '.';
+    case TypeNameFormat::InternalName:
     case TypeNameFormat::DnlibToString:
         return '/';
     default:
@@ -27,6 +28,7 @@ static char get_generic_param_start_separator(TypeNameFormat format)
     switch (format)
     {
     case TypeNameFormat::IL:
+    case TypeNameFormat::InternalName:
     case TypeNameFormat::DnlibToString:
         return '<';
     default:
@@ -39,14 +41,13 @@ static char get_generic_param_end_separator(TypeNameFormat format)
     switch (format)
     {
     case TypeNameFormat::IL:
+    case TypeNameFormat::InternalName:
     case TypeNameFormat::DnlibToString:
         return '>';
     default:
         return ']';
     }
 }
-
-
 
 // Helper to append class full name recursively (namespace + name, handling nested types)
 RtResultVoid MetadataName::append_klass_full_name_without_generic_params(utils::Utf8StringBuilder& sb, const RtClass* klass, TypeNameFormat format)
@@ -346,20 +347,51 @@ RtResultVoid MetadataName::append_method_full_name_without_params(utils::Utf8Str
     const metadata::RtClass* klass = method->parent;
 
     // Append class full name
-    RET_ERR_ON_FAIL(append_klass_full_name_without_generic_params(sb, klass, cur_format));
+    RET_ERR_ON_FAIL(append_type_full_name(sb, klass->by_val, cur_format, false));
 
     // Append :: and method name
     sb.append_cstr("::");
     sb.append_cstr(method->name);
-
-    // Append generic parameters if present
-    uint16_t generic_param_count = vm::Method::get_generic_param_count(method);
-    if (generic_param_count > 0)
+    if (cur_format == TypeNameFormat::InternalName)
     {
-        sb.append_char(get_generic_param_start_separator(cur_format));
-        sb.append_chars(',', generic_param_count - 1);
-        sb.append_char(get_generic_param_end_separator(cur_format));
+        uint16_t generic_param_count = vm::Method::get_generic_param_count(method);
+        if (generic_param_count > 0)
+        {
+            sb.append_char(get_generic_param_start_separator(cur_format));
+            sb.append_chars(',', generic_param_count - 1);
+            sb.append_char(get_generic_param_end_separator(cur_format));
+        }
     }
+    else
+    {
+        // Append generic parameters if present
+        if (method->generic_container)
+        {
+            const metadata::RtGenericContainer* gc = method->generic_container;
+            sb.append_char(get_generic_param_start_separator(cur_format));
+            sb.append_chars(',', gc->generic_param_count - 1);
+            sb.append_char(get_generic_param_end_separator(cur_format));
+        }
+        else if (method->generic_method)
+        {
+            const metadata::RtGenericInst* method_inst = method->generic_method->generic_context.method_inst;
+            if (method_inst)
+            {
+                TypeNameFormat nextFormat = cur_format == TypeNameFormat::AssemblyQualified ? TypeNameFormat::FullName : cur_format;
+                sb.append_char(get_generic_param_start_separator(cur_format));
+                for (uint8_t i = 0; i < method_inst->generic_arg_count; ++i)
+                {
+                    if (i > 0)
+                    {
+                        sb.append_char(',');
+                    }
+                    RET_ERR_ON_FAIL(append_type_full_name(sb, method_inst->generic_args[i], nextFormat, false));
+                }
+                sb.append_char(get_generic_param_end_separator(cur_format));
+            }
+        }
+    }
+
     sb.sure_null_terminator_but_not_append();
     RET_VOID_OK();
 }
@@ -385,27 +417,6 @@ RtResultVoid MetadataName::append_method_full_name_with_params(utils::Utf8String
     sb.sure_null_terminator_but_not_append();
     RET_VOID_OK();
 }
-
-// RtResult<const char*> MetadataName::build_class_full_name(const RtClass* klass)
-// {
-//     utils::Utf8StringBuilder sb;
-//     RET_ERR_ON_FAIL(append_klass_full_name(sb, const_cast<RtClass*>(klass)));
-//     RET_OK(sb.dup_to_zero_end_cstr());
-// }
-
-// RtResult<const char*> MetadataName::build_method_full_name_with_params(const RtMethodInfo* method)
-// {
-//     utils::Utf8StringBuilder sb;
-//     RET_ERR_ON_FAIL(append_method_full_name_with_params(sb, const_cast<RtMethodInfo*>(method)));
-//     RET_OK(sb.dup_to_zero_end_cstr());
-// }
-
-// RtResult<const char*> MetadataName::build_method_full_name_without_params(const RtMethodInfo* method)
-// {
-//     utils::Utf8StringBuilder sb;
-//     RET_ERR_ON_FAIL(append_method_full_name_without_params(sb, const_cast<RtMethodInfo*>(method)));
-//     RET_OK(sb.dup_to_zero_end_cstr());
-// }
 
 } // namespace metadata
 } // namespace leanclr

@@ -73,7 +73,7 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
     // Try with full method name (including parameters)
     utils::Utf8StringBuilder sb;
     {
-        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::DnlibToString));
+        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = g_internalCallMap.find(sb.get_const_chars());
         if (it != g_internalCallMap.end())
             RET_OK(&it->second);
@@ -82,7 +82,7 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
     // Try with method name without parameters
     {
         sb.clear();
-        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::DnlibToString));
+        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = g_internalCallMap.find(sb.get_const_chars());
         if (it != g_internalCallMap.end())
             RET_OK(&it->second);
@@ -113,7 +113,7 @@ RtResult<InternalCallInvoker> InternalCalls::get_newobj_internal_call_by_method(
     utils::Utf8StringBuilder sb;
     // Try with full method name (including parameters)
     {
-        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::DnlibToString));
+        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
         const char* fullName = sb.get_const_chars();
         auto it = g_newobjInternalCallMap.find(fullName);
         if (it != g_newobjInternalCallMap.end())
@@ -123,7 +123,7 @@ RtResult<InternalCallInvoker> InternalCalls::get_newobj_internal_call_by_method(
     // Try with method name without parameters
     {
         sb.clear();
-        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::DnlibToString));
+        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
         const char* nameOnly = sb.get_const_chars();
         auto it = g_newobjInternalCallMap.find(nameOnly);
         if (it != g_newobjInternalCallMap.end())
