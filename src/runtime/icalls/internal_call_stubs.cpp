@@ -72,6 +72,7 @@
 #include "system_io_monoio.h"
 #include "system_console_windowsconsole.h"
 #include "interop.h"
+#include "leanclr_profile.h"
 
 namespace leanclr
 {
@@ -160,6 +161,7 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemTextEncodingHelper::get_internal_call_entries());
     Append(entries, SystemSecurityCryptographyRNGCryptoServiceProvider::get_internal_call_entries());
     Append(entries, SystemSecuritySecurityManager::get_internal_call_entries());
+    Append(entries, LeanCLRProfile::get_internal_call_entries());
 }
 
 void InternalCallStubs::get_newobj_internal_call_entries(utils::Vector<vm::NewobjInternalCallEntry>& entries) noexcept

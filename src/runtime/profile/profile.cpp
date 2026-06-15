@@ -2,7 +2,6 @@
 
 #include <algorithm>
 #include <cstdio>
-#include <map>
 #include <string>
 #include <vector>
 
@@ -54,29 +53,35 @@ RtResult<std::string> build_method_signature(const metadata::RtMethodInfo* metho
     RET_OK(std::string(sb.get_const_chars()));
 }
 
-void append_xml_escaped(FILE* fp, const std::string& text)
+void append_json_escaped(std::string& out, const std::string& text)
 {
     for (char c : text)
     {
         switch (c)
         {
-        case '&':
-            std::fputs("&amp;", fp);
-            break;
-        case '<':
-            std::fputs("&lt;", fp);
-            break;
-        case '>':
-            std::fputs("&gt;", fp);
-            break;
         case '"':
-            std::fputs("&quot;", fp);
+            out.append("\\\"");
             break;
-        case '\'':
-            std::fputs("&apos;", fp);
+        case '\\':
+            out.append("\\\\");
+            break;
+        case '\b':
+            out.append("\\b");
+            break;
+        case '\f':
+            out.append("\\f");
+            break;
+        case '\n':
+            out.append("\\n");
+            break;
+        case '\r':
+            out.append("\\r");
+            break;
+        case '\t':
+            out.append("\\t");
             break;
         default:
-            std::fputc(c, fp);
+            out.push_back(c);
             break;
         }
     }
@@ -133,38 +138,39 @@ std::vector<ExportCandidate> collect_candidates(const ExportOptions& options, Ca
     return candidates;
 }
 
-RtResultVoid export_candidates_as_xml(const char* path, const std::vector<ExportCandidate>& candidates)
+std::string build_candidates_json(const std::vector<ExportCandidate>& candidates)
+{
+    std::string json;
+    json.push_back('[');
+    for (size_t i = 0; i < candidates.size(); ++i)
+    {
+        if (i > 0)
+        {
+            json.push_back(',');
+        }
+        const ExportCandidate& candidate = candidates[i];
+        json.append("{\"assembly\":\"");
+        append_json_escaped(json, candidate.assembly);
+        json.append("\",\"signature\":\"");
+        append_json_escaped(json, candidate.signature);
+        json.append("\",\"calls\":");
+        json.append(std::to_string(candidate.calls));
+        json.append(",\"cost\":");
+        json.append(std::to_string(candidate.cost));
+        json.push_back('}');
+    }
+    json.push_back(']');
+    return json;
+}
+
+RtResultVoid write_json_to_file(const char* path, const std::string& json)
 {
     FILE* fp = std::fopen(path, "wb");
     if (fp == nullptr)
     {
         RET_ERR(RtErr::FileNotFound);
     }
-
-    std::fputs("<?xml version=\"1.0\" encoding=\"utf-8\"?>\n", fp);
-    std::fputs("<aot>\n", fp);
-
-    std::map<std::string, std::vector<std::string>> by_assembly;
-    for (const ExportCandidate& candidate : candidates)
-    {
-        by_assembly[candidate.assembly].push_back(candidate.signature);
-    }
-
-    for (const auto& kv : by_assembly)
-    {
-        std::fputs("  <assembly name=\"", fp);
-        append_xml_escaped(fp, kv.first);
-        std::fputs("\">\n", fp);
-        for (const std::string& signature : kv.second)
-        {
-            std::fputs("    <method signature=\"", fp);
-            append_xml_escaped(fp, signature);
-            std::fputs("\"/>\n", fp);
-        }
-        std::fputs("  </assembly>\n", fp);
-    }
-
-    std::fputs("</aot>\n", fp);
+    std::fwrite(json.data(), 1, json.size(), fp);
     std::fclose(fp);
     RET_VOID_OK();
 }
@@ -332,16 +338,39 @@ size_t Profile::get_global_entries(ProfileEntry* out, size_t capacity) noexcept
 #endif
 }
 
-RtResultVoid Profile::export_period_pgo_xml(const char* path, const ExportOptions& options) noexcept
+RtResult<std::string> Profile::get_period_stats_json(const ExportOptions& options) noexcept
+{
+#if LEANCLR_PGO_PROFILE
+    const std::vector<ExportCandidate> candidates =
+        collect_candidates(options, [](const ProfileSlot& slot) { return slot.period_calls; }, [](const ProfileSlot& slot) { return slot.period_cost; });
+    RET_OK(build_candidates_json(candidates));
+#else
+    (void)options;
+    RET_OK(std::string("[]"));
+#endif
+}
+
+RtResult<std::string> Profile::get_global_stats_json(const ExportOptions& options) noexcept
+{
+#if LEANCLR_PGO_PROFILE
+    const std::vector<ExportCandidate> candidates =
+        collect_candidates(options, [](const ProfileSlot& slot) { return slot.global_calls; }, [](const ProfileSlot& slot) { return slot.global_cost; });
+    RET_OK(build_candidates_json(candidates));
+#else
+    (void)options;
+    RET_OK(std::string("[]"));
+#endif
+}
+
+RtResultVoid Profile::export_period_stats_json(const char* path, const ExportOptions& options) noexcept
 {
 #if LEANCLR_PGO_PROFILE
     if (path == nullptr || path[0] == '\0')
     {
         RET_ERR(RtErr::ArgumentNull);
     }
-    const std::vector<ExportCandidate> candidates =
-        collect_candidates(options, [](const ProfileSlot& slot) { return slot.period_calls; }, [](const ProfileSlot& slot) { return slot.period_cost; });
-    return export_candidates_as_xml(path, candidates);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::string, json, get_period_stats_json(options));
+    return write_json_to_file(path, json);
 #else
     (void)path;
     (void)options;
@@ -349,16 +378,15 @@ RtResultVoid Profile::export_period_pgo_xml(const char* path, const ExportOption
 #endif
 }
 
-RtResultVoid Profile::export_global_pgo_xml(const char* path, const ExportOptions& options) noexcept
+RtResultVoid Profile::export_global_stats_json(const char* path, const ExportOptions& options) noexcept
 {
 #if LEANCLR_PGO_PROFILE
     if (path == nullptr || path[0] == '\0')
     {
         RET_ERR(RtErr::ArgumentNull);
     }
-    const std::vector<ExportCandidate> candidates =
-        collect_candidates(options, [](const ProfileSlot& slot) { return slot.global_calls; }, [](const ProfileSlot& slot) { return slot.global_cost; });
-    return export_candidates_as_xml(path, candidates);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::string, json, get_global_stats_json(options));
+    return write_json_to_file(path, json);
 #else
     (void)path;
     (void)options;

@@ -1,0 +1,31 @@
+<Project ToolsVersion="15.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <OutputType>Library</OutputType>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <GenerateTargetFrameworkAttribute>false</GenerateTargetFrameworkAttribute>
+    <AssemblyName>LeanCLR</AssemblyName>
+    <RootNamespace>LeanCLR</RootNamespace>
+    <NoStandardLib>true</NoStandardLib>
+    <NoConfig>true</NoConfig>
+    <ProjectGuid>{9E8BBD77-6CDA-4BD8-A93C-2B32254CF3F9}</ProjectGuid>
+    <TargetFrameworkProfile />
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)' == 'Debug'">
+    <DebugType>portable</DebugType>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>$(ProjectDir)\..\dotnetframework4.x\mscorlib.dll</HintPath>
+    </Reference>
+    <Reference Include="System.Core">
+      <HintPath>$(ProjectDir)\..\dotnetframework4.x\System.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="System">
+      <HintPath>$(ProjectDir)\..\dotnetframework4.x\System.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Profile.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+</Project>

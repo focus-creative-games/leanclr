@@ -2,6 +2,7 @@
 
 #include <cstddef>
 #include <cstdint>
+#include <string>
 
 #include "core/rt_base.h"
 #include "metadata/rt_metadata.h"
@@ -51,8 +52,11 @@ class Profile
     static size_t get_period_entries(ProfileEntry* out, size_t capacity) noexcept;
     static size_t get_global_entries(ProfileEntry* out, size_t capacity) noexcept;
 
-    static RtResultVoid export_period_pgo_xml(const char* path, const ExportOptions& options) noexcept;
-    static RtResultVoid export_global_pgo_xml(const char* path, const ExportOptions& options) noexcept;
+    static RtResult<std::string> get_period_stats_json(const ExportOptions& options = ExportOptions{}) noexcept;
+    static RtResult<std::string> get_global_stats_json(const ExportOptions& options = ExportOptions{}) noexcept;
+
+    static RtResultVoid export_period_stats_json(const char* path, const ExportOptions& options = ExportOptions{}) noexcept;
+    static RtResultVoid export_global_stats_json(const char* path, const ExportOptions& options = ExportOptions{}) noexcept;
 };
 
 } // namespace profile
