@@ -202,7 +202,7 @@ class Utf8StringBuilder : public StringBuilderAny<Utf8Char>
         return *this;
     }
 
-    Utf8StringBuilder& append_cstr(const uint8_t* data, size_t len)
+    Utf8StringBuilder& append_cstr(const char* data, size_t len)
     {
         if (len > 0)
         {

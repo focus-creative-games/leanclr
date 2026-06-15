@@ -23,6 +23,7 @@
 #include "metadata/metadata_compare.h"
 #include "metadata/metadata_hash.h"
 #include "metadata/module_def.h"
+#include "metadata/metadata_name.h"
 #include "utils/hash_util.h"
 #include "utils/hashmap.h"
 #include "utils/string_builder.h"
@@ -420,7 +421,7 @@ RtResult<RtReflectionModule*> Reflection::get_module_reflection_object(metadata:
     UNWRAP_OR_RET_ERR_ON_FAIL(ref_obj->assembly, get_assembly_reflection_object(mod->get_assembly()));
 
     utils::Utf8StringBuilder fqname_buf;
-    Type::append_assembly_name(fqname_buf, mod->get_assembly_name());
+    metadata::MetadataName::append_assembly_name(fqname_buf, mod->get_assembly_name());
 
     auto name_no_ext = mod->get_name_no_ext();
     auto name = mod->get_name();

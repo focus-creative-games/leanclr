@@ -7,14 +7,6 @@ namespace leanclr
 namespace vm
 {
 
-enum class TypeNameFormat
-{
-    IL,
-    Reflection,
-    FullName,
-    AssemblyQualified,
-};
-
 struct AssemblyQualifiedNames
 {
   public:
@@ -144,8 +136,6 @@ class Type
     static RtResult<const metadata::RtTypeSig*> resolve_assembly_qualified_name(metadata::RtModuleDef* default_mod, const char* type_full_name, size_t name_len,
                                                                                 bool ignore_case);
     static RtResult<RtString*> get_full_name(const metadata::RtTypeSig* typeSig, bool full_name, bool assembly_qualified);
-    static RtResultVoid append_type_full_name(utils::Utf8StringBuilder& sb, const metadata::RtTypeSig* typeSig, TypeNameFormat format, bool nested);
-    static void append_assembly_name(utils::Utf8StringBuilder& sb, const metadata::RtAssemblyName& assemblyName);
     static RtResult<metadata::RtClass*> get_declaring_type(const metadata::RtTypeSig* typeSig);
     static RtResult<const metadata::RtMethodInfo*> get_declaring_method_of_mvar(const metadata::RtTypeSig* typeSig);
     static RtResultVoid parse_assembly_name(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info, bool* is_version_defined,

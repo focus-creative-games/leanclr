@@ -1,6 +1,7 @@
 #include "il2cpp-api.h"
 
 #include "vm/type.h"
+#include "metadata/metadata_name.h"
 
 #include <clocale>
 
@@ -1435,7 +1436,7 @@ void il2cpp_runtime_class_init(Il2CppClass* klass)
         vm::RtException* inner_ex = vm::Exception::raise_error_as_exception(ret.unwrap_err(), nullptr, nullptr);
         utils::Utf8StringBuilder sb;
         sb.append_cstr("Failed to initialize class: ");
-        auto ret = vm::Type::append_type_full_name(sb, klass->by_val, vm::TypeNameFormat::IL, false);
+        auto ret = metadata::MetadataName::append_type_full_name(sb, klass->by_val, metadata::TypeNameFormat::IL, false);
         if (ret.is_err())
         {
             sb.clear();
@@ -1671,8 +1672,8 @@ Il2CppClass* il2cpp_type_get_class_or_element_class(const Il2CppType* type)
 char* il2cpp_type_get_name(const Il2CppType* type)
 {
     utils::Utf8StringBuilder sb;
-    vm::TypeNameFormat format = vm::TypeNameFormat::IL;
-    auto ret = vm::Type::append_type_full_name(sb, type, format, false);
+    metadata::TypeNameFormat format = metadata::TypeNameFormat::IL;
+    auto ret = metadata::MetadataName::append_type_full_name(sb, type, format, false);
     if (ret.is_err())
     {
         return nullptr;
@@ -1683,8 +1684,8 @@ char* il2cpp_type_get_name(const Il2CppType* type)
 char* il2cpp_type_get_assembly_qualified_name(const Il2CppType* type)
 {
     utils::Utf8StringBuilder sb;
-    vm::TypeNameFormat format = vm::TypeNameFormat::AssemblyQualified;
-    auto ret = vm::Type::append_type_full_name(sb, type, format, false);
+    metadata::TypeNameFormat format = metadata::TypeNameFormat::AssemblyQualified;
+    auto ret = metadata::MetadataName::append_type_full_name(sb, type, format, false);
     if (ret.is_err())
     {
         return nullptr;
@@ -1695,8 +1696,8 @@ char* il2cpp_type_get_assembly_qualified_name(const Il2CppType* type)
 char* il2cpp_type_get_reflection_name(const Il2CppType* type)
 {
     utils::Utf8StringBuilder sb;
-    vm::TypeNameFormat format = vm::TypeNameFormat::Reflection;
-    auto ret = vm::Type::append_type_full_name(sb, type, format, false);
+    metadata::TypeNameFormat format = metadata::TypeNameFormat::Reflection;
+    auto ret = metadata::MetadataName::append_type_full_name(sb, type, format, false);
     if (ret.is_err())
     {
         return nullptr;
@@ -1969,8 +1970,8 @@ void il2cpp_custom_attrs_free(Il2CppCustomAttrInfo* ainfo)
 void il2cpp_type_get_name_chunked(const Il2CppType* type, void (*chunkReportFunc)(void* data, void* userData), void* userData)
 {
     utils::Utf8StringBuilder sb;
-    vm::TypeNameFormat format = vm::TypeNameFormat::IL;
-    auto ret = vm::Type::append_type_full_name(sb, type, format, false);
+    metadata::TypeNameFormat format = metadata::TypeNameFormat::IL;
+    auto ret = metadata::MetadataName::append_type_full_name(sb, type, format, false);
     if (ret.is_err())
     {
         assert(false);

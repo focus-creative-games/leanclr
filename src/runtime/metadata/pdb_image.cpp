@@ -145,7 +145,7 @@ RtResult<const PdbImage::SymbolDocumentData*> PdbImage::GetDocument(metadata::En
         if (sourceFileNameIndex > 0)
         {
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(utils::BinaryReader, sourceFileNameReader, _cli_image.get_decoded_blob_reader(sourceFileNameIndex));
-            sourceFileNames.append_cstr(sourceFileNameReader.data(), sourceFileNameReader.length());
+            sourceFileNames.append_cstr(reinterpret_cast<const char*>(sourceFileNameReader.data()), sourceFileNameReader.length());
         }
         first = false;
     }

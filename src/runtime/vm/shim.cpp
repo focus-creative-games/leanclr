@@ -47,7 +47,7 @@ RtResultVoid fn_not_implemented_internal_call_invoker(metadata::RtManagedMethodP
 {
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
+    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     printf("Internal call invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     RETURN_NOT_IMPLEMENTED_ERROR();
@@ -59,7 +59,7 @@ RtResultVoid fn_not_implemented_intrinsic_invoker(metadata::RtManagedMethodPoint
 {
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
+    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     printf("Intrinsic invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     RETURN_NOT_IMPLEMENTED_ERROR();
@@ -71,7 +71,7 @@ RtResultVoid fn_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer,
 {
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
+    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     printf("P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     RETURN_NOT_IMPLEMENTED_ERROR();
@@ -83,7 +83,7 @@ RtResultVoid fn_not_implemented_pinvoke_invoker(metadata::RtManagedMethodPointer
 {
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
+    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     printf("P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     RETURN_NOT_IMPLEMENTED_ERROR();
@@ -95,7 +95,7 @@ RtResultVoid fn_not_implemented_runtime_impl_invoker(metadata::RtManagedMethodPo
 {
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
+    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     printf("Runtime impl invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     // Placeholder implementation
@@ -108,7 +108,7 @@ RtResultVoid fn_not_implemented_invoker(metadata::RtManagedMethodPointer method_
 {
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
+    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     printf("Not implemented invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     // Placeholder implementation

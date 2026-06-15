@@ -47,7 +47,7 @@ RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata:
         sb.append_cstr(method->parent->image->get_name_no_ext());
         sb.append_char(']');
         size_t length = sb.length();
-        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method));
+        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::DnlibToString));
         const char* signature_with_module = sb.get_const_chars();
         auto it = g_internalcall_map.find(signature_with_module);
         if (it != g_internalcall_map.end())
@@ -68,7 +68,7 @@ RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata:
         sb.append_cstr(method->parent->image->get_name_no_ext());
         sb.append_char(']');
         size_t length = sb.length();
-        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method));
+        RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::DnlibToString));
 
         const char* signature_with_module = sb.get_const_chars();
         auto it = g_internalcall_map.find(signature_with_module);

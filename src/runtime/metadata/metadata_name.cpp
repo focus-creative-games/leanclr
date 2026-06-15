@@ -9,182 +9,296 @@ namespace leanclr
 namespace metadata
 {
 
-// Helper to append class full name recursively (namespace + name, handling nested types)
-RtResultVoid MetadataName::append_klass_full_name(utils::Utf8StringBuilder& sb, const RtClass* klass)
+static char get_nested_type_separator(TypeNameFormat format)
 {
-    // Check for enclosing type (nested class)
-    if (klass->image)
+    switch (format)
     {
-        auto optEnclosingTypeDefRid = klass->image->get_enclosing_type_def_rid(klass->token);
-        if (optEnclosingTypeDefRid)
+    case TypeNameFormat::IL:
+        return '.';
+    case TypeNameFormat::DnlibToString:
+        return '/';
+    default:
+        return '+';
+    }
+}
+
+static char get_generic_param_start_separator(TypeNameFormat format)
+{
+    switch (format)
+    {
+    case TypeNameFormat::IL:
+    case TypeNameFormat::DnlibToString:
+        return '<';
+    default:
+        return '[';
+    }
+}
+
+static char get_generic_param_end_separator(TypeNameFormat format)
+{
+    switch (format)
+    {
+    case TypeNameFormat::IL:
+    case TypeNameFormat::DnlibToString:
+        return '>';
+    default:
+        return ']';
+    }
+}
+
+
+
+// Helper to append class full name recursively (namespace + name, handling nested types)
+RtResultVoid MetadataName::append_klass_full_name_without_generic_params(utils::Utf8StringBuilder& sb, const RtClass* klass, TypeNameFormat format)
+{
+    auto optEnclosingTypeDefRid = klass->image->get_enclosing_type_def_rid(klass->token);
+    if (optEnclosingTypeDefRid)
+    {
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, enclosing_klass, klass->image->get_class_by_type_def_rid(optEnclosingTypeDefRid.value()));
+        RET_ERR_ON_FAIL(append_klass_full_name_without_generic_params(sb, enclosing_klass, format));
+        sb.append_char(get_nested_type_separator(format));
+    }
+    else
+    {
+        // Not a nested type - append namespace and name
+        if (klass->namespaze && klass->namespaze[0] != 0)
         {
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, enclosing_klass, klass->image->get_class_by_type_def_rid(optEnclosingTypeDefRid.value()));
-            RET_ERR_ON_FAIL(append_klass_full_name(sb, enclosing_klass));
-            sb.append_char('/'); // nested types use '/' separator
-            sb.append_cstr(klass->name);
-            RET_VOID_OK();
+            sb.append_cstr(klass->namespaze);
+            sb.append_char('.');
         }
     }
-
-    // Not a nested type - append namespace and name
-    if (klass->namespaze && klass->namespaze[0] != 0)
+    if (format == TypeNameFormat::IL)
     {
-        sb.append_cstr(klass->namespaze);
-        sb.append_char('.');
+        const char* il_name_end = std::strchr(klass->name, '`');
+        if (il_name_end)
+        {
+            sb.append_cstr(klass->name, static_cast<size_t>(il_name_end - klass->name));
+        }
+        else
+        {
+            sb.append_cstr(klass->name);
+        }
     }
-    sb.append_cstr(klass->name);
+    else
+    {
+        sb.append_cstr(klass->name);
+    }
     RET_VOID_OK();
 }
 
-// Helper to append type signature name based on element type
-RtResultVoid MetadataName::append_type_sig_name(utils::Utf8StringBuilder& sb, const RtTypeSig* type_sig)
+static void append_public_key_token(utils::Utf8StringBuilder& sb, const uint8_t* token, size_t length)
 {
-    if (!type_sig)
+    for (size_t i = 0; i < length; ++i)
     {
-        RET_VOID_OK();
+        sb.append_hex(token[i]);
     }
+}
 
-    switch (type_sig->ele_type)
+void MetadataName::append_assembly_name(utils::Utf8StringBuilder& sb, const metadata::RtAssemblyName& assemblyName)
+{
+    sb.append_cstr(assemblyName.name);
+    sb.append_cstr(", Version=");
+    sb.append_u16(assemblyName.version_major);
+    sb.append_char('.');
+    sb.append_u16(assemblyName.version_minor);
+    sb.append_char('.');
+    sb.append_u16(assemblyName.version_build);
+    sb.append_char('.');
+    sb.append_u16(assemblyName.version_revision);
+    sb.append_cstr(", Culture=");
+    if (assemblyName.culture == nullptr || assemblyName.culture[0] == '\0')
     {
-    case RtElementType::Void:
-        sb.append_cstr("System.Void");
-        break;
-    case RtElementType::Boolean:
-        sb.append_cstr("System.Boolean");
-        break;
-    case RtElementType::Char:
-        sb.append_cstr("System.Char");
-        break;
-    case RtElementType::I1:
-        sb.append_cstr("System.SByte");
-        break;
-    case RtElementType::U1:
-        sb.append_cstr("System.Byte");
-        break;
-    case RtElementType::I2:
-        sb.append_cstr("System.Int16");
-        break;
-    case RtElementType::U2:
-        sb.append_cstr("System.UInt16");
-        break;
-    case RtElementType::I4:
-        sb.append_cstr("System.Int32");
-        break;
-    case RtElementType::U4:
-        sb.append_cstr("System.UInt32");
-        break;
-    case RtElementType::I8:
-        sb.append_cstr("System.Int64");
-        break;
-    case RtElementType::U8:
-        sb.append_cstr("System.UInt64");
-        break;
-    case RtElementType::R4:
-        sb.append_cstr("System.Single");
-        break;
-    case RtElementType::R8:
-        sb.append_cstr("System.Double");
-        break;
-    case RtElementType::String:
-        sb.append_cstr("System.String");
-        break;
-    case RtElementType::Ptr:
-    {
-        const RtTypeSig* base_type = type_sig->data.element_type;
-        RET_ERR_ON_FAIL(append_type_sig_name(sb, base_type));
-        sb.append_char('*');
-        break;
+        sb.append_cstr("neutral");
     }
-    case RtElementType::ByRef:
+    else
     {
-        const RtTypeSig* base_type = type_sig->data.element_type;
-        RET_ERR_ON_FAIL(append_type_sig_name(sb, base_type));
-        sb.append_char('&');
-        break;
+        sb.append_cstr(assemblyName.culture);
     }
-    case RtElementType::ValueType:
-    case RtElementType::Class:
+    sb.append_cstr(", PublicKeyToken=");
+    if (assemblyName.public_key_token[0] != 0)
     {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, klass, vm::Class::get_class_by_type_def_gid(type_sig->data.type_def_gid));
-        RET_ERR_ON_FAIL(append_klass_full_name(sb, klass));
-        break;
+        append_public_key_token(sb, assemblyName.public_key_token, sizeof(assemblyName.public_key_token));
     }
-    case RtElementType::Var:
-    case RtElementType::MVar:
+    else
     {
-        const RtGenericParam* generic_param = type_sig->data.generic_param;
-        sb.append_cstr(generic_param->name);
-        break;
+        sb.append_cstr("null");
     }
-    case RtElementType::Array:
+    sb.sure_null_terminator_but_not_append();
+}
+
+RtResultVoid MetadataName::append_type_full_name(utils::Utf8StringBuilder& sb, const metadata::RtTypeSig* typeSig, TypeNameFormat cur_format, bool nested)
+{
+    TypeNameFormat nextFormat = cur_format == TypeNameFormat::AssemblyQualified ? TypeNameFormat::FullName : cur_format;
+    switch (typeSig->ele_type)
     {
-        const RtArrayType* arr_type = type_sig->data.array_type;
-        const RtTypeSig* base_type = arr_type->ele_type;
-        RET_ERR_ON_FAIL(append_type_sig_name(sb, base_type));
+    case metadata::RtElementType::Array:
+    {
+        const metadata::RtArrayType* arrayType = typeSig->data.array_type;
+        const metadata::RtTypeSig* elementType = arrayType->ele_type;
+
+        RET_ERR_ON_FAIL(append_type_full_name(sb, elementType, nextFormat, false));
+
         sb.append_char('[');
-        uint8_t rank = arr_type->rank;
-        sb.append_chars(',', rank - 1);
-        sb.append_char(']');
-        break;
-    }
-    case RtElementType::GenericInst:
-    {
-        const RtGenericClass* generic_class = type_sig->data.generic_class;
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, generic_base_klass, vm::Class::get_class_by_type_def_gid(generic_class->base_type_def_gid));
-        RET_ERR_ON_FAIL(append_klass_full_name(sb, generic_base_klass));
-        sb.append_char('<');
-
-        const RtGenericInst* generic_inst = generic_class->class_inst;
-        uint16_t generic_arg_count = generic_inst->generic_arg_count;
-        const RtTypeSig* const* generic_args = generic_inst->generic_args;
-        for (uint16_t i = 0; i < generic_arg_count; ++i)
+        if (arrayType->rank > 1)
         {
-            if (i > 0)
-            {
-                sb.append_char(',');
-            }
-            const RtTypeSig* generic_arg_type = generic_args[i];
-            RET_ERR_ON_FAIL(append_type_sig_name(sb, generic_arg_type));
+            sb.append_chars(',', arrayType->rank - 1);
         }
-        sb.append_char('>');
-        break;
-    }
-    case RtElementType::TypedByRef:
-        sb.append_cstr("System.TypedReference");
-        break;
-    case RtElementType::I:
-        sb.append_cstr("System.IntPtr");
-        break;
-    case RtElementType::U:
-        sb.append_cstr("System.UIntPtr");
-        break;
-    case RtElementType::FnPtr:
-    {
-        const RtMethodSig* method_sig = type_sig->data.method_sig;
-        RET_ERR_ON_FAIL(append_method_sig_name(sb, method_sig));
-        break;
-    }
-    case RtElementType::Object:
-        sb.append_cstr("System.Object");
-        break;
-    case RtElementType::SZArray:
-    {
-        const RtTypeSig* base_type = type_sig->data.element_type;
-        RET_ERR_ON_FAIL(append_type_sig_name(sb, base_type));
-        sb.append_cstr("[]");
-        break;
-    }
-    case RtElementType::Sentinel:
-        RETURN_NOT_IMPLEMENTED_ERROR();
-    default:
-        // Unreachable
-        break;
-    }
+        else
+        {
+            sb.append_char('*');
+        }
+        sb.append_char(']');
 
-    // Handle by_ref flag after type (similar to Rust's trailing &)
-    if (type_sig->by_ref)
+        if (typeSig->by_ref)
+        {
+            sb.append_char('&');
+        }
+
+        if (cur_format == TypeNameFormat::AssemblyQualified)
+        {
+            sb.append_cstr(", ");
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, elementKlass, vm::Class::get_class_from_typesig(elementType));
+            append_assembly_name(sb, elementKlass->image->get_assembly_name());
+        }
+        break;
+    }
+    case metadata::RtElementType::SZArray:
     {
-        sb.append_cstr("&");
+        const metadata::RtTypeSig* elementType = typeSig->data.element_type;
+
+        RET_ERR_ON_FAIL(append_type_full_name(sb, elementType, cur_format, false));
+        sb.append_cstr("[]");
+
+        if (typeSig->by_ref)
+        {
+            sb.append_char('&');
+        }
+
+        if (cur_format == TypeNameFormat::AssemblyQualified)
+        {
+            sb.append_cstr(", ");
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, elementKlass, vm::Class::get_class_from_typesig(elementType));
+            append_assembly_name(sb, elementKlass->image->get_assembly_name());
+        }
+        break;
+    }
+    case metadata::RtElementType::Ptr:
+    {
+        const metadata::RtTypeSig* elementType = typeSig->data.element_type;
+
+        RET_ERR_ON_FAIL(append_type_full_name(sb, elementType, cur_format, false));
+        sb.append_char('*');
+
+        if (typeSig->by_ref)
+        {
+            sb.append_char('&');
+        }
+
+        if (cur_format == TypeNameFormat::AssemblyQualified)
+        {
+            sb.append_cstr(", ");
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, elementKlass, vm::Class::get_class_from_typesig(elementType));
+            append_assembly_name(sb, elementKlass->image->get_assembly_name());
+        }
+        break;
+    }
+    case metadata::RtElementType::FnPtr:
+    {
+        sb.append_cstr("delegate* unmanaged");
+        const metadata::RtMethodSig* method_sig = typeSig->data.method_sig;
+        assert(method_sig->generic_param_count == 0 && "Generic parameters are not supported for function pointers");
+        sb.append_char('[');
+        sb.append_cstr(metadata::MetadataName::get_call_convention_name((metadata::RtSigType)method_sig->flags));
+        sb.append_char(']');
+        sb.append_char(get_generic_param_start_separator(cur_format));
+        for (size_t i = 0; i < method_sig->params.size(); ++i)
+        {
+            RET_ERR_ON_FAIL(append_type_full_name(sb, method_sig->params[i], nextFormat, false));
+            sb.append_char(',');
+        }
+        RET_ERR_ON_FAIL(append_type_full_name(sb, method_sig->return_type, nextFormat, false));
+        sb.append_char(get_generic_param_end_separator(cur_format));
+        break;
+    }
+    case metadata::RtElementType::Var:
+    case metadata::RtElementType::MVar:
+    {
+        const metadata::RtGenericParam* genericParam = typeSig->data.generic_param;
+        sb.append_cstr(genericParam->name);
+
+        if (typeSig->by_ref)
+        {
+            sb.append_char('&');
+        }
+        break;
+    }
+    default:
+    {
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(typeSig));
+        RET_ERR_ON_FAIL(append_klass_full_name_without_generic_params(sb, klass, cur_format));
+        if (!nested)
+        {
+            if (vm::Class::is_generic_inst(klass))
+            {
+                const metadata::RtGenericClass* genericClass = typeSig->data.generic_class;
+                const metadata::RtGenericInst* inst = genericClass->class_inst;
+
+                sb.append_char(get_generic_param_start_separator(cur_format));
+                for (uint8_t i = 0; i < inst->generic_arg_count; ++i)
+                {
+                    if (i > 0)
+                    {
+                        sb.append_char(',');
+                    }
+
+                    const metadata::RtTypeSig* argType = inst->generic_args[i];
+                    metadata::RtElementType argEleType = argType->ele_type;
+
+                    if (nextFormat == TypeNameFormat::AssemblyQualified && argEleType != metadata::RtElementType::Var &&
+                        argEleType != metadata::RtElementType::MVar)
+                    {
+                        sb.append_char('[');
+                        RET_ERR_ON_FAIL(append_type_full_name(sb, argType, nextFormat, false));
+                        sb.append_char(']');
+                    }
+                    else
+                    {
+                        RET_ERR_ON_FAIL(append_type_full_name(sb, argType, nextFormat, false));
+                    }
+                }
+                sb.append_char(get_generic_param_end_separator(cur_format));
+            }
+            else if (klass->generic_container)
+            {
+                const metadata::RtGenericContainer* gc = klass->generic_container;
+                sb.append_char(get_generic_param_start_separator(cur_format));
+                for (uint8_t i = 0; i < gc->generic_param_count; ++i)
+                {
+                    if (i > 0)
+                    {
+                        sb.append_char(',');
+                    }
+
+                    const metadata::RtGenericParam& gp = gc->generic_params[i];
+                    sb.append_cstr(gp.name);
+                }
+                sb.append_char(get_generic_param_end_separator(cur_format));
+            }
+
+            if (typeSig->by_ref)
+            {
+                sb.append_char('&');
+            }
+
+            if (cur_format == TypeNameFormat::AssemblyQualified && typeSig->ele_type != metadata::RtElementType::Var &&
+                typeSig->ele_type != metadata::RtElementType::MVar)
+            {
+                sb.append_cstr(", ");
+                append_assembly_name(sb, klass->image->get_assembly_name());
+            }
+        }
+        break;
+    }
     }
     RET_VOID_OK();
 }
@@ -208,30 +322,31 @@ const char* MetadataName::get_call_convention_name(RtSigType call_conv)
     }
 }
 
-RtResultVoid MetadataName::append_method_sig_name(utils::Utf8StringBuilder& sb, const RtMethodSig* method_sig)
+RtResultVoid MetadataName::append_method_sig_name(utils::Utf8StringBuilder& sb, const RtMethodSig* method_sig, TypeNameFormat cur_format)
 {
+    TypeNameFormat nextFormat = cur_format == TypeNameFormat::AssemblyQualified ? TypeNameFormat::FullName : cur_format;
     sb.append_cstr("delegate* unmanaged");
     assert(method_sig->generic_param_count == 0 && "Generic parameters are not supported for function pointers");
     sb.append_char('[');
     sb.append_cstr(get_call_convention_name((RtSigType)method_sig->flags));
     sb.append_char(']');
-    sb.append_char('<');
+    sb.append_char(get_generic_param_start_separator(cur_format));
     for (size_t i = 0; i < method_sig->params.size(); ++i)
     {
-        RET_ERR_ON_FAIL(append_type_sig_name(sb, method_sig->params[i]));
+        RET_ERR_ON_FAIL(append_type_full_name(sb, method_sig->params[i], nextFormat, false));
         sb.append_char(',');
     }
-    RET_ERR_ON_FAIL(append_type_sig_name(sb, method_sig->return_type));
-    sb.append_char('>');
+    RET_ERR_ON_FAIL(append_type_full_name(sb, method_sig->return_type, nextFormat, false));
+    sb.append_char(get_generic_param_end_separator(cur_format));
     RET_VOID_OK();
 }
 
-RtResultVoid MetadataName::append_method_full_name_without_params(utils::Utf8StringBuilder& sb, const RtMethodInfo* method)
+RtResultVoid MetadataName::append_method_full_name_without_params(utils::Utf8StringBuilder& sb, const RtMethodInfo* method, TypeNameFormat cur_format)
 {
     const metadata::RtClass* klass = method->parent;
 
     // Append class full name
-    RET_ERR_ON_FAIL(append_klass_full_name(sb, klass));
+    RET_ERR_ON_FAIL(append_klass_full_name_without_generic_params(sb, klass, cur_format));
 
     // Append :: and method name
     sb.append_cstr("::");
@@ -241,17 +356,18 @@ RtResultVoid MetadataName::append_method_full_name_without_params(utils::Utf8Str
     uint16_t generic_param_count = vm::Method::get_generic_param_count(method);
     if (generic_param_count > 0)
     {
-        sb.append_char('<');
+        sb.append_char(get_generic_param_start_separator(cur_format));
         sb.append_chars(',', generic_param_count - 1);
-        sb.append_char('>');
+        sb.append_char(get_generic_param_end_separator(cur_format));
     }
     sb.sure_null_terminator_but_not_append();
     RET_VOID_OK();
 }
 
-RtResultVoid MetadataName::append_method_full_name_with_params(utils::Utf8StringBuilder& sb, const RtMethodInfo* method)
+RtResultVoid MetadataName::append_method_full_name_with_params(utils::Utf8StringBuilder& sb, const RtMethodInfo* method, TypeNameFormat cur_format)
 {
-    RET_ERR_ON_FAIL(append_method_full_name_without_params(sb, method));
+    RET_ERR_ON_FAIL(append_method_full_name_without_params(sb, method, cur_format));
+    TypeNameFormat nextFormat = cur_format == TypeNameFormat::AssemblyQualified ? TypeNameFormat::FullName : cur_format;
 
     // Append parameters
     sb.append_char('(');
@@ -263,7 +379,7 @@ RtResultVoid MetadataName::append_method_full_name_with_params(utils::Utf8String
             sb.append_char(',');
         }
         const RtTypeSig* param = method->parameters[i];
-        RET_ERR_ON_FAIL(append_type_sig_name(sb, param));
+        RET_ERR_ON_FAIL(append_type_full_name(sb, param, nextFormat, false));
     }
     sb.append_char(')');
     sb.sure_null_terminator_but_not_append();

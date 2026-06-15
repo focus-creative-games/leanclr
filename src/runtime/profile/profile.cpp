@@ -2,6 +2,7 @@
 
 #include <algorithm>
 #include <cstdio>
+#include <cstring>
 #include <string>
 #include <vector>
 
@@ -19,13 +20,13 @@ namespace
 {
 struct ExportCandidate
 {
-    std::string assembly;
+    const char* assembly;
     std::string signature;
     uint64_t calls;
     uint64_t cost;
 };
 
-bool g_enabled = false;
+bool g_enabled = true;
 std::vector<ProfileSlot> g_slots;
 std::vector<const metadata::RtMethodInfo*> g_slot_methods;
 
@@ -47,16 +48,21 @@ inline const char* get_assembly_name(const metadata::RtMethodInfo* method)
 RtResult<std::string> build_method_signature(const metadata::RtMethodInfo* method)
 {
     utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_type_sig_name(sb, method->return_type));
+    RET_ERR_ON_FAIL(metadata::MetadataName::append_type_full_name(sb, method->return_type, metadata::TypeNameFormat::DnlibToString, false));
     sb.append_char(' ');
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method));
+    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::DnlibToString));
     RET_OK(std::string(sb.get_const_chars()));
 }
 
-void append_json_escaped(std::string& out, const std::string& text)
+void append_json_escaped(std::string& out, const char* text)
 {
-    for (char c : text)
+    if (text == nullptr)
     {
+        return;
+    }
+    for (; *text != '\0'; ++text)
+    {
+        const char c = *text;
         switch (c)
         {
         case '"':
@@ -87,6 +93,11 @@ void append_json_escaped(std::string& out, const std::string& text)
     }
 }
 
+void append_json_escaped(std::string& out, const std::string& text)
+{
+    append_json_escaped(out, text.c_str());
+}
+
 template <typename CallsGetter, typename CostGetter>
 std::vector<ExportCandidate> collect_candidates(const ExportOptions& options, CallsGetter calls_getter, CostGetter cost_getter)
 {
@@ -108,28 +119,31 @@ std::vector<ExportCandidate> collect_candidates(const ExportOptions& options, Ca
             continue;
         }
         candidates.push_back(ExportCandidate{
-            std::string(get_assembly_name(method)),
+            get_assembly_name(method),
             signature_result.unwrap(),
             calls,
             cost,
         });
     }
 
-    std::sort(candidates.begin(), candidates.end(), [](const ExportCandidate& a, const ExportCandidate& b) {
-        if (a.cost != b.cost)
-        {
-            return a.cost > b.cost;
-        }
-        if (a.calls != b.calls)
-        {
-            return a.calls > b.calls;
-        }
-        if (a.assembly != b.assembly)
-        {
-            return a.assembly < b.assembly;
-        }
-        return a.signature < b.signature;
-    });
+    std::sort(candidates.begin(), candidates.end(),
+              [](const ExportCandidate& a, const ExportCandidate& b)
+              {
+                  if (a.cost != b.cost)
+                  {
+                      return a.cost > b.cost;
+                  }
+                  if (a.calls != b.calls)
+                  {
+                      return a.calls > b.calls;
+                  }
+                  const int assembly_cmp = std::strcmp(a.assembly, b.assembly);
+                  if (assembly_cmp != 0)
+                  {
+                      return assembly_cmp < 0;
+                  }
+                  return a.signature < b.signature;
+              });
 
     if (options.top_n > 0 && candidates.size() > options.top_n)
     {
@@ -140,13 +154,18 @@ std::vector<ExportCandidate> collect_candidates(const ExportOptions& options, Ca
 
 std::string build_candidates_json(const std::vector<ExportCandidate>& candidates)
 {
+    if (candidates.empty())
+    {
+        return "[]";
+    }
+
     std::string json;
-    json.push_back('[');
+    json.append("[\n");
     for (size_t i = 0; i < candidates.size(); ++i)
     {
         if (i > 0)
         {
-            json.push_back(',');
+            json.append(",\n");
         }
         const ExportCandidate& candidate = candidates[i];
         json.append("{\"assembly\":\"");
@@ -159,7 +178,7 @@ std::string build_candidates_json(const std::vector<ExportCandidate>& candidates
         json.append(std::to_string(candidate.cost));
         json.push_back('}');
     }
-    json.push_back(']');
+    json.append("\n]");
     return json;
 }
 
@@ -353,8 +372,9 @@ RtResult<std::string> Profile::get_period_stats_json(const ExportOptions& option
 RtResult<std::string> Profile::get_global_stats_json(const ExportOptions& options) noexcept
 {
 #if LEANCLR_PGO_PROFILE
-    const std::vector<ExportCandidate> candidates =
-        collect_candidates(options, [](const ProfileSlot& slot) { return slot.global_calls; }, [](const ProfileSlot& slot) { return slot.global_cost; });
+    const std::vector<ExportCandidate> candidates = collect_candidates(
+        options, [](const ProfileSlot& slot) { return slot.global_calls + slot.period_calls; },
+        [](const ProfileSlot& slot) { return slot.global_cost + slot.period_cost; });
     RET_OK(build_candidates_json(candidates));
 #else
     (void)options;

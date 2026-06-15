@@ -2,6 +2,7 @@
 #include "icall_base.h"
 
 #include "metadata/module_def.h"
+#include "metadata/metadata_name.h"
 #include "utils/string_builder.h"
 #include "vm/class.h"
 #include "vm/reflection.h"
@@ -76,7 +77,7 @@ RtResult<vm::RtString*> SystemReflectionRuntimeAssembly::get_fullname(vm::RtRefl
 {
     metadata::RtModuleDef* mod = ref_ass->assembly->mod;
     utils::Utf8StringBuilder sb;
-    vm::Type::append_assembly_name(sb, mod->get_assembly_name());
+    metadata::MetadataName::append_assembly_name(sb, mod->get_assembly_name());
     RET_OK(vm::String::create_string_from_utf8chars(sb.get_const_chars(), static_cast<int32_t>(sb.length())));
 }
 
