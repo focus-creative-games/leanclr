@@ -25,7 +25,7 @@ else
 fi
 
 if [[ ! -f "$RUNNER" ]]; then
-  echo "ERROR: aot-tester not found at '$RUNNER'. Run 'scripts/test/aot-runner/build.sh' first." >&2
+  echo "ERROR: aot-tester not found at '$RUNNER'. Run 'scripts/test/aot-tester/build.sh' first." >&2
   exit 1
 fi
 

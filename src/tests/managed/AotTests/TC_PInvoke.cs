@@ -9,7 +9,7 @@ using System.Text;
 /// 入口名须与 C# 中 <see cref="DllImportAttribute.EntryPoint"/> 一致。
 /// </summary>
 /// <remarks>
-/// 以下为带 <see cref="UnitTestAttribute"/> 的用例；在已链接 <c>__Internal</c> 原生桩（如 aot-runner）或
+/// 以下为带 <see cref="UnitTestAttribute"/> 的用例；在已链接 <c>__Internal</c> 原生桩（如 aot-tester）或
 /// Emscripten（<c>leanclr_test_pinvoke.js</c>）的环境下由测试运行器执行。
 /// 单独运行示例：<c>simple-aot ... -e WasmPInvokeVerify::UnitTest_AddI32 Test</c>。
 /// </remarks>

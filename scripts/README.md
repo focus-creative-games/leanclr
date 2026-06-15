@@ -1,6 +1,6 @@
 # Scripts
 
-Repository-level build, test, and developer scripts. Module-specific scripts (samples, aot-runner) remain next to their projects.
+Repository-level build, test, and developer scripts. Module-specific scripts (samples, aot-tester) remain next to their projects.
 
 All build and intermediate outputs go under **`out/`** at the repository root (override with `LEANCLR_OUT_ROOT`). Source trees under `src/` stay clean.
 
@@ -39,7 +39,7 @@ scripts/
 ├── ci.sh                    # CI: build + run tests (Linux)
 ├── test/                    # Unit test build & run
 ├── runtime/                 # leanclr runtime library (CMake)
-├── leanaot/                 # LeanAOT tooling (aot-runner build, …)
+├── leanaot/                 # LeanAOT tooling (aot-tester build, …)
 ├── generator/               # Opcode / icall code generation
 ├── dev/                     # clean-out, format-cpp-files
 └── lib/                     # repo-root, out-dir-init, cmake-dir
@@ -54,11 +54,11 @@ scripts/
 | `test/basic-tester/build.*` | Build C++ test runner executable |
 | `test/run.*` | Run `out/cmake/tests/basic-tester/<Config>-<Arch>/bin/.../test` |
 | `runtime/build.*` | Build `leanclr` → `out/cmake/runtime/<Config>-<Arch>/` (Windows: optional `sln`, `shared`) |
-| `test/aot-runner/build.*` | Build native `aot-tester` executable |
-| `test/aot-runner/gen_cpp.*` | Run LeanAOT to generate C++ under `src/tests/aot-tester/cpp/` |
-| `test/aot-runner/gen_cpp_posix.*` | Generate C++ under `src/tests/aot-tester/cpp-posix/` using POSIX BCL (`dotnetframework4.x-linux`) |
-| `test/aot-runner/run.*` | Build and run `aot-tester` with `AotTests` assembly |
-| `test/aot-runner/build-wasm.*` | Build `aot-tester` with Emscripten → `out/cmake/tests/aot-tester/<Config>-wasm/` |
+| `test/aot-tester/build.*` | Build native `aot-tester` executable |
+| `test/aot-tester/gen_cpp.*` | Run LeanAOT to generate C++ under `src/tests/aot-tester/cpp/` |
+| `test/aot-tester/gen_cpp_posix.*` | Generate C++ under `src/tests/aot-tester/cpp-posix/` using POSIX BCL (`dotnetframework4.x-linux`) |
+| `test/aot-tester/run.*` | Build and run `aot-tester` with `AotTests` assembly |
+| `test/aot-tester/build-wasm.*` | Build `aot-tester` with Emscripten → `out/cmake/tests/aot-tester/<Config>-wasm/` |
 | `leanaot/build.*` | Build LeanAOT → `out/dotnet/LeanAOT/<Config>/net8.0/` |
 | `publish_leanaot.bat` | `dotnet publish` Release → `../leanclr-unity/LeanCLR~/leanaot/` (sibling repo) |
 | `publish_runtime.bat` | Mirror `src/runtime` → `../leanclr-unity/LeanCLR~/runtime/` (excludes scripts, CMakeLists.txt, `3rd/zlib`) |

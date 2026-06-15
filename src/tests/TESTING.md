@@ -44,7 +44,7 @@ tests/
 |--------|-------------|------|
 | **basic-tester** (`test.exe`) | CoreTests, CorlibTests, Common, RefNetstandard, ILTests.Native, ILTests | **CI 主路径** |
 | **RunTests.exe** | CoreTests, CorlibTests, AotTests, ILTests | 本地一次性跑四套 managed 测试 |
-| **aot-tester** | AotTests | AOT 流水线（`scripts/test/aot-runner/`） |
+| **aot-tester** | AotTests | AOT 流水线（`scripts/test/aot-tester/`） |
 | **AotTests.App.Main** | AotTests（自扫描） | AOT 生成 C++ 时的入口 |
 
 三套 runner 的 discovery 规则基本一致，但存在细微差异：
