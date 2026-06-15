@@ -17,6 +17,7 @@ size_t OpCodes::s_opsizes[static_cast<size_t>(OpCodeEnum::__Count)] = {
     //{{LOW_LEVEL_INSTRUCTION_SIZES
     sizeof(Illegal),
     sizeof(Nop),
+    sizeof(ProfileAddCost),
     sizeof(InitLocals1Short),
     sizeof(InitLocals2Short),
     sizeof(InitLocals3Short),
@@ -695,6 +696,14 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
         ir->__code = 1;
         return codes + sizeof(Nop);
     }
+    case OpCodeEnum::ProfileAddCost:
+    {
+        auto ir = (ProfileAddCost*)codes;
+        ir->__prefix = 254;
+        ir->__code = 2;
+        ir->cost = (uint32_t)inst.get_i4();
+        return codes + sizeof(ProfileAddCost);
+    }
     case OpCodeEnum::InitLocals1Short:
     {
         auto ir = (InitLocals1Short*)codes;
@@ -744,7 +753,7 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
     {
         auto ir = (Arglist*)codes;
         ir->__prefix = 254;
-        ir->__code = 2;
+        ir->__code = 3;
         return codes + sizeof(Arglist);
     }
     case OpCodeEnum::LdLocI1:

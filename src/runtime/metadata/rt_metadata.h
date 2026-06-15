@@ -573,6 +573,9 @@ struct RtMethodInfo
     uint16_t total_arg_stack_object_size;
     uint16_t ret_stack_object_size;
     RtInvokerType invoker_type;
+#if LEANCLR_PGO_PROFILE
+    uint32_t profile_slot;
+#endif
 };
 
 // Property information structure

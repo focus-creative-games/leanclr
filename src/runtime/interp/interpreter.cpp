@@ -9,6 +9,7 @@
 #include "ll_transformer.h"
 #include "machine_state.h"
 #include "execution_helper.h"
+#include "profile/profile.h"
 #include "vm/object.h"
 #include "vm/rt_array.h"
 #include "vm/method.h"
@@ -1107,6 +1108,7 @@ RtResult<const RtStackObject*> Interpreter::execute(const metadata::RtMethodInfo
     static void* const in_labels4[] = {
         &&LABEL4_Illegal,
         &&LABEL4_Nop,
+        &&LABEL4_ProfileAddCost,
         &&LABEL4_Arglist,
     };
     static void* const in_labels5[] = {};
@@ -8009,6 +8011,13 @@ method_start:
             {
                 LEANCLR_SWITCH4()
                 {
+                    LEANCLR_CASE_BEGIN4(ProfileAddCost)
+                    {
+#if LEANCLR_PGO_PROFILE
+                        profile::Profile::add_cost(frame->method, static_cast<uint64_t>(ir->cost));
+#endif
+                    }
+                    LEANCLR_CASE_END4()
                     LEANCLR_CASE_BEGIN4(Illegal)
                     {
                         assert(false && "never reach here");

@@ -26,10 +26,17 @@ struct BasicBlock
     utils::NotFreeList<const Variable*> eval_stack;
     size_t eval_stack_top;
     BasicBlock* next_bb;
+#if LEANCLR_PGO_PROFILE
+    uint32_t profile_cost;
+#endif
 
     BasicBlock(alloc::MemPool* pool)
         : visited(false), inited_eval_stack(false), il_begin_offset(0), il_end_offset(0), insts(pool), in_eval_stack(pool), in_eval_stack_top(0),
           eval_stack(pool), eval_stack_top(0), next_bb(nullptr)
+#if LEANCLR_PGO_PROFILE
+          ,
+          profile_cost(0)
+#endif
     {
     }
 

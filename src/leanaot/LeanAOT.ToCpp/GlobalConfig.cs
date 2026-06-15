@@ -61,6 +61,8 @@ namespace LeanAOT.ToCpp
         /// </summary>
         public bool EmitNullCheckBeforeCallInstanceMethod { get; set;} = true;
 
+        public bool EnableProfileInstrumentation { get; set; }
+
         /// <summary>
         /// LeanAOT-only: paths to <c>aot.xml</c> rule files (CLI order). Empty when unset.
         /// </summary>

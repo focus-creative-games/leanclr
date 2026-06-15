@@ -188,6 +188,10 @@ typedef double float64_t;
 #define LEANCLR_GC_DEBUG 0
 #endif
 
+#ifndef LEANCLR_PGO_PROFILE
+#define LEANCLR_PGO_PROFILE 0
+#endif
+
 #if LEANCLR_GC_DEBUG
 #define LEANCLR_GC_DECLARE_CALL_SITE_PARAM , const ::leanclr::gc::GcAllocSite& site
 #define LEANCLR_GC_CALL_SITE_PARAM , site

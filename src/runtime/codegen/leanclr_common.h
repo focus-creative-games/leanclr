@@ -23,6 +23,7 @@
 #include "metadata/module_def.h"
 #include "interp/interp_defs.h"
 #include "interp/execution_helper.h"
+#include "profile/profile.h"
 #include "utils/string_builder.h"
 
 #define LEANCLR_CODEGEN_DEBUG LEANCLR_DEBUG
@@ -32,6 +33,23 @@
 
 #define LEANCLR_CODEGEN_ASSUME(expr) LEANCLR_ASSUME(expr)
 #define LEANCLR_CODEGEN_ASSUME_NOT_NULL(ptr) LEANCLR_ASSUME_NOT_NULL(ptr)
+
+#if LEANCLR_PGO_PROFILE
+#define LEANCLR_CODEGEN_PROFILE_INC_CALL_COUNT(methodInfo) \
+    do                                                     \
+    {                                                      \
+        leanclr::codegen::profile_inc_call_count(methodInfo); \
+    } while (0)
+
+#define LEANCLR_CODEGEN_PROFILE_ADD_COST(methodInfo, cost) \
+    do                                                      \
+    {                                                       \
+        leanclr::codegen::profile_add_cost(methodInfo, static_cast<uint32_t>(cost)); \
+    } while (0)
+#else
+#define LEANCLR_CODEGEN_PROFILE_INC_CALL_COUNT(methodInfo) ((void)0)
+#define LEANCLR_CODEGEN_PROFILE_ADD_COST(methodInfo, cost) ((void)0)
+#endif
 
 #define LEANCLR_CODEGEN_THROW_ON_ERROR(retExpr, methodInfo, ip)                                          \
     do                                                                                                   \
@@ -615,6 +633,16 @@ inline intptr_t cast_float_to_intptr(Src value) noexcept
 inline vm::InternalCallFunction resolve_internal_call(const char* name) noexcept
 {
     return (vm::InternalCallFunction)vm::InternalCalls::get_lite_internal_call(name);
+}
+
+inline void profile_inc_call_count(const metadata::RtMethodInfo* method) noexcept
+{
+    profile::Profile::inc_call_count(method);
+}
+
+inline void profile_add_cost(const metadata::RtMethodInfo* method, uint32_t cost) noexcept
+{
+    profile::Profile::add_cost(method, cost);
 }
 
 RtErr raise_internal_call_entry_not_found_error(const char* name) noexcept;

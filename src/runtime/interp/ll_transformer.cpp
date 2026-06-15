@@ -633,7 +633,18 @@ RtResultVoid Transformer::transform_instructions()
     while (cur_bb != nullptr)
     {
         const hl::BasicBlock* hl_bb = cur_bb->hl_bb;
-        cur_bb->insts.reserve(hl_bb->insts.size());
+        cur_bb->insts.reserve(hl_bb->insts.size() + 1);
+
+#if LEANCLR_PGO_PROFILE
+        if (hl_bb->profile_cost > 0)
+        {
+            GeneralInst* profile_inst = _mem_pool.malloc_any_zeroed<GeneralInst>();
+            profile_inst->set_opcode(OpCodeEnum::ProfileAddCost);
+            profile_inst->set_i4(static_cast<int32_t>(hl_bb->profile_cost));
+            profile_inst->set_il_offset(static_cast<int32_t>(hl_bb->il_begin_offset));
+            cur_bb->insts.push_back(profile_inst);
+        }
+#endif
 
         for (const hl::GeneralInst* hl_inst : hl_bb->insts)
         {
@@ -644,6 +655,9 @@ RtResultVoid Transformer::transform_instructions()
             {
             case hl::OpCodeEnum::Nop:
                 add = false;
+                break;
+            case hl::OpCodeEnum::ProfileAddCost:
+                ll_inst->set_opcode(OpCodeEnum::ProfileAddCost);
                 break;
             case hl::OpCodeEnum::Arglist:
                 ll_inst->set_opcode(OpCodeEnum::Arglist);

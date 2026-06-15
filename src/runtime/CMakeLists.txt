@@ -4,6 +4,7 @@ project(leanclr CXX C)
 
 option(BUILD_SHARED_LEANCLR "Build leanclr as a shared (dynamic) library" OFF)
 option(LEANCLR_ENABLE_CPP_EXCEPTIONS "Enable C++ exceptions for runtime target" OFF)
+option(LEANCLR_ENABLE_PROFILE "Enable PGO profiling instrumentation" OFF)
 
 set(LEANCLR_GC_ALGORITHM "MARK_SWEEP")
 option(LEANCLR_GC_DEBUG "Enable GC debug (quarantine, allocation sites)" ON)
@@ -21,6 +22,7 @@ set(RUNTIME_DIRS
     misc
     pinvokes
     platform
+    profile
     public_impl
     utils
     vm
@@ -61,6 +63,9 @@ else()
 endif()
 if(LEANCLR_GC_DEBUG)
     target_compile_definitions(leanclr PUBLIC LEANCLR_GC_DEBUG=1)
+endif()
+if(LEANCLR_ENABLE_PROFILE)
+    target_compile_definitions(leanclr PUBLIC LEANCLR_PGO_PROFILE=1)
 endif()
 
 target_include_directories(leanclr PUBLIC

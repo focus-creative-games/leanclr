@@ -19,6 +19,7 @@ enum class OpCodeEnum
     //{{HIGH_LEVEL_OPCODES
     Illegal,
     Nop,
+    ProfileAddCost,
     Arglist,
     InitLocals,
     LdArg,

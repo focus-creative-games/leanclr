@@ -23,6 +23,58 @@ namespace interp
 namespace hl
 {
 
+#if LEANCLR_PGO_PROFILE
+static uint32_t get_profile_weight_by_il_opcode(il::OpCodeValue opcode)
+{
+    switch (opcode)
+    {
+    case il::OpCodeValue::Nop:
+    case il::OpCodeValue::Break:
+        return 0;
+
+    case il::OpCodeValue::Call:
+    case il::OpCodeValue::Callvirt:
+    case il::OpCodeValue::Calli:
+        return 10;
+
+    case il::OpCodeValue::Newobj:
+        return 30;
+    case il::OpCodeValue::Newarr:
+        return 20;
+
+    case il::OpCodeValue::Ldfld:
+    case il::OpCodeValue::Stfld:
+    case il::OpCodeValue::Ldsfld:
+    case il::OpCodeValue::Stsfld:
+    case il::OpCodeValue::Ldelem:
+    case il::OpCodeValue::Stelem:
+    case il::OpCodeValue::LdelemI1:
+    case il::OpCodeValue::LdelemU1:
+    case il::OpCodeValue::LdelemI2:
+    case il::OpCodeValue::LdelemU2:
+    case il::OpCodeValue::LdelemI4:
+    case il::OpCodeValue::LdelemU4:
+    case il::OpCodeValue::LdelemI8:
+    case il::OpCodeValue::LdelemI:
+    case il::OpCodeValue::LdelemR4:
+    case il::OpCodeValue::LdelemR8:
+    case il::OpCodeValue::LdelemRef:
+    case il::OpCodeValue::StelemI:
+    case il::OpCodeValue::StelemI1:
+    case il::OpCodeValue::StelemI2:
+    case il::OpCodeValue::StelemI4:
+    case il::OpCodeValue::StelemI8:
+    case il::OpCodeValue::StelemR4:
+    case il::OpCodeValue::StelemR8:
+    case il::OpCodeValue::StelemRef:
+        return 3;
+
+    default:
+        return 1;
+    }
+}
+#endif
+
 Transformer::Transformer(metadata::RtModuleDef* mod, const metadata::RtMethodInfo* method_info, const metadata::RtMethodBody& method_body,
                          alloc::MemPool& mem_pool)
     : _mod(mod), _method(method_info), _method_body(&method_body), _pool(&mem_pool), _vars(&mem_pool)
@@ -2392,6 +2444,9 @@ RtResultVoid Transformer::transform_body()
         {
             il::OpCodeValue opcode = *(const il::OpCodeValue*)(codes_begin + il_offset_cur);
             _cur_il_offset = static_cast<int32_t>(il_offset_cur);
+#if LEANCLR_PGO_PROFILE
+            bb->profile_cost += get_profile_weight_by_il_opcode(opcode);
+#endif
             if (!_not_retset_prefix_after_cur_il)
             {
                 clear_prefix();

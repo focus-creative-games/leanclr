@@ -390,6 +390,70 @@ namespace LeanAOT.ToCpp
         private void EmitBasicBlockLabel(BasicBlock bb)
         {
             _bodyWriter.AddLine($"{GetBasicBlockStartLabelName(bb)}:");
+            if (_globalConfig.EnableProfileInstrumentation)
+            {
+                uint blockCost = ComputeBasicBlockProfileCost(bb);
+                if (blockCost > 0)
+                {
+                    _bodyWriter.AddLine($"{VmFunctionNames.PROFILE_ADD_COST}({CurMethodVar.GetFullReferenceVariableName()}, {blockCost}u);");
+                }
+            }
+        }
+
+        private static uint ComputeBasicBlockProfileCost(BasicBlock bb)
+        {
+            uint total = 0;
+            foreach (var inst in bb.instructions)
+            {
+                total += ComputeInstructionProfileWeight(inst.OpCode.Code);
+            }
+            return total;
+        }
+
+        private static uint ComputeInstructionProfileWeight(Code code)
+        {
+            switch (code)
+            {
+            case Code.Nop:
+            case Code.Break:
+                return 0;
+            case Code.Call:
+            case Code.Callvirt:
+            case Code.Calli:
+                return 10;
+            case Code.Newobj:
+                return 30;
+            case Code.Newarr:
+                return 20;
+            case Code.Ldfld:
+            case Code.Stfld:
+            case Code.Ldsfld:
+            case Code.Stsfld:
+            case Code.Ldelem:
+            case Code.Stelem:
+            case Code.Ldelem_I1:
+            case Code.Ldelem_U1:
+            case Code.Ldelem_I2:
+            case Code.Ldelem_U2:
+            case Code.Ldelem_I4:
+            case Code.Ldelem_U4:
+            case Code.Ldelem_I8:
+            case Code.Ldelem_I:
+            case Code.Ldelem_R4:
+            case Code.Ldelem_R8:
+            case Code.Ldelem_Ref:
+            case Code.Stelem_I:
+            case Code.Stelem_I1:
+            case Code.Stelem_I2:
+            case Code.Stelem_I4:
+            case Code.Stelem_I8:
+            case Code.Stelem_R4:
+            case Code.Stelem_R8:
+            case Code.Stelem_Ref:
+                return 3;
+            default:
+                return 1;
+            }
         }
 
         private string GetEvalVariableName(EvalVariable var)
@@ -3129,6 +3193,11 @@ namespace LeanAOT.ToCpp
             if (_globalConfig.EmitNullCheckBeforeCallInstanceMethod && !_method.IsStatic)
             {
                 EmitAssumeNotNull(GetParameterName(_parameterVariables[0]));
+            }
+
+            if (_globalConfig.EnableProfileInstrumentation)
+            {
+                _bodyWriter.AddLine($"{VmFunctionNames.PROFILE_INC_CALL_COUNT}({CurMethodVar.GetFullReferenceVariableName()});");
             }
 
             MethodDef methodDef = _method.MethodDef;

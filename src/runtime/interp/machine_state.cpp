@@ -2,6 +2,7 @@
 #include "machine_state.h"
 
 #include "alloc/general_allocation.h"
+#include "profile/profile.h"
 #include "vm/settings.h"
 #include "interpreter.h"
 
@@ -88,6 +89,9 @@ RtResult<InterpFrame*> MachineState::enter_frame_from_native(const metadata::RtM
     }
     frame->eval_stack_size = method_max_stack;
     frame->ip = imi->codes;
+#if LEANCLR_PGO_PROFILE
+    profile::Profile::inc_call_count(method);
+#endif
     RET_OK(frame);
 }
 
@@ -120,6 +124,9 @@ RtResult<InterpFrame*> MachineState::enter_frame_from_interp(const metadata::RtM
     std::memset(frame->eval_stack_base + arg_size, 0, (static_cast<size_t>(method_max_stack) - arg_size) * sizeof(RtStackObject));
 #endif
     frame->ip = imi->codes;
+#if LEANCLR_PGO_PROFILE
+    profile::Profile::inc_call_count(method);
+#endif
     RET_OK(frame);
 }
 

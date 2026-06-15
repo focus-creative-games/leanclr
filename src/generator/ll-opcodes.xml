@@ -1,6 +1,9 @@
 <llopcodes>
     <opcode name="Illegal" hlopcode="Illegal" prefix="4"/>
     <opcode name="Nop" hlopcode="Nop" prefix="4"/>
+    <opcode name="ProfileAddCost" hlopcode="ProfileAddCost" prefix="4">
+        <param name="cost" type="u32" arg="i4" arg_kind="const"/>
+    </opcode>
     <opcode name="InitLocals1_S" hlopcode="InitLocals" prefix="0">
         <param name="offset" arg="locals_offset" arg_kind="stack_const"/>
     </opcode>

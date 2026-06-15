@@ -121,6 +121,9 @@ internal class Program
         [Option("leanaot-enable-layout-validation", Required = false, HelpText = "LeanAOT-only: enable managed type layout validation in codegen (default off).")]
         public bool LeanAotEnableLayoutValidation { get; set; }
 
+        [Option("leanaot-enable-profile", Required = false, HelpText = "LeanAOT-only: emit PGO profile instrumentation in generated code.")]
+        public bool LeanAotEnableProfile { get; set; }
+
         [Option("leanaot-may-throw-exception-in-icall", Required = false, HelpText = "LeanAOT-only: enable may throw exception in icall (default off).")]
         public bool LeanAotMayThrowExceptionInIcall { get; set; }
 
@@ -538,9 +541,14 @@ internal class Program
         config.StatsOutputDir = options.StatsOutputDir;
         config.CompilerFlags = NormalizeCompilerFlags(options.CompilerFlags);
         config.EnableLayoutValidation = options.LeanAotEnableLayoutValidation;
+        config.EnableProfileInstrumentation = options.LeanAotEnableProfile;
         if (options.LeanAotEnableLayoutValidation)
         {
             s_logger.Info("LeanAOT layout validation enabled (--leanaot-enable-layout-validation).");
+        }
+        if (options.LeanAotEnableProfile)
+        {
+            s_logger.Info("LeanAOT profile instrumentation enabled (--leanaot-enable-profile).");
         }
         config.MayThrowExceptionInIcall = options.LeanAotMayThrowExceptionInIcall;
         config.UnityVersion = string.IsNullOrWhiteSpace(options.LeanAotUnityVersion)

@@ -1,6 +1,7 @@
 <hlopcodes>
     <opcode name="Illegal"/>
     <opcode name="Nop"/>
+    <opcode name="ProfileAddCost" params="i4"/>
     <opcode name="Arglist"/>
     <opcode name="InitLocals" params="arg1,arg2"/>
     <opcode name="LdArg" params="src,dst"/>

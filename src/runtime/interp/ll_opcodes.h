@@ -16,6 +16,7 @@ enum class OpCodeEnum
     //{{LOW_LEVEL_OPCODE_ENUM
     Illegal,
     Nop,
+    ProfileAddCost,
     InitLocals1Short,
     InitLocals2Short,
     InitLocals3Short,
@@ -1381,7 +1382,8 @@ enum class OpCodeValue4 : uint8_t
     //{{LOW_LEVEL_OPCODE4
     Illegal = 0x00,
     Nop = 0x01,
-    Arglist = 0x02,
+    ProfileAddCost = 0x02,
+    Arglist = 0x03,
 
     //}}LOW_LEVEL_OPCODE4
 };
@@ -1408,6 +1410,15 @@ struct Nop
     uint8_t __code;
     uint8_t __padding_2;
     uint8_t __padding_3;
+};
+
+struct ProfileAddCost
+{
+    uint8_t __prefix;
+    uint8_t __code;
+    uint8_t __padding_2;
+    uint8_t __padding_3;
+    uint32_t cost;
 };
 
 struct InitLocals1Short
@@ -7376,6 +7387,7 @@ struct GetEnumLongHashCode
     uint8_t __padding_6;
     uint8_t __padding_7;
 };
+
 
 //}}LOW_LEVEL_INSTRUCTION_STRUCTSS
 
