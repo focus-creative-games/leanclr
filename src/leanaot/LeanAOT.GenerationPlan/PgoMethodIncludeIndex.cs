@@ -100,19 +100,8 @@ namespace LeanAOT.GenerationPlan
                         throw new AotRuleFileException(fullPath, "<method> requires attribute signature.");
 
                     signature = signature.Trim();
-                    RejectWildcards(fullPath, signature, "method/@signature");
                     signatures.Add(signature);
                 }
-            }
-        }
-
-        private static void RejectWildcards(string path, string value, string hint)
-        {
-            if (value.IndexOf('*') >= 0 || value.IndexOf('?') >= 0)
-            {
-                throw new AotRuleFileException(
-                    path,
-                    $"PGO rule files require exact matches; glob is not supported in {hint}: {value}");
             }
         }
 
