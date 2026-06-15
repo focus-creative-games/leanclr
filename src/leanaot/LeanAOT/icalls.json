@@ -265,6 +265,51 @@
     "header": "icalls/interop.h"
   },
   {
+    "name": "LeanCLR.Profile::EndPeriodStats",
+    "func": "LeanCLRProfile::end_period_stats",
+    "header": "icalls/leanclr_profile.h"
+  },
+  {
+    "name": "LeanCLR.Profile::ExportGlobalStatsJson",
+    "func": "LeanCLRProfile::export_global_stats_json",
+    "header": "icalls/leanclr_profile.h"
+  },
+  {
+    "name": "LeanCLR.Profile::ExportPeriodStatsJson",
+    "func": "LeanCLRProfile::export_period_stats_json",
+    "header": "icalls/leanclr_profile.h"
+  },
+  {
+    "name": "LeanCLR.Profile::GetGlobalStats",
+    "func": "LeanCLRProfile::get_global_stats",
+    "header": "icalls/leanclr_profile.h"
+  },
+  {
+    "name": "LeanCLR.Profile::GetGlobalStatsJson",
+    "func": "LeanCLRProfile::get_global_stats_json",
+    "header": "icalls/leanclr_profile.h"
+  },
+  {
+    "name": "LeanCLR.Profile::GetPeriodStats",
+    "func": "LeanCLRProfile::get_period_stats",
+    "header": "icalls/leanclr_profile.h"
+  },
+  {
+    "name": "LeanCLR.Profile::GetPeriodStatsJson",
+    "func": "LeanCLRProfile::get_period_stats_json",
+    "header": "icalls/leanclr_profile.h"
+  },
+  {
+    "name": "LeanCLR.Profile::ResetGlobalStats",
+    "func": "LeanCLRProfile::reset_global_stats",
+    "header": "icalls/leanclr_profile.h"
+  },
+  {
+    "name": "LeanCLR.Profile::ResetPeriodStats",
+    "func": "LeanCLRProfile::reset_period_stats",
+    "header": "icalls/leanclr_profile.h"
+  },
+  {
     "name": "Mono.RuntimeClassHandle::GetTypeFromClass",
     "func": "MonoRuntimeClassHandle::get_type_from_class",
     "header": "icalls/mono_runtimeclasshandle.h"
@@ -2290,12 +2335,12 @@
     "header": "icalls/system_threading_internalthread.h"
   },
   {
-    "name": "System.Threading.Monitor::Enter",
+    "name": "System.Threading.Monitor::Enter(System.Object)",
     "func": "SystemThreadingMonitor::enter",
     "header": "icalls/system_threading_monitor.h"
   },
   {
-    "name": "System.Threading.Monitor::Exit",
+    "name": "System.Threading.Monitor::Exit(System.Object)",
     "func": "SystemThreadingMonitor::exit",
     "header": "icalls/system_threading_monitor.h"
   },
