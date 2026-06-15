@@ -85,6 +85,8 @@ namespace LeanAOT.ToCpp
             return $"{methodDef.DeclaringType.FullName}::{methodDef.Name}";
         }
 
+        private readonly static HashSet<string> _coreLibModules = new HashSet<string> { "mscorlib", "System", "System.Core", "LeanCLR" };
+
         public bool TryGetIcallOrIntrinsic(MethodDef methodDef, out RuntimeApiEntry entry, out MethodKind methodKind)
         {
             entry = null;
@@ -94,7 +96,7 @@ namespace LeanAOT.ToCpp
                 return false;
             }
             UTF8String moduleName = methodDef.Module.Assembly.Name;
-            if (moduleName != "mscorlib" && moduleName != "System" && moduleName != "System.Core")
+            if (!_coreLibModules.Contains(moduleName))
             {
                 return false;
             }
