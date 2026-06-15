@@ -53,6 +53,8 @@ Unity 传给 `il2cpp.exe` 的实参无法随意扩展时，可在启动 Unity / 
 当前支持的 Lean 专有开关示例（均可放在 **`LEANAOT_EXTRA_ARGS`** 中，或直接写在命令行）：
 
 - `--leanaot-aot-rule-file=<path>`：方法 AOT 规则文件（`aot.xml`）；可重复指定多个路径；详见 `docs/aot-rule-file.md`。
+- `--leanaot-pgo-rule-file=<path>`：PGO 规则文件（`pgo-aot.xml`，由 `pgo2aot` 从运行时 profile JSON 生成）；可重复；与 `aot.xml` 叠加，仅**追加**需要 AOT 的热路径方法。详见 `docs/pgo2aot.md`。
+- `--leanaot-enable-pgo-profile`：在生成代码中插入 profile 采集桩，用于采集 `calls` / `cost` 并导出 JSON（配合 `LeanCLR.Profile` API）；正式发包构建应去掉此开关。
 - `--leanaot-exclude-assembly-from-global-metadata=<shortName>`：将已在 `-a` / `--assembly`（或 `--directory` 发现）中的程序集**短名**（与 `-a` 一致，无 `.dll` 后缀）从 **`Metadata/global-metadata.dat` 的 COPH 打包中排除**；可重复；不影响 C++ 生成与 `MethodMap.tsv`。仅允许排除当前 AOT 列表中的程序集，否则报错。
 - `--leanaot-enable-layout-validation`：开启托管类型布局校验（**默认关闭**；需要校验时在 `LEANAOT_EXTRA_ARGS` 或命令行中显式加上）。
 

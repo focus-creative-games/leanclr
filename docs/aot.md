@@ -89,6 +89,17 @@ LeanAOT can load one or more XML rule files to control which managed methods are
 - **AOT rule file user guide:** [aot-rule-file.md](aot-rule-file.md)
 - **AOT rule file implementation design:** [aot-rule-file-design.md](aot-rule-file-design.md)
 
+### Profile-Guided AOT (PGO, optional)
+
+For workloads where hand-written `aot.xml` is too coarse, LeanCLR supports a **profile → rule file → rebuild** loop:
+
+1. Build with `--leanaot-enable-pgo-profile` and run under load.
+2. Export profile JSON from the runtime (`LeanCLR.Profile`).
+3. Convert JSON to `pgo-aot.xml` with the **`pgo2aot`** tool.
+4. Rebuild with `--leanaot-pgo-rule-file` (additive hot-method includes).
+
+See [pgo2aot.md](pgo2aot.md) for JSON format, selection strategies, and examples.
+
 ---
 
 ## 2) How Generated C++ Code Participates in Build

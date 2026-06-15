@@ -83,6 +83,15 @@ lean [options] <dll_name> [-- <dll_args>...]
 lean -l dotnetframework -l libs CoreTests -e test.App::Main
 ```
 
+### pgo2aot
+
+Converts LeanCLR runtime **profile JSON** into **PGO rule XML** (`pgo-aot.xml`) for LeanAOT. See [pgo2aot.md](../docs/pgo2aot.md).
+
+```cmd
+dotnet build src\tools\pgo2aot\Pgo2Aot.csproj -c Release
+dotnet out\dotnet\Pgo2Aot\Release\net8.0\pgo2aot.dll --input profile.json --output pgo-aot.xml --strategy pareto
+```
+
 ---
 
 ## src/samples (Sample Projects)
