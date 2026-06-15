@@ -1,27 +1,28 @@
-namespace Pgo2Aot;
-
-public sealed class ProfileEntry
+namespace Pgo2Aot
 {
-    public required string Assembly { get; init; }
+    public sealed class ProfileEntry
+    {
+        public string Assembly { get; set; } = string.Empty;
 
-    public required string Signature { get; init; }
+        public string Signature { get; set; } = string.Empty;
 
-    public ulong Calls { get; init; }
+        public ulong Calls { get; set; }
 
-    public ulong Cost { get; init; }
+        public ulong Cost { get; set; }
 
-    public ulong GetMetric(SortMetric sortBy) => sortBy == SortMetric.Calls ? Calls : Cost;
-}
+        public ulong GetMetric(SortMetric sortBy) => sortBy == SortMetric.Calls ? Calls : Cost;
+    }
 
-public enum SortMetric
-{
-    Cost,
-    Calls,
-}
+    public enum SortMetric
+    {
+        Cost,
+        Calls,
+    }
 
-public enum SelectionStrategyKind
-{
-    Threshold,
-    Top,
-    Pareto,
+    public enum SelectionStrategyKind
+    {
+        Threshold,
+        Top,
+        Pareto,
+    }
 }
