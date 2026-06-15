@@ -440,7 +440,6 @@ launchSettings.json
 /src/tools/exportextern/Properties/launchSettings.json
 /src/leanaot/aot-tester/cpp-posix
 /src/tests/aot-tester/cpp-posix
-/scripts/publish_runtime.bat
-/scripts/publish_leanaot.bat
+/scripts/publish_*.bat
 /src/tools/pgo2aot/samples
 /tmp/

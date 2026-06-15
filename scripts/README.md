@@ -61,7 +61,9 @@ scripts/
 | `test/aot-tester/build-wasm.*` | Build `aot-tester` with Emscripten → `out/cmake/tests/aot-tester/<Config>-wasm/` |
 | `leanaot/build.*` | Build LeanAOT → `out/dotnet/LeanAOT/<Config>/net8.0/` |
 | `publish_leanaot.bat` | `dotnet publish` Release → `../leanclr-unity/LeanCLR~/leanaot/` (sibling repo) |
+| `publish_pgo2aot.bat` | `dotnet publish` Release → `../leanclr4unity/LeanCLR~/pgo2aot/` (sibling repo) |
 | `publish_runtime.bat` | Mirror `src/runtime` → `../leanclr-unity/LeanCLR~/runtime/` (excludes scripts, CMakeLists.txt, `3rd/zlib`) |
+| `publish_csharp.bat` | Sync `Profile.cs` → `../leanclr4unity/Runtime/`; mirror `src/tools/pgo2aot` (except `Program.cs`) → `../leanclr4unity/Runtime/Pgo2Aot/` |
 | `generator/gen_*.bat` | Regenerate opcode headers and icall JSON |
 | `dev/format-cpp-files.bat` | clang-format `src/runtime` sources |
 | `dev/clean-out.*` | Remove entire `out/` directory |
