@@ -26,15 +26,14 @@ LeanCLR is designed to fill this gap: maintain high ECMA-335 compatibility while
 
 ## Documentation
 
-Detailed documentation is available under [docs](./docs):
+Full documentation site: **https://doc.leanclr.com**
 
-- [Documentation Overview](./docs/README.md) - Documentation structure and navigation
-- [Build Documentation](./docs/build/README.md) - Build-related documentation overview
-- [Build Runtime](./docs/build/build_runtime.md) - How to build the LeanCLR runtime
-- [Embed LeanCLR](./docs/build/embed_leanclr.md) - How to integrate LeanCLR into your project
-- [AOT Documentation](./docs/aot.md) - AOT capabilities and usage
-- [Test Framework](./src/tests/README.md) - Unit test framework and test authoring guide
-- [Scripts](./scripts/README.md) - Build, test, and development scripts index
+- [Getting Started](https://doc.leanclr.com/docs/getting-started/overview)
+- [Build & Integration](https://doc.leanclr.com/docs/integration/overview)
+- [AOT](https://doc.leanclr.com/docs/aot/overview)
+- [Interop](https://doc.leanclr.com/docs/interop/overview)
+- [Testing](https://doc.leanclr.com/docs/development/testing)
+- [Contributing](https://doc.leanclr.com/docs/development/contributing)
 
 ## Ecosystem & Integrations
 
@@ -73,17 +72,13 @@ Current versions are highly stable:
 
 ## Editions
 
-LeanCLR provides **Core** and **Standard** editions.  
-The Core edition offers maximum portability, is single-threaded, and includes no platform-specific code; it can be directly compiled on all platforms with C++11 support, and is suitable as a pure scripting runtime.  
-The Standard edition includes multi-threading and full platform-dependent BCL icalls, and is intended for full-featured CLR scenarios.
+LeanCLR plans **Standard** and **Core** editions: **Core is trimmed from Standard**. The currently available release is **Standard (single-threaded)**; full multi-threading and the Core edition are still on the roadmap. See [Core & Standard](https://doc.leanclr.com/docs/intro/editions).
 
-Main differences:
-
-| Feature | Core | Standard |
+| Feature | Standard (current) | Core (planned) |
 | - | - | - |
-| Thread model | Single-threaded | Multi-threaded |
-| Platform-dependent icalls | Partial (only those implementable with C++11 standard library) | Full |
-| GC | Active, precise full GC only | Precise, incremental GC with multiple GC strategies |
+| Thread model | Single-threaded (multi-threading planned) | Single-threaded |
+| Platform-dependent icalls | Partial, still evolving | No platform-specific code; C++11 only |
+| GC | Precise mark-sweep full GC | Leaner active full GC |
 
 ## Demo
 
@@ -105,7 +100,7 @@ Main differences:
 | Repository | Description |
 |------|------|
 | [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | Unity plugin for LeanCLR; replace IL2CPP on WebGL / mini-game targets to reduce package size and memory usage |
-| [leanclr-godot](https://github.com/maidopi-usagi/leanCLR-godot) | LeanCLR Godot plugin |
+| [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) | LeanCLR Godot plugin (in development) |
 | [hybridclr](https://github.com/focus-creative-games/hybridclr) | **HybridCLR**: full-featured, low-overhead, high-performance C# hot-update solution for Unity |
 
 ## Contact

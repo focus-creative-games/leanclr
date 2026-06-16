@@ -2,7 +2,7 @@
 
 This project demonstrates how to add and register custom P/Invoke (Platform Invocation) functions in LeanCLR on the WebAssembly (WASM) platform. It provides a practical example of integrating native JavaScript or C++ functions with managed C# code using LeanCLR's manual P/Invoke registration mechanism.
 
-For a detailed explanation of the custom P/Invoke mechanism, see the documentation: [docs/custom_pinvoke.md](../../../../docs/custom_pinvoke.md)
+For a detailed explanation of the custom P/Invoke mechanism, see [Custom P/Invoke](https://doc.leanclr.com/docs/interop/custom-pinvoke).
 
 ## Project Structure
 
@@ -101,7 +101,7 @@ mergeInto(LibraryManager.library, {
 
 ## References
 
-- [docs/custom_pinvoke.md](../../../../docs/custom_pinvoke.md) — Full guide to custom P/Invoke in LeanCLR.
+- [Custom P/Invoke](https://doc.leanclr.com/docs/interop/custom-pinvoke) — Full guide to custom P/Invoke in LeanCLR.
 - [src/tests/managed/CoreTests/CustomPInvoke.cs](../../../../src/tests/managed/CoreTests/CustomPInvoke.cs) — C# P/Invoke declaration.
 - [main.cpp](main.cpp) — Native implementation and registration.
 - [mylib.js](mylib.js) — JavaScript implementation of the native function (if used).

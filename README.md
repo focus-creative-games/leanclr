@@ -26,15 +26,14 @@ LeanCLR 的定位是补足上述空白：在保持 ECMA-335 高兼容的前提�
 
 ## 文档
 
-详细文档位于 [docs](./docs) 目录：
+完整文档站点：**https://doc.leanclr.com**
 
-- [文档概览](./docs/README.md) - 文档结构和导航
-- [构建文档](./docs/build/README.md) - 构建相关文档概述
-- [构建运行时](./docs/build/build_runtime.md) - 如何构建 LeanCLR 运行时
-- [嵌入 LeanCLR](./docs/build/embed_leanclr.md) - 如何将 LeanCLR 集成到您的项目
-- [AOT 文档](./docs/aot.md) - AOT 能力与使用说明
-- [测试框架](./src/tests/README.md) - 单元测试框架和测试用例编写指南
-- [脚本说明](./scripts/README.md) - 构建、测试与开发脚本索引
+- [快速开始](https://doc.leanclr.com/docs/getting-started/overview)
+- [构建与集成](https://doc.leanclr.com/docs/integration/overview)
+- [AOT](https://doc.leanclr.com/docs/aot/overview)
+- [互操作](https://doc.leanclr.com/docs/interop/overview)
+- [测试指南](https://doc.leanclr.com/docs/development/testing)
+- [贡献指南](https://doc.leanclr.com/docs/development/contributing)
 
 ## 生态与集成
 
@@ -73,14 +72,13 @@ LeanCLR目前已经支持Unity引擎，很快将支持更多的引擎和平台
 
 ## 版本说明
 
-LeanCLR 提供 **Core** 和 **Standard** 两个版本。Core版本有最佳的跨平台能力，单线程，不含任何平台相关代码，可以直接编译到所有支持c++ 11的平台，适合作为一个纯脚本引擎。
-Standard版本支持多线程，完整实现了BCL中平台相关icalls，适合用于一个全功能的CLR。它们主要区别如下：
+LeanCLR 规划 **Standard** 与 **Core** 两个版本：**Core 自 Standard 裁剪而来**。当前对外可用的是 **Standard（单线程）**；完整多线程与 Core 版仍在规划中。详见 [Core 与 Standard](https://doc.leanclr.com/docs/intro/editions)。
 
-|特性|Core|Standard|
-|-|-|-|
-|线程模型|单线程|多线程|
-|平台相关 icalls|仅支持部分能用c++ 11标准库实现的icalls|支持全部|
-|GC|仅支持主动式、精确式全量GC|准确式、增量式GC，支持多种GC方案|
+| 特性 | Standard（当前） | Core（规划中） |
+|------|------------------|----------------|
+| 线程模型 | 单线程（多线程规划中） | 单线程 |
+| 平台相关 icalls | 部分实现，持续完善 | 不含平台相关代码，仅 C++11 |
+| GC | 准确式 mark-sweep 全量 GC | 更精简的主动式全量 GC |
 
 ## Demo
 
@@ -102,7 +100,7 @@ Standard版本支持多线程，完整实现了BCL中平台相关icalls，适合
 | 仓库 | 说明 |
 |------|------|
 | [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | leanclr-unity 是 LeanCLR 的 Unity 插件，发布 WebGL / 小游戏平台时替换 IL2CPP 为 LeanCLR，大幅缩减包体、降低内存占用 |
-| [leanclr-godot](https://github.com/maidopi-usagi/leanCLR-godot) | LeanCLR Godot 插件 |
+| [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) | LeanCLR Godot 插件（开发中） |
 | [hybridclr](https://github.com/focus-creative-games/hybridclr) | **HybridCLR**：特性完整、零成本、高性能、低内存的 Unity 全平台原生 C# 热更新方案 |
 
 ## 联系方式

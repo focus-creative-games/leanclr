@@ -2,7 +2,7 @@
 
 This directory contains the unit test framework and test cases for the LeanCLR runtime.
 
-**See [TESTING.md](TESTING.md) for the full guide** (project boundaries, conventions, build/run instructions, and refactoring roadmap).
+**完整指南见文档站 [测试指南](https://doc.leanclr.com/docs/development/testing) 与 [测试框架](https://doc.leanclr.com/docs/development/test-framework)。**
 
 ## Quick Start
 
