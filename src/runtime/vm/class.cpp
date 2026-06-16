@@ -2419,7 +2419,7 @@ bool Class::is_assignable_from_generic_parameter_convariant0(const metadata::RtC
         }
         if ((generic_param->flags & (uint16_t)metadata::RtGenericParamAttribute::VarianceMask) == 0)
         {
-            continue;
+            return false;
         }
 
         auto ret_from_arg_class = get_class_from_typesig(from_arg);
