@@ -156,7 +156,7 @@ class Vector
         {
             return;
         }
-        size_t index = it - begin();
+        size_t index = static_cast<size_t>(it - begin());
         data_[index].~T();
         for (size_t i = index; i < size_ - 1; ++i)
         {

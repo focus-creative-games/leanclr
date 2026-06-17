@@ -81,7 +81,7 @@ RtResult<const char*> CliImage::read_assembly_name_no_ext() const
     }
 
     auto& row = opt_row.value();
-    int32_t index = row.name;
+    int32_t index = static_cast<int32_t>(row.name);
     if (index < string_heap.size)
     {
         RET_OK(reinterpret_cast<const char*>(string_heap.data + index));

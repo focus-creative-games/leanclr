@@ -179,6 +179,11 @@ class Utf8StringBuilder : public StringBuilderAny<Utf8Char>
         return *this;
     }
 
+    Utf8StringBuilder& append_char(char c)
+    {
+        return append_char(static_cast<uint8_t>(c));
+    }
+
     Utf8StringBuilder& append_chars(char c, size_t count)
     {
         reserve(count);
