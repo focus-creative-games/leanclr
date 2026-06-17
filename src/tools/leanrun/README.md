@@ -1,10 +1,10 @@
-# Lean
+# LeanRun
 
-Lean is a command-line tool that embeds the LeanCLR runtime, allowing you to execute methods from .NET assemblies (DLL files) directly from the command line.
+LeanRun is a command-line tool that embeds the LeanCLR runtime, allowing you to execute methods from .NET assemblies (DLL files) directly from the command line.
 
 ## Overview
 
-Lean provides a lightweight way to run .NET assemblies without requiring a full .NET runtime installation. It supports:
+LeanRun provides a lightweight way to run .NET assemblies without requiring a full .NET runtime installation. It supports:
 
 - Executing the default entry point of an assembly
 - Specifying a custom entry point method
@@ -36,9 +36,9 @@ Visual Studio 2022 with C++ development tools is required.
 
 ### Option 1: Generate Visual Studio Solution
 
-1. Navigate to the `lean` tool directory:
+1. Navigate to the `leanrun` tool directory:
    ```cmd
-   cd src/tools/lean
+   cd src/tools/leanrun
    ```
 
 2. Run the solution generator script:
@@ -47,18 +47,15 @@ Visual Studio 2022 with C++ development tools is required.
    ```
    - `ARCH`: Optional. Specify `x64` (default) or `x86`
 
-3. Open the generated solution file:
-   ```cmd
-   build\lean.sln
-   ```
+3. Open the generated solution file under `out/cmake/tools/leanrun/vs-sln-x64/`.
 
 4. Build the project in Visual Studio (Ctrl+Shift+B)
 
 ### Option 2: Command-Line Build
 
-1. Navigate to the `lean` tool directory:
+1. Navigate to the `leanrun` tool directory:
    ```cmd
-   cd src/tools/lean
+   cd src/tools/leanrun
    ```
 
 2. Run the build script:
@@ -80,7 +77,7 @@ Visual Studio 2022 with C++ development tools is required.
 After a successful build, the executable will be located at:
 
 ```
-build/bin/<CONFIG>/lean.exe
+out/cmake/tools/leanrun/<CONFIG>-x64/bin/<CONFIG>/leanrun.exe
 ```
 
 ## Usage
@@ -88,7 +85,7 @@ build/bin/<CONFIG>/lean.exe
 ### Basic Syntax
 
 ```cmd
-lean [options] <dll_name> [-- <dll_args>...]
+leanrun [options] <dll_name> [-- <dll_args>...]
 ```
 
 ### Options
@@ -105,7 +102,7 @@ lean [options] <dll_name> [-- <dll_args>...]
 #### Run an assembly with default entry point
 
 ```cmd
-lean MyApp
+leanrun MyApp
 ```
 
 This will:
@@ -115,7 +112,7 @@ This will:
 #### Specify library search directories
 
 ```cmd
-lean -l . -l libs -l bin/Release MyApp
+leanrun -l . -l libs -l bin/Release MyApp
 ```
 
 This will search for assemblies in the following order:
@@ -125,7 +122,7 @@ This will search for assemblies in the following order:
 #### Specify a custom entry point
 
 ```cmd
-lean -e MyNamespace.MyClass::Main MyApp
+leanrun -e MyNamespace.MyClass::Main MyApp
 ```
 
 This will execute the `Main` method in the `MyNamespace.MyClass` class.
@@ -133,7 +130,7 @@ This will execute the `Main` method in the `MyNamespace.MyClass` class.
 #### Pass arguments to the target DLL
 
 ```cmd
-lean -l . MyApp -- arg1 arg2 arg3
+leanrun -l . MyApp -- arg1 arg2 arg3
 ```
 
 Arguments after `--` are passed to the target assembly and can be accessed via `Environment.GetCommandLineArgs()`.
@@ -141,7 +138,7 @@ Arguments after `--` are passed to the target assembly and can be accessed via `
 #### Complete example
 
 ```cmd
-lean -l . -l ../libs -e test.App::Run CoreTests -- --verbose --output result.txt
+leanrun -l . -l ../libs -e test.App::Run CoreTests -- --verbose --output result.txt
 ```
 
 ### Entry Point Requirements

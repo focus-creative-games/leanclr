@@ -23,7 +23,7 @@ body:
         - Multi-threading
         - ECMA-335 Compliance
         - Platform Support
-        - Tooling (lean CLI)
+        - Tooling (leanrun CLI)
         - Documentation
         - Testing Framework
         - Other
