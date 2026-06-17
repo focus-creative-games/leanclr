@@ -76,24 +76,6 @@ namespace leanclr
 
         // Public API implementations
 
-#if !LEANCLR_USE_VOID_PTR_GCHANDLE
-        uint32_t GCHandle::get_handle_id(void* handle)
-        {
-            HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
-            return h->id;
-        }
-
-        void* GCHandle::get_handle_by_id(uint32_t id)
-        {
-            auto it = s_handle_map.find(id);
-            if (it != s_handle_map.end())
-            {
-                return it->second;
-            }
-            return nullptr;
-        }
-#endif
-
         void* GCHandle::new_handle(RtObject* obj, bool pinned)
         {
             return get_target_handle(obj, nullptr, (int32_t)(pinned ? GCHandleType::Pinned : GCHandleType::Normal));

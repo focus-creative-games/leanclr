@@ -23,12 +23,6 @@
 #include "interp/interpreter.h"
 #include "gc/garbage_collector.h"
 
-#define LEANCLR_ENABLE_LIVENESS_TEST 1
-
-#if LEANCLR_ENABLE_LIVENESS_TEST
-#include "il2cpp/liveness.h"
-#endif
-
 #ifdef _WIN32
 #include <windows.h>
 #include <direct.h>
@@ -448,48 +442,6 @@ RtResultVoid run_tests(metadata::RtModuleDef* mod, const char* phase_name, bool 
     RET_VOID_OK();
 }
 
-#if LEANCLR_ENABLE_LIVENESS_TEST
-
-void on_handle_object(vm::RtObject**objs, int count, void* userdata)
-{
-    for (int i = 0; i < count; i++)
-    {
-        vm::RtObject* obj = objs[i];
-        if (obj->klass->token == 0)
-        {
-            continue;
-        }
-        // validate object by klass->token
-        metadata::RtToken type_token = metadata::RtToken::decode(obj->klass->token);
-        if (type_token.table_type != metadata::TableType::TypeDef)
-        {
-            panic("Invalid type token");
-        }
-    }
-}
-
-void test_liveness()
-{
-    void* state = leanclr::il2cpp::Liveness::allocate_struct(nullptr, 0, on_handle_object, nullptr, nullptr);
-    if (!state)
-    {
-        std::cout << "Failed to allocate liveness state" << std::endl;
-        return;
-    }
-    auto ret_obj = LEANCLR_NEWOBJ_INTERNAL(vm::Class::get_corlib_types().cls_object, "test_liveness");
-    if (ret_obj.is_err())
-    {
-        std::cout << "Failed to create test object, error: " << static_cast<int>(ret_obj.unwrap_err()) << std::endl;
-        return;
-    }
-    vm::RtObject* test_obj = ret_obj.unwrap();
-    leanclr::il2cpp::Liveness::calculation_from_root(test_obj, state);
-    leanclr::il2cpp::Liveness::calculation_from_statics(state);
-    leanclr::il2cpp::Liveness::finalize(state);
-    leanclr::il2cpp::Liveness::free_struct(state);
-    std::cout << "Liveness completed." << std::endl;
-}
-#endif
 
 int main()
 {
@@ -708,9 +660,6 @@ int main()
         }
     }
 
-#if LEANCLR_ENABLE_LIVENESS_TEST
-    test_liveness();
-#endif
     gc::GarbageCollector::collect();
 #else
     std::cout << std::endl;

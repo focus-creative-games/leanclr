@@ -14,7 +14,6 @@ set(RUNTIME_DIRS
     codegen
     core
     icalls
-    il2cpp
     interp
     intrinsics
     log
@@ -52,7 +51,6 @@ else()
 endif()
 
 target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS LEANCLR_USE_SHIPPING_ZLIB=1)
-target_compile_definitions(leanclr PUBLIC UNITY_VERSION=60000400)
 
 if(LEANCLR_GC_ALGORITHM STREQUAL "MARK_SWEEP")
     target_compile_definitions(leanclr PUBLIC LEANCLR_GC_MARK_SWEEP=1)

@@ -21,82 +21,6 @@ namespace leanclr
 namespace vm
 {
 
-static utils::Vector<metadata::RtModuleDef*> g_placeholder_modules;
-
-static metadata::RtModuleDef* create_placeholder_assembly(const char* name)
-{
-    metadata::RtAssembly* ass = alloc::GeneralAllocation::malloc_any_zeroed<metadata::RtAssembly>();
-    metadata::CliImage* cliImage = alloc::GeneralAllocation::malloc_any_zeroed<metadata::CliImage>();
-    alloc::MemPool* pool = alloc::GeneralAllocation::new_any<alloc::MemPool>();
-    metadata::RtModuleDef* mod = alloc::GeneralAllocation::malloc_any_zeroed<metadata::RtModuleDef>();
-    ass->mod = mod;
-    new (mod) metadata::RtModuleDef(ass, *cliImage, nullptr, *pool);
-    mod->init_as_placeholder_module(name);
-    metadata::RtModuleDef::register_module_def(mod);
-    return mod;
-}
-
-static RtResultVoid create_placeholder_assemblies()
-{
-#ifdef LEANCLR_PLACEHOLDER_ASSEMBLY_NAMES
-    const char* placeholder_assembly_names = LEANCLR_TOSTRING(LEANCLR_PLACEHOLDER_ASSEMBLY_NAMES);
-#else
-    const char* placeholder_assembly_names = "";
-#endif
-    const char* cur = placeholder_assembly_names;
-    while (*cur != '\0')
-    {
-        const char* comma = std::strchr(cur, '+');
-        const char* token_end = comma != nullptr ? comma : cur + std::strlen(cur);
-        size_t length = token_end - cur;
-        char* name = (char*)alloc::GeneralAllocation::malloc(length + 1);
-        std::memcpy(name, cur, length);
-        name[length] = '\0';
-        metadata::RtModuleDef* mod = create_placeholder_assembly(name);
-        g_placeholder_modules.push_back(mod);
-        if (comma != nullptr)
-        {
-            cur = comma + 1;
-        }
-        else
-        {
-            break;
-        }
-    }
-    RET_VOID_OK();
-}
-
-static metadata::RtModuleDef* find_placeholder_assembly(const char* name)
-{
-    for (metadata::RtModuleDef* mod : g_placeholder_modules)
-    {
-        if (strcmp(mod->get_name_no_ext(), name) == 0)
-        {
-            return mod;
-        }
-    }
-    return nullptr;
-}
-
-static metadata::RtModuleDef* find_and_remove_placeholder_assembly(const char* name)
-{
-    for (auto it = g_placeholder_modules.begin(); it != g_placeholder_modules.end(); ++it)
-    {
-        if (strcmp((*it)->get_name_no_ext(), name) == 0)
-        {
-            metadata::RtModuleDef* mod = *it;
-            g_placeholder_modules.erase(it);
-            return mod;
-        }
-    }
-    return nullptr;
-}
-
-RtResultVoid Assembly::initialize()
-{
-    return create_placeholder_assemblies();
-}
-
 RtResult<metadata::RtAssembly*> Assembly::load_corlib()
 {
     return load_by_name(STR_CORLIB_NAME);
@@ -134,11 +58,6 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
     auto result = file_loader(name, "dll", dllFileData);
     if (!file_loader(name, "dll", dllFileData))
     {
-        metadata::RtModuleDef* placeholder_mod = find_placeholder_assembly(name);
-        if (placeholder_mod)
-        {
-            RET_OK(placeholder_mod->get_assembly());
-        }
         std::printf("Failed to load assembly from file loader for %s\n", name);
         RET_ERR(RtErr::FileNotFound);
     }
@@ -197,9 +116,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const char*, name_no_ext, image->read_assembly_name_no_ext());
 
-    metadata::RtModuleDef* placeholder_mod = find_and_remove_placeholder_assembly(name_no_ext);
-
-    if (metadata::RtModuleDef::find_module(name_no_ext) && !placeholder_mod)
+    if (metadata::RtModuleDef::find_module(name_no_ext))
     {
         RET_ERR(RtErr::ModuleAlreadyLoaded);
     }
@@ -221,36 +138,18 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
         pdbImage = nullptr;
     }
 
-    metadata::RtAssembly* ass = nullptr;
-    metadata::RtModuleDef* mod = nullptr;
-    uint32_t module_id = 0;
-    if (placeholder_mod)
-    {
-        ass = placeholder_mod->get_assembly();
-        mod = placeholder_mod;
-        module_id = placeholder_mod->get_id();
-        placeholder_mod->destroy_placeholder_datas();
-        std::memset((void*)mod, 0, sizeof(metadata::RtModuleDef));
-        new (mod) metadata::RtModuleDef(ass, *image, pdbImage, *pool);
-    }
-    else
-    {
-        ass = alloc::GeneralAllocation::malloc_any_zeroed<metadata::RtAssembly>();
-        mod = alloc::GeneralAllocation::new_any<metadata::RtModuleDef>(ass, *image, pdbImage, *pool);
-        ass->mod = mod;
-    }
+    metadata::RtAssembly* ass = alloc::GeneralAllocation::malloc_any_zeroed<metadata::RtAssembly>();
+    metadata::RtModuleDef* mod = alloc::GeneralAllocation::new_any<metadata::RtModuleDef>(ass, *image, pdbImage, *pool);
+    ass->mod = mod;
     cleanup_guard.register_cleanup(
         [ass, mod]()
         {
             alloc::GeneralAllocation::free(ass);
             alloc::GeneralAllocation::delete_any(mod);
         });
-    RET_ERR_ON_FAIL(mod->load(module_id));
+    RET_ERR_ON_FAIL(mod->load());
 
-    if (placeholder_mod == nullptr)
-    {
-        metadata::RtModuleDef::register_module_def(mod);
-    }
+    metadata::RtModuleDef::register_module_def(mod);
     cleanup_guard.register_cleanup(
         [mod]()
         {

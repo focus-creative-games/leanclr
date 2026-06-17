@@ -707,7 +707,6 @@ struct RtClass
     const RtVirtualInvokeData* vtable;
     const RtInterfaceOffset* interface_vtable_offsets;
     uint8_t* static_fields_data;
-    void* unity_user_data;
     size_t* gc_bitmap;
     size_t* static_gc_bitmap;
     EncodedTokenId token;

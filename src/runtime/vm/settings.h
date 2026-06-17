@@ -26,7 +26,6 @@ typedef void (*ReportUnhandledExceptionFunc)(RtException* exception);
 class Settings
 {
   public:
-    /// for il2cpp begin
     static const char* get_domain_name();
     static void set_domain_name(const char* domain_name);
 
@@ -40,7 +39,6 @@ class Settings
     static const char* get_config();
 
     static void set_command_line_arguments_utf16(int32_t argc, const Utf16Char** argv);
-    /// for il2cpp end
 
     static FileLoader get_file_loader();
     static void set_file_loader(FileLoader loader);
