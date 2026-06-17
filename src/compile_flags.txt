@@ -1,5 +1,6 @@
 -xc++
 -I.
+-I./runtime
 -std=c++14
 -fms-compatibility
 -fno-exceptions
@@ -11,7 +12,6 @@
 -DUNITY_VERSION=60000400
 -DLEANCLR_GC_MARK_SWEEP=1
 -DLEANCLR_GC_DEBUG=1
--DLEANCLR_PGO_PROFILE=1
 -D_DEBUG
 -DUNICODE
 -D_UNICODE
