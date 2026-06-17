@@ -41,6 +41,11 @@ if(EMSCRIPTEN)
 endif()
 list(APPEND RUNTIME_SOURCES ${dir_c_sources})
 
+# Third-party zlib predates -Wsign-conversion; suppress on our code only.
+if(NOT MSVC)
+    set_source_files_properties(${dir_c_sources} PROPERTIES COMPILE_OPTIONS "-Wno-sign-conversion")
+endif()
+
 file(GLOB_RECURSE gc_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/gc/*.cpp")
 list(APPEND RUNTIME_SOURCES ${gc_sources})
 
