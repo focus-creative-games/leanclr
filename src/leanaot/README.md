@@ -47,7 +47,7 @@ LeanAOT -d <dll-search-path> [-d <dll-search-path> ...]
 
 ```bat
 LeanAOT ^
-  -d libraries\dotnetframework4.x ^
+  -d libraries\mono-4.5 ^
   -d leanaot\Test\bin\Debug ^
   -a mscorlib ^
   -a Test ^

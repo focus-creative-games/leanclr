@@ -27,7 +27,7 @@ if exist "%COMMON_DLL%" (
     if errorlevel 1 exit /b %ERRORLEVEL%
 )
 
-"%RUNNER%" -l "%REPO_ROOT%\src\libraries\dotnetframework4.x" -l "%AOTTEST_DLL_DIR%" -e AotTests.App::Main AotTests
+"%RUNNER%" -l "%REPO_ROOT%\src\libraries\mono-4.5" -l "%AOTTEST_DLL_DIR%" -e AotTests.App::Main AotTests
 set "EXIT_CODE=%ERRORLEVEL%"
 
 if not "%EXIT_CODE%"=="0" exit /b %EXIT_CODE%

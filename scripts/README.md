@@ -56,7 +56,7 @@ scripts/
 | `runtime/build.*` | Build `leanclr` → `out/cmake/runtime/<Config>-<Arch>/` (Windows: optional `sln`, `shared`) |
 | `test/aot-tester/build.*` | Build native `aot-tester` executable |
 | `test/aot-tester/gen_cpp.*` | Run LeanAOT to generate C++ under `src/tests/aot-tester/cpp/` |
-| `test/aot-tester/gen_cpp_posix.*` | Generate C++ under `src/tests/aot-tester/cpp-posix/` using POSIX BCL (`dotnetframework4.x-linux`) |
+| `test/aot-tester/gen_cpp_posix.*` | Generate C++ under `src/tests/aot-tester/cpp-posix/` using POSIX BCL (`mono-4.5`) |
 | `test/aot-tester/run.*` | Build and run `aot-tester` with `AotTests` assembly |
 | `test/aot-tester/build-wasm.*` | Build `aot-tester` with Emscripten → `out/cmake/tests/aot-tester/<Config>-wasm/` |
 | `leanaot/build.*` | Build LeanAOT → `out/dotnet/LeanAOT/<Config>/net8.0/` |

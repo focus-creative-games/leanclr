@@ -35,7 +35,7 @@ echo [3/3] Running LeanAOT...
   --emit-null-checks ^
   --enable-array-bounds-check ^
   --leanaot-may-throw-exception-in-icall ^
-  -d "%REPO_ROOT%\src\libraries\dotnetframework4.x-linux" ^
+  -d "%REPO_ROOT%\src\libraries\mono-4.5" ^
   -d "%AOTTEST_DLL_DIR%" ^
   --leanaot-aot-rule-file "%AOT_TESTER_SRC%\aot-rules-mscorlib.xml" ^
   --leanaot-aot-rule-file "%AOT_TESTER_SRC%\aot-rules-test.xml" ^

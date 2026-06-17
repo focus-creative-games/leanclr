@@ -40,7 +40,7 @@ echo "stage test DLLs to $DLLS_DIR"
 rm -rf "$DLLS_DIR"
 mkdir -p "$DLLS_DIR"
 
-cp -a "$REPO_ROOT/src/libraries/dotnetframework4.x" "$DLLS_DIR/"
+cp -a "$REPO_ROOT/src/libraries/mono-4.5" "$DLLS_DIR/"
 CORETESTS_DLL="$(leanclr_dotnet_out_dir CoreTests "$CONFIG")/CoreTests.dll"
 CORLIBTESTS_DLL="$(leanclr_dotnet_out_dir CorlibTests "$CONFIG")/CorlibTests.dll"
 if [[ ! -f "$CORLIBTESTS_DLL" ]]; then

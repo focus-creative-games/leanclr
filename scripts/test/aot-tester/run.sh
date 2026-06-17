@@ -39,7 +39,7 @@ if [[ -f "$COMMON_DLL" ]]; then
 fi
 
 "$RUNNER" \
-  -l "$REPO_ROOT/src/libraries/dotnetframework4.x" \
+  -l "$REPO_ROOT/src/libraries/mono-4.5" \
   -l "$AOTTEST_DLL_DIR" \
   -e AotTests.App::Main \
   AotTests

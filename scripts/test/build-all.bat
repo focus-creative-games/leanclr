@@ -40,10 +40,10 @@ if errorlevel 1 (
     exit /b 1
 )
 
-robocopy "%REPO_ROOT%\src\libraries\dotnetframework4.x" "%DLLS_DIR%\dotnetframework4.x" /E /NFL /NDL /NJH /NJS /NP /R:1 /W:1 >nul
+robocopy "%REPO_ROOT%\src\libraries\mono-4.5" "%DLLS_DIR%\mono-4.5" /E /NFL /NDL /NJH /NJS /NP /R:1 /W:1 >nul
 set "RC=%ERRORLEVEL%"
 if %RC% GEQ 8 (
-    echo ERROR: failed to copy dotnetframework4.x libraries.
+    echo ERROR: failed to copy mono-4.5 libraries.
     exit /b %RC%
 )
 
