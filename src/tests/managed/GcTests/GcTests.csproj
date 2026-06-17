@@ -20,13 +20,13 @@
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="mscorlib">
-      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\mscorlib.dll</HintPath>
+      <HintPath>$(ProjectDir)\..\..\..\libraries\mono-4.5\mscorlib.dll</HintPath>
     </Reference>
     <Reference Include="System.Core">
-      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\System.Core.dll</HintPath>
+      <HintPath>$(ProjectDir)\..\..\..\libraries\mono-4.5\System.Core.dll</HintPath>
     </Reference>
     <Reference Include="System">
-      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\System.dll</HintPath>
+      <HintPath>$(ProjectDir)\..\..\..\libraries\mono-4.5\System.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

@@ -111,7 +111,7 @@ static void setup_default_lib_dirs()
 
     const std::string exe_dir = get_executable_directory();
     g_lib_dirs.push_back(exe_dir + "/dlls");
-    g_lib_dirs.push_back(exe_dir + "/dlls/dotnetframework4.x");
+    g_lib_dirs.push_back(exe_dir + "/dlls/mono-4.5");
 
     for (const auto& dir : g_lib_dirs)
     {
@@ -418,7 +418,8 @@ RtResultVoid run_tests(metadata::RtModuleDef* mod, const char* phase_name, bool 
                 if (ret2.is_err())
                 {
                     std::cout << "  Failed to run ctor, error: " << static_cast<int>(ret2.unwrap_err()) << " " << method_index
-                              << " run unittest : " << klass->namespaze << "." << klass->name << "::" << method->name << " token: " << method->token << std::endl;
+                              << " run unittest : " << klass->namespaze << "." << klass->name << "::" << method->name << " token: " << method->token
+                              << std::endl;
                     ++failed;
                 }
                 else
@@ -441,7 +442,6 @@ RtResultVoid run_tests(metadata::RtModuleDef* mod, const char* phase_name, bool 
     }
     RET_VOID_OK();
 }
-
 
 int main()
 {

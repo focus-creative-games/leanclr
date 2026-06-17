@@ -35,7 +35,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="mscorlib">
-      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\mscorlib.dll</HintPath>
+      <HintPath>$(ProjectDir)\..\..\..\libraries\mono-4.5\mscorlib.dll</HintPath>
     </Reference>
   </ItemGroup>
   <ItemGroup>

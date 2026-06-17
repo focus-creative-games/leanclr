@@ -83,7 +83,7 @@ static void setup_default_lib_dirs()
     if (pos != std::string::npos)
     {
         library_dir = cur_dir.substr(0, pos) + "/libraries";
-        g_lib_dirs.push_back(library_dir + "/dotnetframework4.x"); // Example additional directory
+        g_lib_dirs.push_back(library_dir + "/mono-4.5"); // Example additional directory
     }
     for (const auto& dir : g_lib_dirs)
     {

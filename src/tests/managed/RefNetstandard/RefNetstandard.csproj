@@ -32,7 +32,7 @@
   </ItemGroup>
   <ItemGroup>
     <Reference Include="netstandard">
-      <HintPath>$(ProjectDir)\..\..\..\libraries\dotnetframework4.x\netstandard.dll</HintPath>
+      <HintPath>$(ProjectDir)\..\..\..\libraries\mono-4.5\Facades\netstandard.dll</HintPath>
     </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

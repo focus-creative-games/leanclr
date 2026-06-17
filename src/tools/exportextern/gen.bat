@@ -11,11 +11,9 @@ if not exist %LIBRARIES_DIR% (
     exit /b 1
 )
 
-set WIN_LIBRARIES_DIR=%LIBRARIES_DIR%\dotnetframework4.x
-set LINUX_LIBRARIES_DIR=%LIBRARIES_DIR%\dotnetframework4.x-linux
+set WIN_LIBRARIES_DIR=%LIBRARIES_DIR%\mono-4.5
 
 for %%f in (mscorlib System System.Core) do (
     
 %EXE% %WIN_LIBRARIES_DIR%\%%f.dll all %WIN_LIBRARIES_DIR%\%%f_externs.txt
-%EXE% %LINUX_LIBRARIES_DIR%\%%f.dll all %LINUX_LIBRARIES_DIR%\%%f_externs.txt
 )

@@ -10,6 +10,8 @@ namespace CorlibTests.InternalCall
             public int PublicField = 11;
             private int _privateField = 22;
             public const int ConstField = 33;
+
+            public int PrivateFieldAccessor => _privateField;
         }
 
         [CoversIcall("System.Reflection.RuntimeFieldInfo::ResolveType")]

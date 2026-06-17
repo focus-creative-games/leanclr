@@ -99,11 +99,11 @@ namespace test
             }
         }
 
-        public unsafe static string Run10()
-        {
-            char[] arr = new char[] { 'a', 'b', 'c', 'd', 'e' };
-            return new string(new ReadOnlySpan<char>(arr));
-        }
+        //public unsafe static string Run10()
+        //{
+        //    char[] arr = new char[] { 'a', 'b', 'c', 'd', 'e' };
+        //    return new string(new ReadOnlySpan<char>(arr));
+        //}
 
         public static string Run11()
         {
