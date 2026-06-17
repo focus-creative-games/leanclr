@@ -26,6 +26,7 @@
 #include "system_runtime_interopservices_runtimeinformation.h"
 #include "system_runtime_runtimeimports.h"
 #include "system_runtime_remoting_activation_activationservices.h"
+#include "system_runtime_remoting_remotingservices.h"
 #include "system_runtimefieldhandle.h"
 #include "system_runtimemethodhandle.h"
 #include "system_enum.h"
@@ -118,6 +119,7 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemRuntimeInteropServicesRuntimeInformation::get_internal_call_entries());
     Append(entries, SystemRuntimeRuntimeImports::get_internal_call_entries());
     Append(entries, SystemRuntimeRemotingActivationActivationServices::get_internal_call_entries());
+    Append(entries, SystemRuntimeRemotingRemotingServices::get_internal_call_entries());
     Append(entries, SystemRuntimeFieldHandle::get_internal_call_entries());
     Append(entries, SystemRuntimeMethodHandle::get_internal_call_entries());
     Append(entries, SystemConsoleWindowsConsole::get_internal_call_entries());
