@@ -1,5 +1,6 @@
 -xc++
 -I.
+-I./runtime
 -std=c++14
 -fms-compatibility
 -fno-exceptions
@@ -10,7 +11,6 @@
 -DLEANCLR_USE_SHIPPING_ZLIB=1
 -DLEANCLR_GC_MARK_SWEEP=1
 -DLEANCLR_GC_DEBUG=1
--DLEANCLR_PGO_PROFILE=1
 -D_DEBUG
 -DUNICODE
 -D_UNICODE
