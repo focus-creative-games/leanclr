@@ -28,6 +28,8 @@ namespace leanclr
 namespace vm
 {
 
+int32_t Class::s_finalizer_vtable_index = -1;
+
 RtResult<metadata::RtClass*> get_class_must_exist(metadata::RtModuleDef* corlib, const char* full_name)
 {
     return corlib->get_class_by_name(full_name, false, true);
@@ -164,9 +166,26 @@ RtResult<metadata::RtClass*> Class::get_class_by_type_def_gid(uint32_t gid)
     return def_mod->get_class_by_type_def_rid(metadata::RtMetadata::decode_rid_from_gid(gid));
 }
 
+RtResultVoid Class::setup_finalizer_vtable_index()
+{
+    metadata::RtClass* cls_object = get_corlib_types().cls_object;
+    RET_ERR_ON_FAIL(initialize_all(cls_object));
+    for (int32_t i = 0; i < cls_object->vtable_count; ++i)
+    {
+        if (std::strcmp(cls_object->vtable[i].method->name, STR_FINALIZE) == 0)
+        {
+            s_finalizer_vtable_index = i;
+            RET_VOID_OK();
+        }
+    }
+    panic("Finalizer method not found in object class");
+    RET_ASSERT_ERR(RtErr::BadImageFormat);
+}
+
 RtResultVoid Class::initialize()
 {
     RET_ERR_ON_FAIL(init_corlib_classes(metadata::RtModuleDef::get_corlib_module()));
+    RET_ERR_ON_FAIL(setup_finalizer_vtable_index());
     RET_VOID_OK();
 }
 
@@ -1145,8 +1164,8 @@ RtResultVoid Class::setup_gc_bitmap_for_field(const metadata::RtFieldInfo* field
     handle_reference_type_field:
     {
         assert(field->offset % sizeof(void*) == 0);
-        size_t bit_index = for_static ? field->offset / sizeof(void*)
-                                      : Field::get_instance_field_offset_includes_object_header_for_all_type(field) / sizeof(void*);
+        size_t bit_index =
+            for_static ? field->offset / sizeof(void*) : Field::get_instance_field_offset_includes_object_header_for_all_type(field) / sizeof(void*);
         set_gc_bitmap_bit(bitmap, bit_index);
         max_bitmap_index = std::max(max_bitmap_index, bit_index);
         break;
@@ -1230,7 +1249,7 @@ RtResultVoid Class::setup_static_gc_bitmap_impl(metadata::RtClass* klass, size_t
 }
 
 RtResultVoid Class::finalize_gc_bitmap(size_t** dest_bitmap, uint16_t* dest_word_count, size_t* scratch_bitmap, size_t max_bitmap_index,
-                                      size_t max_bitmap_bit_count, bool require_nonempty)
+                                       size_t max_bitmap_bit_count, bool require_nonempty)
 {
     if (max_bitmap_index == 0 && scratch_bitmap[0] == 0)
     {
@@ -1304,7 +1323,8 @@ RtResultVoid Class::setup_static_gc_bitmap(metadata::RtClass* klass)
     alloc::ScopeFreeGuard free_guard(gc_bitmap);
     size_t max_bitmap_index = 0;
     RET_ERR_ON_FAIL(setup_static_gc_bitmap_impl(klass, gc_bitmap, max_bitmap_index));
-    RET_ERR_ON_FAIL(finalize_gc_bitmap(&klass->static_gc_bitmap, &klass->static_gc_bitmap_word_count, gc_bitmap, max_bitmap_index, max_bitmap_bit_count, false));
+    RET_ERR_ON_FAIL(
+        finalize_gc_bitmap(&klass->static_gc_bitmap, &klass->static_gc_bitmap_word_count, gc_bitmap, max_bitmap_index, max_bitmap_bit_count, false));
     RET_VOID_OK();
 }
 
@@ -1390,10 +1410,6 @@ RtResultVoid Class::setup_methods_typedef(metadata::RtClass* klass)
         if (std::strcmp(method->name, STR_CCTOR) == 0)
         {
             klass->extra_flags |= (uint32_t)metadata::RtClassExtraAttribute::HasStaticConstructor;
-        }
-        else if (std::strcmp(method->name, STR_FINALIZE) == 0)
-        {
-            klass->extra_flags |= (uint32_t)metadata::RtClassExtraAttribute::HasFinalizer;
         }
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtGenericContainer*, genericContainer, mod->get_generic_container(method->token));
         metadata::RtGenericContainerContext gcc{klass->generic_container, genericContainer};
