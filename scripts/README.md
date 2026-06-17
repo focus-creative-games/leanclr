@@ -75,4 +75,4 @@ These invoke CMake/dotnet but write outputs only under `out/`:
 - `src/runtime/build.*` — forward to `scripts/runtime/`
 - `src/samples/*/build.*` — platform samples
 - `src/tests/basic-tester/build.*` — forward to `scripts/test/basic-tester/`
-- `src/tools/lean/build.*` — lean tool
+- `src/tools/leanrun/build.*` — leanrun tool

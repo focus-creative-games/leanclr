@@ -9,7 +9,7 @@ set "ARCH=%~1"
 if "%ARCH%"=="" set "ARCH=x64"
 set "GENERATOR=Visual Studio 17 2022"
 
-call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "tools\lean" "vs-sln" "%ARCH%"
+call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "tools\leanrun" "vs-sln" "%ARCH%"
 
 echo === Generate VS solution (%GENERATOR%, %ARCH%) ===
 echo Build dir: %CMAKE_BUILD_DIR%

@@ -10,7 +10,7 @@ if "%CONFIG%"=="" set "CONFIG=Debug"
 set "ARCH=%~2"
 if "%ARCH%"=="" set "ARCH=x64"
 
-call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "tools\lean" "%CONFIG%" "%ARCH%"
+call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "tools\leanrun" "%CONFIG%" "%ARCH%"
 
 echo === Config: %CONFIG% ^| Arch: %ARCH% ===
 echo Build dir: %CMAKE_BUILD_DIR%
@@ -22,11 +22,11 @@ echo [1/2] CMake configure...
 cmake -S "%SCRIPT_DIR%." -B "%CMAKE_BUILD_DIR%" -G "Visual Studio 17 2022" -A %ARCH%
 if errorlevel 1 goto :error
 
-echo [2/2] Build target 'lean'...
-cmake --build "%CMAKE_BUILD_DIR%" --config %CONFIG% --target lean --parallel
+echo [2/2] Build target 'leanrun'...
+cmake --build "%CMAKE_BUILD_DIR%" --config %CONFIG% --target leanrun --parallel
 if errorlevel 1 goto :error
 
-set "EXE=%CMAKE_BUILD_DIR%\bin\%CONFIG%\lean.exe"
+set "EXE=%CMAKE_BUILD_DIR%\bin\%CONFIG%\leanrun.exe"
 if exist "%EXE%" (
   echo Built: "%EXE%"
 ) else (
