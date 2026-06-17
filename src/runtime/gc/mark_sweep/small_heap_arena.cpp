@@ -2,6 +2,7 @@
 
 #if LEANCLR_GC_MARK_SWEEP
 
+#include "gc/gc_finalizer.h"
 #include "utils/mem_op.h"
 
 namespace leanclr
@@ -186,6 +187,7 @@ size_t SmallHeapArena::sweep(const GCAliveObjectBitmap& alive_object_bitmap)
 
             LEANCLR_ASSUME((uintptr_t)obj % GC_ALIGN == 0);
             LEANCLR_ASSUME(_block_size % GC_ALIGN == 0);
+            GcFinalizer::on_object_freed(obj);
 #if LEANCLR_GC_DEBUG
             gc_debug_quarantine_object(obj, _block_size);
 #else

@@ -2,6 +2,7 @@
 #include "appdomain.h"
 #include "settings.h"
 #include "gc/garbage_collector.h"
+#include "gc/gc_finalizer.h"
 
 namespace leanclr
 {
@@ -102,18 +103,17 @@ int32_t GC::get_generation(vm::RtObject* obj)
 
 void GC::wait_for_pending_finalizers()
 {
+    gc::GcFinalizer::wait_for_pending_finalizers();
 }
 
 void GC::suppress_finalize(vm::RtObject* obj)
 {
-    // DOTO
-    (void)obj;
+    gc::GcFinalizer::suppress_finalize(obj);
 }
 
 void GC::reregister_for_finalize(vm::RtObject* obj)
 {
-    // DOTO
-    (void)obj;
+    gc::GcFinalizer::reregister_for_finalize(obj);
 }
 
 int64_t GC::get_total_memory(bool force_full_collection)
