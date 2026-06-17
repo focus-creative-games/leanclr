@@ -48,7 +48,7 @@ static RtResultVoid create_placeholder_assemblies()
     {
         const char* comma = std::strchr(cur, '+');
         const char* token_end = comma != nullptr ? comma : cur + std::strlen(cur);
-        size_t length = token_end - cur;
+        size_t length = static_cast<size_t>(token_end - cur);
         char* name = (char*)alloc::GeneralAllocation::malloc(length + 1);
         std::memcpy(name, cur, length);
         name[length] = '\0';
