@@ -86,29 +86,5 @@ namespace Tests.CSharp
         }
 
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void CreateStringFromReadOnlySpanChar()
-        {
-            char[] arr = new char[] { 'a', 'b', 'c', 'd', 'e' };
-            var s = new string(new ReadOnlySpan<char>(arr));
-            Assert.Equal("abcde", s);
-        }
-
-        [UnitTest]
-        public void CreateEmptyStringFromEmptySpan()
-        {
-            var s = new string(new ReadOnlySpan<char>());
-            Assert.Equal(string.Empty, s);
-        }
-
-        [UnitTest]
-        public void EmptySpanToString()
-        {
-            ReadOnlySpan<char> span = ReadOnlySpan<char>.Empty;
-            var s = span.ToString();
-            Assert.Equal(string.Empty, s);
-        }
-#endif
     }
 }

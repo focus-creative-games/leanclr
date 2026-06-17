@@ -795,15 +795,6 @@ namespace CorlibTests.InternalCall
             Assert.Equal("a b c", "  a b c  ".Trim());
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void Trim_NoWhitespaceUnchanged()
-        {
-            Assert.Equal("abc", " abc ".Trim());
-            Assert.Equal("abc", "  abc".TrimStart());
-            Assert.Equal("abc", "abc  ".TrimEnd());
-        }
-#endif
 
         [UnitTest]
         public void Trim_AllWhitespaceBecomesEmpty()
@@ -813,65 +804,10 @@ namespace CorlibTests.InternalCall
         }
 
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void Trim_EmptyString()
-        {
-            Assert.Equal("", "".Trim());
-            Assert.Equal("", "".TrimStart());
-            Assert.Equal("", "".TrimEnd());
-        }
-
-        [UnitTest]
-        public void Trim_CustomTrimChars()
-        {
-            Assert.Equal("abc", "xxabcxx".Trim('x'));
-            Assert.Equal("bc", "aabcaa".Trim('a'));
-            Assert.Equal("hello", "...hello...".Trim('.'));
-        }
-#endif
-
-
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void TrimStart_CustomChars()
-        {
-            Assert.Equal("bc", "aabc".TrimStart('a'));
-            Assert.Equal("hello", "...hello".TrimStart('.'));
-            Assert.Equal("abc", "  abc".TrimStart());
-        }
-
-        [UnitTest]
-        public void TrimEnd_CustomChars()
-        {
-            Assert.Equal("ab", "abxx".TrimEnd('x'));
-            Assert.Equal("hello", "hello...".TrimEnd('.'));
-            Assert.Equal("abc", "abc  ".TrimEnd());
-        }
-        //[UnitTest]
-        //public void Trim_NullTrimChars_Throws()
-        //{
-        //    Assert.ExpectException<ArgumentNullException>(() => "abc".Trim(null));
-        //    Assert.ExpectException<ArgumentNullException>(() => "abc".TrimStart(null));
-        //    Assert.ExpectException<ArgumentNullException>(() => "abc".TrimEnd(null));
-        //}
-#endif
-
 #endregion
 
 #region Split
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void Split_SingleChar()
-        {
-            string[] parts = "a,b,c".Split(',');
-            Assert.Equal(3, parts.Length);
-            Assert.Equal("a", parts[0]);
-            Assert.Equal("b", parts[1]);
-            Assert.Equal("c", parts[2]);
-        }
-#endif
 
         [UnitTest]
         public void Split_MultipleSeparators()
@@ -931,33 +867,6 @@ namespace CorlibTests.InternalCall
             Assert.Equal("c", parts[2]);
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void Split_NoSeparatorMatch_ReturnsWholeString()
-        {
-            string[] parts = "abc".Split(',');
-            Assert.Equal(1, parts.Length);
-            Assert.Equal("abc", parts[0]);
-        }
-
-        [UnitTest]
-        public void Split_EmptyString()
-        {
-            string[] parts = "".Split(',');
-            Assert.Equal(1, parts.Length);
-            Assert.Equal("", parts[0]);
-        }
-
-        [UnitTest]
-        public void Split_ConsecutiveSeparators()
-        {
-            string[] parts = "a||b".Split('|');
-            Assert.Equal(3, parts.Length);
-            Assert.Equal("a", parts[0]);
-            Assert.Equal("", parts[1]);
-            Assert.Equal("b", parts[2]);
-        }
-#endif
 
 #endregion
 

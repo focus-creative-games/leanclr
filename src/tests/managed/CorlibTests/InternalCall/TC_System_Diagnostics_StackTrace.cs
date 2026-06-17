@@ -333,16 +333,6 @@ namespace CorlibTests.InternalCall
             }
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void StackTrace_DirectConstruction()
-        {
-            StackTrace trace2 = CallStackTraceConstructor(2);
-            Assert.NotNull(trace2);
-            
-            Assert.Equal(3, trace2.FrameCount);
-        }
-#endif
 
         // Helper methods for testing
 

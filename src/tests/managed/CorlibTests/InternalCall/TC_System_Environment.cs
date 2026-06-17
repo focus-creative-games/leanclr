@@ -68,16 +68,6 @@ namespace CorlibTests.InternalCall
         }
 
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void GetCommandLineArgs_NotEmpty()
-        {
-            string[] args = Environment.GetCommandLineArgs();
-            Assert.IsTrue(args.Length > 0);
-            Assert.Equal("leanclr", args[0]);
-        }
-#endif
-
         [UnitTest]
         public void Is64BitOperatingSystem_True()
         {

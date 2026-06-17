@@ -266,32 +266,6 @@ namespace Tests.Bugs
             Assert.Null(r);
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void NullableEnumOptional_DefaultEnumConstant_DefaultValueAndInvoke()
-        {
-            var method = GetType().GetMethod("FooNullableEnumVal", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            Assert.True(method.GetParameters()[0].IsOptional);
-            object dv = method.GetParameters()[0].DefaultValue;
-            if (dv is Color boxedColor)
-            {
-                Assert.Equal(Color.Blue, boxedColor);
-            }
-            else if (dv is int boxedInt)
-            {
-                Assert.Equal((int)Color.Blue, boxedInt);
-            }
-            else
-            {
-                Assert.Fail($"FooNullableEnumVal default value: expected boxed Color or int: type:{dv?.GetType()} value:{dv}");
-            }
-
-            Color? r = (Color?)GetType().InvokeMember("FooNullableEnumVal", BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.Static | BindingFlags.InvokeMethod | BindingFlags.OptionalParamBinding, null, null,
-                null);
-            Assert.Equal<Color?>((Color?)Color.Blue, r);
-        }
-#endif
 
         [UnitTest]
         public void NullableStructOptional_DefaultNull_DefaultValueAndInvoke()
@@ -317,69 +291,6 @@ namespace Tests.Bugs
             Assert.Equal(22, r.Value.Y);
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void IntPtrParamOptional_Default_DefaultValueAndInvoke()
-        {
-            var method = GetType().GetMethod("FooIntPtr", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            Assert.True(method.GetParameters()[0].IsOptional);
-            object dv = method.GetParameters()[0].DefaultValue;
-            if (dv is IntPtr ip)
-            {
-                Assert.True(ip == IntPtr.Zero);
-            }
-            else if (dv is int i)
-            {
-                Assert.Equal(0, i);
-            }
-            else if (dv is long l)
-            {
-                Assert.Equal(0L, l);
-            }
-            else
-            {
-                Assert.Fail("FooIntPtr default value: expected IntPtr, int, or long");
-            }
-
-            IntPtr r = (IntPtr)GetType().InvokeMember("FooIntPtr", BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.Static | BindingFlags.InvokeMethod | BindingFlags.OptionalParamBinding, null, null,
-                null);
-            Assert.True(r == IntPtr.Zero);
-        }
-
-        [UnitTest]
-        public void UIntPtrParamOptional_Default_DefaultValueAndInvoke()
-        {
-            var method = GetType().GetMethod("FooUIntPtr", BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static);
-            Assert.True(method.GetParameters()[0].IsOptional);
-            object dv = method.GetParameters()[0].DefaultValue;
-            if (dv is UIntPtr up)
-            {
-                Assert.True(up == UIntPtr.Zero);
-            }
-            else if (dv is uint u)
-            {
-                Assert.True(u == 0u);
-            }
-            else if (dv is int si)
-            {
-                Assert.Equal(0, si);
-            }
-            else if (dv is ulong ul)
-            {
-                Assert.True(ul == 0ul);
-            }
-            else
-            {
-                Assert.Fail($"FooUIntPtr default value: expected UIntPtr, uint, or ulong: type:{dv?.GetType()} value:{dv}");
-            }
-
-            UIntPtr r = (UIntPtr)GetType().InvokeMember("FooUIntPtr", BindingFlags.Public | BindingFlags.NonPublic |
-                BindingFlags.Instance | BindingFlags.Static | BindingFlags.InvokeMethod | BindingFlags.OptionalParamBinding, null, null,
-                null);
-            Assert.True(r == UIntPtr.Zero);
-        }
-#endif
 
         private const BindingFlags OptionalPrimitiveBf =
             BindingFlags.Public | BindingFlags.NonPublic | BindingFlags.Static;

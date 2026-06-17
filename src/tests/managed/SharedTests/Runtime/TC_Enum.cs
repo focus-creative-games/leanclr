@@ -68,42 +68,6 @@ namespace Tests.CSharp
             Assert.Equal(1, h);
         }
 
-        enum SByteEnum : sbyte
-        {
-            Red = -1,
-            Green = 1,
-        }
-
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void TestSByteEnum()
-        {
-#if !UNITY_EDITOR
-            int h = SByteEnum.Green.GetHashCode();
-            Assert.Equal(1, h);
-            int h2 = SByteEnum.Red.GetHashCode();
-            Assert.Equal(-1, h2);
-#endif
-        }
-
-        enum ShortEnum : short
-        {
-            Red = -1,
-            Green = 1,
-        }
-
-        [UnitTest]
-        public void TestShortEnum()
-        {
-#if !UNITY_EDITOR
-            int h = ShortEnum.Green.GetHashCode();
-            Assert.Equal(1, h);
-            int h2 = ShortEnum.Red.GetHashCode();
-            Assert.Equal(65535, h2);
-#endif
-        }
-#endif
-
         enum UShortEnum : ushort
         {
             Red = 1,

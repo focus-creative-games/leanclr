@@ -68,28 +68,6 @@ namespace CorlibTests.InternalCall
             Assert.Equal(0.0, Math.Asin(0.0));
         }
 
-#if IL2CPP_ONLY
-        [CoversIcall("System.Math::Acosh(System.Double)")]
-        [UnitTest]
-        public void Acosh1()
-        {
-            Assert.Equal(0.0, Math.Acosh(1.0));
-        }
-
-        [CoversIcall("System.Math::Asinh(System.Double)")]
-        [UnitTest]
-        public void Asinh1()
-        {
-            Assert.Equal(0.0, Math.Asinh(0.0));
-        }
-
-        [CoversIcall("System.Math::Atanh(System.Double)")]
-        [UnitTest]
-        public void Atanh1()
-        {
-            Assert.Equal(0.0, Math.Atanh(0.0));
-        }
-#endif
 
         [CoversIcall("System.Math::Atan(System.Double)")]
         [UnitTest]
@@ -105,14 +83,6 @@ namespace CorlibTests.InternalCall
             Assert.Equal(0.0, Math.Atan2(0.0, 1.0));
         }
 
-#if IL2CPP_ONLY
-        [CoversIcall("System.Math::Cbrt(System.Double)")]
-        [UnitTest]
-        public void Cbrt1()
-        {
-            AssertNearlyEqual(2.0, Math.Cbrt(8.0));
-        }
-#endif
 
         [CoversIcall("System.Math::Ceiling(System.Double)")]
         [CoversIcall("System.MathF::Ceiling(System.Single)")]

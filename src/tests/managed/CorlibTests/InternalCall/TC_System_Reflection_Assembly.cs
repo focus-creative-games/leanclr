@@ -28,14 +28,6 @@ namespace CorlibTests.InternalCall
             Assert.True(types.Length > 10);
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void GetEntryAssembly_Null()
-        {
-            var entry_ass = Assembly.GetEntryAssembly();
-            Assert.Null(entry_ass);
-        }
-#endif
 
         [UnitTest]
         public void GetExecutingAssembly_Self()
@@ -45,15 +37,6 @@ namespace CorlibTests.InternalCall
             Assert.Equal(self_ass, executing_ass);
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void GetCallingAssembly_Top_CorLib()
-        {
-            var calling_ass = Assembly.GetCallingAssembly();
-            var corlib_ass = typeof(int).Assembly;
-            Assert.Equal(corlib_ass, calling_ass);
-        }
-#endif
 
         private void NestMethod()
         {

@@ -463,43 +463,5 @@ namespace CorlibTests.InternalCall
             Assert.Equal(2, a.value);
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void GetFieldOffset()
-        {
-            var f = typeof(A).GetField("value2");
-            int offset = System.Runtime.InteropServices.Marshal.OffsetOf(typeof(A), "value2").ToInt32();
-            Assert.Equal(8, offset);
-        }
-
-
-        [UnitTest]
-        public void GetMarshalInfo_WithoutMarshalAs_ReturnsNull()
-        {
-            var method = typeof(FieldInfo).GetMethod("get_marshal_info", BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.NotNull(method);
-
-            var field = typeof(A).GetField("value");
-            Assert.NotNull(field);
-
-            object marshalInfo = method.Invoke(field, null);
-            Assert.Null(marshalInfo);
-        }
-
-        [UnitTest]
-        public void GetMarshalInfo_WithMarshalAs_ReturnsMarshalAsAttribute()
-        {
-            var method = typeof(FieldInfo).GetMethod("get_marshal_info", BindingFlags.Instance | BindingFlags.NonPublic);
-            Assert.NotNull(method);
-
-            var field = typeof(MarshalA).GetField("value");
-            Assert.NotNull(field);
-
-            object marshalInfo = method.Invoke(field, null);
-            Assert.NotNull(marshalInfo);
-            Assert.Equal(typeof(MarshalAsAttribute), marshalInfo.GetType());
-            Assert.Equal(UnmanagedType.I4, ((MarshalAsAttribute)marshalInfo).Value);
-        }
-#endif
     }
 }

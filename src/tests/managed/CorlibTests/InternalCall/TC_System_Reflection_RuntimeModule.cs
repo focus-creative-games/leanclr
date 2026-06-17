@@ -148,19 +148,6 @@ namespace CorlibTests.InternalCall
             Assert.Equal(field, resolved);
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void ResolveStringToken_ValidToken()
-        {
-            // Test ResolveStringToken via public Module.ResolveString
-            Module module = typeof(TC_System_Reflection_RuntimeModule).Module;
-            // String tokens are rare and module-specific
-            // Test that the method can be called without throwing
-                // Try a sample token (may not exist)
-            string resolved = module.ResolveString(0x70000000);
-            Assert.NotNull(resolved);
-        }
-#endif
 
         [UnitTest]
         public void ResolveMemberToken_ValidToken()

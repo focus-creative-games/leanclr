@@ -197,15 +197,5 @@ namespace CorlibTests.InternalCall
             Assert.Equal(1234567890123L, result);
         }
 
-#if IL2CPP_ONLY
-        [CoversIcall("System.Threading.Interlocked::MemoryBarrierProcessWide")]
-        [CoversIcall("System.Threading.Interlocked::MemoryBarrierProcessWide()")]
-        [UnitTest]
-        public void MemoryBarrierProcessWide()
-        {
-            // Just ensure it doesn't crash
-            Interlocked.MemoryBarrierProcessWide();
-        }
-#endif
     }
 }

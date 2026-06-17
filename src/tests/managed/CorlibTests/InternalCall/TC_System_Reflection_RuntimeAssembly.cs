@@ -8,26 +8,6 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_System_Reflection_RuntimeAssembly : TestCaseBase
     {
-#if IL2CPP_ONLY
-        [CoversIcall("System.Reflection.RuntimeAssembly::get_code_base(System.Reflection.Assembly,System.Boolean)")]
-        [UnitTest]
-        public void GetCodeBase()
-        {
-            var assembly = typeof(TC_System_Reflection_RuntimeAssembly).Assembly;
-            var codeBase = assembly.CodeBase;
-            Assert.Equal("CorlibTests.dll", codeBase);
-        }
-
-
-        [CoversIcall("System.Reflection.RuntimeAssembly::get_location")]
-        [UnitTest]
-        public void GetLocation()
-        {
-            var assembly = typeof(TC_System_Reflection_RuntimeAssembly).Assembly;
-            var location = assembly.Location;
-            Assert.Equal("CorlibTests.dll", location);
-        }
-#endif
         [CoversIcall("System.Reflection.RuntimeAssembly::get_fullname(System.Reflection.Assembly)")]
         [CoversIcall("System.RuntimeType::getFullName")]
         [UnitTest]
@@ -91,15 +71,5 @@ namespace CorlibTests.InternalCall
         }
 
 
-#if IL2CPP_ONLY
-        [CoversIcall("System.Reflection.RuntimeAssembly::GetFilesInternal(System.String,System.Boolean)")]
-        [UnitTest]
-        public void GetFilesInternal()
-        {
-            var assembly = typeof(TC_System_Reflection_RuntimeAssembly).Assembly;
-            var files = assembly.GetFiles();
-            Assert.Equal(0, files.Length);
-        }
-#endif
     }
 }

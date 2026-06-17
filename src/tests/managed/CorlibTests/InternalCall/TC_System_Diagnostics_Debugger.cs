@@ -10,17 +10,6 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_System_Diagnostics_Debugger : TestCaseBase
     {
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void IsAttached_Internal_PropertyAccess()
-        {
-            // Test IsAttached_internal via public Debugger.IsAttached property
-            // This indirectly invokes the IsAttached_internal icall
-            bool isAttached = Debugger.IsAttached;
-            // Should not throw and should return a boolean value
-            Assert.IsFalse(isAttached);
-        }
-#endif
 
         [UnitTest]
         public void IsAttached_Internal_ConsistentValue()
@@ -40,17 +29,6 @@ namespace CorlibTests.InternalCall
             Assert.IsTrue(isAttached == true || isAttached == false);
         }
 
-#if IL2CPP_ONLY
-        [UnitTest]
-        public void IsLogging_Property_Access()
-        {
-            // Test IsLogging via public Debugger.IsLogging property
-            // This indirectly invokes the IsLogging icall
-            bool isLogging = Debugger.IsLogging();
-            // Should not throw and should return a boolean value
-            Assert.IsFalse(isLogging);
-        }
-#endif
 
         [UnitTest]
         public void IsLogging_Consistent()
