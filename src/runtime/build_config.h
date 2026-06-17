@@ -30,6 +30,9 @@ typedef double float64_t;
 #elif defined(__ANDROID__)
 #define LEANCLR_PLATFORM_ANDROID 1
 #define LEANCLR_PLATFORM_POSIX 1
+#elif defined(__OHOS__) || defined(__HARMONYOS__)
+#define LEANCLR_PLATFORM_OHOS 1
+#define LEANCLR_PLATFORM_POSIX 1
 #elif defined(__EMSCRIPTEN__)
 #define LEANCLR_PLATFORM_WASM 1
 #define LEANCLR_PLATFORM_POSIX 1
