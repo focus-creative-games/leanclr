@@ -6,10 +6,17 @@ namespace leanclr
 {
 namespace vm
 {
+#if LEANCLR_USE_VOID_PTR_GCHANDLE
+typedef intptr_t GCHandleId;
+#else
+typedef int32_t GCHandleId;
+#endif
 
 class GCHandle
 {
   public:
+    static GCHandleId get_handle_id(void* handle);
+    static void* get_handle_by_id(GCHandleId id);
     static void* new_handle(RtObject* obj, bool pinned);
     static void* new_weakref_handle(RtObject* obj, bool track_resurrection);
     static void free_handle(void* handle);

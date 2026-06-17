@@ -204,5 +204,7 @@ typedef double float64_t;
 #define LEANCLR_GC_MARK_SWEEP 1
 #endif
 
+#define LEANCLR_USE_VOID_PTR_GCHANDLE 0
+
 #define LEANCLR_STRINGIFY(x) #x
 #define LEANCLR_TOSTRING(x) LEANCLR_STRINGIFY(x)
