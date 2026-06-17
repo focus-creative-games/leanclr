@@ -213,12 +213,12 @@ static int run(const std::string& dll_name, const std::vector<std::string>& dll_
         std::cerr << std::endl;
         std::cerr << std::endl;
 
-        utils::StringBuilder sb;
+        utils::Utf8StringBuilder sb;
 
-        metadata::MetadataName::append_klass_full_name(sb, ex->klass).unwrap();
+        metadata::MetadataName::append_klass_full_name_without_generic_params(sb, ex->klass, metadata::TypeNameFormat::FullName).is_ok();
         sb.append_cstr(": ");
         sb.sure_null_terminator_but_not_append();
-        std::cerr << sb.as_cstr();
+        std::cerr << sb.get_const_chars();
 
         sb.clear();
         vm::RtString* message = ex->message;
@@ -230,12 +230,12 @@ static int run(const std::string& dll_name, const std::vector<std::string>& dll_
         {
             sb.sure_null_terminator_but_not_append();
         }
-        std::cerr << sb.as_cstr() << std::endl << std::endl;
+        std::cerr << sb.get_const_chars() << std::endl << std::endl;
 
         sb.clear();
         vm::RtString* stack_trace_str = reinterpret_cast<vm::RtString*>(ret.unwrap());
         sb.append_utf16_str(&stack_trace_str->first_char, stack_trace_str->length);
-        std::cerr << sb.as_cstr() << std::endl << std::endl;
+        std::cerr << sb.get_const_chars() << std::endl << std::endl;
 
         return -1;
     }
