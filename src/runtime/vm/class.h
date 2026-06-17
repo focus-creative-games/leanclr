@@ -248,7 +248,14 @@ class Class
     {
         assert(has_initialized_part(klass, metadata::RtClassInitPart::VirtualTable));
         assert(s_finalizer_vtable_index != -1);
-        return klass->vtable[s_finalizer_vtable_index].method->parent->by_val->ele_type != metadata::RtElementType::Object;
+        return !is_object_class(klass->vtable[s_finalizer_vtable_index].method->parent);
+    }
+
+    static const metadata::RtMethodInfo* get_finalizer(const metadata::RtClass* klass)
+    {
+        assert(has_initialized_part(klass, metadata::RtClassInitPart::VirtualTable));
+        assert(s_finalizer_vtable_index != -1);
+        return klass->vtable[s_finalizer_vtable_index].method;
     }
 
     static bool is_interface(const metadata::RtClass* klass)
