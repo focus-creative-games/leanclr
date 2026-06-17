@@ -1670,27 +1670,27 @@
     "header": "icalls/system_runtime_compilerservices_runtimehelpers.h"
   },
   {
-    "name": "System.Runtime.InteropServices.GCHandle::CheckCurrentDomain(System.IntPtr)",
+    "name": "System.Runtime.InteropServices.GCHandle::CheckCurrentDomain(System.Int32)",
     "func": "SystemRuntimeInteropServicesGCHandle::check_current_domain",
     "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
   {
-    "name": "System.Runtime.InteropServices.GCHandle::FreeHandle(System.IntPtr)",
+    "name": "System.Runtime.InteropServices.GCHandle::FreeHandle(System.Int32)",
     "func": "SystemRuntimeInteropServicesGCHandle::free_handle",
     "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
   {
-    "name": "System.Runtime.InteropServices.GCHandle::GetAddrOfPinnedObject(System.IntPtr)",
+    "name": "System.Runtime.InteropServices.GCHandle::GetAddrOfPinnedObject(System.Int32)",
     "func": "SystemRuntimeInteropServicesGCHandle::get_addr_of_pinned_object",
     "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
   {
-    "name": "System.Runtime.InteropServices.GCHandle::GetTarget(System.IntPtr)",
+    "name": "System.Runtime.InteropServices.GCHandle::GetTarget(System.Int32)",
     "func": "SystemRuntimeInteropServicesGCHandle::get_target",
     "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
   {
-    "name": "System.Runtime.InteropServices.GCHandle::GetTargetHandle(System.Object,System.IntPtr,System.Runtime.InteropServices.GCHandleType)",
+    "name": "System.Runtime.InteropServices.GCHandle::GetTargetHandle(System.Object,System.Int32,System.Runtime.InteropServices.GCHandleType)",
     "func": "SystemRuntimeInteropServicesGCHandle::get_target_handle",
     "header": "icalls/system_runtime_interopservices_gchandle.h"
   },
@@ -1918,6 +1918,11 @@
     "name": "System.Runtime.Remoting.Activation.ActivationServices::AllocateUninitializedClassInstance(System.Type)",
     "func": "SystemRuntimeRemotingActivationActivationServices::allocate_uninitialized_class_instance",
     "header": "icalls/system_runtime_remoting_activation_activationservices.h"
+  },
+  {
+    "name": "System.Runtime.Remoting.RemotingServices::IsTransparentProxy(System.Object)",
+    "func": "SystemRuntimeRemotingRemotingServices::is_transparent_proxy",
+    "header": "icalls/system_runtime_remoting_remotingservices.h"
   },
   {
     "name": "System.Runtime.RuntimeImports::_ecvt_s",
