@@ -265,7 +265,7 @@ enum class RtClassExtraAttribute : uint32_t
     ArrayOrSZArray = 0x10,
     Generic = 0x20,
     HasStaticConstructor = 0x40,
-    HasFinalizer = 0x80,
+    // HasFinalizer = 0x80,
     MethodMask = 0x80 | 0x40,
     ReferenceType = 0x100,
 };

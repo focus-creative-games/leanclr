@@ -246,7 +246,9 @@ class Class
 
     static bool has_finalizer(const metadata::RtClass* klass)
     {
-        return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasFinalizer) != 0;
+        assert(has_initialized_part(klass, metadata::RtClassInitPart::VirtualTable));
+        assert(s_finalizer_vtable_index != -1);
+        return klass->vtable[s_finalizer_vtable_index].method->parent->by_val->ele_type != metadata::RtElementType::Object;
     }
 
     static bool is_interface(const metadata::RtClass* klass)
@@ -545,6 +547,9 @@ class Class
     static const utils::Vector<const metadata::RtClass*>& get_all_classes_with_static_data();
 
   private:
+    static int32_t s_finalizer_vtable_index;
+    static RtResultVoid setup_finalizer_vtable_index();
+
     static bool get_gc_bitmap_bit(const size_t* bitmap, size_t bit_index)
     {
         return bitmap[bit_index / Class::kBitsPerWord] & (static_cast<size_t>(1) << (bit_index % Class::kBitsPerWord));
