@@ -101,7 +101,7 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
 
     utils::Utf8StringBuilder sb;
 
-    metadata::MetadataName::append_klass_full_name(sb, ex->klass).is_ok();
+    metadata::MetadataName::append_klass_full_name_without_generic_params(sb, ex->klass, metadata::TypeNameFormat::IL).is_ok();
     sb.append_cstr(": ");
     sb.sure_null_terminator_but_not_append();
     std::cerr << sb.get_const_chars();
