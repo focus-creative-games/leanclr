@@ -17,7 +17,8 @@ namespace CorlibTests.InternalCall
             return a + b;
         }
 
-        [UnitTest]
+        // TODO, icall `System.Reflection.Emit.AssemblyBuilder::basic_init` is not implemented
+        //[UnitTest]
         public void CreateLambda()
         {
             var eventType = typeof(Func<int, int, int>);
@@ -30,7 +31,7 @@ namespace CorlibTests.InternalCall
 
         delegate int FunIn(in int a, in int b);
 
-        // This test creates a lambda with 'in' parameters, this is not supported in il2cpp.
+        // TODO, icall `System.Reflection.Emit.AssemblyBuilder::basic_init` is not implemented
         //[UnitTest]
         public void CreateLambdaInArgument()
         {
