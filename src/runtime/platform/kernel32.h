@@ -13,6 +13,12 @@ class Kernel32
     /// Wraps GetConsoleCP / GetConsoleOutputCP.
     static int32_t get_console_cp();
     static int32_t get_console_output_cp();
+    static intptr_t get_std_handle(int32_t std_handle);
+    static bool get_console_screen_buffer_info(intptr_t handle, void* info);
+    static bool peek_console_input(intptr_t handle, void* record, int32_t length, int32_t* events_read);
+    static bool read_console_input(intptr_t handle, void* record, int32_t length, int32_t* events_read);
+    static bool get_console_mode(intptr_t handle, int32_t* mode);
+    static bool set_console_mode(intptr_t handle, int32_t mode);
 
 #if LEANCLR_PLATFORM_WIN
     static bool set_thread_error_mode(uint32_t mode, uint32_t& old_mode);

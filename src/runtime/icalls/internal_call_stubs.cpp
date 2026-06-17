@@ -71,6 +71,8 @@
 #include "system_io_path.h"
 #include "system_io_monoio.h"
 #include "system_console_windowsconsole.h"
+#include "system_consoleriver.h"
+#include "system_windowsconsoledriver.h"
 #include "interop.h"
 #include "leanclr_profile.h"
 
@@ -121,6 +123,8 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemRuntimeFieldHandle::get_internal_call_entries());
     Append(entries, SystemRuntimeMethodHandle::get_internal_call_entries());
     Append(entries, SystemConsoleWindowsConsole::get_internal_call_entries());
+    Append(entries, SystemConsoleDriver::get_internal_call_entries());
+    Append(entries, SystemWindowsConsoleDriver::get_internal_call_entries());
     Append(entries, Interop::get_internal_call_entries());
     Append(entries, SystemEnum::get_internal_call_entries());
     Append(entries, SystemMonoCustomAttrs::get_internal_call_entries());

@@ -9,6 +9,8 @@
 #include "utils/rt_vector.h"
 #include "vm/rt_string.h"
 
+#include <cstring>
+
 namespace leanclr
 {
 namespace platform
@@ -29,6 +31,162 @@ int32_t Kernel32::get_console_output_cp()
     return static_cast<int32_t>(::GetConsoleOutputCP());
 #else
     return 0;
+#endif
+}
+
+intptr_t Kernel32::get_std_handle(int32_t std_handle)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return reinterpret_cast<intptr_t>(::GetStdHandle(static_cast<DWORD>(std_handle)));
+#else
+    (void)std_handle;
+    return static_cast<intptr_t>(-1);
+#endif
+}
+
+bool Kernel32::get_console_screen_buffer_info(intptr_t handle, void* info)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    if (info == nullptr)
+    {
+        return false;
+    }
+    CONSOLE_SCREEN_BUFFER_INFO native_info{};
+    if (::GetConsoleScreenBufferInfo(reinterpret_cast<HANDLE>(handle), &native_info) == 0)
+    {
+        return false;
+    }
+    // Managed System.ConsoleScreenBufferInfo matches WIN32 CONSOLE_SCREEN_BUFFER_INFO layout.
+    std::memcpy(info, &native_info, sizeof(CONSOLE_SCREEN_BUFFER_INFO));
+    return true;
+#else
+    (void)handle;
+    (void)info;
+    return false;
+#endif
+}
+
+#ifdef LEANCLR_PLATFORM_WIN
+namespace
+{
+
+// Matches System.WindowsConsoleDriver.InputRecord in mscorlib (flattened KEY_EVENT fields).
+struct ManagedInputRecord
+{
+    int16_t event_type;
+    bool key_down;
+    int16_t repeat_count;
+    int16_t virtual_key_code;
+    int16_t virtual_scan_code;
+    char16_t character;
+    int32_t control_key_state;
+    int32_t pad1;
+    bool pad2;
+};
+
+void write_managed_input_record(void* dest, const INPUT_RECORD& native) noexcept
+{
+    ManagedInputRecord managed{};
+    managed.event_type = static_cast<int16_t>(native.EventType);
+    if (native.EventType == KEY_EVENT)
+    {
+        const KEY_EVENT_RECORD& key = native.Event.KeyEvent;
+        managed.key_down = key.bKeyDown != FALSE;
+        managed.repeat_count = static_cast<int16_t>(key.wRepeatCount);
+        managed.virtual_key_code = static_cast<int16_t>(key.wVirtualKeyCode);
+        managed.virtual_scan_code = static_cast<int16_t>(key.wVirtualScanCode);
+        managed.character = key.uChar.UnicodeChar;
+        managed.control_key_state = static_cast<int32_t>(key.dwControlKeyState);
+    }
+    std::memcpy(dest, &managed, sizeof(ManagedInputRecord));
+}
+
+} // namespace
+#endif
+
+bool Kernel32::peek_console_input(intptr_t handle, void* record, int32_t length, int32_t* events_read)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    if (record == nullptr || events_read == nullptr || length <= 0)
+    {
+        return false;
+    }
+
+    INPUT_RECORD native_record{};
+    DWORD native_events_read = 0;
+    if (::PeekConsoleInput(reinterpret_cast<HANDLE>(handle), &native_record, static_cast<DWORD>(length), &native_events_read) == 0)
+    {
+        return false;
+    }
+
+    write_managed_input_record(record, native_record);
+    *events_read = static_cast<int32_t>(native_events_read);
+    return true;
+#else
+    (void)handle;
+    (void)record;
+    (void)length;
+    (void)events_read;
+    return false;
+#endif
+}
+
+bool Kernel32::read_console_input(intptr_t handle, void* record, int32_t length, int32_t* events_read)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    if (record == nullptr || events_read == nullptr || length <= 0)
+    {
+        return false;
+    }
+
+    INPUT_RECORD native_record{};
+    DWORD native_events_read = 0;
+    if (::ReadConsoleInput(reinterpret_cast<HANDLE>(handle), &native_record, static_cast<DWORD>(length), &native_events_read) == 0)
+    {
+        return false;
+    }
+
+    write_managed_input_record(record, native_record);
+    *events_read = static_cast<int32_t>(native_events_read);
+    return true;
+#else
+    (void)handle;
+    (void)record;
+    (void)length;
+    (void)events_read;
+    return false;
+#endif
+}
+
+bool Kernel32::get_console_mode(intptr_t handle, int32_t* mode)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    if (mode == nullptr)
+    {
+        return false;
+    }
+    DWORD native_mode = 0;
+    if (::GetConsoleMode(reinterpret_cast<HANDLE>(handle), &native_mode) == 0)
+    {
+        return false;
+    }
+    *mode = static_cast<int32_t>(native_mode);
+    return true;
+#else
+    (void)handle;
+    (void)mode;
+    return false;
+#endif
+}
+
+bool Kernel32::set_console_mode(intptr_t handle, int32_t mode)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return ::SetConsoleMode(reinterpret_cast<HANDLE>(handle), static_cast<DWORD>(mode)) != 0;
+#else
+    (void)handle;
+    (void)mode;
+    return false;
 #endif
 }
 
