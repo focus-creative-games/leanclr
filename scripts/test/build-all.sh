@@ -19,7 +19,7 @@ echo "build basic-tester"
 
 echo "build managed tests"
 pushd "$TESTS_DIR/managed" >/dev/null
-dotnet build -c "$CONFIG" -p:LeanClrIl2CppOnly=true
+dotnet build -c "$CONFIG"
 popd >/dev/null
 
 if [[ -n "$ARCH" ]]; then
