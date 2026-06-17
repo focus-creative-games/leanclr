@@ -248,14 +248,24 @@ class Class
     {
         assert(has_initialized_part(klass, metadata::RtClassInitPart::VirtualTable));
         assert(s_finalizer_vtable_index != -1);
-        return !is_object_class(klass->vtable[s_finalizer_vtable_index].method->parent);
+        if (klass->vtable_count > s_finalizer_vtable_index)
+        {
+            const metadata::RtMethodInfo* finalizer = klass->vtable[s_finalizer_vtable_index].method_impl;
+            return !is_object_class(finalizer->parent);
+        }
+        return false;
     }
 
     static const metadata::RtMethodInfo* get_finalizer(const metadata::RtClass* klass)
     {
         assert(has_initialized_part(klass, metadata::RtClassInitPart::VirtualTable));
         assert(s_finalizer_vtable_index != -1);
-        return klass->vtable[s_finalizer_vtable_index].method;
+        if (klass->vtable_count > s_finalizer_vtable_index)
+        {
+            const metadata::RtMethodInfo* finalizer = klass->vtable[s_finalizer_vtable_index].method_impl;
+            return finalizer;
+        }
+        return nullptr;
     }
 
     static bool is_interface(const metadata::RtClass* klass)

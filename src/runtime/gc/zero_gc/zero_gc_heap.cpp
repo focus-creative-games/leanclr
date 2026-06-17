@@ -5,6 +5,7 @@
 #include "alloc/general_allocation.h"
 #include "gc/gc_common.h"
 #include "gc/gc_config.h"
+#include "gc/gc_finalizer.h"
 #include "vm/class.h"
 
 #if LEANCLR_GC_ZERO_GC
@@ -64,6 +65,7 @@ vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t
     assert(size >= sizeof(vm::RtObject));
     auto obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(size);
     obj->klass = const_cast<metadata::RtClass*>(klass);
+    GcFinalizer::on_object_allocated(obj);
     s_used_bytes += size;
     s_heap_bytes += size;
     GcPressure::on_alloc(size);

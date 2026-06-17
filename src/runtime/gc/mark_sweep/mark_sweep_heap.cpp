@@ -7,6 +7,7 @@
 #include "alloc/general_allocation.h"
 #include "gc/gc_config.h"
 #include "gc/gc_debug.h"
+#include "gc/gc_finalizer.h"
 #include "gc/gc_handle_table.h"
 #include "gc/gc_roots.h"
 #include "gc/mark_sweep/small_heap_arena.h"
@@ -97,6 +98,7 @@ static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, in
             continue;
         }
         size_t aligned_size = utils::MemOp::align_up(get_object_allocated_size(obj), GC_ALIGN);
+        GcFinalizer::on_object_freed(obj);
 #if LEANCLR_GC_DEBUG
         gc_debug_quarantine_object(obj, aligned_size);
 #else
@@ -160,14 +162,16 @@ void MarkSweepHeap::collect()
         return;
     }
     GcPressure::on_collect();
+    GcFinalizer::run_pending_finalizers();
+
     GCAliveObjectBitmap alive_object_bitmap;
     GcRoots::foreach_root(alive_object_bitmap);
+    GcFinalizer::promote_unreachable(alive_object_bitmap);
 
     int64_t freed_bytes = 0;
     sweep_small_objects(alive_object_bitmap, freed_bytes);
     sweep_big_objects(alive_object_bitmap, freed_bytes);
     vm::GCHandle::sweep_weak_handles(is_object_alive, &alive_object_bitmap);
-    // TODO: Run finalizers for collected objects.
 
     int64_t old_heap_bytes = s_heap_bytes;
     s_used_bytes -= freed_bytes;
@@ -241,6 +245,7 @@ vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, 
         }
     }
     obj->klass = const_cast<metadata::RtClass*>(klass);
+    GcFinalizer::on_object_allocated(obj);
 #if LEANCLR_GC_DEBUG
     obj->__sync_block = site != nullptr ? const_cast<GcAllocSite*>(site->intern_site()) : nullptr;
 #endif
