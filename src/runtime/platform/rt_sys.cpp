@@ -14,6 +14,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cerrno>
 
 #ifdef LEANCLR_PLATFORM_POSIX
 #include <dirent.h>
@@ -163,7 +164,7 @@ void RtSys::set_last_win32_error(int32_t error)
 
 int32_t RtSys::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size)
 {
-#ifdef LEANCLR_PLATFORM_POSIX
+#ifndef LEANCLR_PLATFORM_WIN
     if (format == nullptr || buffer == nullptr || buffer_size <= 0)
     {
         errno = EINVAL;

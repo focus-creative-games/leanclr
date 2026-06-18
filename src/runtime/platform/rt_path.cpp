@@ -11,9 +11,13 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <direct.h>
-#else
+#elif LEANCLR_PLATFORM_POSIX
 #include <errno.h>
 #include <unistd.h>
+#endif
+
+#if LEANCLR_PLATFORM_PORTABLE
+#include "rt_portable_io.h"
 #endif
 
 namespace leanclr
@@ -32,7 +36,7 @@ using io_error_internal::kErrorFileNotFound;
 using io_error_internal::kErrorGenFailure;
 using io_error_internal::kErrorSuccess;
 using io_error_internal::set_error;
-#ifndef LEANCLR_PLATFORM_WIN
+#if LEANCLR_PLATFORM_POSIX
 using io_error_internal::errno_to_monoio;
 #endif
 
@@ -86,7 +90,7 @@ vm::RtString* Path::get_temp_path()
         return vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(buffer), static_cast<int32_t>(len));
     }
     return vm::String::create_string_from_utf8cstr("C:\\Temp\\");
-#else
+#elif LEANCLR_PLATFORM_POSIX
     for (const char* env_var : {"TMPDIR", "TMP", "TEMP"})
     {
         temp_dir = std::getenv(env_var);
@@ -104,11 +108,16 @@ vm::RtString* Path::get_temp_path()
 #endif
     }
     return vm::String::create_string_from_utf8cstr(temp_dir);
+#elif LEANCLR_PLATFORM_PORTABLE
+    return portable_io::path_get_temp_path();
 #endif
 }
 
 vm::RtString* Path::get_current_directory(int32_t* error)
 {
+#if LEANCLR_PLATFORM_PORTABLE
+    return portable_io::path_get_current_directory(error);
+#else
     set_error(error, kErrorSuccess);
 
 #ifdef LEANCLR_PLATFORM_WIN
@@ -146,7 +155,7 @@ vm::RtString* Path::get_current_directory(int32_t* error)
     if (heap_buf)
         std::free(heap_buf);
     return result;
-#else
+#elif LEANCLR_PLATFORM_POSIX
     char stack_buf[1024];
     if (::getcwd(stack_buf, sizeof(stack_buf)) != nullptr)
     {
@@ -154,6 +163,7 @@ vm::RtString* Path::get_current_directory(int32_t* error)
     }
     set_error(error, errno_to_monoio(errno));
     return vm::String::get_empty_string();
+#endif
 #endif
 }
 

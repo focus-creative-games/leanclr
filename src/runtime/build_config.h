@@ -16,8 +16,13 @@ typedef double float64_t;
 //   * __EMSCRIPTEN__ is checked before __linux__ for the same reason on some
 //     toolchains.
 // POSIX platforms additionally define LEANCLR_PLATFORM_POSIX.
+//
+// LEANCLR_FORCE_PORTABLE (CMake option) forces the unknown/portable code path for
+// testing: no Win32 or POSIX OS headers, only C++11 standard library I/O.
 // ---------------------------------------------------------------------------
-#if defined(_WIN32)
+#if defined(LEANCLR_FORCE_PORTABLE)
+#define LEANCLR_PLATFORM_UNKNOWN 1
+#elif defined(_WIN32)
 #define LEANCLR_PLATFORM_WIN 1
 #elif defined(__APPLE__)
 #include <TargetConditionals.h>
@@ -41,6 +46,12 @@ typedef double float64_t;
 #define LEANCLR_PLATFORM_POSIX 1
 #else
 #define LEANCLR_PLATFORM_UNKNOWN 1
+#endif
+
+#if defined(LEANCLR_PLATFORM_UNKNOWN)
+#define LEANCLR_PLATFORM_PORTABLE 1
+#else
+#define LEANCLR_PLATFORM_PORTABLE 0
 #endif
 
 // Native aligned heap: Windows CRT (_aligned_*), or POSIX posix_memalign where

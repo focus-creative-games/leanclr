@@ -1012,6 +1012,7 @@ RtResultVoid kernel32_set_file_information_by_handle_invoker(metadata::RtManaged
 }
 #endif
 
+#if LEANCLR_PLATFORM_POSIX || LEANCLR_PLATFORM_WIN
 static vm::InternalCallEntry s_interop_internal_call_entries[] = {
 #if LEANCLR_PLATFORM_POSIX
     {"Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)", (vm::InternalCallFunction)&Interop::double_to_string,
@@ -1109,9 +1110,15 @@ static vm::InternalCallEntry s_interop_internal_call_entries[] = {
 #endif
 };
 
+#endif // LEANCLR_PLATFORM_POSIX || LEANCLR_PLATFORM_WIN
+
 utils::Span<vm::InternalCallEntry> Interop::get_internal_call_entries() noexcept
 {
+#if LEANCLR_PLATFORM_POSIX || LEANCLR_PLATFORM_WIN
     return utils::Span<vm::InternalCallEntry>(s_interop_internal_call_entries, sizeof(s_interop_internal_call_entries) / sizeof(vm::InternalCallEntry));
+#else
+    return utils::Span<vm::InternalCallEntry>(nullptr, 0);
+#endif
 }
 } // namespace icalls
 } // namespace leanclr

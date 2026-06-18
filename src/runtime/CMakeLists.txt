@@ -2,6 +2,7 @@
 cmake_minimum_required(VERSION 3.15)
 project(leanclr CXX C)
 
+option(LEANCLR_FORCE_PORTABLE "Force LEANCLR_PLATFORM_UNKNOWN portable I/O path (for testing)" OFF)
 option(BUILD_SHARED_LEANCLR "Build leanclr as a shared (dynamic) library" OFF)
 option(LEANCLR_ENABLE_CPP_EXCEPTIONS "Enable C++ exceptions for runtime target" OFF)
 option(LEANCLR_ENABLE_PROFILE "Enable PGO profiling instrumentation" OFF)
@@ -56,6 +57,10 @@ else()
 endif()
 
 target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS LEANCLR_USE_SHIPPING_ZLIB=1)
+
+if(LEANCLR_FORCE_PORTABLE)
+    target_compile_definitions(leanclr PRIVATE LEANCLR_FORCE_PORTABLE=1)
+endif()
 
 if(LEANCLR_GC_ALGORITHM STREQUAL "MARK_SWEEP")
     target_compile_definitions(leanclr PUBLIC LEANCLR_GC_MARK_SWEEP=1)

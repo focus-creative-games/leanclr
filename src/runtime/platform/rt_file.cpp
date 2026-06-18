@@ -6,7 +6,7 @@
 #ifdef LEANCLR_PLATFORM_WIN
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
-#else
+#elif LEANCLR_PLATFORM_POSIX
 #include <errno.h>
 #include <fcntl.h>
 #include <sys/stat.h>
@@ -15,6 +15,10 @@
 
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
+#endif
+
+#if LEANCLR_PLATFORM_PORTABLE
+#include "rt_portable_io.h"
 #endif
 
 namespace leanclr
@@ -40,7 +44,7 @@ using io_error_internal::kErrorSuccess;
 using io_error_internal::set_error;
 #ifdef LEANCLR_PLATFORM_WIN
 using io_error_internal::win32_error_to_monoio;
-#else
+#elif LEANCLR_PLATFORM_POSIX
 using io_error_internal::errno_to_monoio;
 #endif
 
@@ -59,11 +63,70 @@ constexpr int32_t kFileAccessReadWrite = 3;
 
 } // namespace
 
+#if LEANCLR_PLATFORM_PORTABLE
+
+intptr_t File::get_stdin()
+{
+    return portable_io::file_get_stdin();
+}
+
+intptr_t File::get_stdout()
+{
+    return portable_io::file_get_stdout();
+}
+
+intptr_t File::get_stderr()
+{
+    return portable_io::file_get_stderr();
+}
+
+bool File::is_standard_handle(intptr_t handle)
+{
+    return portable_io::file_is_standard_handle(handle);
+}
+
+intptr_t File::open(const Utf16Char* filename, int32_t mode, int32_t access, int32_t share, int32_t options, int32_t* error)
+{
+    return portable_io::file_open(filename, mode, access, share, options, error);
+}
+
+bool File::close(intptr_t handle, int32_t* error)
+{
+    return portable_io::file_close(handle, error);
+}
+
+int32_t File::read(intptr_t handle, uint8_t* buffer, int32_t count, int32_t* error)
+{
+    return portable_io::file_read(handle, buffer, count, error);
+}
+
+int32_t File::write(intptr_t handle, const uint8_t* buffer, int32_t count, int32_t* error)
+{
+    return portable_io::file_write(handle, buffer, count, error);
+}
+
+int64_t File::seek(intptr_t handle, int64_t offset, int32_t origin, int32_t* error)
+{
+    return portable_io::file_seek(handle, offset, origin, error);
+}
+
+int64_t File::get_length(intptr_t handle, int32_t* error)
+{
+    return portable_io::file_get_length(handle, error);
+}
+
+int32_t File::get_file_type(intptr_t handle, int32_t* error)
+{
+    return portable_io::file_get_file_type(handle, error);
+}
+
+#else
+
 intptr_t File::get_stdin()
 {
 #ifdef LEANCLR_PLATFORM_WIN
     return reinterpret_cast<intptr_t>(::GetStdHandle(STD_INPUT_HANDLE));
-#else
+#elif LEANCLR_PLATFORM_POSIX
     return static_cast<intptr_t>(STDIN_FILENO);
 #endif
 }
@@ -72,7 +135,7 @@ intptr_t File::get_stdout()
 {
 #ifdef LEANCLR_PLATFORM_WIN
     return reinterpret_cast<intptr_t>(::GetStdHandle(STD_OUTPUT_HANDLE));
-#else
+#elif LEANCLR_PLATFORM_POSIX
     return static_cast<intptr_t>(STDOUT_FILENO);
 #endif
 }
@@ -81,7 +144,7 @@ intptr_t File::get_stderr()
 {
 #ifdef LEANCLR_PLATFORM_WIN
     return reinterpret_cast<intptr_t>(::GetStdHandle(STD_ERROR_HANDLE));
-#else
+#elif LEANCLR_PLATFORM_POSIX
     return static_cast<intptr_t>(STDERR_FILENO);
 #endif
 }
@@ -91,7 +154,7 @@ bool File::is_standard_handle(intptr_t handle)
 #ifdef LEANCLR_PLATFORM_WIN
     HANDLE h = reinterpret_cast<HANDLE>(handle);
     return h == ::GetStdHandle(STD_INPUT_HANDLE) || h == ::GetStdHandle(STD_OUTPUT_HANDLE) || h == ::GetStdHandle(STD_ERROR_HANDLE);
-#else
+#elif LEANCLR_PLATFORM_POSIX
     return handle == STDIN_FILENO || handle == STDOUT_FILENO || handle == STDERR_FILENO;
 #endif
 }
@@ -187,7 +250,7 @@ intptr_t File::open(const Utf16Char* filename, int32_t mode, int32_t access, int
         ::SetFilePointerEx(h, zero, nullptr, FILE_END);
     }
     return reinterpret_cast<intptr_t>(h);
-#else
+#elif LEANCLR_PLATFORM_POSIX
     // Convert UTF-16 filename to UTF-8 for the POSIX open() syscall.
     utils::Utf8StringBuilder sb(filename, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(filename)));
 
@@ -266,7 +329,7 @@ bool File::close(intptr_t handle, int32_t* error)
         return false;
     }
     return true;
-#else
+#elif LEANCLR_PLATFORM_POSIX
     if (::close(static_cast<int>(handle)) != 0)
     {
         set_error(error, errno_to_monoio(errno));
@@ -304,7 +367,7 @@ int32_t File::read(intptr_t handle, uint8_t* buffer, int32_t count, int32_t* err
         return -1;
     }
     return static_cast<int32_t>(bytes_read);
-#else
+#elif LEANCLR_PLATFORM_POSIX
     ssize_t n;
     do
     {
@@ -343,7 +406,7 @@ int32_t File::write(intptr_t handle, const uint8_t* buffer, int32_t count, int32
         return -1;
     }
     return static_cast<int32_t>(bytes_written);
-#else
+#elif LEANCLR_PLATFORM_POSIX
     ssize_t total = 0;
     while (total < count)
     {
@@ -399,7 +462,7 @@ int64_t File::seek(intptr_t handle, int64_t offset, int32_t origin, int32_t* err
         return -1;
     }
     return static_cast<int64_t>(result.QuadPart);
-#else
+#elif LEANCLR_PLATFORM_POSIX
     int whence;
     switch (origin)
     {
@@ -444,7 +507,7 @@ int64_t File::get_length(intptr_t handle, int32_t* error)
         return 0;
     }
     return static_cast<int64_t>(size.QuadPart);
-#else
+#elif LEANCLR_PLATFORM_POSIX
     struct stat st;
     if (::fstat(static_cast<int>(handle), &st) != 0)
     {
@@ -475,7 +538,7 @@ int32_t File::get_file_type(intptr_t handle, int32_t* error)
     }
     // Win32 FILE_TYPE_* values match MonoFileType enum values.
     return static_cast<int32_t>(file_type);
-#else
+#elif LEANCLR_PLATFORM_POSIX
     struct stat st;
     if (::fstat(static_cast<int>(handle), &st) != 0)
     {
@@ -491,6 +554,8 @@ int32_t File::get_file_type(intptr_t handle, int32_t* error)
     return FileTypeUnknown;
 #endif
 }
+
+#endif // !LEANCLR_PLATFORM_PORTABLE
 
 } // namespace os
 } // namespace leanclr
