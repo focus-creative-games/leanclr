@@ -97,8 +97,8 @@ class RuntimeApi
     static RtResultVoid get_assemblies(utils::Vector<metadata::RtAssembly*>& out_assemblies);
     static RtResult<metadata::RtAssembly*> get_assembly(const char* assembly_name);
     static RtResult<metadata::RtAssembly*> load_assembly(const char* assembly_name);
-    static metadata::RtModuleDef* get_assembly_by_module(metadata::RtAssembly* ass);
-    static metadata::RtAssembly* get_module_by_assembly(metadata::RtModuleDef* mod);
+    static metadata::RtAssembly* get_assembly_by_module(metadata::RtModuleDef* mod);
+    static metadata::RtModuleDef* get_module_by_assembly(metadata::RtAssembly* ass);
     static bool is_corlib(metadata::RtModuleDef* mod);
     static const char* get_module_name_noext(metadata::RtModuleDef* mod);
 
