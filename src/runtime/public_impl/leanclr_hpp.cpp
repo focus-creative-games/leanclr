@@ -98,12 +98,12 @@ RtResult<metadata::RtAssembly*> RuntimeApi::load_assembly(const char* assembly_n
     return vm::Assembly::load_by_name(assembly_name);
 }
 
-metadata::RtModuleDef* RuntimeApi::get_assembly_by_module(metadata::RtAssembly* ass)
+metadata::RtModuleDef* RuntimeApi::get_module_by_assembly(metadata::RtAssembly* ass)
 {
     return ass->mod;
 }
 
-metadata::RtAssembly* RuntimeApi::get_module_by_assembly(metadata::RtModuleDef* mod)
+metadata::RtAssembly* RuntimeApi::get_assembly_by_module(metadata::RtModuleDef* mod)
 {
     return mod->get_assembly();
 }
