@@ -79,14 +79,14 @@ extern "C"
         }
     }
 
-    LeanclrModuleDef* leanclr_get_assembly_by_module(LeanclrAssembly* ass)
-    {
-        return reinterpret_cast<LeanclrModuleDef*>(((metadata::RtAssembly*)ass)->mod);
-    }
-
-    LeanclrAssembly* leanclr_get_module_by_assembly(LeanclrModuleDef* mod)
+    LeanclrAssembly* leanclr_get_assembly_by_module(LeanclrModuleDef* mod)
     {
         return reinterpret_cast<LeanclrAssembly*>(((metadata::RtModuleDef*)mod)->get_assembly());
+    }
+
+    LeanclrModuleDef* leanclr_get_module_by_assembly(LeanclrAssembly* ass)
+    {
+        return reinterpret_cast<LeanclrModuleDef*>(((metadata::RtAssembly*)ass)->mod);
     }
 
     bool leanclr_is_corlib(LeanclrModuleDef* mod)

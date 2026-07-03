@@ -46,8 +46,8 @@ extern "C"
     LEANCLR_API size_t leanclr_get_assemblies(LeanclrAssembly** out_assemblies, size_t out_assemblies_capacity, LeanclrException** out_exception);
     LEANCLR_API LeanclrAssembly* leanclr_get_assembly(const char* assembly_name);
     LEANCLR_API LeanclrAssembly* leanclr_load_assembly(const char* assembly_name, LeanclrException** out_exception);
-    LEANCLR_API LeanclrModuleDef* leanclr_get_assembly_by_module(LeanclrAssembly* ass);
-    LEANCLR_API LeanclrAssembly* leanclr_get_module_by_assembly(LeanclrModuleDef* mod);
+    LEANCLR_API LeanclrAssembly* leanclr_get_assembly_by_module(LeanclrModuleDef* mod);
+    LEANCLR_API LeanclrModuleDef* leanclr_get_module_by_assembly(LeanclrAssembly* ass);
     LEANCLR_API bool leanclr_is_corlib(LeanclrModuleDef* mod);
     LEANCLR_API const char* leanclr_get_module_name_noext(LeanclrModuleDef* mod);
 
