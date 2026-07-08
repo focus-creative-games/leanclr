@@ -8,6 +8,21 @@ using System.Threading.Tasks;
 
 namespace Tests.Instruments.Funcs
 {
+    class ConstrainedCallvirTarget
+    {
+        public int value;
+
+        public ConstrainedCallvirTarget(int value)
+        {
+            this.value = value;
+        }
+
+        public int GetValue()
+        {
+            return value;
+        }
+    }
+
     internal class TC_callvir_aot : TestCaseBase
     {
         static string GetType2<T>(T x)
@@ -19,10 +34,15 @@ namespace Tests.Instruments.Funcs
         {
             return x.Calc();
         }
-        
+
         public static int GetValueHashCode<T>(T x)
         {
             return x.GetHashCode();
+        }
+
+        public static int CallGetValue<T>(ref T x) where T : ConstrainedCallvirTarget
+        {
+            return x.GetValue();
         }
 
         [UnitTest]
@@ -51,6 +71,13 @@ namespace Tests.Instruments.Funcs
         {
             var x = new ForFunClass(1, 2);
             Assert.Equal("ForFunClass", GetType2(x));
+        }
+
+        [UnitTest]
+        public void class_cons_nonvirtual_method()
+        {
+            var x = new ConstrainedCallvirTarget(1);
+            Assert.Equal(1, CallGetValue(ref x));
         }
 
         /// TODO BUG OF il2cpp
