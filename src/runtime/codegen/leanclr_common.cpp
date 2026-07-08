@@ -1,6 +1,8 @@
 #include "leanclr_common.h"
 #include <cstdio>
 #include <cstring>
+
+#include "const_strs.h"
 #include "vm/object.h"
 #include "metadata/module_def.h"
 #include "utils/string_builder.h"
@@ -377,6 +379,11 @@ RtResult<vm::RtObject*> marshal_handle_to_safe_handle(RtMarshalHandle handle, co
     assert(fi->offset == 0);
 #endif
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, LEANCLR_CODEGEN_NEWOBJ(klass, "codegen::marshal_handle_to_safe_handle"));
+    const metadata::RtMethodInfo* ctor = vm::Class::get_method_for_name(klass, STR_CTOR, 0, false);
+    if (ctor)
+    {
+        RET_ERR_ON_FAIL(vm::Runtime::invoke_object_arguments_with_run_cctor(ctor, obj, nullptr, 0));
+    }
     RtMarshalHandle* field_addr = reinterpret_cast<RtMarshalHandle*>(obj + 1);
     *field_addr = handle;
     RET_OK(obj);
