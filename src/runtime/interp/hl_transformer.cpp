@@ -1420,10 +1420,11 @@ RtResultVoid Transformer::add_callvirt(const metadata::RtMethodInfo* method)
         metadata::RtClass* cons_klass = _constrained_class;
         _constrained_class = nullptr;
         RET_ERR_ON_FAIL(vm::Class::initialize_all(cons_klass));
-        if (!vm::Method::is_virtual(method) && !vm::Class::is_object_class(method->parent))
-        {
-            RET_ASSERT_ERR(RtErr::ExecutionEngine);
-        }
+        // compiler may generate constrained callvir on non-virtual method. see Tests.Instruments.Funcs.TC_callvir_aot.CallGetValue<T>
+        // if (!vm::Method::is_virtual(method) && !vm::Class::is_object_class(method->parent))
+        // {
+        //     RET_ASSERT_ERR(RtErr::ExecutionEngine);
+        // }
         if (vm::Class::is_value_type(cons_klass))
         {
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, cons_method,
