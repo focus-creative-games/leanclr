@@ -2362,15 +2362,24 @@ RtResultVoid Transformer::setup_exception_clauses()
         if (i > 0)
         {
             const auto& last = clauses[i - 1];
-            if (!(src.try_offset >= last.try_offset + last.try_length ||
-                  (src.try_offset <= last.try_offset && src.try_offset + src.try_length >= last.try_offset + last.try_length) ||
-                  (src.handler_offset <= last.try_offset && src.handler_offset + src.handler_length >= last.try_offset + last.try_length)))
+            const uint32_t last_try_end = last.try_offset + last.try_length;
+            const uint32_t src_try_end = src.try_offset + src.try_length;
+            const bool try_disjoint = src.try_offset >= last_try_end || last.try_offset >= src_try_end;
+            if (!try_disjoint)
             {
-                RET_ASSERT_ERR(RtErr::ExecutionEngine);
+                // overlapping try blocks: src (outer) must contain last (inner)
+                if (!(src.try_offset <= last.try_offset && src_try_end >= last_try_end))
+                {
+                    RET_ASSERT_ERR(RtErr::ExecutionEngine);
+                }
             }
 
-            if (!(src.handler_offset >= last.handler_offset + last.handler_length ||
-                  (src.handler_offset <= last.handler_offset && src.handler_offset + src.handler_length >= last.handler_offset + last.handler_length)))
+            const uint32_t last_handler_end = last.handler_offset + last.handler_length;
+            const uint32_t src_handler_end = src.handler_offset + src.handler_length;
+            const bool handler_disjoint = src.handler_offset >= last_handler_end || last.handler_offset >= src_handler_end;
+            if (!handler_disjoint &&
+                !((src.handler_offset <= last.handler_offset && src_handler_end >= last_handler_end) ||
+                  (last.handler_offset <= src.handler_offset && last_handler_end >= src_handler_end)))
             {
                 RET_ASSERT_ERR(RtErr::ExecutionEngine);
             }
