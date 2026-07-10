@@ -1,3 +1,5 @@
+#include <unordered_set>
+
 #include "array_class.h"
 #include "class.h"
 #include "metadata/metadata_cache.h"
@@ -152,6 +154,72 @@ static RtResult<const RtMethodInfo*> build_array_generic_method(RtClass* klass, 
     RET_OK(new_method);
 }
 
+#define DECLAR_SZARRAY_INTERFACE_LIST(var_name, corlib_types) RtClass* to_inflate[5] = {\
+    corlib_types.cls_ilist_generic,         corlib_types.cls_icollection_generic,         corlib_types.cls_ienumerable_generic,\
+    corlib_types.cls_ireadonlylist_generic, corlib_types.cls_ireadonlycollection_generic, \
+};
+
+
+
+static void to_unique_element_classes(const Vector<const RtClass*>& element_classes, Vector<const RtClass*>& unique_element_classes)
+{
+    std::unordered_set<const RtClass*> unique_element_classes_set;
+    for (const RtClass* element_class : element_classes)
+    {
+        if (unique_element_classes_set.insert(element_class).second)
+        {
+            unique_element_classes.push_back(element_class);
+        }
+    }
+}
+
+RtResultVoid collect_array_interface_generic_variant_element_classes(const metadata::RtClass* klass, Vector<const metadata::RtClass*>& unique_element_classes)
+{
+    if (vm::Class::is_value_type(klass))
+    {
+        unique_element_classes.push_back(klass);
+        RET_VOID_OK();
+    }
+
+    Vector<const RtClass*> element_classes;
+    const metadata::RtClass* cur_klass = klass;
+    auto& corlib_types = vm::Class::get_corlib_types();
+    while (cur_klass)
+    {
+        element_classes.push_back(cur_klass);
+        assert(!vm::Class::is_value_type(cur_klass));
+        if (cur_klass != corlib_types.cls_enum && cur_klass != corlib_types.cls_valuetype)
+        {
+            for (size_t i = 0; i < cur_klass->interface_count; ++i)
+            {
+                const metadata::RtClass* iface = cur_klass->interfaces[i];
+                element_classes.push_back(iface);
+            }
+        }
+        if (vm::Class::is_szarray_class(cur_klass))
+        {
+            Vector<const metadata::RtClass*> sub_element_classes;
+            RET_ERR_ON_FAIL(collect_array_interface_generic_variant_element_classes(cur_klass->element_class, sub_element_classes));
+            DECLAR_SZARRAY_INTERFACE_LIST(to_inflate, corlib_types);
+            for (const metadata::RtClass* sub_element_class : sub_element_classes)
+            {
+                const RtTypeSig* const generic_args[1] = {sub_element_class->by_val};
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtGenericInst*, generic_inst, MetadataCache::get_pooled_generic_inst(generic_args, 1));
+                for (const RtClass* to_inflate : to_inflate)
+                {
+                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+                        RtClass*, generic_class, vm::GenericClass::get_class(to_inflate->by_val->data.type_def_gid, generic_inst));
+                    element_classes.push_back(generic_class);
+                }
+            }
+        }
+
+        cur_klass = cur_klass->parent;
+    }
+    to_unique_element_classes(element_classes, unique_element_classes);
+    RET_VOID_OK();
+}
+
 // Initialize array interface methods from System.Array
 RtResultVoid ArrayClass::initialize_array_interface_methods()
 {
@@ -300,24 +368,27 @@ RtResultVoid ArrayClass::setup_interfaces(RtClass* klass)
     if (!Class::is_szarray_class(klass))
         RET_VOID_OK();
 
-    const RtTypeSig* ele_type_sig = Class::get_by_val_type_sig(klass->element_class);
-    const RtTypeSig* const generic_args[1] = {ele_type_sig};
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtGenericInst*, generic_inst, MetadataCache::get_pooled_generic_inst(generic_args, 1));
-
     const CorLibTypes& corlib = Class::get_corlib_types();
-    RtClass* to_inflate[5] = {
-        corlib.cls_ilist_generic,         corlib.cls_icollection_generic,         corlib.cls_ienumerable_generic,
-        corlib.cls_ireadonlylist_generic, corlib.cls_ireadonlycollection_generic,
-    };
+    DECLAR_SZARRAY_INTERFACE_LIST(to_inflate, corlib);
 
-    size_t interface_count = 5;
+    Vector<const RtClass*> element_classes;
+    RET_ERR_ON_FAIL(collect_array_interface_generic_variant_element_classes(klass->element_class, element_classes));
+
+
+    size_t interface_count = element_classes.size() * (sizeof(to_inflate) / sizeof(to_inflate[0]));
     const RtClass** interfaces = klass->image->get_mem_pool().calloc_any<const RtClass*>(interface_count);
-    for (size_t i = 0; i < interface_count; ++i)
+    int32_t current_interface_index = 0;
+    for (const RtClass* element_class : element_classes)
     {
-        uint32_t gid = Class::get_type_def_gid(to_inflate[i]);
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, inflated_iface, GenericClass::get_class(gid, generic_inst));
-        interfaces[i] = inflated_iface;
+        const RtTypeSig* const generic_args[1] = {element_class->by_val};
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtGenericInst*, generic_inst, MetadataCache::get_pooled_generic_inst(generic_args, 1));
+        for (const RtClass* to_inflate : to_inflate)
+        {
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, inflated_iface, GenericClass::get_class(to_inflate->by_val->data.type_def_gid, generic_inst));
+            interfaces[current_interface_index++] = inflated_iface;
+        }
     }
+    assert(current_interface_index == interface_count);
     klass->interfaces = interfaces;
     klass->interface_count = static_cast<uint16_t>(interface_count);
     RET_VOID_OK();
