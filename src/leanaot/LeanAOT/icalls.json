@@ -545,6 +545,31 @@
     "header": "icalls/system_console_windowsconsole.h"
   },
   {
+    "name": "System.ConsoleDriver::InternalKeyAvailable",
+    "func": "SystemConsoleDriver::internal_key_available",
+    "header": "icalls/system_consoleriver.h"
+  },
+  {
+    "name": "System.ConsoleDriver::Isatty",
+    "func": "SystemConsoleDriver::isatty",
+    "header": "icalls/system_consoleriver.h"
+  },
+  {
+    "name": "System.ConsoleDriver::SetBreak",
+    "func": "SystemConsoleDriver::set_break",
+    "header": "icalls/system_consoleriver.h"
+  },
+  {
+    "name": "System.ConsoleDriver::SetEcho",
+    "func": "SystemConsoleDriver::set_echo",
+    "header": "icalls/system_consoleriver.h"
+  },
+  {
+    "name": "System.ConsoleDriver::TtySetup",
+    "func": "SystemConsoleDriver::tty_setup",
+    "header": "icalls/system_consoleriver.h"
+  },
+  {
     "name": "System.CurrentSystemTimeZone::GetTimeZoneData(System.Int32,System.Int64[]&,System.String[]&,System.Boolean&)",
     "func": "SystemCurrentSystemTimeZone::get_time_zone_data",
     "header": "icalls/system_currentsystemtimezone.h"
@@ -2220,6 +2245,11 @@
     "header": "icalls/system_text_encodinghelper.h"
   },
   {
+    "name": "System.Text.Normalization::load_normalization_resource(System.IntPtr&,System.IntPtr&,System.IntPtr&,System.IntPtr&,System.IntPtr&,System.IntPtr&)",
+    "func": "SystemTextNormalization::load_normalization_resource",
+    "header": "icalls/system_text_normalization.h"
+  },
+  {
     "name": "System.Threading.Interlocked::Add(System.Int32&,System.Int32)",
     "func": "SystemThreadingInterlocked::add_i32",
     "header": "icalls/system_threading_interlocked.h"
@@ -2743,5 +2773,35 @@
     "name": "System.ValueType::InternalGetHashCode(System.Object,System.Object[]&)",
     "func": "SystemValueType::internal_get_hash_code",
     "header": "icalls/system_valuetype.h"
+  },
+  {
+    "name": "System.WindowsConsoleDriver::GetConsoleMode(System.IntPtr,System.Int32&)",
+    "func": "SystemWindowsConsoleDriver::get_console_mode",
+    "header": "icalls/system_windowsconsoledriver.h"
+  },
+  {
+    "name": "System.WindowsConsoleDriver::GetConsoleScreenBufferInfo(System.IntPtr,System.ConsoleScreenBufferInfo&)",
+    "func": "SystemWindowsConsoleDriver::get_console_screen_buffer_info",
+    "header": "icalls/system_windowsconsoledriver.h"
+  },
+  {
+    "name": "System.WindowsConsoleDriver::GetStdHandle(System.Handles)",
+    "func": "SystemWindowsConsoleDriver::get_std_handle",
+    "header": "icalls/system_windowsconsoledriver.h"
+  },
+  {
+    "name": "System.WindowsConsoleDriver::PeekConsoleInput(System.IntPtr,System.InputRecord&,System.Int32,System.Int32&)",
+    "func": "SystemWindowsConsoleDriver::peek_console_input",
+    "header": "icalls/system_windowsconsoledriver.h"
+  },
+  {
+    "name": "System.WindowsConsoleDriver::ReadConsoleInput(System.IntPtr,System.InputRecord&,System.Int32,System.Int32&)",
+    "func": "SystemWindowsConsoleDriver::read_console_input",
+    "header": "icalls/system_windowsconsoledriver.h"
+  },
+  {
+    "name": "System.WindowsConsoleDriver::SetConsoleMode(System.IntPtr,System.Int32)",
+    "func": "SystemWindowsConsoleDriver::set_console_mode",
+    "header": "icalls/system_windowsconsoledriver.h"
   }
 ]
