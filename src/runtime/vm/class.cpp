@@ -2505,12 +2505,14 @@ bool Class::is_assignable_from_generic_interface(const metadata::RtClass* from_c
     {
         return true;
     }
+    const metadata::RtClass* to_base_klass = to_class->by_val->data.generic_class->cache_base_klass;
+    assert(to_base_klass);
 
     if (is_generic_inst(from_class))
     {
         const metadata::RtClass* base_klass = from_class->by_val->data.generic_class->cache_base_klass;
         assert(base_klass);
-        if (base_klass == to_class && is_assignable_from_generic_parameter_convariant(from_class, to_class, from_class))
+        if (base_klass == to_base_klass && is_assignable_from_generic_parameter_convariant(from_class, to_class, from_class))
         {
             return true;
         }
@@ -2529,7 +2531,7 @@ bool Class::is_assignable_from_generic_interface(const metadata::RtClass* from_c
             {
                 const metadata::RtClass* base_iface = iface->by_val->data.generic_class->cache_base_klass;
                 assert(base_iface);
-                if (base_iface == to_class && is_assignable_from_generic_parameter_convariant(iface, to_class, from_class))
+                if (base_iface == to_base_klass && is_assignable_from_generic_parameter_convariant(iface, to_class, from_class))
                 {
                     return true;
                 }
