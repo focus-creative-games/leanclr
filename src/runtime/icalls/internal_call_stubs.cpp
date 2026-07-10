@@ -59,6 +59,7 @@
 #include "system_reflection_runtimemodule.h"
 #include "system_currentsystemtimezone.h"
 #include "system_text_encodinghelper.h"
+#include "system_text_normalization.h"
 #include "system_security_cryptography_rngcryptoserviceprovider.h"
 #include "system_security_securitymanager.h"
 #include "system_threading_internalthread.h"
@@ -163,6 +164,7 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemIOPath::get_internal_call_entries());
     Append(entries, SystemIOMonoIO::get_internal_call_entries());
     Append(entries, SystemTextEncodingHelper::get_internal_call_entries());
+    Append(entries, SystemTextNormalization::get_internal_call_entries());
     Append(entries, SystemSecurityCryptographyRNGCryptoServiceProvider::get_internal_call_entries());
     Append(entries, SystemSecuritySecurityManager::get_internal_call_entries());
     Append(entries, LeanCLRProfile::get_internal_call_entries());
