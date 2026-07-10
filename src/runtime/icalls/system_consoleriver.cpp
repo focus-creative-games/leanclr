@@ -27,24 +27,24 @@ const char* string_to_utf8_cstr(vm::RtString* str, utils::Utf8StringBuilder& buf
 
 } // namespace
 
-bool SystemConsoleDriver::isatty(intptr_t handle) noexcept
+RtResult<bool> SystemConsoleDriver::isatty(intptr_t handle) noexcept
 {
-    return platform::RtConsole::isatty(handle);
+    RET_OK(platform::RtConsole::isatty(handle));
 }
 
-int32_t SystemConsoleDriver::internal_key_available(int32_t timeout_msec) noexcept
+RtResult<int32_t> SystemConsoleDriver::internal_key_available(int32_t timeout_msec) noexcept
 {
-    return platform::RtConsole::internal_key_available(timeout_msec);
+    RET_OK(platform::RtConsole::internal_key_available(timeout_msec));
 }
 
-bool SystemConsoleDriver::set_echo(bool enable) noexcept
+RtResult<bool> SystemConsoleDriver::set_echo(bool enable) noexcept
 {
-    return platform::RtConsole::set_echo(enable);
+    RET_OK(platform::RtConsole::set_echo(enable));
 }
 
-bool SystemConsoleDriver::set_break(bool enable) noexcept
+RtResult<bool> SystemConsoleDriver::set_break(bool enable) noexcept
 {
-    return platform::RtConsole::set_break(enable);
+    RET_OK(platform::RtConsole::set_break(enable));
 }
 
 RtResult<bool> SystemConsoleDriver::tty_setup(vm::RtString* keypad, vm::RtString* teardown, vm::RtArray** control_chars, int32_t** size) noexcept
@@ -81,7 +81,8 @@ static RtResultVoid isatty_invoker(metadata::RtManagedMethodPointer, const metad
                                    interp::RtStackObject* ret) noexcept
 {
     auto handle = EvalStackOp::get_param<intptr_t>(params, 0);
-    EvalStackOp::set_return(ret, SystemConsoleDriver::isatty(handle));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemConsoleDriver::isatty(handle));
+    EvalStackOp::set_return(ret, static_cast<int32_t>(result));
     RET_VOID_OK();
 }
 
@@ -90,7 +91,8 @@ static RtResultVoid internal_key_available_invoker(metadata::RtManagedMethodPoin
                                                    interp::RtStackObject* ret) noexcept
 {
     auto timeout = EvalStackOp::get_param<int32_t>(params, 0);
-    EvalStackOp::set_return(ret, SystemConsoleDriver::internal_key_available(timeout));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, result, SystemConsoleDriver::internal_key_available(timeout));
+    EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }
 
@@ -99,7 +101,8 @@ static RtResultVoid set_echo_invoker(metadata::RtManagedMethodPointer, const met
                                      interp::RtStackObject* ret) noexcept
 {
     auto enable = EvalStackOp::get_param<bool>(params, 0);
-    EvalStackOp::set_return(ret, SystemConsoleDriver::set_echo(enable));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemConsoleDriver::set_echo(enable));
+    EvalStackOp::set_return(ret, static_cast<int32_t>(result));
     RET_VOID_OK();
 }
 
@@ -108,7 +111,8 @@ static RtResultVoid set_break_invoker(metadata::RtManagedMethodPointer, const me
                                       interp::RtStackObject* ret) noexcept
 {
     auto enable = EvalStackOp::get_param<bool>(params, 0);
-    EvalStackOp::set_return(ret, SystemConsoleDriver::set_break(enable));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemConsoleDriver::set_break(enable));
+    EvalStackOp::set_return(ret, static_cast<int32_t>(result));
     RET_VOID_OK();
 }
 
