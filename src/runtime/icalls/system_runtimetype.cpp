@@ -872,7 +872,8 @@ RtResult<vm::RtString*> SystemRuntimeType::get_name(vm::RtReflectionRuntimeType*
 RtResult<vm::RtString*> SystemRuntimeType::get_namespace(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(runtime_type->reflection_type.type_handle));
-    return vm::String::create_string_from_utf8cstr(klass->namespaze);
+    vm::RtString* namespace_str = klass->namespaze[0] == '\0' ? nullptr : vm::String::create_string_from_utf8cstr(klass->namespaze);
+    RET_OK(namespace_str);
 }
 
 RtResult<vm::RtArray*> SystemRuntimeType::get_interfaces(vm::RtReflectionRuntimeType* runtime_type) noexcept
