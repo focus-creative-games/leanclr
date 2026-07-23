@@ -131,11 +131,22 @@ Standard 版本按 BCL 来源分为三个分支：
 
 ## 相关仓库
 
+官方仓库：
+
 | 仓库 | 说明 |
 |------|------|
 | [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | leanclr-unity 是 LeanCLR 的 Unity 插件，发布 WebGL / 小游戏平台时替换 IL2CPP 为 LeanCLR，大幅缩减包体、降低内存占用 |
+| [leanclr-unreal](https://github.com/focus-creative-games/leanclr-unreal) | LeanCLR Unreal Engine 插件（开发中） |
 | [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) | LeanCLR Godot 插件（开发中） |
+| [leanclr-cocos](https://github.com/focus-creative-games/leanclr-cocos) | LeanCLR Godot 插件（开发中） |
 | [hybridclr](https://github.com/focus-creative-games/hybridclr) | **HybridCLR**：特性完整、零成本、高性能、低内存的 Unity 全平台原生 C# 热更新方案 |
+
+第三方仓库：
+
+| 仓库 | 说明 |
+|------|------|
+| [leanclr-godot](https://github.com/wqaetly/leanclr/tree/coreclr#) | LeanCLR Godot 插件（开发中） |
+| [UnrealCSharp](https://github.com/crazytuzi/UnrealCSharp)| UnrealCSharp是UE下C#编程插件，基于.NET 10（CoreCLR/Mono）。提供多种编程模式，功能强大且容易上手，能够灵活高效地进行游戏开发。|
 
 ## 联系方式
 

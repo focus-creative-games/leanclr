@@ -131,11 +131,22 @@ Standard is split by BCL source:
 
 ## Related Repositories
 
+Official repositories:
+
 | Repository | Description |
 |------|------|
-| [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | Unity plugin for LeanCLR; replace IL2CPP on WebGL / mini-game targets to reduce package size and memory usage |
+| [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | LeanCLR Unity plugin. Replace IL2CPP with LeanCLR when shipping WebGL / mini-game targets to significantly reduce package size and memory usage. |
+| [leanclr-unreal](https://github.com/focus-creative-games/leanclr-unreal) | LeanCLR Unreal Engine plugin (in development) |
 | [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) | LeanCLR Godot plugin (in development) |
-| [hybridclr](https://github.com/focus-creative-games/hybridclr) | **HybridCLR**: full-featured, low-overhead, high-performance C# hot-update solution for Unity |
+| [leanclr-cocos](https://github.com/focus-creative-games/leanclr-cocos) | LeanCLR Cocos plugin (in development) |
+| [hybridclr](https://github.com/focus-creative-games/hybridclr) | **HybridCLR**: full-featured, zero-overhead, high-performance, low-memory native C# hot-update solution for Unity |
+
+Third-party repositories:
+
+| Repository | Description |
+|------|------|
+| [leanclr-godot](https://github.com/wqaetly/leanclr/tree/coreclr#) | LeanCLR Godot plugin (in development) |
+| [UnrealCSharp](https://github.com/crazytuzi/UnrealCSharp) | UnrealCSharp is a UE C# programming plugin based on .NET 10 (CoreCLR/Mono). It provides multiple programming modes, rich features, and an easy onboarding experience for flexible and efficient game development. |
 
 ## Contact
 
