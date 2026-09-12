@@ -643,16 +643,10 @@ RtResultVoid kernel32_free_library_invoker(metadata::RtManagedMethodPointer, con
     RET_VOID_OK();
 }
 
-RtResult<vm::RtObject*> Interop::kernel32_load_library_ex(vm::RtString* lib_filename, intptr_t reserved, int32_t flags) noexcept
+RtResult<intptr_t> Interop::kernel32_load_library_ex(vm::RtString* lib_filename, intptr_t reserved, int32_t flags) noexcept
 {
-    static metadata::RtClass* safe_library_handle_class = nullptr;
-    if (!safe_library_handle_class)
-    {
-        metadata::RtModuleDef* mod = vm::Assembly::get_corlib()->mod;
-        UNWRAP_OR_RET_ERR_ON_FAIL(safe_library_handle_class, mod->get_class_by_name("Microsoft.Win32.SafeHandles.SafeLibraryHandle", false, true));
-    }
     intptr_t h = platform::Kernel32::load_library_ex(lib_filename, reserved, flags);
-    return vmutils::SafeHandle::new_safe_handle(safe_library_handle_class, h);
+    RET_OK(h);
 }
 
 /// @icall: Interop/Kernel32::LoadLibraryEx(System.String,System.IntPtr,System.Int32)
@@ -662,7 +656,7 @@ RtResultVoid kernel32_load_library_ex_invoker(metadata::RtManagedMethodPointer, 
     vm::RtString* name = interp::EvalStackOp::get_param<vm::RtString*>(params, 0);
     intptr_t reserved = interp::EvalStackOp::get_param<intptr_t>(params, 1);
     int32_t flags = interp::EvalStackOp::get_param<int32_t>(params, 2);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, Interop::kernel32_load_library_ex(name, reserved, flags));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, result, Interop::kernel32_load_library_ex(name, reserved, flags));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }

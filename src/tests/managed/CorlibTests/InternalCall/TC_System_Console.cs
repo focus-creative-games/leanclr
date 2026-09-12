@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Reflection;
 
 namespace CorlibTests.InternalCall
 {
@@ -119,10 +120,11 @@ namespace CorlibTests.InternalCall
         public void TreatControlCAsInput_ToggleWithoutThrow()
         {
             bool previous = Console.TreatControlCAsInput;
+            bool nullConsoleDriver = IsNullConsoleDriver();
             try
             {
                 Console.TreatControlCAsInput = true;
-                Assert.True(Console.TreatControlCAsInput);
+                Assert.Equal(!nullConsoleDriver, Console.TreatControlCAsInput);
                 Console.TreatControlCAsInput = false;
                 Assert.False(Console.TreatControlCAsInput);
             }
@@ -130,6 +132,14 @@ namespace CorlibTests.InternalCall
             {
                 Console.TreatControlCAsInput = previous;
             }
+        }
+
+        private static bool IsNullConsoleDriver()
+        {
+            Type consoleDriverType = typeof(Console).Assembly.GetType("System.ConsoleDriver");
+            FieldInfo driverField = consoleDriverType.GetField("driver", BindingFlags.NonPublic | BindingFlags.Static);
+            object driver = driverField.GetValue(null);
+            return driver != null && driver.GetType().FullName == "System.NullConsoleDriver";
         }
 
         [UnitTest]

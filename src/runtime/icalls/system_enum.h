@@ -20,6 +20,8 @@ class SystemEnum
 
     // Get enum values and names
     static RtResult<bool> get_enum_values_and_names(vm::RtReflectionRuntimeType* enum_klass, vm::RtArray** values, vm::RtArray** names) noexcept;
+    static RtResultVoid get_enum_values_and_names_qcall(void* qcall_type_handle, void* native_handle, vm::RtArray** values, vm::RtArray** names,
+                                                        bool get_names) noexcept;
 
     // Box enum value
     static RtResult<vm::RtObject*> internal_box_enum(vm::RtReflectionRuntimeType* runtime_type, uint64_t value) noexcept;

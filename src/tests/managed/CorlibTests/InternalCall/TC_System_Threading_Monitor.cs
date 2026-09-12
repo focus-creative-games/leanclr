@@ -42,26 +42,44 @@ namespace CorlibTests.InternalCall
         [UnitTest]
         public void WaitPulse_SignalWaitingThread()
         {
-            // TODO: Implement this test
-            // int state = 0;
-            // var thread = new Thread(() =>
-            // {
-            //     lock (_lock)
-            //     {
-            //         while (state == 0)
-            //             Monitor.Wait(_lock);
-            //         state = 2;
-            //     }
-            // });
-            // thread.Start();
-            // Thread.Sleep(50);
-            // lock (_lock)
-            // {
-            //     state = 1;
-            //     Monitor.Pulse(_lock);
-            // }
-            // thread.Join(2000);
-            // Assert.Equal(2, state);
+            int state = 0;
+            var thread = new Thread(() =>
+            {
+                lock (_lock)
+                {
+                    state = 1;
+                    Monitor.Pulse(_lock);
+
+                    while (state == 1)
+                    {
+                        Monitor.Wait(_lock);
+                    }
+
+                    state = 3;
+                    Monitor.Pulse(_lock);
+                }
+            });
+
+            lock (_lock)
+            {
+                thread.Start();
+                while (state == 0)
+                {
+                    Assert.IsTrue(Monitor.Wait(_lock, 2000));
+                }
+
+                Assert.Equal(1, state);
+                state = 2;
+                Monitor.Pulse(_lock);
+
+                while (state == 2)
+                {
+                    Assert.IsTrue(Monitor.Wait(_lock, 2000));
+                }
+            }
+
+            Assert.IsTrue(thread.Join(2000));
+            Assert.Equal(3, state);
         }
 
         [CoversIcall("System.Threading.Monitor::Monitor_test_owner")]

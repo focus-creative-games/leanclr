@@ -65,6 +65,8 @@ struct GeneralInst
     il::OpCodePrefix prefix;
     IRExtraValue extra_data;
     int32_t il_offset;
+    uint16_t vararg_count;
+    bool null_check_this;
 
     OpCodeEnum get_opcode() const
     {
@@ -378,6 +380,26 @@ struct GeneralInst
         extra_data.method = method;
     }
 
+    uint16_t get_vararg_count() const
+    {
+        return vararg_count;
+    }
+
+    void set_vararg_count(uint16_t count)
+    {
+        vararg_count = count;
+    }
+
+    bool needs_null_check_this() const
+    {
+        return null_check_this;
+    }
+
+    void set_null_check_this(bool value)
+    {
+        null_check_this = value;
+    }
+
     std::pair<const metadata::RtMethodInfo*, size_t> get_method_and_frame_base() const
     {
         return {extra_data.method, arg2.value};
@@ -488,6 +510,7 @@ class Transformer
 
     RtResult<metadata::RtRuntimeHandle> get_cached_runtime_handle(uint32_t token);
     RtResult<const metadata::RtMethodInfo*> get_method_from_token(uint32_t raw_token);
+    RtResult<std::pair<const metadata::RtMethodInfo*, uint16_t>> get_call_target_from_token(uint32_t raw_token);
     RtResult<metadata::RtMethodSig> get_standalone_method_sig_from_token(uint32_t token);
     RtResult<const metadata::RtTypeSig*> get_type_from_token(uint32_t raw_token);
     RtResult<metadata::RtClass*> get_class_from_token(uint32_t raw_token);
@@ -552,8 +575,8 @@ class Transformer
 
     RtResult<const metadata::RtMethodInfo*> try_redirect_newobj_method(const metadata::RtMethodInfo* method);
     RtResultVoid add_call_common(const metadata::RtMethodInfo* method, metadata::RtInvokerType invoker_type, metadata::RtInvokeMethodPointer invoker,
-                                 bool is_new_obj, bool is_call_vir);
-    RtResultVoid add_call(const metadata::RtMethodInfo* method);
+                                 bool is_new_obj, bool is_call_vir, uint16_t vararg_count = 0, bool null_check_this = false);
+    RtResultVoid add_call(const metadata::RtMethodInfo* method, uint16_t vararg_count = 0, bool null_check_this = false);
     RtResult<bool> try_handle_newobj_intrinsic(const metadata::RtMethodInfo* method);
     RtResultVoid add_newobj(const metadata::RtMethodInfo* method);
     RtResultVoid add_enum_hash_code_call(metadata::RtClass* enum_klass);

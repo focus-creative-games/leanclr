@@ -12,8 +12,10 @@ namespace icalls
 
 RtResultVoid SystemReflectionRuntimeEventInfo::get_event_info(vm::RtReflectionEventInfo* ref_event, vm::RtReflectionMonoEventInfo* ref_event_info) noexcept
 {
-    const metadata::RtEventInfo* event_info = ref_event->event;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, reflected_klass, vm::Class::get_class_from_typesig(ref_event->ref_type->type_handle));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtEventInfo*, event_info,
+                                            vm::Reflection::get_event_info_from_reflection_object(ref_event));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtClass*, reflected_klass,
+                                            vm::Reflection::get_reflection_event_klass(ref_event));
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, declaring_type, vm::Reflection::get_klass_reflection_object(event_info->parent));
     ref_event_info->declaring_type = declaring_type;
@@ -75,7 +77,8 @@ static RtResultVoid get_event_info_invoker(metadata::RtManagedMethodPointer meth
 
 RtResult<int32_t> SystemReflectionRuntimeEventInfo::get_metadata_token(vm::RtReflectionEventInfo* event_info) noexcept
 {
-    const metadata::RtEventInfo* event = event_info->event;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtEventInfo*, event,
+                                            vm::Reflection::get_event_info_from_reflection_object(event_info));
     RET_OK(static_cast<int32_t>(event->token));
 }
 

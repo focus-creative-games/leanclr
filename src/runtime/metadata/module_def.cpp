@@ -36,6 +36,44 @@ static uint32_t allocate_image_id()
 static utils::Vector<RtModuleDef*> g_loadedModuleDefs;
 static RtModuleDef* g_corlibModule = nullptr;
 
+static bool is_corlib_name(const char* name)
+{
+    return strcmp(name, STR_CORLIB_NAME) == 0 || strcmp(name, STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0;
+}
+
+static bool is_coreclr_mscorlib_facade(const char* name, const CliImage& cliImage)
+{
+    if (strcmp(name, STR_CORLIB_NAME) != 0)
+    {
+        return false;
+    }
+
+    uint32_t assemblyRefCount = cliImage.get_table_row_num(TableType::AssemblyRef);
+    for (uint32_t i = 1; i <= assemblyRefCount; ++i)
+    {
+        auto optRow = cliImage.read_assembly_ref(i);
+        if (!optRow)
+        {
+            return false;
+        }
+
+        uint32_t nameIndex = optRow.value().name;
+        const CliHeap& stringHeap = cliImage.get_string_heap();
+        if (nameIndex >= stringHeap.size)
+        {
+            return false;
+        }
+
+        const char* refName = reinterpret_cast<const char*>(stringHeap.data + nameIndex);
+        if (strcmp(refName, STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0)
+        {
+            return true;
+        }
+    }
+
+    return false;
+}
+
 static void visit_reflection_object_roots(gc::GcVisitObjectRoot visit, void* userdata)
 {
     for (RtModuleDef* mod : g_loadedModuleDefs)
@@ -192,7 +230,7 @@ RtResultVoid RtModuleDef::load()
     _nameNoExt = _assemblyName.name;
     _name = utils::StringUtil::concat(_assemblyName.name, ".dll");
 
-    _corLib = strcmp(_nameNoExt, STR_CORLIB_NAME) == 0;
+    _corLib = is_corlib_name(_nameNoExt) && !is_coreclr_mscorlib_facade(_nameNoExt, _cliImage);
 
     uint32_t assemblyRefCount = _cliImage.get_table_row_num(TableType::AssemblyRef);
     if (assemblyRefCount > 0)
@@ -1468,7 +1506,7 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig(utils::BinaryReader& reader, 
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RtSigType sigType = RtMetadata::decode_sig_type(byteType);
-    if (sigType >= RtSigType::Field)
+    if (sigType == RtSigType::Field || sigType == RtSigType::LocalVar || sigType == RtSigType::Property || sigType == RtSigType::MethodSpec)
     {
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
@@ -1499,9 +1537,24 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig_skip_prologue(uint8_t sigType
 
     RtMethodSig methodSig;
 
+    methodSig.fixed_param_count = static_cast<uint16_t>(paramCount);
     methodSig.params.resize(paramCount);
     for (uint32_t i = 0; i < paramCount; i++)
     {
+        uint8_t nextByte;
+        if (!reader.try_peek_byte(nextByte))
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+        if (static_cast<RtElementType>(nextByte) == RtElementType::Sentinel)
+        {
+            uint8_t sentinel;
+            if (!reader.try_read_byte(sentinel))
+            {
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
+            }
+            methodSig.fixed_param_count = static_cast<uint16_t>(i);
+        }
         UNWRAP_OR_RET_ERR_ON_FAIL(methodSig.params[i], read_typesig(reader, gcc, gc));
     }
     methodSig.flags = sigType;
@@ -1841,7 +1894,7 @@ RtResult<RtCustomAttributeRawData> RtModuleDef::get_custom_attribute_raw_data(ui
     RtToken constructorToken = RtMetadata::decode_custom_attribute_type_coded_index(row.type_);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, constructorMethod,
                                             get_method_by_token(constructorToken, RtGenericContainerContext{}, nullptr));
-    auto ret = RtCustomAttributeRawData{constructorMethod, row.value};
+    auto ret = RtCustomAttributeRawData{constructorMethod, constructorToken.to_encoded_id(), row.value};
     RET_OK(ret);
 }
 
@@ -1894,13 +1947,14 @@ RtResult<const RtMethodInfo*> RtModuleDef::get_method_by_rid(uint32_t rid)
     }
     uint32_t typeDefRid = opt_typeDefRid.value();
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, klass, get_class_by_type_def_rid(typeDefRid));
-    RET_ERR_ON_FAIL(vm::Class::initialize_vtables(klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_methods(klass));
     assert(klass->method_count > 0);
     uint32_t firstMethodRid = RtToken::decode_rid(klass->methods[0]->token);
     assert(rid >= firstMethodRid && rid < firstMethodRid + klass->method_count);
     method = klass->methods[rid - firstMethodRid];
     assert(method != nullptr);
     assert(RtToken::decode_rid(method->token) == rid);
+    _methods[rid - 1] = method;
     RET_OK(method);
 }
 
@@ -1995,8 +2049,13 @@ RtResult<const RtFieldInfo*> RtModuleDef::get_field_by_token(const RtToken& toke
     }
 }
 
-RtResult<RtRuntimeHandle> RtModuleDef::get_member_ref_by_rid(uint32_t memberRefRid, const RtGenericContainerContext& gcc, const RtGenericContext* gc)
+RtResult<RtRuntimeHandle> RtModuleDef::get_member_ref_by_rid(uint32_t memberRefRid, const RtGenericContainerContext& gcc, const RtGenericContext* gc,
+                                                             uint16_t* outVarargCount)
 {
+    if (outVarargCount != nullptr)
+    {
+        *outVarargCount = 0;
+    }
     auto opt_row = _cliImage.read_member_ref(memberRefRid);
     if (!opt_row)
     {
@@ -2015,18 +2074,32 @@ RtResult<RtRuntimeHandle> RtModuleDef::get_member_ref_by_rid(uint32_t memberRefR
     RtSigType sigType = RtMetadata::decode_sig_type(byteType);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const char*, name, get_string(row.name));
 
+    const RtTypeSig* memberLookupTypeSig = parentTypeSig;
+    if (parentTypeSig->ele_type == RtElementType::Ptr)
+    {
+        memberLookupTypeSig = parentTypeSig->data.element_type;
+    }
+
     RtClass* baseClass;
-    RtElementType eleType = parentTypeSig->ele_type;
+    RtClass* memberLookupClass;
+    RtGenericContext memberParentGenericContext{};
+    const RtGenericContext* memberParentGenericContextPtr = nullptr;
+    RtElementType eleType = memberLookupTypeSig->ele_type;
     switch (eleType)
     {
     case RtElementType::GenericInst:
     {
-        UNWRAP_OR_RET_ERR_ON_FAIL(baseClass, vm::Class::get_class_by_type_def_gid(parentTypeSig->data.generic_class->base_type_def_gid));
+        UNWRAP_OR_RET_ERR_ON_FAIL(baseClass, vm::Class::get_class_by_type_def_gid(memberLookupTypeSig->data.generic_class->base_type_def_gid));
+        UNWRAP_OR_RET_ERR_ON_FAIL(memberLookupClass, vm::Class::get_class_from_typesig(memberLookupTypeSig));
+        memberParentGenericContext.class_inst = memberLookupTypeSig->data.generic_class->class_inst;
+        memberParentGenericContext.method_inst = nullptr;
+        memberParentGenericContextPtr = &memberParentGenericContext;
         break;
     }
     default:
     {
-        UNWRAP_OR_RET_ERR_ON_FAIL(baseClass, vm::Class::get_class_from_typesig(parentTypeSig));
+        UNWRAP_OR_RET_ERR_ON_FAIL(baseClass, vm::Class::get_class_from_typesig(memberLookupTypeSig));
+        memberLookupClass = baseClass;
         break;
     }
     }
@@ -2035,12 +2108,11 @@ RtResult<RtRuntimeHandle> RtModuleDef::get_member_ref_by_rid(uint32_t memberRefR
 
     if (sigType == RtSigType::Field)
     {
-        // Find field in baseClass by name
-        RET_ERR_ON_FAIL(vm::Class::initialize_fields(baseClass));
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, fieldTypeSig, read_typesig(reader, declaring_gcc, nullptr));
-        for (uint32_t i = 0; i < baseClass->field_count; ++i)
+        RET_ERR_ON_FAIL(vm::Class::initialize_fields(memberLookupClass));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, fieldTypeSig, read_typesig(reader, declaring_gcc, memberParentGenericContextPtr));
+        for (uint32_t i = 0; i < memberLookupClass->field_count; ++i)
         {
-            const RtFieldInfo* field = baseClass->fields + i;
+            const RtFieldInfo* field = memberLookupClass->fields + i;
             if (std::strcmp(field->name, name) != 0)
             {
                 continue;
@@ -2049,32 +2121,29 @@ RtResult<RtRuntimeHandle> RtModuleDef::get_member_ref_by_rid(uint32_t memberRefR
             {
                 continue;
             }
-            if (eleType == RtElementType::GenericInst)
-            {
-                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, fieldDeclClass, vm::Class::get_class_from_typesig(parentTypeSig));
-                RET_ERR_ON_FAIL(vm::Class::initialize_fields(fieldDeclClass));
-                RET_OK(RtRuntimeHandle{fieldDeclClass->fields + i});
-            }
-            else
-            {
-                RET_OK(RtRuntimeHandle{field});
-            }
+            RET_OK(RtRuntimeHandle{field});
         }
         RET_ERR(RtErr::MissingField);
     }
     else if (sigType < RtSigType::Field)
     {
-        // Find method in baseClass by name
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtMethodSig, methodSig, read_method_sig_skip_prologue(byteType, reader, declaring_gcc, nullptr));
-        RET_ERR_ON_FAIL(vm::Class::initialize_methods(baseClass));
-        for (uint32_t i = 0; i < baseClass->method_count; ++i)
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtMethodSig, methodSig,
+                                                read_method_sig_skip_prologue(byteType, reader, declaring_gcc, memberParentGenericContextPtr));
+        uint16_t fixedParamCount = methodSig.fixed_param_count;
+        if (fixedParamCount > methodSig.params.size())
         {
-            const RtMethodInfo* method = baseClass->methods[i];
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+        uint16_t varargCount = static_cast<uint16_t>(methodSig.params.size() - fixedParamCount);
+        RET_ERR_ON_FAIL(vm::Class::initialize_methods(memberLookupClass));
+        for (uint32_t i = 0; i < memberLookupClass->method_count; ++i)
+        {
+            const RtMethodInfo* method = memberLookupClass->methods[i];
             if (std::strcmp(method->name, name) != 0)
             {
                 continue;
             }
-            if (method->parameter_count != methodSig.params.size())
+            if (method->parameter_count != fixedParamCount)
             {
                 continue;
             }
@@ -2087,20 +2156,15 @@ RtResult<RtRuntimeHandle> RtModuleDef::get_member_ref_by_rid(uint32_t memberRefR
             {
                 continue;
             }
-            if (!MetadataCompare::is_typesigs_equal_ignore_attrs(methodSig.params.begin(), method->parameters, methodSig.params.size(), true))
+            if (!MetadataCompare::is_typesigs_equal_ignore_attrs(methodSig.params.begin(), method->parameters, fixedParamCount, true))
             {
                 continue;
             }
-            if (eleType == RtElementType::GenericInst)
+            if (outVarargCount != nullptr)
             {
-                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, methodDeclClass, vm::Class::get_class_from_typesig(parentTypeSig));
-                RET_ERR_ON_FAIL(vm::Class::initialize_methods(methodDeclClass));
-                RET_OK(RtRuntimeHandle{methodDeclClass->methods[i]});
+                *outVarargCount = varargCount;
             }
-            else
-            {
-                RET_OK(RtRuntimeHandle{method});
-            }
+            RET_OK(RtRuntimeHandle{method});
         }
         RET_ERR(RtErr::MissingMethod);
     }

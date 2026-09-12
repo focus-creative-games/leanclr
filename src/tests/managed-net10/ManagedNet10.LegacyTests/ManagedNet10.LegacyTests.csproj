@@ -1,0 +1,331 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>disable</ImplicitUsings>
+    <Nullable>disable</Nullable>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
+    <EnableDefaultCompileItems>false</EnableDefaultCompileItems>
+    <StartupObject>ManagedNet10.LegacyTests.Program</StartupObject>
+    <NoWarn>$(NoWarn);SYSLIB0011</NoWarn>
+    <Copyright>Copyright 2026</Copyright>
+    <IlNativeAssemblyName>ILTests.Native</IlNativeAssemblyName>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="BranchTestEntries.cs" />
+    <Compile Include="ArrayBoxingTestEntries.cs" />
+    <Compile Include="CompareTestEntries.cs" />
+    <Compile Include="ConvertTestEntries.cs" />
+    <Compile Include="ExceptionTestEntries.cs" />
+    <Compile Include="FieldTestEntries.cs" />
+    <Compile Include="FunctionTestEntries.cs" />
+    <Compile Include="LegacyCompatibilityShims.cs" />
+    <Compile Include="LegacyTestRunner.cs" />
+    <Compile Include="MemoryTestEntries.cs" />
+    <Compile Include="ObjectMiscTestEntries.cs" />
+    <Compile Include="Program.cs" />
+    <Compile Include="RuntimeTestEntries.cs" />
+    <Compile Include="RuntimeNullableBoxingTestEntries.cs" />
+    <Compile Include="ArrayCopyRegressionTestEntries.cs" />
+    <Compile Include="CorlibToStringTestEntries.cs" />
+    <Compile Include="CorlibThreadingTestEntries.cs" />
+    <Compile Include="CorlibTypeSystemTestEntries.cs" />
+    <Compile Include="CorlibAppDomainTestEntries.cs" />
+    <Compile Include="CorlibTypedReferenceTestEntries.cs" />
+    <Compile Include="CorlibRuntimeTypeHandleTestEntries.cs" />
+    <Compile Include="CorlibRuntimeTypeTestEntries.cs" />
+    <Compile Include="CorlibArrayBufferIntrinsicTestEntries.cs" />
+    <Compile Include="CorlibCoreObjectValueTestEntries.cs" />
+    <Compile Include="CorlibEnvironmentTestEntries.cs" />
+    <Compile Include="CorlibConsoleTestEntries.cs" />
+    <Compile Include="CorlibDelegateTestEntries.cs" />
+    <Compile Include="CorlibIOTestEntries.cs" />
+    <Compile Include="CorlibRuntimeServicesTestEntries.cs" />
+    <Compile Include="CorlibDiagnosticsTestEntries.cs" />
+    <Compile Include="CorlibGlobalizationTestEntries.cs" />
+    <Compile Include="CorlibLightLambdaTestEntries.cs" />
+    <Compile Include="CorlibReflectionAssemblyTestEntries.cs" />
+    <Compile Include="CorlibReflectionRuntimeAssemblyTestEntries.cs" />
+    <Compile Include="CorlibReflectionRuntimeConstructorInfoTestEntries.cs" />
+    <Compile Include="CorlibReflectionFieldInfoTestEntries.cs" />
+    <Compile Include="CorlibReflectionRuntimeFieldInfoTestEntries.cs" />
+    <Compile Include="CorlibReflectionRuntimeMethodInfoTestEntries.cs" />
+    <Compile Include="CorlibReflectionRuntimeParameterInfoTestEntries.cs" />
+    <Compile Include="CorlibReflectionRuntimePropertyInfoTestEntries.cs" />
+    <Compile Include="CorlibReflectionEventInfoTestEntries.cs" />
+    <Compile Include="CorlibReflectionMonoMethodInfoTestEntries.cs" />
+    <Compile Include="CorlibReflectionModuleTestEntries.cs" />
+    <Compile Include="CorlibReflectionAssemblyNameTestEntries.cs" />
+    <Compile Include="CorlibStringTestEntries.cs" />
+    <Compile Include="CoreRegressionTestEntries.cs" />
+    <Compile Include="CoreBootstrapTestEntries.cs" />
+    <Compile Include="CoreAppDirectTestEntries.cs" />
+    <Compile Include="CoreApp2DirectTestEntries.cs" />
+    <Compile Include="ToStringRegressionTestEntries.cs" />
+    <Compile Include="Net10SpanRegressionTestEntries.cs" />
+    <Compile Include="..\..\managed\Common\Assert.cs" Link="Common\Assert.cs" />
+    <Compile Include="..\..\managed\Common\AotMethodAttribute.cs" Link="Common\AotMethodAttribute.cs" />
+    <Compile Include="..\..\managed\Common\CoversIcallAttribute.cs" Link="Common\CoversIcallAttribute.cs" />
+    <Compile Include="..\..\managed\Common\GcUnitTestAttribute.cs" Link="Common\GcUnitTestAttribute.cs" />
+    <Compile Include="..\..\managed\Common\IgnoreTestAttribute.cs" Link="Common\IgnoreTestAttribute.cs" />
+    <Compile Include="..\..\managed\Common\MonoPInvokeCallbackAttribute.cs" Link="Common\MonoPInvokeCallbackAttribute.cs" />
+    <Compile Include="..\..\managed\Common\TestCaseBase.cs" Link="Common\TestCaseBase.cs" />
+    <Compile Include="..\..\managed\Common\UnitTestAttribute.cs" Link="Common\UnitTestAttribute.cs" />
+    <Compile Include="GcTestEntries.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\AOTExplicitStruct.cs" Link="Fixtures\AOTExplicitStruct.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\AOTActivator.cs" Link="Fixtures\AOTActivator.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\AOTEnums.cs" Link="Fixtures\AOTEnums.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\AOTValueTypes.cs" Link="Fixtures\AOTValueTypes.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\ArmHFAStructs.cs" Link="Fixtures\ArmHFAStructs.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\BaseImplNone.cs" Link="Fixtures\BaseImplNone.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\CallFromNatives.cs" Link="Fixtures\CallFromNatives.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\CallDefs.cs" Link="Fixtures\CallDefs.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\CustomAttributes.cs" Link="Fixtures\CustomAttributes.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\FullGenericClass.cs" Link="Fixtures\FullGenericClass.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\FunctionPointers.cs" Link="Fixtures\FunctionPointers.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\HierarchyGeneric.cs" Link="Fixtures\HierarchyGeneric.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\InnerTypes.cs" Link="Fixtures\InnerTypes.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\InterfaceExplicitImplements.cs" Link="Fixtures\InterfaceExplicitImplements.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\LdftnDefs.cs" Link="Fixtures\LdftnDefs.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\LdvirftnDefs.cs" Link="Fixtures\LdvirftnDefs.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\MethodRefs.cs" Link="Fixtures\MethodRefs.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\NativeArrayParam.cs" Link="Fixtures\NativeArrayParam.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\NullableTypeUtil.cs" Link="Fixtures\NullableTypeUtil.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\PreserveMethodBridges.cs" Link="Fixtures\PreserveMethodBridges.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\RefTypes.cs" Link="Fixtures\RefTypes.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\Test.cs" Link="Fixtures\Test.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TestAOTCtorParam.cs" Link="Fixtures\TestAOTCtorParam.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TestAOTParam.cs" Link="Fixtures\TestAOTParam.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TestAOTReturn.cs" Link="Fixtures\TestAOTReturn.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TestDelegates.cs" Link="Fixtures\TestDelegates.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TestNotInitedNullableType.cs" Link="Fixtures\TestNotInitedNullableType.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TypeFields.cs" Link="Fixtures\TypeFields.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TypeStaticFields.cs" Link="Fixtures\TypeStaticFields.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TypeStaticFields2.cs" Link="Fixtures\TypeStaticFields2.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TypeThreadStaticFields.cs" Link="Fixtures\TypeThreadStaticFields.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\TypeThreadStaticFields2.cs" Link="Fixtures\TypeThreadStaticFields2.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\VectorTypes.cs" Link="Fixtures\VectorTypes.cs" />
+    <Compile Include="..\..\managed\SharedTests\Fixtures\VirtualGenericMethod.cs" Link="Fixtures\VirtualGenericMethod.cs" />
+    <Compile Include="AotTestEntries.cs" />
+    <Compile Include="..\..\managed\AotTests\App.cs" Link="AotTests\App.cs" />
+    <Compile Include="..\..\managed\AotTests\TC_Call_AotInterp.cs" Link="AotTests\TC_Call_AotInterp.cs" />
+    <Compile Include="..\..\managed\AotTests\TC_CallVir_AotInterp.cs" Link="AotTests\TC_CallVir_AotInterp.cs" />
+    <Compile Include="..\..\managed\AotTests\TC_EvalStackNotEmpty.cs" Link="AotTests\TC_EvalStackNotEmpty.cs" />
+    <Compile Include="..\..\managed\AotTests\TC_ldsflda.cs" Link="AotTests\TC_ldsflda.cs" />
+    <Compile Include="..\..\managed\AotTests\TC_MonoPInvokeCallback.cs" Link="AotTests\TC_MonoPInvokeCallback.cs" />
+    <Compile Include="..\..\managed\AotTests\TC_NewMdArray.cs" Link="AotTests\TC_NewMdArray.cs" />
+    <Compile Include="..\..\managed\AotTests\TC_StaticCtorOrder.cs" Link="AotTests\TC_StaticCtorOrder.cs" />
+    <Compile Include="..\..\managed\AotTests\TC_System_Diagnostics_StopWatch.cs" Link="AotTests\TC_System_Diagnostics_StopWatch.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_add.cs" Link="Instructions\Arithmetic\TC_add.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_and.cs" Link="Instructions\Arithmetic\TC_and.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_mul.cs" Link="Instructions\Arithmetic\TC_mul.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_add_ovf.cs" Link="Instructions\Arithmetic\TC_add_ovf.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_mul_ovf.cs" Link="Instructions\Arithmetic\TC_mul_ovf.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_neg.cs" Link="Instructions\Arithmetic\TC_neg.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_not.cs" Link="Instructions\Arithmetic\TC_not.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_or.cs" Link="Instructions\Arithmetic\TC_or.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_shl.cs" Link="Instructions\Arithmetic\TC_shl.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_shr.cs" Link="Instructions\Arithmetic\TC_shr.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_shr_un.cs" Link="Instructions\Arithmetic\TC_shr_un.cs" />
+    <Compile Include="Instructions\Arithmetic\TC_sub.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_sub_ovf.cs" Link="Instructions\Arithmetic\TC_sub_ovf.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arithmetic\TC_xor.cs" Link="Instructions\Arithmetic\TC_xor.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Ariths\TC_ckfinite.cs" Link="Instructions\Ariths\TC_ckfinite.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Ariths\TC_div.cs" Link="Instructions\Ariths\TC_div.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Ariths\TC_div_un.cs" Link="Instructions\Ariths\TC_div_un.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Ariths\TC_rem.cs" Link="Instructions\Ariths\TC_rem.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Ariths\TC_rem_un.cs" Link="Instructions\Ariths\TC_rem_un.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Arrays\*.cs" LinkBase="Instructions\Arrays" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Boxing\*.cs" LinkBase="Instructions\Boxing" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Br.cs" Link="Instructions\Branches\TC_Br.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Beq.cs" Link="Instructions\Branches\TC_Beq.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Bge.cs" Link="Instructions\Branches\TC_Bge.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Bge_un.cs" Link="Instructions\Branches\TC_Bge_un.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Bgt.cs" Link="Instructions\Branches\TC_Bgt.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Bgt_un.cs" Link="Instructions\Branches\TC_Bgt_un.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Ble.cs" Link="Instructions\Branches\TC_Ble.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Ble_un.cs" Link="Instructions\Branches\TC_Ble_un.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Blt.cs" Link="Instructions\Branches\TC_Blt.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Blt_un.cs" Link="Instructions\Branches\TC_Blt_un.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Brfalse.cs" Link="Instructions\Branches\TC_Brfalse.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_Bne_un.cs" Link="Instructions\Branches\TC_Bne_un.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_brtrue.cs" Link="Instructions\Branches\TC_brtrue.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Branches\TC_switch.cs" Link="Instructions\Branches\TC_switch.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Compare\TC_Ceq.cs" Link="Instructions\Compare\TC_Ceq.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Compare\TC_Cgt.cs" Link="Instructions\Compare\TC_Cgt.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Compare\TC_Cgt_un.cs" Link="Instructions\Compare\TC_Cgt_un.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Compare\TC_Clt.cs" Link="Instructions\Compare\TC_Clt.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Compare\TC_Clt_un.cs" Link="Instructions\Compare\TC_Clt_un.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Converts\*.cs" LinkBase="Instructions\Converts" />
+    <Compile Include="..\..\managed\ILTests\Wrappers\TC_conv_ovf.cs" Link="ILTests\Wrappers\TC_conv_ovf.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Exceptions\*.cs" LinkBase="Instructions\Exceptions" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Fields\*.cs" LinkBase="Instructions\Fields" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\ForInherenGenericAotValue.cs" Link="Instructions\Funcs\ForInherenGenericAotValue.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\ForInhereInterpClass.cs" Link="Instructions\Funcs\ForInhereInterpClass.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\ForInhereInterpValue.cs" Link="Instructions\Funcs\ForInhereInterpValue.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\ForInherenGenericInterpValue.cs" Link="Instructions\Funcs\ForInherenGenericInterpValue.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\IInterpBar.cs" Link="Instructions\Funcs\IInterpBar.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\IInterpFoo.cs" Link="Instructions\Funcs\IInterpFoo.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\IInterpRun.cs" Link="Instructions\Funcs\IInterpRun.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\ForInhereAotClass.cs" Link="Instructions\Funcs\ForInhereAotClass.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\ForInhereAotValue.cs" Link="Instructions\Funcs\ForInhereAotValue.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\ForInterpCtorParam.cs" Link="Instructions\Funcs\ForInterpCtorParam.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_call_aot.cs" Link="Instructions\Funcs\TC_call_aot.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_call_aot_param.cs" Link="Instructions\Funcs\TC_call_aot_param.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_call_aot_return.cs" Link="Instructions\Funcs\TC_call_aot_return.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_calli.cs" Link="Instructions\Funcs\TC_calli.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_call_interp.cs" Link="Instructions\Funcs\TC_call_interp.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_callvir_aot.cs" Link="Instructions\Funcs\TC_callvir_aot.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_callvir_interp.cs" Link="Instructions\Funcs\TC_callvir_interp.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_ldftn.cs" Link="Instructions\Funcs\TC_ldftn.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_ldvirftn.cs" Link="Instructions\Funcs\TC_ldvirftn.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_newobj_aot.cs" Link="Instructions\Funcs\TC_newobj_aot.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_newobj_interp.cs" Link="Instructions\Funcs\TC_newobj_interp.cs" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Memory\*.cs" LinkBase="Instructions\Memory" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Misc\*.cs" LinkBase="Instructions\Misc" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\NotImpls\*.cs" LinkBase="Instructions\NotImpls" />
+    <Compile Include="..\..\managed\SharedTests\Instructions\Objects\*.cs" LinkBase="Instructions\Objects" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\IcallReflection.cs" Link="CorlibTests\InternalCall\IcallReflection.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_Interop_Sys.cs" Link="CorlibTests\InternalCall\TC_Interop_Sys.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_LightLambda.cs" Link="CorlibTests\InternalCall\TC_LightLambda.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_AppDomain.cs" Link="CorlibTests\InternalCall\TC_System_AppDomain.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Console.cs" Link="CorlibTests\InternalCall\TC_System_Console.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Diagnostics_StackTrace.cs" Link="CorlibTests\InternalCall\TC_System_Diagnostics_StackTrace.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Array.cs" Link="CorlibTests\InternalCall\TC_System_Array.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Buffer.cs" Link="CorlibTests\InternalCall\TC_System_Buffer.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_DateTime.cs" Link="CorlibTests\InternalCall\TC_System_DateTime.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Delegate.cs" Link="CorlibTests\InternalCall\TC_System_Delegate.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Diagnostics_Debugger.cs" Link="CorlibTests\InternalCall\TC_System_Diagnostics_Debugger.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Diagnostics_StackFrame.cs" Link="CorlibTests\InternalCall\TC_System_Diagnostics_StackFrame.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Diagnostics_StopWatch.cs" Link="CorlibTests\InternalCall\TC_System_Diagnostics_StopWatch.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Enum.cs" Link="CorlibTests\InternalCall\TC_System_Enum.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Environment.cs" Link="CorlibTests\InternalCall\TC_System_Environment.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_GC.cs" Link="CorlibTests\InternalCall\TC_System_GC.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Globalization_CultureData.cs" Link="CorlibTests\InternalCall\TC_System_Globalization_CultureData.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Globalization_CultureInfo.cs" Link="CorlibTests\InternalCall\TC_System_Globalization_CultureInfo.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_IO_MonoIO.cs" Link="CorlibTests\InternalCall\TC_System_IO_MonoIO.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Math.cs" Link="CorlibTests\InternalCall\TC_System_Math.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Threading_Monitor.cs" Link="CorlibTests\InternalCall\TC_System_Threading_Monitor.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Threading_OSSpecificSynchronizationContext.cs" Link="CorlibTests\InternalCall\TC_System_Threading_OSSpecificSynchronizationContext.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Threading_Thread.cs" Link="CorlibTests\InternalCall\TC_System_Threading_Thread.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Threading_ThreadPool.cs" Link="CorlibTests\InternalCall\TC_System_Threading_ThreadPool.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Threading_WaitHandle.cs" Link="CorlibTests\InternalCall\TC_System_Threading_WaitHandle.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Object_Icalls.cs" Link="CorlibTests\InternalCall\TC_System_Object_Icalls.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_Assembly.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_Assembly.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_AssemblyName.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_AssemblyName.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_EventInfo.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_EventInfo.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_FieldInfo.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_FieldInfo.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_MonoMethodInfo.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_MonoMethodInfo.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_RuntimeAssembly.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_RuntimeAssembly.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_RuntimeConstructorInfo.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_RuntimeConstructorInfo.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_RuntimeFieldInfo.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_RuntimeFieldInfo.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_RuntimeMethodInfo.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_RuntimeMethodInfo.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_RuntimeParameterInfo.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_RuntimeParameterInfo.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_RuntimePropertyInfo.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_RuntimePropertyInfo.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Reflection_RuntimeModule.cs" Link="CorlibTests\InternalCall\TC_System_Reflection_RuntimeModule.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Runtime_CompilerServices_RuntimeHelper.cs" Link="CorlibTests\InternalCall\TC_System_Runtime_CompilerServices_RuntimeHelper.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Runtime_InteropServices_GCHandle.cs" Link="CorlibTests\InternalCall\TC_System_Runtime_InteropServices_GCHandle.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Runtime_InteropServices_RuntimeInformation.cs" Link="CorlibTests\InternalCall\TC_System_Runtime_InteropServices_RuntimeInformation.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_RuntimeType.cs" Link="CorlibTests\InternalCall\TC_System_RuntimeType.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_RuntimeTypeHandle.cs" Link="CorlibTests\InternalCall\TC_System_RuntimeTypeHandle.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_String.cs" Link="CorlibTests\InternalCall\TC_System_String.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Threading_Interlocked.cs" Link="CorlibTests\InternalCall\TC_System_Threading_Interlocked.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Threading_Volatile.cs" Link="CorlibTests\InternalCall\TC_System_Threading_Volatile.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_Type.cs" Link="CorlibTests\InternalCall\TC_System_Type.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_TypedReference.cs" Link="CorlibTests\InternalCall\TC_System_TypedReference.cs" />
+    <Compile Include="..\..\managed\CorlibTests\InternalCall\TC_System_ValueType.cs" Link="CorlibTests\InternalCall\TC_System_ValueType.cs" />
+    <Compile Include="..\..\managed\CorlibTests\Intrinsic\TC_String.cs" Link="CorlibTests\Intrinsic\TC_String.cs" />
+    <Compile Include="..\..\managed\CorlibTests\Intrinsic\TC_Syste_Span.cs" Link="CorlibTests\Intrinsic\TC_Syste_Span.cs" />
+    <Compile Include="..\..\managed\CorlibTests\Intrinsic\TC_System_Object.cs" Link="CorlibTests\Intrinsic\TC_System_Object.cs" />
+    <Compile Include="..\..\managed\CoreTests\Regression\*.cs" LinkBase="Regression" />
+    <Compile Include="..\..\managed\CoreTests\Regression\GenericStruct\*.cs" LinkBase="Regression\GenericStruct" />
+    <Compile Include="..\..\managed\CoreTests\Bootstrap\TestCallMethod.cs" Link="Bootstrap\TestCallMethod.cs" />
+    <Compile Include="..\..\managed\CoreTests\Bootstrap\TestPassArgument.cs" Link="Bootstrap\TestPassArgument.cs" />
+    <Compile Include="..\..\managed\CoreTests\Bootstrap\TestReturnValue.cs" Link="Bootstrap\TestReturnValue.cs" />
+    <Compile Include="..\..\managed\CoreTests\App.cs" Link="CoreTests\App.cs" />
+    <Compile Include="..\..\managed\CoreTests\App2.cs" Link="CoreTests\App2.cs" />
+    <Compile Include="..\..\managed\CoreTests\CustomPInvoke.cs" Link="CoreTests\CustomPInvoke.cs" />
+    <Compile Include="..\..\managed\GcTests\Fixtures\GcGraphTypes.cs" Link="GcTests\Fixtures\GcGraphTypes.cs" />
+    <Compile Include="..\..\managed\GcTests\Fixtures\GcTestCaseBase.cs" Link="GcTests\Fixtures\GcTestCaseBase.cs" />
+    <Compile Include="..\..\managed\GcTests\Collection\TC_GC_Collection.cs" Link="GcTests\Collection\TC_GC_Collection.cs" />
+    <Compile Include="..\..\managed\GcTests\Roots\TC_GC_Roots.cs" Link="GcTests\Roots\TC_GC_Roots.cs" />
+    <Compile Include="..\..\managed\GcTests\Roots\TC_GC_StaticBitmapBitZero.cs" Link="GcTests\Roots\TC_GC_StaticBitmapBitZero.cs" />
+    <Compile Include="..\..\managed\GcTests\Handles\TC_GC_Handles.cs" Link="GcTests\Handles\TC_GC_Handles.cs" />
+    <Compile Include="..\..\managed\GcTests\Scan\TC_GC_Graph.cs" Link="GcTests\Scan\TC_GC_Graph.cs" />
+    <Compile Include="..\..\managed\GcTests\Scan\TC_GC_Arrays.cs" Link="GcTests\Scan\TC_GC_Arrays.cs" />
+    <Compile Include="..\..\managed\GcTests\Scan\TC_GC_ArrayNonSealedElement.cs" Link="GcTests\Scan\TC_GC_ArrayNonSealedElement.cs" />
+    <Compile Include="..\..\managed\GcTests\Scan\TC_GC_InstanceFields.cs" Link="GcTests\Scan\TC_GC_InstanceFields.cs" />
+    <Compile Include="..\..\managed\GcTests\Scan\TC_GC_ValueTypes.cs" Link="GcTests\Scan\TC_GC_ValueTypes.cs" />
+    <Compile Include="..\..\managed\GcTests\Sweep\TC_GC_Sweep.cs" Link="GcTests\Sweep\TC_GC_Sweep.cs" />
+    <Compile Include="..\..\managed\GcTests\Finalizer\TC_GC_Finalizer.cs" Link="GcTests\Finalizer\TC_GC_Finalizer.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Activator.cs" Link="Runtime\TC_Activator.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Assembly.cs" Link="Runtime\TC_Assembly.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_ArrayGenericInterface.cs" Link="Runtime\TC_ArrayGenericInterface.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_AOTTypeImplInterpInterface.cs" Link="Runtime\TC_AOTTypeImplInterpInterface.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_CustomAttribute.cs" Link="Runtime\TC_CustomAttribute.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Delegate_DynamicInvoke.cs" Link="Runtime\TC_Delegate_DynamicInvoke.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Delegate_OpenClose.cs" Link="Runtime\TC_Delegate_OpenClose.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_dynamic.cs" Link="Runtime\TC_dynamic.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Enum.cs" Link="Runtime\TC_Enum.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_event.cs" Link="Runtime\TC_event.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_foreach.cs" Link="Runtime\TC_foreach.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Interlocked.cs" Link="Runtime\TC_Interlocked.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_InterfaceDefaultMethod.cs" Link="Runtime\TC_InterfaceDefaultMethod.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Marshal.cs" Link="Runtime\TC_Marshal.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Nullable.cs" Link="Runtime\TC_Nullable.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Reflection.cs" Link="Runtime\TC_Reflection.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_String.cs" Link="Runtime\TC_String.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_using.cs" Link="Runtime\TC_using.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\MonoPInvokeWrapperPreserves.cs" Link="Runtime\MonoPInvokeWrapperPreserves.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_AOTGeneric.cs" Link="Runtime\TC_AOTGeneric.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_AOTStructLayout.cs" Link="Runtime\TC_AOTStructLayout.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_async.cs" Link="Runtime\TC_async.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_CrashReport.cs" Link="Runtime\TC_CrashReport.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Delegate_BeginEndInvoke.cs" Link="Runtime\TC_Delegate_BeginEndInvoke.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_explicit_implement.cs" Link="Runtime\TC_explicit_implement.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_ExternalCall.cs" Link="Runtime\TC_ExternalCall.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_FunctionPointer.cs" Link="Runtime\TC_FunctionPointer.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_Instinct.cs" Link="Runtime\TC_Instinct.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_InterpStructLayout.cs" Link="Runtime\TC_InterpStructLayout.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_MonoPInvokeWrapper.cs" Link="Runtime\TC_MonoPInvokeWrapper.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\TC_MultiCastDelegate.cs" Link="Runtime\TC_MultiCastDelegate.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_InnerType.cs" Link="Runtime\Misc\TC_InnerType.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_MethodBridge.cs" Link="Runtime\Misc\TC_MethodBridge.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_MethodBridgeAOTStruct.cs" Link="Runtime\Misc\TC_MethodBridgeAOTStruct.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_MethodBridgeInterpStruct.cs" Link="Runtime\Misc\TC_MethodBridgeInterpStruct.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_PreJit.cs" Link="Runtime\Misc\TC_PreJit.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_RefOtherAssembly.cs" Link="Runtime\Misc\TC_RefOtherAssembly.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_RuntimeApi.cs" Link="Runtime\Misc\TC_RuntimeApi.cs" />
+    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_Thread.cs" Link="Runtime\Misc\TC_Thread.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <IlFile Include="ILTests\Instructions\*.il" />
+    <PackageReference Include="ILAsm" Version="9.4.0" GeneratePathProperty="true" PrivateAssets="all" />
+  </ItemGroup>
+
+  <Target Name="EnsureLegacyILAsmRestored" BeforeTargets="BuildLegacyIlAssembly">
+    <Error Condition="'$(PkgILAsm)' == '' Or !Exists('$(PkgILAsm)\build\net\ILAsm.targets')"
+           Text="ILAsm NuGet package is missing. Run 'dotnet restore' on managed-net10.sln." />
+  </Target>
+
+  <Target Name="BuildLegacyIlAssembly" BeforeTargets="ResolveAssemblyReferences">
+    <PropertyGroup>
+      <IlNativeOutput>$(OutputPath)$(IlNativeAssemblyName).dll</IlNativeOutput>
+      <_IlAsmExe Condition="'$(Platform)' == 'x86'">$(PkgILAsm)\bin\Win.x86\ilasm.exe</_IlAsmExe>
+      <_IlAsmExe Condition="'$(_IlAsmExe)' == ''">$(PkgILAsm)\bin\Win.x64\ilasm.exe</_IlAsmExe>
+      <_IlSources>@(IlFile->'&quot;$(MSBuildProjectDirectory)\%(Identity)&quot;', ' ')</_IlSources>
+    </PropertyGroup>
+    <MakeDir Directories="$(OutputPath)" />
+    <Exec Command="&quot;$(_IlAsmExe)&quot; /dll /output:&quot;$(IlNativeOutput)&quot; /quiet $(_IlSources)" />
+    <ItemGroup>
+      <Reference Include="$(IlNativeAssemblyName)">
+        <HintPath>$(IlNativeOutput)</HintPath>
+        <Private>false</Private>
+      </Reference>
+    </ItemGroup>
+  </Target>
+
+</Project>

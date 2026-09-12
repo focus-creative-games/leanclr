@@ -19,31 +19,34 @@ namespace Tests.Instruments.Arrays
             Assert.Equal(2, y);
         }
 
-        //[UnitTest]
-        //public void OutOfRange_lower()
-        //{
-        //    var arr = new ulong[] { 1, 2 };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[-1];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower()
+        {
+            var arr = new ulong[] { 1, 2 };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[-1];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper()
-        //{
-        //    var arr = new ulong[] { 1, 2 };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[2];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper()
+        {
+            var arr = new ulong[] { 1, 2 };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[2];
+            });
+        }
 
-        //[UnitTest]
-        //public void NullRef()
-        //{
-        //    ulong[] arr = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    var s = arr[0];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void NullRef()
+        {
+            ulong[] arr = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            var s = arr[0];
+            });
+        }
     }
 }

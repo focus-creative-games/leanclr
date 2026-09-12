@@ -3,6 +3,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <limits>
+#include <type_traits>
+#include <utility>
 #include "vm/rt_managed_types.h"
 #include "vm/rt_exception.h"
 #include "vm/method.h"
@@ -23,6 +25,8 @@
 #include "metadata/module_def.h"
 #include "interp/interp_defs.h"
 #include "interp/execution_helper.h"
+#include "interp/interpreter.h"
+#include "interp/machine_state.h"
 #include "profile/profile.h"
 #include "utils/string_builder.h"
 
@@ -231,6 +235,7 @@
     do                                              \
     {                                               \
         ___ret_err = err;                           \
+        ___ret_ip = 0;                              \
         LEANCLR_CODEGEN_GOTO_HANDLE_RETURN_ERROR(); \
     } while (0)
 
@@ -244,6 +249,7 @@
     do                                                                \
     {                                                                 \
         ___ret_err = err;                                             \
+        ___ret_ip = ip;                                               \
         LEANCLR_CODEGEN_GOTO_HANDLE_RETURN_ERROR();                   \
     } while (0)
 
@@ -253,6 +259,7 @@
         if (LEANCLR_CODEGEN_UNLIKELY(!(checkVar)))                                                      \
         {                                                                                               \
             ___ret_err = leanclr::RtErr::NullReference;                                                 \
+            ___ret_ip = ip;                                                                             \
             LEANCLR_CODEGEN_GOTO_HANDLE_RETURN_ERROR();                                                 \
         }                                                                                               \
     } while (0)
@@ -264,6 +271,7 @@
         if (LEANCLR_CODEGEN_UNLIKELY(__result.is_err()))             \
         {                                                            \
             ___ret_err = __result.unwrap_err();                      \
+            ___ret_ip = ip;                                          \
             LEANCLR_CODEGEN_GOTO_HANDLE_RETURN_ERROR();              \
         }                                                            \
     } while (0)
@@ -275,6 +283,7 @@
         if (LEANCLR_CODEGEN_UNLIKELY(__result.is_err()))                               \
         {                                                                              \
             ___ret_err = __result.unwrap_err();                                        \
+            ___ret_ip = ip;                                                            \
             LEANCLR_CODEGEN_GOTO_HANDLE_RETURN_ERROR();                                \
         }                                                                              \
         retVar = (decltype(retVar))__result.unwrap();                                  \
@@ -288,6 +297,7 @@
         if (LEANCLR_CODEGEN_UNLIKELY(__result.is_err()))                                              \
         {                                                                                             \
             ___ret_err = __result.unwrap_err();                                                       \
+            ___ret_ip = ip;                                                                           \
             LEANCLR_CODEGEN_GOTO_HANDLE_RETURN_ERROR();                                               \
         }                                                                                             \
         retVar = __result.unwrap();                                                                   \
@@ -301,6 +311,7 @@
         if (LEANCLR_CODEGEN_UNLIKELY(__result.is_err()))                                                  \
         {                                                                                                 \
             ___ret_err = __result.unwrap_err();                                                           \
+            ___ret_ip = ip;                                                                               \
             LEANCLR_CODEGEN_GOTO_HANDLE_RETURN_ERROR();                                                   \
         }                                                                                                 \
         retVar = (retType)__result.unwrap();                                                              \
@@ -336,6 +347,116 @@ static T select_arch(T v32, T v64)
 #else
     return v32;
 #endif
+}
+
+template <typename T>
+struct is_rt_result : std::false_type
+{};
+
+template <typename T>
+struct is_rt_result<RtResult<T>> : std::true_type
+{};
+
+template <typename T>
+struct remove_cvref
+{
+    typedef typename std::remove_cv<typename std::remove_reference<T>::type>::type type;
+};
+
+template <typename Dst, typename Src>
+inline RtResult<Dst> wrap_result_to_impl(Src result, std::true_type) noexcept
+{
+    if (result.is_err())
+    {
+        return result.unwrap_err();
+    }
+    return RtResult<Dst>::Ok((Dst)result.unwrap());
+}
+
+template <typename Dst, typename Src>
+inline RtResult<Dst> wrap_result_to_impl(Src value, std::false_type) noexcept
+{
+    return RtResult<Dst>::Ok((Dst)value);
+}
+
+template <typename Dst, typename Src>
+inline RtResult<Dst> wrap_result_to(Src value) noexcept
+{
+    typedef typename remove_cvref<Src>::type RawSrc;
+    return wrap_result_to_impl<Dst>(std::move(value), is_rt_result<RawSrc>());
+}
+
+template <typename Dst, typename Src>
+inline Dst make_intptr_value_type(Src value) noexcept
+{
+    Dst result = {};
+    result.__field_0 = (intptr_t)value;
+    return result;
+}
+
+template <typename Dst, typename Src>
+inline RtResult<Dst> wrap_intptr_result_to_impl(Src result, std::true_type) noexcept
+{
+    if (result.is_err())
+    {
+        return result.unwrap_err();
+    }
+    return RtResult<Dst>::Ok(make_intptr_value_type<Dst>(result.unwrap()));
+}
+
+template <typename Dst, typename Src>
+inline RtResult<Dst> wrap_intptr_result_to_impl(Src value, std::false_type) noexcept
+{
+    return RtResult<Dst>::Ok(make_intptr_value_type<Dst>(value));
+}
+
+template <typename Dst, typename Src>
+inline RtResult<Dst> wrap_intptr_result_to(Src value) noexcept
+{
+    typedef typename remove_cvref<Src>::type RawSrc;
+    return wrap_intptr_result_to_impl<Dst>(std::move(value), is_rt_result<RawSrc>());
+}
+
+template <typename Dst>
+inline Dst make_typed_reference_value_type(const vm::RtTypedReference& value) noexcept
+{
+    Dst result = {};
+    result.__field_0 = (uint8_t*)value.value;
+    result.__field_1 = (intptr_t)value.type_handle;
+    return result;
+}
+
+template <typename Src>
+inline vm::RtTypedReference make_runtime_typed_reference(const Src& value) noexcept
+{
+    vm::RtTypedReference result = {};
+    result.value = value.__field_0;
+    result.type_handle = (const void*)value.__field_1;
+    result.klass = nullptr;
+    return result;
+}
+
+template <typename Dst>
+inline RtResult<Dst> wrap_typed_reference_result_to_impl(RtResult<vm::RtTypedReference> result, std::true_type) noexcept
+{
+    if (result.is_err())
+    {
+        return result.unwrap_err();
+    }
+    return RtResult<Dst>::Ok(make_typed_reference_value_type<Dst>(result.unwrap()));
+}
+
+template <typename Dst>
+inline RtResult<Dst> wrap_typed_reference_result_to_impl(vm::RtTypedReference value, std::false_type) noexcept
+{
+    return RtResult<Dst>::Ok(make_typed_reference_value_type<Dst>(value));
+}
+
+template <typename Dst, typename Src>
+inline RtResult<Dst> wrap_typed_reference_result_to(Src value) noexcept
+{
+    typedef typename remove_cvref<Src>::type RawSrc;
+    return wrap_typed_reference_result_to_impl<Dst>(std::move(value), is_rt_result<RawSrc>());
 }
 
 using vm::RT_OBJECT_HEADER_SIZE;
@@ -448,6 +569,32 @@ inline bool is_aot_method(const metadata::RtMethodInfo* method) noexcept
     return method->invoker_type == metadata::RtInvokerType::Aot;
 }
 
+class AotFrameScope
+{
+  public:
+    explicit AotFrameScope(const metadata::RtMethodInfo* method) noexcept
+        : _old_frame_top(interp::MachineState::get_global_machine_state().enter_frame_from_icall_or_intrinsic(method))
+    {
+    }
+
+    AotFrameScope(const metadata::RtMethodInfo* method, interp::RtStackObject* roots, uint32_t root_count) noexcept
+        : _old_frame_top(interp::MachineState::get_global_machine_state().enter_frame_from_icall_or_intrinsic(
+              method, roots, root_count, interp::InterpFrameRootScanMode::ExplicitObjectRoots))
+    {
+    }
+
+    ~AotFrameScope() noexcept
+    {
+        interp::MachineState::get_global_machine_state().leave_frame_from_icall_or_intrinsic(_old_frame_top);
+    }
+
+    AotFrameScope(const AotFrameScope&) = delete;
+    AotFrameScope& operator=(const AotFrameScope&) = delete;
+
+  private:
+    uint32_t _old_frame_top;
+};
+
 inline RtResultVoid invoke_with_run_class_static_constructor(const metadata::RtMethodInfo* method, interp::RtStackObject* arg_buff,
                                                              interp::RtStackObject* ret_buff) noexcept
 {
@@ -468,6 +615,54 @@ inline RtResultVoid virtual_invoke_without_run_class_static_constructor(const me
                                                                         interp::RtStackObject* ret_buff) noexcept
 {
     return vm::Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(method, arg_buff, ret_buff);
+}
+
+inline RtResultVoid invoke_interpreter_with_varargs(const metadata::RtMethodInfo* method, const interp::RtStackObject* arg_buff,
+                                                    interp::RtStackObject* ret_buff, uint16_t vararg_count) noexcept
+{
+    auto execute_ret = interp::Interpreter::execute(method, arg_buff, vararg_count);
+    if (execute_ret.is_err())
+    {
+        LEANCLR_CODEGEN_RETURN_ERR(execute_ret.unwrap_err());
+    }
+    const interp::RtStackObject* result = execute_ret.unwrap();
+    if (method->ret_stack_object_size > 0)
+    {
+        std::memcpy(ret_buff, result, method->ret_stack_object_size * sizeof(interp::RtStackObject));
+    }
+    LEANCLR_CODEGEN_RETURN_VOID();
+}
+
+inline RtResultVoid invoke_with_run_class_static_constructor_with_varargs(const metadata::RtMethodInfo* method, interp::RtStackObject* arg_buff,
+                                                                          interp::RtStackObject* ret_buff, uint16_t vararg_count) noexcept
+{
+    if (vararg_count == 0)
+    {
+        return invoke_with_run_class_static_constructor(method, arg_buff, ret_buff);
+    }
+    if (vm::Method::is_static(method) && vm::Class::is_cctor_not_finished(method->parent))
+    {
+        RET_ERR_ON_FAIL(vm::Runtime::run_class_static_constructor(method->parent));
+    }
+    return invoke_interpreter_with_varargs(method, arg_buff, ret_buff, vararg_count);
+}
+
+inline RtResultVoid virtual_invoke_without_run_class_static_constructor_with_varargs(const metadata::RtMethodInfo* method,
+                                                                                     interp::RtStackObject* arg_buff,
+                                                                                     interp::RtStackObject* ret_buff,
+                                                                                     uint16_t vararg_count) noexcept
+{
+    if (vararg_count == 0)
+    {
+        return virtual_invoke_without_run_class_static_constructor(method, arg_buff, ret_buff);
+    }
+    if (arg_buff == nullptr || arg_buff[0].obj == nullptr)
+    {
+        RET_ERR(RtErr::NullReference);
+    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, actual_method,
+                                            vm::Method::get_virtual_method_impl(arg_buff[0].obj, method));
+    return invoke_interpreter_with_varargs(actual_method, arg_buff, ret_buff, vararg_count);
 }
 
 inline RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl(vm::RtObject* obj, const metadata::RtMethodInfo* virtual_method) noexcept
@@ -566,6 +761,11 @@ inline RtResult<const uint8_t*> get_field_rva_data(const metadata::RtFieldInfo* 
     return vm::Field::get_field_rva_data(field);
 }
 
+inline RtResult<size_t> get_field_size(const metadata::RtFieldInfo* field) noexcept
+{
+    return vm::Field::get_field_size(field);
+}
+
 inline uint32_t get_field_offset_includes_object_header(const metadata::RtFieldInfo* field) noexcept
 {
     return vm::Field::get_field_offset_includes_object_header_for_all_type(field);
@@ -618,10 +818,22 @@ inline int32_t cast_float_to_i32(Src value) noexcept
     return interp::cast_float_to_i32<Src, Dst>(value);
 }
 
+template <typename Src>
+inline uint32_t cast_float_to_u32(Src value) noexcept
+{
+    return interp::cast_float_to_u32(value);
+}
+
 template <typename Src, typename Dst>
 inline int64_t cast_float_to_i64(Src value) noexcept
 {
     return interp::cast_float_to_i64<Src, Dst>(value);
+}
+
+template <typename Src>
+inline uint64_t cast_float_to_u64(Src value) noexcept
+{
+    return interp::cast_float_to_u64(value);
 }
 
 template <typename Src, typename Dst>

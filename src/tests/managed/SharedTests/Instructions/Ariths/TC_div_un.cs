@@ -24,24 +24,26 @@ namespace Tests.Instruments.Ariths
             Assert.Equal(2UL, a / b);
         }
 
-        //[UnitTest]
-        //public static void uint_DivideByZeroException()
-        //{
-        //    uint a = 1;
-        //    uint b = 0;
-        //    Assert.ExpectException(new DivideByZeroException());
-        //    uint c = a / b;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public static void uint_DivideByZeroException()
+        {
+            uint a = 1;
+            uint b = 0;
+            Assert.ExpectException<DivideByZeroException>(() =>
+            {
+            uint c = a / b;
+            });
+        }
 
-        //[UnitTest]
-        //public static void ulong_DivideByZeroException()
-        //{
-        //    ulong a = 1;
-        //    ulong b = 0;
-        //    Assert.ExpectException(new DivideByZeroException());
-        //    ulong c = a / b;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public static void ulong_DivideByZeroException()
+        {
+            ulong a = 1;
+            ulong b = 0;
+            Assert.ExpectException<DivideByZeroException>(() =>
+            {
+            ulong c = a / b;
+            });
+        }
     }
 }

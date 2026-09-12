@@ -171,6 +171,11 @@ static RtResult<uint64_t> read_customattribute_elem_simple_value(utils::BinaryRe
 
 static RtResult<uint64_t> read_customattribute_elem_value(metadata::RtModuleDef* mod, utils::BinaryReader* reader, metadata::RtElementType ele_type);
 
+static RtResult<metadata::RtClass*> get_class_from_reflection_type(RtReflectionType* type_obj)
+{
+    return Reflection::get_class_from_reflection_type_object(type_obj);
+}
+
 static RtResult<metadata::RtElementType> get_custom_attribute_elem_type_from_typesig(const metadata::RtTypeSig* type_sig)
 {
     metadata::RtElementType original_ele_type = type_sig->ele_type;
@@ -409,7 +414,7 @@ static RtResult<uint64_t> read_customattribute_elem_value(metadata::RtModuleDef*
             auto& enum_name_span = opt_enum_name.value();
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, type_obj,
                                                     CustomAttribute::parse_assembly_qualified_type(mod, enum_name_span.data(), enum_name_span.size(), false));
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, enum_klass, Class::get_class_from_typesig(type_obj->type_handle));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, enum_klass, get_class_from_reflection_type(type_obj));
             if (!Class::is_enum_type(enum_klass))
                 RET_ASSERT_ERR(RtErr::BadImageFormat);
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint64_t, enum_value,
@@ -569,7 +574,7 @@ static RtResult<metadata::RtElementType> read_field_or_prop_type(metadata::RtMod
         auto& enum_name_span = opt_enum_name.value();
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, type_obj,
                                                 CustomAttribute::parse_assembly_qualified_type(mod, enum_name_span.data(), enum_name_span.size(), false));
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, enum_klass, Class::get_class_from_typesig(type_obj->type_handle));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, enum_klass, get_class_from_reflection_type(type_obj));
         if (!Class::is_enum_type(enum_klass))
             RET_ASSERT_ERR(RtErr::BadImageFormat);
         result = Class::get_element_type(enum_klass->element_class);
@@ -991,11 +996,12 @@ RtResult<bool> CustomAttribute::has_customattribute_on_event(const metadata::RtE
 
 RtResult<bool> CustomAttribute::has_customattribute_on_parameter(RtReflectionParameter* parameter, const metadata::RtClass* customattribute_klass)
 {
-    auto ref_method = reinterpret_cast<RtReflectionMethod*>(parameter->member);
-    const metadata::RtMethodInfo* method = ref_method->method;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method,
+                                            Reflection::get_parameter_method_info_from_reflection_object(parameter));
     metadata::RtModuleDef* mod = method->parent->image;
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<uint32_t>, opt_param_token, Method::get_parameter_token(method, parameter->index));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<uint32_t>, opt_param_token,
+                                            Reflection::get_parameter_token_from_reflection_object(parameter));
     if (!opt_param_token)
         RET_OK(false);
     uint32_t param_token = opt_param_token.value();
@@ -1014,57 +1020,61 @@ static RtResult<CustomAttributeProvider> get_token_of_customattribute_provider(R
         RET_ERR(RtErr::NullReference);
 
     const CorLibTypes& corlib_types = Class::get_corlib_types();
-    const metadata::RtClass* obj_klass = obj->klass;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, provider_obj, Reflection::normalize_coreclr_reflection_object(obj));
+    const metadata::RtClass* obj_klass = provider_obj->klass;
 
     CustomAttributeProvider provider{};
 
     if (obj_klass == corlib_types.cls_runtimetype)
     {
-        RtReflectionType* type_obj = reinterpret_cast<RtReflectionType*>(obj);
-        const metadata::RtTypeSig* type_sig = type_obj->type_handle;
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, target_klass, Class::get_class_from_typesig(type_sig));
+        RtReflectionType* type_obj = reinterpret_cast<RtReflectionType*>(provider_obj);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, target_klass,
+                                                Reflection::get_class_from_reflection_type_object(type_obj));
         metadata::RtModuleDef* mod = target_klass->image;
         provider.mod = mod;
         provider.token = target_klass->token;
     }
     else if (obj_klass == corlib_types.cls_reflection_method || obj_klass == corlib_types.cls_reflection_constructor)
     {
-        RtReflectionMethod* method_obj = reinterpret_cast<RtReflectionMethod*>(obj);
-        const metadata::RtMethodInfo* method = method_obj->method;
+        RtReflectionMethod* method_obj = reinterpret_cast<RtReflectionMethod*>(provider_obj);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, Reflection::get_method_info_from_reflection_object(method_obj));
         metadata::RtModuleDef* mod = method->parent->image;
         provider.mod = mod;
         provider.token = method->token;
     }
     else if (obj_klass == corlib_types.cls_reflection_field)
     {
-        RtReflectionField* field_obj = reinterpret_cast<RtReflectionField*>(obj);
-        const metadata::RtFieldInfo* field = field_obj->field;
+        RtReflectionField* field_obj = reinterpret_cast<RtReflectionField*>(provider_obj);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, field, Reflection::get_field_info_from_reflection_object(field_obj));
         metadata::RtModuleDef* mod = field->parent->image;
         provider.mod = mod;
         provider.token = field->token;
     }
     else if (obj_klass == corlib_types.cls_reflection_property)
     {
-        RtReflectionProperty* prop_obj = reinterpret_cast<RtReflectionProperty*>(obj);
-        const metadata::RtPropertyInfo* property = prop_obj->property;
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtPropertyInfo*, property,
+                                                Reflection::get_property_info_from_reflection_object(
+                                                    reinterpret_cast<RtReflectionProperty*>(provider_obj)));
         metadata::RtModuleDef* mod = property->parent->image;
         provider.mod = mod;
         provider.token = property->token;
     }
     else if (obj_klass == corlib_types.cls_reflection_event)
     {
-        RtReflectionEventInfo* event_obj = reinterpret_cast<RtReflectionEventInfo*>(obj);
-        const metadata::RtEventInfo* event = event_obj->event;
+        RtReflectionEventInfo* event_obj = reinterpret_cast<RtReflectionEventInfo*>(provider_obj);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtEventInfo*, event,
+                                                Reflection::get_event_info_from_reflection_object(event_obj));
         metadata::RtModuleDef* mod = event->parent->image;
         provider.mod = mod;
         provider.token = event->token;
     }
     else if (obj_klass == corlib_types.cls_reflection_parameter)
     {
-        RtReflectionParameter* param_obj = reinterpret_cast<RtReflectionParameter*>(obj);
-        RtReflectionMethod* ref_method = reinterpret_cast<RtReflectionMethod*>(param_obj->member);
-        const metadata::RtMethodInfo* method = ref_method->method;
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<uint32_t>, opt_param_token, Method::get_parameter_token(method, param_obj->index));
+        RtReflectionParameter* param_obj = reinterpret_cast<RtReflectionParameter*>(provider_obj);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method,
+                                                Reflection::get_parameter_method_info_from_reflection_object(param_obj));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<uint32_t>, opt_param_token,
+                                                Reflection::get_parameter_token_from_reflection_object(param_obj));
         uint32_t param_token = opt_param_token.value_or(0);
         metadata::RtModuleDef* mod = method->parent->image;
         provider.mod = mod;
@@ -1072,11 +1082,20 @@ static RtResult<CustomAttributeProvider> get_token_of_customattribute_provider(R
     }
     else if (obj_klass == corlib_types.cls_reflection_assembly)
     {
-        RtReflectionAssembly* assembly_obj = reinterpret_cast<RtReflectionAssembly*>(obj);
-        metadata::RtAssembly* assembly = assembly_obj->assembly;
+        RtReflectionAssembly* assembly_obj = reinterpret_cast<RtReflectionAssembly*>(provider_obj);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, assembly,
+                                                Reflection::get_assembly_from_reflection_object(assembly_obj));
         metadata::RtModuleDef* mod = assembly->mod;
         provider.mod = mod;
         provider.token = mod->get_assembly_token();
+    }
+    else if (obj_klass == corlib_types.cls_reflection_module)
+    {
+        RtReflectionModule* module_obj = reinterpret_cast<RtReflectionModule*>(provider_obj);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtModuleDef*, mod,
+                                                Reflection::get_module_from_reflection_object(module_obj));
+        provider.mod = mod;
+        provider.token = mod->get_module_token();
     }
     else
     {
@@ -1139,6 +1158,117 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_on_target_token(metadat
     return ca_arr;
 }
 
+static bool has_struct_layout_pseudo_attribute(const metadata::RtClass* klass)
+{
+    uint32_t layout_flags = klass->flags & (static_cast<uint32_t>(metadata::RtTypeAttribute::SequentialLayout) |
+                                            static_cast<uint32_t>(metadata::RtTypeAttribute::ExplicitLayout));
+    uint32_t string_format = klass->flags & static_cast<uint32_t>(metadata::RtTypeAttribute::StringFormatMask);
+    return layout_flags != 0 || string_format != 0 || klass->image->get_class_layout_data(klass->token).has_value();
+}
+
+static RtResult<RtObject*> create_struct_layout_pseudo_attribute(const metadata::RtClass* klass)
+{
+    metadata::RtModuleDef* corlib = Class::get_corlib_types().cls_object->image;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, attr_klass,
+                                            corlib->get_class_by_name("System.Runtime.InteropServices.StructLayoutAttribute", false, true));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, layout_kind_klass,
+                                            corlib->get_class_by_name("System.Runtime.InteropServices.LayoutKind", false, true));
+
+    const metadata::RtTypeSig* ctor_params[] = {layout_kind_klass->by_val};
+    const metadata::RtMethodInfo* ctor =
+        Method::find_matched_method_in_class_by_name_and_signature(attr_klass, STR_CTOR, ctor_params, 1);
+    if (ctor == nullptr)
+    {
+        RET_ERR(RtErr::MissingMethod);
+    }
+
+    int32_t layout_kind = 3; // LayoutKind.Auto
+    if ((klass->flags & static_cast<uint32_t>(metadata::RtTypeAttribute::SequentialLayout)) != 0)
+    {
+        layout_kind = 0; // LayoutKind.Sequential
+    }
+    else if ((klass->flags & static_cast<uint32_t>(metadata::RtTypeAttribute::ExplicitLayout)) != 0)
+    {
+        layout_kind = 2; // LayoutKind.Explicit
+    }
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, attr_obj,
+                                            LEANCLR_NEWOBJ_INTERNAL(attr_klass, "CustomAttribute::create_struct_layout_pseudo_attribute"));
+    const void* ctor_args[] = {&layout_kind};
+    RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(ctor, attr_obj, ctor_args));
+
+    int32_t pack = 0;
+    int32_t size = 0;
+    auto layout_data = klass->image->get_class_layout_data(klass->token);
+    if (layout_data.has_value())
+    {
+        pack = static_cast<int32_t>(layout_data->packing);
+        size = static_cast<int32_t>(layout_data->size);
+    }
+
+    int32_t char_set = 2; // CharSet.Ansi
+    uint32_t string_format = klass->flags & static_cast<uint32_t>(metadata::RtTypeAttribute::StringFormatMask);
+    if (string_format == static_cast<uint32_t>(metadata::RtTypeAttribute::UnicodeClass))
+    {
+        char_set = 3; // CharSet.Unicode
+    }
+    else if (string_format == static_cast<uint32_t>(metadata::RtTypeAttribute::AutoClass))
+    {
+        char_set = 4; // CharSet.Auto
+    }
+
+    const metadata::RtFieldInfo* pack_field = Class::get_field_for_name(attr_klass, "Pack", true);
+    const metadata::RtFieldInfo* size_field = Class::get_field_for_name(attr_klass, "Size", true);
+    const metadata::RtFieldInfo* char_set_field = Class::get_field_for_name(attr_klass, "CharSet", true);
+    if (pack_field == nullptr || size_field == nullptr || char_set_field == nullptr)
+    {
+        RET_ERR(RtErr::MissingField);
+    }
+    RET_ERR_ON_FAIL(Field::set_instance_value(pack_field, attr_obj, &pack));
+    RET_ERR_ON_FAIL(Field::set_instance_value(size_field, attr_obj, &size));
+    RET_ERR_ON_FAIL(Field::set_instance_value(char_set_field, attr_obj, &char_set));
+    RET_OK(attr_obj);
+}
+
+static RtResult<RtArray*> append_custom_attribute(RtArray* normal_attrs, RtObject* pseudo_attr)
+{
+    const CorLibTypes& types = Class::get_corlib_types();
+    int32_t normal_count = normal_attrs != nullptr ? Array::get_array_length(normal_attrs) : 0;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, result,
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(types.cls_attribute, normal_count + 1,
+                                                                                       "CustomAttribute::append_custom_attribute"));
+    for (int32_t i = 0; i < normal_count; ++i)
+    {
+        Array::set_array_data_at<RtObject*>(result, i, Array::get_array_data_at<RtObject*>(normal_attrs, i));
+    }
+    Array::set_array_data_at<RtObject*>(result, normal_count, pseudo_attr);
+    RET_OK(result);
+}
+
+RtResult<RtArray*> CustomAttribute::get_customattributes_on_class_with_pseudo(const metadata::RtClass* klass,
+                                                                              const metadata::RtClass* attr_klass)
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, normal_attrs,
+                                            get_customattributes_on_target_token(klass->image, klass->token, attr_klass));
+    if (attr_klass == nullptr || !has_struct_layout_pseudo_attribute(klass))
+    {
+        RET_OK(normal_attrs);
+    }
+
+    metadata::RtModuleDef* corlib = Class::get_corlib_types().cls_object->image;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, struct_layout_klass,
+                                            corlib->get_class_by_name("System.Runtime.InteropServices.StructLayoutAttribute", false, true));
+    RET_ERR_ON_FAIL(Class::initialize_super_types(const_cast<metadata::RtClass*>(struct_layout_klass)));
+    RET_ERR_ON_FAIL(Class::initialize_super_types(const_cast<metadata::RtClass*>(attr_klass)));
+    if (!Class::has_class_parent_fast(struct_layout_klass, attr_klass))
+    {
+        RET_OK(normal_attrs);
+    }
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, pseudo_attr, create_struct_layout_pseudo_attribute(klass));
+    return append_custom_attribute(normal_attrs, pseudo_attr);
+}
+
 RtResult<RtArray*> CustomAttribute::get_customattributes_on_target_object(RtObject* obj, const metadata::RtClass* attr_klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(CustomAttributeProvider, provider, get_token_of_customattribute_provider(obj));
@@ -1152,19 +1282,45 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target(RtObject
 }
 
 static const metadata::RtMethodInfo* s_customattribute_data_ctor = nullptr;
+static const metadata::RtClass* s_runtime_customattribute_data_class = nullptr;
+static const metadata::RtClass* s_metadata_token_class = nullptr;
+static const metadata::RtClass* s_const_array_class = nullptr;
+
+struct RuntimeMetadataConstArray
+{
+    int32_t length;
+    intptr_t data;
+};
 
 RtResult<const metadata::RtMethodInfo*> get_customattribute_data_ctor()
 {
     if (s_customattribute_data_ctor == nullptr)
     {
         const CorLibTypes& corlib_types = Class::get_corlib_types();
+        metadata::RtModuleDef* corlib = corlib_types.cls_customattributedata->image;
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, runtime_customattribute_data_class,
+                                                corlib->get_class_by_name("System.Reflection.RuntimeCustomAttributeData", false, true));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, metadata_token_class,
+                                                corlib->get_class_by_name("System.Reflection.MetadataToken", false, true));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, const_array_class,
+                                                corlib->get_class_by_name("System.Reflection.ConstArray", false, true));
+
+        RET_ERR_ON_FAIL(Class::initialize_all(runtime_customattribute_data_class));
+        RET_ERR_ON_FAIL(Class::initialize_all(metadata_token_class));
+        RET_ERR_ON_FAIL(Class::initialize_all(const_array_class));
+
         const metadata::RtTypeSig* param_type_sigs[] = {
-            corlib_types.cls_runtimetype->by_val,
-            corlib_types.cls_array->by_val,
+            corlib_types.cls_reflection_module->by_val,
+            metadata_token_class->by_val,
+            const_array_class->by_ref,
         };
-        const metadata::RtMethodInfo* ctor = Method::find_matched_method_in_class_by_name_and_param_count(corlib_types.cls_customattributedata, STR_CTOR, 4);
+        const metadata::RtMethodInfo* ctor =
+            Method::find_matched_method_in_class_by_name_and_signature(runtime_customattribute_data_class, STR_CTOR, param_type_sigs, 3);
         if (!ctor)
             RET_ERR(RtErr::MissingMethod);
+        s_runtime_customattribute_data_class = runtime_customattribute_data_class;
+        s_metadata_token_class = metadata_token_class;
+        s_const_array_class = const_array_class;
         s_customattribute_data_ctor = ctor;
     }
     RET_OK(s_customattribute_data_ctor);
@@ -1182,28 +1338,32 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(me
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(metadata::RtCustomAttributeRidRange, rid_range, mod->get_custom_attribute_rid_range(target_token));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const metadata::RtMethodInfo*, ca_data_ctor, get_customattribute_data_ctor());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(RtArray*, ca_data_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(types.cls_customattributedata, (int32_t)rid_range.count, "CustomAttribute::get_customattributes_data_on_target_token"));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionAssembly*, assembly_obj, Reflection::get_assembly_reflection_object(mod->get_assembly()));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionModule*, module_obj, Reflection::get_module_reflection_object(mod));
     for (uint32_t i = 0; i < rid_range.count; ++i)
     {
         uint32_t ca_rid = rid_range.start_rid + i;
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtCustomAttributeRawData, raw_data, mod->get_custom_attribute_raw_data(ca_rid));
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca, read_custom_attribute(mod, &raw_data));
 
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(utils::BinaryReader, reader, mod->get_decoded_blob_reader(raw_data.dataBlobIndex));
-        RtArray* typed_arg_arr = nullptr;
-        RtArray* named_arg_arr = nullptr;
-        RET_ERR_ON_FAIL(resolve_customattribute_data_arguments(&reader, mod, raw_data.ctor, &typed_arg_arr, &named_arg_arr));
+        RuntimeMetadataConstArray blob;
+        blob.length = static_cast<int32_t>(reader.length());
+        blob.data = reinterpret_cast<intptr_t>(reader.data());
 
-        const void* ctor_args[4];
-        UNWRAP_OR_RET_ERR_ON_FAIL(ctor_args[0], Reflection::get_method_reflection_object(raw_data.ctor, raw_data.ctor->parent));
-        const void* data_ptr = reader.data();
-        size_t data_len = reader.length();
-        ctor_args[1] = assembly_obj;
-        ctor_args[2] = &data_ptr;
-        ctor_args[3] = &data_len;
+        int32_t ctor_token = static_cast<int32_t>(raw_data.ctor_token);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ctor_token_obj,
+                                                LEANCLR_BOX_OBJECT_INTERNAL(s_metadata_token_class, &ctor_token,
+                                                                            "CustomAttribute::get_customattributes_data_on_target_token"));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, blob_obj,
+                                                LEANCLR_BOX_OBJECT_INTERNAL(s_const_array_class, &blob,
+                                                                            "CustomAttribute::get_customattributes_data_on_target_token"));
 
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca_data_obj, LEANCLR_NEWOBJ_INTERNAL(ca_data_ctor->parent, "CustomAttribute::get_customattributes_data_on_target_token"));
-        RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(ca_data_ctor, ca_data_obj, ctor_args));
+        RtObject* ctor_args[3] = {
+            reinterpret_cast<RtObject*>(module_obj),
+            ctor_token_obj,
+            blob_obj,
+        };
+        RET_ERR_ON_FAIL(Runtime::invoke_object_arguments_with_run_cctor(ca_data_ctor, ca_data_obj, ctor_args, 3));
 
         // gc::GarbageCollector::write_barrier((RtObject**)Array::get_array_data_start_as<RtObject*>(ca_data_arr) + i, ca_data_obj);
         Array::set_array_data_at<RtObject*>(ca_data_arr, (int32_t)i, ca_data_obj);

@@ -14,6 +14,8 @@ namespace vm
 
 RtResult<RtObject*> Object::__new_object(const metadata::RtClass* klass LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
+    RET_ERR_ON_FAIL(Class::initialize_fields(const_cast<metadata::RtClass*>(klass)));
+
     if (LEANCLR_UNLIKELY(Class::is_cctor_not_finished_hierarchy(klass)))
     {
         RET_ERR_ON_FAIL(Runtime::run_class_static_constructor_hierarchy(klass));

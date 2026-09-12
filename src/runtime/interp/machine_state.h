@@ -3,6 +3,7 @@
 #include <cstddef>
 #include <cstdint>
 
+#include "gc/gc_roots.h"
 #include "interp_defs.h"
 #include "utils/rt_span.h"
 
@@ -11,12 +12,22 @@ namespace leanclr
 namespace interp
 {
 
+enum class InterpFrameRootScanMode : uint8_t
+{
+    InterpreterFrame,
+    ExplicitObjectRoots,
+    MethodArguments,
+    None,
+};
+
 struct InterpFrame
 {
     const metadata::RtMethodInfo* method;
     RtStackObject* eval_stack_base;
     uint32_t eval_stack_size;
     uint32_t old_eval_stack_top;
+    int32_t vararg_count;
+    InterpFrameRootScanMode root_scan_mode;
     const uint8_t* ip;
 
     void save(const uint8_t* next_ip)
@@ -63,6 +74,8 @@ class MachineState
         _frame_stack_top = new_top;
     }
 
+    void visit_roots(gc::GcVisitObjectRoot visit, void* userdata) const;
+
     InterpFrame* get_executing_frame_stack()
     {
         if (_frame_stack_top == 0)
@@ -90,11 +103,13 @@ class MachineState
     RtResult<InterpFrame*> alloc_frame_stack();
     void free_frame_stack(uint32_t old_eval_stack_top);
 
-    RtResult<InterpFrame*> enter_frame_from_native(const metadata::RtMethodInfo* method, const RtStackObject* args);
-    RtResult<InterpFrame*> enter_frame_from_interp(const metadata::RtMethodInfo* method, RtStackObject* frame_base);
+    RtResult<InterpFrame*> enter_frame_from_native(const metadata::RtMethodInfo* method, const RtStackObject* args, int32_t vararg_count = 0);
+    RtResult<InterpFrame*> enter_frame_from_interp(const metadata::RtMethodInfo* method, RtStackObject* frame_base, int32_t vararg_count = 0);
     InterpFrame* leave_frame(const MachineStateSavePoint& sp, InterpFrame* frame);
 
-    uint32_t enter_frame_from_icall_or_intrinsic(const metadata::RtMethodInfo* method);
+    uint32_t enter_frame_from_icall_or_intrinsic(const metadata::RtMethodInfo* method, RtStackObject* eval_stack_base = nullptr,
+                                                 uint32_t eval_stack_size = 0,
+                                                 InterpFrameRootScanMode root_scan_mode = InterpFrameRootScanMode::None);
     void leave_frame_from_icall_or_intrinsic(uint32_t old_frame_top);
 
   private:

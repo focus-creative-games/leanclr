@@ -75,127 +75,134 @@ namespace Tests.Instruments.Arrays
             Assert.Equal(13, arr[1, 2].x1);
         }
 
-        //[UnitTest]
-        //public void OutOfRange_lower()
-        //{
-        //    var arr = new ValueTypeSize1[2, 3] {
-        //        {
-        //            new ValueTypeSize1 { x1 = 1 },
-        //            new ValueTypeSize1 { x1 = 2 },
-        //            new ValueTypeSize1 { x1 = 3 },
-        //        },
-        //        {
-        //            new ValueTypeSize1 { x1 = 11 },
-        //            new ValueTypeSize1 { x1 = 12 },
-        //            new ValueTypeSize1 { x1 = 13 },
-        //        } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[-1, -1];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower()
+        {
+            var arr = new ValueTypeSize1[2, 3] {
+                {
+                    new ValueTypeSize1 { x1 = 1 },
+                    new ValueTypeSize1 { x1 = 2 },
+                    new ValueTypeSize1 { x1 = 3 },
+                },
+                {
+                    new ValueTypeSize1 { x1 = 11 },
+                    new ValueTypeSize1 { x1 = 12 },
+                    new ValueTypeSize1 { x1 = 13 },
+                } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[-1, -1];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_lower2()
-        //{
-        //    var arr = new ValueTypeSize1[2, 3] {
-        //        {
-        //            new ValueTypeSize1 { x1 = 1 },
-        //            new ValueTypeSize1 { x1 = 2 },
-        //            new ValueTypeSize1 { x1 = 3 },
-        //        },
-        //        {
-        //            new ValueTypeSize1 { x1 = 11 },
-        //            new ValueTypeSize1 { x1 = 12 },
-        //            new ValueTypeSize1 { x1 = 13 },
-        //        } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[-1, 1];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower2()
+        {
+            var arr = new ValueTypeSize1[2, 3] {
+                {
+                    new ValueTypeSize1 { x1 = 1 },
+                    new ValueTypeSize1 { x1 = 2 },
+                    new ValueTypeSize1 { x1 = 3 },
+                },
+                {
+                    new ValueTypeSize1 { x1 = 11 },
+                    new ValueTypeSize1 { x1 = 12 },
+                    new ValueTypeSize1 { x1 = 13 },
+                } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[-1, 1];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_lower3()
-        //{
-        //    var arr = new ValueTypeSize1[2, 3] {
-        //        {
-        //            new ValueTypeSize1 { x1 = 1 },
-        //            new ValueTypeSize1 { x1 = 2 },
-        //            new ValueTypeSize1 { x1 = 3 },
-        //        },
-        //        {
-        //            new ValueTypeSize1 { x1 = 11 },
-        //            new ValueTypeSize1 { x1 = 12 },
-        //            new ValueTypeSize1 { x1 = 13 },
-        //        } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[1, -1];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower3()
+        {
+            var arr = new ValueTypeSize1[2, 3] {
+                {
+                    new ValueTypeSize1 { x1 = 1 },
+                    new ValueTypeSize1 { x1 = 2 },
+                    new ValueTypeSize1 { x1 = 3 },
+                },
+                {
+                    new ValueTypeSize1 { x1 = 11 },
+                    new ValueTypeSize1 { x1 = 12 },
+                    new ValueTypeSize1 { x1 = 13 },
+                } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[1, -1];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper()
-        //{
-        //    var arr = new ValueTypeSize1[2, 3] {
-        //        {
-        //            new ValueTypeSize1 { x1 = 1 },
-        //            new ValueTypeSize1 { x1 = 2 },
-        //            new ValueTypeSize1 { x1 = 3 },
-        //        },
-        //        {
-        //            new ValueTypeSize1 { x1 = 11 },
-        //            new ValueTypeSize1 { x1 = 12 },
-        //            new ValueTypeSize1 { x1 = 13 },
-        //        } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[2, 0];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper()
+        {
+            var arr = new ValueTypeSize1[2, 3] {
+                {
+                    new ValueTypeSize1 { x1 = 1 },
+                    new ValueTypeSize1 { x1 = 2 },
+                    new ValueTypeSize1 { x1 = 3 },
+                },
+                {
+                    new ValueTypeSize1 { x1 = 11 },
+                    new ValueTypeSize1 { x1 = 12 },
+                    new ValueTypeSize1 { x1 = 13 },
+                } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[2, 0];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper2()
-        //{
-        //    var arr = new ValueTypeSize1[2, 3] {
-        //        {
-        //            new ValueTypeSize1 { x1 = 1 },
-        //            new ValueTypeSize1 { x1 = 2 },
-        //            new ValueTypeSize1 { x1 = 3 },
-        //        },
-        //        {
-        //            new ValueTypeSize1 { x1 = 11 },
-        //            new ValueTypeSize1 { x1 = 12 },
-        //            new ValueTypeSize1 { x1 = 13 },
-        //        } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[0, 3];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper2()
+        {
+            var arr = new ValueTypeSize1[2, 3] {
+                {
+                    new ValueTypeSize1 { x1 = 1 },
+                    new ValueTypeSize1 { x1 = 2 },
+                    new ValueTypeSize1 { x1 = 3 },
+                },
+                {
+                    new ValueTypeSize1 { x1 = 11 },
+                    new ValueTypeSize1 { x1 = 12 },
+                    new ValueTypeSize1 { x1 = 13 },
+                } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[0, 3];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper3()
-        //{
-        //    var arr = new ValueTypeSize1[2, 3] {
-        //        {
-        //            new ValueTypeSize1 { x1 = 1 },
-        //            new ValueTypeSize1 { x1 = 2 },
-        //            new ValueTypeSize1 { x1 = 3 },
-        //        },
-        //        {
-        //            new ValueTypeSize1 { x1 = 11 },
-        //            new ValueTypeSize1 { x1 = 12 },
-        //            new ValueTypeSize1 { x1 = 13 },
-        //        } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[2, 3];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper3()
+        {
+            var arr = new ValueTypeSize1[2, 3] {
+                {
+                    new ValueTypeSize1 { x1 = 1 },
+                    new ValueTypeSize1 { x1 = 2 },
+                    new ValueTypeSize1 { x1 = 3 },
+                },
+                {
+                    new ValueTypeSize1 { x1 = 11 },
+                    new ValueTypeSize1 { x1 = 12 },
+                    new ValueTypeSize1 { x1 = 13 },
+                } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[2, 3];
+            });
+        }
 
-        //[UnitTest]
-        //public void NullRef()
-        //{
-        //    ValueTypeSize1[,] arr = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    var s = arr[0, 0];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void NullRef()
+        {
+            ValueTypeSize1[,] arr = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            var s = arr[0, 0];
+            });
+        }
     }
 }

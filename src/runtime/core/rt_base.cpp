@@ -4,6 +4,16 @@ namespace leanclr
 {
 RtErr fatal_on_not_implemented_error()
 {
+    return fatal_on_not_implemented_error(nullptr, 0);
+}
+
+RtErr fatal_on_not_implemented_error(const char* file, int line)
+{
+    if (file != nullptr)
+    {
+        printf("Not implemented error at %s:%d\n", file, line);
+        fflush(stdout);
+    }
     assert(false);
     // crash the program
     int* p = (int*)-1;

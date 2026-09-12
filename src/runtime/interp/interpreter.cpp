@@ -1,4 +1,5 @@
 #include <cmath>
+#include <cstring>
 #include <limits>
 
 #include "interpreter.h"
@@ -18,11 +19,24 @@
 #include "vm/intrinsics.h"
 #include "vm/rt_exception.h"
 #include "vm/enum.h"
+#include "vm/reflection.h"
 
 namespace leanclr
 {
 namespace interp
 {
+
+static bool is_runtime_field_info_value_method(const metadata::RtMethodInfo* method) noexcept
+{
+    if (method == nullptr || method->parent == nullptr)
+    {
+        return false;
+    }
+
+    const metadata::RtClass* klass = method->parent;
+    return std::strcmp(klass->namespaze, "System") == 0 && std::strcmp(klass->name, "IRuntimeFieldInfo") == 0 &&
+           std::strcmp(method->name, "get_Value") == 0 && method->parameter_count == 0;
+}
 
 static RtResult<const RtInterpMethodInfo*> transform(const metadata::RtMethodInfo* method)
 {
@@ -41,9 +55,17 @@ static RtResult<const RtInterpMethodInfo*> transform(const metadata::RtMethodInf
     size_t pageSize = 1024;
     alloc::MemPool pool(guessSize, pageSize, utils::MemOp::align_up(guessSize, pageSize));
     hl::Transformer hl_transformer(mod, method, methodBody, pool);
-    RET_ERR_ON_FAIL(hl_transformer.transform());
+    auto hl_ret = hl_transformer.transform();
+    if (hl_ret.is_err())
+    {
+        RET_ERR(hl_ret.unwrap_err());
+    }
     ll::Transformer ll_transformer(hl_transformer, pool);
-    RET_ERR_ON_FAIL(ll_transformer.transform());
+    auto ll_ret = ll_transformer.transform();
+    if (ll_ret.is_err())
+    {
+        RET_ERR(ll_ret.unwrap_err());
+    }
     return ll_transformer.build_interp_method_info();
 }
 
@@ -82,6 +104,17 @@ inline void set_stack_value_at(RtStackObject* base, size_t index, T value)
 {
     RtStackObject* obj = base + index;
     *reinterpret_cast<T*>(obj) = value;
+}
+
+static RtResultVoid invoke_non_interp_method_with_roots(const metadata::RtMethodInfo* method, metadata::RtManagedMethodPointer method_ptr,
+                                                        RtStackObject* frame_base)
+{
+    MachineState& ms = MachineState::get_global_machine_state();
+    uint32_t old_frame_top = ms.enter_frame_from_icall_or_intrinsic(
+        method, frame_base, static_cast<uint32_t>(method->total_arg_stack_object_size), InterpFrameRootScanMode::MethodArguments);
+    RtResultVoid result = method->invoke_method_ptr(method_ptr, method, frame_base, frame_base);
+    ms.leave_frame_from_icall_or_intrinsic(old_frame_top);
+    return result;
 }
 
 template <typename T>
@@ -173,6 +206,7 @@ void pop_throw_flow(vm::RtException* ex, InterpFrame* frame)
     assert(data.ex == ex);
     assert(data.frame == frame);
     s_exception_flows.pop_back();
+    vm::Exception::clear_current_exception_if_matches(ex);
 }
 
 void pop_leave_flow(InterpFrame* frame)
@@ -260,7 +294,8 @@ void setup_filter_checker(const RtInterpExceptionClause* clause)
 void setup_filter_handler(const RtInterpMethodInfo* imi, InterpFrame* frame, const void* handler_start_ip)
 {
     assert(!s_exception_flows.empty());
-    ExceptionFlow& flow = s_exception_flows.back();
+    ExceptionFlow flow = s_exception_flows.back();
+    s_exception_flows.pop_back();
     assert(flow.throw_flow);
     auto& data = flow.throw_data;
     assert(!data.handled);
@@ -274,7 +309,7 @@ void setup_filter_handler(const RtInterpMethodInfo* imi, InterpFrame* frame, con
     new_data.frame = data.frame;
     new_data.ip = data.ip;
     new_data.next_search_clause_idx = data.next_search_clause_idx;
-    new_data.cur_clause = nullptr;
+    new_data.cur_clause = data.cur_clause;
     new_data.handled = true;
     pop_outscope_flows(imi, frame, handler_start_ip);
     s_exception_flows.push_back(new_flow);
@@ -435,10 +470,18 @@ vm::RtException* get_exception_in_last_throw_flow(InterpFrame* frame, uint32_t i
         }                                                                                      \
     }
 
-#define ENTER_INTERP_FRAME(_method, _frame_base_idx, _next_ip)                                                    \
-    frame->save(_next_ip);                                                                                        \
-    HANDLE_RAISE_RUNTIME_ERROR2(frame, ms.enter_frame_from_interp(_method, eval_stack_base + (_frame_base_idx))); \
-    ip = frame->ip;                                                                                               \
+#define TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(klass)                                           \
+    {                                                                                          \
+        if (vm::Class::is_cctor_not_finished(klass) && !vm::Class::is_before_field_init(klass)) \
+        {                                                                                      \
+            HANDLE_RAISE_RUNTIME_ERROR_VOID(vm::Runtime::run_class_static_constructor(klass)); \
+        }                                                                                      \
+    }
+
+#define ENTER_INTERP_FRAME(_method, _frame_base_idx, _next_ip, _vararg_count)                                                    \
+    frame->save(_next_ip);                                                                                                       \
+    HANDLE_RAISE_RUNTIME_ERROR2(frame, ms.enter_frame_from_interp(_method, eval_stack_base + (_frame_base_idx), _vararg_count)); \
+    ip = frame->ip;                                                                                                              \
     goto method_start;
 
 #define LEAVE_FRAME()                  \
@@ -539,11 +582,12 @@ T* get_static_field_address(const metadata::RtFieldInfo* field)
 #define LEANCLR_CASE_END5() LEANCLR_CASE_END_N(5)
 #define LEANCLR_CASE_END_LITE5() LEANCLR_CASE_END_LITE_N(5)
 
-RtResult<const RtStackObject*> Interpreter::execute(const metadata::RtMethodInfo* method, const interp::RtStackObject* params)
+RtResult<const RtStackObject*> Interpreter::execute(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
+                                                    int32_t vararg_count)
 {
     MachineState& ms = MachineState::get_global_machine_state();
     MachineStateSavePoint sp(ms);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InterpFrame*, frame, ms.enter_frame_from_native(method, params));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InterpFrame*, frame, ms.enter_frame_from_native(method, params, vararg_count));
 
 #pragma region goto_lable
 #if LEANCLR_USE_COMPUTED_GOTO_DISPATCHER
@@ -1226,6 +1270,10 @@ method_start:
                 RtStackObject* dst = eval_stack_base + ir->dst;
                 RtStackObject* src = eval_stack_base + ir->src;
                 dst->i8 = src->i8;
+                if (src != dst)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StLocI2Short)
@@ -1233,6 +1281,10 @@ method_start:
                 RtStackObject* dst = eval_stack_base + ir->dst;
                 RtStackObject* src = eval_stack_base + ir->src;
                 dst->i16 = src->i16;
+                if (src != dst)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StLocI4Short)
@@ -1240,6 +1292,10 @@ method_start:
                 RtStackObject* dst = eval_stack_base + ir->dst;
                 RtStackObject* src = eval_stack_base + ir->src;
                 dst->i32 = src->i32;
+                if (src != dst)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StLocI8Short)
@@ -1247,6 +1303,10 @@ method_start:
                 RtStackObject* dst = eval_stack_base + ir->dst;
                 RtStackObject* src = eval_stack_base + ir->src;
                 dst->i64 = src->i64;
+                if (src != dst)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StLocAnyShort)
@@ -1254,6 +1314,10 @@ method_start:
                 RtStackObject* dst = eval_stack_base + ir->dst;
                 RtStackObject* src = eval_stack_base + ir->src;
                 std::memcpy(dst, src, ir->size * sizeof(RtStackObject));
+                if (src != dst)
+                {
+                    std::memset(src, 0, ir->size * sizeof(RtStackObject));
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(LdNullShort)
@@ -1774,7 +1838,7 @@ method_start:
                 }
                 if (divisor == -1 && dividend == INT32_MIN)
                 {
-                    RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
+                    RAISE_RUNTIME_ERROR(RtErr::Overflow);
                 }
                 dst->i32 = dividend / divisor;
             }
@@ -1792,7 +1856,7 @@ method_start:
                 }
                 if (divisor == -1 && dividend == INT64_MIN)
                 {
-                    RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
+                    RAISE_RUNTIME_ERROR(RtErr::Overflow);
                 }
                 dst->i64 = dividend / divisor;
             }
@@ -1854,7 +1918,7 @@ method_start:
                 }
                 if (divisor == -1 && dividend == INT32_MIN)
                 {
-                    RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
+                    RAISE_RUNTIME_ERROR(RtErr::Overflow);
                 }
                 else
                 {
@@ -1875,7 +1939,7 @@ method_start:
                 }
                 if (divisor == -1 && dividend == INT64_MIN)
                 {
-                    RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
+                    RAISE_RUNTIME_ERROR(RtErr::Overflow);
                 }
                 else
                 {
@@ -2182,15 +2246,15 @@ method_start:
             LEANCLR_CASE_BEGIN0(ConvU4R4Short)
             {
                 float src = get_stack_value_at<float>(eval_stack_base, ir->src);
-                int32_t value = cast_float_to_i32<float, uint32_t>(src);
-                set_stack_value_at<int32_t>(eval_stack_base, ir->dst, value);
+                uint32_t value = cast_float_to_u32(src);
+                set_stack_value_at<uint32_t>(eval_stack_base, ir->dst, value);
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(ConvU4R8Short)
             {
                 double src = get_stack_value_at<double>(eval_stack_base, ir->src);
-                int32_t value = cast_float_to_i32<double, uint32_t>(src);
-                set_stack_value_at<int32_t>(eval_stack_base, ir->dst, value);
+                uint32_t value = cast_float_to_u32(src);
+                set_stack_value_at<uint32_t>(eval_stack_base, ir->dst, value);
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(ConvI8I4Short)
@@ -2767,8 +2831,13 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                int8_t value = get_stack_value_at<int8_t>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                int8_t value = src->i8;
                 vm::Array::set_array_data_at<int8_t>(array, index, value);
+                if (ir->value != ir->arr)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StelemI2Short)
@@ -2784,8 +2853,13 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                int16_t value = get_stack_value_at<int16_t>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                int16_t value = src->i16;
                 vm::Array::set_array_data_at<int16_t>(array, index, value);
+                if (ir->value != ir->arr)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StelemI4Short)
@@ -2801,8 +2875,13 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                int32_t value = src->i32;
                 vm::Array::set_array_data_at<int32_t>(array, index, value);
+                if (ir->value != ir->arr)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StelemI8Short)
@@ -2818,8 +2897,13 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                int64_t value = get_stack_value_at<int64_t>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                int64_t value = src->i64;
                 vm::Array::set_array_data_at<int64_t>(array, index, value);
+                if (ir->value != ir->arr)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StelemIShort)
@@ -2835,8 +2919,13 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                intptr_t value = get_stack_value_at<intptr_t>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                intptr_t value = *reinterpret_cast<intptr_t*>(src);
                 vm::Array::set_array_data_at<intptr_t>(array, index, value);
+                if (ir->value != ir->arr)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StelemR4Short)
@@ -2852,8 +2941,13 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                float value = get_stack_value_at<float>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                float value = src->f32;
                 vm::Array::set_array_data_at<float>(array, index, value);
+                if (ir->value != ir->arr)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StelemR8Short)
@@ -2869,8 +2963,13 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                double value = get_stack_value_at<double>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                double value = src->f64;
                 vm::Array::set_array_data_at<double>(array, index, value);
+                if (ir->value != ir->arr)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StelemRefShort)
@@ -2886,13 +2985,18 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                vm::RtObject* value = get_stack_value_at<vm::RtObject*>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                vm::RtObject* value = src->obj;
                 const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(array);
                 if (value && !vm::Class::is_assignable_from(value->klass, ele_klass))
                 {
                     RAISE_RUNTIME_ERROR(RtErr::ArrayTypeMismatch);
                 }
                 vm::Array::set_array_data_at<vm::RtObject*>(array, index, value);
+                if (ir->value != ir->arr)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StelemAnyRefShort)
@@ -2907,13 +3011,18 @@ method_start:
                 {
                     RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                 }
-                vm::RtObject* value = get_stack_value_at<vm::RtObject*>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                vm::RtObject* value = src->obj;
                 const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(array);
                 if (value && !vm::Class::is_assignable_from(value->klass, ele_klass))
                 {
                     RAISE_RUNTIME_ERROR(RtErr::ArrayTypeMismatch);
                 }
                 vm::Array::set_array_data_at<vm::RtObject*>(array, index, value);
+                if (ir->value != ir->arr)
+                {
+                    src->value = 0;
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StelemAnyValShort)
@@ -2938,6 +3047,10 @@ method_start:
                 RtStackObject* src = eval_stack_base + ir->value;
                 void* dst_addr = const_cast<void*>(vm::Array::get_array_element_address_with_size_as_ptr_void(array, index, ir->ele_size));
                 std::memcpy(dst_addr, src, ir->ele_size);
+                if (ir->value != ir->arr)
+                {
+                    std::memset(src, 0, ir->ele_size);
+                }
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(LdftnShort)
@@ -3250,42 +3363,50 @@ method_start:
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StsfldI1Short)
             {
-                int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                int32_t value = src->i32;
                 const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
                 metadata::RtClass* klass = field->parent;
                 TRY_RUN_CLASS_STATIC_CCTOR(klass);
                 int8_t* field_addr = get_static_field_address<int8_t>(field);
                 *field_addr = static_cast<int8_t>(value);
+                src->value = 0;
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StsfldI2Short)
             {
-                int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                int32_t value = src->i32;
                 const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
                 metadata::RtClass* klass = field->parent;
                 TRY_RUN_CLASS_STATIC_CCTOR(klass);
                 int16_t* field_addr = get_static_field_address<int16_t>(field);
                 *field_addr = static_cast<int16_t>(value);
+                src->value = 0;
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StsfldI4Short)
             {
-                int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                int32_t value = src->i32;
                 const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
                 metadata::RtClass* klass = field->parent;
                 TRY_RUN_CLASS_STATIC_CCTOR(klass);
                 int32_t* field_addr = get_static_field_address<int32_t>(field);
                 *field_addr = value;
+                src->value = 0;
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StsfldI8Short)
             {
-                int64_t value = get_stack_value_at<int64_t>(eval_stack_base, ir->value);
+                RtStackObject* src = eval_stack_base + ir->value;
+                int64_t value = src->i64;
                 const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
                 metadata::RtClass* klass = field->parent;
                 TRY_RUN_CLASS_STATIC_CCTOR(klass);
                 int64_t* field_addr = get_static_field_address<int64_t>(field);
                 *field_addr = value;
+                src->value = 0;
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(StsfldAnyShort)
@@ -3296,6 +3417,7 @@ method_start:
                 TRY_RUN_CLASS_STATIC_CCTOR(klass);
                 uint8_t* field_addr = get_static_field_address<uint8_t>(field);
                 std::memcpy(field_addr, src, ir->size);
+                std::memset(src, 0, ir->size);
             }
             LEANCLR_CASE_END0()
             LEANCLR_CASE_BEGIN0(RetVoidShort)
@@ -3332,10 +3454,16 @@ method_start:
                 const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                 if (vm::Method::is_static(target_method))
                 {
-                    TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                    TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                 }
                 const uint8_t* next_ip = reinterpret_cast<const uint8_t*>(ir + 1);
-                ENTER_INTERP_FRAME(target_method, ir->frame_base, next_ip);
+                RtStackObject* frame_base = eval_stack_base + ir->frame_base;
+                if ((ir->vararg_count & 0x80u) != 0 && !vm::Method::is_static(target_method) && !vm::Class::is_value_type(target_method->parent) &&
+                    frame_base->obj == nullptr)
+                {
+                    RAISE_RUNTIME_ERROR(RtErr::NullReference);
+                }
+                ENTER_INTERP_FRAME(target_method, ir->frame_base, next_ip, static_cast<int32_t>(ir->vararg_count & 0x7Fu));
             }
             LEANCLR_CASE_END_LITE0()
             LEANCLR_CASE_BEGIN_LITE0(CallVirtInterpShort)
@@ -3347,6 +3475,12 @@ method_start:
                     RAISE_RUNTIME_ERROR(RtErr::NullReference);
                 }
                 const metadata::RtMethodInfo* original_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+                if (is_runtime_field_info_value_method(original_method))
+                {
+                    set_stack_value_at<void*>(eval_stack_base, ir->frame_base, obj);
+                    ip = reinterpret_cast<const uint8_t*>(ir + 1);
+                    LEANCLR_CONTINUE0();
+                }
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, actual_method,
                                                         vm::Method::get_virtual_method_impl(obj, original_method));
                 if (actual_method->invoker_type == metadata::RtInvokerType::Interpreter)
@@ -3355,14 +3489,14 @@ method_start:
                     {
                         set_stack_value_at(eval_stack_base, ir->frame_base, obj + 1);
                     }
-                    ENTER_INTERP_FRAME(actual_method, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1));
+                    ENTER_INTERP_FRAME(actual_method, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1), 0);
                 }
                 else
                 {
                     ip = reinterpret_cast<const uint8_t*>(ir + 1);
                     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                    HANDLE_RAISE_RUNTIME_ERROR_VOID(CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->invoke_method_ptr)(
-                        actual_method->virtual_method_ptr, actual_method, frame_base, frame_base));
+                    HANDLE_RAISE_RUNTIME_ERROR_VOID(
+                        invoke_non_interp_method_with_roots(actual_method, actual_method->virtual_method_ptr, frame_base));
                 }
             }
             LEANCLR_CASE_END_LITE0()
@@ -3372,11 +3506,11 @@ method_start:
                 const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                 if (vm::Method::is_static(target_method))
                 {
-                    TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                    TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                 }
                 ip = reinterpret_cast<const uint8_t*>(ir + 1);
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
             }
             LEANCLR_CASE_END_LITE0()
             LEANCLR_CASE_BEGIN_LITE0(CallIntrinsicShort)
@@ -3385,11 +3519,11 @@ method_start:
                 const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                 if (vm::Method::is_static(target_method))
                 {
-                    TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                    TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                 }
                 ip = reinterpret_cast<const uint8_t*>(ir + 1);
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
             }
             LEANCLR_CASE_END_LITE0()
             LEANCLR_CASE_BEGIN_LITE0(CallPInvokeShort)
@@ -3398,11 +3532,11 @@ method_start:
                 const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                 if (vm::Method::is_static(target_method))
                 {
-                    TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                    TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                 }
                 ip = reinterpret_cast<const uint8_t*>(ir + 1);
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
             }
             LEANCLR_CASE_END_LITE0()
             LEANCLR_CASE_BEGIN_LITE0(CallAotShort)
@@ -3415,7 +3549,12 @@ method_start:
                 }
                 ip = reinterpret_cast<const uint8_t*>(ir + 1);
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                if (ir->null_check_this && !vm::Method::is_static(target_method) && !vm::Class::is_value_type(target_method->parent) &&
+                    frame_base->obj == nullptr)
+                {
+                    RAISE_RUNTIME_ERROR(RtErr::NullReference);
+                }
+                HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
             }
             LEANCLR_CASE_END_LITE0()
             LEANCLR_CASE_BEGIN_LITE0(CallRuntimeImplementedShort)
@@ -3424,11 +3563,11 @@ method_start:
                 const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                 if (vm::Method::is_static(target_method))
                 {
-                    TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                    TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                 }
                 ip = reinterpret_cast<const uint8_t*>(ir + 1);
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
             }
             LEANCLR_CASE_END_LITE0()
             LEANCLR_CASE_BEGIN_LITE0(CalliInterpShort)
@@ -3443,13 +3582,13 @@ method_start:
                 }
                 if (target_method->invoker_type == metadata::RtInvokerType::Interpreter)
                 {
-                    ENTER_INTERP_FRAME(target_method, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1));
+                    ENTER_INTERP_FRAME(target_method, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1), 0);
                 }
                 else
                 {
                     ip = reinterpret_cast<const uint8_t*>(ir + 1);
                     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                    HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                    HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
                 }
             }
             LEANCLR_CASE_END_LITE0()
@@ -3471,7 +3610,7 @@ method_start:
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                 std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                 frame_base->obj = obj;
-                ENTER_INTERP_FRAME(ctor, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1));
+                ENTER_INTERP_FRAME(ctor, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1), 0);
             }
             LEANCLR_CASE_END_LITE0()
             LEANCLR_CASE_BEGIN_LITE0(NewValueTypeInterpShort)
@@ -3485,13 +3624,13 @@ method_start:
                 std::memmove(final_frame_base + 1, original_frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                 final_frame_base->ptr = original_frame_base;
                 std::memset(original_frame_base, 0, value_stack_objects * sizeof(RtStackObject));
-                ENTER_INTERP_FRAME(ctor, ir->frame_base + value_stack_objects, reinterpret_cast<const uint8_t*>(ir + 1));
+                ENTER_INTERP_FRAME(ctor, ir->frame_base + value_stack_objects, reinterpret_cast<const uint8_t*>(ir + 1), 0);
             }
             LEANCLR_CASE_END_LITE0()
             LEANCLR_CASE_BEGIN0(NewObjInternalCallShort)
             {
                 const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
-                TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                 vm::InternalCallInvoker invoker = vm::InternalCalls::get_internal_call_invoker_by_id_unchecked(ir->invoker_idx);
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                 HANDLE_RAISE_RUNTIME_ERROR_VOID(invoker(target_method->method_ptr, target_method, frame_base, frame_base));
@@ -3500,7 +3639,7 @@ method_start:
             LEANCLR_CASE_BEGIN0(NewObjIntrinsicShort)
             {
                 const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
-                TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                 vm::InternalCallInvoker invoker = vm::Intrinsics::get_intrinsic_invoker_by_id_unchecked(ir->invoker_idx);
                 RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                 HANDLE_RAISE_RUNTIME_ERROR_VOID(invoker(target_method->method_ptr, target_method, frame_base, frame_base));
@@ -3694,6 +3833,10 @@ method_start:
                         RtStackObject* dst = eval_stack_base + ir->dst;
                         RtStackObject* src = eval_stack_base + ir->src;
                         dst->i8 = src->i8;
+                        if (src != dst)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StLocI2)
@@ -3701,6 +3844,10 @@ method_start:
                         RtStackObject* dst = eval_stack_base + ir->dst;
                         RtStackObject* src = eval_stack_base + ir->src;
                         dst->i16 = src->i16;
+                        if (src != dst)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StLocI4)
@@ -3708,6 +3855,10 @@ method_start:
                         RtStackObject* dst = eval_stack_base + ir->dst;
                         RtStackObject* src = eval_stack_base + ir->src;
                         dst->i32 = src->i32;
+                        if (src != dst)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StLocI8)
@@ -3715,6 +3866,10 @@ method_start:
                         RtStackObject* dst = eval_stack_base + ir->dst;
                         RtStackObject* src = eval_stack_base + ir->src;
                         dst->i64 = src->i64;
+                        if (src != dst)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StLocAny)
@@ -3722,6 +3877,10 @@ method_start:
                         RtStackObject* dst = eval_stack_base + ir->dst;
                         RtStackObject* src = eval_stack_base + ir->src;
                         std::memcpy(dst, src, ir->size * sizeof(RtStackObject));
+                        if (src != dst)
+                        {
+                            std::memset(src, 0, ir->size * sizeof(RtStackObject));
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(LdNull)
@@ -4671,7 +4830,7 @@ method_start:
                         }
                         if (divisor == -1 && dividend == INT32_MIN)
                         {
-                            RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
+                            RAISE_RUNTIME_ERROR(RtErr::Overflow);
                         }
                         dst->i32 = dividend / divisor;
                     }
@@ -4689,7 +4848,7 @@ method_start:
                         }
                         if (divisor == -1 && dividend == INT64_MIN)
                         {
-                            RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
+                            RAISE_RUNTIME_ERROR(RtErr::Overflow);
                         }
                         dst->i64 = dividend / divisor;
                     }
@@ -4751,7 +4910,7 @@ method_start:
                         }
                         if (divisor == -1 && dividend == INT32_MIN)
                         {
-                            RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
+                            RAISE_RUNTIME_ERROR(RtErr::Overflow);
                         }
                         else
                         {
@@ -4772,7 +4931,7 @@ method_start:
                         }
                         if (divisor == -1 && dividend == INT64_MIN)
                         {
-                            RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
+                            RAISE_RUNTIME_ERROR(RtErr::Overflow);
                         }
                         else
                         {
@@ -5560,8 +5719,13 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        int8_t value = get_stack_value_at<int8_t>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        int8_t value = src->i8;
                         vm::Array::set_array_data_at<int8_t>(array, index, value);
+                        if (ir->value != ir->arr)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StelemI2)
@@ -5577,8 +5741,13 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        int16_t value = get_stack_value_at<int16_t>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        int16_t value = src->i16;
                         vm::Array::set_array_data_at<int16_t>(array, index, value);
+                        if (ir->value != ir->arr)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StelemI4)
@@ -5594,8 +5763,13 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        int32_t value = src->i32;
                         vm::Array::set_array_data_at<int32_t>(array, index, value);
+                        if (ir->value != ir->arr)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StelemI8)
@@ -5611,8 +5785,13 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        int64_t value = get_stack_value_at<int64_t>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        int64_t value = src->i64;
                         vm::Array::set_array_data_at<int64_t>(array, index, value);
+                        if (ir->value != ir->arr)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StelemI)
@@ -5628,8 +5807,13 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        intptr_t value = get_stack_value_at<intptr_t>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        intptr_t value = *reinterpret_cast<intptr_t*>(src);
                         vm::Array::set_array_data_at<intptr_t>(array, index, value);
+                        if (ir->value != ir->arr)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StelemR4)
@@ -5645,8 +5829,13 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        float value = get_stack_value_at<float>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        float value = src->f32;
                         vm::Array::set_array_data_at<float>(array, index, value);
+                        if (ir->value != ir->arr)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StelemR8)
@@ -5662,8 +5851,13 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        double value = get_stack_value_at<double>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        double value = src->f64;
                         vm::Array::set_array_data_at<double>(array, index, value);
+                        if (ir->value != ir->arr)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StelemRef)
@@ -5679,13 +5873,18 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        vm::RtObject* value = get_stack_value_at<vm::RtObject*>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        vm::RtObject* value = src->obj;
                         const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(array);
                         if (value && !vm::Class::is_assignable_from(value->klass, ele_klass))
                         {
                             RAISE_RUNTIME_ERROR(RtErr::ArrayTypeMismatch);
                         }
                         vm::Array::set_array_data_at<vm::RtObject*>(array, index, value);
+                        if (ir->value != ir->arr)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StelemAnyRef)
@@ -5700,13 +5899,18 @@ method_start:
                         {
                             RAISE_RUNTIME_ERROR(RtErr::IndexOutOfRange);
                         }
-                        vm::RtObject* value = get_stack_value_at<vm::RtObject*>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        vm::RtObject* value = src->obj;
                         const metadata::RtClass* ele_klass = vm::Array::get_array_element_class(array);
                         if (value && !vm::Class::is_assignable_from(value->klass, ele_klass))
                         {
                             RAISE_RUNTIME_ERROR(RtErr::ArrayTypeMismatch);
                         }
                         vm::Array::set_array_data_at<vm::RtObject*>(array, index, value);
+                        if (ir->value != ir->arr)
+                        {
+                            src->value = 0;
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StelemAnyVal)
@@ -5731,15 +5935,20 @@ method_start:
                         RtStackObject* src = eval_stack_base + ir->value;
                         void* dst_addr = const_cast<void*>(vm::Array::get_array_element_address_with_size_as_ptr_void(array, index, ir->ele_size));
                         std::memcpy(dst_addr, src, ir->ele_size);
+                        if (ir->value != ir->arr)
+                        {
+                            std::memset(src, 0, ir->ele_size);
+                        }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(MkRefAny)
                     {
                         const metadata::RtClass* klass = get_resolved_data<metadata::RtClass>(imi, ir->klass_idx);
                         const void* src_addr = get_stack_value_at<const void*>(eval_stack_base, ir->addr);
+                        HANDLE_RAISE_RUNTIME_ERROR(const void*, method_table, vm::Reflection::get_net10_method_table(klass->by_val));
                         vm::RtTypedReference* dst = get_ptr_stack_value_at<vm::RtTypedReference>(eval_stack_base, ir->dst);
-                        dst->type_handle = klass->by_val;
                         dst->value = src_addr;
+                        dst->type_handle = method_table;
                         dst->klass = klass;
                     }
                     LEANCLR_CASE_END1()
@@ -5757,7 +5966,7 @@ method_start:
                     LEANCLR_CASE_BEGIN1(RefAnyType)
                     {
                         vm::RtTypedReference* src = get_ptr_stack_value_at<vm::RtTypedReference>(eval_stack_base, ir->src);
-                        set_stack_value_at<const metadata::RtTypeSig*>(eval_stack_base, ir->dst, src->type_handle);
+                        set_stack_value_at<const metadata::RtTypeSig*>(eval_stack_base, ir->dst, src->klass->by_val);
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(LdToken)
@@ -5771,7 +5980,7 @@ method_start:
                         float value = get_stack_value_at<float>(eval_stack_base, ir->src);
                         if (!std::isfinite(value))
                         {
-                            RAISE_RUNTIME_ERROR(RtErr::Overflow);
+                            RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
                         }
                     }
                     LEANCLR_CASE_END1()
@@ -5780,17 +5989,26 @@ method_start:
                         double value = get_stack_value_at<double>(eval_stack_base, ir->src);
                         if (!std::isfinite(value))
                         {
-                            RAISE_RUNTIME_ERROR(RtErr::Overflow);
+                            RAISE_RUNTIME_ERROR(RtErr::Arithmetic);
                         }
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(LocAlloc)
                     {
-                        uint32_t size = get_stack_value_at<uint32_t>(eval_stack_base, ir->size);
+                        uintptr_t native_size = get_stack_value_at<uintptr_t>(eval_stack_base, ir->size);
+                        if (native_size > std::numeric_limits<uint32_t>::max())
+                        {
+                            RAISE_RUNTIME_ERROR(RtErr::Overflow);
+                        }
+                        uint32_t size = static_cast<uint32_t>(native_size);
                         void* data;
                         if (size > 0)
                         {
                             data = imi->init_locals ? alloc::GeneralAllocation::malloc_zeroed(size) : alloc::GeneralAllocation::malloc(size);
+                            if (!data)
+                            {
+                                RAISE_RUNTIME_ERROR(RtErr::OutOfMemory);
+                            }
                         }
                         else
                         {
@@ -6109,42 +6327,50 @@ method_start:
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StsfldI1)
                     {
-                        int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        int32_t value = src->i32;
                         const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
                         metadata::RtClass* klass = field->parent;
                         TRY_RUN_CLASS_STATIC_CCTOR(klass);
                         int8_t* field_addr = get_static_field_address<int8_t>(field);
                         *field_addr = static_cast<int8_t>(value);
+                        src->value = 0;
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StsfldI2)
                     {
-                        int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        int32_t value = src->i32;
                         const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
                         metadata::RtClass* klass = field->parent;
                         TRY_RUN_CLASS_STATIC_CCTOR(klass);
                         int16_t* field_addr = get_static_field_address<int16_t>(field);
                         *field_addr = static_cast<int16_t>(value);
+                        src->value = 0;
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StsfldI4)
                     {
-                        int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        int32_t value = src->i32;
                         const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
                         metadata::RtClass* klass = field->parent;
                         TRY_RUN_CLASS_STATIC_CCTOR(klass);
                         int32_t* field_addr = get_static_field_address<int32_t>(field);
                         *field_addr = value;
+                        src->value = 0;
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StsfldI8)
                     {
-                        int64_t value = get_stack_value_at<int64_t>(eval_stack_base, ir->value);
+                        RtStackObject* src = eval_stack_base + ir->value;
+                        int64_t value = src->i64;
                         const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
                         metadata::RtClass* klass = field->parent;
                         TRY_RUN_CLASS_STATIC_CCTOR(klass);
                         int64_t* field_addr = get_static_field_address<int64_t>(field);
                         *field_addr = value;
+                        src->value = 0;
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(StsfldAny)
@@ -6155,6 +6381,7 @@ method_start:
                         TRY_RUN_CLASS_STATIC_CCTOR(klass);
                         uint8_t* field_addr = get_static_field_address<uint8_t>(field);
                         std::memcpy(field_addr, src, ir->size);
+                        std::memset(src, 0, ir->size);
                     }
                     LEANCLR_CASE_END1()
                     LEANCLR_CASE_BEGIN1(RetVoid)
@@ -6186,10 +6413,16 @@ method_start:
                         const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                         if (vm::Method::is_static(target_method))
                         {
-                            TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                            TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                         }
                         const uint8_t* next_ip = reinterpret_cast<const uint8_t*>(ir + 1);
-                        ENTER_INTERP_FRAME(target_method, ir->frame_base, next_ip);
+                        RtStackObject* frame_base = eval_stack_base + ir->frame_base;
+                        if ((ir->vararg_count & 0x8000u) != 0 && !vm::Method::is_static(target_method) && !vm::Class::is_value_type(target_method->parent) &&
+                            frame_base->obj == nullptr)
+                        {
+                            RAISE_RUNTIME_ERROR(RtErr::NullReference);
+                        }
+                        ENTER_INTERP_FRAME(target_method, ir->frame_base, next_ip, static_cast<int32_t>(ir->vararg_count & 0x7FFFu));
                     }
                     LEANCLR_CASE_END_LITE1()
                     LEANCLR_CASE_BEGIN_LITE1(CallVirtInterp)
@@ -6201,6 +6434,12 @@ method_start:
                             RAISE_RUNTIME_ERROR(RtErr::NullReference);
                         }
                         const metadata::RtMethodInfo* original_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+                        if (is_runtime_field_info_value_method(original_method))
+                        {
+                            set_stack_value_at<void*>(eval_stack_base, ir->frame_base, obj);
+                            ip = reinterpret_cast<const uint8_t*>(ir + 1);
+                            LEANCLR_CONTINUE0();
+                        }
                         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, actual_method,
                                                                 vm::Method::get_virtual_method_impl(obj, original_method));
                         if (actual_method->invoker_type == metadata::RtInvokerType::Interpreter)
@@ -6209,14 +6448,14 @@ method_start:
                             {
                                 set_stack_value_at(eval_stack_base, ir->frame_base, obj + 1);
                             }
-                            ENTER_INTERP_FRAME(actual_method, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1));
+                            ENTER_INTERP_FRAME(actual_method, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1), 0);
                         }
                         else
                         {
                             ip = reinterpret_cast<const uint8_t*>(ir + 1);
                             RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                            HANDLE_RAISE_RUNTIME_ERROR_VOID(CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->invoke_method_ptr)(
-                                actual_method->virtual_method_ptr, actual_method, frame_base, frame_base));
+                            HANDLE_RAISE_RUNTIME_ERROR_VOID(
+                                invoke_non_interp_method_with_roots(actual_method, actual_method->virtual_method_ptr, frame_base));
                         }
                     }
                     LEANCLR_CASE_END_LITE1()
@@ -6226,11 +6465,11 @@ method_start:
                         const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                         if (vm::Method::is_static(target_method))
                         {
-                            TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                            TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                         }
                         ip = reinterpret_cast<const uint8_t*>(ir + 1);
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                        HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                        HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
                     }
                     LEANCLR_CASE_END_LITE1()
                     LEANCLR_CASE_BEGIN_LITE1(CallIntrinsic)
@@ -6239,11 +6478,11 @@ method_start:
                         const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                         if (vm::Method::is_static(target_method))
                         {
-                            TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                            TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                         }
                         ip = reinterpret_cast<const uint8_t*>(ir + 1);
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                        HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                        HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
                     }
                     LEANCLR_CASE_END_LITE1()
                     LEANCLR_CASE_BEGIN_LITE1(CallPInvoke)
@@ -6252,11 +6491,11 @@ method_start:
                         const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                         if (vm::Method::is_static(target_method))
                         {
-                            TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                            TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                         }
                         ip = reinterpret_cast<const uint8_t*>(ir + 1);
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                        HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                        HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
                     }
                     LEANCLR_CASE_END_LITE1()
                     LEANCLR_CASE_BEGIN_LITE1(CallAot)
@@ -6269,7 +6508,12 @@ method_start:
                         }
                         ip = reinterpret_cast<const uint8_t*>(ir + 1);
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                        HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                        if (ir->null_check_this && !vm::Method::is_static(target_method) && !vm::Class::is_value_type(target_method->parent) &&
+                            frame_base->obj == nullptr)
+                        {
+                            RAISE_RUNTIME_ERROR(RtErr::NullReference);
+                        }
+                        HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
                     }
                     LEANCLR_CASE_END_LITE1()
                     LEANCLR_CASE_BEGIN_LITE1(CallRuntimeImplemented)
@@ -6278,11 +6522,11 @@ method_start:
                         const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
                         if (vm::Method::is_static(target_method))
                         {
-                            TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                            TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                         }
                         ip = reinterpret_cast<const uint8_t*>(ir + 1);
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                        HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                        HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
                     }
                     LEANCLR_CASE_END_LITE1()
                     LEANCLR_CASE_BEGIN_LITE1(CalliInterp)
@@ -6298,13 +6542,13 @@ method_start:
 
                         if (target_method->invoker_type == metadata::RtInvokerType::Interpreter)
                         {
-                            ENTER_INTERP_FRAME(target_method, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1));
+                            ENTER_INTERP_FRAME(target_method, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1), 0);
                         }
                         else
                         {
                             ip = reinterpret_cast<const uint8_t*>(ir + 1);
                             RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-                            HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+                            HANDLE_RAISE_RUNTIME_ERROR_VOID(invoke_non_interp_method_with_roots(target_method, target_method->method_ptr, frame_base));
                         }
                     }
                     LEANCLR_CASE_END_LITE1()
@@ -6326,7 +6570,7 @@ method_start:
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                         std::memmove(frame_base + 1, frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                         frame_base->obj = obj;
-                        ENTER_INTERP_FRAME(ctor, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1));
+                        ENTER_INTERP_FRAME(ctor, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1), 0);
                     }
                     LEANCLR_CASE_END_LITE1()
                     LEANCLR_CASE_BEGIN_LITE1(NewValueTypeInterp)
@@ -6341,13 +6585,13 @@ method_start:
                                      static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
                         final_frame_base->ptr = original_frame_base;
                         std::memset(original_frame_base, 0, value_stack_objects * sizeof(RtStackObject));
-                        ENTER_INTERP_FRAME(ctor, ir->frame_base + value_stack_objects, reinterpret_cast<const uint8_t*>(ir + 1));
+                        ENTER_INTERP_FRAME(ctor, ir->frame_base + value_stack_objects, reinterpret_cast<const uint8_t*>(ir + 1), 0);
                     }
                     LEANCLR_CASE_END_LITE1()
                     LEANCLR_CASE_BEGIN1(NewObjInternalCall)
                     {
                         const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
-                        TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                        TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                         vm::InternalCallInvoker invoker = vm::InternalCalls::get_internal_call_invoker_by_id_unchecked(ir->invoker_idx);
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                         HANDLE_RAISE_RUNTIME_ERROR_VOID(invoker(target_method->method_ptr, target_method, frame_base, frame_base));
@@ -6356,7 +6600,7 @@ method_start:
                     LEANCLR_CASE_BEGIN1(NewObjIntrinsic)
                     {
                         const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
-                        TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+                        TRY_RUN_CLASS_STATIC_CCTOR_FOR_METHOD(target_method->parent);
                         vm::InternalCallInvoker invoker = vm::Intrinsics::get_intrinsic_invoker_by_id_unchecked(ir->invoker_idx);
                         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
                         HANDLE_RAISE_RUNTIME_ERROR_VOID(invoker(target_method->method_ptr, target_method, frame_base, frame_base));
@@ -6700,15 +6944,15 @@ method_start:
                     LEANCLR_CASE_BEGIN2(ConvU4R4)
                     {
                         float src = get_stack_value_at<float>(eval_stack_base, ir->src);
-                        int32_t value = cast_float_to_i32<float, uint32_t>(src);
-                        set_stack_value_at<int32_t>(eval_stack_base, ir->dst, value);
+                        uint32_t value = cast_float_to_u32(src);
+                        set_stack_value_at<uint32_t>(eval_stack_base, ir->dst, value);
                     }
                     LEANCLR_CASE_END2()
                     LEANCLR_CASE_BEGIN2(ConvU4R8)
                     {
                         double src = get_stack_value_at<double>(eval_stack_base, ir->src);
-                        int32_t value = cast_float_to_i32<double, uint32_t>(src);
-                        set_stack_value_at<int32_t>(eval_stack_base, ir->dst, value);
+                        uint32_t value = cast_float_to_u32(src);
+                        set_stack_value_at<uint32_t>(eval_stack_base, ir->dst, value);
                     }
                     LEANCLR_CASE_END2()
                     LEANCLR_CASE_BEGIN2(ConvI8I4)
@@ -6746,15 +6990,15 @@ method_start:
                     LEANCLR_CASE_BEGIN2(ConvU8R4)
                     {
                         float src = get_stack_value_at<float>(eval_stack_base, ir->src);
-                        int64_t value = cast_float_to_i64<float, uint64_t>(src);
-                        set_stack_value_at<int64_t>(eval_stack_base, ir->dst, value);
+                        uint64_t value = cast_float_to_u64(src);
+                        set_stack_value_at<uint64_t>(eval_stack_base, ir->dst, value);
                     }
                     LEANCLR_CASE_END2()
                     LEANCLR_CASE_BEGIN2(ConvU8R8)
                     {
                         double src = get_stack_value_at<double>(eval_stack_base, ir->src);
-                        int64_t value = cast_float_to_i64<double, uint64_t>(src);
-                        set_stack_value_at<int64_t>(eval_stack_base, ir->dst, value);
+                        uint64_t value = cast_float_to_u64(src);
+                        set_stack_value_at<uint64_t>(eval_stack_base, ir->dst, value);
                     }
                     LEANCLR_CASE_END2()
                     LEANCLR_CASE_BEGIN2(ConvR4I4)
@@ -8031,8 +8275,7 @@ method_start:
                     LEANCLR_CASE_END4()
                     LEANCLR_CASE_BEGIN4(Arglist)
                     {
-                        assert(false && "Not implemented");
-                        RAISE_RUNTIME_ERROR(RtErr::ExecutionEngine);
+                        set_stack_value_at<intptr_t>(eval_stack_base, ir->dst, reinterpret_cast<intptr_t>(&frame->vararg_count));
                     }
                     LEANCLR_CASE_END4()
 #if !LEANCLR_USE_COMPUTED_GOTO_DISPATCHER
@@ -8101,7 +8344,7 @@ unwind_exception_handler:
                 }
                 case metadata::RtILExceptionClauseType::Filter:
                 {
-                    ip = imi->codes + clause->handler_begin_offset;
+                    ip = imi->codes + clause->filter_begin_offset;
                     setup_filter_checker(clause);
                     set_stack_value_at<vm::RtObject*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
                     handled = true;

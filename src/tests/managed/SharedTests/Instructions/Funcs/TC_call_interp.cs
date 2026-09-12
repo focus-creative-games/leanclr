@@ -17,14 +17,15 @@ namespace Tests.Instruments.Funcs
     /// </summary>
     internal class TC_call_interp : TestCaseBase
     {
-        //[UnitTest]
-        //public void class_null_this()
-        //{
-        //    ForInhereAotClass a = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    a.Show2();
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void class_null_this()
+        {
+            ForInhereAotClass a = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            a.Show2();
+            });
+        }
 
         [UnitTest]
         public void class_1()
@@ -97,8 +98,8 @@ namespace Tests.Instruments.Funcs
         [UnitTest]
         public void LocalFunction_Call_1_Param_Return2()
         {
-            //出错在 MetadataParser.cpp 524行 IL2CPP_ASSERT(paramCount == methodDef.parameterCount);
-            //B的函数定义只有一个参数 编译成il后会有两个参数
+            // 出错在 MetadataParser.cpp 524行 IL2CPP_ASSERT(paramCount == methodDef.parameterCount);
+            // B的函数定义只有一个参数 编译成il后会有两个参数
             int c = 1;
             int B(int d)
             {

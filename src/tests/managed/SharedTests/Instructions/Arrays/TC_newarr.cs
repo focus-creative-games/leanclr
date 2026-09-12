@@ -28,12 +28,14 @@ namespace Tests.Instruments.Arrays
             Assert.Null(arr[1]);
         }
 
-        //[UnitTest]
-        //public void overflow()
-        //{
-        //    Assert.ExpectException<OverflowException>();
-        //    int a = -1;
-        //    var arr = new string[a];
-        //}
+        [UnitTest]
+        public void overflow()
+        {
+            Assert.ExpectException<OverflowException>(() =>
+            {
+                int a = -1;
+                var arr = new string[a];
+            });
+        }
     }
 }

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq.Expressions;
 using System.Reflection;
 
@@ -17,8 +17,8 @@ namespace CorlibTests.InternalCall
             return a + b;
         }
 
-        // TODO, icall `System.Reflection.Emit.AssemblyBuilder::basic_init` is not implemented
-        //[UnitTest]
+         // TODO, icall `System.Reflection.Emit.AssemblyBuilder::basic_init` is not implemented
+        [UnitTest]
         public void CreateLambda()
         {
             var eventType = typeof(Func<int, int, int>);
@@ -31,16 +31,24 @@ namespace CorlibTests.InternalCall
 
         delegate int FunIn(in int a, in int b);
 
-        // TODO, icall `System.Reflection.Emit.AssemblyBuilder::basic_init` is not implemented
-        //[UnitTest]
+         // TODO, icall `System.Reflection.Emit.AssemblyBuilder::basic_init` is not implemented
+        [UnitTest]
         public void CreateLambdaInArgument()
         {
+            bool trace = Environment.GetEnvironmentVariable("LEANCLR_LEGACY_TRACE") == "1";
+            if (trace) Console.WriteLine("lightlambda-in: event type");
             var eventType = typeof(FunIn);
+            if (trace) Console.WriteLine("lightlambda-in: p1");
             var p1 = Expression.Parameter(typeof(int).MakeByRefType(), "arg1");
+            if (trace) Console.WriteLine("lightlambda-in: p2");
             var p2 = Expression.Parameter(typeof(int).MakeByRefType(), "arg2");
+            if (trace) Console.WriteLine("lightlambda-in: method");
             var method = typeof(TC_LightLambda).GetMethod("Sum2", BindingFlags.Static | BindingFlags.Public);
+            if (trace) Console.WriteLine("lightlambda-in: call");
             var methodCallExpression = Expression.Call(method, p1, p2);
+            if (trace) Console.WriteLine("lightlambda-in: compile");
             var lambda = Expression.Lambda(eventType, methodCallExpression, p1, p2).Compile();
+            if (trace) Console.WriteLine("lightlambda-in: done");
         }
     }
 }

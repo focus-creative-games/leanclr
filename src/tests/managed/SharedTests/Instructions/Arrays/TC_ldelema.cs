@@ -19,42 +19,47 @@ namespace Tests.Instruments.Arrays
             Assert.Equal(1, y);
         }
 
-        //[UnitTest]
-        //public void OutOfRange_lower()
-        //{
-        //    var arr = new int[] { -1, 1 };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    ref int s = ref arr[-1];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower()
+        {
+            var arr = new int[] { -1, 1 };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            ref int s = ref arr[-1];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper()
-        //{
-        //    var arr = new int[] { -1, 1 };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    ref int s = ref arr[2];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper()
+        {
+            var arr = new int[] { -1, 1 };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            ref int s = ref arr[2];
+            });
+        }
 
-        //[UnitTest]
-        //public void NullRef()
-        //{
-        //    int[] arr = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    ref int s = ref arr[0];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void NullRef()
+        {
+            int[] arr = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            ref int s = ref arr[0];
+            });
+        }
 
-        //[UnitTest]
-        //public void LoadCovariantElement()
-        //{
-        //    Assert.ExpectException<System.ArrayTypeMismatchException>();
-        //    var arr = new string[] { "a", "b" };
-        //    object[] arr2 = arr;
-        //    ref object s = ref arr2[0];
-        //    s = new object();
-        //}
+        [UnitTest]
+        public void LoadCovariantElement()
+        {
+            Assert.ExpectException<System.ArrayTypeMismatchException>(() =>
+            {
+                var arr = new string[] { "a", "b" };
+                object[] arr2 = arr;
+                ref object s = ref arr2[0];
+                s = new object();
+            });
+        }
 
 
         interface ITest
@@ -68,6 +73,16 @@ namespace Tests.Instruments.Arrays
         }
 
         struct TestStruct : ITest
+        {
+            public int x;
+
+            public int Test()
+            {
+                return x;
+            }
+        }
+
+        struct TestStruct2 : ITest
         {
             public int x;
 
@@ -102,22 +117,23 @@ namespace Tests.Instruments.Arrays
             Assert.Equal(1, CallArrayMemberFunction(arr2));
         }
 
-        //[UnitTest]
-        //public void UncheckedForStructArray1()
-        //{
-        //    int[] arr = new int[1] { 1 };
-        //    uint[] arr2 = System.Runtime.com<int[], uint[]>(ref arr);
-        //    ref int x = ref arr[0];
-        //    Assert.Equal(1, x);
-        //}
+        [UnitTest]
+        public void UncheckedForStructArray1()
+        {
+            int[] arr = new int[1] { 1 };
+            uint[] arr2 = UnsafeUtility.As<int[], uint[]>(ref arr);
+            ref int x = ref arr[0];
+            Assert.Equal(1, arr2.Length);
+            Assert.Equal(1, x);
+        }
 
-        //[UnitTest]
-        //public void UncheckedForStructArray2()
-        //{
-        //    TestStruct2[] arr = new TestStruct2[1] { new TestStruct2 { x = 1 } };
-        //    TestStruct[] arr2 = UnsafeUtility.As<TestStruct2[], TestStruct[]>(ref arr);
-        //    ref TestStruct x = ref arr2[0];
-        //    Assert.Equal(1, x.x);
-        //}
+        [UnitTest]
+        public void UncheckedForStructArray2()
+        {
+            TestStruct2[] arr = new TestStruct2[1] { new TestStruct2 { x = 1 } };
+            TestStruct[] arr2 = UnsafeUtility.As<TestStruct2[], TestStruct[]>(ref arr);
+            ref TestStruct x = ref arr2[0];
+            Assert.Equal(1, x.x);
+        }
     }
 }

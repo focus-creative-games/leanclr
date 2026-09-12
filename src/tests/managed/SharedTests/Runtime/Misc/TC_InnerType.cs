@@ -16,7 +16,7 @@ namespace Tests.Mics
             Assert.Equal(3, InnerTypes.Sum(new InnerTypes.A { x = 1 }, new InnerTypes.B { x = 2 }));
         }
 
-        //[UnitTest]
+        [UnitTest]
         public void Test2()
         {
             string s = InnerTypes.SumC1(new InnerTypes.C<InnerTypes.A, InnerTypes.B> { x = new InnerTypes.A { x = 1 }, y = new InnerTypes.B { x = 2 } });

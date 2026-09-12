@@ -173,6 +173,12 @@ bool Type::contains_generic_param(const metadata::RtTypeSig* typeSig)
         }
         return false;
     }
+    case metadata::RtElementType::Class:
+    case metadata::RtElementType::ValueType:
+    {
+        auto klass_ret = Class::get_class_from_typesig(typeSig);
+        return klass_ret.is_ok() && Class::is_generic(klass_ret.unwrap());
+    }
     case metadata::RtElementType::Array:
     {
         const metadata::RtArrayType* arrayType = typeSig->data.array_type;
@@ -245,8 +251,27 @@ void AssemblyQualifiedNames::trim_whitespaces()
 std::string_view AssemblyQualifiedNames::parse_after(char delimiter)
 {
     size_t cur = _pos;
-    while (_pos < _len && _str[_pos] != delimiter)
+    int bracket_depth = 0;
+    while (_pos < _len)
     {
+        char ch = _str[_pos];
+        if (ch == '\\' && _pos + 1 < _len)
+        {
+            _pos += 2;
+            continue;
+        }
+        if (ch == '[')
+        {
+            ++bracket_depth;
+        }
+        else if (ch == ']' && bracket_depth > 0)
+        {
+            --bracket_depth;
+        }
+        else if (ch == delimiter && bracket_depth == 0)
+        {
+            break;
+        }
         _pos++;
     }
     if (_pos < _len)
@@ -273,6 +298,149 @@ RtResult<const metadata::RtTypeSig*> Type::resolve_assembly_qualified_name(metad
         }
         return metadata::MetadataCache::get_pooled_szarray_typesig_by_element_typesig(elementTypeSig, false);
     }
+
+    size_t generic_args_start = SIZE_MAX;
+    int bracket_depth = 0;
+    for (size_t i = 0; i < name_len; ++i)
+    {
+        char ch = type_full_name[i];
+        if (ch == '\\' && i + 1 < name_len)
+        {
+            ++i;
+            continue;
+        }
+        if (ch == '[')
+        {
+            if (bracket_depth == 0)
+            {
+                generic_args_start = i;
+                break;
+            }
+            ++bracket_depth;
+        }
+        else if (ch == ']' && bracket_depth > 0)
+        {
+            --bracket_depth;
+        }
+    }
+
+    if (generic_args_start != SIZE_MAX && generic_args_start > 0 && name_len > generic_args_start + 1 && type_full_name[name_len - 1] == ']')
+    {
+        bool has_arity = false;
+        for (size_t i = 0; i < generic_args_start; ++i)
+        {
+            if (type_full_name[i] == '`')
+            {
+                has_arity = true;
+                break;
+            }
+        }
+        if (has_arity)
+        {
+            DUP_STR_TO_LOCAL_TEMP_ZERO_END_STR(temp_zero_end_base_name, type_full_name, generic_args_start);
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, generic_base_klass,
+                                                    mod->get_class_by_nested_full_name(temp_zero_end_base_name, ignore_case, false));
+            if (!generic_base_klass)
+            {
+                RET_OK((const metadata::RtTypeSig*)nullptr);
+            }
+
+            utils::Vector<const metadata::RtTypeSig*> generic_args;
+            size_t pos = generic_args_start + 1;
+            size_t end = name_len - 1;
+            while (pos < end)
+            {
+                while (pos < end && (std::isspace(static_cast<unsigned char>(type_full_name[pos])) || type_full_name[pos] == ','))
+                {
+                    ++pos;
+                }
+                if (pos >= end)
+                {
+                    break;
+                }
+
+                size_t arg_start = pos;
+                size_t arg_len = 0;
+                if (type_full_name[pos] == '[')
+                {
+                    ++pos;
+                    arg_start = pos;
+                    int arg_bracket_depth = 1;
+                    while (pos < end)
+                    {
+                        char ch = type_full_name[pos];
+                        if (ch == '\\' && pos + 1 < end)
+                        {
+                            pos += 2;
+                            continue;
+                        }
+                        if (ch == '[')
+                        {
+                            ++arg_bracket_depth;
+                        }
+                        else if (ch == ']')
+                        {
+                            --arg_bracket_depth;
+                            if (arg_bracket_depth == 0)
+                            {
+                                arg_len = pos - arg_start;
+                                ++pos;
+                                break;
+                            }
+                        }
+                        ++pos;
+                    }
+                    if (arg_len == 0 && arg_start < pos)
+                    {
+                        RET_ERR(RtErr::TypeLoad);
+                    }
+                }
+                else
+                {
+                    int arg_bracket_depth = 0;
+                    while (pos < end)
+                    {
+                        char ch = type_full_name[pos];
+                        if (ch == '\\' && pos + 1 < end)
+                        {
+                            pos += 2;
+                            continue;
+                        }
+                        if (ch == '[')
+                        {
+                            ++arg_bracket_depth;
+                        }
+                        else if (ch == ']' && arg_bracket_depth > 0)
+                        {
+                            --arg_bracket_depth;
+                        }
+                        else if (ch == ',' && arg_bracket_depth == 0)
+                        {
+                            break;
+                        }
+                        ++pos;
+                    }
+                    arg_len = pos - arg_start;
+                }
+
+                if (generic_args.size() >= UINT8_MAX)
+                {
+                    RET_ERR(RtErr::TypeLoad);
+                }
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, arg_type_sig,
+                                                        parse_assembly_qualified_type(mod, type_full_name + arg_start, arg_len, ignore_case));
+                generic_args.push_back(arg_type_sig);
+            }
+
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtGenericInst*, generic_inst,
+                                                    metadata::MetadataCache::get_pooled_generic_inst(generic_args.data(), static_cast<uint8_t>(generic_args.size())));
+            const metadata::RtGenericClass* generic_class =
+                metadata::MetadataCache::get_pooled_generic_class(Class::get_type_def_gid(generic_base_klass), generic_inst);
+            metadata::RtTypeSig generic_type_sig = metadata::RtTypeSig::new_byval_with_data(metadata::RtElementType::GenericInst, generic_class);
+            return metadata::MetadataCache::get_pooled_typesig(generic_type_sig);
+        }
+    }
+
     DUP_STR_TO_LOCAL_TEMP_ZERO_END_STR(temp_zero_end_full_name, type_full_name, name_len);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, mod->get_class_by_nested_full_name(temp_zero_end_full_name, ignore_case, false));
     if (klass)
@@ -588,7 +756,7 @@ RtResult<const metadata::RtTypeSig*> Type::parse_assembly_qualified_type(metadat
             break;
         }
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig,
-                                                Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), false));
+                                                Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), ignore_case));
         if (!typeSig)
         {
             continue;
@@ -601,7 +769,7 @@ RtResult<const metadata::RtTypeSig*> Type::parse_assembly_qualified_type(metadat
     for (metadata::RtModuleDef* mod : registered_modules)
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, typeSig,
-                                                Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), false));
+                                                Type::resolve_assembly_qualified_name(mod, qn.type_full_name.c_str(), qn.type_full_name.size(), ignore_case));
         if (!typeSig)
         {
             continue;

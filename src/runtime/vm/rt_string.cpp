@@ -1,9 +1,11 @@
 
 #include "rt_string.h"
+#include "const_strs.h"
 #include "gc/garbage_collector.h"
 #include "gc/gc_roots.h"
 #include "class.h"
 #include "field.h"
+#include "metadata/module_def.h"
 #include "3rd/utf8/utf8.h"
 #include <vector>
 #include <string>
@@ -59,6 +61,10 @@ static RtResultVoid init_static_empty_string(metadata::RtClass* stringClass)
     }
     g_empty_string = String::fast_allocate_string(0);
     RET_ERR_ON_FAIL(Field::set_static_value(emptyField, &g_empty_string));
+    if (std::strcmp(stringClass->image->get_name_no_ext(), STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0)
+    {
+        RET_VOID_OK();
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, empty_str, Field::get_value_object(emptyField, nullptr));
     assert(empty_str == g_empty_string);
     RET_VOID_OK();
@@ -66,6 +72,12 @@ static RtResultVoid init_static_empty_string(metadata::RtClass* stringClass)
 
 static RtResultVoid init_redirected_ctor_method(metadata::RtClass* stringClass)
 {
+    if (std::strcmp(stringClass->image->get_name_no_ext(), STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0)
+    {
+        g_redirectedCtorMethod = nullptr;
+        RET_VOID_OK();
+    }
+
     for (uint16_t i = 0; i < stringClass->method_count; ++i)
     {
         const metadata::RtMethodInfo* method = stringClass->methods[i];
@@ -84,6 +96,7 @@ RtResultVoid String::initialize()
 {
     metadata::RtClass* stringClass = Class::get_corlib_types().cls_string;
     g_stringClass = stringClass;
+    RET_ERR_ON_FAIL(Class::initialize_all(stringClass));
     RET_ERR_ON_FAIL(init_static_empty_string(stringClass));
     RET_ERR_ON_FAIL(init_redirected_ctor_method(stringClass));
     RET_VOID_OK();
@@ -194,11 +207,19 @@ RtString* String::intern_string(RtString* s)
     return s;
 }
 
-bool String::is_interned_string(RtString* s)
+RtString* String::get_interned_string(RtString* s)
 {
     if (s == nullptr)
-        return false;
-    return g_internTable.find(s) != g_internTable.end();
+        return nullptr;
+    auto it = g_internTable.find(s);
+    if (it == g_internTable.end())
+        return nullptr;
+    return *it;
+}
+
+bool String::is_interned_string(RtString* s)
+{
+    return get_interned_string(s) != nullptr;
 }
 
 } // namespace vm

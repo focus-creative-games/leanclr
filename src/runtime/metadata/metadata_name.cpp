@@ -318,6 +318,8 @@ const char* MetadataName::get_call_convention_name(RtSigType call_conv)
         return "FastCall";
     case RtSigType::VarArg:
         return "VarArg";
+    case RtSigType::Unmanaged:
+        return "Unmanaged";
     default:
         return "Default";
     }

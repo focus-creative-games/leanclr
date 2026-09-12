@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.CompilerServices;
@@ -25,15 +25,17 @@ namespace CorlibTests.InternalCall
             Assert.Equal(20, length); // 5 integers * 4 bytes each
         }
 
-        //[UnitTest]
-        //public void ByteLength_StringArray()
-        //{
-        //    string[] arr = new string[3];
-        //    int length = Buffer.ByteLength(arr);
-        //    Assert.Equal(-1, length); // Reference types return -1
-        //}
+        [UnitTest]
+        public void ByteLength_StringArray()
+        {
+            string[] arr = new string[3];
+            Assert.ExpectException<ArgumentException>(() =>
+            {
+                Buffer.ByteLength(arr);
+            });
+        }
 
-        // MemoryCopy
+         // MemoryCopy
         [UnitTest]
         public unsafe void MemoryCopy_ByteArray()
         {
@@ -53,7 +55,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(5, dest[4]);
         }
 
-        // BlockCopy — element size 1 (byte)
+         // BlockCopy — element size 1 (byte)
         [UnitTest]
         public void BlockCopy_ByteArray_DifferentArrays()
         {
@@ -80,7 +82,7 @@ namespace CorlibTests.InternalCall
             Assert.Equal(4, arr[5]);
         }
 
-        // BlockCopy — element size > 1 (int, 4 bytes per element)
+         // BlockCopy — element size > 1 (int, 4 bytes per element)
         [UnitTest]
         public void BlockCopy_IntArray_DifferentArrays()
         {
@@ -109,7 +111,7 @@ namespace CorlibTests.InternalCall
         {
             int[] src = new int[] { unchecked((int)0xAABBCCDD) };
             int[] dest = new int[1];
-            // Little-endian layout: DD CC BB AA — copy 2 bytes at byte offset 1 (CC BB).
+             // Little-endian layout: DD CC BB AA — copy 2 bytes at byte offset 1 (CC BB).
             Buffer.BlockCopy(src, 1, dest, 0, 2);
             Assert.Equal(unchecked((int)0x0000BBCC), dest[0]);
         }

@@ -85,31 +85,34 @@ namespace Tests.Instruments.Arrays
 
         }
 
-        //[UnitTest]
-        //public void OutOfRange_lower()
-        //{
-        //    var arr = new ValueTypeSize4[] { new ValueTypeSize4 { x1 = 1 }, new ValueTypeSize4 { x1 = 2 } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[-1];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower()
+        {
+            var arr = new ValueTypeSize4[] { new ValueTypeSize4 { x1 = 1 }, new ValueTypeSize4 { x1 = 2 } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[-1];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper()
-        //{
-        //    var arr = new ValueTypeSize4[] { new ValueTypeSize4 { x1 = 1 }, new ValueTypeSize4 { x1 = 2 } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[2];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper()
+        {
+            var arr = new ValueTypeSize4[] { new ValueTypeSize4 { x1 = 1 }, new ValueTypeSize4 { x1 = 2 } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[2];
+            });
+        }
 
-        //[UnitTest]
-        //public void NullRef()
-        //{
-        //    ValueTypeSize4[] arr = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    var s = arr[0];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void NullRef()
+        {
+            ValueTypeSize4[] arr = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            var s = arr[0];
+            });
+        }
     }
 }

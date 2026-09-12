@@ -109,6 +109,54 @@ namespace LeanAOT.ToCpp
             return false;
         }
 
+        private static uint? GetInlineArrayLength(TypeDef typeDef)
+        {
+            if (typeDef == null || !typeDef.IsValueType)
+            {
+                return null;
+            }
+
+            foreach (var ca in typeDef.CustomAttributes)
+            {
+                if (ca.AttributeType.FullName != "System.Runtime.CompilerServices.InlineArrayAttribute")
+                {
+                    continue;
+                }
+                if (ca.ConstructorArguments.Count != 1)
+                {
+                    throw new NotSupportedException($"Unexpected InlineArrayAttribute constructor shape on {typeDef.FullName}");
+                }
+
+                object value = ca.ConstructorArguments[0].Value;
+                uint length = value switch
+                {
+                    int i when i > 0 => (uint)i,
+                    uint u when u > 0 => u,
+                    _ => throw new NotSupportedException($"Invalid InlineArrayAttribute length on {typeDef.FullName}: {value}")
+                };
+                return length;
+            }
+
+            return null;
+        }
+
+        private void AddInlineArrayTailPaddingIfNeeded(TypeDetail type, CodeThrunkWriter typeDefinesWriter)
+        {
+            uint? inlineArrayLength = GetInlineArrayLength(type.TypeDef);
+            if (!inlineArrayLength.HasValue)
+            {
+                return;
+            }
+            if (type.HasObjectHeader || type.InstanceFieldsExcludeParent.Count != 1 || inlineArrayLength.Value == 1)
+            {
+                throw new NotSupportedException($"Invalid inline array type shape: {type.TypeDef.FullName}");
+            }
+
+            FieldDetail elementField = type.InstanceFieldsExcludeParent[0];
+            string elementTypeName = _typeNameService.GetCppTypeNameAsFieldOrArgOrLoc(elementField.Type, TypeNameRelaxLevel.Exactly);
+            typeDefinesWriter.AddLine($"{elementTypeName} __inlineArrayPadding[{inlineArrayLength.Value - 1}];");
+        }
+
         private void AddTypeNotStaticDefinition(TypeDetail type, CodeThrunkWriter typeDefinesWriter)
         {
             TypeDef typeDef = type.TypeDef;
@@ -188,6 +236,7 @@ namespace LeanAOT.ToCpp
                 {
                     typeDefinesWriter.AddLine($"{_typeNameService.GetCppTypeNameAsFieldOrArgOrLoc(field.Type, TypeNameRelaxLevel.Exactly)} {field.Name};");
                 }
+                AddInlineArrayTailPaddingIfNeeded(type, typeDefinesWriter);
                 if (!type.HasObjectHeader && type.InstanceFieldsIncludeParent.Count == 0)
                 {
                     typeDefinesWriter.AddLine($"uint8_t __placeholderForEmptyStruct;");

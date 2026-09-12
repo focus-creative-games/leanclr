@@ -47,6 +47,8 @@ class CustomAttribute
 
     static RtResult<RtArray*> get_customattributes_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token,
                                                                    const metadata::RtClass* attr_klass);
+    static RtResult<RtArray*> get_customattributes_on_class_with_pseudo(const metadata::RtClass* klass,
+                                                                        const metadata::RtClass* attr_klass);
     static RtResult<RtArray*> get_customattributes_on_target_object(RtObject* obj, const metadata::RtClass* attr_klass);
     static RtResult<RtArray*> get_customattributes_data_on_target(RtObject* obj);
     static RtResult<RtArray*> get_customattributes_data_on_target_token(metadata::RtModuleDef* mod, metadata::EncodedTokenId target_token);

@@ -22,31 +22,34 @@ namespace Tests.Instruments.Arrays
             Assert.Equal((IntPtr)2, y);
         }
 
-        //[UnitTest]
-        //public void OutOfRange_lower()
-        //{
-        //    var arr = new IntPtr[2];
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    arr[-1] = (IntPtr)1;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower()
+        {
+            var arr = new IntPtr[2];
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            arr[-1] = (IntPtr)1;
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper()
-        //{
-        //    var arr = new IntPtr[2];
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    arr[2] = (IntPtr)1;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper()
+        {
+            var arr = new IntPtr[2];
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            arr[2] = (IntPtr)1;
+            });
+        }
 
-        //[UnitTest]
-        //public void NullRef()
-        //{
-        //    IntPtr[] arr = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    arr[0] = (IntPtr)1;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void NullRef()
+        {
+            IntPtr[] arr = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            arr[0] = (IntPtr)1;
+            });
+        }
     }
 }

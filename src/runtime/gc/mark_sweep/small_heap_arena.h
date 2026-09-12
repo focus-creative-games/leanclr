@@ -59,6 +59,7 @@ class SmallHeapArena
     void* allocate_block();
     bool is_full();
     bool is_empty() const;
+    bool contains_allocated_block(const void* ptr) const;
     size_t get_block_size() const;
     size_t sweep(const GCAliveObjectBitmap& alive_object_bitmap);
 };
@@ -81,6 +82,7 @@ class SizeClassPool
     SizeClassPool(size_t arena_size, size_t block_size, size_t block_alignment);
 
     void* allocate_block();
+    bool contains_allocated_block(const void* ptr) const;
     void sweep(const GCAliveObjectBitmap& alive_object_bitmap, int64_t& freed_bytes);
     size_t block_size() const
     {

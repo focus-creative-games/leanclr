@@ -10,8 +10,7 @@ ILTests/
 │   └── conv.ovf.il
 ├── Wrappers/              # C# [UnitTest] wrappers calling IL methods
 │   └── TC_conv_ovf.cs
-├── ILTestsEntry.cs        # Assembly marker for RunTests
-└── ILTests.csproj
+└── ILTestsEntry.cs        # Assembly marker for the legacy source set
 ```
 
 Build produces two assemblies:
@@ -31,7 +30,10 @@ Requires **ILAsm** NuGet package (restored automatically via `dotnet restore`).
 
 ## Running
 
-- **basic-tester** (CI): loads `ILTests.Native.dll` then `ILTests.dll`, runs wrapper `[UnitTest]` methods.
-- **RunTests**: includes `ILTests` assembly in reflection scan.
+The old Mono `ILTests.csproj`, `basic-tester`, `RunTests`, and `managed.sln` entries were removed with the Mono profile cleanup. Keep the source files here as legacy material and link migrated cases into `src/tests/managed-net10/ManagedNet10.LegacyTests`.
 
-Build via `dotnet build managed.sln` or `scripts/test/build-all.bat`.
+Run the current net10 regression suite with:
+
+```batch
+powershell -ExecutionPolicy Bypass -File scripts\dotnet10\interp-smoke.ps1 -Configuration Release -AssemblyName ManagedNet10.LegacyTests -Entry "ManagedNet10.LegacyTests.Program::RunAll"
+```

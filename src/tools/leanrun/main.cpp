@@ -15,13 +15,18 @@
 #include "vm/settings.h"
 #include "vm/type.h"
 #include "vm/rt_exception.h"
+#include "vm/rt_array.h"
+#include "vm/stacktrace.h"
 #include "vm/property.h"
-#include "vm/field.h"
 #include "metadata/metadata_name.h"
+#include "interp/eval_stack_op.h"
+#include "vm/pinvoke.h"
 
 #ifdef _WIN32
 #include <windows.h>
 #endif
+
+#include <cstring>
 
 using namespace leanclr;
 
@@ -76,6 +81,94 @@ static void print_usage(const char* program_name)
               << "  " << program_name << " -e MyNamespace.MyClass::Main MyApp\n";
 }
 
+static void print_native_exception_stack_trace(vm::RtException* ex)
+{
+    if (ex == nullptr || ex->trace_ips == nullptr)
+    {
+        return;
+    }
+
+    const int32_t stack_count = vm::Array::get_array_length(ex->trace_ips);
+    if (stack_count <= 0)
+    {
+        return;
+    }
+
+    std::cerr << "Native exception stack trace:" << std::endl;
+    for (int32_t i = 0; i < stack_count; ++i)
+    {
+        auto* frame_obj = vm::Array::get_array_data_at<vm::RtObject*>(ex->trace_ips, i);
+        vm::RtReflectionMethod* reflection_method = nullptr;
+        int32_t native_offset = -1;
+        int32_t il_offset = -1;
+        vm::RtString* file_name = nullptr;
+        int32_t line_number = 0;
+        int32_t column_number = 0;
+        bool is_last_frame_from_foreign_exception_stack_trace = false;
+        auto frame_result = vm::StackTrace::get_stack_frame_data(frame_obj, &reflection_method, &native_offset, &il_offset, &file_name,
+                                                                &line_number, &column_number,
+                                                                &is_last_frame_from_foreign_exception_stack_trace);
+        (void)native_offset;
+        (void)file_name;
+        (void)line_number;
+        (void)column_number;
+        (void)is_last_frame_from_foreign_exception_stack_trace;
+        if (!frame_result.is_ok() || reflection_method == nullptr || reflection_method->method == nullptr)
+        {
+            continue;
+        }
+
+        utils::Utf8StringBuilder sb;
+        metadata::MetadataName::append_method_full_name_without_params(sb, reflection_method->method, metadata::TypeNameFormat::FullName).is_ok();
+        sb.sure_null_terminator_but_not_append();
+        std::cerr << "  at " << sb.get_const_chars();
+        if (il_offset >= 0)
+        {
+            std::cerr << " il_" << il_offset;
+        }
+        std::cerr << std::endl;
+    }
+}
+
+static bool is_system_private_corelib_loaded()
+{
+    auto* corlib = vm::Assembly::get_corlib();
+    return corlib != nullptr && corlib->mod != nullptr && std::strcmp(corlib->mod->get_name_no_ext(), "System.Private.CoreLib") == 0;
+}
+
+static RtResultVoid runtime_api_get_int_argument_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    interp::EvalStackOp::set_return(ret, interp::EvalStackOp::get_param<int32_t>(params, 0));
+    RET_VOID_OK();
+}
+
+static RtResultVoid runtime_api_get_string_argument_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    interp::EvalStackOp::set_return(ret, interp::EvalStackOp::get_param<vm::RtString*>(params, 0));
+    RET_VOID_OK();
+}
+
+static RtResultVoid runtime_api_get_multi_argument_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    int32_t value = interp::EvalStackOp::get_param<int32_t>(params, 0);
+    float c = interp::EvalStackOp::get_param<float>(params, 1);
+    double a = interp::EvalStackOp::get_param<double>(params, 2);
+    int64_t e = interp::EvalStackOp::get_param<int64_t>(params, 3);
+    interp::EvalStackOp::set_return(ret, value + static_cast<int32_t>(c) + static_cast<int32_t>(a) + static_cast<int32_t>(e));
+    RET_VOID_OK();
+}
+
+static void register_leanrun_test_pinvokes()
+{
+    vm::PInvokes::register_pinvoke("Tests.CSharp.NativeDll::GetIntArgument", nullptr, runtime_api_get_int_argument_invoker);
+    vm::PInvokes::register_pinvoke("Tests.CSharp.NativeDll::GetStringArgument", nullptr, runtime_api_get_string_argument_invoker);
+    vm::PInvokes::register_pinvoke("Tests.CSharp.NativeDll::GetMultiArgument", nullptr, runtime_api_get_multi_argument_invoker);
+    vm::PInvokes::register_pinvoke("Tests.CSharp.NativeDll::GetIntArgumentCdecl", nullptr, runtime_api_get_int_argument_invoker);
+}
+
 static void print_error_and_exit(const std::string& err_message, RtErr err)
 {
     std::cerr << "Error: " << err_message << " (Error code: " << static_cast<int>(err) << ")" << std::endl;
@@ -84,15 +177,6 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
     if (!ex)
     {
         std::cerr << "Failed to raise exception for invocation error" << std::endl;
-        std::exit(-1);
-    }
-
-    const metadata::RtPropertyInfo* prop = vm::Class::get_property_for_name(ex->klass, "StackTrace", true);
-    assert(prop);
-    auto ret = vm::Runtime::invoke_with_run_cctor(prop->get_method, ex, nullptr);
-    if (ret.is_err())
-    {
-        std::cerr << "Failed to get exception stack trace" << std::endl;
         std::exit(-1);
     }
 
@@ -117,6 +201,22 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
         sb.sure_null_terminator_but_not_append();
     }
     std::cerr << sb.get_const_chars() << std::endl << std::endl;
+
+    if (is_system_private_corelib_loaded())
+    {
+        print_native_exception_stack_trace(ex);
+        std::exit(-1);
+    }
+
+    const metadata::RtPropertyInfo* prop = vm::Class::get_property_for_name(ex->klass, "StackTrace", true);
+    assert(prop);
+    auto ret = vm::Runtime::invoke_with_run_cctor(prop->get_method, ex, nullptr);
+    if (ret.is_err())
+    {
+        std::cerr << "Failed to get exception stack trace" << std::endl;
+        print_native_exception_stack_trace(ex);
+        std::exit(-1);
+    }
 
     sb.clear();
     vm::RtString* stack_trace_str = reinterpret_cast<vm::RtString*>(ret.unwrap());
@@ -184,6 +284,7 @@ static int run(const std::string& dll_name, const std::vector<std::string>& dll_
         std::cerr << "Failed to initialize runtime, error: " << static_cast<int>(init_result.unwrap_err()) << std::endl;
         return -1;
     }
+    register_leanrun_test_pinvokes();
 
     // Load assembly
     auto ass_result = vm::Assembly::load_by_name(dll_name.c_str());

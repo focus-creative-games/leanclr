@@ -30,6 +30,8 @@ class Method
     static RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl(RtObject* obj, const metadata::RtMethodInfo* virtual_method);
     static RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl_on_klass(const metadata::RtClass* klass,
                                                                                     const metadata::RtMethodInfo* virtual_method);
+    static RtResult<const metadata::RtMethodInfo*> get_static_interface_method_impl_on_klass(const metadata::RtClass* klass,
+                                                                                             const metadata::RtMethodInfo* interface_method);
 
     // Method queries/search
     static const metadata::RtMethodInfo* find_matched_method_in_class(const metadata::RtClass* klass, const metadata::RtMethodInfo* to_match_method);

@@ -49,9 +49,10 @@ RtResult<vm::RtReflectionType*> SystemReflectionAssembly::internal_get_type(vm::
     (void)module; // unused
     utils::Utf8StringBuilder name_buf(vm::String::get_chars_ptr(name), static_cast<size_t>(vm::String::get_length(name)));
 
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, ass, vm::Reflection::get_assembly_from_reflection_object(assembly));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
         const metadata::RtTypeSig*, resolved_type_sig,
-        vm::Type::resolve_assembly_qualified_name(assembly->assembly->mod, name_buf.get_const_chars(), name_buf.length(), ignore_case));
+        vm::Type::resolve_assembly_qualified_name(ass->mod, name_buf.get_const_chars(), name_buf.length(), ignore_case));
     if (resolved_type_sig == nullptr)
     {
         if (throw_on_error)
@@ -65,7 +66,7 @@ RtResult<vm::RtReflectionType*> SystemReflectionAssembly::internal_get_type(vm::
 
 RtResult<vm::RtArray*> SystemReflectionAssembly::get_types(vm::RtReflectionAssembly* ref_assembly, bool exported_only) noexcept
 {
-    metadata::RtAssembly* ass = ref_assembly->assembly;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, ass, vm::Reflection::get_assembly_from_reflection_object(ref_assembly));
     return vm::Assembly::get_types(ass, exported_only);
 }
 
@@ -122,7 +123,8 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_with_partial_
 
 RtResult<intptr_t> SystemReflectionAssembly::internal_get_referenced_assemblies(vm::RtReflectionAssembly* ref_ass) noexcept
 {
-    metadata::RtModuleDef* mod = ref_ass->assembly->mod;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, ass, vm::Reflection::get_assembly_from_reflection_object(ref_ass));
+    metadata::RtModuleDef* mod = ass->mod;
     utils::Vector<metadata::RtAssembly*> ref_asses;
     RET_ERR_ON_FAIL(mod->get_reference_assemblies(ref_asses));
 

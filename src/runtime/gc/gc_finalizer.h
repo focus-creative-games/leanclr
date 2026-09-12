@@ -18,6 +18,7 @@ class GcFinalizer
     static void suppress_finalize(vm::RtObject* obj);
     static void reregister_for_finalize(vm::RtObject* obj);
     static void on_object_freed(vm::RtObject* obj);
+    static void register_gc_roots();
 };
 
 } // namespace gc

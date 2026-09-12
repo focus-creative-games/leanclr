@@ -37,6 +37,8 @@ class ZeroGcHeap
         (void)mode;
     }
 
+    static bool is_allocated_object(const vm::RtObject* obj);
+
     static void write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)
     {
         *obj_ref_location = new_obj;

@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -12,14 +12,14 @@ namespace CorlibTests.InternalCall
 {
     internal class TC_System_Reflection_Assembly : TestCaseBase
     {
-        //[UnitTest]
-        //public void Assembly_FullName_ok()
-        //{
-        //    var assembly = typeof(TC_System_Reflection_Assembly).Assembly;
-        //    Assert.NotNull(assembly);
-        //    string fullName = assembly.FullName;
-        //    Assert.True(fullName.Contains("CorlibTests"));
-        //}
+        [UnitTest]
+        public void Assembly_FullName_ok()
+        {
+            var assembly = typeof(TC_System_Reflection_Assembly).Assembly;
+            Assert.NotNull(assembly);
+            string fullName = assembly.FullName;
+            Assert.True(fullName.Contains(assembly.GetName().Name));
+        }
 
         [UnitTest]
         public void GetTypes_Ok()

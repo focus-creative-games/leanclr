@@ -42,6 +42,26 @@ static bool is_method_signature_equal(const RtMethodInfo* a, const RtMethodInfo*
     return MetadataCompare::is_typesigs_equal_ignore_attrs(a->parameters, b->parameters, a->parameter_count, compareGenericParamByIndex);
 }
 
+static const RtMethodInfo* find_virtual_method_impl_by_signature(const RtClass* klass, const RtMethodInfo* virtual_method)
+{
+    for (const RtClass* cur = klass; cur != nullptr; cur = cur->parent)
+    {
+        for (uint16_t i = 0; i < cur->method_count; ++i)
+        {
+            const RtMethodInfo* candidate = cur->methods[i];
+            if (Method::is_static(candidate) || !Method::is_virtual(candidate) || Method::is_abstract(candidate))
+            {
+                continue;
+            }
+            if (is_method_signature_equal(candidate, virtual_method, true, true))
+            {
+                return candidate;
+            }
+        }
+    }
+    return nullptr;
+}
+
 RtResult<const RtMethodInfo*> Method::get_method_by_method_def_gid(uint32_t method_def_gid)
 {
     uint32_t module_id = RtMetadata::decode_module_id_from_gid(method_def_gid);
@@ -101,7 +121,15 @@ RtResult<const RtVirtualInvokeData*> Method::get_interface_method_invoke_data(co
             {
                 continue;
             }
+            if (slot >= implemented_interface->vtable_count)
+            {
+                RET_ERR(RtErr::MissingMethod);
+            }
             size_t vtable_index = static_cast<size_t>(off.offset) + slot;
+            if (vtable_index >= klass->vtable_count)
+            {
+                RET_ERR(RtErr::MissingMethod);
+            }
             RET_OK(klass->vtable + vtable_index);
         }
     }
@@ -111,7 +139,15 @@ RtResult<const RtVirtualInvokeData*> Method::get_interface_method_invoke_data(co
         const RtInterfaceOffset& off = offsets[i];
         if (off.interface == interface_klass)
         {
+            if (slot >= interface_klass->vtable_count)
+            {
+                RET_ERR(RtErr::MissingMethod);
+            }
             size_t vtable_index = static_cast<size_t>(off.offset) + slot;
+            if (vtable_index >= klass->vtable_count)
+            {
+                RET_ERR(RtErr::MissingMethod);
+            }
             RET_OK(klass->vtable + vtable_index);
         }
     }
@@ -136,12 +172,33 @@ RtResult<const RtMethodInfo*> Method::get_virtual_method_impl_on_klass(const RtC
     const RtMethodInfo* actual_method = nullptr;
     if (!Class::is_interface(declaring_klass))
     {
-        actual_method = klass->vtable[slot].method_impl;
+        if (slot != metadata::RT_INVALID_METHOD_SLOT && slot < klass->vtable_count)
+        {
+            actual_method = klass->vtable[slot].method_impl;
+        }
+        if (!actual_method)
+        {
+            actual_method = find_virtual_method_impl_by_signature(klass, virtual_method);
+        }
     }
     else
     {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtVirtualInvokeData*, invoke_data, get_interface_method_invoke_data(klass, declaring_klass, slot));
-        actual_method = invoke_data->method_impl;
+        if (slot != metadata::RT_INVALID_METHOD_SLOT)
+        {
+            auto invoke_data_result = get_interface_method_invoke_data(klass, declaring_klass, slot);
+            if (invoke_data_result.is_ok())
+            {
+                actual_method = invoke_data_result.unwrap()->method_impl;
+            }
+        }
+        if (!actual_method)
+        {
+            actual_method = find_virtual_method_impl_by_signature(klass, virtual_method);
+        }
+    }
+    if (!actual_method)
+    {
+        RET_ERR(RtErr::MissingMethod);
     }
     if (actual_method->generic_container)
     {
@@ -161,6 +218,169 @@ RtResult<const RtMethodInfo*> Method::get_virtual_method_impl_on_klass(const RtC
     }
 
     RET_OK(actual_method);
+}
+
+static bool is_same_declaring_type(const RtClass* a, const RtClass* b)
+{
+    if (a == b)
+    {
+        return true;
+    }
+    return MetadataCompare::is_typesig_equal_ignore_attrs(a->by_val, b->by_val, true);
+}
+
+static bool is_same_declared_method(const RtMethodInfo* a, const RtMethodInfo* b)
+{
+    return is_same_declaring_type(a->parent, b->parent) && MetadataCompare::is_method_signature_equal(a, b, true, true);
+}
+
+static RtResult<const RtMethodInfo*> get_open_method_on_same_class_inst(const RtMethodInfo* method)
+{
+    if (!method->generic_method || !method->generic_method->generic_context.method_inst)
+    {
+        RET_OK(method);
+    }
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, method_def,
+                                            Method::get_method_by_method_def_gid(method->generic_method->base_method_gid));
+    const RtGenericInst* class_inst = method->generic_method->generic_context.class_inst;
+    if (class_inst)
+    {
+        return GenericMethod::get_method(method_def, class_inst, nullptr);
+    }
+    RET_OK(method_def);
+}
+
+static RtResult<bool> is_same_static_interface_declaration(const RtMethodInfo* declaration_method, const RtMethodInfo* interface_method)
+{
+    if (is_same_declared_method(declaration_method, interface_method))
+    {
+        RET_OK(true);
+    }
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, open_interface_method, get_open_method_on_same_class_inst(interface_method));
+    if (open_interface_method != interface_method && is_same_declared_method(declaration_method, open_interface_method))
+    {
+        RET_OK(true);
+    }
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, open_declaration_method, get_open_method_on_same_class_inst(declaration_method));
+    if (open_declaration_method != declaration_method && is_same_declared_method(open_declaration_method, interface_method))
+    {
+        RET_OK(true);
+    }
+
+    if (open_interface_method != interface_method && open_declaration_method != declaration_method &&
+        is_same_declared_method(open_declaration_method, open_interface_method))
+    {
+        RET_OK(true);
+    }
+
+    RET_OK(false);
+}
+
+static RtResult<const RtMethodInfo*> apply_interface_method_inst_to_body(const RtMethodInfo* body_method, const RtMethodInfo* interface_method)
+{
+    if (!interface_method->generic_method || !interface_method->generic_method->generic_context.method_inst)
+    {
+        RET_OK(body_method);
+    }
+
+    const RtGenericInst* method_inst = interface_method->generic_method->generic_context.method_inst;
+    const RtGenericInst* class_inst = nullptr;
+    const RtMethodInfo* body_def = body_method;
+
+    if (body_method->generic_method)
+    {
+        class_inst = body_method->generic_method->generic_context.class_inst;
+        if (body_method->generic_method->generic_context.method_inst == method_inst)
+        {
+            RET_OK(body_method);
+        }
+        UNWRAP_OR_RET_ERR_ON_FAIL(body_def, Method::get_method_by_method_def_gid(body_method->generic_method->base_method_gid));
+    }
+    else if (Class::is_generic_inst(body_method->parent))
+    {
+        class_inst = body_method->parent->by_val->data.generic_class->class_inst;
+    }
+
+    if (!body_def->generic_container)
+    {
+        RET_OK(body_method);
+    }
+    return GenericMethod::get_method(body_def, class_inst, method_inst);
+}
+
+RtResult<const RtMethodInfo*> Method::get_static_interface_method_impl_on_klass(const RtClass* klass, const RtMethodInfo* interface_method)
+{
+    if (!is_static(interface_method) || !Class::is_interface(interface_method->parent))
+    {
+        RET_ERR(RtErr::MissingMethod);
+    }
+
+    const RtClass* metadata_klass = klass;
+    const RtGenericContext* inflate_gc = nullptr;
+    RtGenericContext generic_inst_gc{};
+    if (Class::is_generic_inst(klass))
+    {
+        metadata_klass = Class::get_generic_base_klass_of_generic_class(klass);
+        if (!metadata_klass)
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+        generic_inst_gc.class_inst = klass->by_val->data.generic_class->class_inst;
+        generic_inst_gc.method_inst = nullptr;
+        inflate_gc = &generic_inst_gc;
+    }
+
+    const CliImage& cli_image = metadata_klass->image->get_cli_image();
+    RtGenericContainerContext gcc = Class::get_generic_container_context(metadata_klass);
+
+    auto opt_method_impl_range = cli_image.find_row_range_of_owner_at_sorted_table(TableType::MethodImpl, 0, RtToken::decode_rid(metadata_klass->token));
+    if (opt_method_impl_range)
+    {
+        RidRange& range = opt_method_impl_range.value();
+        for (uint32_t method_impl_rid = range.ridBegin; method_impl_rid < range.ridEnd; ++method_impl_rid)
+        {
+            auto opt_row = cli_image.read_method_impl(method_impl_rid);
+            if (!opt_row)
+            {
+                RET_ASSERT_ERR(RtErr::BadImageFormat);
+            }
+
+            RowMethodImpl row = opt_row.value();
+            RtToken body_token = RtMetadata::decode_method_def_or_ref_coded_index(row.method_body);
+            RtToken decl_token = RtMetadata::decode_method_def_or_ref_coded_index(row.method_declaration);
+
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, body_method,
+                                                    metadata_klass->image->get_method_by_token(body_token, gcc, nullptr));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, declaration_method,
+                                                    metadata_klass->image->get_method_by_token(decl_token, gcc, nullptr));
+
+            if (inflate_gc)
+            {
+                UNWRAP_OR_RET_ERR_ON_FAIL(body_method, inflate(body_method, inflate_gc));
+                UNWRAP_OR_RET_ERR_ON_FAIL(declaration_method, inflate(declaration_method, inflate_gc));
+            }
+
+            if (!Class::is_interface(declaration_method->parent) || !is_static(body_method))
+            {
+                continue;
+            }
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, same_declaration,
+                                                    is_same_static_interface_declaration(declaration_method, interface_method));
+            if (same_declaration)
+            {
+                return apply_interface_method_inst_to_body(body_method, interface_method);
+            }
+        }
+    }
+
+    if (!is_abstract(interface_method) && has_method_body(interface_method))
+    {
+        RET_OK(interface_method);
+    }
+    RET_ERR(RtErr::MissingMethod);
 }
 
 const RtMethodInfo* Method::find_matched_method_in_class(const RtClass* klass, const RtMethodInfo* to_match_method)
@@ -588,20 +808,21 @@ RtResult<std::optional<RtMethodBody>> Method::get_method_body(const RtMethodInfo
 static RtResult<RtReflectionExceptionHandlingClause*> create_reflection_exceptionhandlingclause(RtModuleDef* mod,
                                                                                                 const metadata::RtGenericContainerContext& gcc,
                                                                                                 const metadata::RtGenericContext* gc,
+                                                                                                RtReflectionMethodBody* method_body,
                                                                                                 const metadata::RtExceptionClause& clause)
 {
     metadata::RtClass* cls_exceptionhandlingclause = Class::get_corlib_types().cls_reflection_exceptionhandlingclause;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, clause_obj_base, LEANCLR_NEWOBJ_INTERNAL(cls_exceptionhandlingclause, "Method::create_reflection_exceptionhandlingclause"));
     RtReflectionExceptionHandlingClause* clause_obj = static_cast<RtReflectionExceptionHandlingClause*>(clause_obj_base);
 
+    clause_obj->method_body = method_body;
     if (clause.flags == metadata::RtILExceptionClauseType::Exception)
     {
         if (clause.class_token_or_filter_offset != 0)
         {
             metadata::RtToken token = metadata::RtToken::decode(clause.class_token_or_filter_offset);
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, catch_klass, mod->get_class_by_type_def_ref_spec_token(token, gcc, gc));
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, catch_type, Reflection::get_klass_reflection_object(catch_klass));
-            clause_obj->catch_type = catch_type;
+            RET_ERR_ON_FAIL(mod->get_class_by_type_def_ref_spec_token(token, gcc, gc));
+            clause_obj->catch_metadata_token = static_cast<int32_t>(clause.class_token_or_filter_offset);
         }
     }
     else if (clause.flags == metadata::RtILExceptionClauseType::Filter)
@@ -648,6 +869,16 @@ RtResult<RtReflectionMethodBody*> Method::create_reflection_method_body(const Rt
                                             LEANCLR_NEWOBJ_INTERNAL(corlib_types.cls_reflection_methodbody, "Method::create_reflection_method_body"));
     RtReflectionMethodBody* method_body_obj = static_cast<RtReflectionMethodBody*>(method_body_obj_base);
 
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        RtArray*, code_arr,
+        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_byte, static_cast<int32_t>(raw_method_body.code_size),
+                                                   "Method::create_reflection_method_body"));
+    if (raw_method_body.code_size > 0)
+    {
+        std::memcpy(Array::get_array_data_start_as<uint8_t>(code_arr), raw_method_body.code, raw_method_body.code_size);
+    }
+    method_body_obj->codes = code_arr;
+
     // Setup generic context
     metadata::RtGenericContainerContext generic_container_context{method->parent->generic_container, method->generic_container};
 
@@ -666,7 +897,7 @@ RtResult<RtReflectionMethodBody*> Method::create_reflection_method_body(const Rt
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
             RtReflectionExceptionHandlingClause*, ex_clause_obj,
-            create_reflection_exceptionhandlingclause(mod, generic_container_context, generic_context, raw_exception_clauses[i]));
+            create_reflection_exceptionhandlingclause(mod, generic_container_context, generic_context, method_body_obj, raw_exception_clauses[i]));
         Array::set_array_data_at<RtObject*>(clause_arr, static_cast<int32_t>(i), ex_clause_obj);
     }
     method_body_obj->clauses = clause_arr;
@@ -710,9 +941,16 @@ RtResultVoid Method::get_parameter_modifiers(const RtMethodInfo* method, int32_t
     {
         RET_ERR(RtErr::Argument);
     }
+    if (method->token == metadata::RtToken::Invalid)
+    {
+        RET_VOID_OK();
+    }
     metadata::RtModuleDef* mod = method->parent->image;
     auto optMethodRow = mod->get_cli_image().read_method(metadata::RtToken::decode_rid(method->token));
-    assert(optMethodRow.has_value() && "Method row must be present");
+    if (!optMethodRow.has_value())
+    {
+        RET_ERR(RtErr::BadImageFormat);
+    }
     auto retBlobReader = mod->get_decoded_blob_reader(optMethodRow->signature);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL2(utils::BinaryReader, reader, retBlobReader);
     return mod->read_parameter_modifier(reader, index, optional, RtGenericContainerContext{}, nullptr, modifiers);

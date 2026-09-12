@@ -1,6 +1,7 @@
 #include "system_reflection_customattributedata.h"
 
 #include "vm/customattribute.h"
+#include "vm/reflection.h"
 #include "utils/binary_reader.h"
 
 namespace leanclr
@@ -15,8 +16,10 @@ RtResultVoid SystemReflectionCustomAttributeData::resolve_arguments_internal(vm:
     const void* data_ptr = reinterpret_cast<const void*>(data);
     utils::BinaryReader reader(data_ptr, static_cast<size_t>(data_length));
 
-    RET_ERR_ON_FAIL(
-        vm::CustomAttribute::resolve_customattribute_data_arguments(&reader, ctor_assembly->assembly->mod, ctor->method, typed_arg_arr_ptr, named_arg_arr_ptr));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, vm::Reflection::get_method_info_from_reflection_object(ctor));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, assembly,
+                                            vm::Reflection::get_assembly_from_reflection_object(ctor_assembly));
+    RET_ERR_ON_FAIL(vm::CustomAttribute::resolve_customattribute_data_arguments(&reader, assembly->mod, method, typed_arg_arr_ptr, named_arg_arr_ptr));
     RET_VOID_OK();
 }
 

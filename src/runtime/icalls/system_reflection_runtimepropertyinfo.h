@@ -11,9 +11,11 @@ class SystemReflectionRuntimePropertyInfo
 {
   public:
     static utils::Span<vm::InternalCallEntry> get_internal_call_entries() noexcept;
+    static utils::Span<vm::NewobjInternalCallEntry> get_newobj_internal_call_entries() noexcept;
 
     // Get property reflection object from property handle and optional type
-    static RtResult<vm::RtReflectionProperty*> internal_from_handle_type(metadata::RtPropertyInfo* property, const metadata::RtTypeSig* type_sig) noexcept;
+    static RtResult<vm::RtReflectionProperty*> internal_from_handle_type(const metadata::RtPropertyInfo* property,
+                                                                         const metadata::RtTypeSig* type_sig) noexcept;
 
     // Get property info
     static RtResultVoid get_property_info(vm::RtReflectionProperty* property, vm::RtMonoPropertyInfo* result_info, int32_t pinfo) noexcept;

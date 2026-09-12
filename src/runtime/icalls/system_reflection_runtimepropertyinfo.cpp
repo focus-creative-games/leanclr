@@ -1,10 +1,13 @@
 #include "system_reflection_runtimepropertyinfo.h"
 #include "icall_base.h"
 #include "vm/class.h"
+#include "vm/field.h"
+#include "vm/object.h"
 #include "vm/property.h"
 #include "vm/reflection.h"
 #include "vm/rt_array.h"
 #include "vm/rt_string.h"
+#include "metadata/module_def.h"
 
 namespace leanclr
 {
@@ -24,9 +27,14 @@ enum class PInfo : int32_t
 
 // ========== Implementation Functions ==========
 
-RtResult<vm::RtReflectionProperty*> SystemReflectionRuntimePropertyInfo::internal_from_handle_type(metadata::RtPropertyInfo* property,
+RtResult<vm::RtReflectionProperty*> SystemReflectionRuntimePropertyInfo::internal_from_handle_type(const metadata::RtPropertyInfo* property,
                                                                                                    const metadata::RtTypeSig* type_sig) noexcept
 {
+    if (property == nullptr)
+    {
+        RET_ERR(RtErr::ArgumentNull);
+    }
+
     const metadata::RtClass* property_parent = property->parent;
     if (type_sig == nullptr)
     {
@@ -48,12 +56,15 @@ RtResult<vm::RtReflectionProperty*> SystemReflectionRuntimePropertyInfo::interna
 RtResultVoid SystemReflectionRuntimePropertyInfo::get_property_info(vm::RtReflectionProperty* property, vm::RtMonoPropertyInfo* result_info,
                                                                     int32_t pinfo) noexcept
 {
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtPropertyInfo*, prop,
+                                            vm::Reflection::get_property_info_from_reflection_object(property));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtClass*, reflected_klass,
+                                            vm::Reflection::get_reflection_property_klass(property));
+
     if (pinfo & static_cast<int32_t>(PInfo::Attributes))
     {
-        result_info->attrs = property->property->flags;
+        result_info->attrs = prop->flags;
     }
-    const metadata::RtClass* reflected_klass = property->klass;
-    const metadata::RtPropertyInfo* prop = property->property;
 
     if (pinfo & static_cast<int32_t>(PInfo::GetMethod))
     {
@@ -101,7 +112,8 @@ RtResultVoid SystemReflectionRuntimePropertyInfo::get_property_info(vm::RtReflec
 
 RtResult<vm::RtArray*> SystemReflectionRuntimePropertyInfo::get_type_modifiers(vm::RtReflectionProperty* property, bool optional) noexcept
 {
-    const metadata::RtPropertyInfo* prop = property->property;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtPropertyInfo*, prop,
+                                            vm::Reflection::get_property_info_from_reflection_object(property));
     metadata::RtModuleDef* mod = prop->parent->image;
 
     utils::Vector<metadata::RtClass*> modifiers;
@@ -121,12 +133,16 @@ RtResult<vm::RtArray*> SystemReflectionRuntimePropertyInfo::get_type_modifiers(v
 
 RtResult<vm::RtObject*> SystemReflectionRuntimePropertyInfo::get_default_value(vm::RtReflectionProperty* property) noexcept
 {
-    return vm::Property::get_const_object(property->property);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtPropertyInfo*, prop,
+                                            vm::Reflection::get_property_info_from_reflection_object(property));
+    return vm::Property::get_const_object(prop);
 }
 
 RtResult<int32_t> SystemReflectionRuntimePropertyInfo::get_metadata_token(vm::RtReflectionProperty* property) noexcept
 {
-    RET_OK(static_cast<int32_t>(property->property->token));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtPropertyInfo*, prop,
+                                            vm::Reflection::get_property_info_from_reflection_object(property));
+    RET_OK(static_cast<int32_t>(prop->token));
 }
 
 // ========== Invoker Functions ==========
@@ -135,8 +151,15 @@ RtResult<int32_t> SystemReflectionRuntimePropertyInfo::get_metadata_token(vm::Rt
 static RtResultVoid internal_from_handle_type_invoker_runtimepropertyinfo(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                                           const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-    metadata::RtPropertyInfo* property = EvalStackOp::get_param<metadata::RtPropertyInfo*>(params, 0);
-    const metadata::RtTypeSig* type_sig = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 1);
+    auto property_arg = EvalStackOp::get_param<const void*>(params, 0);
+    auto type_arg = EvalStackOp::get_param<const void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtPropertyInfo*, property,
+                                            vm::Reflection::get_property_info_from_handle_arg(property_arg));
+    const metadata::RtTypeSig* type_sig = nullptr;
+    if (type_arg != nullptr)
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(type_sig, vm::Reflection::get_type_sig_from_runtime_type_handle_arg(type_arg));
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionProperty*, result,
                                             SystemReflectionRuntimePropertyInfo::internal_from_handle_type(property, type_sig));
     EvalStackOp::set_return(ret, result);
@@ -186,6 +209,28 @@ static RtResultVoid get_metadata_token_invoker_system_reflection_runtimeproperty
     RET_VOID_OK();
 }
 
+/// @newobj: System.Reflection.RuntimePropertyInfo::.ctor(System.Int32,System.RuntimeType,System.RuntimeType/RuntimeTypeCache,System.Boolean&)
+static RtResultVoid newobj_runtime_property_info_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo* ctor,
+                                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    int32_t property_token = EvalStackOp::get_param<int32_t>(params, 0);
+    auto declaring_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 1);
+    auto reflected_type_cache = EvalStackOp::get_param<vm::RtObject*>(params, 2);
+    auto is_private = EvalStackOp::get_param<bool*>(params, 3);
+    if (declaring_type == nullptr || reflected_type_cache == nullptr || is_private == nullptr)
+    {
+        RET_ERR(RtErr::ArgumentNull);
+    }
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtPropertyInfo*, property,
+                                            vm::Reflection::get_property_info_from_runtime_type(declaring_type, property_token));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, property_obj_raw,
+                                            vm::Reflection::create_runtime_property_info_object(
+                                                property, declaring_type, reflected_type_cache, is_private));
+    EvalStackOp::set_return(ret, property_obj_raw);
+    RET_VOID_OK();
+}
+
 // ========== Registration ==========
 
 static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimepropertyinfo[] = {
@@ -206,6 +251,18 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimePropertyInfo::get_inte
     constexpr size_t entry_count =
         sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo) / sizeof(s_internal_call_entries_system_reflection_runtimepropertyinfo[0]);
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimepropertyinfo, entry_count);
+}
+
+static vm::NewobjInternalCallEntry s_newobj_internal_call_entries_system_reflection_runtimepropertyinfo[] = {
+    {"System.Reflection.RuntimePropertyInfo::.ctor(System.Int32,System.RuntimeType,System.RuntimeType/RuntimeTypeCache,System.Boolean&)",
+     newobj_runtime_property_info_invoker},
+};
+
+utils::Span<vm::NewobjInternalCallEntry> SystemReflectionRuntimePropertyInfo::get_newobj_internal_call_entries() noexcept
+{
+    constexpr size_t entry_count = sizeof(s_newobj_internal_call_entries_system_reflection_runtimepropertyinfo) /
+                                   sizeof(s_newobj_internal_call_entries_system_reflection_runtimepropertyinfo[0]);
+    return utils::Span<vm::NewobjInternalCallEntry>(s_newobj_internal_call_entries_system_reflection_runtimepropertyinfo, entry_count);
 }
 
 } // namespace icalls

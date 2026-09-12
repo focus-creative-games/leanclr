@@ -9,6 +9,10 @@ namespace Tests.Instruments.Funcs
 {
     internal class TC_calli : TestCaseBase
     {
-        // TODO 不好构造测试用例
+        [UnitTest]
+        public void static_function_pointer_call()
+        {
+            Assert.Equal(42, TestInstructionOpcodes.CalliAddOne(41));
+        }
     }
 }

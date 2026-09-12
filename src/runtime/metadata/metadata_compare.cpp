@@ -100,6 +100,10 @@ bool MetadataCompare::is_method_signature_equal(const RtMethodSig* a, const RtMe
         return false;
     if (a->generic_param_count != b->generic_param_count)
         return false;
+    if (a->fixed_param_count != b->fixed_param_count)
+        return false;
+    if (a->params.size() != b->params.size())
+        return false;
     if (!is_typesig_equal_ignore_attrs(a->return_type, b->return_type, false))
         return false;
     if (!is_typesigs_equal_ignore_attrs(a->params.data(), b->params.data(), a->params.size(), false))

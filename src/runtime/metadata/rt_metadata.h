@@ -364,6 +364,7 @@ enum class RtSigType : uint8_t
     Field = 0x6,
     LocalVar = 0x7,
     Property = 0x8,
+    Unmanaged = 0x9,
     MethodSpec = 0xA,
     GenericInst = 0x10,
     HasThis = 0x20,
@@ -377,6 +378,7 @@ struct RtMethodSig
 {
     uint8_t flags;
     uint8_t generic_param_count;
+    uint16_t fixed_param_count;
     const RtTypeSig* return_type;
     utils::Vector<const RtTypeSig*> params;
 };
@@ -739,6 +741,7 @@ struct RtCustomAttributeRidRange
 struct RtCustomAttributeRawData
 {
     const RtMethodInfo* ctor;
+    EncodedTokenId ctor_token;
     uint32_t dataBlobIndex;
 };
 

@@ -2,6 +2,7 @@
 #include "interp/interp_defs.h"
 #include "vm/object.h"
 #include "vm/class.h"
+#include "vm/reflection.h"
 
 namespace leanclr
 {
@@ -13,10 +14,56 @@ RtResultVoid SystemObject::ctor(vm::RtObject* obj) noexcept
     RET_VOID_OK();
 }
 
+RtResult<vm::RtReflectionType*> SystemObject::get_type(vm::RtObject* obj) noexcept
+{
+    if (obj == nullptr)
+    {
+        RET_ERR(RtErr::NullReference);
+    }
+
+    return vm::Reflection::get_klass_reflection_object(obj->klass);
+}
+
+RtResult<vm::RtObject*> SystemObject::memberwise_clone(vm::RtObject* obj) noexcept
+{
+    if (obj == nullptr)
+    {
+        RET_ERR(RtErr::NullReference);
+    }
+
+    return LEANCLR_CLONE_INTERNAL(obj, "SystemObject::memberwise_clone");
+}
+
 /// @intrinsic: System.Object::.ctor()
 RtResultVoid ctor_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                           interp::RtStackObject* ret) noexcept
 {
+    RET_VOID_OK();
+}
+
+/// @intrinsic: System.Object::GetType()
+static RtResultVoid get_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
+                                     interp::RtStackObject* ret) noexcept
+{
+    (void)methodPtr;
+    (void)method;
+    vm::RtObject* obj = interp::EvalStackOp::get_param<vm::RtObject*>(params, 0);
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionType*, runtime_type, SystemObject::get_type(obj));
+    interp::EvalStackOp::set_return(ret, runtime_type);
+    RET_VOID_OK();
+}
+
+/// @intrinsic: System.Object::MemberwiseClone()
+static RtResultVoid memberwise_clone_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    (void)methodPtr;
+    (void)method;
+    vm::RtObject* obj = interp::EvalStackOp::get_param<vm::RtObject*>(params, 0);
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, clone, SystemObject::memberwise_clone(obj));
+    interp::EvalStackOp::set_return(ret, clone);
     RET_VOID_OK();
 }
 
@@ -37,6 +84,8 @@ RtResultVoid newobj_ctor_invoker(metadata::RtManagedMethodPointer methodPtr, con
 // Intrinsic registry
 static vm::IntrinsicEntry s_intrinsic_entries_system_object[] = {
     {"System.Object::.ctor()", (vm::IntrinsicFunction)&SystemObject::ctor, ctor_invoker},
+    {"System.Object::GetType()", (vm::IntrinsicFunction)&SystemObject::get_type, get_type_invoker},
+    {"System.Object::MemberwiseClone()", (vm::IntrinsicFunction)&SystemObject::memberwise_clone, memberwise_clone_invoker},
 };
 
 // Newobj intrinsic registry

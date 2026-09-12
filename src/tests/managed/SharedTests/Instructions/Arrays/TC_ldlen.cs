@@ -26,13 +26,14 @@ namespace Tests.Instruments.Arrays
             Assert.Equal(2, arr.LongLength);
         }
 
-        //[UnitTest]
-        //public void nullobj()
-        //{
-        //    int[] arr = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    int n = arr.Length;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void nullobj()
+        {
+            int[] arr = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            int n = arr.Length;
+            });
+        }
     }
 }

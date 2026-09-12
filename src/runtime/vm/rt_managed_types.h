@@ -29,8 +29,8 @@ struct RtMarshalByRefObject : public RtObject
 // Managed array
 struct RtArray : public RtObject
 {
-    const ArrayBounds* bounds;
     int32_t length;
+    uint32_t padding;
     uint64_t first_data;
 };
 
@@ -45,6 +45,8 @@ struct RtString : RtObject
 struct RtReflectionType
 {
     RtObject header;
+    RtObject* keepalive;
+    void* cache;
     const metadata::RtTypeSig* type_handle;
 };
 
@@ -52,12 +54,22 @@ struct RtReflectionType
 struct RtReflectionRuntimeType
 {
     RtReflectionType reflection_type;
-    RtObject* type_info;
-    RtObject* generic_cache;
-    RtObject* serialization_ctor;
 };
 
 using RtReflectionMonoType = RtReflectionRuntimeType;
+
+struct RtSignature : public RtObject
+{
+    RtArray* arguments;
+    RtReflectionRuntimeType* declaring_type;
+    RtReflectionRuntimeType* return_type_or_field_type;
+    RtObject* keep_alive;
+    void* sig;
+    int32_t csig;
+    int32_t managed_calling_convention_and_arg_iterator_flags;
+    int32_t size_of_arg_stack;
+    const metadata::RtMethodInfo* method;
+};
 
 // Reflection field
 struct RtReflectionField
@@ -74,13 +86,40 @@ struct RtReflectionField
 struct RtReflectionMethod
 {
     RtObject header;
-    const metadata::RtMethodInfo* method;
+    const metadata::RtMethodInfo* method; // RuntimeMethodInfo.m_handle
+    RtObject* reflected_type_cache;
     RtString* name;
-    RtReflectionType* ref_type;
+    RtString* to_string;
+    RtArray* parameters;
+    RtObject* return_parameter;
+    int32_t binding_flags;
+    int32_t method_attributes;
+    RtObject* signature;
+    RtReflectionRuntimeType* declaring_type;
+    RtObject* keepalive;
+    RtObject* invoker;
 };
 
 using RtReflectionGenericMethod = RtReflectionMethod;
-using RtReflectionConstructor = RtReflectionMethod;
+
+struct RtReflectionConstructor
+{
+    RtObject header;
+    RtReflectionRuntimeType* declaring_type;
+    RtObject* reflected_type_cache;
+    RtString* to_string;
+    RtArray* parameters;
+    RtObject* empty1;
+    RtObject* empty2;
+    RtObject* empty3;
+    const metadata::RtMethodInfo* method; // RuntimeConstructorInfo.m_handle
+    int32_t method_attributes;
+    int32_t binding_flags;
+    RtObject* signature;
+    RtObject* invoker;
+};
+
+struct RtReflectionMethodBody;
 
 // Mono method info
 struct RtMonoMethodInfo
@@ -144,28 +183,18 @@ struct RtReflectionAssembly;
 // Reflection module
 struct RtReflectionModule : public RtObject
 {
-    const void* image; // EEImage*
-    RtReflectionAssembly* assembly;
-    RtString* fqname;
-    RtString* name;
-    RtString* scope_name;
-    bool is_resource;
-    uint32_t token;
+    RtReflectionRuntimeType* runtime_type; // System.Reflection.RuntimeModule.m_runtimeType
+    RtReflectionAssembly* assembly;        // System.Reflection.RuntimeModule.m_runtimeAssembly
+    metadata::RtModuleDef* native_handle;  // System.Reflection.RuntimeModule.m_pData
 };
 
 // Reflection assembly
 struct RtReflectionAssembly : public RtObject
 {
-    metadata::RtAssembly* assembly;
-    RtObject* evidence;
-    RtObject* resolve_event_holder;
-    RtObject* minimum;
-    RtObject* optional;
-    RtObject* refused;
-    RtObject* granted;
-    RtObject* denied;
-    bool from_byte_array;
-    RtString* name;
+    RtObject* module_resolve;
+    RtString* full_name;
+    RtObject* sync_root;
+    metadata::RtAssembly* assembly; // System.Reflection.RuntimeAssembly.m_assembly
 };
 
 // Reflection assembly name
@@ -196,8 +225,8 @@ struct RtCustomAttribute : public RtObject
 // Typed reference
 struct RtTypedReference
 {
-    const metadata::RtTypeSig* type_handle;
     const void* value;
+    const void* type_handle;
     const metadata::RtClass* klass;
 };
 
@@ -212,26 +241,18 @@ struct RtDelegateData : public RtObject
 // Delegate
 struct RtDelegate : public RtObject
 {
-    uintptr_t _method_ptr;
-    uintptr_t invoke_impl;
     RtObject* target;
-    const metadata::RtMethodInfo* method;
-    uintptr_t _delegate_trampoline;
-    intptr_t extra_arg;
-    uintptr_t method_code;
-    uintptr_t _interp_method;
-    metadata::RtManagedMethodPointer interp_invoke_impl;
-    const metadata::RtMethodInfo* method_info;
-    const metadata::RtMethodInfo* original_method_info;
-    RtDelegateData* data;
-    bool method_is_virtual;
+    RtObject* method_base;
+    uintptr_t method_ptr;
+    uintptr_t method_ptr_aux;
 };
 
 // Multicast delegate
 struct RtMulticastDelegate
 {
     RtDelegate dele;
-    RtArray* deles;
+    RtObject* invocation_list;
+    intptr_t invocation_count;
 };
 
 // Forward declaration for mono app domain
@@ -518,32 +539,34 @@ struct RtStackFrame : public RtObject
 // Reflection exception handling clause
 struct RtReflectionExceptionHandlingClause : public RtObject
 {
-    RtReflectionType* catch_type;
-    int32_t filter_offset;
+    RtReflectionMethodBody* method_body;
     int32_t flags;
     int32_t try_offset;
     int32_t try_length;
     int32_t handler_offset;
     int32_t handler_length;
+    int32_t catch_metadata_token;
+    int32_t filter_offset;
 };
 
 // Reflection local variable info
 struct RtReflectionLocalVariableInfo : public RtObject
 {
     RtReflectionType* type_;
+    int32_t position;
     bool is_pinned;
-    uint16_t position;
 };
 
 // Reflection method body
 struct RtReflectionMethodBody : public RtObject
 {
+    RtArray* codes;
     RtArray* clauses;
     RtArray* locals;
-    RtArray* codes;
-    bool init_locals;
+    RtReflectionMethod* method_base;
     int32_t sig_token;
     int32_t max_stack;
+    bool init_locals;
 };
 
 // Reflection mono event info
@@ -631,6 +654,7 @@ struct RtInternalThread : public RtObject
     void* netcore1;
     void* netcore2;
     void* last;
+    RtObject* coreclr_managed_thread;
 };
 
 // Thread
@@ -664,7 +688,6 @@ constexpr uint32_t RT_STRING_FIRST_CHAR_OFFSET = offsetof(RtString, first_char);
 constexpr uint32_t RT_ARRAY_HEADER_SIZE = offsetof(RtArray, first_data);
 constexpr uint32_t RT_ARRAY_FIRST_DATA_OFFSET = offsetof(RtArray, first_data);
 constexpr uint32_t RT_ARRAY_LENGTH_OFFSET = offsetof(RtArray, length);
-constexpr uint32_t RT_ARRAY_BOUNDS_OFFSET = offsetof(RtArray, bounds);
 #ifdef _MSC_VER
 #pragma warning(pop)
 #else

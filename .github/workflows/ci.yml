@@ -8,30 +8,98 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-and-test:
-    if: false
+  sdk-tools-and-net10:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Build SDK tools
+        run: |
+          dotnet build src/leanaot/LeanAOT.sln -c Release
+          dotnet build src/tools/exportextern/ExportExtern.csproj -c Release
+          dotnet build src/tools/pgo2aot/Pgo2Aot.csproj -c Release
+
+      - name: Export .NET 10 BCL externs
+        shell: pwsh
+        run: ./scripts/dotnet10/export-bcl-externs.ps1 -Configuration Release
+
+      - name: Check .NET 10 runtime API profile
+        run: python src/generator/check_runtime_api_signatures.py --profile coreclr-net10 --diff-report artifacts/dotnet10-externs/coreclr-net10-diff.json
+
+      - name: Build and run net10 managed smoke tests
+        run: |
+          dotnet build src/tests/managed-net10/managed-net10.sln -c Release
+          dotnet run --project src/tests/managed-net10/ManagedNet10.Smoke/ManagedNet10.Smoke.csproj -c Release --no-build
+
+      - name: Run net10 LeanAOT smoke
+        shell: pwsh
+        run: ./scripts/dotnet10/aot-smoke.ps1 -Configuration Release
+
+      - name: Notify Feishu on failure
+        if: failure()
+        env:
+          FEISHU_ROBOT_NOTIFY_URL: ${{ secrets.FEISHU_ROBOT_NOTIFY_URL }}
+        run: |
+          if [ -z "$FEISHU_ROBOT_NOTIFY_URL" ]; then exit 0; fi
+          MSG="{\"msg_type\":\"text\",\"content\":{\"text\":\"[CI] SDK/.NET 10 baseline failed.\nRepo: ${{ github.repository }}\nCommit: ${{ github.sha }}\nWorkflow: ${{ github.workflow }}\nJob: ${{ github.job }}\nPlease check and fix it.\"}}"
+          curl -X POST -H "Content-Type: application/json" -d "$MSG" "$FEISHU_ROBOT_NOTIFY_URL"
+
+  native-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Make scripts executable
+        run: |
+          chmod +x scripts/test/basic-tester/build.sh
 
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake g++
 
-      - name: Make scripts executable
-        run: |
-          chmod +x scripts/ci.sh
-          chmod +x scripts/test/build-all.sh
-          chmod +x scripts/test/run.sh
-          chmod +x scripts/test/basic-tester/build.sh
-
-      - name: Build and run tests
-        run: ./scripts/ci.sh Release
+      - name: Build native basic tester
+        run: ./scripts/test/basic-tester/build.sh Release
 
       - name: Notify Feishu on failure
         if: failure()
+        env:
+          FEISHU_ROBOT_NOTIFY_URL: ${{ secrets.FEISHU_ROBOT_NOTIFY_URL }}
         run: |
-          MSG="{\"msg_type\":\"text\",\"content\":{\"text\":\"[CI] Automated test failed.\\nRepo: ${{ github.repository }}\\nCommit: ${{ github.sha }}\\nWorkflow: ${{ github.workflow }}\\nJob: ${{ github.job }}\\nPlease check and fix it.\"}}"
-          curl -X POST -H "Content-Type: application/json" -d "$MSG" "${{ secrets.FEISHU_ROBOT_NOTIFY_URL }}"
+          if [ -z "$FEISHU_ROBOT_NOTIFY_URL" ]; then exit 0; fi
+          MSG="{\"msg_type\":\"text\",\"content\":{\"text\":\"[CI] Native Linux baseline failed.\nRepo: ${{ github.repository }}\nCommit: ${{ github.sha }}\nWorkflow: ${{ github.workflow }}\nJob: ${{ github.job }}\nPlease check and fix it.\"}}"
+          curl -X POST -H "Content-Type: application/json" -d "$MSG" "$FEISHU_ROBOT_NOTIFY_URL"
+
+  legacy-managed-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Build legacy managed tests
+        run: msbuild src\tests\managed\managed.sln /restore /p:Configuration=Release /m
+
+      - name: Notify Feishu on failure
+        if: failure()
+        shell: bash
+        env:
+          FEISHU_ROBOT_NOTIFY_URL: ${{ secrets.FEISHU_ROBOT_NOTIFY_URL }}
+        run: |
+          if [ -z "$FEISHU_ROBOT_NOTIFY_URL" ]; then exit 0; fi
+          MSG="{\"msg_type\":\"text\",\"content\":{\"text\":\"[CI] Legacy managed Windows baseline failed.\nRepo: ${{ github.repository }}\nCommit: ${{ github.sha }}\nWorkflow: ${{ github.workflow }}\nJob: ${{ github.job }}\nPlease check and fix it.\"}}"
+          curl -X POST -H "Content-Type: application/json" -d "$MSG" "$FEISHU_ROBOT_NOTIFY_URL"

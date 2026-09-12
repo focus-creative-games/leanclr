@@ -24,6 +24,7 @@ class SystemGC
     static RtResultVoid suppress_finalize(vm::RtObject* obj) noexcept;
     static RtResultVoid reregister_for_finalize(vm::RtObject* obj) noexcept;
     static RtResult<int64_t> get_total_memory(bool force_full_collection) noexcept;
+    static RtResultVoid get_memory_info(vm::RtObject* data, int32_t kind) noexcept;
 };
 
 } // namespace icalls

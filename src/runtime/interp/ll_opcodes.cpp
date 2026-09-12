@@ -754,6 +754,7 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
         auto ir = (Arglist*)codes;
         ir->__prefix = 254;
         ir->__code = 3;
+        ir->dst = (uint16_t)inst.get_var_dst_eval_stack_idx();
         return codes + sizeof(Arglist);
     }
     case OpCodeEnum::LdLocI1:
@@ -6288,6 +6289,7 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
         ir->__code = 230;
         ir->method_idx = (uint16_t)inst.get_resolved_data_index();
         ir->frame_base = (uint16_t)inst.get_frame_base();
+        ir->vararg_count = static_cast<uint16_t>(inst.get_vararg_count() | (inst.needs_null_check_this() ? 0x8000u : 0u));
         return codes + sizeof(CallInterp);
     }
     case OpCodeEnum::CallInterpShort:
@@ -6296,6 +6298,7 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
         ir->__code = 215;
         ir->method_idx = (uint8_t)inst.get_resolved_data_index();
         ir->frame_base = (uint8_t)inst.get_frame_base();
+        ir->vararg_count = static_cast<uint8_t>(inst.get_vararg_count() | (inst.needs_null_check_this() ? 0x80u : 0u));
         return codes + sizeof(CallInterpShort);
     }
     case OpCodeEnum::CallVirtInterp:
@@ -6305,6 +6308,7 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
         ir->__code = 231;
         ir->method_idx = (uint16_t)inst.get_resolved_data_index();
         ir->frame_base = (uint16_t)inst.get_frame_base();
+        ir->vararg_count = inst.get_vararg_count();
         return codes + sizeof(CallVirtInterp);
     }
     case OpCodeEnum::CallVirtInterpShort:
@@ -6313,6 +6317,7 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
         ir->__code = 216;
         ir->method_idx = (uint8_t)inst.get_resolved_data_index();
         ir->frame_base = (uint8_t)inst.get_frame_base();
+        ir->vararg_count = static_cast<uint8_t>(inst.get_vararg_count());
         return codes + sizeof(CallVirtInterpShort);
     }
     case OpCodeEnum::CallInternalCall:
@@ -6373,6 +6378,7 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
         ir->__code = 235;
         ir->method_idx = (uint16_t)inst.get_resolved_data_index();
         ir->frame_base = (uint16_t)inst.get_frame_base();
+        ir->null_check_this = inst.needs_null_check_this() ? 1 : 0;
         return codes + sizeof(CallAot);
     }
     case OpCodeEnum::CallAotShort:
@@ -6381,6 +6387,7 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, const GeneralInst& i
         ir->__code = 220;
         ir->method_idx = (uint8_t)inst.get_resolved_data_index();
         ir->frame_base = (uint8_t)inst.get_frame_base();
+        ir->null_check_this = inst.needs_null_check_this() ? 1 : 0;
         return codes + sizeof(CallAotShort);
     }
     case OpCodeEnum::CallRuntimeImplemented:

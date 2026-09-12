@@ -71,9 +71,12 @@ static RtResultVoid get_native_name_invoker(metadata::RtManagedMethodPointer met
 {
     (void)methodPtr;
     (void)method;
-    auto h = EvalStackOp::get_param<metadata::RtAssembly*>(params, 0);
+    auto assembly_arg = EvalStackOp::get_param<const void*>(params, 0);
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtMonoAssemblyName*, result, SystemReflectionAssemblyName::get_native_name(h));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, assembly,
+                                            vm::Reflection::get_assembly_from_handle_arg(assembly_arg));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtMonoAssemblyName*, result,
+                                            SystemReflectionAssemblyName::get_native_name(assembly));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }

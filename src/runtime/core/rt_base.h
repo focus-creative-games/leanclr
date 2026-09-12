@@ -30,9 +30,10 @@ constexpr size_t PTR_SIZE = sizeof(void*);
 constexpr size_t PTR_ALIGN = PTR_SIZE;
 
 RtErr fatal_on_not_implemented_error();
+RtErr fatal_on_not_implemented_error(const char* file, int line);
 
 #if LEANCLR_FATAL_ON_RAISE_NOT_IMPLEMENTED_ERROR
-#define RETURN_NOT_IMPLEMENTED_ERROR() RET_ERR(fatal_on_not_implemented_error())
+#define RETURN_NOT_IMPLEMENTED_ERROR() RET_ERR(fatal_on_not_implemented_error(__FILE__, __LINE__))
 #else
 #define RETURN_NOT_IMPLEMENTED_ERROR() RET_ERR(RtErr::NotImplemented)
 #endif

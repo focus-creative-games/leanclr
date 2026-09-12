@@ -146,6 +146,30 @@ bool SmallHeapArena::is_empty() const
     return _chunk_in_use_mask == 0;
 }
 
+bool SmallHeapArena::contains_allocated_block(const void* ptr) const
+{
+    if (ptr == nullptr || _data == nullptr)
+    {
+        return false;
+    }
+
+    uintptr_t block_addr = reinterpret_cast<uintptr_t>(ptr);
+    uintptr_t data_addr = reinterpret_cast<uintptr_t>(_data);
+    uintptr_t data_end = data_addr + _block_count * _block_size;
+    if (block_addr < data_addr || block_addr >= data_end)
+    {
+        return false;
+    }
+
+    uintptr_t offset = block_addr - data_addr;
+    if (offset % _block_size != 0)
+    {
+        return false;
+    }
+
+    return is_block_in_use(static_cast<size_t>(offset / _block_size));
+}
+
 size_t SmallHeapArena::get_block_size() const
 {
     return _block_size;
@@ -262,6 +286,18 @@ void* SizeClassPool::allocate_block()
     _arenas.push_back(_current_arena);
     _next_find_not_full_start = _arenas.size();
     return _current_arena->allocate_block();
+}
+
+bool SizeClassPool::contains_allocated_block(const void* ptr) const
+{
+    for (size_t i = 0; i < _arenas.size(); ++i)
+    {
+        if (_arenas[i]->contains_allocated_block(ptr))
+        {
+            return true;
+        }
+    }
+    return false;
 }
 
 SmallHeapArena* SizeClassPool::find_next_not_full_arena()

@@ -10,6 +10,7 @@ namespace icalls
 class SystemReflectionRuntimeAssembly
 {
   public:
+    static utils::Span<vm::InternalCallEntry> get_net10_internal_call_entries() noexcept;
     static utils::Span<vm::InternalCallEntry> get_internal_call_entries() noexcept;
 
     // Get manifest resource internal
@@ -51,6 +52,9 @@ class SystemReflectionRuntimeAssembly
 
     // Get modules internal
     static RtResult<vm::RtArray*> get_modules_internal(vm::RtReflectionAssembly* ref_ass) noexcept;
+
+    // Get assembly metadata token
+    static RtResult<int32_t> get_token_internal(vm::RtReflectionAssembly* ref_ass) noexcept;
 
     // Get files internal
     static RtResult<vm::RtObject*> get_files_internal(vm::RtReflectionAssembly* ref_ass, vm::RtString* path, bool get_resource_modules) noexcept;

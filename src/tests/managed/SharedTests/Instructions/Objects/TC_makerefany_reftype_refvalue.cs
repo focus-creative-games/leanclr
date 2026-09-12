@@ -28,22 +28,34 @@ namespace Tests.Instruments.Objs
             Assert.Equal("abc", __refvalue(t, string));
         }
 
-        //[UnitTest]
-        //public void ref_invalidcast()
-        //{
-        //    string a = "abc";
-        //    TypedReference t = __makeref(a);
-        //    Assert.ExpectException<InvalidCastException>();
-        //    Assert.Equal(3, __refvalue(t, int));
-        //}
+        [UnitTest]
+        public void ref_invalidcast()
+        {
+            string a = "abc";
+            TypedReference t = __makeref(a);
+            try
+            {
+                Assert.Equal(3, __refvalue(t, int));
+                Assert.Fail();
+            }
+            catch (InvalidCastException)
+            {
+            }
+        }
 
-        //[UnitTest]
-        //public void ref_invalidcast_2()
-        //{
-        //    int a = 5;
-        //    TypedReference t = __makeref(a);
-        //    Assert.ExpectException<InvalidCastException>();
-        //    Assert.Equal("5", __refvalue(t, string));
-        //}
+        [UnitTest]
+        public void ref_invalidcast_2()
+        {
+            int a = 5;
+            TypedReference t = __makeref(a);
+            try
+            {
+                Assert.Equal("5", __refvalue(t, string));
+                Assert.Fail();
+            }
+            catch (InvalidCastException)
+            {
+            }
+        }
     }
 }

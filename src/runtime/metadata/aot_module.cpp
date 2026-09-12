@@ -100,5 +100,37 @@ const RtAotMethodMonoPInvokeCallbackData* AotModule::find_mono_pinvoke_callback_
     return nullptr;
 }
 
+RtResult<const RtMethodInfo*> AotModule::find_mono_pinvoke_callback_method_by_native_ptr(RtNativeMethodPointer ptr)
+{
+    if (ptr == nullptr)
+    {
+        RET_OK(nullptr);
+    }
+    utils::Vector<RtModuleDef*> modules;
+    RtModuleDef::get_registered_modules(modules);
+    for (RtModuleDef* module : modules)
+    {
+        if (module == nullptr)
+        {
+            continue;
+        }
+        const RtAotModuleData* aotModuleData = module->get_aot_module_data();
+        if (aotModuleData == nullptr || aotModuleData->mono_pinvoke_callback_entry_count == 0)
+        {
+            continue;
+        }
+        const RtAotMethodMonoPInvokeCallbackData* entries = aotModuleData->mono_pinvoke_callback_entries;
+        uint32_t count = aotModuleData->mono_pinvoke_callback_entry_count;
+        for (uint32_t i = 0; i < count; ++i)
+        {
+            if (entries[i].native_method_ptr == ptr)
+            {
+                return module->get_method_by_token(RtToken::decode(entries[i].token), RtGenericContainerContext{}, nullptr);
+            }
+        }
+    }
+    RET_OK(nullptr);
+}
+
 } // namespace metadata
 } // namespace leanclr

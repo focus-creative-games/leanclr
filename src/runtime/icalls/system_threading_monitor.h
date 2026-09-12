@@ -35,6 +35,11 @@ class SystemThreadingMonitor
 
     // Test if current thread owns the monitor
     static RtResult<bool> monitor_test_owner(vm::RtObject* monitor) noexcept;
+
+    static RtResult<bool> try_enter_fast_path(vm::RtObject* monitor) noexcept;
+    static RtResult<int32_t> try_enter_fast_path_with_timeout(vm::RtObject* monitor, int32_t timeout) noexcept;
+    static RtResult<int32_t> exit_fast_path(vm::RtObject* monitor) noexcept;
+    static RtResult<bool> is_entered_native(vm::RtObject* monitor) noexcept;
 };
 
 } // namespace icalls

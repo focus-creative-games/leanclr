@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -24,6 +24,13 @@ namespace Tests.Fixtures
         public float y;
         public float z;
 
+        public Vector3(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = 0f;
+        }
+
         public Vector3(float x, float y, float z)
         {
             this.x = x;
@@ -38,6 +45,22 @@ namespace Tests.Fixtures
         public float y;
         public float z;
         public float w;
+
+        public Vector4(float x, float y)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = 0f;
+            this.w = 0f;
+        }
+
+        public Vector4(float x, float y, float z)
+        {
+            this.x = x;
+            this.y = y;
+            this.z = z;
+            this.w = 0f;
+        }
 
         public Vector4(float x, float y, float z, float w)
         {

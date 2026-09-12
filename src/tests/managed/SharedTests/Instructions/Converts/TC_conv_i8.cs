@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace Tests.Instruments.Converts
 {
@@ -132,21 +132,21 @@ namespace Tests.Instruments.Converts
             Assert.Equal(-1, y);
         }
 
-        //[UnitTest]
-        //public void float_overflow_up()
-        //{
-        //    float x = 0x100000001;
-        //    long y = (long)x;
-        //    Assert.Equal(1, y);
-        //}
+        [UnitTest]
+        public void float_overflow_up()
+        {
+            float x = 0x100000001;
+            long y = (long)x;
+            Assert.Equal(1, y);
+        }
 
-        //[UnitTest]
-        //public void float_overflow_down()
-        //{
-        //    float x = -0x100000001;
-        //    long y = (long)x;
-        //    Assert.Equal(-1, y);
-        //}
+        [UnitTest]
+        public void float_overflow_down()
+        {
+            float x = -0x100000001;
+            long y = (long)x;
+            Assert.Equal(-1, y);
+        }
 
         [UnitTest]
         public void double_1()
@@ -164,20 +164,20 @@ namespace Tests.Instruments.Converts
             Assert.Equal(-1, y);
         }
 
-        //[UnitTest]
-        //public void double_overflow_up()
-        //{
-        //    double x = 0x1_00000001;
-        //    long y = (long)x;
-        //    Assert.Equal(1, y);
-        //}
+        [UnitTest]
+        public void double_overflow_up()
+        {
+            double x = 0x1_00000001;
+            long y = (long)x;
+            Assert.Equal(1, y);
+        }
 
-        //[UnitTest]
-        //public void double_overflow_down()
-        //{
-        //    double x = -0x1_00000001;
-        //    long y = (long)x;
-        //    Assert.Equal(-1, y);
-        //}
+        [UnitTest]
+        public void double_overflow_down()
+        {
+            double x = -0x1_00000001;
+            long y = (long)x;
+            Assert.Equal(-1, y);
+        }
     }
 }

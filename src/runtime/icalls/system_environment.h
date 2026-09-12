@@ -39,6 +39,7 @@ class SystemEnvironment
     static RtResult<bool> get_is_64bit_operating_system() noexcept;
     static RtResult<int32_t> get_processor_count() noexcept;
     static RtResult<int32_t> get_page_size() noexcept;
+    static RtResult<int32_t> get_current_managed_thread_id() noexcept;
 };
 
 } // namespace icalls

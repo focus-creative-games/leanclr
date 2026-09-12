@@ -55,6 +55,11 @@ int32_t ZeroGcHeap::get_collection_count()
     return 0;
 }
 
+bool ZeroGcHeap::is_allocated_object(const vm::RtObject* obj)
+{
+    return obj != nullptr && obj->klass != nullptr;
+}
+
 vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
 {
     return allocate_object(klass, size);

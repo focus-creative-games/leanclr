@@ -60,12 +60,15 @@ namespace Tests.Instruments.Mems
             Assert.Equal(6, b[5]);
         }
         
-        //[UnitTest]
-        //public unsafe void alloc_overflow()
-        //{
-        //    Assert.ExpectException<StackOverflowException>();
-        //    int* b = stackalloc int[1000000000];
-        //    b[0] = 5;
-        //}
+        [UnitTest]
+        public unsafe void alloc_overflow()
+        {
+            Assert.ExpectException<OverflowException>(() =>
+            {
+                int n = -1;
+                int* b = stackalloc int[n];
+                b[0] = 5;
+            });
+        }
     }
 }

@@ -1,4 +1,6 @@
+#include <cstring>
 #include <functional>
+#include <limits>
 
 #include "class.h"
 #include "const_strs.h"
@@ -22,6 +24,7 @@
 #include "customattribute.h"
 #include "assembly.h"
 #include "type.h"
+#include "utils/mem_op.h"
 
 namespace leanclr
 {
@@ -33,6 +36,11 @@ int32_t Class::s_finalizer_vtable_index = -1;
 RtResult<metadata::RtClass*> get_class_must_exist(metadata::RtModuleDef* corlib, const char* full_name)
 {
     return corlib->get_class_by_name(full_name, false, true);
+}
+
+RtResult<metadata::RtClass*> get_class_optional(metadata::RtModuleDef* corlib, const char* full_name)
+{
+    return corlib->get_class_by_name(full_name, false, false);
 }
 
 CorLibTypes g_corlibTypes{};
@@ -119,22 +127,40 @@ RtResultVoid Class::init_corlib_classes(metadata::RtModuleDef* corlib)
 
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_assembly, get_class_must_exist(corlib, "System.Reflection.RuntimeAssembly"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_module, get_class_must_exist(corlib, "System.Reflection.RuntimeModule"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_field, get_class_must_exist(corlib, "System.Reflection.RuntimeFieldInfo"));
+    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_field, get_class_optional(corlib, "System.Reflection.RtFieldInfo"));
+    if (t.cls_reflection_field == nullptr)
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_field, get_class_must_exist(corlib, "System.Reflection.RuntimeFieldInfo"));
+    }
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_method, get_class_must_exist(corlib, "System.Reflection.RuntimeMethodInfo"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_constructor, get_class_must_exist(corlib, "System.Reflection.RuntimeConstructorInfo"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_property, get_class_must_exist(corlib, "System.Reflection.RuntimePropertyInfo"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_event, get_class_must_exist(corlib, "System.Reflection.RuntimeEventInfo"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_parameter, get_class_must_exist(corlib, "System.Reflection.RuntimeParameterInfo"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_memberinfo, get_class_must_exist(corlib, "System.Reflection.MemberInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_methodbody, get_class_must_exist(corlib, "System.Reflection.MethodBody"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_exceptionhandlingclause, get_class_must_exist(corlib, "System.Reflection.ExceptionHandlingClause"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_localvariableinfo, get_class_must_exist(corlib, "System.Reflection.LocalVariableInfo"));
+    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_methodbody, get_class_optional(corlib, "System.Reflection.RuntimeMethodBody"));
+    if (t.cls_reflection_methodbody == nullptr)
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_methodbody, get_class_must_exist(corlib, "System.Reflection.MethodBody"));
+    }
+    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_exceptionhandlingclause,
+                              get_class_optional(corlib, "System.Reflection.RuntimeExceptionHandlingClause"));
+    if (t.cls_reflection_exceptionhandlingclause == nullptr)
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_exceptionhandlingclause,
+                                  get_class_must_exist(corlib, "System.Reflection.ExceptionHandlingClause"));
+    }
+    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_localvariableinfo, get_class_optional(corlib, "System.Reflection.RuntimeLocalVariableInfo"));
+    if (t.cls_reflection_localvariableinfo == nullptr)
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_localvariableinfo, get_class_must_exist(corlib, "System.Reflection.LocalVariableInfo"));
+    }
 
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_appdomain, get_class_must_exist(corlib, "System.AppDomain"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_appdomain_setup, get_class_must_exist(corlib, "System.AppDomainSetup"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_appcontext, get_class_must_exist(corlib, "System.Runtime.Remoting.Contexts.Context"));
+    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_appcontext, get_class_optional(corlib, "System.Runtime.Remoting.Contexts.Context"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_thread, get_class_must_exist(corlib, "System.Threading.Thread"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_internal_thread, get_class_must_exist(corlib, "System.Threading.InternalThread"));
+    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_internal_thread, get_class_optional(corlib, "System.Threading.InternalThread"));
 
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_marshal_as, get_class_must_exist(corlib, "System.Runtime.InteropServices.MarshalAsAttribute"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_byreflike, get_class_must_exist(corlib, "System.Runtime.CompilerServices.IsByRefLikeAttribute"));
@@ -183,6 +209,13 @@ RtResultVoid Class::initialize()
 RtResultVoid Class::verify_integrity_of_corlib_classes()
 {
     const CorLibTypes& t = get_corlib_types();
+    metadata::RtModuleDef* corlib = metadata::RtModuleDef::get_corlib_module();
+    if (corlib != nullptr && std::strcmp(corlib->get_name_no_ext(), STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0)
+    {
+        RET_ERR_ON_FALSE(sizeof(RtObject) == RT_OBJECT_HEADER_SIZE, RtErr::BadImageFormat);
+        RET_VOID_OK();
+    }
+
     metadata::RtClass* const corlib_type_arr[] = {
         t.cls_void,
         t.cls_boolean,
@@ -283,10 +316,15 @@ RtResultVoid Class::verify_integrity_of_corlib_classes()
 
     for (metadata::RtClass* cls : corlib_type_arr)
     {
+        if (cls == nullptr)
+        {
+            continue;
+        }
         RET_ERR_ON_FAIL(initialize_all(cls));
     }
 
     RET_ERR_ON_FALSE(sizeof(RtObject) == RT_OBJECT_HEADER_SIZE, RtErr::BadImageFormat);
+
     RET_ERR_ON_FALSE(RT_TYPED_REFERENCE_SIZE == PTR_SIZE * 3, RtErr::BadImageFormat);
     RET_ERR_ON_FALSE(get_instance_size_without_object_header(t.cls_typedreference) == RT_TYPED_REFERENCE_SIZE, RtErr::BadImageFormat);
 
@@ -297,7 +335,11 @@ RtResultVoid Class::verify_integrity_of_corlib_classes()
 
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_assembly) == sizeof(RtReflectionAssembly), RtErr::BadImageFormat);
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_module) == sizeof(RtReflectionModule), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_field) == sizeof(RtReflectionField), RtErr::BadImageFormat);
+    auto reflection_field_size = get_instance_size_with_object_header(t.cls_reflection_field);
+    if (reflection_field_size != sizeof(RtReflectionField) && reflection_field_size != sizeof(RtObject))
+    {
+        RET_ERR(RtErr::BadImageFormat);
+    }
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_method) == sizeof(RtReflectionMethod), RtErr::BadImageFormat);
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_constructor) == sizeof(RtReflectionConstructor), RtErr::BadImageFormat);
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_property) == sizeof(RtReflectionProperty), RtErr::BadImageFormat);
@@ -309,7 +351,10 @@ RtResultVoid Class::verify_integrity_of_corlib_classes()
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_localvariableinfo) == sizeof(RtReflectionLocalVariableInfo), RtErr::BadImageFormat);
 
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_appdomain) == sizeof(RtAppDomain), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_appcontext) == sizeof(RtAppContext), RtErr::BadImageFormat);
+    if (t.cls_appcontext != nullptr)
+    {
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_appcontext) == sizeof(RtAppContext), RtErr::BadImageFormat);
+    }
 
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_cultureinfo) == sizeof(RtCultureInfo), RtErr::BadImageFormat);
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_culturedata) == sizeof(RtCultureData), RtErr::BadImageFormat);
@@ -317,7 +362,6 @@ RtResultVoid Class::verify_integrity_of_corlib_classes()
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_numberformatinfo) == sizeof(RtNumberFormatInfo), RtErr::BadImageFormat);
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_regioninfo) == sizeof(RtRegionInfo), RtErr::BadImageFormat);
     RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_calendardata) == sizeof(RtCalendarData), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_stackframe) == sizeof(RtStackFrame), RtErr::BadImageFormat);
 
     RET_VOID_OK();
 }
@@ -856,6 +900,10 @@ static RtResult<bool> is_reference_type_or_contains_reference_type_in_typesig(co
     case metadata::RtElementType::Array:
     case metadata::RtElementType::SZArray:
         RET_OK(true);
+    case metadata::RtElementType::Var:
+    case metadata::RtElementType::MVar:
+        RET_OK((typeSig->data.generic_param->flags &
+                static_cast<uint16_t>(metadata::RtGenericParamAttribute::ReferenceTypeConstraint)) != 0);
     case metadata::RtElementType::ValueType:
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, cls, Class::get_class_from_typesig(typeSig));
@@ -912,6 +960,7 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
     }
     case metadata::RtClassFamily::ArrayOrSZArray:
     {
+        RET_ERR_ON_FAIL(initialize_fields(const_cast<metadata::RtClass*>(klass->element_class)));
         klass->instance_size_without_header = 0;
         klass->alignment = PTR_ALIGN;
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, isRefType, is_reference_type_or_contains_reference_type_in_typesig(klass->element_class->by_val));
@@ -993,9 +1042,116 @@ void Class::collect_instance_fields(const metadata::RtClass* klass, utils::Vecto
     }
 }
 
+namespace
+{
+bool is_inline_array_attribute_class(const metadata::RtClass* klass)
+{
+    return klass != nullptr && klass->namespaze != nullptr && klass->name != nullptr &&
+           std::strcmp(klass->namespaze, "System.Runtime.CompilerServices") == 0 &&
+           std::strcmp(klass->name, "InlineArrayAttribute") == 0;
+}
+
+RtResult<std::optional<uint32_t>> get_inline_array_length(const metadata::RtClass* klass)
+{
+    if (klass == nullptr || klass->image == nullptr || klass->token == 0)
+    {
+        RET_OK(std::optional<uint32_t>{});
+    }
+
+    metadata::RtModuleDef* mod = klass->image;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(metadata::RtCustomAttributeRidRange, rid_range, mod->get_custom_attribute_rid_range(klass->token));
+    for (uint32_t i = 0; i < rid_range.count; ++i)
+    {
+        uint32_t ca_rid = rid_range.start_rid + i;
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtCustomAttributeRawData, raw_data, mod->get_custom_attribute_raw_data(ca_rid));
+        if (!is_inline_array_attribute_class(raw_data.ctor->parent))
+        {
+            continue;
+        }
+
+        if (raw_data.ctor->parameter_count != 1 || raw_data.dataBlobIndex == 0)
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(utils::BinaryReader, reader, mod->get_decoded_blob_reader(raw_data.dataBlobIndex));
+        uint16_t prolog = 0;
+        uint32_t length = 0;
+        if (!reader.try_read_u16(prolog) || prolog != 0x0001 || !reader.try_read_u32(length))
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+        if (length == 0)
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+        RET_OK(std::optional<uint32_t>{length});
+    }
+
+    RET_OK(std::optional<uint32_t>{});
+}
+
+RtResult<std::optional<metadata::SizeAndAlignment>> get_inline_array_layout(metadata::RtClass* klass,
+                                                                            const utils::Vector<const metadata::RtFieldInfo*>& instanceFields,
+                                                                            int32_t first_field_index_of_current_class)
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<uint32_t>, opt_length, get_inline_array_length(klass));
+    if (!opt_length)
+    {
+        RET_OK(std::optional<metadata::SizeAndAlignment>{});
+    }
+
+    if (Class::is_reference_type(klass) || first_field_index_of_current_class < 0 ||
+        instanceFields.size() != static_cast<size_t>(first_field_index_of_current_class + 1))
+    {
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    }
+
+    const metadata::RtFieldInfo* element_field = instanceFields[static_cast<size_t>(first_field_index_of_current_class)];
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::SizeAndAlignment, element_layout,
+                                            metadata::Layout::get_field_size_and_alignment(const_cast<metadata::RtTypeSig*>(element_field->type_sig)));
+
+    uint64_t size = static_cast<uint64_t>(element_layout.size) * static_cast<uint64_t>(*opt_length);
+    if (size > std::numeric_limits<uint32_t>::max())
+    {
+        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    }
+    size = utils::MemOp::align_up(static_cast<uint32_t>(size), element_layout.alignment);
+
+    metadata::SizeAndAlignment result = {static_cast<uint32_t>(size), element_layout.alignment};
+    RET_OK(std::optional<metadata::SizeAndAlignment>{result});
+}
+} // namespace
+
 RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
 {
     assert(has_initialized_part(klass, metadata::RtClassInitPart::Field));
+
+    if (is_enum_type(klass))
+    {
+        if (klass->element_class == nullptr || klass->element_class->by_val == nullptr)
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::SizeAndAlignment, enum_layout,
+                                                metadata::Layout::get_field_size_and_alignment(const_cast<metadata::RtTypeSig*>(klass->element_class->by_val)));
+        klass->instance_size_without_header = std::max(enum_layout.size, static_cast<uint32_t>(1));
+        klass->alignment = static_cast<uint8_t>(enum_layout.alignment);
+        klass->static_size = 0;
+
+        for (uint16_t i = 0; i < klass->field_count; ++i)
+        {
+            metadata::RtFieldInfo* field = const_cast<metadata::RtFieldInfo*>(klass->fields + i);
+            if (Field::is_instance(field))
+            {
+                field->offset = 0;
+            }
+        }
+
+        RET_VOID_OK();
+    }
+
     utils::Vector<const metadata::RtFieldInfo*> instanceFields;
     utils::Vector<const metadata::RtFieldInfo*> staticFields;
 
@@ -1057,7 +1213,6 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
         // If the class has reference type fields, we need to use natural alignment for those fields, so ignore packing size
         packingSize = 0;
     }
-
     metadata::SizeAndAlignment instanceSizeAndAlignment;
     if (is_explicit_layout(klass))
     {
@@ -1079,6 +1234,12 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
         }
         UNWRAP_OR_RET_ERR_ON_FAIL(instanceSizeAndAlignment,
                                   metadata::Layout::compute_layout(instanceFields, first_field_index_of_current_class, static_cast<uint8_t>(packingSize)));
+    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<metadata::SizeAndAlignment>, inline_array_layout,
+                                            get_inline_array_layout(klass, instanceFields, first_field_index_of_current_class));
+    if (inline_array_layout)
+    {
+        instanceSizeAndAlignment = *inline_array_layout;
     }
     klass->instance_size_without_header = std::max(instanceSizeAndAlignment.size, classSize);
     if (!is_ref_type)
@@ -1142,9 +1303,16 @@ RtResultVoid Class::setup_gc_bitmap_for_field(const metadata::RtFieldInfo* field
     case metadata::RtElementType::Ptr:
     case metadata::RtElementType::FnPtr:
     case metadata::RtElementType::TypedByRef:
+    {
+        break;
+    }
     case metadata::RtElementType::Var:
     case metadata::RtElementType::MVar:
     {
+        if ((type_sig->data.generic_param->flags & static_cast<uint16_t>(metadata::RtGenericParamAttribute::ReferenceTypeConstraint)) != 0)
+        {
+            goto handle_reference_type_field;
+        }
         break;
     }
     case metadata::RtElementType::Object:
@@ -1405,9 +1573,12 @@ RtResultVoid Class::setup_methods_typedef(metadata::RtClass* klass)
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtGenericContainer*, genericContainer, mod->get_generic_container(method->token));
         metadata::RtGenericContainerContext gcc{klass->generic_container, genericContainer};
 
-        auto retMethodSig = mod->read_method_sig(methodRow.signature, gcc, nullptr);
-        RET_ERR_ON_FAIL(retMethodSig);
-        const metadata::RtMethodSig& methodSig = retMethodSig.unwrap();
+        auto method_sig_ret = mod->read_method_sig(methodRow.signature, gcc, nullptr);
+        if (method_sig_ret.is_err())
+        {
+            RET_ERR(method_sig_ret.unwrap_err());
+        }
+        metadata::RtMethodSig methodSig = method_sig_ret.unwrap();
         method->return_type = methodSig.return_type;
         size_t paramCount = methodSig.params.size();
         method->parameter_count = static_cast<uint16_t>(paramCount);
@@ -1430,7 +1601,12 @@ RtResultVoid Class::setup_methods_typedef(metadata::RtClass* klass)
             }
         }
 
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InvokeTypeAndMethod, invoker_type_and_method, Shim::get_invoker(method));
+        auto invoker_ret = Shim::get_invoker(method);
+        if (invoker_ret.is_err())
+        {
+            RET_ERR(invoker_ret.unwrap_err());
+        }
+        InvokeTypeAndMethod invoker_type_and_method = invoker_ret.unwrap();
         method->invoke_method_ptr = invoker_type_and_method.invoker;
         method->invoker_type = invoker_type_and_method.invoker_type;
         MethodAndVirtualMethod method_and_virtual_method = Shim::get_method_pointer(method);
@@ -1455,7 +1631,11 @@ RtResultVoid Class::build_methods_arg_descs(metadata::RtClass* klass)
             // Generic methods arg descs are built on demand
             continue;
         }
-        RET_ERR_ON_FAIL(Method::build_method_arg_descs(const_cast<metadata::RtMethodInfo*>(method)));
+        auto arg_desc_ret = Method::build_method_arg_descs(const_cast<metadata::RtMethodInfo*>(method));
+        if (arg_desc_ret.is_err())
+        {
+            RET_ERR(arg_desc_ret.unwrap_err());
+        }
     }
     RET_VOID_OK();
 }
@@ -1757,7 +1937,9 @@ static RtResultVoid setup_methodimpl_vtable(metadata::RtClass* klass, const meta
                                                     method_impl_declaring_klass->image->get_method_by_token(decl_token, gcc, nullptr));
 
             if (!Method::is_virtual(declaration_method) || !Method::is_virtual(body_method))
-                RET_ASSERT_ERR(RtErr::BadImageFormat);
+            {
+                continue;
+            }
 
             const metadata::RtClass* declaration_klass = declaration_method->parent;
             uint16_t declaration_slot = declaration_method->slot;
@@ -2213,6 +2395,14 @@ RtResult<metadata::RtClass*> Class::get_generic_param_class_by_typesig(const met
     genericParamClass->flags = (uint32_t)metadata::RtTypeAttribute::Public;
     genericParamClass->by_val = byValTypeSig;
     genericParamClass->by_ref = byRefTypeSig;
+    if ((genericParam->flags & static_cast<uint16_t>(metadata::RtGenericParamAttribute::ReferenceTypeConstraint)) != 0)
+    {
+        genericParamClass->extra_flags |= static_cast<uint32_t>(metadata::RtClassExtraAttribute::ReferenceType);
+    }
+    else if ((genericParam->flags & static_cast<uint16_t>(metadata::RtGenericParamAttribute::NotNullableValueTypeConstraint)) != 0)
+    {
+        genericParamClass->extra_flags |= static_cast<uint32_t>(metadata::RtClassExtraAttribute::ValueType);
+    }
 
     g_genericParamClassCache.insert({genericParam, genericParamClass});
     RET_OK(genericParamClass);
@@ -2424,7 +2614,8 @@ bool Class::is_assignable_from_generic_parameter_convariant0(const metadata::RtC
         {
             continue;
         }
-        if ((generic_param->flags & (uint16_t)metadata::RtGenericParamAttribute::VarianceMask) == 0)
+        uint16_t variance = generic_param->flags & (uint16_t)metadata::RtGenericParamAttribute::VarianceMask;
+        if (variance == 0 && !implemented_in_array)
         {
             return false;
         }
@@ -2443,6 +2634,22 @@ bool Class::is_assignable_from_generic_parameter_convariant0(const metadata::RtC
         }
         const metadata::RtClass* from_arg_class = ret_from_arg_class.unwrap();
         const metadata::RtClass* to_arg_class = ret_to_arg_class.unwrap();
+        if (variance == 0)
+        {
+            assert(implemented_in_array);
+            if (is_value_type(from_arg_class) || is_value_type(to_arg_class))
+            {
+                if (ArrayClass::get_array_variance_reduce_type(from_arg_class) != ArrayClass::get_array_variance_reduce_type(to_arg_class))
+                {
+                    return false;
+                }
+            }
+            else if (!is_assignable_from(from_arg_class, to_arg_class))
+            {
+                return false;
+            }
+            continue;
+        }
         if (is_value_type(from_arg_class) || is_value_type(to_arg_class))
         {
             if (implemented_in_array)

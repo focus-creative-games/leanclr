@@ -11,7 +11,9 @@ namespace LeanAOT.ToCpp
         public const string CastFloatToSmallInt = "leanclr::codegen::cast_float_to_small_int";
 
         public const string CastFloatToI32 = "leanclr::codegen::cast_float_to_i32";
+        public const string CastFloatToU32 = "leanclr::codegen::cast_float_to_u32";
         public const string CastFloatToI64 = "leanclr::codegen::cast_float_to_i64";
+        public const string CastFloatToU64 = "leanclr::codegen::cast_float_to_u64";
         public const string CastFloatToIntPtr = "leanclr::codegen::cast_float_to_intptr";
 
         public const string Localloc = "alloca";
@@ -47,6 +49,7 @@ namespace LeanAOT.ToCpp
         public const string GetMdArrayGlobalIndex = "leanclr::codegen::get_mdarray_global_index_from_indices";
         public const string NewDelegate = "leanclr::codegen::new_delegate";
         public const string GetFieldRvaData = "leanclr::codegen::get_field_rva_data";
+        public const string GetNet10MethodTable = "leanclr::vm::Reflection::get_net10_method_table";
 
         public const string GetStackObjectSizeForType = "leanclr::codegen::get_stack_object_size_for_type";
         public const string ExpandArgumentToEvalStack = "leanclr::codegen::expand_argument_to_eval_stack";
@@ -54,6 +57,8 @@ namespace LeanAOT.ToCpp
         public const string InvokeWithRunClassStaticConstructor = "leanclr::codegen::invoke_with_run_class_static_constructor";
         public const string InvokeWithoutRunClassStaticConstructor = "leanclr::codegen::invoke_without_run_class_static_constructor";
         public const string VirtualInvokeWithoutRunClassStaticConstructor = "leanclr::codegen::virtual_invoke_without_run_class_static_constructor";
+        public const string InvokeWithRunClassStaticConstructorWithVarArgs = "leanclr::codegen::invoke_with_run_class_static_constructor_with_varargs";
+        public const string VirtualInvokeWithoutRunClassStaticConstructorWithVarArgs = "leanclr::codegen::virtual_invoke_without_run_class_static_constructor_with_varargs";
 
         public const string SetRetOrReturnError = "leanclr::codegen::set_ret_or_return_error";
 

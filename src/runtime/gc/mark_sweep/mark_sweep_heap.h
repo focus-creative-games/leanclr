@@ -33,6 +33,7 @@ class MarkSweepHeap
     static int32_t get_collection_count();
 
     static void set_gc_mode(GCMode mode);
+    static bool is_allocated_object(const vm::RtObject* obj);
 
     static void write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)
     {

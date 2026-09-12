@@ -21,6 +21,11 @@ namespace LeanAOT.GenerationPlan
         /// When non-null, profiled methods in PGO rule files are force-included even if <c>aot.xml</c> excluded them.
         /// </summary>
         public PgoMethodIncludeIndex PgoIncludeIndex;
+
+        /// <summary>
+        /// Optional runtime-profile gate for methods that must stay on the interpreter path.
+        /// </summary>
+        public Func<MethodDef, bool> ShouldSkipUnsupportedRuntimeMethod;
     }
 
     public class Manifest
@@ -111,6 +116,12 @@ namespace LeanAOT.GenerationPlan
                         {
                             // aot or intrinsic methods must be aot
                             TryAddMethodPlan(methodPlans, methodsInAotPlan, method);
+                            continue;
+                        }
+
+                        if (args.ShouldSkipUnsupportedRuntimeMethod?.Invoke(method) == true)
+                        {
+                            s_logger.Debug($"[Manifest] Skip method (unsupported runtime intrinsic): {method.FullName} token: {method.MDToken}");
                             continue;
                         }
 

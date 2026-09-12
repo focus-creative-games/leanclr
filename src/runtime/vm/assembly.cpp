@@ -21,9 +21,17 @@ namespace leanclr
 namespace vm
 {
 
+static RtResult<metadata::RtAssembly*> load_by_name_impl(const char* name, bool log_missing);
+
 RtResult<metadata::RtAssembly*> Assembly::load_corlib()
 {
-    return load_by_name(STR_CORLIB_NAME);
+    metadata::RtAssembly* loaded_corlib = get_corlib();
+    if (loaded_corlib)
+    {
+        RET_OK(loaded_corlib);
+    }
+
+    return load_by_name(STR_SYSTEM_PRIVATE_CORELIB_NAME);
 }
 
 metadata::RtAssembly* Assembly::get_corlib()
@@ -41,10 +49,15 @@ metadata::RtAssembly* Assembly::find_by_name(const char* name_no_ext)
 
 RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
 {
+    return load_by_name_impl(name, true);
+}
+
+static RtResult<metadata::RtAssembly*> load_by_name_impl(const char* name, bool log_missing)
+{
     FullyQualifiedAssemblyName qn(name, std::strlen(name));
     RET_ERR_ON_FAIL(qn.parse());
-    std::string assembly_anme(qn.name(), qn.name_length());
-    metadata::RtModuleDef* mod = metadata::RtModuleDef::find_module(assembly_anme.c_str());
+    std::string assembly_name(qn.name(), qn.name_length());
+    metadata::RtModuleDef* mod = metadata::RtModuleDef::find_module(assembly_name.c_str());
     if (mod)
     {
         RET_OK(mod->get_assembly());
@@ -55,10 +68,12 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
         RET_ERR(RtErr::FileNotFound);
     }
     FileData dllFileData = {};
-    auto result = file_loader(name, "dll", dllFileData);
     if (!file_loader(name, "dll", dllFileData))
     {
-        std::printf("Failed to load assembly from file loader for %s\n", name);
+        if (log_missing)
+        {
+            std::printf("Failed to load assembly from file loader for %s\n", name);
+        }
         RET_ERR(RtErr::FileNotFound);
     }
     AssemblyData dllData{dllFileData.data, dllFileData.length, dllFileData.shared};
@@ -76,7 +91,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
         log::InternalLogger::debug("PDB file not found for assembly");
     }
 
-    return load_from_data(dllData, pdb_data_ptr);
+    return Assembly::load_from_data(dllData, pdb_data_ptr);
 }
 
 RtResult<metadata::RtAssembly*> Assembly::load_by_name(RtAppDomain* app_domain, const char* name_no_ext, RtObject* evidence, bool ref_only,

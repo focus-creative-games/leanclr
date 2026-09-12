@@ -1475,8 +1475,7 @@ struct Arglist
 {
     uint8_t __prefix;
     uint8_t __code;
-    uint8_t __padding_2;
-    uint8_t __padding_3;
+    uint16_t dst;
 };
 
 struct LdLocI1
@@ -6981,8 +6980,7 @@ struct CallInterp
     uint8_t __code;
     uint16_t method_idx;
     uint16_t frame_base;
-    uint8_t __padding_6;
-    uint8_t __padding_7;
+    uint16_t vararg_count;
 };
 
 struct CallInterpShort
@@ -6990,7 +6988,7 @@ struct CallInterpShort
     uint8_t __code;
     uint8_t method_idx;
     uint8_t frame_base;
-    uint8_t __padding_3;
+    uint8_t vararg_count;
 };
 
 struct CallVirtInterp
@@ -6999,8 +6997,7 @@ struct CallVirtInterp
     uint8_t __code;
     uint16_t method_idx;
     uint16_t frame_base;
-    uint8_t __padding_6;
-    uint8_t __padding_7;
+    uint16_t vararg_count;
 };
 
 struct CallVirtInterpShort
@@ -7008,7 +7005,7 @@ struct CallVirtInterpShort
     uint8_t __code;
     uint8_t method_idx;
     uint8_t frame_base;
-    uint8_t __padding_3;
+    uint8_t vararg_count;
 };
 
 struct CallInternalCall
@@ -7071,7 +7068,7 @@ struct CallAot
     uint8_t __code;
     uint16_t method_idx;
     uint16_t frame_base;
-    uint8_t __padding_6;
+    uint8_t null_check_this;
     uint8_t __padding_7;
 };
 
@@ -7080,7 +7077,7 @@ struct CallAotShort
     uint8_t __code;
     uint8_t method_idx;
     uint8_t frame_base;
-    uint8_t __padding_3;
+    uint8_t null_check_this;
 };
 
 struct CallRuntimeImplemented

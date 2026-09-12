@@ -10,8 +10,34 @@ namespace platform
 class RtSys
 {
   public:
+    using EnumSystemLocalesExCallback = int32_t (*)(Utf16Char* locale_name, uint32_t flags, void* context);
+    using EnumCalendarInfoExExCallback = int32_t (*)(Utf16Char* calendar_info, uint32_t calendar, intptr_t reserved, void* context);
+    using EnumTimeFormatsExCallback = int32_t (*)(Utf16Char* time_format, void* context);
+
     static int32_t get_last_win32_error();
     static void set_last_win32_error(int32_t error);
+    static uint32_t get_environment_variable(const Utf16Char* variable_name, Utf16Char* value, uint32_t value_length);
+    static int32_t set_environment_variable(const Utf16Char* variable_name, const Utf16Char* value);
+    static int32_t get_locale_info_ex(const Utf16Char* locale_name, uint32_t lc_type, Utf16Char* locale_data, int32_t locale_data_length);
+    static int32_t lcid_to_locale_name(int32_t locale_id, Utf16Char* locale_name, int32_t locale_name_length, uint32_t flags);
+    static int32_t locale_name_to_lcid(const Utf16Char* locale_name, uint32_t flags);
+    static int32_t resolve_locale_name(const Utf16Char* locale_name, Utf16Char* locale_name_buffer, int32_t locale_name_buffer_length);
+    static int32_t enum_system_locales_ex(EnumSystemLocalesExCallback callback, uint32_t flags, void* context, intptr_t reserved);
+    static int32_t get_calendar_info_ex(const Utf16Char* locale_name, uint32_t calendar, intptr_t reserved, uint32_t cal_type,
+                                        void* cal_data, int32_t cal_data_length, int32_t* value);
+    static int32_t enum_calendar_info_ex_ex(EnumCalendarInfoExExCallback callback, const Utf16Char* locale_name, uint32_t calendar,
+                                            const Utf16Char* reserved, uint32_t cal_type, void* context);
+    static int32_t enum_time_formats_ex(EnumTimeFormatsExCallback callback, const Utf16Char* locale_name, uint32_t flags, void* context);
+    static int32_t lc_map_string_ex(const Utf16Char* locale_name, uint32_t map_flags, const Utf16Char* source, int32_t source_length, void* destination,
+                                    int32_t destination_length, void* version_information, void* reserved, intptr_t sort_handle);
+    static int32_t find_nls_string_ex(const Utf16Char* locale_name, uint32_t find_flags, const Utf16Char* source, int32_t source_length,
+                                      const Utf16Char* value, int32_t value_length, int32_t* found_length, void* version_information,
+                                      void* reserved, intptr_t sort_handle);
+    static int32_t find_string_ordinal(uint32_t find_flags, const Utf16Char* source, int32_t source_length,
+                                       const Utf16Char* value, int32_t value_length, int32_t ignore_case);
+    static int32_t compare_string_ex(const Utf16Char* locale_name, uint32_t compare_flags, const Utf16Char* string1, int32_t string1_length,
+                                     const Utf16Char* string2, int32_t string2_length, void* version_information, void* reserved,
+                                     intptr_t sort_handle);
     static int32_t double_to_string(double value, const char* format, char* buffer, int32_t buffer_size);
     static int32_t ch_mod(vm::RtString* path, int32_t mode);
     static int32_t mk_dir(vm::RtString* path, int32_t mode);

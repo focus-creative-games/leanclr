@@ -129,6 +129,18 @@ RtResult<ReduceTypeAndSize> InterpDefs::get_reduce_type_and_size_by_typesig(cons
         result.byte_size = PTR_SIZE;
         break;
     }
+    case metadata::RtElementType::Var:
+    case metadata::RtElementType::MVar:
+    {
+        const metadata::RtGenericParam* generic_param = typeSig->data.generic_param;
+        if ((generic_param->flags & static_cast<uint16_t>(metadata::RtGenericParamAttribute::ReferenceTypeConstraint)) != 0)
+        {
+            result.reduce_type = metadata::RtArgOrLocOrFieldReduceType::Ref;
+            result.byte_size = PTR_SIZE;
+            break;
+        }
+        RETURN_NOT_IMPLEMENTED_ERROR();
+    }
     case metadata::RtElementType::TypedByRef:
     {
         result.reduce_type = metadata::RtArgOrLocOrFieldReduceType::Other;

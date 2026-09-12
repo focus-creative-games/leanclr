@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -32,13 +32,13 @@ namespace CorlibTests.InternalCall
             Assert.NotNull(assembly);
         }
 
-        //[UnitTest]
-        //public void LoadAssemblyNotExist_ByName()
-        //{
-        //    AppDomain domain = AppDomain.CurrentDomain;
-        //    var assembly = domain.Load("CorlibTests2");
-        //    Assert.Null(assembly);
-        //}
+        [UnitTest]
+        public void LoadAssemblyNotExist_ByName()
+        {
+            AppDomain domain = AppDomain.CurrentDomain;
+            var assembly = domain.Load("CorlibTests2");
+            Assert.Null(assembly);
+        }
         [UnitTest]
         public void GetAssemblies_NotEmpty()
         {

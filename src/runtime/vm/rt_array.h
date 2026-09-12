@@ -56,6 +56,12 @@ class Array
         return Class::get_stack_location_size(array_klass->element_class);
     }
 
+    static int32_t get_array_rank(const RtArray* array)
+    {
+        assert(array);
+        return Class::get_rank(array->klass);
+    }
+
     static const metadata::RtClass* get_array_element_class(const RtArray* array)
     {
         assert(array);
@@ -80,13 +86,40 @@ class Array
     static T* get_array_data_start_as(RtArray* array)
     {
         assert(array);
-        return reinterpret_cast<T*>(const_cast<uint64_t*>(&array->first_data));
+        return reinterpret_cast<T*>(get_array_data_start_as_ptr_void(array));
     }
 
     static void* get_array_data_start_as_ptr_void(RtArray* array)
     {
         assert(array);
-        return &array->first_data;
+        return reinterpret_cast<uint8_t*>(&array->first_data) + get_array_bounds_byte_size(array);
+    }
+
+    static const ArrayBounds* get_array_bounds(const RtArray* array)
+    {
+        assert(array);
+        if (array->klass->by_val->ele_type != metadata::RtElementType::Array)
+        {
+            return nullptr;
+        }
+
+        return reinterpret_cast<const ArrayBounds*>(&array->first_data);
+    }
+
+    static ArrayBounds* get_array_bounds(RtArray* array)
+    {
+        return const_cast<ArrayBounds*>(get_array_bounds(static_cast<const RtArray*>(array)));
+    }
+
+    static size_t get_array_bounds_byte_size(const RtArray* array)
+    {
+        assert(array);
+        if (array->klass->by_val->ele_type != metadata::RtElementType::Array)
+        {
+            return 0;
+        }
+
+        return static_cast<size_t>(get_array_rank(array)) * sizeof(ArrayBounds);
     }
 
     template <typename T>
@@ -94,7 +127,7 @@ class Array
     {
         assert(array);
         assert(get_array_element_size(array) == sizeof(T));
-        return reinterpret_cast<T*>(&array->first_data) + static_cast<size_t>(index);
+        return get_array_data_start_as<T>(array) + static_cast<size_t>(index);
     }
 
     static void* get_array_element_address_as_ptr_void(RtArray* array, int32_t index)
@@ -102,14 +135,16 @@ class Array
         assert(array);
         assert(index >= 0 && index < get_array_length(array));
         size_t ele_size = get_array_element_size(array);
-        return reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(&array->first_data) + ele_size * static_cast<size_t>(index));
+        return reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(get_array_data_start_as_ptr_void(array)) +
+                                       ele_size * static_cast<size_t>(index));
     }
 
     static void* get_array_element_address_with_size_as_ptr_void(RtArray* array, int32_t index, size_t ele_size)
     {
         assert(array);
         assert(index >= 0 && index < get_array_length(array));
-        return reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(&array->first_data) + ele_size * static_cast<size_t>(index));
+        return reinterpret_cast<void*>(reinterpret_cast<uint8_t*>(get_array_data_start_as_ptr_void(array)) +
+                                       ele_size * static_cast<size_t>(index));
     }
 
     template <typename T>
@@ -117,7 +152,9 @@ class Array
     {
         assert(array);
         assert(get_array_element_size(array) == sizeof(T));
-        const T* data_ptr = reinterpret_cast<const T*>(&array->first_data) + static_cast<size_t>(index);
+        const T* data_ptr = reinterpret_cast<const T*>(reinterpret_cast<const uint8_t*>(&array->first_data) +
+                                                      get_array_bounds_byte_size(array)) +
+                            static_cast<size_t>(index);
         return *data_ptr;
     }
 
@@ -126,7 +163,7 @@ class Array
     {
         assert(array);
         assert(get_array_element_size(array) == sizeof(T));
-        T* data_ptr = reinterpret_cast<T*>(&array->first_data) + static_cast<size_t>(index);
+        T* data_ptr = get_array_data_start_as<T>(array) + static_cast<size_t>(index);
         *data_ptr = value;
     }
 
@@ -148,6 +185,12 @@ class Array
                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
     static RtResultVoid szarray_address_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
+    static RtResultVoid szarray_interface_count_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
+                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
+    static RtResultVoid szarray_interface_copy_to_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
+                                                          const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
+    static RtResultVoid szarray_generic_get_enumerator_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
+                                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
     static RtResultVoid newmdarray_lengths_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                    const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
     static RtResultVoid newmdarray_lengths_lower_bounds_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,

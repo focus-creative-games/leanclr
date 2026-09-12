@@ -54,67 +54,74 @@ namespace Tests.Instruments.Arrays
             Assert.Equal(13, arr[1, 2].x);
         }
 
-        //[UnitTest]
-        //public void OutOfRange_lower()
-        //{
-        //    var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[-1, -1];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower()
+        {
+            var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[-1, -1];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_lower2()
-        //{
-        //    var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[-1, 1];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower2()
+        {
+            var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[-1, 1];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_lower3()
-        //{
-        //    var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[1, -1];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower3()
+        {
+            var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[1, -1];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper()
-        //{
-        //    var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[2, 0];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper()
+        {
+            var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[2, 0];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper2()
-        //{
-        //    var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[0, 3];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper2()
+        {
+            var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[0, 3];
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper3()
-        //{
-        //    var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = arr[2, 3];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper3()
+        {
+            var arr = new A[2, 3] { { new A(1), new A(2), new A(3) }, { new A(11), new A(12), new A(13) } };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = arr[2, 3];
+            });
+        }
 
-        //[UnitTest]
-        //public void NullRef()
-        //{
-        //    A[,] arr = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    var s = arr[0, 0];
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void NullRef()
+        {
+            A[,] arr = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            var s = arr[0, 0];
+            });
+        }
     }
 }

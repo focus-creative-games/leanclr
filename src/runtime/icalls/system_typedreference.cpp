@@ -4,6 +4,7 @@
 #include "vm/class.h"
 #include "vm/field.h"
 #include "vm/object.h"
+#include "vm/reflection.h"
 #include "vm/rt_managed_types.h"
 
 namespace leanclr
@@ -40,9 +41,9 @@ RtResultVoid SystemTypedReference::internal_make_typed_reference(vm::RtTypedRefe
         field_type = field_info->type_sig;
     }
 
-    result->type_handle = field_type;
     UNWRAP_OR_RET_ERR_ON_FAIL(result->klass, vm::Class::get_class_from_typesig(field_type));
     result->value = value;
+    UNWRAP_OR_RET_ERR_ON_FAIL(result->type_handle, vm::Reflection::get_net10_method_table(field_type));
 
     RET_VOID_OK();
 }
@@ -84,7 +85,7 @@ static RtResultVoid invoker_internal_to_object(metadata::RtManagedMethodPointer 
     (void)method_pointer;
     (void)method;
 
-    auto typed_ref = EvalStackOp::get_param<const vm::RtTypedReference*>(params, 0);
+    auto typed_ref = reinterpret_cast<const vm::RtTypedReference*>(params);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, SystemTypedReference::internal_to_object(typed_ref));
     EvalStackOp::set_return(ret, obj);

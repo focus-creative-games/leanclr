@@ -1,7 +1,0 @@
-[
-  {
-    "name": "System.Object::.ctor()",
-    "func": "newobj_ctor",
-    "header": "intrinsics/system_object.h"
-  }
-]

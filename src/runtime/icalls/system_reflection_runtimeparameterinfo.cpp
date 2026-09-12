@@ -12,9 +12,9 @@ namespace icalls
 
 RtResult<int32_t> SystemReflectionRuntimeParameterInfo::get_metadata_token(const vm::RtReflectionParameter* param) noexcept
 {
-    vm::RtReflectionMethod* ref_method = reinterpret_cast<vm::RtReflectionMethod*>(param->member);
-    const metadata::RtMethodInfo* method = ref_method->method;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<uint32_t>, token_opt, vm::Method::get_parameter_token(method, param->index));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<uint32_t>, token_opt,
+                                            vm::Reflection::get_parameter_token_from_reflection_object(
+                                                const_cast<vm::RtReflectionParameter*>(param)));
     uint32_t token = token_opt.has_value() ? token_opt.value() : 0;
     RET_OK(static_cast<int32_t>(token));
 }
@@ -24,25 +24,10 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeParameterInfo::get_type_modifiers(
 {
     (void)parameter_type;
 
-    const metadata::RtMethodInfo* method = nullptr;
-    const metadata::RtClass* member_klass = member->klass;
-    const metadata::RtClass* reflection_method_class = vm::Class::get_corlib_types().cls_reflection_method;
-    const metadata::RtClass* reflection_constructor_class = vm::Class::get_corlib_types().cls_reflection_constructor;
-
-    if (member_klass == reflection_method_class)
-    {
-        vm::RtReflectionMethod* ref_method = reinterpret_cast<vm::RtReflectionMethod*>(member);
-        method = ref_method->method;
-    }
-    else if (member_klass == reflection_constructor_class)
-    {
-        vm::RtReflectionMethod* ref_constructor = reinterpret_cast<vm::RtReflectionMethod*>(member);
-        method = ref_constructor->method;
-    }
-    else
-    {
-        RET_ERR(RtErr::InvalidOperation);
-    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, normalized_member, vm::Reflection::normalize_coreclr_reflection_object(member));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method,
+                                            vm::Reflection::get_method_info_from_reflection_object(
+                                                reinterpret_cast<vm::RtReflectionMethod*>(normalized_member)));
 
     utils::Vector<metadata::RtClass*> modifiers;
     RET_ERR_ON_FAIL(vm::Method::get_parameter_modifiers(method, index, optional, modifiers));

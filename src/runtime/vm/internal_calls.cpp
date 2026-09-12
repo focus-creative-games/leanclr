@@ -6,6 +6,9 @@
 #include "utils/string_util.h"
 #include "metadata/metadata_name.h"
 #include "icalls/internal_call_stubs.h"
+#include "const_strs.h"
+
+#include <cstring>
 
 namespace leanclr
 {
@@ -18,6 +21,33 @@ static utils::HashMap<const char*, InternalCallRegistry, utils::CStrHasher, util
 static utils::HashMap<const char*, InternalCallInvoker, utils::CStrHasher, utils::CStrCompare> g_newobjInternalCallMap;
 static utils::Vector<InternalCallInvoker> g_internalCallInvokerIdList;
 static utils::HashMap<InternalCallInvoker, uint16_t> g_internalCallInvokerIdMap;
+
+static bool starts_with(const char* value, const char* prefix) noexcept
+{
+    return std::strncmp(value, prefix, std::strlen(prefix)) == 0;
+}
+
+static bool is_coreclr_corlib_method(const metadata::RtMethodInfo* method) noexcept
+{
+    if (method == nullptr || method->parent == nullptr || method->parent->image == nullptr)
+    {
+        return false;
+    }
+
+    return method->parent->image->is_corlib() && std::strcmp(method->parent->image->get_name_no_ext(), STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0;
+}
+
+static bool is_mono_only_internal_call_name(const char* name) noexcept
+{
+    return starts_with(name, "Mono.") || starts_with(name, "System.IO.Mono") || starts_with(name, "System.Mono") ||
+        starts_with(name, "System.Reflection.Mono") || starts_with(name, "System.Runtime.Remoting") ||
+        std::strstr(name, "Mono.") != nullptr || std::strstr(name, "System.Runtime.Remoting.") != nullptr;
+}
+
+static bool is_internal_call_allowed_for_method(const metadata::RtMethodInfo* method, const char* registered_name) noexcept
+{
+    return !is_coreclr_corlib_method(method) || !is_mono_only_internal_call_name(registered_name);
+}
 
 void InternalCalls::register_lite_internal_call(const char* name, ManagedMethodPointer func)
 {
@@ -71,16 +101,17 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = g_internalCallMap.find(sb.get_const_chars());
-        if (it != g_internalCallMap.end())
+        if (it != g_internalCallMap.end() && is_internal_call_allowed_for_method(method, sb.get_const_chars()))
             RET_OK(&it->second);
     }
 
     // Try with method name without parameters
+    if (!is_coreclr_corlib_method(method))
     {
         sb.clear();
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = g_internalCallMap.find(sb.get_const_chars());
-        if (it != g_internalCallMap.end())
+        if (it != g_internalCallMap.end() && is_internal_call_allowed_for_method(method, sb.get_const_chars()))
             RET_OK(&it->second);
     }
 
@@ -117,6 +148,7 @@ RtResult<InternalCallInvoker> InternalCalls::get_newobj_internal_call_by_method(
     }
 
     // Try with method name without parameters
+    if (!is_coreclr_corlib_method(method))
     {
         sb.clear();
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
@@ -162,7 +194,13 @@ void InternalCalls::initialize()
     utils::Vector<vm::InternalCallEntry> entries;
     icalls::InternalCallStubs::get_internal_call_entries(entries);
     for (auto& entry : entries)
+    {
         register_internal_call(entry.name, entry.func, entry.invoker);
+        if (entry.func != nullptr)
+        {
+            register_lite_internal_call(entry.name, entry.func);
+        }
+    }
 
     utils::Vector<vm::NewobjInternalCallEntry> newobjEntries;
     icalls::InternalCallStubs::get_newobj_internal_call_entries(newobjEntries);

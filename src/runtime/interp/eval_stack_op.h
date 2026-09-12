@@ -34,6 +34,11 @@ class EvalStackOp
     {
         *reinterpret_cast<T*>(ret) = value;
     }
+
+    static void set_return(RtStackObject* ret, bool value)
+    {
+        ret->value = value ? 1ULL : 0ULL;
+    }
 };
 
 } // namespace interp

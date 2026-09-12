@@ -1,5 +1,6 @@
 #include "rt_exception.h"
 #include <cstdlib>
+#include <cstdio>
 #include "gc/garbage_collector.h"
 #include "gc/gc_roots.h"
 #include "class.h"
@@ -29,6 +30,14 @@ void register_exception_gc_roots()
 void Exception::set_current_exception(RtException* ex)
 {
     s_ref_exception = ex;
+}
+
+void Exception::clear_current_exception_if_matches(RtException* ex)
+{
+    if (s_ref_exception == ex)
+    {
+        s_ref_exception = nullptr;
+    }
 }
 
 RtException* Exception::get_and_clear_current_exception()
@@ -105,6 +114,27 @@ static metadata::RtClass* get_exception_klass_of_runtime_error(RtErr err)
 
 RtException* Exception::raise_error_as_exception(RtErr err, interp::InterpFrame* frame, const void* ip)
 {
+    if (std::getenv("LEANCLR_EXCEPTION_TRACE") != nullptr)
+    {
+        const metadata::RtMethodInfo* method = frame != nullptr ? frame->method : nullptr;
+        const char* ns = method != nullptr && method->parent != nullptr && method->parent->namespaze != nullptr ? method->parent->namespaze : "";
+        const char* type_name = method != nullptr && method->parent != nullptr && method->parent->name != nullptr ? method->parent->name : "<null>";
+        const char* method_name = method != nullptr && method->name != nullptr ? method->name : "<null>";
+        int64_t ir_offset = -1;
+        if (method != nullptr && method->interp_data != nullptr && method->interp_data->codes != nullptr && ip != nullptr)
+        {
+            ir_offset = static_cast<int64_t>(static_cast<const uint8_t*>(ip) - method->interp_data->codes);
+        }
+        std::fprintf(stderr, "leanclr-exception: err=%d method=%s.%s::%s ir=%lld ip=%p\n", static_cast<int>(err), ns, type_name,
+                     method_name, static_cast<long long>(ir_offset), ip);
+    }
+    if (err == RtErr::BadImageFormat && std::getenv("LEANCLR_REFLECTION_TRACE") != nullptr)
+    {
+        const metadata::RtMethodInfo* method = frame != nullptr ? frame->method : nullptr;
+        const char* type_name = method != nullptr && method->parent != nullptr && method->parent->name != nullptr ? method->parent->name : "<null>";
+        const char* method_name = method != nullptr && method->name != nullptr ? method->name : "<null>";
+        std::fprintf(stderr, "leanclr-exception: BadImageFormat in %s::%s ip=%p\n", type_name, method_name, ip);
+    }
     if (err == RtErr::ManagedException)
     {
         return internal_get_current_exception();
@@ -130,6 +160,7 @@ RtException* Exception::raise_error_as_exception(RtErr err, interp::InterpFrame*
 
 RtException* Exception::raise_aot_error_as_exception(RtErr err, const metadata::RtMethodInfo* methodInfo, int32_t ip)
 {
+    (void)methodInfo;
     return raise_error_as_exception(err, nullptr, reinterpret_cast<const void*>(static_cast<intptr_t>(ip)));
 }
 

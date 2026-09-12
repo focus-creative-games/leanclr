@@ -219,6 +219,31 @@ void MarkSweepHeap::set_gc_mode(GCMode mode)
     s_gc_mode = mode;
 }
 
+bool MarkSweepHeap::is_allocated_object(const vm::RtObject* obj)
+{
+    if (obj == nullptr || (reinterpret_cast<uintptr_t>(obj) % GC_ALIGN) != 0)
+    {
+        return false;
+    }
+
+    void* ptr = const_cast<vm::RtObject*>(obj);
+    if (s_big_object_arenas.find(ptr) != s_big_object_arenas.end())
+    {
+        return obj->klass != nullptr;
+    }
+
+    for (size_t i = 0; i < kSizeClassPoolCount; ++i)
+    {
+        SizeClassPool* pool = s_size_class_pools[i];
+        if (pool != nullptr && pool->contains_allocated_block(ptr))
+        {
+            return obj->klass != nullptr;
+        }
+    }
+
+    return false;
+}
+
 vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite* site)
 {
     assert(size >= sizeof(vm::RtObject));

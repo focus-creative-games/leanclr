@@ -89,6 +89,12 @@ RtResult<bool> SystemBuffer::internal_block_copy(RtArray* src, int32_t src_offse
     RET_OK(true);
 }
 
+RtResultVoid SystemBuffer::bulk_move_with_write_barrier_internal(uint8_t* dst, const uint8_t* src, uintptr_t count) noexcept
+{
+    std::memmove(dst, src, static_cast<size_t>(count));
+    RET_VOID_OK();
+}
+
 // Invoker functions
 
 /// @icall: System.Buffer::_ByteLength(System.Array)
@@ -123,6 +129,17 @@ static RtResultVoid internal_block_copy_invoker(RtManagedMethodPointer, const Rt
     RET_VOID_OK();
 }
 
+/// @icall: System.Buffer::BulkMoveWithWriteBarrierInternal
+static RtResultVoid bulk_move_with_write_barrier_internal_invoker(RtManagedMethodPointer, const RtMethodInfo*, const RtStackObject* params,
+                                                                  RtStackObject* ret) noexcept
+{
+    uint8_t* dst = EvalStackOp::get_param<uint8_t*>(params, 0);
+    const uint8_t* src = EvalStackOp::get_param<const uint8_t*>(params, 1);
+    uintptr_t count = EvalStackOp::get_param<uintptr_t>(params, 2);
+    (void)ret;
+    return SystemBuffer::bulk_move_with_write_barrier_internal(dst, src, count);
+}
+
 // Internal call entries
 
 static InternalCallEntry s_internal_call_entries_system_buffer[] = {
@@ -130,6 +147,10 @@ static InternalCallEntry s_internal_call_entries_system_buffer[] = {
     {"System.Buffer::InternalMemcpy(System.Byte*,System.Byte*,System.Int32)", (InternalCallFunction)&SystemBuffer::internal_memcpy, internal_memcpy_invoker},
     {"System.Buffer::InternalBlockCopy(System.Array,System.Int32,System.Array,System.Int32,System.Int32)",
      (InternalCallFunction)&SystemBuffer::internal_block_copy, internal_block_copy_invoker},
+    {"System.Buffer::BulkMoveWithWriteBarrierInternal(System.Byte&,System.Byte&,System.UIntPtr)",
+     (InternalCallFunction)&SystemBuffer::bulk_move_with_write_barrier_internal, bulk_move_with_write_barrier_internal_invoker},
+    {"System.Buffer::BulkMoveWithWriteBarrierInternal", (InternalCallFunction)&SystemBuffer::bulk_move_with_write_barrier_internal,
+     bulk_move_with_write_barrier_internal_invoker},
 };
 
 utils::Span<InternalCallEntry> SystemBuffer::get_internal_call_entries() noexcept

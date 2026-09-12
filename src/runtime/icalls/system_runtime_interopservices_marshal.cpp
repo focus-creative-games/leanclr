@@ -7,6 +7,7 @@
 #include "vm/class.h"
 #include "vm/field.h"
 #include "vm/marshal.h"
+#include "vm/reflection.h"
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
 
@@ -277,7 +278,8 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::copy_from_unmanaged_fixed(void
 
 RtResult<vm::RtDelegate*> SystemRuntimeInteropServicesMarshal::get_delegate_for_function_pointer_internal(void* ptr, vm::RtReflectionType* ref_type) noexcept
 {
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(ref_type->type_handle));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass,
+                                            vm::Reflection::get_class_from_reflection_type_object(ref_type));
     return vm::Marshal::marshal_function_pointer_to_delegate(reinterpret_cast<metadata::RtNativeMethodPointer>(ptr), klass);
 }
 
@@ -881,6 +883,14 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtime_interopservi
     {"System.Runtime.InteropServices.Marshal::GetLastWin32Error()", (vm::InternalCallFunction)&SystemRuntimeInteropServicesMarshal::get_last_win32_error,
      get_last_win32_error_invoker},
     {"System.Runtime.InteropServices.Marshal::SetLastWin32Error(System.Int32)",
+     (vm::InternalCallFunction)&SystemRuntimeInteropServicesMarshal::set_last_win32_error, set_last_win32_error_invoker},
+    {"System.Runtime.InteropServices.Marshal::GetLastPInvokeError()", (vm::InternalCallFunction)&SystemRuntimeInteropServicesMarshal::get_last_win32_error,
+     get_last_win32_error_invoker},
+    {"System.Runtime.InteropServices.Marshal::GetLastPInvokeError", (vm::InternalCallFunction)&SystemRuntimeInteropServicesMarshal::get_last_win32_error,
+     get_last_win32_error_invoker},
+    {"System.Runtime.InteropServices.Marshal::SetLastPInvokeError(System.Int32)",
+     (vm::InternalCallFunction)&SystemRuntimeInteropServicesMarshal::set_last_win32_error, set_last_win32_error_invoker},
+    {"System.Runtime.InteropServices.Marshal::SetLastPInvokeError",
      (vm::InternalCallFunction)&SystemRuntimeInteropServicesMarshal::set_last_win32_error, set_last_win32_error_invoker},
 
     // COM/WinRT stubs

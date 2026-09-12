@@ -11,7 +11,7 @@ namespace LeanAOT.ToCpp
 
         public string GenerateMethodDeclaring()
         {
-            return $"{MethodGenerationUtil.GetResultTypeName(method.RetType)} {name}({MethodGenerationUtil.CreateMethodRelaxedArgs(method, true)}{(method.ParamCountIncludeThis > 0 ? " ," : "")}{ConstStrings.MethodInfoPtrTypeName} __method, bool __callvir) {ConstStrings.CppFunctionNoexcept}";
+            return $"{MethodGenerationUtil.GetResultTypeName(method.RetType)} {name}({MethodGenerationUtil.CreateMethodRelaxedArgs(method, true)}{(method.ParamCountIncludeThis > 0 ? ", " : "")}{ConstStrings.MethodInfoPtrTypeName} __method, bool __callvir, const {ConstStrings.StackObjectTypeName}* __varargs, uint16_t __vararg_count) {ConstStrings.CppFunctionNoexcept}";
         }
     }
 

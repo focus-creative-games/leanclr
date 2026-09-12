@@ -1,7 +1,9 @@
 #include <cstdint>
 #include <cstring>
 
+#include "build_config.h"
 #include "core/rt_base.h"
+#include "metadata/rt_marshal_types.h"
 
 #ifndef __EMSCRIPTEN__
 
@@ -99,6 +101,26 @@ using LeanClrPinvokeNestedBinaryOp_fn = int32_t(LEANCLR_TEST_PINVOKE_CC*)(void*,
 extern "C" int32_t leanclr_pinvoke_invoke_nested_binary_op(void* outer, void* inner, int32_t a, int32_t b)
 {
     return reinterpret_cast<LeanClrPinvokeNestedBinaryOp_fn>(outer)(inner, a, b);
+}
+
+extern "C" int32_t LEANCLR_PINVOKE_CALL_WINAPI RuntimeApi_GetIntArgument(int32_t value)
+{
+    return value;
+}
+
+extern "C" leanclr::metadata::RtMarshalAnsiStr LEANCLR_PINVOKE_CALL_WINAPI RuntimeApi_GetStringArgument(leanclr::metadata::RtMarshalAnsiStr value)
+{
+    return value;
+}
+
+extern "C" int32_t LEANCLR_PINVOKE_CALL_WINAPI RuntimeApi_GetMultiArgument(int32_t value, float c, double a, int64_t e)
+{
+    return value + static_cast<int32_t>(c) + static_cast<int32_t>(a) + static_cast<int32_t>(e);
+}
+
+extern "C" int32_t LEANCLR_PINVOKE_CALL_CDECL RuntimeApi_GetIntArgumentCdecl(int32_t value)
+{
+    return value;
 }
 
 extern "C" int32_t leanclr_pinvoke_safe_handle_add_ten(void* raw_handle)

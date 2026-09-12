@@ -302,7 +302,8 @@ class RtModuleDef
     RtResult<const RtFieldInfo*> get_field_by_member_ref_rid(uint32_t rid, const RtGenericContainerContext& gcc, const RtGenericContext* gc);
     RtResult<const RtFieldInfo*> get_field_by_token(const RtToken& token, const RtGenericContainerContext& gcc, const RtGenericContext* gc);
 
-    RtResult<RtRuntimeHandle> get_member_ref_by_rid(uint32_t memberRefRid, const RtGenericContainerContext& gcc, const RtGenericContext* gc);
+    RtResult<RtRuntimeHandle> get_member_ref_by_rid(uint32_t memberRefRid, const RtGenericContainerContext& gcc, const RtGenericContext* gc,
+                                                    uint16_t* outVarargCount = nullptr);
 
     std::optional<uint32_t> get_field_offset(EncodedTokenId fieldToken) const;
     std::optional<ClassLayoutData> get_class_layout_data(EncodedTokenId typeDefToken) const;

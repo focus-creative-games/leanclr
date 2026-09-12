@@ -6,6 +6,7 @@
 #include "vm/rt_array.h"
 #include "vm/class.h"
 #include "vm/environment.h"
+#include "vm/rt_thread.h"
 
 #include "platform/rt_time.h"
 
@@ -344,36 +345,85 @@ static RtResultVoid get_page_size_invoker(metadata::RtManagedMethodPointer, cons
     RET_VOID_OK();
 }
 
+RtResult<int32_t> SystemEnvironment::get_current_managed_thread_id() noexcept
+{
+    vm::RtThread* thread = vm::Thread::get_current_thread();
+    if (thread == nullptr || thread->internal_thread == nullptr)
+    {
+        RET_OK(1);
+    }
+
+    RET_OK(thread->internal_thread->managed_id != 0 ? thread->internal_thread->managed_id : 1);
+}
+
+/// @icall: System.Environment::get_CurrentManagedThreadId
+static RtResultVoid get_current_managed_thread_id_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                          const interp::RtStackObject* /*params*/, interp::RtStackObject* ret) noexcept
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(int32_t, id, SystemEnvironment::get_current_managed_thread_id());
+    EvalStackOp::set_return(ret, id);
+    RET_VOID_OK();
+}
+
 static vm::InternalCallEntry s_internal_call_entries_system_environment[] = {
+    {"System.Environment::get_ExitCode()", (vm::InternalCallFunction)SystemEnvironment::get_exit_code, get_exit_code_invoker},
     {"System.Environment::get_ExitCode", (vm::InternalCallFunction)SystemEnvironment::get_exit_code, get_exit_code_invoker},
+    {"System.Environment::set_ExitCode(System.Int32)", (vm::InternalCallFunction)SystemEnvironment::set_exit_code, set_exit_code_invoker},
     {"System.Environment::set_ExitCode", (vm::InternalCallFunction)SystemEnvironment::set_exit_code, set_exit_code_invoker},
+    {"System.Environment::get_HasShutdownStarted()", (vm::InternalCallFunction)SystemEnvironment::get_has_shutdown_started,
+     get_has_shutdown_started_invoker},
     {"System.Environment::get_HasShutdownStarted", (vm::InternalCallFunction)SystemEnvironment::get_has_shutdown_started, get_has_shutdown_started_invoker},
+    {"System.Environment::get_MachineName()", (vm::InternalCallFunction)SystemEnvironment::get_machine_name, get_machine_name_invoker},
     {"System.Environment::get_MachineName", (vm::InternalCallFunction)SystemEnvironment::get_machine_name, get_machine_name_invoker},
+    {"System.Environment::GetNewLine()", (vm::InternalCallFunction)SystemEnvironment::get_new_line, get_new_line_invoker},
+    {"System.Environment::get_Platform()", (vm::InternalCallFunction)SystemEnvironment::get_platform, get_platform_invoker},
     {"System.Environment::GetNewLine", (vm::InternalCallFunction)SystemEnvironment::get_new_line, get_new_line_invoker},
     {"System.Environment::get_Platform", (vm::InternalCallFunction)SystemEnvironment::get_platform, get_platform_invoker},
+    {"System.Environment::GetOSVersionString()", (vm::InternalCallFunction)SystemEnvironment::get_os_version_string, get_os_version_string_invoker},
     {"System.Environment::GetOSVersionString", (vm::InternalCallFunction)SystemEnvironment::get_os_version_string, get_os_version_string_invoker},
+    {"System.Environment::get_TickCount()", (vm::InternalCallFunction)SystemEnvironment::get_tick_count, get_tick_count_invoker},
     {"System.Environment::get_TickCount", (vm::InternalCallFunction)SystemEnvironment::get_tick_count, get_tick_count_invoker},
+    {"System.Environment::get_UserName()", (vm::InternalCallFunction)SystemEnvironment::get_user_name, get_user_name_invoker},
     {"System.Environment::get_UserName", (vm::InternalCallFunction)SystemEnvironment::get_user_name, get_user_name_invoker},
+    {"System.Environment::Exit(System.Int32)", (vm::InternalCallFunction)SystemEnvironment::exit, exit_invoker_system_environment},
     {"System.Environment::Exit", (vm::InternalCallFunction)SystemEnvironment::exit, exit_invoker_system_environment},
+    {"System.Environment::GetCommandLineArgs()", (vm::InternalCallFunction)SystemEnvironment::get_command_line_args, get_command_line_args_invoker},
     {"System.Environment::GetCommandLineArgs", (vm::InternalCallFunction)SystemEnvironment::get_command_line_args, get_command_line_args_invoker},
     {"System.Environment::internalGetEnvironmentVariable_native", (vm::InternalCallFunction)SystemEnvironment::internal_get_environment_variable_native,
      internal_get_environment_variable_native_invoker},
     {"System.Environment::InternalSetEnvironmentVariable(System.Char*,System.Int32,System.Char*,System.Int32)",
      (vm::InternalCallFunction)SystemEnvironment::internal_set_environment_variable_native, internal_set_environment_variable_native_invoker},
+    {"System.Environment::GetEnvironmentVariableNames()", (vm::InternalCallFunction)SystemEnvironment::get_environment_variable_names,
+     get_environment_variable_names_invoker},
     {"System.Environment::GetEnvironmentVariableNames", (vm::InternalCallFunction)SystemEnvironment::get_environment_variable_names,
      get_environment_variable_names_invoker},
+    {"System.Environment::GetWindowsFolderPath(System.Int32)", (vm::InternalCallFunction)SystemEnvironment::get_windows_folder_path,
+     get_windows_folder_path_invoker},
     {"System.Environment::GetWindowsFolderPath", (vm::InternalCallFunction)SystemEnvironment::get_windows_folder_path, get_windows_folder_path_invoker},
+    {"System.Environment::GetLogicalDrivesInternal()", (vm::InternalCallFunction)SystemEnvironment::get_logical_drives_internal,
+     get_logical_drives_internal_invoker},
     {"System.Environment::GetLogicalDrivesInternal", (vm::InternalCallFunction)SystemEnvironment::get_logical_drives_internal,
      get_logical_drives_internal_invoker},
+    {"System.Environment::GetMachineConfigPath()", (vm::InternalCallFunction)SystemEnvironment::get_machine_config_path, get_machine_config_path_invoker},
     {"System.Environment::GetMachineConfigPath", (vm::InternalCallFunction)SystemEnvironment::get_machine_config_path, get_machine_config_path_invoker},
+    {"System.Environment::internalGetHome()", (vm::InternalCallFunction)SystemEnvironment::internal_get_home, internal_get_home_invoker},
     {"System.Environment::internalGetHome", (vm::InternalCallFunction)SystemEnvironment::internal_get_home, internal_get_home_invoker},
+    {"System.Environment::get_bundled_machine_config()", (vm::InternalCallFunction)SystemEnvironment::get_bundled_machine_config,
+     get_bundled_machine_config_invoker},
     {"System.Environment::get_bundled_machine_config", (vm::InternalCallFunction)SystemEnvironment::get_bundled_machine_config,
      get_bundled_machine_config_invoker},
+    {"System.Environment::FailFast()", (vm::InternalCallFunction)SystemEnvironment::fail_fast, fail_fast_invoker},
     {"System.Environment::FailFast", (vm::InternalCallFunction)SystemEnvironment::fail_fast, fail_fast_invoker},
     {"System.Environment::GetIs64BitOperatingSystem()", (vm::InternalCallFunction)SystemEnvironment::get_is_64bit_operating_system,
      get_is_64bit_operating_system_invoker},
+    {"System.Environment::get_ProcessorCount()", (vm::InternalCallFunction)SystemEnvironment::get_processor_count, get_processor_count_invoker},
     {"System.Environment::get_ProcessorCount", (vm::InternalCallFunction)SystemEnvironment::get_processor_count, get_processor_count_invoker},
+    {"System.Environment::GetPageSize()", (vm::InternalCallFunction)SystemEnvironment::get_page_size, get_page_size_invoker},
     {"System.Environment::GetPageSize", (vm::InternalCallFunction)SystemEnvironment::get_page_size, get_page_size_invoker},
+    {"System.Environment::get_CurrentManagedThreadId()", (vm::InternalCallFunction)SystemEnvironment::get_current_managed_thread_id,
+     get_current_managed_thread_id_invoker},
+    {"System.Environment::get_CurrentManagedThreadId", (vm::InternalCallFunction)SystemEnvironment::get_current_managed_thread_id,
+     get_current_managed_thread_id_invoker},
 };
 
 utils::Span<vm::InternalCallEntry> SystemEnvironment::get_internal_call_entries() noexcept

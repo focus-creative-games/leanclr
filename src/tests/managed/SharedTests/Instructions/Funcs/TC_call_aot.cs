@@ -18,14 +18,15 @@ namespace Tests.Instruments.Funcs
     /// </summary>
     internal class TC_call_aot : TestCaseBase
     {
-        //[UnitTest]
-        //public void class_null_this()
-        //{
-        //    ForFunClass a = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    a.Show2();
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void class_null_this()
+        {
+            ForFunClass a = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            a.Show2();
+            });
+        }
 
         [UnitTest]
         public void class_1()

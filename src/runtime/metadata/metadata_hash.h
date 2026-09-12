@@ -64,6 +64,7 @@ struct MethodSigHash
     {
         size_t h = (size_t)key->flags;
         h = utils::HashUtil::combine_hash(h, (size_t)key->generic_param_count);
+        h = utils::HashUtil::combine_hash(h, (size_t)key->fixed_param_count);
         h = utils::HashUtil::combine_hash(h, MetadataHash::hash_type_sig_ignore_attrs(key->return_type));
         for (size_t i = 0; i < key->params.size(); ++i)
         {

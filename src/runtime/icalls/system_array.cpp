@@ -4,6 +4,7 @@
 #include "vm/object.h"
 #include "vm/class.h"
 #include "vm/array_class.h"
+#include "vm/reflection.h"
 #include <cstring>
 
 namespace leanclr
@@ -257,7 +258,8 @@ static RtResultVoid fast_copy_invoker(metadata::RtManagedMethodPointer, const me
 /// @icall: System.Array::CreateInstanceImpl
 RtResult<vm::RtArray*> SystemArray::create_instance_impl(vm::RtReflectionType* ele_ref_type, vm::RtArray* lengths, vm::RtArray* lower_bounds) noexcept
 {
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, ele_klass, vm::Class::get_class_from_typesig(ele_ref_type->type_handle));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, ele_klass,
+                                            vm::Reflection::get_class_from_reflection_type_object(ele_ref_type));
 
     size_t dimension;
     if (lengths == nullptr)

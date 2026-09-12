@@ -77,6 +77,10 @@ RtResultVoid AppDomain::initialize_context()
 {
     auto& corlib_types = Class::get_corlib_types();
     auto appcontext_class = corlib_types.cls_appcontext;
+    if (appcontext_class == nullptr)
+    {
+        RET_VOID_OK();
+    }
 
     auto context_res = LEANCLR_NEWOBJ_INTERNAL(appcontext_class, "AppDomain::initialize_context");
     RET_ERR_ON_FAIL(context_res);
@@ -87,7 +91,10 @@ RtResultVoid AppDomain::initialize_context()
     g_default_mono_domain.context = context;
 
     auto current_thread = Thread::get_current_thread();
-    current_thread->internal_thread->current_appcontext = reinterpret_cast<RtObject*>(context);
+    if (current_thread->internal_thread != nullptr)
+    {
+        current_thread->internal_thread->current_appcontext = reinterpret_cast<RtObject*>(context);
+    }
 
     RET_VOID_OK();
 }

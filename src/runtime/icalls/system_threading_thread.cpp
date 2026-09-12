@@ -26,6 +26,11 @@ RtResultVoid SystemThreadingThread::reset_abort_native(vm::RtThread* this_thread
     RET_VOID_OK();
 }
 
+RtResultVoid SystemThreadingThread::internal_finalize() noexcept
+{
+    RET_VOID_OK();
+}
+
 RtResultVoid SystemThreadingThread::suspend_internal(vm::RtThread* this_thread) noexcept
 {
     RET_VOID_OK();
@@ -335,6 +340,14 @@ static RtResultVoid reset_abort_native_invoker(metadata::RtManagedMethodPointer 
 {
     auto this_thread = EvalStackOp::get_param<vm::RtThread*>(params, 0);
     RET_ERR_ON_FAIL(SystemThreadingThread::reset_abort_native(this_thread));
+    RET_VOID_OK();
+}
+
+/// @icall: System.Threading.Thread::InternalFinalize()
+static RtResultVoid internal_finalize_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    RET_ERR_ON_FAIL(SystemThreadingThread::internal_finalize());
     RET_VOID_OK();
 }
 
@@ -919,6 +932,17 @@ utils::Span<vm::InternalCallEntry> SystemThreadingThread::get_internal_call_entr
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_thread,
                                               sizeof(s_internal_call_entries_system_threading_thread) / sizeof(vm::InternalCallEntry));
+}
+
+utils::Span<vm::InternalCallEntry> SystemThreadingThread::get_net10_internal_call_entries() noexcept
+{
+    static vm::InternalCallEntry s_entries[] = {
+        {"System.Threading.Thread::InternalFinalize()", (vm::InternalCallFunction)&SystemThreadingThread::internal_finalize,
+         internal_finalize_invoker},
+        {"System.Threading.Thread::SleepInternal(System.Int32)", (vm::InternalCallFunction)&SystemThreadingThread::sleep_internal, sleep_internal_invoker},
+        {"System.Threading.Thread::YieldInternal", (vm::InternalCallFunction)&SystemThreadingThread::yield_internal, yield_internal_invoker},
+    };
+    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
 }
 
 } // namespace icalls

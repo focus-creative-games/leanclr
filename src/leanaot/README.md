@@ -7,7 +7,7 @@ LeanAOT is an Ahead-Of-Time (AOT) compiler that translates .NET managed assembli
 - Translates CIL bytecode from one or more managed assemblies into C++
 - Supports generics, interfaces, delegates, and virtual dispatch
 - Pluggable output: code generation targets can be extended
-- Works with `.NET Framework 4.x` assemblies
+- Uses the current `coreclr-net10` runtime API profile by default
 
 ## Project Structure
 
@@ -32,6 +32,7 @@ scripts\publish_leanaot.bat
 ```
 LeanAOT -d <dll-search-path> [-d <dll-search-path> ...]
         -a <assembly-name>   [-a <assembly-name> ...]
+        [--leanaot-runtime-api-profile coreclr-net10]
         -o <output-dir>
 ```
 
@@ -42,16 +43,18 @@ LeanAOT -d <dll-search-path> [-d <dll-search-path> ...]
 | `-d` | | Yes | Directory to search for DLL files. Repeat for multiple paths. |
 | `-a` | `--assembly` | Yes | Name of the assembly to AOT (without `.dll` extension). Repeat for multiple assemblies. |
 | `-o` | | Yes | Output directory for the generated C++ source files. |
+| | `--leanaot-runtime-api-profile` | No | Runtime API profile to load. Defaults to `LEANCLR_RUNTIME_API_PROFILE` or `coreclr-net10`. |
 
 ### Example
 
 ```bat
 LeanAOT ^
-  -d libraries\mono-4.5 ^
-  -d leanaot\Test\bin\Debug ^
-  -a mscorlib ^
-  -a Test ^
-  -o samples\simple-aot\cpp
+  -d artifacts\dotnet10-runtime-pack ^
+  -d out\dotnet\ManagedNet10.Smoke\Release\net10.0 ^
+  -a System.Private.CoreLib ^
+  -a ManagedNet10.Smoke ^
+  --leanaot-runtime-api-profile coreclr-net10 ^
+  -o out\leanaot\ManagedNet10.Smoke
 ```
 
-This will scan the two search paths for the `mscorlib` and `Test` assemblies, translate them to C++, and write the output into `samples\simple-aot\cpp`.
+This scans the .NET 10 runtime pack and smoke assembly output, translates the requested assemblies to C++, and writes the generated source into `out\leanaot\ManagedNet10.Smoke`.

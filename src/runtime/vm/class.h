@@ -244,6 +244,11 @@ class Class
         return (klass->extra_flags & (uint32_t)metadata::RtClassExtraAttribute::HasStaticConstructor) != 0;
     }
 
+    static bool is_before_field_init(const metadata::RtClass* klass)
+    {
+        return (klass->flags & (uint32_t)metadata::RtTypeAttribute::BeforeFieldInit) != 0;
+    }
+
     static bool has_finalizer(const metadata::RtClass* klass)
     {
         assert(has_initialized_part(klass, metadata::RtClassInitPart::VirtualTable));

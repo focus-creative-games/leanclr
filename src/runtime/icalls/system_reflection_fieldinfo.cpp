@@ -12,7 +12,7 @@ namespace icalls
 
 // ========== Implementation Functions ==========
 
-RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle_type(metadata::RtFieldInfo* field,
+RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle_type(const metadata::RtFieldInfo* field,
                                                                                       const metadata::RtTypeSig* type_sig) noexcept
 {
     const metadata::RtClass* field_parent = field->parent;
@@ -35,7 +35,8 @@ RtResult<vm::RtReflectionField*> SystemReflectionFieldInfo::internal_from_handle
 
 RtResult<vm::RtCustomAttribute*> SystemReflectionFieldInfo::get_marshal_info(vm::RtReflectionField* field) noexcept
 {
-    return vm::CustomAttribute::get_marshal_info(field->field);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, field_info, vm::Reflection::get_field_info_from_reflection_object(field));
+    return vm::CustomAttribute::get_marshal_info(field_info);
 }
 
 // ========== Invoker Functions ==========
@@ -44,8 +45,15 @@ RtResult<vm::RtCustomAttribute*> SystemReflectionFieldInfo::get_marshal_info(vm:
 static RtResultVoid internal_from_handle_type_invoker_fieldinfo(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-    metadata::RtFieldInfo* field = EvalStackOp::get_param<metadata::RtFieldInfo*>(params, 0);
-    const metadata::RtTypeSig* type_sig = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 1);
+    auto field_arg = EvalStackOp::get_param<const void*>(params, 0);
+    auto type_arg = EvalStackOp::get_param<const void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, field,
+                                            vm::Reflection::get_field_info_from_handle_arg(field_arg));
+    const metadata::RtTypeSig* type_sig = nullptr;
+    if (type_arg != nullptr)
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(type_sig, vm::Reflection::get_type_sig_from_runtime_type_handle_arg(type_arg));
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionField*, result, SystemReflectionFieldInfo::internal_from_handle_type(field, type_sig));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();

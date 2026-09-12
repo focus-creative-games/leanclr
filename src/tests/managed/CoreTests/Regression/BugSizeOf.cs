@@ -45,22 +45,22 @@ namespace Tests.Bugs
             public int size;
         }
 
-        //[UnitTest]
-        //public void ComplexSize()
-        //{
-        //    Assert.Equal(24, System.Runtime.CompilerServices.SizeOf<TexInfo100>());
-        //}
+        [UnitTest]
+        public void ComplexSize()
+        {
+            Assert.Equal(24, UnsafeUtility.SizeOf<TexInfo100>());
+        }
 
-        //[UnitTest]
-        //public void ComplexSize2()
-        //{
-        //    Assert.Equal(24, UnsafeUtility.SizeOf<ValueTuple<int, MyDecimal>>());
-        //}
+        [UnitTest]
+        public void ComplexSize2()
+        {
+            Assert.Equal(24, UnsafeUtility.SizeOf<ValueTuple<int, MyDecimal>>());
+        }
 
-        //[UnitTest]
-        //public void ComplexSize3()
-        //{
-        //    Assert.Equal(24, UnsafeUtility.SizeOf<Pair>());
-        //}
+        [UnitTest]
+        public void ComplexSize3()
+        {
+            Assert.Equal(24, UnsafeUtility.SizeOf<Pair>());
+        }
     }
 }

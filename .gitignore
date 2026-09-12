@@ -17,6 +17,8 @@
 # Mono auto generated files
 mono_crash.*
 
+.codex-tools/
+
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -443,3 +445,4 @@ launchSettings.json
 /scripts/publish_*.bat
 /src/tools/pgo2aot/samples
 /tmp/
+/src/tests/managed/.idea/

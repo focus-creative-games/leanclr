@@ -11,6 +11,11 @@ namespace icalls
 RtResult<vm::RtReflectionEventInfo*> SystemReflectionEventInfo::internal_from_handle_type(metadata::RtEventInfo* event,
                                                                                           const metadata::RtTypeSig* type_sig) noexcept
 {
+    if (event == nullptr)
+    {
+        RET_ERR(RtErr::ArgumentNull);
+    }
+
     const metadata::RtClass* klass;
     if (!type_sig)
     {
@@ -35,8 +40,14 @@ static RtResultVoid internal_from_handle_type_invoker_eventinfo(metadata::RtMana
 {
     (void)methodPtr;
     (void)method;
-    auto event = EvalStackOp::get_param<metadata::RtEventInfo*>(params, 0);
-    auto type_sig = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 1);
+    auto event_arg = EvalStackOp::get_param<const void*>(params, 0);
+    auto type_arg = EvalStackOp::get_param<const void*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtEventInfo*, event, vm::Reflection::get_event_info_from_handle_arg(event_arg));
+    const metadata::RtTypeSig* type_sig = nullptr;
+    if (type_arg != nullptr)
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(type_sig, vm::Reflection::get_type_sig_from_runtime_type_handle_arg(type_arg));
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionEventInfo*, ref_event, SystemReflectionEventInfo::internal_from_handle_type(event, type_sig));
     EvalStackOp::set_return(ret, ref_event);
     RET_VOID_OK();

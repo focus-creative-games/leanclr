@@ -14,6 +14,7 @@ class Enum
 
     // Get enum values and names arrays
     static RtResult<std::tuple<bool, RtArray*, RtArray*>> get_enum_values_and_names(metadata::RtClass* klass);
+    static RtResult<std::tuple<bool, RtArray*, RtArray*>> get_enum_storage_values_and_names(metadata::RtClass* klass, bool get_names);
 
     // Get boxed enum data as unsigned u64
     static RtResult<uint64_t> get_boxed_enum_data_as_unsigned_and_extended_to_u64(RtObject* obj);

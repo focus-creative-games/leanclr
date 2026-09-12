@@ -1,4 +1,7 @@
-﻿namespace LeanAOT.ToCpp
+using dnlib.DotNet;
+using LeanAOT.Core;
+
+namespace LeanAOT.ToCpp
 {
 
     public class GlobalServices
@@ -20,5 +23,10 @@
         public MetadataService MetadataService { get; set; }
 
         public RuntimeApiCatalog RuntimeApiCatalog { get; set; }
+
+        public bool IsCoreLibraryModule(ModuleDef module)
+        {
+            return RuntimeApiCatalog?.IsCoreLibraryModule(module) ?? MetaUtil.IsCorlibOrSystemOrSystemCore(module);
+        }
     }
 }

@@ -7,6 +7,7 @@
 #include "vm/rt_string.h"
 #include "vm/assembly.h"
 #include "vm/array_class.h"
+#include "vm/reflection.h"
 #include "metadata/metadata_const.h"
 #include "metadata/module_def.h"
 #include "utils/platform.h"
@@ -26,6 +27,8 @@ GeneralInst::GeneralInst(const hl::GeneralInst& hl_inst)
     arg3 = hl_inst.arg3;
     dst_or_ret = hl_inst.dst_or_ret;
     extra_data = hl_inst.extra_data;
+    vararg_count = hl_inst.get_vararg_count();
+    null_check_this = hl_inst.needs_null_check_this();
 #if LEANCLR_DEBUG
     extra_data2.value = 0;
     resolved_data_idx = 0;
@@ -138,13 +141,13 @@ Transformer::LeaveSurroundingBlockType Transformer::get_leave_surrounding_block_
             continue;
         }
 
-        if (clause.is_in_try_block(il_src) && !clause.is_in_try_block(il_target))
-        {
-            result = LeaveSurroundingBlockType::Try;
-        }
-        else if (clause.is_in_handler_block(il_src) && !clause.is_in_handler_block(il_target))
+        if (clause.is_in_handler_block(il_src) && !clause.is_in_handler_block(il_target))
         {
             result = LeaveSurroundingBlockType::CatchOrFilter;
+        }
+        else if (clause.is_in_try_block(il_src) && !clause.is_in_try_block(il_target) && result != LeaveSurroundingBlockType::CatchOrFilter)
+        {
+            result = LeaveSurroundingBlockType::Try;
         }
     }
 
@@ -517,7 +520,7 @@ RtResult<bool> Transformer::transform_special_call_methods(GeneralInst* ll_inst,
             ll_inst->update_var_dst(ll_inst->get_var_ret());
         }
     }
-    else if (std::strcmp(klass_name, "ByReference`1") == 0)
+    else if (std::strcmp(klass_name, "ByReference`1") == 0 || std::strcmp(klass_name, "ByReference") == 0)
     {
         if (std::strcmp(method_name, STR_CTOR) == 0)
         {
@@ -617,7 +620,7 @@ RtResult<bool> Transformer::transform_special_newobj_methods(GeneralInst* ll_ins
         }
         // TODO: explicit operator, Subtract, ToXXX
     }
-    else if (std::strcmp(klass_name, "ByReference`1") == 0)
+    else if (std::strcmp(klass_name, "ByReference`1") == 0 || std::strcmp(klass_name, "ByReference") == 0)
     {
         assert(param_count == 1);
         ll_inst->set_opcode(OpCodeEnum::Nop);
@@ -1563,7 +1566,15 @@ RtResultVoid Transformer::transform_instructions()
             case hl::OpCodeEnum::LdToken:
             {
                 ll_inst->set_opcode(OpCodeEnum::LdToken);
-                setup_inst_resolved_data(ll_inst, (const void*)hl_inst->get_runtime_handle().get_handle_without_type());
+                metadata::RtRuntimeHandle handle = metadata::RtEncodedRuntimeHandle::decode(hl_inst->get_runtime_handle());
+                const void* token_data = handle.value;
+                if (handle.is_type())
+                {
+                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, type_handle,
+                                                            vm::Reflection::get_net10_type_handle(handle.typeSig));
+                    token_data = type_handle;
+                }
+                setup_inst_resolved_data(ll_inst, token_data);
                 break;
             }
             case hl::OpCodeEnum::Ckfinite:

@@ -24,6 +24,18 @@ class SystemArray
     // Sets the value at the specified index from the source pointer.
     static RtResultVoid set_generic_value_impl(vm::RtArray* arr, int32_t index, void* value) noexcept;
 
+    // Copies elements between managed arrays using LeanCLR's runtime array layout.
+    static RtResultVoid copy(vm::RtArray* source_array, int32_t source_index, vm::RtArray* destination_array, int32_t destination_index,
+                             int32_t length) noexcept;
+    static RtResultVoid copy(vm::RtArray* source_array, vm::RtArray* destination_array, int32_t length) noexcept;
+    static RtResultVoid copy_indexed(vm::RtArray* source_array, int32_t source_index, vm::RtArray* destination_array,
+                                     int32_t destination_index, int32_t length) noexcept;
+    static RtResultVoid copy_simple(vm::RtArray* source_array, vm::RtArray* destination_array, int32_t length) noexcept;
+
+    // Clears an array range using LeanCLR's runtime array layout.
+    static RtResultVoid clear(vm::RtArray* array, int32_t index, int32_t length) noexcept;
+    static RtResultVoid clear(vm::RtArray* array) noexcept;
+
     static utils::Span<vm::IntrinsicEntry> get_intrinsic_entries() noexcept;
 };
 } // namespace intrinsics

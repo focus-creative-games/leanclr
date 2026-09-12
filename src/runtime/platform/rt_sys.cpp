@@ -34,6 +34,59 @@ namespace platform
 namespace
 {
 
+bool equals_ascii_ignorecase_utf16(const Utf16Char* value, const char* ascii) noexcept
+{
+    if (value == nullptr || ascii == nullptr)
+    {
+        return false;
+    }
+
+    while (*value != 0 && *ascii != '\0')
+    {
+        Utf16Char left = *value++;
+        char right = *ascii++;
+        if (left >= static_cast<Utf16Char>('A') && left <= static_cast<Utf16Char>('Z'))
+        {
+            left = static_cast<Utf16Char>(left + ('a' - 'A'));
+        }
+        if (right >= 'A' && right <= 'Z')
+        {
+            right = static_cast<char>(right + ('a' - 'A'));
+        }
+        if (left != static_cast<Utf16Char>(right))
+        {
+            return false;
+        }
+    }
+
+    return *value == 0 && *ascii == '\0';
+}
+
+bool try_get_dotnet10_locale_number_override(const Utf16Char* locale_name, uint32_t lc_type, Utf16Char* locale_data,
+                                             int32_t locale_data_length, int32_t& result) noexcept
+{
+    constexpr uint32_t LOCALE_IDIGITS_VALUE = 0x00000011;
+    constexpr uint32_t LOCALE_RETURN_NUMBER_VALUE = 0x20000000;
+    constexpr uint32_t LOCALE_NOUSEROVERRIDE_VALUE = 0x80000000;
+
+    if ((lc_type & LOCALE_RETURN_NUMBER_VALUE) == 0 || locale_data == nullptr ||
+        locale_data_length < static_cast<int32_t>(sizeof(int32_t)))
+    {
+        return false;
+    }
+
+    uint32_t base_type = lc_type & ~(LOCALE_RETURN_NUMBER_VALUE | LOCALE_NOUSEROVERRIDE_VALUE);
+    if (base_type == LOCALE_IDIGITS_VALUE &&
+        (equals_ascii_ignorecase_utf16(locale_name, "en-US") || equals_ascii_ignorecase_utf16(locale_name, "zh-CN")))
+    {
+        *reinterpret_cast<int32_t*>(locale_data) = 3;
+        result = static_cast<int32_t>(sizeof(int32_t) / sizeof(Utf16Char));
+        return true;
+    }
+
+    return false;
+}
+
 #ifdef LEANCLR_PLATFORM_POSIX
 struct ManagedDirectoryEntry
 {
@@ -158,6 +211,346 @@ void RtSys::set_last_win32_error(int32_t error)
     ::SetLastError(static_cast<DWORD>(static_cast<uint32_t>(error)));
 #else
     s_last_win32_error = error;
+#endif
+}
+
+uint32_t RtSys::get_environment_variable(const Utf16Char* variable_name, Utf16Char* value, uint32_t value_length)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    if (variable_name == nullptr)
+    {
+        ::SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;
+    }
+    return static_cast<uint32_t>(::GetEnvironmentVariableW(reinterpret_cast<LPCWSTR>(variable_name), reinterpret_cast<LPWSTR>(value),
+                                                          static_cast<DWORD>(value_length)));
+#else
+    (void)variable_name;
+    (void)value;
+    (void)value_length;
+    s_last_win32_error = 203; // ERROR_ENVVAR_NOT_FOUND
+    return 0;
+#endif
+}
+
+int32_t RtSys::set_environment_variable(const Utf16Char* variable_name, const Utf16Char* value)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    if (variable_name == nullptr)
+    {
+        ::SetLastError(ERROR_INVALID_PARAMETER);
+        return 0;
+    }
+    return ::SetEnvironmentVariableW(reinterpret_cast<LPCWSTR>(variable_name), reinterpret_cast<LPCWSTR>(value)) ? 1 : 0;
+#else
+    if (variable_name == nullptr)
+    {
+        s_last_win32_error = 87; // ERROR_INVALID_PARAMETER
+        return 0;
+    }
+
+    utils::Utf8StringBuilder name;
+    name.append_utf16_str(variable_name, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(variable_name)));
+    if (value == nullptr)
+    {
+        return ::unsetenv(name.get_const_chars()) == 0 ? 1 : 0;
+    }
+
+    utils::Utf8StringBuilder value_utf8;
+    value_utf8.append_utf16_str(value, static_cast<size_t>(utils::StringUtil::get_utf16chars_length(value)));
+    return ::setenv(name.get_const_chars(), value_utf8.get_const_chars(), 1) == 0 ? 1 : 0;
+#endif
+}
+
+int32_t RtSys::get_locale_info_ex(const Utf16Char* locale_name, uint32_t lc_type, Utf16Char* locale_data, int32_t locale_data_length)
+{
+    int32_t dotnet10_override = 0;
+    if (try_get_dotnet10_locale_number_override(locale_name, lc_type, locale_data, locale_data_length, dotnet10_override))
+    {
+        return dotnet10_override;
+    }
+
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::GetLocaleInfoEx(reinterpret_cast<LPCWSTR>(locale_name), static_cast<LCTYPE>(lc_type),
+                                                 reinterpret_cast<LPWSTR>(locale_data), locale_data_length));
+#else
+    (void)locale_name;
+    (void)lc_type;
+    (void)locale_data;
+    (void)locale_data_length;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
+#endif
+}
+
+int32_t RtSys::lcid_to_locale_name(int32_t locale_id, Utf16Char* locale_name, int32_t locale_name_length, uint32_t flags)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::LCIDToLocaleName(static_cast<LCID>(locale_id), reinterpret_cast<LPWSTR>(locale_name), locale_name_length,
+                                                  static_cast<DWORD>(flags)));
+#else
+    (void)locale_id;
+    (void)locale_name;
+    (void)locale_name_length;
+    (void)flags;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
+#endif
+}
+
+int32_t RtSys::locale_name_to_lcid(const Utf16Char* locale_name, uint32_t flags)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::LocaleNameToLCID(reinterpret_cast<LPCWSTR>(locale_name), static_cast<DWORD>(flags)));
+#else
+    (void)locale_name;
+    (void)flags;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
+#endif
+}
+
+int32_t RtSys::resolve_locale_name(const Utf16Char* locale_name, Utf16Char* locale_name_buffer, int32_t locale_name_buffer_length)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::ResolveLocaleName(reinterpret_cast<LPCWSTR>(locale_name), reinterpret_cast<LPWSTR>(locale_name_buffer),
+                                                   locale_name_buffer_length));
+#else
+    (void)locale_name;
+    (void)locale_name_buffer;
+    (void)locale_name_buffer_length;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
+#endif
+}
+
+struct EnumSystemLocalesExContext
+{
+    RtSys::EnumSystemLocalesExCallback callback;
+    void* context;
+};
+
+#ifdef LEANCLR_PLATFORM_WIN
+static BOOL CALLBACK enum_system_locales_ex_adapter(LPWSTR locale_name, DWORD flags, LPARAM context)
+{
+    auto* adapter_context = reinterpret_cast<EnumSystemLocalesExContext*>(context);
+    if (adapter_context == nullptr || adapter_context->callback == nullptr)
+    {
+        return FALSE;
+    }
+
+    return adapter_context->callback(reinterpret_cast<Utf16Char*>(locale_name), static_cast<uint32_t>(flags), adapter_context->context) != 0
+        ? TRUE
+        : FALSE;
+}
+#endif
+
+int32_t RtSys::enum_system_locales_ex(EnumSystemLocalesExCallback callback, uint32_t flags, void* context, intptr_t reserved)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    EnumSystemLocalesExContext adapter_context{callback, context};
+    return static_cast<int32_t>(::EnumSystemLocalesEx(enum_system_locales_ex_adapter, static_cast<DWORD>(flags),
+                                                     reinterpret_cast<LPARAM>(&adapter_context), reinterpret_cast<LPVOID>(reserved)));
+#else
+    (void)callback;
+    (void)flags;
+    (void)context;
+    (void)reserved;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
+#endif
+}
+
+int32_t RtSys::get_calendar_info_ex(const Utf16Char* locale_name, uint32_t calendar, intptr_t reserved, uint32_t cal_type,
+                                    void* cal_data, int32_t cal_data_length, int32_t* value)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::GetCalendarInfoEx(reinterpret_cast<LPCWSTR>(locale_name), static_cast<CALID>(calendar),
+                                                   reinterpret_cast<LPCWSTR>(reserved), static_cast<CALTYPE>(cal_type),
+                                                   reinterpret_cast<LPWSTR>(cal_data), cal_data_length, reinterpret_cast<LPDWORD>(value)));
+#else
+    (void)locale_name;
+    (void)calendar;
+    (void)reserved;
+    (void)cal_type;
+    (void)cal_data;
+    (void)cal_data_length;
+    (void)value;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
+#endif
+}
+
+struct EnumCalendarInfoExExContext
+{
+    RtSys::EnumCalendarInfoExExCallback callback;
+    void* context;
+};
+
+#ifdef LEANCLR_PLATFORM_WIN
+static BOOL CALLBACK enum_calendar_info_ex_ex_adapter(LPWSTR calendar_info, CALID calendar, LPWSTR reserved, LPARAM context)
+{
+    auto* adapter_context = reinterpret_cast<EnumCalendarInfoExExContext*>(context);
+    if (adapter_context == nullptr || adapter_context->callback == nullptr)
+    {
+        return FALSE;
+    }
+
+    return adapter_context->callback(reinterpret_cast<Utf16Char*>(calendar_info), static_cast<uint32_t>(calendar),
+                                     reinterpret_cast<intptr_t>(reserved), adapter_context->context) != 0
+        ? TRUE
+        : FALSE;
+}
+#endif
+
+int32_t RtSys::enum_calendar_info_ex_ex(EnumCalendarInfoExExCallback callback, const Utf16Char* locale_name, uint32_t calendar,
+                                        const Utf16Char* reserved, uint32_t cal_type, void* context)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    EnumCalendarInfoExExContext adapter_context{callback, context};
+    return static_cast<int32_t>(::EnumCalendarInfoExEx(enum_calendar_info_ex_ex_adapter, reinterpret_cast<LPCWSTR>(locale_name),
+                                                       static_cast<CALID>(calendar), reinterpret_cast<LPCWSTR>(reserved),
+                                                       static_cast<CALTYPE>(cal_type), reinterpret_cast<LPARAM>(&adapter_context)));
+#else
+    (void)callback;
+    (void)locale_name;
+    (void)calendar;
+    (void)reserved;
+    (void)cal_type;
+    (void)context;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
+#endif
+}
+
+struct EnumTimeFormatsExContext
+{
+    RtSys::EnumTimeFormatsExCallback callback;
+    void* context;
+};
+
+#ifdef LEANCLR_PLATFORM_WIN
+static BOOL CALLBACK enum_time_formats_ex_adapter(LPWSTR time_format, LPARAM context)
+{
+    auto* adapter_context = reinterpret_cast<EnumTimeFormatsExContext*>(context);
+    if (adapter_context == nullptr || adapter_context->callback == nullptr)
+    {
+        return FALSE;
+    }
+
+    return adapter_context->callback(reinterpret_cast<Utf16Char*>(time_format), adapter_context->context) != 0 ? TRUE : FALSE;
+}
+#endif
+
+int32_t RtSys::enum_time_formats_ex(EnumTimeFormatsExCallback callback, const Utf16Char* locale_name, uint32_t flags, void* context)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    EnumTimeFormatsExContext adapter_context{callback, context};
+    return static_cast<int32_t>(::EnumTimeFormatsEx(enum_time_formats_ex_adapter, reinterpret_cast<LPCWSTR>(locale_name),
+                                                    static_cast<DWORD>(flags), reinterpret_cast<LPARAM>(&adapter_context)));
+#else
+    (void)callback;
+    (void)locale_name;
+    (void)flags;
+    (void)context;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
+#endif
+}
+
+int32_t RtSys::lc_map_string_ex(const Utf16Char* locale_name, uint32_t map_flags, const Utf16Char* source, int32_t source_length, void* destination,
+                                int32_t destination_length, void* version_information, void* reserved, intptr_t sort_handle)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::LCMapStringEx(reinterpret_cast<LPCWSTR>(locale_name), static_cast<DWORD>(map_flags),
+                                               reinterpret_cast<LPCWSTR>(source), source_length,
+                                               reinterpret_cast<LPWSTR>(destination), destination_length,
+                                               static_cast<LPNLSVERSIONINFO>(version_information), reserved,
+                                               static_cast<LPARAM>(sort_handle)));
+#else
+    (void)locale_name;
+    (void)map_flags;
+    (void)source;
+    (void)source_length;
+    (void)destination;
+    (void)destination_length;
+    (void)version_information;
+    (void)reserved;
+    (void)sort_handle;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
+#endif
+}
+
+int32_t RtSys::find_nls_string_ex(const Utf16Char* locale_name, uint32_t find_flags, const Utf16Char* source, int32_t source_length,
+                                  const Utf16Char* value, int32_t value_length, int32_t* found_length, void* version_information,
+                                  void* reserved, intptr_t sort_handle)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::FindNLSStringEx(reinterpret_cast<LPCWSTR>(locale_name), static_cast<DWORD>(find_flags),
+                                                 reinterpret_cast<LPCWSTR>(source), source_length,
+                                                 reinterpret_cast<LPCWSTR>(value), value_length,
+                                                 reinterpret_cast<LPINT>(found_length),
+                                                 static_cast<LPNLSVERSIONINFO>(version_information), reserved,
+                                                 static_cast<LPARAM>(sort_handle)));
+#else
+    (void)locale_name;
+    (void)find_flags;
+    (void)source;
+    (void)source_length;
+    (void)value;
+    (void)value_length;
+    (void)found_length;
+    (void)version_information;
+    (void)reserved;
+    (void)sort_handle;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return -1;
+#endif
+}
+
+int32_t RtSys::find_string_ordinal(uint32_t find_flags, const Utf16Char* source, int32_t source_length,
+                                   const Utf16Char* value, int32_t value_length, int32_t ignore_case)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::FindStringOrdinal(static_cast<DWORD>(find_flags),
+                                                   reinterpret_cast<LPCWCH>(source), source_length,
+                                                   reinterpret_cast<LPCWCH>(value), value_length,
+                                                   ignore_case != 0 ? TRUE : FALSE));
+#else
+    (void)find_flags;
+    (void)source;
+    (void)source_length;
+    (void)value;
+    (void)value_length;
+    (void)ignore_case;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return -1;
+#endif
+}
+
+int32_t RtSys::compare_string_ex(const Utf16Char* locale_name, uint32_t compare_flags, const Utf16Char* string1, int32_t string1_length,
+                                 const Utf16Char* string2, int32_t string2_length, void* version_information, void* reserved,
+                                 intptr_t sort_handle)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return static_cast<int32_t>(::CompareStringEx(reinterpret_cast<LPCWSTR>(locale_name), static_cast<DWORD>(compare_flags),
+                                                 reinterpret_cast<LPCWSTR>(string1), string1_length,
+                                                 reinterpret_cast<LPCWSTR>(string2), string2_length,
+                                                 static_cast<LPNLSVERSIONINFO>(version_information), reserved,
+                                                 static_cast<LPARAM>(sort_handle)));
+#else
+    (void)locale_name;
+    (void)compare_flags;
+    (void)string1;
+    (void)string1_length;
+    (void)string2;
+    (void)string2_length;
+    (void)version_information;
+    (void)reserved;
+    (void)sort_handle;
+    s_last_win32_error = 120; // ERROR_CALL_NOT_IMPLEMENTED
+    return 0;
 #endif
 }
 

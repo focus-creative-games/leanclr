@@ -8,5 +8,10 @@ namespace Tests.Instruments.NotImpls
 {
     internal class TC_jmp : TestCaseBase
     {
+        [UnitTest]
+        public void jmp_transfers_to_target_method()
+        {
+            Assert.Equal(42, TestInstructionOpcodes.JmpAddOne(41));
+        }
     }
 }

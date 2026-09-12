@@ -1,19 +1,19 @@
-//using Tests.Fixtures;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+using Tests.Fixtures;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
 
-//namespace Tests.Mics
-//{
-//    internal class TC_RefOtherAssembly : TestCaseBase
-//    {
-//        [UnitTest]
-//        public void Ref1()
-//        {
-//            int value = BootstrapTests.FT_Arg.Arg_int(100);
-//            Assert.Equal(100, value);
-//        }
-//    }
-//}
+namespace Tests.Mics
+{
+   internal class TC_RefOtherAssembly : TestCaseBase
+   {
+       [UnitTest]
+       public void Ref1()
+       {
+           int value = BootstrapTests.FT_Arg.Arg_int(100);
+           Assert.Equal(100, value);
+       }
+   }
+}

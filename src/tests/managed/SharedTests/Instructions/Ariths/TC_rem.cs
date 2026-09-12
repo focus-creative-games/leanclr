@@ -24,25 +24,27 @@ namespace Tests.Instruments.Ariths
             Assert.Equal(-1, a % b);
         }
 
-        //[UnitTest]
-        //public static void int_DivideByZeroException()
-        //{
-        //    int a = 9;
-        //    int b = 0;
-        //    Assert.ExpectException(new DivideByZeroException());
-        //    var c = a % b;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public static void int_DivideByZeroException()
+        {
+            int a = 9;
+            int b = 0;
+            Assert.ExpectException<DivideByZeroException>(() =>
+            {
+            var c = a % b;
+            });
+        }
 
-        //[UnitTest]
-        //public static void int_OverflowException()
-        //{
-        //    int a = int.MinValue;
-        //    int b = -1;
-        //    Assert.ExpectException(new OverflowException());
-        //    var c = a % b;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public static void int_OverflowException()
+        {
+            int a = int.MinValue;
+            int b = -1;
+            Assert.ExpectException<OverflowException>(() =>
+            {
+            var c = a % b;
+            });
+        }
 
         [UnitTest]
         public static void long_1()
@@ -60,25 +62,27 @@ namespace Tests.Instruments.Ariths
             Assert.Equal(-1L,  a % b);
         }
 
-        //[UnitTest]
-        //public static void long_DivideByZeroException()
-        //{
-        //    long a = 9;
-        //    long b = 0;
-        //    Assert.ExpectException(new DivideByZeroException());
-        //    var c = a % b;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public static void long_DivideByZeroException()
+        {
+            long a = 9;
+            long b = 0;
+            Assert.ExpectException<DivideByZeroException>(() =>
+            {
+            var c = a % b;
+            });
+        }
 
-        //[UnitTest]
-        //public static void long_OverflowException()
-        //{
-        //    long a = long.MinValue;
-        //    long b = -1;
-        //    Assert.ExpectException(new OverflowException());
-        //    var c = a % b;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public static void long_OverflowException()
+        {
+            long a = long.MinValue;
+            long b = -1;
+            Assert.ExpectException<OverflowException>(() =>
+            {
+            var c = a % b;
+            });
+        }
 
         [UnitTest]
         public static void float_1()

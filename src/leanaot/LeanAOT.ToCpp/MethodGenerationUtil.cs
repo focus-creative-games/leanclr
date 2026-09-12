@@ -41,6 +41,54 @@ namespace LeanAOT.ToCpp
             return GlobalServices.Inst.TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(typeSig, relaxLevel);
         }
 
+        private static readonly string[] IntPtrBackedRuntimeHandleInternalPrefixes =
+        {
+            "System_Private_CoreLib_System_RuntimeFieldHandleInternal_",
+            "System_Private_CoreLib_System_RuntimeMethodHandleInternal_",
+        };
+
+        private static bool HasIntPtrBackedRuntimeHandleInternalPrefix(string typeName)
+        {
+            return IntPtrBackedRuntimeHandleInternalPrefixes.Any(prefix => typeName.StartsWith(prefix, StringComparison.Ordinal));
+        }
+
+        public static bool IsIntPtrBackedRuntimeHandleInternalTypeName(string typeName)
+        {
+            typeName = typeName?.Trim();
+            return typeName != null &&
+                   !typeName.EndsWith("*", StringComparison.Ordinal) &&
+                   HasIntPtrBackedRuntimeHandleInternalPrefix(typeName);
+        }
+
+        public static bool IsIntPtrBackedRuntimeHandleInternalPointerTypeName(string typeName)
+        {
+            typeName = typeName?.Trim();
+            return typeName != null &&
+                   typeName.EndsWith("*", StringComparison.Ordinal) &&
+                   HasIntPtrBackedRuntimeHandleInternalPrefix(typeName.Substring(0, typeName.Length - 1).TrimEnd());
+        }
+
+        public static bool IsTypedReferenceValueTypeName(string typeName)
+        {
+            typeName = typeName?.Trim();
+            return typeName != null &&
+                   !typeName.EndsWith("*", StringComparison.Ordinal) &&
+                   typeName.StartsWith("System_Private_CoreLib_System_TypedReference_", StringComparison.Ordinal);
+        }
+
+        public static string GetResultWrapFunctionName(string retTypeName)
+        {
+            if (IsIntPtrBackedRuntimeHandleInternalTypeName(retTypeName))
+            {
+                return $"{ConstStrings.CodegenNamespace}::wrap_intptr_result_to";
+            }
+            if (IsTypedReferenceValueTypeName(retTypeName))
+            {
+                return $"{ConstStrings.CodegenNamespace}::wrap_typed_reference_result_to";
+            }
+            return $"{ConstStrings.CodegenNamespace}::wrap_result_to";
+        }
+
         public static string CreateMethodExactArgs(MethodDetail methodDetail, bool includeArgName)
         {
             return string.Join(", ", methodDetail.ParamsIncludeThis.Select(param => $"{GetExactTypeName(param.Type)}{(includeArgName ? $" {param.Name}" : "")}"));

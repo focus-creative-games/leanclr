@@ -1,55 +1,56 @@
-﻿//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+using Tests.Fixtures;
 
-//namespace Main.AOTDefs
-//{
-//    public struct NativeArrayParamValueType
-//    {
-//        public int x;
-//        public int y;
-//        public long a;
-//        public long b;
+namespace Main.AOTDefs
+{
+   public struct NativeArrayParamValueType
+   {
+       public int x;
+       public int y;
+       public long a;
+       public long b;
 
-//        public int GetValue<T>(T a)
-//        {
-//            return GetValue0(default, default, default, default, default);
-//        }
+       public int GetValue<T>(T a)
+       {
+           return GetValue0(default, default, default, default, default);
+       }
 
-//        private int GetValue0(sbyte a1, double a2, Vector3 a3, float a4, Vector4 a5)
-//        {
-//            return x;
-//        }
+       private int GetValue0(sbyte a1, double a2, Vector3 a3, float a4, Vector4 a5)
+       {
+           return x;
+       }
 
-//        public int Run()
-//        {
-//            return GetValue(1);
-//        }
-//    }
+       public int Run()
+       {
+           return GetValue(1);
+       }
+   }
 
 
-//    public class NativeArrayParamClass
-//    {
-//        public int x;
-//        public int y;
-//        public long a;
-//        public long b;
+   public class NativeArrayParamClass
+   {
+       public int x;
+       public int y;
+       public long a;
+       public long b;
 
-//        public int GetValue<T>(T a)
-//        {
-//            return GetValue0(default, default, default, default, default);
-//        }
+       public int GetValue<T>(T a)
+       {
+           return GetValue0(default, default, default, default, default);
+       }
 
-//        private int GetValue0(sbyte a1, double a2, Vector3 a3, float a4, Vector4 a5)
-//        {
-//            return x;
-//        }
+       private int GetValue0(sbyte a1, double a2, Vector3 a3, float a4, Vector4 a5)
+       {
+           return x;
+       }
 
-//        public int Run()
-//        {
-//            return GetValue(1);
-//        }
-//    }
-//}
+       public int Run()
+       {
+           return GetValue(1);
+       }
+   }
+}

@@ -5,6 +5,7 @@
 #include "metadata/metadata_cache.h"
 #include "alloc/general_allocation.h"
 #include "utils/hashmap.h"
+#include <cstddef>
 
 namespace leanclr
 {
@@ -26,6 +27,15 @@ struct HandleInfo
     GCHandleType type_;
     GCHandleId id;
 };
+static_assert(offsetof(HandleInfo, obj) == 0, "GCHandle target slot must stay at the start of HandleInfo");
+
+struct DependentHandleInfo
+{
+    RtObject* target;
+    RtObject* dependent;
+    bool freed;
+};
+static_assert(offsetof(DependentHandleInfo, target) == 0, "DependentHandle target slot must stay at the start of DependentHandleInfo");
 
 // Head of the freed handle list
 static HandleInfo* s_freed_handle_head = nullptr;
@@ -33,6 +43,7 @@ static GCHandleId s_last_handle_id = 0;
 
 // TODO: optimize this
 static utils::HashMap<GCHandleId, HandleInfo*> s_handle_map;
+static utils::Vector<DependentHandleInfo*> s_dependent_handles;
 
 // Allocate a new handle or reuse a freed one
 static HandleInfo* alloc_handle()
@@ -131,6 +142,25 @@ RtObject* GCHandle::get_target(void* handle)
     return h->obj;
 }
 
+RtObject** GCHandle::get_target_slot(void* handle)
+{
+    HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
+    if (h == nullptr)
+    {
+        return nullptr;
+    }
+    return &h->obj;
+}
+
+void* GCHandle::get_handle_by_target_slot(RtObject** slot)
+{
+    if (slot == nullptr)
+    {
+        return nullptr;
+    }
+    return reinterpret_cast<HandleInfo*>(slot);
+}
+
 void* GCHandle::get_target_handle(RtObject* obj, void* handle, int32_t type_)
 {
     HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
@@ -197,6 +227,87 @@ void* GCHandle::get_addr_of_pinned_object(void* handle)
     return obj + 1;
 }
 
+void* GCHandle::new_dependent_handle(RtObject* target, RtObject* dependent)
+{
+    DependentHandleInfo* handle = alloc::GeneralAllocation::malloc_any_zeroed<DependentHandleInfo>();
+    handle->target = target;
+    handle->dependent = dependent;
+    handle->freed = false;
+    s_dependent_handles.push_back(handle);
+    return handle;
+}
+
+RtObject* GCHandle::get_dependent_handle_target(void* handle)
+{
+    DependentHandleInfo* h = reinterpret_cast<DependentHandleInfo*>(handle);
+    if (h == nullptr || h->freed)
+    {
+        return nullptr;
+    }
+    return h->target;
+}
+
+RtObject* GCHandle::get_dependent_handle_dependent(void* handle)
+{
+    DependentHandleInfo* h = reinterpret_cast<DependentHandleInfo*>(handle);
+    if (h == nullptr || h->freed || h->target == nullptr)
+    {
+        return nullptr;
+    }
+    return h->dependent;
+}
+
+RtObject* GCHandle::get_dependent_handle_target_and_dependent(void* handle, RtObject** dependent)
+{
+    DependentHandleInfo* h = reinterpret_cast<DependentHandleInfo*>(handle);
+    if (dependent)
+    {
+        *dependent = nullptr;
+    }
+    if (h == nullptr || h->freed)
+    {
+        return nullptr;
+    }
+    if (dependent && h->target != nullptr)
+    {
+        *dependent = h->dependent;
+    }
+    return h->target;
+}
+
+void GCHandle::set_dependent_handle_target_to_null(void* handle)
+{
+    DependentHandleInfo* h = reinterpret_cast<DependentHandleInfo*>(handle);
+    if (h == nullptr || h->freed)
+    {
+        return;
+    }
+    h->target = nullptr;
+}
+
+void GCHandle::set_dependent_handle_dependent(void* handle, RtObject* dependent)
+{
+    DependentHandleInfo* h = reinterpret_cast<DependentHandleInfo*>(handle);
+    if (h == nullptr || h->freed)
+    {
+        return;
+    }
+    h->dependent = dependent;
+}
+
+bool GCHandle::free_dependent_handle(void* handle)
+{
+    DependentHandleInfo* h = reinterpret_cast<DependentHandleInfo*>(handle);
+    if (h == nullptr || h->freed)
+    {
+        return true;
+    }
+    h->target = nullptr;
+    h->dependent = nullptr;
+    h->freed = true;
+    return true;
+}
+
 bool GCHandle::is_type_pinned(const metadata::RtClass* klass)
 {
     if (Class::is_array_or_szarray(klass))
@@ -224,6 +335,22 @@ void GCHandle::foreach_strong_handles(void (*callback)(vm::RtObject*, void*), vo
         if (hi->obj != nullptr)
         {
             callback(hi->obj, userData);
+        }
+    }
+    for (size_t i = 0; i < s_dependent_handles.size(); ++i)
+    {
+        DependentHandleInfo* hi = s_dependent_handles[i];
+        if (hi == nullptr || hi->freed)
+        {
+            continue;
+        }
+        if (hi->target != nullptr)
+        {
+            callback(hi->target, userData);
+        }
+        if (hi->dependent != nullptr)
+        {
+            callback(hi->dependent, userData);
         }
     }
 }

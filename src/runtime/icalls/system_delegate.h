@@ -21,6 +21,10 @@ class SystemDelegate
 
     // Allocate a delegate like another delegate
     static RtResult<vm::RtMulticastDelegate*> alloc_delegate_like_internal(vm::RtDelegate* source) noexcept;
+
+    // Return the runtime delegate invoke entry marker used by .NET 10 multicast delegate setup
+    static RtResult<void*> get_multicast_invoke(const metadata::RtClass* delegate_klass) noexcept;
+    static RtResult<void*> get_invoke_method(const metadata::RtClass* delegate_klass) noexcept;
 };
 
 } // namespace icalls

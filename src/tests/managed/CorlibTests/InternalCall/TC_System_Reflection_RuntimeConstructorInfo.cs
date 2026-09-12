@@ -12,7 +12,7 @@ namespace CorlibTests.InternalCall
         [UnitTest]
         public void GetMetadataToken_ReturnsNonZero()
         {
-            // Test get_metadata_token via public MetadataToken property
+             // Test get_metadata_token via public MetadataToken property
             ConstructorInfo ctor = typeof(TC_System_Reflection_RuntimeConstructorInfo).GetConstructor(Type.EmptyTypes);
             Assert.NotNull(ctor);
             int token = ctor.MetadataToken;
@@ -22,7 +22,7 @@ namespace CorlibTests.InternalCall
         [UnitTest]
         public void InternalInvoke_NoArgs_CreatesInstance()
         {
-            // Test InternalInvoke via public Invoke
+             // Test InternalInvoke via public Invoke
             ConstructorInfo ctor = typeof(TestClass).GetConstructor(Type.EmptyTypes);
             Assert.NotNull(ctor);
             object instance = ctor.Invoke(new object[0]);
@@ -33,7 +33,7 @@ namespace CorlibTests.InternalCall
         [UnitTest]
         public void InternalInvoke_WithArgs_CreatesInstanceWithValues()
         {
-            // Test InternalInvoke with constructor arguments
+             // Test InternalInvoke with constructor arguments
             ConstructorInfo ctor = typeof(TestClassWithArgs).GetConstructor(new[] { typeof(int), typeof(string) });
             Assert.NotNull(ctor);
             object instance = ctor.Invoke(new object[] { 42, "test" });
@@ -47,7 +47,7 @@ namespace CorlibTests.InternalCall
         [UnitTest]
         public void GetConstructor_ViaReflection_ValidConstructor()
         {
-            // Verify we can get constructor info for testing
+             // Verify we can get constructor info for testing
             Type type = typeof(TestClass);
             ConstructorInfo[] ctors = type.GetConstructors();
             Assert.IsTrue(ctors.Length > 0);
@@ -59,7 +59,7 @@ namespace CorlibTests.InternalCall
         [UnitTest]
         public void GetConstructor_MultipleCtor_CanDistinguish()
         {
-            // Test distinguishing between multiple constructors
+             // Test distinguishing between multiple constructors
             Type type = typeof(TestClassWithMultipleCtors);
             ConstructorInfo ctor1 = type.GetConstructor(Type.EmptyTypes);
             ConstructorInfo ctor2 = type.GetConstructor(new[] { typeof(int) });
@@ -68,25 +68,25 @@ namespace CorlibTests.InternalCall
             Assert.NotEqual(ctor1.MetadataToken, ctor2.MetadataToken);
         }
 
-        //[UnitTest]
-        //public void InternalInvoke_ExceptionHandling()
-        //{
-        //    // Test InternalInvoke with exception handling
-        //    ConstructorInfo ctor = typeof(TestClassWithException).GetConstructor(Type.EmptyTypes);
-        //    Assert.NotNull(ctor);
-        //    try
-        //    {
-        //        object instance = ctor.Invoke(new object[0]);
-        //        Assert.Fail("Expected exception to be thrown");
-        //    }
-        //    catch (TargetInvocationException ex)
-        //    {
-        //        Assert.NotNull(ex.InnerException);
-        //        Assert.IsTrue(ex.InnerException is InvalidOperationException);
-        //    }
-        //}
+        [UnitTest]
+        public void InternalInvoke_ExceptionHandling()
+        {
+            // Test InternalInvoke with exception handling
+            ConstructorInfo ctor = typeof(TestClassWithException).GetConstructor(Type.EmptyTypes);
+            Assert.NotNull(ctor);
+            try
+            {
+                object instance = ctor.Invoke(new object[0]);
+                Assert.Fail("Expected exception to be thrown");
+            }
+            catch (TargetInvocationException ex)
+            {
+                Assert.NotNull(ex.InnerException);
+                Assert.IsTrue(ex.InnerException is InvalidOperationException);
+            }
+        }
 
-        // Test classes for constructor testing
+         // Test classes for constructor testing
 
         private class TestClass
         {

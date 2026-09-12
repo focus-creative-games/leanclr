@@ -18,6 +18,8 @@ class SystemString
     static RtResult<vm::RtString*> newobj_utf16chars_range(const Utf16Char* chars, int32_t startIndex, int32_t length) noexcept;
     static RtResult<vm::RtString*> newobj_utf8chars(const int8_t* chars) noexcept;
     static RtResult<vm::RtString*> newobj_utf8chars_range(const int8_t* chars, int32_t startIndex, int32_t length) noexcept;
+    static RtResult<vm::RtString*> newobj_utf8chars_range_encoding(const int8_t* chars, int32_t startIndex, int32_t length,
+                                                                    vm::RtObject* encoding) noexcept;
     static RtResult<vm::RtString*> newobj_char_count(Utf16Char c, int32_t charCount) noexcept;
     static RtResult<vm::RtString*> newobj_readonlyspan(const vm::RtReadOnlySpan<Utf16Char> span) noexcept;
 

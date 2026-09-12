@@ -76,6 +76,10 @@ RtResultVoid BasicBlockSplitter::split_codes()
         {
         case il::ArgType::None:
         case il::ArgType::Data:
+            if (opcode_info->id == il::OpCodeEnum::Jmp)
+            {
+                _split_offsets.insert(next_offset);
+            }
             break;
         case il::ArgType::StaticBranch:
             _split_offsets.insert(next_offset);

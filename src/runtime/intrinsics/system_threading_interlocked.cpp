@@ -127,6 +127,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_threading_interlocked[] = {
      exchange_object_invoker},
     {"System.Threading.Interlocked::Exchange<>", (vm::IntrinsicFunction)&SystemThreadingInterlocked::exchange, exchange_invoker},
     {"System.Threading.Interlocked::CompareExchange<>", (vm::IntrinsicFunction)&SystemThreadingInterlocked::compare_exchange, compare_exchange_invoker},
+    {"System.Threading.Interlocked::MemoryBarrier()", (vm::IntrinsicFunction)&SystemThreadingInterlocked::memory_barrier, memory_barrier_invoker},
     {"System.Threading.Interlocked::MemoryBarrier", (vm::IntrinsicFunction)&SystemThreadingInterlocked::memory_barrier, memory_barrier_invoker},
 };
 

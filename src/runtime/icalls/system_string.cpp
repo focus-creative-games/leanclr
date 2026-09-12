@@ -127,9 +127,22 @@ RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const int8_t* chars
 {
     if (start_index < 0 || length < 0 || start_index > vm::RT_MAX_ARRAY_INDEX - length)
         RET_ERR(RtErr::ArgumentOutOfRange);
+    if (chars == nullptr)
+    {
+        if (length == 0)
+            RET_OK(vm::String::get_empty_string());
+        RET_ERR(RtErr::NullReference);
+    }
     const char* chars_start = reinterpret_cast<const char*>(chars) + static_cast<size_t>(start_index);
     vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(chars_start, length);
     RET_OK(utf16_string);
+}
+
+RtResult<vm::RtString*> SystemString::newobj_utf8chars_range_encoding(const int8_t* chars, int32_t start_index, int32_t length,
+                                                                      vm::RtObject* encoding) noexcept
+{
+    (void)encoding;
+    return newobj_utf8chars_range(chars, start_index, length);
 }
 
 /// @newobj: System.String::.ctor(System.SByte*,System.Int32,System.Int32)
@@ -140,6 +153,20 @@ static RtResultVoid newobj_utf8chars_range_invoker(metadata::RtManagedMethodPoin
     auto startIndex = EvalStackOp::get_param<int32_t>(params, 1);
     auto length = EvalStackOp::get_param<int32_t>(params, 2);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, SystemString::newobj_utf8chars_range(chars, startIndex, length));
+    EvalStackOp::set_return(ret, str);
+    RET_VOID_OK();
+}
+
+/// @newobj: System.String::.ctor(System.SByte*,System.Int32,System.Int32,System.Text.Encoding)
+static RtResultVoid newobj_utf8chars_range_encoding_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
+                                                            const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    auto chars = EvalStackOp::get_param<const int8_t*>(params, 0);
+    auto startIndex = EvalStackOp::get_param<int32_t>(params, 1);
+    auto length = EvalStackOp::get_param<int32_t>(params, 2);
+    auto encoding = EvalStackOp::get_param<vm::RtObject*>(params, 3);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str,
+                                            SystemString::newobj_utf8chars_range_encoding(chars, startIndex, length, encoding));
     EvalStackOp::set_return(ret, str);
     RET_VOID_OK();
 }
@@ -194,7 +221,21 @@ RtResult<vm::RtString*> SystemString::fast_allocate_string(int32_t length) noexc
 static RtResultVoid fast_allocate_string_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
                                                  const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-    auto length = EvalStackOp::get_param<int32_t>(params, 0);
+    (void)methodPtr;
+    int32_t length = 0;
+    if (method != nullptr && method->parameter_count >= 2)
+    {
+        intptr_t native_length = EvalStackOp::get_param<intptr_t>(params, 1);
+        if (native_length < 0 || native_length > std::numeric_limits<int32_t>::max())
+        {
+            RET_ERR(RtErr::ArgumentOutOfRange);
+        }
+        length = static_cast<int32_t>(native_length);
+    }
+    else
+    {
+        length = EvalStackOp::get_param<int32_t>(params, 0);
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, SystemString::fast_allocate_string(length));
     EvalStackOp::set_return(ret, str);
     RET_VOID_OK();
@@ -242,6 +283,8 @@ static RtResultVoid internal_is_interned_invoker(metadata::RtManagedMethodPointe
 // Internal call registry
 static vm::InternalCallEntry s_internal_call_entries_system_string[] = {
     {"System.String::FastAllocateString", (vm::InternalCallFunction)&SystemString::fast_allocate_string, fast_allocate_string_invoker},
+    {"System.String::FastAllocateString(System.Runtime.CompilerServices.MethodTable*,System.IntPtr)",
+     (vm::InternalCallFunction)&SystemString::fast_allocate_string, fast_allocate_string_invoker},
     {"System.String::InternalIntern", (vm::InternalCallFunction)&SystemString::internal_intern, internal_intern_invoker},
     {"System.String::InternalIsInterned", (vm::InternalCallFunction)&SystemString::internal_is_interned, internal_is_interned_invoker},
 };
@@ -254,6 +297,7 @@ static vm::NewobjInternalCallEntry s_newobj_internal_call_entries[] = {
     {"System.String::.ctor(System.Char*,System.Int32,System.Int32)", newobj_utf16chars_range_invoker},
     {"System.String::.ctor(System.SByte*)", newobj_utf8chars_invoker},
     {"System.String::.ctor(System.SByte*,System.Int32,System.Int32)", newobj_utf8chars_range_invoker},
+    {"System.String::.ctor(System.SByte*,System.Int32,System.Int32,System.Text.Encoding)", newobj_utf8chars_range_encoding_invoker},
     {"System.String::.ctor(System.Char,System.Int32)", newobj_char_count_invoker},
     {"System.String::.ctor(System.ReadOnlySpan`1<System.Char>)", newobj_readonlyspan_invoker},
 };

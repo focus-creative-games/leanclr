@@ -46,6 +46,8 @@ struct GeneralInst
     size_t resolved_data_idx;
     int32_t il_offset;
     int32_t ir_offset;
+    uint16_t vararg_count;
+    bool null_check_this;
 
     GeneralInst(const hl::GeneralInst& hl_inst);
 
@@ -405,6 +407,16 @@ struct GeneralInst
     size_t get_frame_base() const
     {
         return arg2.value;
+    }
+
+    uint16_t get_vararg_count() const
+    {
+        return vararg_count;
+    }
+
+    bool needs_null_check_this() const
+    {
+        return null_check_this;
     }
 
     void set_frame_base(size_t frame_base_idx)

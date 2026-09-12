@@ -33,7 +33,12 @@ RtResultVoid fn_interpreter_invoker(metadata::RtManagedMethodPointer method_poin
         assert(method_pointer == method->virtual_method_ptr);
         const_cast<interp::RtStackObject*>(params)[0].obj = params[0].obj + 1;
     }
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const interp::RtStackObject*, result, interp::Interpreter::execute(method, params));
+    auto execute_ret = interp::Interpreter::execute(method, params);
+    if (execute_ret.is_err())
+    {
+        RET_ERR(execute_ret.unwrap_err());
+    }
+    const interp::RtStackObject* result = execute_ret.unwrap();
     if (method->ret_stack_object_size > 0)
     {
         std::memcpy(ret, result, method->ret_stack_object_size * sizeof(interp::RtStackObject));
@@ -41,15 +46,44 @@ RtResultVoid fn_interpreter_invoker(metadata::RtManagedMethodPointer method_poin
     RET_VOID_OK();
 }
 
+bool should_skip_legacy_il_internal_call(const metadata::RtMethodInfo* method) noexcept
+{
+    const metadata::RtClass* klass = method->parent;
+    if (!klass->image->is_corlib())
+    {
+        return false;
+    }
+
+    if (std::strcmp(klass->namespaze, "System") == 0 && std::strcmp(klass->name, "Object") == 0 &&
+        std::strcmp(method->name, "GetType") == 0 && method->parameter_count == 0)
+    {
+        return true;
+    }
+
+    if (std::strcmp(klass->image->get_name_no_ext(), STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0 &&
+        std::strcmp(klass->name, "Kernel32") == 0)
+    {
+        return std::strcmp(method->name, "CloseHandle") == 0 ||
+               std::strcmp(method->name, "CreateFilePrivate") == 0 ||
+               std::strcmp(method->name, "DeleteFilePrivate") == 0 ||
+               std::strcmp(method->name, "GetFileAttributesExPrivate") == 0 ||
+               std::strcmp(method->name, "GetFileInformationByHandle") == 0 ||
+               std::strcmp(method->name, "GetFileInformationByHandleEx") == 0 ||
+               std::strcmp(method->name, "ReadFile") == 0 ||
+               std::strcmp(method->name, "SetFilePointerEx") == 0 ||
+               std::strcmp(method->name, "WriteFile") == 0;
+    }
+
+    return std::strcmp(klass->namespaze, "System.Reflection") == 0 && std::strcmp(klass->name, "MethodBase") == 0 &&
+           std::strcmp(method->name, "GetCurrentMethod") == 0 && method->parameter_count == 0;
+}
+
 // Not implemented internal call invoker
 RtResultVoid fn_not_implemented_internal_call_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
-    utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("Internal call invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
-#endif
+    printf("Internal call invoker not implemented for method: %s.%s::%s token:0x%0x\n", method->parent->namespaze, method->parent->name,
+           method->name, method->token);
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
@@ -57,11 +91,8 @@ RtResultVoid fn_not_implemented_internal_call_invoker(metadata::RtManagedMethodP
 RtResultVoid fn_not_implemented_intrinsic_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
-    utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("Intrinsic invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
-#endif
+    printf("Intrinsic invoker not implemented for method: %s.%s::%s token:0x%0x\n", method->parent->namespaze, method->parent->name, method->name,
+           method->token);
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
@@ -69,11 +100,8 @@ RtResultVoid fn_not_implemented_intrinsic_invoker(metadata::RtManagedMethodPoint
 RtResultVoid fn_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                 interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
-    utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
-#endif
+    printf("P/Invoke invoker not implemented for method: %s.%s::%s token:0x%0x\n", method->parent->namespaze, method->parent->name, method->name,
+           method->token);
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
@@ -81,11 +109,8 @@ RtResultVoid fn_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer,
 RtResultVoid fn_not_implemented_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
-    utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
-#endif
+    printf("P/Invoke invoker not implemented for method: %s.%s::%s token:0x%0x\n", method->parent->namespaze, method->parent->name, method->name,
+           method->token);
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
@@ -93,12 +118,8 @@ RtResultVoid fn_not_implemented_pinvoke_invoker(metadata::RtManagedMethodPointer
 RtResultVoid fn_not_implemented_runtime_impl_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                      const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
-    utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("Runtime impl invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
-#endif
-    // Placeholder implementation
+    printf("Runtime impl invoker not implemented for method: %s.%s::%s token:0x%0x\n", method->parent->namespaze, method->parent->name,
+           method->name, method->token);
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
@@ -106,13 +127,41 @@ RtResultVoid fn_not_implemented_runtime_impl_invoker(metadata::RtManagedMethodPo
 RtResultVoid fn_not_implemented_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
-    utils::Utf8StringBuilder sb;
-    RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("Not implemented invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
-#endif
-    // Placeholder implementation
+    printf("Generic invoker not implemented for method: %s.%s::%s token:0x%0x\n", method->parent->namespaze, method->parent->name, method->name,
+           method->token);
     RETURN_NOT_IMPLEMENTED_ERROR();
+}
+
+bool is_array_interface_count_method(const char* method_name) noexcept
+{
+    return std::strcmp(method_name, "get_Count") == 0 ||
+           std::strcmp(method_name, "System.Collections.Generic.ICollection`1.get_Count") == 0 ||
+           std::strcmp(method_name, "System.Collections.Generic.IReadOnlyCollection`1.get_Count") == 0;
+}
+
+bool is_array_interface_get_item_method(const char* method_name) noexcept
+{
+    return std::strcmp(method_name, "get_Item") == 0 ||
+           std::strcmp(method_name, "System.Collections.Generic.IList`1.get_Item") == 0 ||
+           std::strcmp(method_name, "System.Collections.Generic.IReadOnlyList`1.get_Item") == 0;
+}
+
+bool is_array_interface_set_item_method(const char* method_name) noexcept
+{
+    return std::strcmp(method_name, "set_Item") == 0 ||
+           std::strcmp(method_name, "System.Collections.Generic.IList`1.set_Item") == 0;
+}
+
+bool is_array_interface_copy_to_method(const char* method_name) noexcept
+{
+    return std::strcmp(method_name, "CopyTo") == 0 ||
+           std::strcmp(method_name, "System.Collections.Generic.ICollection`1.CopyTo") == 0;
+}
+
+bool is_array_interface_get_enumerator_method(const char* method_name) noexcept
+{
+    return std::strcmp(method_name, "GetEnumerator") == 0 ||
+           std::strcmp(method_name, "System.Collections.Generic.IEnumerable`1.GetEnumerator") == 0;
 }
 
 // Method pointer placeholder
@@ -156,6 +205,31 @@ static metadata::RtInvokeMethodPointer try_setup_array_or_szarray_invoke(const m
         {
             assert(param_count == 1);
             return Array::szarray_address_invoker;
+        }
+        else if (is_array_interface_count_method(method_name))
+        {
+            assert(param_count == 0);
+            return Array::szarray_interface_count_invoker;
+        }
+        else if (is_array_interface_get_item_method(method_name))
+        {
+            assert(param_count == 1);
+            return Array::szarray_get_invoker;
+        }
+        else if (is_array_interface_set_item_method(method_name))
+        {
+            assert(param_count == 2);
+            return Array::szarray_set_invoker;
+        }
+        else if (is_array_interface_copy_to_method(method_name))
+        {
+            assert(param_count == 2);
+            return Array::szarray_interface_copy_to_invoker;
+        }
+        else if (is_array_interface_get_enumerator_method(method_name))
+        {
+            assert(param_count == 0);
+            return Array::szarray_generic_get_enumerator_invoker;
         }
         else
         {
@@ -218,16 +292,30 @@ RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* me
     // Determine invoker based on method implementation type
     metadata::RtMethodImplAttribute code_type = Method::get_code_type(method);
 
+    if (Method::is_pinvoke(method))
+    {
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const PInvokeRegistry*, entry, PInvokes::get_pinvoke_by_method(method));
+        if (entry)
+        {
+            RET_OK(InvokeTypeAndMethod(RtInvokerType::PInvoke, entry->invoker));
+        }
+
+        RET_OK(InvokeTypeAndMethod(RtInvokerType::PInvoke, fn_not_implemented_pinvoke_invoker));
+    }
+
     switch (code_type)
     {
     case metadata::RtMethodImplAttribute::IlOrManaged:
     {
         // Try internal call first
 
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const InternalCallRegistry*, icall_entry, InternalCalls::get_internal_call_by_method(method));
-        if (icall_entry)
+        if (!should_skip_legacy_il_internal_call(method))
         {
-            RET_OK(InvokeTypeAndMethod(RtInvokerType::InternalCall, icall_entry->invoker));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const InternalCallRegistry*, icall_entry, InternalCalls::get_internal_call_by_method(method));
+            if (icall_entry)
+            {
+                RET_OK(InvokeTypeAndMethod(RtInvokerType::InternalCall, icall_entry->invoker));
+            }
         }
 
         // Try intrinsic

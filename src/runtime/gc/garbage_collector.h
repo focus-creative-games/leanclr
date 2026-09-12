@@ -72,6 +72,11 @@ class GarbageCollector
         GcHeapImpl::set_gc_mode(mode);
     }
 
+    static bool is_allocated_object(const vm::RtObject* obj)
+    {
+        return GcHeapImpl::is_allocated_object(obj);
+    }
+
     static void write_barrier(vm::RtObject** obj_ref_location, vm::RtObject* new_obj)
     {
         GcHeapImpl::write_barrier(obj_ref_location, new_obj);

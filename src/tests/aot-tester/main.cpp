@@ -15,6 +15,7 @@
 #include "vm/settings.h"
 #include "vm/type.h"
 #include "vm/rt_exception.h"
+#include "vm/rt_string.h"
 #include "vm/property.h"
 #include "vm/field.h"
 #include "metadata/metadata_name.h"
@@ -87,15 +88,6 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
         std::exit(-1);
     }
 
-    const metadata::RtPropertyInfo* prop = vm::Class::get_property_for_name(ex->klass, "StackTrace", true);
-    assert(prop);
-    auto ret = vm::Runtime::invoke_with_run_cctor(prop->get_method, ex, nullptr);
-    if (ret.is_err())
-    {
-        std::cerr << "Failed to get exception stack trace" << std::endl;
-        std::exit(-1);
-    }
-
     std::cerr << std::endl;
     std::cerr << std::endl;
 
@@ -117,6 +109,38 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
         sb.sure_null_terminator_but_not_append();
     }
     std::cerr << sb.get_const_chars() << std::endl << std::endl;
+
+    for (vm::RtException* inner = ex->inner_exception; inner != nullptr; inner = inner->inner_exception)
+    {
+        sb.clear();
+        sb.append_cstr("---> ");
+        metadata::MetadataName::append_klass_full_name_without_generic_params(sb, inner->klass, metadata::TypeNameFormat::IL).is_ok();
+        sb.append_cstr(": ");
+        if (inner->message)
+        {
+            sb.append_utf16_str(&inner->message->first_char, inner->message->length);
+        }
+        sb.sure_null_terminator_but_not_append();
+        std::cerr << sb.get_const_chars() << std::endl;
+    }
+    if (ex->inner_exception != nullptr)
+    {
+        std::cerr << std::endl;
+    }
+
+    const metadata::RtPropertyInfo* prop = vm::Class::get_property_for_name(ex->klass, "StackTrace", true);
+    if (!prop)
+    {
+        std::cerr << "Failed to find exception stack trace property" << std::endl;
+        std::exit(-1);
+    }
+
+    auto ret = vm::Runtime::invoke_with_run_cctor(prop->get_method, ex, nullptr);
+    if (ret.is_err())
+    {
+        std::cerr << "Failed to get exception stack trace, error: " << static_cast<int>(ret.unwrap_err()) << std::endl;
+        std::exit(-1);
+    }
 
     sb.clear();
     vm::RtString* stack_trace_str = reinterpret_cast<vm::RtString*>(ret.unwrap());
@@ -245,6 +269,13 @@ static int run(const std::string& dll_name, const std::vector<std::string>& dll_
     {
         std::cerr << "Failed to invoke entry method, error: " << static_cast<int>(invoke_result.unwrap_err()) << std::endl;
         print_error_and_exit("Invocation failed", invoke_result.unwrap_err());
+    }
+    vm::RtObject* result = invoke_result.unwrap();
+    if (result != nullptr && vm::Class::is_string_class(result->klass))
+    {
+        auto str = reinterpret_cast<vm::RtString*>(result);
+        utils::Utf8StringBuilder sb(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
+        std::cout << sb.get_const_chars();
     }
 
     return 0;

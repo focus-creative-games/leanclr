@@ -26,18 +26,18 @@ namespace Tests.Instruments.Exceptions
             }
         }
 
-        //[UnitTest]
-        //public void foreach_arr()
-        //{
-        //    var arr = new int[] { 1, 2 };
-        //    int sum = 0;
+        [UnitTest]
+        public void foreach_arr()
+        {
+            var arr = new int[] { 1, 2 };
+            int sum = 0;
             
-        //    foreach(var e in arr)
-        //    {
-        //        sum += e;
-        //    }
-        //    Assert.Equal(3, sum);
-        //}
+            foreach(var e in arr)
+            {
+                sum += e;
+            }
+            Assert.Equal(3, sum);
+        }
 
 
         [UnitTest]

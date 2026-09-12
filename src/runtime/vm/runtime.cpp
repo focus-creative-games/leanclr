@@ -14,10 +14,12 @@
 #include "rt_thread.h"
 #include "appdomain.h"
 #include "method.h"
+#include "field.h"
 #include "object.h"
 #include "environment.h"
 #include "settings.h"
 #include "gc.h"
+#include "const_strs.h"
 
 #include "metadata/metadata_cache.h"
 #include "metadata/module_def.h"
@@ -27,10 +29,48 @@
 #include "interp/machine_state.h"
 #include "utils/rt_vector.h"
 
+#include <cstring>
+#include <cstdio>
+#include <cstdlib>
+
 namespace leanclr
 {
 namespace vm
 {
+
+static bool is_runtime_init_trace_enabled()
+{
+    return std::getenv("LEANCLR_RUNTIME_INIT_TRACE") != nullptr;
+}
+
+static RtResultVoid trace_runtime_init_step(const char* step, RtResultVoid result)
+{
+    if (is_runtime_init_trace_enabled())
+    {
+        std::fprintf(stderr, "leanclr-runtime-init: %s => %s", step, result.is_ok() ? "ok" : "err");
+        if (result.is_err())
+        {
+            std::fprintf(stderr, " (%d)", static_cast<int>(result.unwrap_err()));
+        }
+        std::fprintf(stderr, "\n");
+    }
+    return result;
+}
+
+template <typename T>
+static RtResult<T> trace_runtime_init_step(const char* step, RtResult<T> result)
+{
+    if (is_runtime_init_trace_enabled())
+    {
+        std::fprintf(stderr, "leanclr-runtime-init: %s => %s", step, result.is_ok() ? "ok" : "err");
+        if (result.is_err())
+        {
+            std::fprintf(stderr, " (%d)", static_cast<int>(result.unwrap_err()));
+        }
+        std::fprintf(stderr, "\n");
+    }
+    return result;
+}
 
 // Helper structure for managing temporary buffers during method invocation
 struct ScopeBufferGuard
@@ -100,8 +140,11 @@ struct ScopeBufferGuard
         }
         else
         {
-            args_buffer = new interp::RtStackObject[total_args_size];
-            std::memset(args_buffer, 0, total_args_size * sizeof(interp::RtStackObject));
+            args_buffer = static_cast<interp::RtStackObject*>(alloc::GeneralAllocation::malloc_zeroed(total_args_size * sizeof(interp::RtStackObject)));
+            if (args_buffer == nullptr)
+            {
+                RET_ERR(RtErr::OutOfMemory);
+            }
         }
         args_size = total_args_size;
         args = args_buffer;
@@ -114,8 +157,11 @@ struct ScopeBufferGuard
         }
         else
         {
-            ret_buffer = new interp::RtStackObject[ret_size_val];
-            std::memset(ret_buffer, 0, ret_size_val * sizeof(interp::RtStackObject));
+            ret_buffer = static_cast<interp::RtStackObject*>(alloc::GeneralAllocation::malloc_zeroed(ret_size_val * sizeof(interp::RtStackObject)));
+            if (ret_buffer == nullptr)
+            {
+                RET_ERR(RtErr::OutOfMemory);
+            }
         }
         ret_size = ret_size_val;
         ret = ret_buffer;
@@ -259,7 +305,14 @@ struct ScopeBufferGuard
         for (size_t i = 0; i < method_param_count; ++i)
         {
             const metadata::RtTypeSig* param_type_sig = method->parameters[i];
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, param_klass, Class::get_class_from_typesig(param_type_sig));
+            metadata::RtTypeSig byval_param_type_sig{};
+            const metadata::RtTypeSig* value_type_sig = param_type_sig;
+            if (param_type_sig->by_ref)
+            {
+                byval_param_type_sig = param_type_sig->to_canonized_without_byref();
+                value_type_sig = &byval_param_type_sig;
+            }
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, param_klass, Class::get_class_from_typesig(value_type_sig));
             RET_ERR_ON_FAIL(Class::initialize_all(param_klass));
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(interp::ReduceTypeAndSize, reduceTypeAndSize,
                                                     interp::InterpDefs::get_reduce_type_and_size_by_typesig(param_type_sig));
@@ -275,10 +328,23 @@ struct ScopeBufferGuard
                     void* buffer = alloc_zeroed_temp_value_type_buffer(param_klass->instance_size_without_header);
                     RET_ERR_ON_FAIL(Object::unbox_any(param, param_klass, buffer, false));
                     dst.ptr = buffer;
+                    if (std::getenv("LEANCLR_REFLECTION_INVOKE_TRACE") != nullptr)
+                    {
+                        std::fprintf(stderr, "leanclr-invoke: %s.%s::%s byref value param[%zu] klass=%s obj=%s dst=%p i32=%d\n",
+                                     method->parent->namespaze, method->parent->name, method->name, i, param_klass->name,
+                                     param != nullptr && param->klass != nullptr ? param->klass->name : "<null>", dst.ptr,
+                                     *reinterpret_cast<int32_t*>(buffer));
+                    }
                 }
                 else
                 {
                     dst.ptr = &params[i];
+                    if (std::getenv("LEANCLR_REFLECTION_INVOKE_TRACE") != nullptr)
+                    {
+                        std::fprintf(stderr, "leanclr-invoke: %s.%s::%s byref ref param[%zu] klass=%s obj=%s dst=%p slot=%p\n",
+                                     method->parent->namespaze, method->parent->name, method->name, i, param_klass->name,
+                                     param != nullptr && param->klass != nullptr ? param->klass->name : "<null>", dst.ptr, params[i]);
+                    }
                 }
             }
             else
@@ -353,6 +419,24 @@ static RtResult<RtObject*> invoke_without_run_cctor(const metadata::RtMethodInfo
     return convert_return_value(method->return_type, ret_buffer);
 }
 
+static RtResultVoid configure_runtime_feature_switches()
+{
+    metadata::RtModuleDef* corlib_mod = Assembly::get_corlib()->mod;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, runtime_feature_class,
+                                            corlib_mod->get_class_by_name("System.Runtime.CompilerServices.RuntimeFeature", false, true));
+    RET_ERR_ON_FAIL(Class::initialize_all(runtime_feature_class));
+
+    constexpr metadata::EncodedTokenId is_dynamic_code_supported_field_token = 0x040016DA;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, is_dynamic_code_supported_field,
+                                            corlib_mod->get_field_by_token(metadata::RtToken::decode(is_dynamic_code_supported_field_token),
+                                                                          metadata::RtGenericContainerContext{}, nullptr));
+
+    bool is_supported = false;
+    RET_ERR_ON_FAIL(Field::set_static_value(is_dynamic_code_supported_field, &is_supported));
+    Class::set_cctor_finished(runtime_feature_class);
+    RET_VOID_OK();
+}
+
 // Public Runtime functions implementation
 
 RtResultVoid Runtime::initialize()
@@ -379,16 +463,17 @@ RtResultVoid Runtime::initialize()
     interp::MachineState::initialize();
     GC::initialize();
 
-    RET_ERR_ON_FAIL(Assembly::load_corlib());
-    RET_ERR_ON_FAIL(Class::initialize());
-    RET_ERR_ON_FAIL(ArrayClass::initialize());
-    RET_ERR_ON_FAIL(Class::verify_integrity_of_corlib_classes());
-    RET_ERR_ON_FAIL(String::initialize());
-    RET_ERR_ON_FAIL(Exception::initialize());
-    RET_ERR_ON_FAIL(Delegate::initialize());
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtAppDomain*, defaultAppDomain, AppDomain::init_default_app_domain());
+    RET_ERR_ON_FAIL(trace_runtime_init_step("Assembly::load_corlib", Assembly::load_corlib()));
+    RET_ERR_ON_FAIL(trace_runtime_init_step("Class::initialize", Class::initialize()));
+    RET_ERR_ON_FAIL(trace_runtime_init_step("ArrayClass::initialize", ArrayClass::initialize()));
+    RET_ERR_ON_FAIL(trace_runtime_init_step("Class::verify_integrity_of_corlib_classes", Class::verify_integrity_of_corlib_classes()));
+    RET_ERR_ON_FAIL(trace_runtime_init_step("String::initialize", String::initialize()));
+    RET_ERR_ON_FAIL(trace_runtime_init_step("Exception::initialize", Exception::initialize()));
+    RET_ERR_ON_FAIL(trace_runtime_init_step("Delegate::initialize", Delegate::initialize()));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtAppDomain*, defaultAppDomain,
+                                            trace_runtime_init_step("AppDomain::init_default_app_domain", AppDomain::init_default_app_domain()));
     Thread::attach_current_thread(defaultAppDomain);
-    RET_ERR_ON_FAIL(AppDomain::initialize_context());
+    RET_ERR_ON_FAIL(trace_runtime_init_step("AppDomain::initialize_context", AppDomain::initialize_context()));
 
     int32_t argc;
     const char** argv;
@@ -399,8 +484,14 @@ RtResultVoid Runtime::initialize()
     auto corlib_aot_module_data = corlib_mod->get_aot_module_data();
     if (corlib_aot_module_data != nullptr && corlib_aot_module_data->deferred_initializer)
     {
+        if (is_runtime_init_trace_enabled())
+        {
+            std::fprintf(stderr, "leanclr-runtime-init: System.Private.CoreLib deferred_initializer\n");
+        }
         corlib_aot_module_data->deferred_initializer(corlib_mod);
     }
+
+    RET_ERR_ON_FAIL(trace_runtime_init_step("configure_runtime_feature_switches", configure_runtime_feature_switches()));
 
     RET_VOID_OK();
 }

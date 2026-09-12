@@ -38,6 +38,7 @@ void register_all_gc_roots()
     register_environment_gc_roots();
     register_reflection_gc_roots();
     register_threading_gc_roots();
+    gc::GcFinalizer::register_gc_roots();
     metadata::register_modules_gc_roots();
 }
 

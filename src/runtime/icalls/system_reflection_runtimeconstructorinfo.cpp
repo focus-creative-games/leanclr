@@ -16,14 +16,16 @@ namespace icalls
 
 RtResult<uint32_t> SystemReflectionRuntimeConstructorInfo::get_metadata_token(RtReflectionConstructor* constructor) noexcept
 {
-    const RtMethodInfo* method = constructor->method;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, method,
+                                            Reflection::get_method_info_from_reflection_object(reinterpret_cast<RtReflectionMethod*>(constructor)));
     RET_OK(method->token);
 }
 
 RtResult<RtObject*> SystemReflectionRuntimeConstructorInfo::internal_invoke(RtReflectionConstructor* constructor, RtObject* obj, RtArray* parameters,
                                                                             RtObject** out_exc) noexcept
 {
-    const RtMethodInfo* method = constructor->method;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, method,
+                                            Reflection::get_method_info_from_reflection_object(reinterpret_cast<RtReflectionMethod*>(constructor)));
     return Reflection::invoke_method(method, obj, parameters, out_exc);
 }
 

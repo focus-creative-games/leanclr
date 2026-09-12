@@ -30,31 +30,34 @@ namespace Tests.Instruments.Arrays
             Assert.Equal(2, y);
         }
 
-        //[UnitTest]
-        //public void OutOfRange_lower()
-        //{
-        //    var arr = new short[] { 1, 2 };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = GetEle(arr, -1);
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower()
+        {
+            var arr = new short[] { 1, 2 };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = GetEle(arr, -1);
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper()
-        //{
-        //    var arr = new short[] { 1, 2 };
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    var s = GetEle(arr, 2);
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper()
+        {
+            var arr = new short[] { 1, 2 };
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            var s = GetEle(arr, 2);
+            });
+        }
 
-        //[UnitTest]
-        //public void NullRef()
-        //{
-        //    short[] arr = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    var s = GetEle(arr, 0);
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void NullRef()
+        {
+            short[] arr = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            var s = GetEle(arr, 0);
+            });
+        }
     }
 }

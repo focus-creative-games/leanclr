@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 
 namespace CorlibTests.InternalCall
 {
@@ -183,19 +183,20 @@ namespace CorlibTests.InternalCall
             Assert.Equal(0.0, Math.Tanh(0.0));
         }
 
-        // [UnitTest]
-        // public void FMod1()
-        // {
-        //     AssertNearlyEqual(1.0, Math.FMod(7.0, 3.0));
-        // }
+         [UnitTest]
+         public void FMod1()
+         {
+             AssertNearlyEqual(1.0, 7.0 % 3.0);
+         }
 
-        // [UnitTest]
-        // public void ModF1()
-        // {
-        //     double intPart;
-        //     double frac = Math.ModF(3.75, out intPart);
-        //     AssertNearlyEqual(0.75, frac);
-        //     AssertNearlyEqual(3.0, intPart);
-        // }
+         [UnitTest]
+         public void ModF1()
+         {
+             double intPart;
+             intPart = Math.Truncate(3.75);
+             double frac = 3.75 - intPart;
+             AssertNearlyEqual(0.75, frac);
+             AssertNearlyEqual(3.0, intPart);
+         }
     }
 }

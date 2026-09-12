@@ -386,7 +386,7 @@ RtResultVoid ArrayClass::setup_interfaces(RtClass* klass)
         {
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, inflated_iface, GenericClass::get_class(to_inflate->by_val->data.type_def_gid, generic_inst));
             interfaces[current_interface_index++] = inflated_iface;
-        }
+    }
     }
     assert(current_interface_index == interface_count);
     klass->interfaces = interfaces;
@@ -424,7 +424,7 @@ RtResultVoid ArrayClass::setup_methods(RtClass* klass)
             for (size_t i = parameter_count; i < parameter_count * 2; ++i)
                 params_buf[i] = int32_type_sig;
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, cctor_m,
-                                                    build_array_method(klass, STR_CCTOR, void_type_sig, params_buf, parameter_count * 2));
+                                                    build_array_method(klass, STR_CTOR, void_type_sig, params_buf, parameter_count * 2));
             methods[cur_method_index++] = cctor_m;
         }
     }
@@ -541,9 +541,6 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
         else
             RET_ASSERT_ERR(RtErr::BadImageFormat);
 
-        if (iface->vtable_count != method_list->size())
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
-
         for (size_t j = 0; j < iface->vtable_count; ++j)
         {
             metadata::RtVirtualInvokeData* entry = new_vtables + current_slot + j;
@@ -560,8 +557,46 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
                     break;
                 }
             }
+            if (!found && is_net10_array_interface_count_method(iface_name, method_name))
+            {
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, final_m,
+                                                        build_net10_array_interface_count_method(klass, iface_name));
+                entry->method_impl = final_m;
+                found = true;
+            }
+            if (!found && is_net10_array_interface_get_item_method(iface_name, method_name))
+            {
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, final_m,
+                                                        build_net10_array_interface_get_item_method(klass, iface_name, element_type_sig));
+                entry->method_impl = final_m;
+                found = true;
+            }
+            if (!found && is_net10_array_interface_set_item_method(iface_name, method_name))
+            {
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, final_m,
+                                                        build_net10_array_interface_set_item_method(klass, iface_name, element_type_sig));
+                entry->method_impl = final_m;
+                found = true;
+            }
+            if (!found && is_net10_array_interface_copy_to_method(iface_name, method_name))
+            {
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, final_m,
+                                                        build_net10_array_interface_copy_to_method(klass, iface_name, method->parameters,
+                                                                                                   method->parameter_count));
+                entry->method_impl = final_m;
+                found = true;
+            }
+            if (!found && is_net10_array_interface_get_enumerator_method(iface_name, method_name))
+            {
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, final_m,
+                                                        build_net10_array_interface_get_enumerator_method(klass, iface_name, method->return_type));
+                entry->method_impl = final_m;
+                found = true;
+            }
             if (!found)
-                RET_ASSERT_ERR(RtErr::BadImageFormat);
+            {
+                continue;
+            }
         }
         current_slot += iface->vtable_count;
     }

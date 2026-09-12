@@ -22,6 +22,7 @@ class Exception
   public:
     static RtResultVoid initialize();
     static void set_current_exception(RtException* ex);
+    static void clear_current_exception_if_matches(RtException* ex);
     static RtException* get_and_clear_current_exception();
     static RtException* raise_error_as_exception(RtErr err, interp::InterpFrame* frame, const void* ip);
     static RtException* raise_aot_error_as_exception(RtErr err, const metadata::RtMethodInfo* methodInfo, int32_t ip);

@@ -24,32 +24,35 @@ namespace Tests.Instruments.Arrays
             Assert.Equal(2, y.x1);
         }
 
-        //[UnitTest]
-        //public void OutOfRange_lower()
-        //{
-        //    var arr = new ValueTypeSize4[2];
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    int i = -1;
-        //    arr[i] = new ValueTypeSize4 { x1 = 1 };
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_lower()
+        {
+            var arr = new ValueTypeSize4[2];
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            int i = -1;
+            arr[i] = new ValueTypeSize4 { x1 = 1 };
+            });
+        }
 
-        //[UnitTest]
-        //public void OutOfRange_upper()
-        //{
-        //    var arr = new ValueTypeSize4[2];
-        //    Assert.ExpectException<IndexOutOfRangeException>();
-        //    arr[2] = new ValueTypeSize4();
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void OutOfRange_upper()
+        {
+            var arr = new ValueTypeSize4[2];
+            Assert.ExpectException<IndexOutOfRangeException>(() =>
+            {
+            arr[2] = new ValueTypeSize4();
+            });
+        }
 
-        //[UnitTest]
-        //public void NullRef()
-        //{
-        //    ValueTypeSize4[] arr = null;
-        //    Assert.ExpectException<NullReferenceException>();
-        //    arr[0] = new ValueTypeSize4();
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void NullRef()
+        {
+            ValueTypeSize4[] arr = null;
+            Assert.ExpectException<NullReferenceException>(() =>
+            {
+            arr[0] = new ValueTypeSize4();
+            });
+        }
     }
 }

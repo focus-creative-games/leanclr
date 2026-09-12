@@ -58,7 +58,7 @@ class Interop
 
     static RtResult<bool> kernel32_delete_volume_mount_point_private(vm::RtString* mount_point) noexcept;
     static RtResult<bool> kernel32_free_library(intptr_t h_module) noexcept;
-    static RtResult<vm::RtObject*> kernel32_load_library_ex(vm::RtString* lib_filename, intptr_t reserved, int32_t flags) noexcept;
+    static RtResult<intptr_t> kernel32_load_library_ex(vm::RtString* lib_filename, intptr_t reserved, int32_t flags) noexcept;
     // static RtResult<bool> kernel32_get_file_mui_path(uint32_t flags, vm::RtString* file_path, vm::RtObject* language, int32_t* language_length_chars,
     //                                                  vm::RtObject* file_mui_path, int32_t* file_mui_path_length_chars, int64_t* enumerator) noexcept;
     static RtResult<bool> kernel32_close_handle(intptr_t handle) noexcept;

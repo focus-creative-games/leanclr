@@ -39,14 +39,15 @@ namespace Tests.Instruments.Objs
             Assert.Equal("abc", s);
         }
 
-        //[UnitTest]
-        //public void object_2()
-        //{
-        //    object o = 1;
-        //    Assert.ExpectException<InvalidCastException>();
-        //    string s = (string)o;
-        //    Assert.Fail();
-        //}
+        [UnitTest]
+        public void object_2()
+        {
+            object o = 1;
+            Assert.ExpectException<InvalidCastException>(() =>
+            {
+            string s = (string)o;
+            });
+        }
 
         [UnitTest]
         public void int_1()

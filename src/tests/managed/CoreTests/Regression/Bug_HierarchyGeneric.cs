@@ -1,20 +1,20 @@
-//
-//using Tests.Fixtures;
-//using System;
-//using System.Collections.Generic;
-//using System.Linq;
-//using System.Text;
-//using System.Threading.Tasks;
 
-//namespace Tests.Bugs
-//{
-//    internal class Bug_HierarchyGeneric : TestCaseBase
-//    {
-//        [UnitTest]
-//        public void Test()
-//        {
-//            IHG o = new HierarchyGeneric2<int>();
-//            Assert.Equal(5, o.Load(5));
-//        }
-//    }
-//}
+using Tests.Fixtures;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Tests.Bugs
+{
+    internal class Bug_HierarchyGeneric : TestCaseBase
+    {
+        [UnitTest]
+        public void Test()
+        {
+            IHG o = new HierarchyGeneric2<int>();
+            Assert.Equal(5, o.Load(5));
+        }
+    }
+}

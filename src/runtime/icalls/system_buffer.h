@@ -20,6 +20,9 @@ class SystemBuffer
 
     // Internal block copy between arrays
     static RtResult<bool> internal_block_copy(vm::RtArray* src, int32_t src_offset, vm::RtArray* dst, int32_t dst_offset, int32_t count) noexcept;
+
+    // Bulk move used by CoreLib for copies that may contain object references.
+    static RtResultVoid bulk_move_with_write_barrier_internal(uint8_t* dst, const uint8_t* src, uintptr_t count) noexcept;
 };
 
 } // namespace icalls

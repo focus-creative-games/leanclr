@@ -1,6 +1,7 @@
 #include "hl_transformer.h"
 #include "ll_transformer.h"
 #include "il_opcodes.h"
+#include "metadata/metadata_cache.h"
 #include "metadata/module_def.h"
 #include "metadata/generic_metadata.h"
 #include "metadata/aot_module.h"
@@ -234,6 +235,27 @@ RtResult<const metadata::RtMethodInfo*> Transformer::get_method_from_token(uint3
         RET_OK(handle.method);
     }
     RET_ASSERT_ERR(RtErr::BadImageFormat);
+}
+
+RtResult<std::pair<const metadata::RtMethodInfo*, uint16_t>> Transformer::get_call_target_from_token(uint32_t raw_token)
+{
+    metadata::RtModuleDef* mod = get_module();
+    metadata::RtToken token = metadata::RtToken::decode(raw_token);
+    if (token.table_type == metadata::TableType::MemberRef)
+    {
+        uint16_t vararg_count = 0;
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(metadata::RtRuntimeHandle, handle,
+                                                 mod->get_member_ref_by_rid(token.rid, _generic_container_context, _generic_context, &vararg_count));
+        if (!handle.is_method())
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+        RET_ERR_ON_FAIL(vm::Class::initialize_all(const_cast<metadata::RtClass*>(handle.method->parent)));
+        RET_OK(std::make_pair(handle.method, vararg_count));
+    }
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const metadata::RtMethodInfo*, method, get_method_from_token(raw_token));
+    RET_OK(std::make_pair(method, static_cast<uint16_t>(0)));
 }
 
 RtResult<metadata::RtMethodSig> Transformer::get_standalone_method_sig_from_token(uint32_t token)
@@ -1137,6 +1159,7 @@ RtResultVoid Transformer::add_ckfinite()
     // Check if the value is a finite number (not NaN or Inf)
     GeneralInst* ir = create_add_inst(OpCodeEnum::Ckfinite);
     ir->set_var_src(val);
+    ir->set_var_dst(val);
     RET_VOID_OK();
 }
 
@@ -1167,10 +1190,11 @@ RtResult<const metadata::RtMethodInfo*> Transformer::try_redirect_newobj_method(
 }
 
 RtResultVoid Transformer::add_call_common(const metadata::RtMethodInfo* method, metadata::RtInvokerType invoker_type, metadata::RtInvokeMethodPointer invoker,
-                                          bool is_new_obj, bool is_call_vir)
+                                          bool is_new_obj, bool is_call_vir, uint16_t vararg_count, bool null_check_this)
 {
     // Get parameter count including 'this' if instance method
-    size_t param_count = is_new_obj ? vm::Method::get_param_count_exclude_this(method) : vm::Method::get_param_count_include_this(method);
+    size_t fixed_param_count = is_new_obj ? vm::Method::get_param_count_exclude_this(method) : vm::Method::get_param_count_include_this(method);
+    size_t param_count = fixed_param_count + vararg_count;
 
     // Pop parameters in reverse order
     const Variable** params = nullptr;
@@ -1223,12 +1247,15 @@ RtResultVoid Transformer::add_call_common(const metadata::RtMethodInfo* method, 
 
     GeneralInst* ir = create_add_inst(opcode);
     ir->set_method_and_params(method, get_cur_eval_stack_top(), params);
+    ir->set_vararg_count(vararg_count);
+    ir->set_null_check_this(null_check_this);
     ir->set_prefix(_prefix);
-    if (invoker_type == metadata::RtInvokerType::NewObjIntrinsic)
+    if (invoker_type == metadata::RtInvokerType::Intrinsic || invoker_type == metadata::RtInvokerType::CustomInstrinsic ||
+        invoker_type == metadata::RtInvokerType::NewObjIntrinsic)
     {
         ir->set_invoker_idx(vm::Intrinsics::register_intrinsic_invoker_id(invoker));
     }
-    else if (invoker_type == metadata::RtInvokerType::NewObjInternalCall)
+    else if (invoker_type == metadata::RtInvokerType::InternalCall || invoker_type == metadata::RtInvokerType::NewObjInternalCall)
     {
         ir->set_invoker_idx(vm::InternalCalls::register_internal_call_invoker_id(invoker));
     }
@@ -1247,9 +1274,20 @@ RtResultVoid Transformer::add_call_common(const metadata::RtMethodInfo* method, 
     RET_VOID_OK();
 }
 
-RtResultVoid Transformer::add_call(const metadata::RtMethodInfo* method)
+RtResultVoid Transformer::add_call(const metadata::RtMethodInfo* method, uint16_t vararg_count, bool null_check_this)
 {
-    return add_call_common(method, method->invoker_type, method->invoke_method_ptr, false, false);
+    if (((uint32_t)_prefix & (uint32_t)il::OpCodePrefix::Constrained) != 0 && _constrained_class &&
+        vm::Method::is_static(method) && vm::Class::is_interface(method->parent))
+    {
+        metadata::RtClass* cons_klass = _constrained_class;
+        _constrained_class = nullptr;
+        RET_ERR_ON_FAIL(vm::Class::initialize_all(cons_klass));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, cons_method,
+                                                vm::Method::get_static_interface_method_impl_on_klass(cons_klass, method));
+        return add_call(cons_method, vararg_count);
+    }
+
+    return add_call_common(method, method->invoker_type, method->invoke_method_ptr, false, false, vararg_count, null_check_this);
 }
 
 RtResult<bool> Transformer::try_handle_newobj_intrinsic(const metadata::RtMethodInfo* method)
@@ -1271,9 +1309,9 @@ RtResult<bool> Transformer::try_handle_newobj_intrinsic(const metadata::RtMethod
     {
         RET_OK(false);
     }
-    if (std::strcmp(klass->name, "ByReference`1") == 0)
+    if (std::strcmp(klass->name, "ByReference`1") == 0 || std::strcmp(klass->name, "ByReference") == 0)
     {
-        // nothing to do for ByReference<T> constructor
+        // ByReference<T> and .NET 10 System.ByReference are single-pointer ref structs.
         RET_OK(true);
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::InternalCallInvoker, icalls_invoker, vm::InternalCalls::get_newobj_internal_call_by_method(method));
@@ -1450,7 +1488,7 @@ RtResultVoid Transformer::add_callvirt(const metadata::RtMethodInfo* method)
 
     if (vm::Method::is_devirtualed(method))
     {
-        return add_call(method);
+        return add_call(method, 0, true);
     }
     else
     {
@@ -2070,8 +2108,10 @@ RtResultVoid Transformer::add_mkrefany(metadata::RtClass* klass)
 
     ir->set_class(klass);
     ir->set_var_src(addr);
-    // Push TypedRef value
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
+    metadata::RtTypeSig typedref_sig = metadata::RtTypeSig::new_by_val(metadata::RtElementType::TypedByRef);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, pooled_typedref_sig, metadata::MetadataCache::get_pooled_typesig(typedref_sig));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(Variable*, dst, push_typesig_to_eval_stack(pooled_typedref_sig));
+    ir->set_var_dst(dst);
     RET_VOID_OK();
 }
 
@@ -2706,13 +2746,27 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Jmp:
             {
-                RET_ERR(RtErr::NotSupported);
+                uint32_t method_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, get_method_from_token(method_token));
+                RET_ERR_ON_FAIL(add_call(method));
+                RET_ERR_ON_FAIL(add_ret());
+                il_offset_cur += 5;
+                break;
             }
             case il::OpCodeValue::Call:
             {
                 uint32_t method_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
-                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, get_method_from_token(method_token));
-                RET_ERR_ON_FAIL(add_call(method));
+                auto method_ret = get_call_target_from_token(method_token);
+                if (method_ret.is_err())
+                {
+                    RET_ERR(method_ret.unwrap_err());
+                }
+                auto method_and_vararg_count = method_ret.unwrap();
+                auto call_ret = add_call(method_and_vararg_count.first, method_and_vararg_count.second);
+                if (call_ret.is_err())
+                {
+                    RET_ERR(call_ret.unwrap_err());
+                }
                 il_offset_cur += 5;
                 break;
             }

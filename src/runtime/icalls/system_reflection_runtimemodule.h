@@ -7,9 +7,12 @@ namespace leanclr
 namespace icalls
 {
 
+struct MetadataConstArray;
+
 class SystemReflectionRuntimeModule
 {
   public:
+    static utils::Span<vm::InternalCallEntry> get_net10_internal_call_entries() noexcept;
     static utils::Span<vm::InternalCallEntry> get_internal_call_entries() noexcept;
 
     // Get metadata token from module
@@ -52,6 +55,41 @@ class SystemReflectionRuntimeModule
     // Resolve signature
     static RtResult<vm::RtArray*> resolve_signature(metadata::RtModuleDef* module, int32_t token, int32_t* error) noexcept;
 };
+
+RtResult<intptr_t> get_metadata_import(vm::RtReflectionModule* module) noexcept;
+RtResult<int32_t> metadata_import_get_property_props(metadata::RtModuleDef* module, int32_t md_token, void** name,
+                                                     int32_t* property_attributes, MetadataConstArray* signature) noexcept;
+RtResult<int32_t> metadata_import_get_event_props(metadata::RtModuleDef* module, int32_t md_token, void** name,
+                                                  int32_t* event_attributes) noexcept;
+RtResult<int32_t> metadata_import_get_field_def_props(metadata::RtModuleDef* module, int32_t md_token, int32_t* field_attributes) noexcept;
+RtResult<int32_t> metadata_import_get_param_def_props(metadata::RtModuleDef* module, int32_t md_token, int32_t* sequence,
+                                                      int32_t* attributes) noexcept;
+RtResult<int32_t> metadata_import_get_field_marshal(metadata::RtModuleDef* module, int32_t md_token,
+                                                    MetadataConstArray* field_marshal) noexcept;
+RtResult<int32_t> metadata_import_get_field_offset(metadata::RtModuleDef* module, int32_t type_token_value,
+                                                   int32_t field_token_value, int32_t* offset, bool* found) noexcept;
+RtResult<int32_t> metadata_import_get_class_layout(metadata::RtModuleDef* module, int32_t type_token_value,
+                                                   int32_t* pack_size, int32_t* class_size) noexcept;
+RtResult<int32_t> metadata_import_get_default_value(metadata::RtModuleDef* module, int32_t md_token, int64_t* value,
+                                                    const uint16_t** string_metadata_encoding, int32_t* length,
+                                                    int32_t* cor_element_type) noexcept;
+RtResult<int32_t> metadata_import_get_user_string(metadata::RtModuleDef* module, int32_t md_token,
+                                                  const uint16_t** string_metadata_encoding, int32_t* length) noexcept;
+RtResult<int32_t> metadata_import_get_scope_props(metadata::RtModuleDef* module, uint8_t* mvid) noexcept;
+RtResult<int32_t> metadata_import_get_signature_from_token(metadata::RtModuleDef* module, int32_t md_token,
+                                                           MetadataConstArray* signature) noexcept;
+RtResult<int32_t> metadata_import_get_member_ref_props(metadata::RtModuleDef* module, int32_t md_token,
+                                                       MetadataConstArray* signature) noexcept;
+RtResult<int32_t> metadata_import_get_sig_of_method_def(metadata::RtModuleDef* module, int32_t md_token,
+                                                        MetadataConstArray* signature) noexcept;
+RtResult<int32_t> metadata_import_get_sig_of_field_def(metadata::RtModuleDef* module, int32_t md_token,
+                                                       MetadataConstArray* signature) noexcept;
+RtResult<int32_t> metadata_import_get_custom_attribute_props(metadata::RtModuleDef* module, int32_t md_token,
+                                                             int32_t* constructor_token, MetadataConstArray* signature) noexcept;
+RtResult<int32_t> metadata_import_get_parent_token(metadata::RtModuleDef* module, int32_t md_token, int32_t* parent_token) noexcept;
+RtResult<int32_t> metadata_import_get_name(metadata::RtModuleDef* module, int32_t md_token, void** name) noexcept;
+RtResult<int32_t> metadata_import_get_namespace(metadata::RtModuleDef* module, int32_t md_token, void** namespaze) noexcept;
+RtResult<bool> metadata_import_is_valid_token(metadata::RtModuleDef* module, int32_t token_value) noexcept;
 
 } // namespace icalls
 } // namespace leanclr
