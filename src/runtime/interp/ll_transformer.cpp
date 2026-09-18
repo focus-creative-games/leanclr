@@ -11,6 +11,7 @@
 #include "metadata/module_def.h"
 #include "utils/platform.h"
 #include "const_strs.h"
+#include "utils/rt_span.h"
 
 namespace leanclr
 {
@@ -2326,6 +2327,11 @@ RtResult<const RtInterpMethodInfo*> Transformer::build_interp_method_info()
     interp_method->total_arg_and_local_stack_object_size = static_cast<uint16_t>(_hl_transformer.get_total_arg_and_local_stack_object_size());
     interp_method->max_stack_object_size = static_cast<uint16_t>(_hl_transformer.get_max_stack_size());
     interp_method->init_locals = _hl_transformer.need_init_locals();
+    
+    utils::Span<size_t> offsets = _hl_transformer.get_reference_offsets();
+    size_t* offsetsNewBuffer = pool.calloc_any<size_t>(offsets.size());
+    std::memcpy(offsetsNewBuffer, offsets.data(), offsets.size() * sizeof(size_t));
+    interp_method->reference_offsets = utils::Span<size_t>(offsetsNewBuffer, offsets.size());
 
     RET_ERR_ON_FAIL(build_codes(interp_method));
     RET_ERR_ON_FAIL(build_exception_clauses(interp_method));

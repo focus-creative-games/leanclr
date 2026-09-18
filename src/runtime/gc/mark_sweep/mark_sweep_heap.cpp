@@ -146,6 +146,21 @@ static inline bool is_small_object(size_t size)
     return size <= kMaxSmallObejctSize;
 }
 
+bool MarkSweepHeap::is_valid_pointer(vm::RtObject* obj)
+{
+    for (size_t i = 0; i < kSizeClassPoolCount; i++)
+    {
+        size_t arena_size = s_size_class_pool_infos[i].arena_size;
+        void* start = s_size_class_pools[i];
+        void* end = (char*)start + arena_size;
+
+        if(obj >= start && obj < end)
+            return true;
+    }
+
+    return s_big_object_arenas.count(obj);
+}
+
 void MarkSweepHeap::initialize(const Config& config)
 {
     s_gc_mode = config.mode;

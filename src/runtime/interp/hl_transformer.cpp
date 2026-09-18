@@ -15,6 +15,8 @@
 #include "utils/rt_vector.h"
 #include "utils/mem_op.h"
 #include "const_strs.h"
+#include "utils/not_free_list.h"
+#include "utils/rt_span.h"
 
 namespace leanclr
 {
@@ -144,6 +146,23 @@ size_t Transformer::alloc_var_id()
     const size_t id = _next_var_id;
     _next_var_id += 1;
     return id;
+}
+
+utils::Span<size_t> Transformer::get_reference_offsets()
+{
+    size_t varCount = this->_vars.size();
+    utils::NotFreeList<size_t> offsets(_pool);
+    for (size_t i = 0; i < varCount; i++)
+    {
+        const Variable* variable = _vars[i];
+        if(variable->is_not_reference())
+            continue;
+
+        offsets.push_back(variable->eval_stack_offset);
+    }
+
+    utils::Span<size_t> span(offsets.data(), offsets.size());
+    return span;
 }
 
 RtResult<const Variable*> Transformer::alloc_variable_by_typesig(const metadata::RtTypeSig* type_sig, size_t eval_stack_offset)

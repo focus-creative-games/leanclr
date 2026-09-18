@@ -1,6 +1,7 @@
 #pragma once
 
 #include "vm/rt_managed_types.h"
+#include "utils/rt_span.h"
 
 namespace leanclr
 {
@@ -79,6 +80,7 @@ struct RtInterpMethodInfo
     uint8_t exception_clause_count;
     bool init_locals;
     uint32_t code_size;
+    utils::Span<size_t> reference_offsets;
 };
 
 // Constants

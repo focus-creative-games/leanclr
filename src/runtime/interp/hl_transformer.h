@@ -1,10 +1,12 @@
 #pragma once
 
+
 #include "transform_defs.h"
 #include "il_opcodes.h"
 #include "hl_opcodes.h"
 #include "utils/not_free_list.h"
 #include "utils/hashmap.h"
+#include "alloc/mem_pool.h"
 
 namespace leanclr
 {
@@ -469,6 +471,8 @@ class Transformer
         return _basic_block_count;
     }
     RtResult<BasicBlock*> get_branch_target_bb(size_t global_target_offset);
+
+    utils::Span<size_t> get_reference_offsets();
 
   private:
     size_t get_cur_eval_stack_top() const;
