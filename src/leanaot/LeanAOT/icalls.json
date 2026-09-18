@@ -1955,7 +1955,7 @@
     "header": "icalls/system_runtime_runtimeimports.h"
   },
   {
-    "name": "System.Runtime.RuntimeImports::Memmove_wbarrier",
+    "name": "System.Runtime.RuntimeImports::Memmove_wbarrier(System.Byte*,System.Byte*,System.UInt32,System.IntPtr)",
     "func": "SystemRuntimeRuntimeImports::memmove_wbarrier",
     "header": "icalls/system_runtime_runtimeimports.h"
   },
