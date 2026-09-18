@@ -16,8 +16,9 @@ class SystemRuntimeRuntimeImports
     // @icall: System.Runtime.RuntimeImports::Memmove
     static RtResultVoid memmove(uint8_t* dest, const uint8_t* src, uintptr_t size) noexcept;
 
-    // @icall: System.Runtime.RuntimeImports::Memmove_wbarrier
-    static RtResultVoid memmove_wbarrier(uint8_t* dest, const uint8_t* src, uintptr_t size) noexcept;
+    // @icall: System.Runtime.RuntimeImports::Memmove_wbarrier(System.Byte*,System.Byte*,System.UInt32,System.IntPtr)
+    // len is the element count, not the byte count. type_handle is typeof(T).TypeHandle.Value.
+    static RtResultVoid memmove_wbarrier(uint8_t* dest, const uint8_t* src, uint32_t len, const metadata::RtTypeSig* type_handle) noexcept;
 
     // @icall: System.Runtime.RuntimeImports::_ecvt_s
     static RtResultVoid ecvt_s(uint8_t* buffer, int32_t size, double value, int32_t digits, int32_t* decpt, int32_t* sign) noexcept;

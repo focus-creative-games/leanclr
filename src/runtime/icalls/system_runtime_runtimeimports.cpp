@@ -1,4 +1,5 @@
 #include "system_runtime_runtimeimports.h"
+#include "vm/class.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -42,9 +43,14 @@ static RtResultVoid memmove_invoker(RtManagedMethodPointer method_pointer, const
     return SystemRuntimeRuntimeImports::memmove(dest, src, size);
 }
 
-// @icall: System.Runtime.RuntimeImports::Memmove_wbarrier
-RtResultVoid SystemRuntimeRuntimeImports::memmove_wbarrier(uint8_t* dest, const uint8_t* src, uintptr_t size) noexcept
+// @icall: System.Runtime.RuntimeImports::Memmove_wbarrier(System.Byte*,System.Byte*,System.UInt32,System.IntPtr)
+RtResultVoid SystemRuntimeRuntimeImports::memmove_wbarrier(uint8_t* dest, const uint8_t* src, uint32_t len,
+                                                           const metadata::RtTypeSig* type_handle) noexcept
 {
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, ele_klass, vm::Class::get_class_from_typesig(type_handle));
+    RET_ERR_ON_FAIL(vm::Class::initialize_fields(ele_klass));
+    // Buffer.Memmove<T> passes the element count. Reference types are pointer-sized; value types use their instance size.
+    size_t size = static_cast<size_t>(len) * vm::Class::get_stack_location_size(ele_klass);
     // FIXME: implement write barrier
     std::memmove(dest, src, size);
     RET_VOID_OK();
@@ -55,8 +61,9 @@ static RtResultVoid memmove_wbarrier_invoker(RtManagedMethodPointer method_point
 {
     uint8_t* dest = EvalStackOp::get_param<uint8_t*>(params, 0);
     const uint8_t* src = EvalStackOp::get_param<const uint8_t*>(params, 1);
-    uintptr_t size = EvalStackOp::get_param<uintptr_t>(params, 2);
-    return SystemRuntimeRuntimeImports::memmove_wbarrier(dest, src, size);
+    uint32_t len = EvalStackOp::get_param<uint32_t>(params, 2);
+    const metadata::RtTypeSig* type_handle = EvalStackOp::get_param<const metadata::RtTypeSig*>(params, 3);
+    return SystemRuntimeRuntimeImports::memmove_wbarrier(dest, src, len, type_handle);
 }
 
 // @icall: System.Runtime.RuntimeImports::_ecvt_s
@@ -120,7 +127,8 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeRuntimeImports::get_internal_cal
     static vm::InternalCallEntry s_entries[] = {
         {"System.Runtime.RuntimeImports::ZeroMemory", (vm::InternalCallFunction)&SystemRuntimeRuntimeImports::zero_memory, zero_memory_invoker},
         {"System.Runtime.RuntimeImports::Memmove", (vm::InternalCallFunction)&SystemRuntimeRuntimeImports::memmove, memmove_invoker},
-        {"System.Runtime.RuntimeImports::Memmove_wbarrier", (vm::InternalCallFunction)&SystemRuntimeRuntimeImports::memmove_wbarrier, memmove_wbarrier_invoker},
+        {"System.Runtime.RuntimeImports::Memmove_wbarrier(System.Byte*,System.Byte*,System.UInt32,System.IntPtr)",
+         (vm::InternalCallFunction)&SystemRuntimeRuntimeImports::memmove_wbarrier, memmove_wbarrier_invoker},
         {"System.Runtime.RuntimeImports::_ecvt_s", (vm::InternalCallFunction)&SystemRuntimeRuntimeImports::ecvt_s, ecvt_s_invoker},
     };
     return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
