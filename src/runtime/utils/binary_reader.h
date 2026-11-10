@@ -75,9 +75,9 @@ class BinaryReader
 
     bool try_align_up_position(size_t alignment)
     {
-        if (alignment == 0 || (alignment & (alignment - 1)) != 0 || _index > SIZE_MAX - (alignment - 1))
+        size_t aligned_index;
+        if (!CheckedSize::align_up(_index, alignment, aligned_index))
             return false;
-        size_t aligned_index = MemOp::align_up(_index, alignment);
         if (aligned_index > _length)
         {
             return false;
@@ -89,6 +89,17 @@ class BinaryReader
     size_t remaining() const
     {
         return _length - _index;
+    }
+
+    // A child is bounded by its declared payload, even if the parent has more
+    // bytes. Failed slicing never advances the parent or changes the child.
+    bool try_read_slice(size_t count, BinaryReader& child)
+    {
+        if (!is_remaining(count))
+            return false;
+        child = BinaryReader(get_current_ptr(), count);
+        _index += count;
+        return true;
     }
 
     bool try_peek_cstring(size_t max_length, const char*& out_value, size_t& out_length) const
@@ -116,7 +127,7 @@ class BinaryReader
 
     bool is_aligned(size_t alignment) const
     {
-        return _index % alignment == 0;
+        return alignment != 0 && _index % alignment == 0;
     }
 
     const uint8_t* get_current_ptr() const

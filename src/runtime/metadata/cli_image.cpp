@@ -74,7 +74,7 @@ RtResult<const char*> CliImage::read_assembly_name_no_ext() const
 
 RtResultVoid CliImage::load_streams()
 {
-    if (metadata_offset > image_length || metadata_length > image_length - metadata_offset)
+    if (!utils::CheckedSize::contains(image_length, metadata_offset, metadata_length))
         RET_ERR(RtErr::BadImageFormat);
 
     BinaryReader reader(image_data + metadata_offset, metadata_length);
@@ -111,7 +111,7 @@ RtResultVoid CliImage::load_streams()
             RET_ERR(RtErr::BadImageFormat);
 
         // Validate stream data is within bounds
-        if (stream_offset > metadata_length || stream_size > metadata_length - stream_offset)
+        if (!utils::CheckedSize::contains(metadata_length, stream_offset, stream_size))
             RET_ERR(RtErr::BadImageFormat);
 
         // Find matching heap and set its data

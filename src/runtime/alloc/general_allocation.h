@@ -4,6 +4,7 @@
 #include <cstring>
 
 #include "core/rt_base.h"
+#include "utils/checked_size.h"
 
 namespace leanclr
 {
@@ -62,7 +63,9 @@ class GeneralAllocation
 
     static void* calloc(size_t count, size_t size)
     {
-        if (size != 0 && count > SIZE_MAX / size) return nullptr;
+        size_t total;
+        if (!utils::CheckedSize::multiply(count, size, total))
+            return nullptr;
         return s_memory_callbacks.calloc(count, size);
     }
 

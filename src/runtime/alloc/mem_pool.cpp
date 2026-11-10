@@ -19,8 +19,10 @@ size_t MemPool::get_default_region_size()
 
 MemPool::Region* MemPool::create_region(size_t capacity)
 {
-    if (page_size_ == 0 || (page_size_ & (page_size_ - 1)) != 0 || capacity > SIZE_MAX - (page_size_ - 1)) return nullptr;
-    const size_t aligned_capacity = std::max(align_up(capacity, page_size_), region_size_);
+    size_t rounded_capacity;
+    if (!utils::CheckedSize::align_up(capacity, page_size_, rounded_capacity))
+        return nullptr;
+    const size_t aligned_capacity = std::max(rounded_capacity, region_size_);
 
     auto* data = static_cast<uint8_t*>(alloc::GeneralAllocation::malloc_zeroed(aligned_capacity));
     if (!data)
@@ -56,10 +58,14 @@ bool MemPool::add_region(size_t capacity)
 
 uint8_t* MemPool::malloc_zeroed(size_t size, size_t alignment)
 {
-    if (alignment == 0 || (alignment & (alignment - 1)) != 0 || size % alignment != 0) return nullptr;
-    if (!region_ && !add_region(size)) return nullptr;
+    if (alignment == 0 || (alignment & (alignment - 1)) != 0 || size % alignment != 0)
+        return nullptr;
+    if (!region_ && !add_region(size))
+        return nullptr;
 
-    size_t start_pos = align_up(region_->cur, alignment);
+    size_t start_pos;
+    if (!utils::CheckedSize::align_up(region_->cur, alignment, start_pos))
+        return nullptr;
 
     if (start_pos > region_->size || size > region_->size - start_pos)
     {
@@ -78,8 +84,11 @@ uint8_t* MemPool::malloc_zeroed(size_t size, size_t alignment)
 
 uint8_t* MemPool::calloc(size_t count, size_t size, size_t alignment)
 {
-    if (alignment == 0 || (alignment & (alignment - 1)) != 0 || size % alignment != 0 || (size != 0 && count > SIZE_MAX / size)) return nullptr;
-    const size_t total = count * size;
+    if (alignment == 0 || (alignment & (alignment - 1)) != 0 || size % alignment != 0)
+        return nullptr;
+    size_t total;
+    if (!utils::CheckedSize::multiply(count, size, total))
+        return nullptr;
     return malloc_zeroed(total, alignment);
 }
 

@@ -40,12 +40,13 @@ class GeneralAllocator
 
     pointer allocate(size_type n)
     {
-        if (n == 0 || n > SIZE_MAX / sizeof(T))
+        size_t bytes;
+        if (n == 0 || !utils::CheckedSize::multiply(n, sizeof(T), bytes))
         {
             return nullptr;
         }
 
-        void* ptr = GeneralAllocation::malloc(n * sizeof(T));
+        void* ptr = GeneralAllocation::malloc(bytes);
         return static_cast<pointer>(ptr);
     }
 
