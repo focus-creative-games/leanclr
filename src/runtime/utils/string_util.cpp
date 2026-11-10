@@ -3,10 +3,6 @@
 #include "alloc/general_allocation.h"
 #include "build_config.h"
 
-#if LEANCLR_PLATFORM_POSIX
-#include <strings.h>
-#endif
-
 namespace leanclr
 {
 namespace utils
@@ -50,6 +46,8 @@ bool portable_equals_ignorecase_n(const char* s1, const char* s2, size_t len)
         {
             return false;
         }
+        if (s1[i] == '\0')
+            return true;
     }
     return true;
 }
@@ -157,13 +155,7 @@ bool StringUtil::equals_ignorecase(const char* s1, const char* s2)
     if (!s1 || !s2)
         return false;
 
-#if LEANCLR_PLATFORM_WIN
-    return _stricmp(s1, s2) == 0;
-#elif LEANCLR_PLATFORM_POSIX
-    return strcasecmp(s1, s2) == 0;
-#else
     return portable_equals_ignorecase(s1, s2);
-#endif
 }
 
 bool StringUtil::equals_ignorecase_n(const char* s1, const char* s2, size_t len)
@@ -172,13 +164,7 @@ bool StringUtil::equals_ignorecase_n(const char* s1, const char* s2, size_t len)
         return true;
     if (!s1 || !s2)
         return false;
-#if LEANCLR_PLATFORM_WIN
-    return _strnicmp(s1, s2, len) == 0;
-#elif LEANCLR_PLATFORM_POSIX
-    return strncasecmp(s1, s2, len) == 0;
-#else
     return portable_equals_ignorecase_n(s1, s2, len);
-#endif
 }
 } // namespace utils
 } // namespace leanclr

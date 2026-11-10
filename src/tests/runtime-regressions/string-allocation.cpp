@@ -45,6 +45,14 @@ static T take(RtResult<T> r)
 
 int main()
 {
+    check(utils::StringUtil::equals_ignorecase("AsSeMbLy.DLL", "assembly.dll"));
+    check(!utils::StringUtil::equals_ignorecase("I", "\xc4\xb1"));
+    check(!utils::StringUtil::equals_ignorecase("\xc3\x84", "\xc3\xa4"));
+    const char a[] = {'A', 0, 'x'}, b[] = {'a', 0, 'y'};
+    check(utils::StringUtil::equals_ignorecase_n(a, b, 100));
+    check(utils::StringUtil::equals_ignorecase_n("abcd", "ABxx", 2));
+    check(!utils::StringUtil::equals_ignorecase_n("abcd", "ABxx", 3));
+
     original = alloc::GeneralAllocation::get_memory_callbacks();
     auto cb = original;
     cb.malloc = allocate;

@@ -39,6 +39,8 @@ class StringUtil
         return std::strncmp(str1, str2, len) == 0 && str1[len] == '\0';
     }
 
+    // Deterministic byte comparison: fold ASCII A-Z only, stop at NUL.
+    // Non-ASCII bytes compare exactly; no locale or Unicode case folding.
     static bool equals_ignorecase(const char* s1, const char* s2);
 
     static bool equals_ignorecase_n(const char* s1, const char* s2, size_t len);
