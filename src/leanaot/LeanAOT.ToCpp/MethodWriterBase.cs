@@ -1149,6 +1149,12 @@ namespace LeanAOT.ToCpp
             var retType = CalcBasicBinOpRetType(op1.type, op2.type);
             var retVar = PushStack0(_curState.runStackDatas, NewEvalVariable(retType, null));
             string typeName = GetTypeName(retVar);
+            if (retType == EvalDataType.Int32 || retType == EvalDataType.Int64 || retType == EvalDataType.I)
+            {
+                string helper = opSymbol == "+" ? "add" : (opSymbol == "-" ? "sub" : "mul");
+                _bodyWriter.AddLine($"{typeName} {GetEvalVariableName(retVar)} = leanclr::utils::IntegerMath::{helper}<{typeName}>({GetEvalVariableExprWithCast(op1, typeName)}, {GetEvalVariableExprWithCast(op2, typeName)});");
+                return;
+            }
             if (op1.type == op2.type && !isUnsigned)
             {
                 _bodyWriter.AddLine($"{typeName} {GetEvalVariableName(retVar)} = {GetEvalVariableName(op1)} {opSymbol} {GetEvalVariableName(op2)};");
@@ -1164,7 +1170,10 @@ namespace LeanAOT.ToCpp
             var op = Pop();
             var retType = op.type;
             var retVar = PushStack0(_curState.runStackDatas, NewEvalVariable(retType, null));
-            _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = {opSymbol}{GetEvalVariableName(op)};");
+            if (retType == EvalDataType.Int32 || retType == EvalDataType.Int64 || retType == EvalDataType.I)
+                _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = leanclr::utils::IntegerMath::neg<{GetTypeName(retVar)}>({GetEvalVariableName(op)});");
+            else
+                _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = {opSymbol}{GetEvalVariableName(op)};");
         }
 
         private void EmitBinBitwiseOp(Instruction inst, string opSymbol, bool isUnsigned = false)
@@ -1196,16 +1205,9 @@ namespace LeanAOT.ToCpp
         {
             var shiftAmount = Pop();
             var value = Pop();
-            var retType = value.type;
-            var retVar = PushStack0(_curState.runStackDatas, NewEvalVariable(retType, null));
-            if (value.type == retType && !isUnsigned)
-            {
-                _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = {GetEvalVariableName(value)} {opSymbol} {GetEvalVariableName(shiftAmount)};");
-            }
-            else
-            {
-                _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = static_cast<{GetTypeName(retVar)}>({GetEvalVariableExpr(value, isUnsigned)} {opSymbol} {GetEvalVariableName(shiftAmount)});");
-            }
+            var retVar = PushStack0(_curState.runStackDatas, NewEvalVariable(value.type, null));
+            string helper = opSymbol == "<<" ? "shl" : (isUnsigned ? "shr_un" : "shr");
+            _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = leanclr::utils::IntegerMath::{helper}<{GetTypeName(retVar)}>({GetEvalVariableName(value)}, static_cast<uint32_t>({GetEvalVariableName(shiftAmount)}));");
         }
 
         private void AddArch64ConditionMacroBegin()

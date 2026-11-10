@@ -1,5 +1,6 @@
 #include <cmath>
 #include <limits>
+#include "utils/integer_math.h"
 
 #include "interpreter.h"
 #include "vm/class.h"

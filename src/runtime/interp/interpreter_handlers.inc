@@ -152,7 +152,7 @@ LEANCLR_CASE_BEGIN(LdcI8I8)
 #if LEANCLR_SUPPORT_UNALIGNED_ACCESS
                 dst->i64 = *(int64_t*)&ir->value_low;
 #else
-                dst->i64 = (static_cast<int64_t>(ir->value_low)) | ((static_cast<int64_t>(ir->value_high)) << 32);
+                dst->i64 = utils::IntegerMath::from_unsigned<int64_t>(static_cast<uint64_t>(ir->value_low) | (static_cast<uint64_t>(ir->value_high) << 32));
 #endif
             }
             LEANCLR_CASE_END()
@@ -935,7 +935,7 @@ LEANCLR_CASE_BEGIN(AddI4)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i32 = src1->i32 + src2->i32;
+    dst->i32 = utils::IntegerMath::add<int32_t>(src1->i32, src2->i32);
 }
 LEANCLR_CASE_END()
 
@@ -944,7 +944,7 @@ LEANCLR_CASE_BEGIN(AddI8)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i64 = src1->i64 + src2->i64;
+    dst->i64 = utils::IntegerMath::add<int64_t>(src1->i64, src2->i64);
 }
 LEANCLR_CASE_END()
 
@@ -971,7 +971,7 @@ LEANCLR_CASE_BEGIN(SubI4)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i32 = src1->i32 - src2->i32;
+    dst->i32 = utils::IntegerMath::sub<int32_t>(src1->i32, src2->i32);
 }
 LEANCLR_CASE_END()
 
@@ -980,7 +980,7 @@ LEANCLR_CASE_BEGIN(SubI8)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i64 = src1->i64 - src2->i64;
+    dst->i64 = utils::IntegerMath::sub<int64_t>(src1->i64, src2->i64);
 }
 LEANCLR_CASE_END()
 
@@ -1007,7 +1007,7 @@ LEANCLR_CASE_BEGIN(MulI4)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i32 = src1->i32 * src2->i32;
+    dst->i32 = utils::IntegerMath::mul<int32_t>(src1->i32, src2->i32);
 }
 LEANCLR_CASE_END()
 
@@ -1016,7 +1016,7 @@ LEANCLR_CASE_BEGIN(MulI8)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i64 = src1->i64 * src2->i64;
+    dst->i64 = utils::IntegerMath::mul<int64_t>(src1->i64, src2->i64);
 }
 LEANCLR_CASE_END()
 
@@ -1275,7 +1275,7 @@ LEANCLR_CASE_BEGIN(ShlI4)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i32 = src1->i32 << src2->i32;
+    dst->i32 = utils::IntegerMath::shl<int32_t>(src1->i32, static_cast<uint32_t>(src2->i32));
 }
 LEANCLR_CASE_END()
 
@@ -1284,7 +1284,7 @@ LEANCLR_CASE_BEGIN(ShlI8)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i64 = src1->i64 << src2->i32;
+    dst->i64 = utils::IntegerMath::shl<int64_t>(src1->i64, static_cast<uint32_t>(src2->i32));
 }
 LEANCLR_CASE_END()
 
@@ -1293,7 +1293,7 @@ LEANCLR_CASE_BEGIN(ShrI4)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i32 = src1->i32 >> src2->i32;
+    dst->i32 = utils::IntegerMath::shr<int32_t>(src1->i32, static_cast<uint32_t>(src2->i32));
 }
 LEANCLR_CASE_END()
 
@@ -1302,7 +1302,7 @@ LEANCLR_CASE_BEGIN(ShrI8)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->i64 = src1->i64 >> src2->i32;
+    dst->i64 = utils::IntegerMath::shr<int64_t>(src1->i64, static_cast<uint32_t>(src2->i32));
 }
 LEANCLR_CASE_END()
 
@@ -1311,7 +1311,7 @@ LEANCLR_CASE_BEGIN(ShrUnI4)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->u32 = src1->u32 >> src2->i32;
+    dst->u32 = utils::IntegerMath::shr_un<uint32_t>(src1->u32, static_cast<uint32_t>(src2->i32));
 }
 LEANCLR_CASE_END()
 
@@ -1320,7 +1320,7 @@ LEANCLR_CASE_BEGIN(ShrUnI8)
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src1 = eval_stack_base + ir->arg1;
     RtStackObject* src2 = eval_stack_base + ir->arg2;
-    dst->u64 = src1->u64 >> src2->i32;
+    dst->u64 = utils::IntegerMath::shr_un<uint64_t>(src1->u64, static_cast<uint32_t>(src2->i32));
 }
 LEANCLR_CASE_END()
 
@@ -1328,7 +1328,7 @@ LEANCLR_CASE_BEGIN(NegI4)
 {
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src = eval_stack_base + ir->src;
-    dst->i32 = -src->i32;
+    dst->i32 = utils::IntegerMath::neg<int32_t>(src->i32);
 }
 LEANCLR_CASE_END()
 
@@ -1336,7 +1336,7 @@ LEANCLR_CASE_BEGIN(NegI8)
 {
     RtStackObject* dst = eval_stack_base + ir->dst;
     RtStackObject* src = eval_stack_base + ir->src;
-    dst->i64 = -src->i64;
+    dst->i64 = utils::IntegerMath::neg<int64_t>(src->i64);
 }
 LEANCLR_CASE_END()
 

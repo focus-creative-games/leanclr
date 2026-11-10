@@ -10,6 +10,7 @@
 #include <cstring>
 #include "utils/hashset.h"
 #include "utils/hash_util.h"
+#include "utils/integer_math.h"
 
 namespace leanclr
 {
@@ -151,19 +152,19 @@ RtString* String::create_string_from_utf8chars(const char* str, int32_t length)
 
 int32_t String::get_hash_code(RtString* str)
 {
-    int32_t hash = 5381;
+    uint32_t hash = 5381;
     const Utf16Char* char_data_ptr = &str->first_char;
     const int32_t* int32_data_ptr = reinterpret_cast<const int32_t*>(char_data_ptr);
     assert((size_t)int32_data_ptr % 4 == 0);
     for (int32_t i = 0, n = str->length / 2; i < n; ++i)
     {
-        hash = ((hash << 5) + hash) + int32_data_ptr[i];
+        hash = ((hash << 5) + hash) + static_cast<uint32_t>(int32_data_ptr[i]);
     }
     if (str->length % 2 != 0)
     {
         hash = ((hash << 5) + hash) + static_cast<int32_t>(char_data_ptr[str->length - 1]);
     }
-    return hash;
+    return utils::IntegerMath::from_unsigned<int32_t>(hash);
 }
 
 int32_t String::get_string_allocation_size(int32_t length)

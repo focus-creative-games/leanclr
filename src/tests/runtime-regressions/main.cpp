@@ -30,6 +30,9 @@
 #endif
 
 using namespace leanclr;
+#if LEANCLR_REGRESSION_AOT
+extern metadata::RtAotModulesData g_aot_modules_data;
+#endif
 static std::string dll_dir;
 static int fixture_dll_loads;
 static bool reject_fixture_load;
@@ -405,6 +408,43 @@ static void compressed_signed()
     utils::BinaryReader invalid(illegal, sizeof(illegal)); int32_t result;
     check(!invalid.try_read_compressed_int32(result), "reserved compressed integer prefix");
 }
+template <typename T> static void integer_call(metadata::RtClass* klass, const char* name, T a, T b, T expected, bool shift = false)
+{
+    const auto* method = vm::Method::find_matched_method_in_class_by_name(klass, name);
+    check(method != nullptr, "integer fixture method");
+#if LEANCLR_REGRESSION_AOT
+    check(method->invoker_type == metadata::RtInvokerType::Aot, "integer fixture must execute generated AOT code");
+#endif
+    int32_t amount = static_cast<int32_t>(b);
+    const void* args[] = {&a, shift ? static_cast<const void*>(&amount) : &b};
+    auto result = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
+    check(result.is_ok() && result.unwrap() != nullptr, "integer method invocation");
+    check(*reinterpret_cast<T*>(result.unwrap()+1) == expected, name);
+}
+static void integer_arithmetic()
+{
+    auto assembly = vm::Assembly::load_by_name("RegressionFixtures");
+    check(assembly.is_ok(), "load integer fixture");
+    auto type = assembly.unwrap()->mod->get_class_by_name("IntegerFixture", false, false);
+    check(type.is_ok() && type.unwrap(), "integer fixture type");
+    auto initialized = vm::Class::initialize_all(type.unwrap());
+    check(initialized.is_ok(), "initialize integer fixture");
+    auto* klass = type.unwrap();
+    integer_call<int32_t>(klass,"Add32",INT32_MAX,1,INT32_MIN);
+    integer_call<int32_t>(klass,"Sub32",INT32_MIN,1,INT32_MAX);
+    integer_call<int32_t>(klass,"Mul32",INT32_MIN,-1,INT32_MIN);
+    integer_call<int32_t>(klass,"Neg32",INT32_MIN,0,INT32_MIN);
+    integer_call<int32_t>(klass,"Shl32",-1,31,INT32_MIN,true);
+    integer_call<int32_t>(klass,"Shr32",INT32_MIN,31,-1,true);
+    integer_call<int32_t>(klass,"ShrUn32",-1,1,INT32_MAX,true);
+    integer_call<int64_t>(klass,"Add64",INT64_MAX,1,INT64_MIN);
+    integer_call<int64_t>(klass,"Sub64",INT64_MIN,1,INT64_MAX);
+    integer_call<int64_t>(klass,"Mul64",INT64_MIN,-1,INT64_MIN);
+    integer_call<int64_t>(klass,"Neg64",INT64_MIN,0,INT64_MIN);
+    integer_call<int64_t>(klass,"Shl64",-1,63,INT64_MIN,true);
+    integer_call<int64_t>(klass,"Shr64",INT64_MIN,63,-1,true);
+    integer_call<int64_t>(klass,"ShrUn64",INT64_MIN,63,1,true);
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -413,6 +453,9 @@ int main(int argc, char** argv)
     const char* args[] = {"runtime-regressions"};
     vm::Settings::set_command_line_arguments(1, args);
     vm::Settings::set_gc_mode(gc::GCMode::DISABLED);
+#if LEANCLR_REGRESSION_AOT
+    vm::Settings::set_aot_modules_data(&g_aot_modules_data);
+#endif
     auto initialized = vm::Runtime::initialize();
     check(initialized.is_ok(), "runtime initialization failed");
     if (std::strcmp(argv[1], "zero-arrays") == 0) zero_arrays();
@@ -426,6 +469,7 @@ int main(int argc, char** argv)
     else if (std::strcmp(argv[1], "loader-once") == 0) loader_once();
     else if (std::strcmp(argv[1], "gc-accounting") == 0) gc_accounting();
     else if (std::strcmp(argv[1], "compressed-signed") == 0) compressed_signed();
+    else if (std::strcmp(argv[1], "integer-arithmetic") == 0) integer_arithmetic();
     else if (std::strcmp(argv[1], "failed-module") == 0)
     {
         auto module = vm::Assembly::load_by_name("FailedModule");

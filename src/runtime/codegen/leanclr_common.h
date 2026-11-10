@@ -3,6 +3,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <limits>
+#include "utils/integer_math.h"
 #include "vm/rt_managed_types.h"
 #include "vm/rt_exception.h"
 #include "vm/method.h"

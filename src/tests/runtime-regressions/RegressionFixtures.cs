@@ -28,3 +28,20 @@ public class FinalizerFixture
     public static FinalizerFixture Resurrected;
     ~FinalizerFixture() { if (Revive) Resurrected = this; }
 }
+public class IntegerFixture
+{
+    public static int Add32(int a, int b) { return unchecked(a+b); }
+    public static int Sub32(int a, int b) { return unchecked(a-b); }
+    public static int Mul32(int a, int b) { return unchecked(a*b); }
+    public static int Neg32(int a) { return unchecked(-a); }
+    public static int Shl32(int a, int b) { return a << b; }
+    public static int Shr32(int a, int b) { return a >> b; }
+    public static int ShrUn32(int a, int b) { return (int)((uint)a >> b); }
+    public static long Add64(long a, long b) { return unchecked(a+b); }
+    public static long Sub64(long a, long b) { return unchecked(a-b); }
+    public static long Mul64(long a, long b) { return unchecked(a*b); }
+    public static long Neg64(long a) { return unchecked(-a); }
+    public static long Shl64(long a, int b) { return a << b; }
+    public static long Shr64(long a, int b) { return a >> b; }
+    public static long ShrUn64(long a, int b) { return (long)((ulong)a >> b); }
+}
