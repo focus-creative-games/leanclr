@@ -682,6 +682,7 @@ enum class RtCCtorStatus : uint8_t
     Initing,
     InitSelf,
     InitHierarchy,
+    Failed,
 };
 
 // Class structure

@@ -14,6 +14,8 @@
 #include "metadata/cli_image.h"
 #include "metadata/module_def.h"
 #include "vm/assembly.h"
+#include "vm/method.h"
+#include "vm/rt_exception.h"
 // Until B12, the public header needs this override for a static consumer.
 #define LEANCLR_EXPORT
 #define LEANCLR_IMPORT
@@ -33,7 +35,12 @@ static bool load_file(const char* name, const char* ext, vm::FileData& output)
 {
     for (const char* sub : {"/", "/mono-4.5/"})
     {
-        std::ifstream input(dll_dir + sub + name + "." + ext, std::ios::binary | std::ios::ate);
+        std::string path = dll_dir + sub + name + "." + ext;
+#ifdef LEANCLR_REGRESSION_FIXTURE_DIR
+        if (std::strcmp(name, "RegressionFixtures") == 0 || std::strcmp(name, "FailedModule") == 0)
+            path = std::string(LEANCLR_REGRESSION_FIXTURE_DIR) + "/" + name + "." + ext;
+#endif
+        std::ifstream input(path, std::ios::binary | std::ios::ate);
         if (!input) continue;
         auto length = input.tellg();
         if (length < 0) return false;
@@ -158,6 +165,29 @@ static void exported_types()
         delete[] buffer;
     }
 }
+static void failed_initializer()
+{
+    auto assembly = vm::Assembly::load_by_name("RegressionFixtures");
+    check(assembly.is_ok(), "load initializer fixture");
+    auto type = assembly.unwrap()->mod->get_class_by_name("FailedInitializer", false, false);
+    check(type.is_ok() && type.unwrap(), "initializer fixture type");
+    vm::RtException* first_exception = nullptr;
+    for (int i = 0; i < 3; ++i)
+    {
+        auto result = vm::Runtime::run_class_static_constructor(type.unwrap());
+        check(result.is_err() && result.unwrap_err() == core::RtErr::ManagedException, "failed cctor must stay failed");
+        auto* exception = vm::Exception::get_and_clear_current_exception();
+        check(exception && exception->klass == vm::Class::get_corlib_types().cls_type_initialization_exception, "wrap type initialization error");
+        check(exception->inner_exception != nullptr, "preserve initializer cause");
+        if (i == 0) first_exception = exception;
+        else check(first_exception == exception, "reuse cached initialization error");
+        vm::GC::enable(); vm::GC::collect(0); vm::GC::disable();
+    }
+    auto recursive = assembly.unwrap()->mod->get_class_by_name("RecursiveInitializer", false, false);
+    check(recursive.is_ok() && recursive.unwrap(), "recursive initializer type");
+    auto initialized = vm::Runtime::run_class_static_constructor(recursive.unwrap());
+    check(initialized.is_ok(), "recursive cctor must not deadlock or fail");
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -172,6 +202,18 @@ int main(int argc, char** argv)
     else if (std::strcmp(argv[1], "clone-arrays") == 0) clone_arrays();
     else if (std::strcmp(argv[1], "metadata-bounds") == 0) metadata_bounds();
     else if (std::strcmp(argv[1], "exported-types") == 0) exported_types();
+    else if (std::strcmp(argv[1], "failed-initializer") == 0) failed_initializer();
+    else if (std::strcmp(argv[1], "failed-module") == 0)
+    {
+        auto module = vm::Assembly::load_by_name("FailedModule");
+        check(module.is_ok(), "load module fixture");
+        for (int i = 0; i < 2; ++i)
+        {
+            auto result = vm::Runtime::run_module_static_constructor(module.unwrap()->mod);
+            check(result.is_err(), "module initializer must remain failed");
+            check(vm::Exception::get_and_clear_current_exception() != nullptr, "cached module exception");
+        }
+    }
     else check(false, "unknown regression case");
     return 0;
 }

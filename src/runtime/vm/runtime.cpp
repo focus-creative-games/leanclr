@@ -26,6 +26,8 @@
 #include "alloc/metadata_allocation.h"
 #include "interp/machine_state.h"
 #include "utils/rt_vector.h"
+#include "utils/hashmap.h"
+#include "gc/gc_roots.h"
 
 namespace leanclr
 {
@@ -410,29 +412,80 @@ void Runtime::shutdown()
     // todo: implement shutdown logic
 }
 
+struct InitializerFailure
+{
+    RtErr error;
+    RtException* exception;
+};
+static utils::HashMap<const metadata::RtClass*, InitializerFailure> s_initializer_failures;
+
+void register_runtime_gc_roots()
+{
+    gc::GcRoots::register_visit_object_roots([](gc::GcVisitObjectRoot visit, void* context) {
+        for (auto& entry : s_initializer_failures)
+            if (entry.second.exception) visit(entry.second.exception, context);
+    });
+}
+
+static RtResultVoid fail_initializer(metadata::RtClass* klass, RtErr error)
+{
+    RtException* original = Exception::raise_error_as_exception(error, nullptr, nullptr);
+    RtException* exception = original;
+    if (original != nullptr)
+    {
+        auto wrapped = LEANCLR_NEWOBJ_INTERNAL(Class::get_corlib_types().cls_type_initialization_exception, "Runtime::type_initializer_failure");
+        if (wrapped.is_ok())
+        {
+            exception = reinterpret_cast<RtException*>(wrapped.unwrap());
+            exception->inner_exception = original;
+        }
+        Exception::set_current_exception(exception);
+        error = RtErr::ManagedException;
+    }
+    s_initializer_failures[klass] = {error, exception};
+    klass->cctor_status = metadata::RtCCtorStatus::Failed;
+    RET_ERR(error);
+}
+
+static RtResultVoid run_initializer(const metadata::RtClass* type, bool run_module)
+{
+    auto* klass = const_cast<metadata::RtClass*>(type);
+    if (klass->cctor_status == metadata::RtCCtorStatus::Failed)
+    {
+        const auto& failure = s_initializer_failures.at(klass);
+        if (failure.exception) Exception::set_current_exception(failure.exception);
+        RET_ERR(failure.error);
+    }
+    // Recursive access on the single runtime thread observes partial initialization.
+    if (klass->cctor_status != metadata::RtCCtorStatus::NotInited)
+        RET_VOID_OK();
+    RET_ERR_ON_FAIL(Class::initialize_all(klass));
+    Class::set_cctor_initing(klass);
+    if (run_module)
+    {
+        auto module = Runtime::run_module_static_constructor(klass->image);
+        if (module.is_err()) return fail_initializer(klass, module.unwrap_err());
+    }
+    const auto* cctor = Class::get_static_constructor(klass);
+    if (cctor)
+    {
+        auto invoked = invoke_without_run_cctor(cctor, nullptr, nullptr);
+        if (invoked.is_err()) return fail_initializer(klass, invoked.unwrap_err());
+    }
+    Class::set_cctor_finished(klass);
+    RET_VOID_OK();
+}
+
 RtResultVoid Runtime::run_class_static_constructor(const metadata::RtClass* klass)
 {
-    assert(klass);
-
-    if (Class::is_cctor_not_finished(klass))
-    {
-        RET_ERR_ON_FAIL(run_module_static_constructor(klass->image));
-        RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
-        Class::set_cctor_finished(const_cast<metadata::RtClass*>(klass));
-
-        const metadata::RtMethodInfo* cctor = Class::get_static_constructor(klass);
-        if (cctor)
-        {
-            RET_ERR_ON_FAIL(invoke_without_run_cctor(cctor, nullptr, nullptr));
-        }
-    }
-
-    RET_VOID_OK();
+    return run_initializer(klass, true);
 }
 
 RtResultVoid Runtime::run_class_static_constructor_hierarchy(const metadata::RtClass* klass)
 {
     assert(klass);
+    if (klass->cctor_status == metadata::RtCCtorStatus::Initing)
+        RET_VOID_OK();
     if (Class::is_cctor_not_finished(klass))
     {
         RET_ERR_ON_FAIL(run_class_static_constructor(klass));
@@ -442,7 +495,7 @@ RtResultVoid Runtime::run_class_static_constructor_hierarchy(const metadata::RtC
     {
         RET_ERR_ON_FAIL(run_class_static_constructor_hierarchy(parent_klass));
     }
-    if (!Class::is_cctor_not_finished_hierarchy(klass))
+    if (klass->cctor_status == metadata::RtCCtorStatus::InitSelf)
     {
         Class::set_cctor_finished_hierarchy(const_cast<metadata::RtClass*>(klass));
     }
@@ -466,17 +519,10 @@ RtResult<const metadata::RtMethodInfo*> Runtime::get_module_constructor(metadata
 
 RtResultVoid Runtime::run_module_static_constructor(metadata::RtModuleDef* module)
 {
-    if (!module->is_module_cctor_finished())
-    {
-        module->set_module_cctor_finished();
-
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, cctor, get_module_constructor(module));
-
-        if (cctor != nullptr)
-        {
-            RET_ERR_ON_FAIL(invoke_without_run_cctor(cctor, nullptr, nullptr));
-        }
-    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, global, module->get_global_type_def());
+    if (global != nullptr)
+        RET_ERR_ON_FAIL(run_initializer(global, false));
+    module->set_module_cctor_finished();
     RET_VOID_OK();
 }
 

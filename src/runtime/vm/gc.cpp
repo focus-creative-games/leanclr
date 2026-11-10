@@ -23,6 +23,7 @@ static void* s_heap_end = nullptr;
 static void* s_heap_top = nullptr;
 static void* s_heap_bottom = nullptr;
 
+void register_runtime_gc_roots();
 void register_exception_gc_roots();
 void register_string_gc_roots();
 void register_appdomain_gc_roots();
@@ -32,6 +33,7 @@ void register_threading_gc_roots();
 
 void register_all_gc_roots()
 {
+    register_runtime_gc_roots();
     register_exception_gc_roots();
     register_string_gc_roots();
     register_appdomain_gc_roots();
