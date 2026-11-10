@@ -736,6 +736,17 @@ int main(int argc, char** argv)
         check(vm::GCHandle::get_target(weak) == nullptr, "unrooted nested graph must collect");
         vm::GCHandle::free_handle(weak);
     }
+    else if (std::strcmp(argv[1], "lifecycle") == 0)
+    {
+        check(vm::Runtime::get_state() == vm::Runtime::State::Running, "runtime running");
+        auto again = vm::Runtime::initialize();
+        check(again.is_err() && again.unwrap_err() == RtErr::InvalidOperation, "reject double initialization");
+        vm::Runtime::shutdown();
+        vm::Runtime::shutdown();
+        check(vm::Runtime::get_state() == vm::Runtime::State::Stopped, "terminal shutdown");
+        auto invoke = vm::Runtime::invoke_with_run_cctor(nullptr, nullptr, nullptr);
+        check(invoke.is_err() && invoke.unwrap_err() == RtErr::InvalidOperation, "reject execution after shutdown");
+    }
     else if (std::strcmp(argv[1], "failed-module") == 0)
     {
         auto module = vm::Assembly::load_by_name("FailedModule");

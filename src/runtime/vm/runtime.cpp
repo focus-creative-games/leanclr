@@ -1,4 +1,5 @@
 #include "runtime.h"
+#include "utils/scope_guard.h"
 #include "host/services.h"
 #include "bcl/adapter.h"
 
@@ -320,8 +321,22 @@ static RtResult<RtObject*> invoke_without_run_cctor(const metadata::RtMethodInfo
 
 // Public Runtime functions implementation
 
+namespace
+{
+Runtime::State runtime_state = Runtime::State::Uninitialized;
+}
+
+Runtime::State Runtime::get_state()
+{
+    return runtime_state;
+}
+
 RtResultVoid Runtime::initialize()
 {
+    if (runtime_state != State::Uninitialized)
+        return RtErr::InvalidOperation;
+    runtime_state = State::Initializing;
+    auto failed = utils::make_scope_exit([]() { runtime_state = State::Failed; });
     host::Services::freeze();
     // Initialize subsystems
     alloc::MetadataAllocation::init();
@@ -368,12 +383,20 @@ RtResultVoid Runtime::initialize()
         corlib_aot_module_data->deferred_initializer(corlib_mod);
     }
 
+    runtime_state = State::Running;
+    failed.dismiss();
     RET_VOID_OK();
 }
 
 void Runtime::shutdown()
 {
-    // todo: implement shutdown logic
+    // Shutdown is terminal quiescence. Process-lifetime metadata/heap storage
+    // remains owned by this runtime; unloading/reinitialization is unsupported.
+    // A reentrant shutdown during startup must not invalidate the init stack.
+    if (runtime_state == State::Initializing || runtime_state == State::Stopped)
+        return;
+    Environment::shutdown();
+    runtime_state = State::Stopped;
 }
 
 struct InitializerFailure
@@ -449,11 +472,15 @@ static RtResultVoid run_initializer(const metadata::RtClass* type, bool run_modu
 
 RtResultVoid Runtime::run_class_static_constructor(const metadata::RtClass* klass)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     return run_initializer(klass, true);
 }
 
 RtResultVoid Runtime::run_class_static_constructor_hierarchy(const metadata::RtClass* klass)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(klass);
     if (klass->cctor_status == metadata::RtCCtorStatus::Initing)
         RET_VOID_OK();
@@ -490,6 +517,8 @@ RtResult<const metadata::RtMethodInfo*> Runtime::get_module_constructor(metadata
 
 RtResultVoid Runtime::run_module_static_constructor(metadata::RtModuleDef* module)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, global, module->get_global_type_def());
     if (global != nullptr)
         RET_ERR_ON_FAIL(run_initializer(global, false));
@@ -499,6 +528,8 @@ RtResultVoid Runtime::run_module_static_constructor(metadata::RtModuleDef* modul
 
 RtResult<RtObject*> Runtime::invoke_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, const void* const* params)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))
@@ -512,6 +543,8 @@ RtResult<RtObject*> Runtime::invoke_with_run_cctor(const metadata::RtMethodInfo*
 RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params,
                                                                        int32_t paramCount)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     const metadata::RtMethodInfo* actual_method = method;
@@ -559,6 +592,8 @@ RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const met
 
 RtResult<RtObject*> Runtime::invoke_object_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params, int32_t paramCount)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))
@@ -571,6 +606,8 @@ RtResult<RtObject*> Runtime::invoke_object_arguments_with_run_cctor(const metada
 
 RtResult<RtObject*> Runtime::invoke_array_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     RtObject** params_data_start;
     int32_t paramCount;
     if (params)
@@ -588,6 +625,8 @@ RtResult<RtObject*> Runtime::invoke_array_arguments_without_run_cctor(const meta
 
 RtResult<RtObject*> Runtime::invoke_array_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))
     {
         RET_ERR_ON_FAIL(run_class_static_constructor(method->parent));
@@ -599,6 +638,8 @@ RtResult<RtObject*> Runtime::invoke_array_arguments_with_run_cctor(const metadat
 RtResultVoid Runtime::invoke_stackobject_arguments_without_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                                      interp::RtStackObject* ret) noexcept
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
@@ -608,6 +649,8 @@ RtResultVoid Runtime::invoke_stackobject_arguments_without_run_cctor(const metad
 RtResultVoid Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                                              interp::RtStackObject* ret) noexcept
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
@@ -617,6 +660,8 @@ RtResultVoid Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(con
 RtResultVoid Runtime::invoke_stackobject_arguments_with_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                                   interp::RtStackObject* ret) noexcept
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))

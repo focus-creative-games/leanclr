@@ -145,3 +145,17 @@ starts with empty service and memory tables. Install complete MemoryCallbacks an
 the required ServiceCallbacks before initialization. C/C++ standard library and
 Mono adapter shims are still required; CUSTOM does not mean freestanding C++.
 No native OS ABI is selected in PORTABLE or CUSTOM, even on a Windows compiler.
+
+## Runtime lifetime
+
+Runtime calls and host configuration belong to one runtime thread. Initialization
+is single attempt: Uninitialized -> Initializing -> Running or Failed. Duplicate
+and reentrant attempts return InvalidOperation. Failed startup retains any already
+published metadata/roots for process lifetime; callbacks and assembly backing
+storage must outlive it. It cannot be retried in the same process.
+
+Shutdown is idempotent terminal quiescence, marks HasShutdownStarted, and rejects
+subsequent Runtime invocation. It does not unload assemblies, reclaim global
+metadata/GC heaps, run finalizers, detach threads, or support reinitialization.
+Hosts must stop calling into the runtime before shutdown. Reentrant shutdown from
+an initialization callback is ignored while the initialization stack is active.
