@@ -23,6 +23,7 @@
 #include "metadata/module_def.h"
 #include "metadata/aot_module.h"
 #include "alloc/general_allocation.h"
+#include "alloc/scoped_buffer.h"
 #include "alloc/metadata_allocation.h"
 #include "interp/machine_state.h"
 #include "utils/rt_vector.h"
@@ -40,32 +41,12 @@ struct ScopeBufferGuard
     static constexpr size_t kTempArgsBufferSize = 16;
     static constexpr size_t kTempRetBufferSize = 4;
 
-    interp::RtStackObject* args;
-    interp::RtStackObject* ret;
-    size_t args_size;
-    size_t ret_size;
-    interp::RtStackObject args_temp_buffer[kTempArgsBufferSize];
-    interp::RtStackObject ret_temp_buffer[kTempRetBufferSize];
+    alloc::ScopedBuffer<interp::RtStackObject, kTempArgsBufferSize> args;
+    alloc::ScopedBuffer<interp::RtStackObject, kTempRetBufferSize> ret;
     utils::Vector<void*> temp_byref_valuetype_args_buffer;
-
-    ScopeBufferGuard() : args(nullptr), ret(nullptr), args_size(0), ret_size(0)
-    {
-    }
 
     ~ScopeBufferGuard()
     {
-        // Free args buffer if allocated
-        if (args_size > kTempArgsBufferSize && args != nullptr)
-        {
-            alloc::GeneralAllocation::free(args);
-        }
-
-        // Free ret buffer if allocated
-        if (ret_size > kTempRetBufferSize && ret != nullptr)
-        {
-            alloc::GeneralAllocation::free(ret);
-        }
-
         // Free temporary byref value type buffers
         for (size_t i = 0; i < temp_byref_valuetype_args_buffer.size(); ++i)
         {
@@ -76,7 +57,8 @@ struct ScopeBufferGuard
     void* alloc_zeroed_temp_value_type_buffer(size_t size)
     {
         void* buffer = alloc::GeneralAllocation::malloc_zeroed(size);
-        if (!buffer) return nullptr;
+        if (!buffer)
+            return nullptr;
         if (!temp_byref_valuetype_args_buffer.try_push_back(buffer))
         {
             alloc::GeneralAllocation::free(buffer);
@@ -89,6 +71,7 @@ struct ScopeBufferGuard
     {
         interp::RtStackObject* args_buffer;
         interp::RtStackObject* ret_buffer;
+
         ArgsAndRetBuffers(interp::RtStackObject* args_buf, interp::RtStackObject* ret_buf) : args_buffer(args_buf), ret_buffer(ret_buf)
         {
         }
@@ -96,38 +79,9 @@ struct ScopeBufferGuard
 
     RtResult<ArgsAndRetBuffers> prepare_args_and_ret_buffer(const metadata::RtMethodInfo* method)
     {
-        size_t total_args_size = method->total_arg_stack_object_size;
-        size_t ret_size_val = method->ret_stack_object_size;
-
-        interp::RtStackObject* args_buffer;
-        if (total_args_size <= kTempArgsBufferSize)
-        {
-            args_buffer = args_temp_buffer;
-            std::memset(args_buffer, 0, total_args_size * sizeof(interp::RtStackObject));
-        }
-        else
-        {
-            args_buffer = alloc::GeneralAllocation::calloc_any<interp::RtStackObject>(total_args_size);
-            if (!args_buffer) RET_ERR(RtErr::OutOfMemory);
-        }
-        args_size = total_args_size;
-        args = args_buffer;
-
-        interp::RtStackObject* ret_buffer;
-        if (ret_size_val <= kTempRetBufferSize)
-        {
-            ret_buffer = ret_temp_buffer;
-            std::memset(ret_buffer, 0, ret_size_val * sizeof(interp::RtStackObject));
-        }
-        else
-        {
-            ret_buffer = alloc::GeneralAllocation::calloc_any<interp::RtStackObject>(ret_size_val);
-            if (!ret_buffer) RET_ERR(RtErr::OutOfMemory);
-        }
-        ret_size = ret_size_val;
-        ret = ret_buffer;
-
-        RET_OK(ArgsAndRetBuffers(args_buffer, ret_buffer));
+        if (!args.try_allocate_zeroed(method->total_arg_stack_object_size) || !ret.try_allocate_zeroed(method->ret_stack_object_size))
+            RET_ERR(RtErr::OutOfMemory);
+        RET_OK(ArgsAndRetBuffers(args.data(), ret.data()));
     }
 
     RtResult<ArgsAndRetBuffers> convert_params_to_temp_buffer(const metadata::RtMethodInfo* method, RtObject* obj, const void* const* params)
@@ -280,7 +234,8 @@ struct ScopeBufferGuard
                 if (Class::is_value_type(param_klass))
                 {
                     void* buffer = alloc_zeroed_temp_value_type_buffer(param_klass->instance_size_without_header);
-                    if (!buffer) RET_ERR(RtErr::OutOfMemory);
+                    if (!buffer)
+                        RET_ERR(RtErr::OutOfMemory);
                     RET_ERR_ON_FAIL(Object::unbox_any(param, param_klass, buffer, false));
                     dst.ptr = buffer;
                 }
@@ -423,14 +378,18 @@ struct InitializerFailure
     RtErr error;
     RtException* exception;
 };
+
 static utils::HashMap<const metadata::RtClass*, InitializerFailure> s_initializer_failures;
 
 void register_runtime_gc_roots()
 {
-    gc::GcRoots::register_visit_object_roots([](gc::GcVisitObjectRoot visit, void* context) {
-        for (auto& entry : s_initializer_failures)
-            if (entry.second.exception) visit(entry.second.exception, context);
-    });
+    gc::GcRoots::register_visit_object_roots(
+        [](gc::GcVisitObjectRoot visit, void* context)
+        {
+            for (auto& entry : s_initializer_failures)
+                if (entry.second.exception)
+                    visit(entry.second.exception, context);
+        });
 }
 
 static RtResultVoid fail_initializer(metadata::RtClass* klass, RtErr error)
@@ -459,7 +418,8 @@ static RtResultVoid run_initializer(const metadata::RtClass* type, bool run_modu
     if (klass->cctor_status == metadata::RtCCtorStatus::Failed)
     {
         const auto& failure = s_initializer_failures.at(klass);
-        if (failure.exception) Exception::set_current_exception(failure.exception);
+        if (failure.exception)
+            Exception::set_current_exception(failure.exception);
         RET_ERR(failure.error);
     }
     // Recursive access on the single runtime thread observes partial initialization.
@@ -470,13 +430,15 @@ static RtResultVoid run_initializer(const metadata::RtClass* type, bool run_modu
     if (run_module)
     {
         auto module = Runtime::run_module_static_constructor(klass->image);
-        if (module.is_err()) return fail_initializer(klass, module.unwrap_err());
+        if (module.is_err())
+            return fail_initializer(klass, module.unwrap_err());
     }
     const auto* cctor = Class::get_static_constructor(klass);
     if (cctor)
     {
         auto invoked = invoke_without_run_cctor(cctor, nullptr, nullptr);
-        if (invoked.is_err()) return fail_initializer(klass, invoked.unwrap_err());
+        if (invoked.is_err())
+            return fail_initializer(klass, invoked.unwrap_err());
     }
     Class::set_cctor_finished(klass);
     RET_VOID_OK();
@@ -556,7 +518,8 @@ RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const met
     if (return_instance)
     {
         assert(!Class::is_nullable_type(method->parent));
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, new_obj, LEANCLR_NEWOBJ_INTERNAL(method->parent, "Runtime::invoke_object_arguments_without_run_cctor"));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, new_obj,
+                                                LEANCLR_NEWOBJ_INTERNAL(method->parent, "Runtime::invoke_object_arguments_without_run_cctor"));
         actual_obj = new_obj;
     }
 

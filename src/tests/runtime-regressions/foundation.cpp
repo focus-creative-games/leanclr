@@ -1,4 +1,6 @@
 #include "utils/checked_size.h"
+#include "utils/scope_guard.h"
+#include "alloc/scoped_buffer.h"
 #include "utils/binary_reader.h"
 #include "vm/array_layout.h"
 #include <cstdio>
@@ -41,5 +43,21 @@ int main()
     const auto previous = layout;
     check(!vm::ArrayLayout::try_compute(SIZE_MAX, 2, 1, layout) && layout.allocation_size == previous.allocation_size, "array size overflow");
     check(!vm::ArrayLayout::try_compute(1, 0, SIZE_MAX, layout), "bounds size overflow");
+    alloc::ScopedBuffer<uint64_t, 2> buffer;
+    check(buffer.try_allocate_zeroed(2) && buffer.size() == 2 && buffer.data()[1] == 0, "inline scratch buffer");
+    buffer.data()[0] = 42;
+    auto* inline_data = buffer.data();
+    check(!buffer.try_allocate_zeroed(SIZE_MAX) && buffer.data() == inline_data && buffer.data()[0] == 42, "scratch overflow preserves buffer");
+    check(buffer.try_allocate_zeroed(20) && buffer.data() != inline_data && buffer.data()[19] == 0, "heap scratch buffer");
+    check(buffer.try_allocate_zeroed(1) && buffer.data() == inline_data && buffer.data()[0] == 0, "heap to inline ownership transition");
+    check(buffer.try_allocate_zeroed(0) && buffer.size() == 0, "empty scratch buffer");
+    int cleanups = 0;
+    {
+        auto guard = utils::make_scope_exit([&cleanups]() { ++cleanups; });
+        auto moved = std::move(guard);
+        auto dismissed = utils::make_scope_exit([&cleanups]() { cleanups += 100; });
+        dismissed.dismiss();
+    }
+    check(cleanups == 1, "moved cleanup runs once and dismissed cleanup never runs");
     std::puts("foundation tests passed");
 }

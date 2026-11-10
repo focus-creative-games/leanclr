@@ -146,8 +146,12 @@ class ScopeFreeGuard
   public:
     ScopeFreeGuard(void* ptr) : ptr(ptr)
     {
-        assert(ptr != nullptr);
     }
+
+    ScopeFreeGuard(const ScopeFreeGuard&) = delete;
+    ScopeFreeGuard& operator=(const ScopeFreeGuard&) = delete;
+    ScopeFreeGuard(ScopeFreeGuard&&) = delete;
+    ScopeFreeGuard& operator=(ScopeFreeGuard&&) = delete;
 
     ~ScopeFreeGuard()
     {

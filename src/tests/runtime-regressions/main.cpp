@@ -392,6 +392,17 @@ static void allocation_failures()
         check(result.is_err() && result.unwrap_err() == core::RtErr::OutOfMemory, "argument/return buffer OOM must propagate");
         check(callback_allocations.empty(), "partial invocation allocation must be freed");
     }
+    const uint8_t invalid_image[64] = {};
+    for (int allowed = 0; allowed < 5; ++allowed)
+    {
+        allocations_before_failure = allowed;
+        alloc::GeneralAllocation::set_memory_callbacks(callbacks);
+        auto loaded = vm::Assembly::load_from_data({invalid_image, sizeof(invalid_image), true}, nullptr);
+        alloc::GeneralAllocation::set_memory_callbacks(saved_callbacks);
+        check(loaded.is_err() && (loaded.unwrap_err() == RtErr::OutOfMemory || loaded.unwrap_err() == RtErr::BadImageFormat),
+              "assembly allocation and parse failures must return an error");
+        check(callback_allocations.empty(), "assembly rollback must free partially constructed pools");
+    }
     const int32_t dims[] = {100, 100};
     auto warm = LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(vm::Class::get_corlib_types().cls_int32, 2, dims, nullptr, gc::GcAllocSite::none());
     check(warm.is_ok(), "warm multidimensional array class");
