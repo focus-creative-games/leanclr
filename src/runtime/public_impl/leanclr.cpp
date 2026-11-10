@@ -141,11 +141,12 @@ extern "C"
     void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass**& class_buf, size_t& class_buf_capacity, LeanclrException** out_exception)
     {
         metadata::RtModuleDef* rt_mod = reinterpret_cast<metadata::RtModuleDef*>(mod);
-        size_t copy_count = std::min(class_buf_capacity, (size_t)rt_mod->get_class_count());
+        const size_t capacity = class_buf_capacity;
         utils::Vector<metadata::RtClass*> classes;
         auto ret = rt_mod->get_types(export_only, classes);
         class_buf_capacity = 0;
         SET_EXCEPTION_ON_ERR(ret, out_exception);
+        const size_t copy_count = std::min(capacity, classes.size());
         for (size_t i = 0; i < copy_count; i++)
         {
             class_buf[i] = reinterpret_cast<LeanclrClass*>(classes[i]);

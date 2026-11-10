@@ -12,6 +12,12 @@
 #include "vm/gchandle.h"
 #include "utils/binary_reader.h"
 #include "metadata/cli_image.h"
+#include "metadata/module_def.h"
+#include "vm/assembly.h"
+// Until B12, the public header needs this override for a static consumer.
+#define LEANCLR_EXPORT
+#define LEANCLR_IMPORT
+#include "public/leanclr.h"
 #ifdef _WIN32
 #define NOMINMAX
 #include <windows.h>
@@ -133,6 +139,25 @@ static void metadata_bounds()
     VirtualFree(block, 0, MEM_RELEASE);
 #endif
 }
+static void exported_types()
+{
+    auto* mod = vm::Assembly::get_corlib()->mod;
+    utils::Vector<metadata::RtClass*> expected;
+    auto result = mod->get_types(true, expected);
+    check(result.is_ok(), "get exported types");
+    for (size_t capacity : {size_t(0), size_t(2), size_t(mod->get_class_count())})
+    {
+        auto** buffer = new LeanclrClass*[capacity + 1];
+        buffer[capacity] = reinterpret_cast<LeanclrClass*>(uintptr_t(1));
+        size_t written = capacity;
+        LeanclrException* error = reinterpret_cast<LeanclrException*>(uintptr_t(1));
+        leanclr_get_classes(reinterpret_cast<LeanclrModuleDef*>(mod), true, buffer, written, &error);
+        check(error == nullptr && written == std::min(capacity, expected.size()), "exported count must use filtered results");
+        for (size_t i = 0; i < written; ++i) check(buffer[i] == reinterpret_cast<LeanclrClass*>(expected[i]), "exported type mismatch");
+        check(buffer[capacity] == reinterpret_cast<LeanclrClass*>(uintptr_t(1)), "exported buffer overrun");
+        delete[] buffer;
+    }
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -146,6 +171,7 @@ int main(int argc, char** argv)
     if (std::strcmp(argv[1], "zero-arrays") == 0) zero_arrays();
     else if (std::strcmp(argv[1], "clone-arrays") == 0) clone_arrays();
     else if (std::strcmp(argv[1], "metadata-bounds") == 0) metadata_bounds();
+    else if (std::strcmp(argv[1], "exported-types") == 0) exported_types();
     else check(false, "unknown regression case");
     return 0;
 }
