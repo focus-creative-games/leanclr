@@ -18,6 +18,13 @@ public class GenericHolder<T>
 }
 public static class GenericFixtures
 {
+    public static object NullReferenceResult() { return null; }
+    public static void VoidResult(int divisor) { int value = 12 / divisor; if (value == 0) throw new Exception(); }
+    public interface IReference { object Get(); }
+    public interface IVoid { void Touch(); }
+    public sealed class ReferenceReader : IReference, IVoid { public object Get() { return null; } public void Touch() { } }
+    public static object ReferenceBridge(IReference value) { return value.Get(); }
+    public static void VoidBridge(IVoid value) { value.Touch(); }
     public interface IRead { int Read(); }
     public interface IGenericRead<T> { T Read(); }
     public sealed class GenericReader<T> : IRead { public int Read() { return typeof(T) == typeof(int) ? 19 : 23; } }
@@ -65,6 +72,9 @@ public static class GenericFixtures
         if (identity(43) != 43) return 19;
         Func<int> reader = genericReader.Read;
         if (reader() != 19) return 20;
+        if ((string)GenericLibrary.Reference("cross-module") != "cross-module") return 21;
+        if (GenericLibrary.Identity<string>("cross-generic") != "cross-generic") return 22;
+        GenericLibrary.Touch(3);
         return 0;
     }
 }

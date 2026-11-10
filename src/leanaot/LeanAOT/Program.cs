@@ -112,6 +112,9 @@ internal class Program
         [Option("leanaot-max-generic-depth", Default = 32, HelpText = "Maximum closed generic call expansion depth.")]
         public int MaxGenericDepth { get; set; }
 
+        [Option("leanaot-lightweight-returns", HelpText = "Opt-in scalar ABI for AOT void and aligned managed reference returns; runtime APIs keep Result.")]
+        public bool LightweightAotReturns { get; set; }
+
         /// <summary>
         /// LeanAOT-only: PGO-generated exact include lists (repeat for multiple files).
         /// </summary>
@@ -528,6 +531,7 @@ internal class Program
         config.ConvertToCpp = options.ConvertToCpp;
         config.EnableAnalytics = options.EnableAnalytics;
         config.EmitNullChecks = options.EmitNullChecks;
+        config.LightweightAotReturns = options.LightweightAotReturns;
         config.EnableArrayBoundsCheck = options.EnableArrayBoundsCheck;
         config.EmitMethodMap = options.EmitMethodMap;
         config.EmitSourceMapping = options.EmitSourceMapping;
@@ -707,6 +711,7 @@ internal class Program
                 schema = 1,
                 max_instances = manifestArgs.MaxGenericInstances,
                 max_depth = manifestArgs.MaxGenericDepth,
+                return_protocol = globalServices.Config.LightweightAotReturns ? "lightweight-void-reference" : "result",
                 instances = manifest.GenericMethodPlans.Select(p => new { method = p.Method.FullName, key = p.Key, depth = p.Depth }),
                 fallbacks = manifest.GenericFallbacks,
                 method_fallbacks = manifest.MethodFallbacks,

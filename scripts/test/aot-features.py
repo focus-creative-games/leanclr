@@ -22,10 +22,11 @@ def main():
     ap.add_argument('--target', choices=['native', 'wasm', 'all'], default='native')
     ap.add_argument('--config', choices=['Debug', 'Release'], default='Release')
     ap.add_argument('--arch', choices=['x64', 'Win32'], default='x64')
+    ap.add_argument('--lightweight-returns', action='store_true')
     opts = ap.parse_args()
     if opts.target != 'native' and not opts.emsdk:
         ap.error('--emsdk is required for wasm')
-    output = ROOT / 'out/aot-features'
+    output = ROOT / ('out/aot-features-lightweight' if opts.lightweight_returns else 'out/aot-features')
     output.mkdir(parents=True, exist_ok=True)
     csc = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
     ilasm = csc.with_name('ilasm.exe')
@@ -54,8 +55,10 @@ def main():
             if family == 'eh': command += ['-a', 'FilterFixture']
             else: command += ['-a', 'GenericLibrary']
             if variant == 'disabled': command += ['--leanaot-max-generic-instances', '0']
+            if opts.lightweight_returns: command += ['--leanaot-lightweight-returns']
             run(command, output / f'{family}-{variant}-generate.log')
             report = json.loads((generated / 'generic-aot-report.json').read_text())
+            assert report['return_protocol'] == ('lightweight-void-reference' if opts.lightweight_returns else 'result')
             if family == 'eh':
                 assert any(x['Reason'] == 'eh-filter-or-fault' for x in report['method_fallbacks'])
                 assert any(x['Reason'] == 'eh-handler-inside-finally' for x in report['method_fallbacks'])
@@ -67,7 +70,7 @@ def main():
                 prefix = 'GENERIC' if family == 'generic' else 'EH'
                 command = ['cmake', '-S', ROOT / f'src/tests/{family}-aot', '-B', build,
                            f'-DCMAKE_BUILD_TYPE={opts.config}', '-DCMAKE_TRY_COMPILE_CONFIGURATION=Release',
-                           f'-D{prefix}_AOT_CPP={generated}', f'-D{prefix}_AOT_DLLS:STRING=out/aot-features/{family}/managed']
+                           f'-D{prefix}_AOT_CPP={generated}', f'-D{prefix}_AOT_DLLS:STRING={stage.relative_to(ROOT).as_posix()}']
                 if family == 'generic': command += [f'-DGENERIC_AOT_DISABLED={"ON" if variant == "disabled" else "OFF"}']
                 if target == 'native': command += ['-A', opts.arch]
                 else:

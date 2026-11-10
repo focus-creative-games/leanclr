@@ -10,6 +10,7 @@ target_include_directories(generic-aot PRIVATE "${GENERIC_AOT_CPP}")
 target_link_libraries(generic-aot PRIVATE leanclr)
 set_target_properties(generic-aot PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
 enable_testing()
+add_subdirectory(../aot-returns aot-returns)
 if(EMSCRIPTEN)
     set_target_properties(generic-aot PROPERTIES SUFFIX ".js")
     target_link_options(generic-aot PRIVATE -O2 -sENVIRONMENT=node -sALLOW_MEMORY_GROWTH=1 -lnodefs.js

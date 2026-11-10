@@ -20,7 +20,11 @@ env:
 
 jobs:
   aot-features:
-    name: Generic AOT and exception handoff
+    name: AOT features (${{ matrix.protocol }})
+    strategy:
+      fail-fast: false
+      matrix:
+        protocol: [result, lightweight]
     runs-on: windows-2022
     timeout-minutes: 60
     steps:
@@ -44,16 +48,16 @@ jobs:
           .emsdk/emsdk.bat activate 4.0.12
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify native and Wasm AOT/fallback paths
-        run: python scripts/test/aot-features.py --target all --emsdk .emsdk
+        run: python scripts/test/aot-features.py --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
       - name: Verify debug Result and frame invariants
-        run: python scripts/test/aot-features.py --target native --config Debug
+        run: python scripts/test/aot-features.py --target native --config Debug ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
       - name: Verify 32-bit native context and snapshot ABI
-        run: python scripts/test/aot-features.py --target native --arch Win32
+        run: python scripts/test/aot-features.py --target native --arch Win32 ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
-          name: aot-feature-failures
-          path: out/aot-features/*.log
+          name: aot-feature-failures-${{ matrix.protocol }}
+          path: out/aot-features*/*.log
 
   native:
     name: ${{ matrix.name }}

@@ -1,3 +1,4 @@
+#include "../aot-returns/test_assert.h"
 #include "alloc/general_allocation.h"
 #include "metadata/metadata_cache.h"
 #include "metadata/module_def.h"
@@ -61,6 +62,7 @@ static uint32_t invoke(const metadata::RtMethodInfo* method, const void** args)
 
 int main(int argc, char** argv)
 {
+    configure_test_assertions();
     check(argc >= 2, "DLL directory required");
     dlls = argv[1];
     vm::Settings::set_file_loader(load);

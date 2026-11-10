@@ -10,6 +10,7 @@
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
+#include <cstring>
 #include <fstream>
 #include <string>
 
@@ -72,9 +73,12 @@ int main(int argc, char** argv)
     auto identity_method = vm::GenericMethod::get_method(identity_def, nullptr, identity_inst.unwrap());
     require(identity_method.is_ok(), "Generic benchmark method");
     const bool generic_is_aot = identity_method.unwrap()->invoker_type == metadata::RtInvokerType::Aot;
-    const char* methods[] = {"Arithmetic", "Calls", "Properties", "ArrayLoop", "Interfaces", "Structs", "Generics", "Exceptions"};
-    const char* workloads[] = {"arithmetic", "calls", "properties", "array", "interfaces", "structs", "generics", "exceptions"};
-    for (unsigned k = 0; k < 8; ++k)
+    const char* methods[] = {"Arithmetic", "Calls",    "Properties", "ArrayLoop",   "Interfaces",
+                             "Structs",    "Generics", "Exceptions", "VoidReturns", "ReferenceReturns"};
+    const char* workloads[] = {"arithmetic", "calls",    "properties", "array",        "interfaces",
+                               "structs",    "generics", "exceptions", "void-returns", "reference-returns"};
+    const unsigned workload_count = argc > 3 && std::strcmp(argv[3], "returns") == 0 ? 10 : 8;
+    for (unsigned k = 0; k < workload_count; ++k)
     {
         const auto* method = vm::Method::find_matched_method_in_class_by_name(klass, methods[k]);
         require(method != nullptr, "Benchmark method missing");

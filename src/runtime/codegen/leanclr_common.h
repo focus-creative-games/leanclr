@@ -1,4 +1,5 @@
 #pragma once
+#include "aot_result.h"
 
 #include <cstdlib>
 #include <cstring>
@@ -415,8 +416,8 @@ constexpr size_t get_stack_object_size_for_type()
     return (sizeof(T) + sizeof(interp::RtStackObject) - 1) / sizeof(interp::RtStackObject);
 }
 
-template <typename T>
-RtResultVoid set_ret_or_return_error(const RtResult<T>& result, interp::RtStackObject* ret) noexcept
+template <typename TResult>
+RtResultVoid set_ret_or_return_error(const TResult& result, interp::RtStackObject* ret) noexcept
 {
     if (result.is_ok())
     {
@@ -448,6 +449,12 @@ inline RtResultVoid run_class_static_constructor(const metadata::RtClass* klass)
 inline bool is_aot_method(const metadata::RtMethodInfo* method) noexcept
 {
     return method->invoker_type == metadata::RtInvokerType::Aot;
+}
+
+inline bool uses_lightweight_aot_returns(const metadata::RtMethodInfo* method) noexcept
+{
+    const auto* module = method->parent->image->get_aot_module_data();
+    return module && module->return_protocol == 1;
 }
 
 inline RtResultVoid invoke_with_run_class_static_constructor(const metadata::RtMethodInfo* method, interp::RtStackObject* arg_buff,

@@ -7,13 +7,9 @@ namespace LeanAOT.ToCpp
 
     static class MethodGenerationUtil
     {
-        public static string GetResultTypeName(TypeSig typeSig)
+        public static string GetResultTypeName(TypeSig typeSig, bool? lightweight = null)
         {
-            if (MetaUtil.IsVoidType(typeSig))
-            {
-                return "leanclr::RtResultVoid";
-            }
-            return $"leanclr::RtResult<{GlobalServices.Inst.TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(typeSig, TypeNameRelaxLevel.AbiRelaxed)}>";
+            return ReturnProtocol.ResultType(typeSig, lightweight ?? GlobalServices.Inst.Config.LightweightAotReturns);
         }
 
         public static string GetParameterName(Parameter param)

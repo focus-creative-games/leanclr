@@ -15,6 +15,26 @@ public static class Benchmarks
     static readonly uint[] Data = CreateData();
     static readonly ITransform Transformer = new Transform();
     static readonly Box PropertyBox = new Box();
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void VoidReturnLeaf(Box box, int divisor) { box.Value = unchecked(box.Value * 1664525u + (uint)(12345 / divisor)); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void VoidReturnMiddle(Box box, int divisor) { VoidReturnLeaf(box, divisor); box.Value ^= 19u; }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static Box ReferenceReturnLeaf(Box box, int value) { return value == 0 ? null : box; }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static Box ReferenceReturnMiddle(Box box, int value) { Box result = ReferenceReturnLeaf(box, value); if (result != null) result.Value = unchecked(result.Value * 1664525u + 1013904223u); return result; }
+    public static uint VoidReturns(int n, uint seed)
+    {
+        Box box = new Box { Value = seed };
+        for (int i = 0; i < n; ++i) VoidReturnMiddle(box, 7);
+        return box.Value;
+    }
+    public static uint ReferenceReturns(int n, uint seed)
+    {
+        Box box = new Box { Value = seed };
+        for (int i = 0; i < n; ++i) box = ReferenceReturnMiddle(box, 1);
+        return box.Value;
+    }
     static uint[] CreateData()
     {
         uint[] data = new uint[1024];

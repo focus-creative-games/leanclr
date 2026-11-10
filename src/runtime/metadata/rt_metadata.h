@@ -959,6 +959,8 @@ struct RtAotModuleData
     uint32_t mono_pinvoke_callback_entry_count;
     const RtAotGenericMethodData* generic_method_entries;
     uint32_t generic_method_entry_count;
+    // 0: ordinary Result; 1: opt-in scalar void / aligned managed reference ABI.
+    uint32_t return_protocol;
 };
 
 struct RtAotModulesData

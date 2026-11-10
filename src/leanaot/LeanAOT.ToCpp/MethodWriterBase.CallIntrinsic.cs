@@ -261,7 +261,7 @@ namespace LeanAOT.ToCpp
             string funcFullName = $"{namespaceStr}::{entry.Func}";
             if (methodDetail.IsVoidReturn)
             {
-                EmitThrowOnError(inst, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName()}){funcFullName})({argsStr})");
+                EmitThrowOnError(inst, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName(false)}){funcFullName})({argsStr})");
             }
             else
             {

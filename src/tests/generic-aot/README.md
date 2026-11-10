@@ -36,3 +36,11 @@ module registration table gained closed-instance identities; closed generic AOT
 functions also carry their runtime method context. Ordinary method signatures
 and the public C API/Result protocol are unchanged. Old prebuilt registration
 tables are not binary-compatible with this internal table extension.
+
+The default AOT return signatures remain unchanged. The separate opt-in
+`--leanaot-lightweight-returns` generator flag changes internal void/managed
+reference return signatures and records the protocol in module registration.
+Use `scripts/test/aot-features.py --lightweight-returns ...` to verify that mode.
+Both modes exercise the standalone AOT result tests and interface bridges into
+targets using each return ABI, including null success and OOM propagation.
+See [the return protocol report](../../../docs/performance/aot-return-protocol.md).

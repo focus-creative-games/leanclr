@@ -14,6 +14,7 @@ namespace LeanAOT.ToCpp
         public bool EnableAnalytics { get; set; }
 
         public bool EmitNullChecks { get; set; }
+        public bool LightweightAotReturns { get; set; }
 
         public bool EnableArrayBoundsCheck { get; set; }
 

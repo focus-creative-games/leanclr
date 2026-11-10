@@ -351,6 +351,9 @@ RtResultVoid Runtime::initialize()
     auto aot_modules_data = Settings::get_aot_modules_data();
     if (aot_modules_data != nullptr)
     {
+        for (uint32_t i = 0; i < aot_modules_data->module_count; ++i)
+            if (aot_modules_data->modules[i]->return_protocol > 1)
+                return RtErr::NotSupported;
         metadata::AotModule::register_aot_modules(aot_modules_data);
     }
 

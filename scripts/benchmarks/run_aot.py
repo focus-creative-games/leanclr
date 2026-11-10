@@ -106,6 +106,8 @@ def build(opts, output):
                  '-d', ROOT / 'src/libraries/mono-4.5', '-a', 'AotBaseline', '-o', output / 'generated',
                  '--leanaot-aot-rule-file', ROOT / 'src/benchmarks/aot-baseline/aot.xml',
                  '--leanaot-max-generic-instances', str(opts.max_generic_instances)]
+    if opts.lightweight_returns:
+        generator += ['--leanaot-lightweight-returns']
     commands.append([str(x) for x in generator])
     invoke(generator, output / 'generate.log')
     for target in ['native'] + (['wasm'] if opts.emsdk else []):
@@ -133,6 +135,7 @@ def main():
     ap.add_argument('--skip-build', action='store_true')
     ap.add_argument('--build-only', action='store_true')
     ap.add_argument('--max-generic-instances', type=int, default=2048)
+    ap.add_argument('--lightweight-returns', action='store_true')
     ap.add_argument('--samples', type=int, default=7)
     ap.add_argument('--iterations', type=int, default=5000000)
     ap.add_argument('--output', type=Path, default=ROOT / 'out/performance/aot')
@@ -198,7 +201,7 @@ def main():
                   source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
                   notes=['IL2CPP uses Unity BCL after UnityLinker; LeanAOT uses repository Mono BCL.',
                          'Execution labels inspect actual entry/helper backends; AOT EH entries may hand off to interpreter on exceptions.',
-                         'IL2CPP honors NoInlining; current LeanAOT output does not emit a corresponding attribute.',
+                         'LeanAOT now emits native noinline for managed NoInlining; historical P0 used different inlining behavior.',
                          'C++ is a computational reference, not a managed semantic equivalent.',
                          'Process wall time includes workload, warmup, verification and output; it is NOT startup time.',
                          'Native executables and Wasm bytes exclude external BCL/metadata/resources; do not compare as complete deployment sizes.',

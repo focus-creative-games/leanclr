@@ -228,7 +228,8 @@ namespace LeanAOT.ToCpp
 
         public string GenerateMethodDeclaring(string overrideMethodName = null)
         {
-            return $"{MethodGenerationUtil.GetResultTypeName(_retType)} {overrideMethodName ?? _uniqueName}({CreateMethodParameters()}){ConstStrings.CppFunctionNoexcept}";
+            string attributes = _methodDef != null && (_methodDef.ImplAttributes & MethodImplAttributes.NoInlining) != 0 ? "LEANCLR_CODEGEN_NOINLINE " : "";
+            return $"{attributes}{MethodGenerationUtil.GetResultTypeName(_retType)} {overrideMethodName ?? _uniqueName}({CreateMethodParameters()}){ConstStrings.CppFunctionNoexcept}";
         }
 
         public string GenerateVirtualMethodDeclaring()
@@ -246,10 +247,10 @@ namespace LeanAOT.ToCpp
             return $"typedef {CreateRelaxMethodFunctionTypeDefine(cppTypedefName)}";
         }
 
-        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null)
+        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null, bool? lightweight = null)
         {
             var sb = new StringBuilder();
-            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType));
+            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType, lightweight));
             sb.Append(" (*)(");
             bool first = true;
             foreach (var param in _paramsIncludeThis)
@@ -266,9 +267,9 @@ namespace LeanAOT.ToCpp
             return sb.ToString();
         }
 
-        public string CreateMethodFunctionTypeDefineWithoutName()
+        public string CreateMethodFunctionTypeDefineWithoutName(bool? lightweight = null)
         {
-            return CreateMethodFunctionTypeDefine("");
+            return CreateMethodFunctionTypeDefine("", lightweight);
         }
 
         public string CreateNativeMethodFunctionTypeDefine(string cppTypedefName, bool noexcept)
@@ -295,10 +296,10 @@ namespace LeanAOT.ToCpp
             return sb.ToString();
         }
 
-        private string CreateMethodFunctionTypeDefine(string cppTypedefName)
+        private string CreateMethodFunctionTypeDefine(string cppTypedefName, bool? lightweight = null)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType));
+            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType, lightweight));
             sb.Append($" (*{cppTypedefName})(");
             bool first = true;
             foreach (var param in _paramsIncludeThis)

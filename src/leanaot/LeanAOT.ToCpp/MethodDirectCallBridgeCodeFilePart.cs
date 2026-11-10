@@ -64,11 +64,22 @@ namespace LeanAOT.ToCpp
             // and a non-generic class can implement a closed generic interface.
             var plainArgs = MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(methodDetail);
             var contextArgs = plainArgs.Length == 0 ? "__method" : plainArgs + ", __method";
-            _directCallBridgeImplWriter.AddLine("if (__method->generic_method != nullptr)");
-            _directCallBridgeImplWriter.BeginBlock();
-            _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(true)})__method_pointer)({contextArgs});");
-            _directCallBridgeImplWriter.EndBlock();
-            _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(false)})__method_pointer)({plainArgs});");
+            void WriteAotCall(bool lightweight)
+            {
+                _directCallBridgeImplWriter.AddLine("if (__method->generic_method != nullptr)");
+                _directCallBridgeImplWriter.BeginBlock();
+                _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(true, lightweight)})__method_pointer)({contextArgs});");
+                _directCallBridgeImplWriter.EndBlock();
+                _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(false, lightweight)})__method_pointer)({plainArgs});");
+            }
+            if (ReturnProtocol.IsLightweight(methodDetail.RetType, true))
+            {
+                _directCallBridgeImplWriter.AddLine("if (leanclr::codegen::uses_lightweight_aot_returns(__method))");
+                _directCallBridgeImplWriter.BeginBlock();
+                WriteAotCall(true);
+                _directCallBridgeImplWriter.EndBlock();
+            }
+            WriteAotCall(false);
             _directCallBridgeImplWriter.EndBlock();
             _directCallBridgeImplWriter.AddLine($"else");
             _directCallBridgeImplWriter.BeginBlock();
