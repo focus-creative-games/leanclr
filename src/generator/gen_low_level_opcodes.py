@@ -50,36 +50,57 @@ def gen_low_level_opcode_size(low_level_opcodes):
         lines.append(f"{padding}sizeof({opcode.name}),")
     return "\n".join(lines)
 
-def gen_low_level_opcode_write_to_data(low_level_opcodes):
+STACK_FIELDS = {"arg1": "first", "src": "first", "arg2": "second", "arg3": "third", "dst": "destination"}
+VALUE_FIELDS = {'element_size': 'element_size', 'finally_clauses_count': 'finally_count', 'i2': 'static_cast<int16_t>(immediate)', 'i4': 'static_cast<int32_t>(immediate)', 'i8_high': 'static_cast<uint32_t>(immediate >> 32)', 'i8_low': 'static_cast<uint32_t>(immediate)', 'num_targets': 'switch_targets.count', 'size': 'size', 'total_params_stack_object_size': 'parameter_size', 'first_finally_clause_index': 'first_finally', 'field_offset': 'field_offset', 'field_size': 'field_size', 'invoker_idx': 'invoker_index', 'resolved_data_index': 'resolved_index', 'frame_base': 'frame_base', 'locals_offset': 'locals_offset', 'branch_target_offset': '0'}
+
+def operand_expression(param):
+    if param.arg_kind == "stack":
+        return f"operands.{STACK_FIELDS[param.arg]}->eval_stack_offset"
+    expr = VALUE_FIELDS[param.arg]
+    if expr == "0":
+        return expr
+    if expr.startswith("static_cast"):
+        return expr.replace("(immediate", "(operands.immediate")
+    return "operands." + expr
+
+def gen_low_level_opcode_write_to_data(opcodes):
     lines = []
-    padding = "    "
-    for opcode in low_level_opcodes:
-        lines.append(f"{padding}case OpCodeEnum::{opcode.name}:")
-        lines.append(f"{padding}{{")
-        lines.append(f"{padding}    auto ir = ({opcode.name}*)codes;")
-        lines.append(f"{padding}    ir->__code = static_cast<uint16_t>(OpCodeEnum::{opcode.name});")
-        for param in opcode.params:
+    for op in opcodes:
+        lines += [f"    case OpCodeEnum::{op.name}:", "    {", f"        auto* ir = reinterpret_cast<{op.name}*>(codes);",
+                  "        ir->__code = static_cast<uint16_t>(opcode);"]
+        for param in op.params:
             if param.name.startswith("__padding_"):
                 continue
-            if param.arg_kind == "stack":
-                lines.append(f"{padding}    ir->{param.name} = ({get_type_cpp_type_name(param.type)})inst.get_var_{param.arg}_eval_stack_idx();")
-            else:
-                lines.append(f"{padding}    ir->{param.name} = ({get_type_cpp_type_name(param.type)})inst.get_{param.arg}();")
-        match opcode.name:
-            case "Switch":
-                lines.append(f"{padding}    auto targetsInfo = inst.get_switch_targets();")
-                lines.append(f"{padding}    int32_t self_ir_offset = inst.get_ir_offset();")
-                lines.append(f"{padding}    int32_t* target_offsets = (int32_t*)(ir + 1);")
-                lines.append(f"{padding}    for (int i = 0; i < targetsInfo.count; i++)")
-                lines.append(f"{padding}    {{")
-                lines.append(f"{padding}        target_offsets[i] = (int32_t)targetsInfo.targets[i]->ir_offset - self_ir_offset;")
-                lines.append(f"{padding}    }}")
-                lines.append(f"{padding}    return codes + sizeof({opcode.name}) + (targetsInfo.count * sizeof(int32_t));")
-            case _:
-                lines.append(f"{padding}    return codes + sizeof({opcode.name});")
-        lines.append(f"{padding}}}")
+            expr = operand_expression(param)
+            lines.append(f"        ir->{param.name} = static_cast<{get_type_cpp_type_name(param.type)}>({expr});")
+        lines += [f"        return codes + sizeof({op.name});", "    }"]
     return "\n".join(lines)
 
+def gen_branch_patch_offsets(opcodes):
+    lines = []
+    for op in opcodes:
+        for param in op.params:
+            if param.arg_kind == "target":
+                lines.append(f"    case OpCodeEnum::{op.name}: return offsetof({op.name}, {param.name});")
+    return "\n".join(lines)
+
+def gen_operand_validation(opcodes):
+    lines = []
+    for op in opcodes:
+        conditions = []
+        for param in op.params:
+            if param.name.startswith("__padding_") or param.arg_kind == "target":
+                continue
+            expr = operand_expression(param)
+            if param.arg_kind == "stack":
+                conditions.append(f"operands.{STACK_FIELDS[param.arg]} != nullptr")
+            # Immediate bit patterns are selected by the opcode-specific emitter.
+            # Frame slots, indices and sizes must never be silently truncated.
+            if param.type.startswith("u") and param.arg not in ("i2", "i4", "i8_low", "i8_high"):
+                conditions.append(f"{expr} <= UINT{param.type[1:]}_MAX")
+        condition = " && ".join(dict.fromkeys(conditions)) or "true"
+        lines += [f"    case OpCodeEnum::{op.name}:", f"        return {condition};"]
+    return "\n".join(lines)
 
 def gen_computed_goto_labels_region(opcodes):
     return "\n".join(["    static void* const instruction_labels[] = {"] +
@@ -99,6 +120,8 @@ if __name__ == "__main__":
     cpp = file_region_replacer.FileRegionReplacer(source)
     cpp.replace_region("LOW_LEVEL_INSTRUCTION_SIZES", gen_low_level_opcode_size(opcodes))
     cpp.replace_region("LOW_LEVEL_INSTRUCTION_WRITE_TO_DATA", gen_low_level_opcode_write_to_data(opcodes))
+    cpp.replace_region("BRANCH_PATCH_OFFSETS", gen_branch_patch_offsets(opcodes))
+    cpp.replace_region("OPERAND_VALIDATION", gen_operand_validation(opcodes))
     cpp.save()
     interp = file_region_replacer.FileRegionReplacer(interpreter)
     interp.replace_region("COMPUTED_GOTO_LABELS", gen_computed_goto_labels_region(opcodes))

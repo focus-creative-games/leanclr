@@ -13,12 +13,14 @@
 #include "vm/type.h"
 #include "utils/rt_vector.h"
 #include "utils/mem_op.h"
+#include "utils/platform.h"
 #include "const_strs.h"
 
 namespace leanclr
 {
 namespace interp
 {
+using ll::OpCodeEnum;
 
 #if LEANCLR_PGO_PROFILE
 static uint32_t get_profile_weight_by_il_opcode(il::OpCodeValue opcode)
@@ -74,61 +76,16 @@ static uint32_t get_profile_weight_by_il_opcode(il::OpCodeValue opcode)
 
 Transformer::Transformer(metadata::RtModuleDef* mod, const metadata::RtMethodInfo* method_info, const metadata::RtMethodBody& method_body,
                          alloc::MemPool& mem_pool)
-    : _mod(mod), _method(method_info), _method_body(&method_body), _pool(&mem_pool), _pending_insts(&mem_pool), _resolved_datas(&mem_pool), _vars(&mem_pool)
+    : _mod(mod), _method(method_info), _method_body(&method_body), _pool(&mem_pool), _branch_patches(&mem_pool), _resolved_datas(&mem_pool), _vars(&mem_pool)
 {
     _generic_context = _method->generic_method ? &_method->generic_method->generic_context : nullptr;
     _generic_container_context.klass = method_info->parent->generic_container;
     _generic_container_context.method = method_info->generic_container;
 }
 
-const metadata::RtMethodInfo* Transformer::get_method_info() const
-{
-    return _method;
-}
-
-const metadata::RtMethodBody* Transformer::get_method_body() const
-{
-    return _method_body;
-}
-
-metadata::RtModuleDef* Transformer::get_module() const
-{
-    return _mod;
-}
-
-const metadata::RtGenericContainerContext& Transformer::get_generic_container_context() const
-{
-    return _generic_container_context;
-}
-
-const metadata::RtGenericContext* Transformer::get_generic_context() const
-{
-    return _generic_context;
-}
-
-size_t Transformer::get_total_arg_and_local_stack_object_size() const
-{
-    return _total_arg_and_local_stack_object_size;
-}
-
-size_t Transformer::get_max_stack_size() const
-{
-    return _max_eval_stack_size;
-}
-
 bool Transformer::need_init_locals() const
 {
     return (_method_body->flags & static_cast<uint16_t>(metadata::RtILMethodFormat::InitLocals)) != 0;
-}
-
-const Variable* Transformer::get_ret_var() const
-{
-    return _ret_var;
-}
-
-const BasicBlock* Transformer::get_basic_blocks() const
-{
-    return _basic_blocks;
 }
 
 size_t Transformer::get_cur_eval_stack_top() const
@@ -235,7 +192,7 @@ RtResult<const metadata::RtMethodInfo*> Transformer::get_method_from_token(uint3
 
 RtResult<metadata::RtMethodSig> Transformer::get_standalone_method_sig_from_token(uint32_t token)
 {
-    metadata::RtModuleDef* mod = get_module();
+    metadata::RtModuleDef* mod = _mod;
     auto retMethodSig = mod->read_stadalone_method_sig(token, _generic_container_context, _generic_context);
     RET_ERR_ON_FAIL(retMethodSig);
     metadata::RtMethodSig& method_sig = retMethodSig.unwrap();
@@ -279,7 +236,7 @@ RtResult<const metadata::RtFieldInfo*> Transformer::get_field_from_token(uint32_
 
 RtResult<metadata::RtRuntimeHandle> Transformer::get_raw_runtime_handle_from_token(uint32_t raw_token)
 {
-    metadata::RtModuleDef* mod = get_module();
+    metadata::RtModuleDef* mod = _mod;
     metadata::RtToken token = metadata::RtToken::decode(raw_token);
 
     // Decode and resolve the handle based on token type
@@ -317,15 +274,6 @@ RtResult<metadata::RtRuntimeHandle> Transformer::get_raw_runtime_handle_from_tok
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
-}
-
-GeneralInst* Transformer::create_inst(Emitter emitter)
-{
-    GeneralInst* ir_inst = _pool->malloc_any_zeroed<GeneralInst>();
-    ir_inst->set_opcode(ll::OpCodeEnum::Illegal);
-    _pending_insts.push_back({ir_inst, emitter});
-    ir_inst->set_il_offset(_cur_il_offset);
-    return ir_inst;
 }
 
 void Transformer::internal_push_eval_stack_var_and_update_max(const Variable* var)
@@ -471,10 +419,10 @@ RtResultVoid Transformer::add_init_locals()
     if (!need_init_locals() || _local_vars_count == 0)
         RET_VOID_OK();
 
-    GeneralInst* ir = create_inst(&Transformer::emit_InitLocals);
-    ir->set_locals_offset(_total_arg_stack_object_size);
-    ir->set_size(_total_arg_and_local_stack_object_size - _total_arg_stack_object_size);
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.locals_offset = _total_arg_stack_object_size;
+    ir.size = _total_arg_and_local_stack_object_size - _total_arg_stack_object_size;
+    return emit_InitLocals(ir);
 }
 
 RtResultVoid Transformer::add_ldarg(size_t arg_idx)
@@ -483,10 +431,10 @@ RtResultVoid Transformer::add_ldarg(size_t arg_idx)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* arg_var = _arg_vars[arg_idx];
-    GeneralInst* ir = create_inst(&Transformer::emit_LdArg);
-    ir->set_var_src(arg_var);
-    ir->set_var_dst(push_var_to_eval_stack(arg_var));
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = arg_var;
+    ir.destination = push_var_to_eval_stack(arg_var);
+    return emit_LdLoc(ir);
 }
 
 RtResultVoid Transformer::add_starg(size_t arg_idx)
@@ -498,10 +446,10 @@ RtResultVoid Transformer::add_starg(size_t arg_idx)
     RtResult<const Variable*> src_result = pop_eval_stack();
     RET_ERR_ON_FAIL(src_result);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_StArg);
-    ir->set_var_src(src_result.unwrap());
-    ir->set_var_dst(arg_var);
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = src_result.unwrap();
+    ir.destination = arg_var;
+    return emit_StLoc(ir);
 }
 
 RtResultVoid Transformer::add_ldarga(size_t arg_idx)
@@ -510,10 +458,11 @@ RtResultVoid Transformer::add_ldarga(size_t arg_idx)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* arg_var = _arg_vars[arg_idx];
-    GeneralInst* ir = create_inst(&Transformer::emit_LdArga);
-    ir->set_var_src(arg_var);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = arg_var;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    ir.opcode = OpCodeEnum::LdLoca;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_ldloc(size_t local_idx)
@@ -522,10 +471,10 @@ RtResultVoid Transformer::add_ldloc(size_t local_idx)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* local_var = _local_vars[local_idx];
-    GeneralInst* ir = create_inst(&Transformer::emit_LdLoc);
-    ir->set_var_src(local_var);
-    ir->set_var_dst(push_var_to_eval_stack(local_var));
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = local_var;
+    ir.destination = push_var_to_eval_stack(local_var);
+    return emit_LdLoc(ir);
 }
 
 RtResultVoid Transformer::add_stloc(size_t local_idx)
@@ -537,10 +486,10 @@ RtResultVoid Transformer::add_stloc(size_t local_idx)
     RtResult<const Variable*> src_result = pop_eval_stack();
     RET_ERR_ON_FAIL(src_result);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_StLoc);
-    ir->set_var_src(src_result.unwrap());
-    ir->set_var_dst(local_var);
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = src_result.unwrap();
+    ir.destination = local_var;
+    return emit_StLoc(ir);
 }
 
 RtResultVoid Transformer::add_ldloca(size_t local_idx)
@@ -549,49 +498,55 @@ RtResultVoid Transformer::add_ldloca(size_t local_idx)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     const Variable* local_var = _local_vars[local_idx];
-    GeneralInst* ir = create_inst(&Transformer::emit_LdLoca);
-    ir->set_var_src(local_var);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = local_var;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    ir.opcode = OpCodeEnum::LdLoca;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_ldnull()
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_LdNull);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    ir.opcode = OpCodeEnum::LdNull;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_ldci4(int32_t value)
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_LdcI4);
-    ir->set_i4(value);
-    ir->set_var_dst(push_i4_to_eval_stack());
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.immediate = static_cast<uint32_t>(value);
+    ir.destination = push_i4_to_eval_stack();
+    return emit_LdcI4(ir);
 }
 
 RtResultVoid Transformer::add_ldci8(int64_t value)
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_LdcI8);
-    ir->set_i8(value);
-    ir->set_var_dst(push_primitive_to_eval_stack(RtEvalStackDataType::I8));
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.immediate = static_cast<uint64_t>(value);
+    ir.destination = push_primitive_to_eval_stack(RtEvalStackDataType::I8);
+    return emit_LdcI8(ir);
 }
 
 RtResultVoid Transformer::add_ldcr4(float value)
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_LdcR4);
-    ir->set_r4(value);
-    ir->set_var_dst(push_primitive_to_eval_stack(RtEvalStackDataType::R4));
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    uint32_t bits;
+    std::memcpy(&bits, &value, sizeof(bits));
+    ir.immediate = bits;
+    ir.destination = push_primitive_to_eval_stack(RtEvalStackDataType::R4);
+    ir.opcode = OpCodeEnum::LdcI4I4;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_ldcr8(double value)
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_LdcR8);
-    ir->set_r8(value);
-    ir->set_var_dst(push_primitive_to_eval_stack(RtEvalStackDataType::R8));
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    std::memcpy(&ir.immediate, &value, sizeof(value));
+    ir.destination = push_primitive_to_eval_stack(RtEvalStackDataType::R8);
+    ir.opcode = OpCodeEnum::LdcI8I8;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_dup()
@@ -599,26 +554,26 @@ RtResultVoid Transformer::add_dup()
     auto src_result = get_top_var();
     RET_ERR_ON_FAIL(src_result);
     const Variable* src = src_result.unwrap();
-    GeneralInst* ir = create_inst(&Transformer::emit_Dup);
-    ir->set_var_src(src);
-    ir->set_var_dst(push_var_to_eval_stack(src));
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = src;
+    ir.destination = push_var_to_eval_stack(src);
+    return emit_Dup(ir);
 }
 
 RtResultVoid Transformer::add_ret()
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_Ret);
+    InstructionOperands ir{};
     if (!vm::Method::is_void_return(_method))
     {
         auto pop_result = pop_eval_stack();
         RET_ERR_ON_FAIL(pop_result);
-        ir->set_var_src(pop_result.unwrap());
+        ir.first = pop_result.unwrap();
     }
     else
     {
-        ir->set_var_src_invalid();
+        ir.first = nullptr;
     }
-    RET_VOID_OK();
+    return emit_Ret(ir);
 }
 
 RtResult<BasicBlock*> Transformer::get_branch_target_bb(size_t global_target_offset)
@@ -678,10 +633,10 @@ RtResultVoid Transformer::add_br(uint32_t next_offset, int32_t target_offset)
     const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) + static_cast<ptrdiff_t>(target_offset));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(BasicBlock*, target_bb, get_branch_target_bb(target_il_offset));
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Br);
-    ir->set_branch_target(target_bb);
+    InstructionOperands ir{};
+    ir.target = target_bb;
     RET_ERR_ON_FAIL(setup_target_branch_eval_stack(target_bb));
-    RET_VOID_OK();
+    return emit_Br(ir);
 }
 
 RtResultVoid Transformer::add_brtrue_or_false(uint32_t next_offset, int32_t target_offset, bool is_true)
@@ -695,14 +650,17 @@ RtResultVoid Transformer::add_brtrue_or_false(uint32_t next_offset, int32_t targ
     RET_ERR_ON_FAIL(target_bb_result);
     BasicBlock* target_bb = target_bb_result.unwrap();
 
-    GeneralInst* ir = create_inst(is_true ? &Transformer::emit_BrTrue : &Transformer::emit_BrFalse);
-    ir->set_var_src(cond_var);
-    ir->set_branch_target(target_bb);
+    InstructionOperands ir{};
+    ir.first = cond_var;
+    ir.target = target_bb;
     RET_ERR_ON_FAIL(setup_next_and_target_branch_eval_stack(target_bb));
-    RET_VOID_OK();
+    return emit_numeric(ir,
+                        is_true ? NumericOpcodes{OpCodeEnum::BrTrueI4, OpCodeEnum::BrTrueI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}
+                                : NumericOpcodes{OpCodeEnum::BrFalseI4, OpCodeEnum::BrFalseI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal},
+                        ir.first->data_type);
 }
 
-RtResultVoid Transformer::add_condition_branch(uint32_t next_offset, int32_t target_offset, Emitter opcode)
+RtResultVoid Transformer::add_condition_branch(uint32_t next_offset, int32_t target_offset, const NumericOpcodes& opcode)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, right_var, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, left_var, pop_eval_stack());
@@ -716,12 +674,12 @@ RtResultVoid Transformer::add_condition_branch(uint32_t next_offset, int32_t tar
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(BasicBlock*, target_bb, get_branch_target_bb(target_il_offset));
 
-    GeneralInst* ir = create_inst(opcode);
-    ir->set_var_arg1(left_var);
-    ir->set_var_arg2(right_var);
-    ir->set_branch_target(target_bb);
+    InstructionOperands ir{};
+    ir.first = left_var;
+    ir.second = right_var;
+    ir.target = target_bb;
     RET_ERR_ON_FAIL(setup_next_and_target_branch_eval_stack(target_bb));
-    RET_VOID_OK();
+    return emit_numeric(ir, opcode, ir.first->data_type);
 }
 
 RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targets, size_t count)
@@ -744,8 +702,8 @@ RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targ
     if (!any_not_zero_branch)
         RET_VOID_OK();
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Switch);
-    ir->set_var_arg1(key_var);
+    InstructionOperands ir{};
+    ir.first = key_var;
 
     for (size_t i = 0; i < count; ++i)
     {
@@ -758,39 +716,41 @@ RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targ
         RET_ERR_ON_FAIL(setup_target_branch_eval_stack(target_bb));
     }
 
-    ir->set_switch_targets(targets, count);
+    ir.switch_targets = {targets, count};
 
     if (_cur_bb->next_bb)
     {
         RET_ERR_ON_FAIL(setup_target_branch_eval_stack(_cur_bb->next_bb));
     }
-    RET_VOID_OK();
+    return emit_Switch(ir);
 }
 
-RtResultVoid Transformer::add_ldind(Emitter opcode, metadata::RtArgOrLocOrFieldReduceType reduce_type)
+RtResultVoid Transformer::add_ldind(OpCodeEnum opcode, metadata::RtArgOrLocOrFieldReduceType reduce_type)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, src_var, pop_eval_stack());
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_src(src_var);
+    ir.first = src_var;
     RtEvalStackDataType data_type = InterpDefs::get_eval_stack_data_type_by_reduce_type(reduce_type);
-    ir->set_var_dst(push_primitive_to_eval_stack(data_type));
-    ir->set_prefix(_prefix);
-    RET_VOID_OK();
+    ir.destination = push_primitive_to_eval_stack(data_type);
+    ir.prefix = _prefix;
+    ir.opcode = opcode;
+    return append_instruction(ir);
 }
 
-RtResultVoid Transformer::add_stind(Emitter opcode)
+RtResultVoid Transformer::add_stind(OpCodeEnum opcode)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, value_var, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, addr_var, pop_eval_stack());
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_src(value_var);
-    ir->set_var_dst(addr_var);
-    ir->set_prefix(_prefix);
-    RET_VOID_OK();
+    ir.first = value_var;
+    ir.destination = addr_var;
+    ir.prefix = _prefix;
+    ir.opcode = opcode;
+    return append_instruction(ir);
 }
 
 RtResult<RtEvalStackDataType> Transformer::calc_bin_arith_result_type(RtEvalStackDataType left, RtEvalStackDataType right)
@@ -887,28 +847,30 @@ RtResult<size_t> Transformer::calc_arith_op_eval_data_size_by_data_type(RtEvalSt
 
 RtResultVoid Transformer::insert_conv_from_to(const Variable* from_var, const Variable* to_var)
 {
-    Emitter opcode;
+    NumericOpcodes opcode;
     switch (to_var->data_type)
     {
     case RtEvalStackDataType::I4:
-        opcode = &Transformer::emit_ConvI4;
+        opcode = NumericOpcodes{OpCodeEnum::Nop, OpCodeEnum::ConvI4I8, OpCodeEnum::ConvI4R4, OpCodeEnum::ConvI4R8};
         break;
     case RtEvalStackDataType::I8:
-        opcode = &Transformer::emit_ConvI8;
+        opcode = NumericOpcodes{OpCodeEnum::ConvI8I4, OpCodeEnum::Nop, OpCodeEnum::ConvI8R4, OpCodeEnum::ConvI8R8};
         break;
     case RtEvalStackDataType::RefOrPtr:
-        opcode = &Transformer::emit_ConvI;
+        opcode = NumericOpcodes{
+            utils::Platform::select_arch(OpCodeEnum::Nop, OpCodeEnum::ConvI8I4), utils::Platform::select_arch(OpCodeEnum::ConvI4I8, OpCodeEnum::Nop),
+            utils::Platform::select_arch(OpCodeEnum::ConvI4R4, OpCodeEnum::ConvI8R4), utils::Platform::select_arch(OpCodeEnum::ConvI4R8, OpCodeEnum::ConvI8R8)};
         break;
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_src(from_var);
+    ir.first = from_var;
     Variable* converted_var = create_eval_stack_variable(to_var->data_type, to_var->reduce_type, to_var->byte_size, from_var->eval_stack_offset);
-    ir->set_var_dst(converted_var);
-    RET_VOID_OK();
+    ir.destination = converted_var;
+    return emit_numeric(ir, opcode, ir.first->data_type);
 }
 
 RtResultVoid Transformer::insert_conv_for_bin_arith_op(const Variable* left, const Variable* right)
@@ -930,7 +892,7 @@ RtResultVoid Transformer::insert_conv_for_bin_arith_op(const Variable* left, con
     RET_VOID_OK();
 }
 
-RtResultVoid Transformer::add_bin_arith_op(Emitter opcode)
+RtResultVoid Transformer::add_bin_arith_op(const NumericOpcodes& opcode)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, right, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, left, pop_eval_stack());
@@ -940,14 +902,14 @@ RtResultVoid Transformer::add_bin_arith_op(Emitter opcode)
         RET_ERR_ON_FAIL(insert_conv_for_bin_arith_op(left, right));
     }
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_arg1(left);
-    ir->set_var_arg2(right);
+    ir.first = left;
+    ir.second = right;
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtEvalStackDataType, result_type, calc_bin_arith_result_type(left->data_type, right->data_type));
-    ir->set_var_dst(push_primitive_to_eval_stack(result_type));
-    RET_VOID_OK();
+    ir.destination = push_primitive_to_eval_stack(result_type);
+    return emit_numeric(ir, opcode, ir.destination->data_type);
 }
 
 RtResult<RtEvalStackDataType> Transformer::calc_bitop_result_type(RtEvalStackDataType left, RtEvalStackDataType right)
@@ -1003,22 +965,22 @@ RtResult<RtEvalStackDataType> Transformer::calc_bitop_result_type(RtEvalStackDat
     RET_OK(ret_type);
 }
 
-RtResultVoid Transformer::add_bin_bit_op(Emitter opcode)
+RtResultVoid Transformer::add_bin_bit_op(const NumericOpcodes& opcode)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, right, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, left, pop_eval_stack());
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_arg1(left);
-    ir->set_var_arg2(right);
+    ir.first = left;
+    ir.second = right;
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtEvalStackDataType, result_type, calc_bitop_result_type(left->data_type, right->data_type));
-    ir->set_var_dst(push_primitive_to_eval_stack(result_type));
-    RET_VOID_OK();
+    ir.destination = push_primitive_to_eval_stack(result_type);
+    return emit_numeric(ir, opcode, ir.destination->data_type);
 }
 
-RtResultVoid Transformer::add_bit_shift_op(Emitter opcode)
+RtResultVoid Transformer::add_bit_shift_op(const NumericOpcodes& opcode)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, shift_amount, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, value, pop_eval_stack());
@@ -1029,12 +991,12 @@ RtResultVoid Transformer::add_bit_shift_op(Emitter opcode)
     if (shift_amount->is_not_i32_and_native_int())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_arg1(value);
-    ir->set_var_arg2(shift_amount);
-    ir->set_var_dst(push_primitive_to_eval_stack(value->data_type));
-    RET_VOID_OK();
+    ir.first = value;
+    ir.second = shift_amount;
+    ir.destination = push_primitive_to_eval_stack(value->data_type);
+    return emit_numeric(ir, opcode, ir.destination->data_type);
 }
 
 RtResultVoid Transformer::add_neg()
@@ -1043,10 +1005,10 @@ RtResultVoid Transformer::add_neg()
     if (!src->is_primitive())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Neg);
-    ir->set_var_src(src);
-    ir->set_var_dst(push_primitive_to_eval_stack(src->data_type));
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = src;
+    ir.destination = push_primitive_to_eval_stack(src->data_type);
+    return emit_Neg(ir);
 }
 
 RtResultVoid Transformer::add_not()
@@ -1055,14 +1017,14 @@ RtResultVoid Transformer::add_not()
     if (src->is_not_i32_and_i64_and_native_int())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Not);
+    InstructionOperands ir{};
 
-    ir->set_var_src(src);
-    ir->set_var_dst(push_primitive_to_eval_stack(src->data_type));
-    RET_VOID_OK();
+    ir.first = src;
+    ir.destination = push_primitive_to_eval_stack(src->data_type);
+    return emit_Not(ir);
 }
 
-RtResultVoid Transformer::add_bin_compare_op(Emitter opcode)
+RtResultVoid Transformer::add_bin_compare_op(const NumericOpcodes& opcode)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, right, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, left, pop_eval_stack());
@@ -1073,38 +1035,26 @@ RtResultVoid Transformer::add_bin_compare_op(Emitter opcode)
     if (!left->is_primitive())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_arg1(left);
-    ir->set_var_arg2(right);
-    ir->set_var_dst(push_primitive_to_eval_stack(RtEvalStackDataType::I4));
-    RET_VOID_OK();
+    ir.first = left;
+    ir.second = right;
+    ir.destination = push_primitive_to_eval_stack(RtEvalStackDataType::I4);
+    return emit_numeric(ir, opcode, ir.first->data_type);
 }
 
-RtResultVoid Transformer::add_conv(Emitter opcode, RtEvalStackDataType data_type)
+RtResultVoid Transformer::add_conv(const NumericOpcodes& opcode, RtEvalStackDataType data_type)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, src, pop_eval_stack());
 
-    // If the source is already of the target type, just push it back
-    if (src->data_type == data_type)
-    {
-        if (opcode == &Transformer::emit_ConvI4 || opcode == &Transformer::emit_ConvU4 || opcode == &Transformer::emit_ConvI8 ||
-            opcode == &Transformer::emit_ConvU8 || opcode == &Transformer::emit_ConvR4 || opcode == &Transformer::emit_ConvR8 ||
-            opcode == &Transformer::emit_ConvI || opcode == &Transformer::emit_ConvU || opcode == &Transformer::emit_ConvOvfI4 ||
-            opcode == &Transformer::emit_ConvOvfI8 || opcode == &Transformer::emit_ConvOvfI)
-        {
-            internal_push_eval_stack_var_and_update_max(src);
-            RET_VOID_OK();
-        }
-    }
     if (!src->is_primitive())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_src(src);
-    ir->set_var_dst(push_primitive_to_eval_stack(data_type));
-    RET_VOID_OK();
+    ir.first = src;
+    ir.destination = push_primitive_to_eval_stack(data_type);
+    return emit_numeric(ir, opcode, ir.first->data_type);
 }
 
 RtResultVoid Transformer::add_ckfinite()
@@ -1115,9 +1065,9 @@ RtResultVoid Transformer::add_ckfinite()
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     // Check if the value is a finite number (not NaN or Inf)
-    GeneralInst* ir = create_inst(&Transformer::emit_Ckfinite);
-    ir->set_var_src(val);
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = val;
+    return emit_Ckfinite(ir);
 }
 
 RtResult<const metadata::RtMethodInfo*> Transformer::try_redirect_newobj_method(const metadata::RtMethodInfo* method)
@@ -1164,67 +1114,58 @@ RtResultVoid Transformer::add_call_common(const metadata::RtMethodInfo* method, 
     }
 
     // Create the call instruction
-    Emitter opcode;
-    switch (invoker_type)
-    {
-    case metadata::RtInvokerType::Interpreter:
-    case metadata::RtInvokerType::InterpreterVirtualAdjustThunk:
-        opcode = is_call_vir ? &Transformer::emit_CallVirt : &Transformer::emit_Call;
-        break;
-    case metadata::RtInvokerType::InternalCall:
-        opcode = &Transformer::emit_CallInternalCall;
-        break;
-    case metadata::RtInvokerType::Intrinsic:
-    case metadata::RtInvokerType::CustomInstrinsic:
-        opcode = &Transformer::emit_CallIntrinsic;
-        break;
-    case metadata::RtInvokerType::PInvoke:
-        opcode = &Transformer::emit_CallPInvoke;
-        break;
-    case metadata::RtInvokerType::Aot:
-        opcode = &Transformer::emit_CallAot;
-        break;
-    case metadata::RtInvokerType::RuntimeImpl:
-        opcode = &Transformer::emit_CallRuntimeImplemented;
-        break;
-    case metadata::RtInvokerType::NewObjInternalCall:
-        opcode = &Transformer::emit_NewObjInternalCall;
-        break;
-    case metadata::RtInvokerType::NewObjIntrinsic:
-        opcode = &Transformer::emit_NewObjIntrinsic;
-        break;
-    case metadata::RtInvokerType::NotImplemented:
-        // we use CallIntrinsic opcode to mark NotImplemented methods
-        opcode = &Transformer::emit_CallIntrinsic;
-        break;
-    default:
-        RET_ASSERT_ERR(RtErr::ExecutionEngine);
-    }
 
-    GeneralInst* ir = create_inst(opcode);
-    ir->set_method_and_params(method, get_cur_eval_stack_top(), params);
-    ir->set_prefix(_prefix);
+    InstructionOperands ir{};
+    ir.method = method;
+    ir.frame_base = get_cur_eval_stack_top();
+    ir.parameters = params;
+    ir.prefix = _prefix;
     if (invoker_type == metadata::RtInvokerType::NewObjIntrinsic)
     {
-        ir->set_invoker_idx(vm::Intrinsics::register_intrinsic_invoker_id(invoker));
+        ir.invoker_index = vm::Intrinsics::register_intrinsic_invoker_id(invoker);
     }
     else if (invoker_type == metadata::RtInvokerType::NewObjInternalCall)
     {
-        ir->set_invoker_idx(vm::InternalCalls::register_internal_call_invoker_id(invoker));
+        ir.invoker_index = vm::InternalCalls::register_internal_call_invoker_id(invoker);
     }
 
     if (is_new_obj)
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(Variable*, this_var, push_class_to_eval_stack(method->parent));
-        ir->set_var_dst(this_var);
+        ir.destination = this_var;
     }
     else if (!vm::Method::is_void_return(method))
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(Variable*, return_var, push_typesig_to_eval_stack(method->return_type));
-        ir->set_var_dst(return_var);
+        ir.destination = return_var;
     }
 
-    RET_VOID_OK();
+    switch (invoker_type)
+    {
+    case metadata::RtInvokerType::Interpreter:
+    case metadata::RtInvokerType::InterpreterVirtualAdjustThunk:
+        return is_call_vir ? emit_CallVirt(ir) : emit_Call(ir);
+    case metadata::RtInvokerType::InternalCall:
+        return emit_CallInternalCall(ir);
+    case metadata::RtInvokerType::Intrinsic:
+    case metadata::RtInvokerType::CustomInstrinsic:
+        return emit_CallIntrinsic(ir);
+    case metadata::RtInvokerType::PInvoke:
+        return emit_CallPInvoke(ir);
+    case metadata::RtInvokerType::Aot:
+        return emit_CallAot(ir);
+    case metadata::RtInvokerType::RuntimeImpl:
+        return emit_CallRuntimeImplemented(ir);
+    case metadata::RtInvokerType::NewObjInternalCall:
+        return emit_NewObjInternalCall(ir);
+    case metadata::RtInvokerType::NewObjIntrinsic:
+        return emit_NewObjIntrinsic(ir);
+    case metadata::RtInvokerType::NotImplemented:
+        // we use CallIntrinsic opcode to mark NotImplemented methods
+        return emit_CallIntrinsic(ir);
+    default:
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
+    }
 }
 
 RtResultVoid Transformer::add_call(const metadata::RtMethodInfo* method)
@@ -1317,45 +1258,49 @@ RtResultVoid Transformer::add_newobj(const metadata::RtMethodInfo* method)
     }
 
     size_t total_param_stack_object_size = old_eval_stack_top - get_cur_eval_stack_top();
-    GeneralInst* ir =
-        create_inst(target_method->invoker_type == metadata::RtInvokerType::Interpreter ? &Transformer::emit_NewObj : &Transformer::emit_NewObjAot);
-    ir->set_newobj_method_and_params(target_method, get_cur_eval_stack_top(), total_param_stack_object_size, params);
+    InstructionOperands ir{};
+    ir.method = target_method;
+    ir.frame_base = get_cur_eval_stack_top();
+    ir.parameter_size = total_param_stack_object_size;
+    ir.parameters = params;
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(Variable*, obj_var, push_class_to_eval_stack(klass));
-    ir->set_var_dst(obj_var);
+    ir.destination = obj_var;
 
-    RET_VOID_OK();
+    return target_method->invoker_type == metadata::RtInvokerType::Interpreter ? emit_NewObj(ir) : emit_NewObjAot(ir);
 }
 
 RtResultVoid Transformer::add_enum_hash_code_call(metadata::RtClass* enum_klass)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ReduceTypeAndSize, type_and_size, InterpDefs::get_reduce_type_and_size_by_typesig(enum_klass->by_val));
-    Emitter opcode;
+    OpCodeEnum opcode;
     switch (type_and_size.reduce_type)
     {
     case metadata::RtArgOrLocOrFieldReduceType::I1:
-        opcode = &Transformer::emit_LdIndI1;
+        opcode = OpCodeEnum::LdIndI1;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::U1:
-        opcode = &Transformer::emit_LdIndU1;
+        opcode = OpCodeEnum::LdIndU1;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I2:
-        opcode = &Transformer::emit_LdIndU2; // in the implementation, short enum is always unsigned for load
+        opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndU2Unaligned
+                                                                  : OpCodeEnum::LdIndU2; // in the implementation, short enum is always unsigned for load
         break;
     case metadata::RtArgOrLocOrFieldReduceType::U2:
-        opcode = &Transformer::emit_LdIndU2;
+        opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndU2Unaligned : OpCodeEnum::LdIndU2;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I4:
-        opcode = &Transformer::emit_LdIndI4;
+        opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI4Unaligned : OpCodeEnum::LdIndI4;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I8:
     {
-        GeneralInst* ir = create_inst(&Transformer::emit_GetEnumLongHashCode);
+        InstructionOperands ir{};
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, addr_result, pop_eval_stack());
         const Variable* dst_var = push_i4_to_eval_stack();
-        ir->set_var_src(addr_result);
-        ir->set_var_dst(dst_var);
-        RET_VOID_OK();
+        ir.first = addr_result;
+        ir.destination = dst_var;
+        ir.opcode = OpCodeEnum::GetEnumLongHashCode;
+        return append_instruction(ir);
     }
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
@@ -1365,23 +1310,25 @@ RtResultVoid Transformer::add_enum_hash_code_call(metadata::RtClass* enum_klass)
 
 RtResultVoid Transformer::add_box_ref_inplace(metadata::RtClass* klass, size_t eval_stack_idx, const Variable* obj)
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_BoxRefInplace);
+    InstructionOperands ir{};
     Variable* dst = create_eval_stack_variable(RtEvalStackDataType::RefOrPtr, metadata::RtArgOrLocOrFieldReduceType::Ref, PTR_SIZE, obj->eval_stack_offset);
 
-    ir->set_var_src(obj);
-    ir->set_var_dst(dst);
-    ir->set_class(klass);
-    RET_VOID_OK();
+    ir.first = obj;
+    ir.destination = dst;
+    ir.klass = klass;
+    return emit_BoxRefInplace(ir);
 }
 
 RtResultVoid Transformer::add_ldind_ref_inplace(size_t eval_stack_idx, const Variable* obj)
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_LdIndRef);
+    InstructionOperands ir{};
     Variable* dst = create_eval_stack_variable(RtEvalStackDataType::RefOrPtr, metadata::RtArgOrLocOrFieldReduceType::Ref, PTR_SIZE, obj->eval_stack_offset);
     _cur_bb->eval_stack[eval_stack_idx] = dst;
-    ir->set_var_src(obj);
-    ir->set_var_dst(dst);
-    RET_VOID_OK();
+    ir.first = obj;
+    ir.destination = dst;
+    ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? utils::Platform::select_arch(OpCodeEnum::LdIndI4Unaligned, OpCodeEnum::LdIndI8Unaligned)
+                                                                 : utils::Platform::select_arch(OpCodeEnum::LdIndI4, OpCodeEnum::LdIndI8);
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_callvirt(const metadata::RtMethodInfo* method)
@@ -1455,24 +1402,27 @@ RtResultVoid Transformer::add_calli(const metadata::RtMethodSig& method_sig)
         }
     }
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Calli);
-    ir->set_prefix(_prefix);
-    const metadata::RtMethodSig* sig_copy = new (get_module()->get_mem_pool().malloc_any_zeroed<metadata::RtMethodSig>()) metadata::RtMethodSig(method_sig);
-    ir->set_method_sig_and_params(sig_copy, get_cur_eval_stack_top(), func_ptr, params);
+    InstructionOperands ir{};
+    ir.prefix = _prefix;
+    const metadata::RtMethodSig* sig_copy = new (_mod->get_mem_pool().malloc_any_zeroed<metadata::RtMethodSig>()) metadata::RtMethodSig(method_sig);
+    ir.signature = sig_copy;
+    ir.frame_base = get_cur_eval_stack_top();
+    ir.third = func_ptr;
+    ir.parameters = params;
     if (!method_sig.return_type->is_void())
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, ret_var, push_typesig_to_eval_stack(method_sig.return_type));
-        ir->set_var_dst(ret_var);
+        ir.destination = ret_var;
     }
-    RET_VOID_OK();
+    return emit_Calli(ir);
 }
 
 RtResultVoid Transformer::add_ldftn(const metadata::RtMethodInfo* method)
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_Ldftn);
-    ir->set_method(method);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.method = method;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_Ldftn(ir);
 }
 
 RtResultVoid Transformer::add_ldvirtftn(const metadata::RtMethodInfo* method)
@@ -1485,11 +1435,11 @@ RtResultVoid Transformer::add_ldvirtftn(const metadata::RtMethodInfo* method)
     {
         return add_ldftn(method);
     }
-    GeneralInst* ir = create_inst(&Transformer::emit_Ldvirtftn);
-    ir->set_var_src(obj_result);
-    ir->set_method(method);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = obj_result;
+    ir.method = method;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_Ldvirtftn(ir);
 }
 
 RtResultVoid Transformer::add_initobj(metadata::RtClass* klass)
@@ -1500,40 +1450,40 @@ RtResultVoid Transformer::add_initobj(metadata::RtClass* klass)
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ReduceTypeAndSize, type_and_size, InterpDefs::get_reduce_type_and_size_by_typesig(klass->by_val));
 
-    GeneralInst* ir;
+    InstructionOperands ir{};
     switch (type_and_size.reduce_type)
     {
     case metadata::RtArgOrLocOrFieldReduceType::I1:
     case metadata::RtArgOrLocOrFieldReduceType::U1:
-        ir = create_inst(&Transformer::emit_InitObjI1);
+        ir.opcode = OpCodeEnum::InitObjI1;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I2:
     case metadata::RtArgOrLocOrFieldReduceType::U2:
-        ir = create_inst(&Transformer::emit_InitObjI2);
+        ir.opcode = OpCodeEnum::InitObjI2;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I4:
     case metadata::RtArgOrLocOrFieldReduceType::R4:
-        ir = create_inst(&Transformer::emit_InitObjI4);
+        ir.opcode = OpCodeEnum::InitObjI4;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I8:
     case metadata::RtArgOrLocOrFieldReduceType::R8:
-        ir = create_inst(&Transformer::emit_InitObjI8);
+        ir.opcode = OpCodeEnum::InitObjI8;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::Ref:
     case metadata::RtArgOrLocOrFieldReduceType::I:
-        ir = create_inst(&Transformer::emit_InitObjRef);
+        ir.opcode = utils::Platform::select_arch(OpCodeEnum::InitObjI4, OpCodeEnum::InitObjI8);
         break;
     case metadata::RtArgOrLocOrFieldReduceType::Other:
     {
-        ir = create_inst(&Transformer::emit_InitObjAny);
-        ir->set_size(type_and_size.byte_size);
+        ir.opcode = OpCodeEnum::InitObjAny;
+        ir.size = type_and_size.byte_size;
         break;
     }
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
-    ir->set_var_src(addr_result);
-    RET_VOID_OK();
+    ir.first = addr_result;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_cpobj(metadata::RtClass* klass)
@@ -1544,41 +1494,41 @@ RtResultVoid Transformer::add_cpobj(metadata::RtClass* klass)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ReduceTypeAndSize, type_and_size, InterpDefs::get_reduce_type_and_size_by_typesig(klass->by_val));
-    GeneralInst* ir;
+    InstructionOperands ir{};
     switch (type_and_size.reduce_type)
     {
     case metadata::RtArgOrLocOrFieldReduceType::I1:
     case metadata::RtArgOrLocOrFieldReduceType::U1:
-        ir = create_inst(&Transformer::emit_CpObjI1);
+        ir.opcode = OpCodeEnum::CpObjI1;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I2:
     case metadata::RtArgOrLocOrFieldReduceType::U2:
-        ir = create_inst(&Transformer::emit_CpObjI2);
+        ir.opcode = OpCodeEnum::CpObjI2;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I4:
     case metadata::RtArgOrLocOrFieldReduceType::R4:
-        ir = create_inst(&Transformer::emit_CpObjI4);
+        ir.opcode = OpCodeEnum::CpObjI4;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I8:
     case metadata::RtArgOrLocOrFieldReduceType::R8:
-        ir = create_inst(&Transformer::emit_CpObjI8);
+        ir.opcode = OpCodeEnum::CpObjI8;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::Ref:
     case metadata::RtArgOrLocOrFieldReduceType::I:
-        ir = create_inst(&Transformer::emit_CpObjRef);
+        ir.opcode = utils::Platform::select_arch(OpCodeEnum::CpObjI4, OpCodeEnum::CpObjI8);
         break;
     case metadata::RtArgOrLocOrFieldReduceType::Other:
     {
-        ir = create_inst(&Transformer::emit_CpObjAny);
-        ir->set_size(type_and_size.byte_size);
+        ir.opcode = OpCodeEnum::CpObjAny;
+        ir.size = type_and_size.byte_size;
         break;
     }
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
-    ir->set_var_src(src);
-    ir->set_var_dst(dst);
-    RET_VOID_OK();
+    ir.first = src;
+    ir.destination = dst;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_ldobj(metadata::RtClass* klass)
@@ -1588,47 +1538,48 @@ RtResultVoid Transformer::add_ldobj(metadata::RtClass* klass)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ReduceTypeAndSize, type_and_size, InterpDefs::get_reduce_type_and_size_by_typesig(klass->by_val));
-    GeneralInst* ir;
+    InstructionOperands ir{};
     switch (type_and_size.reduce_type)
     {
     case metadata::RtArgOrLocOrFieldReduceType::I1:
-        ir = create_inst(&Transformer::emit_LdIndI1);
+        ir.opcode = OpCodeEnum::LdIndI1;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::U1:
-        ir = create_inst(&Transformer::emit_LdIndU1);
+        ir.opcode = OpCodeEnum::LdIndU1;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I2:
-        ir = create_inst(&Transformer::emit_LdIndI2);
+        ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI2Unaligned : OpCodeEnum::LdIndI2;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::U2:
-        ir = create_inst(&Transformer::emit_LdIndU2);
+        ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndU2Unaligned : OpCodeEnum::LdIndU2;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I4:
     case metadata::RtArgOrLocOrFieldReduceType::R4:
-        ir = create_inst(&Transformer::emit_LdIndI4);
+        ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI4Unaligned : OpCodeEnum::LdIndI4;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I8:
     case metadata::RtArgOrLocOrFieldReduceType::R8:
-        ir = create_inst(&Transformer::emit_LdIndI8);
+        ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI8Unaligned : OpCodeEnum::LdIndI8;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::Ref:
     case metadata::RtArgOrLocOrFieldReduceType::I:
-        ir = create_inst(&Transformer::emit_LdIndRef);
+        ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? utils::Platform::select_arch(OpCodeEnum::LdIndI4Unaligned, OpCodeEnum::LdIndI8Unaligned)
+                                                                     : utils::Platform::select_arch(OpCodeEnum::LdIndI4, OpCodeEnum::LdIndI8);
         break;
     case metadata::RtArgOrLocOrFieldReduceType::Other:
     {
-        ir = create_inst(&Transformer::emit_LdObjAny);
-        ir->set_size(type_and_size.byte_size);
+        ir.opcode = OpCodeEnum::LdObjAny;
+        ir.size = type_and_size.byte_size;
         break;
     }
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
-    ir->set_prefix(_prefix);
-    ir->set_var_src(addr);
+    ir.prefix = _prefix;
+    ir.first = addr;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(Variable*, dst, push_typesig_to_eval_stack(klass->by_val));
-    ir->set_var_dst(dst);
-    RET_VOID_OK();
+    ir.destination = dst;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_stobj(metadata::RtClass* klass)
@@ -1639,55 +1590,56 @@ RtResultVoid Transformer::add_stobj(metadata::RtClass* klass)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ReduceTypeAndSize, type_and_size, InterpDefs::get_reduce_type_and_size_by_typesig(klass->by_val));
-    GeneralInst* ir;
+    InstructionOperands ir{};
     switch (type_and_size.reduce_type)
     {
     case metadata::RtArgOrLocOrFieldReduceType::I1:
     case metadata::RtArgOrLocOrFieldReduceType::U1:
-        ir = create_inst(&Transformer::emit_StIndI1);
+        ir.opcode = OpCodeEnum::StIndI1;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I2:
     case metadata::RtArgOrLocOrFieldReduceType::U2:
-        ir = create_inst(&Transformer::emit_StIndI2);
+        ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::StIndI2Unaligned : OpCodeEnum::StIndI2;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I4:
     case metadata::RtArgOrLocOrFieldReduceType::R4:
-        ir = create_inst(&Transformer::emit_StIndI4);
+        ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::StIndI4Unaligned : OpCodeEnum::StIndI4;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::I8:
     case metadata::RtArgOrLocOrFieldReduceType::R8:
-        ir = create_inst(&Transformer::emit_StIndI8);
+        ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::StIndI8Unaligned : OpCodeEnum::StIndI8;
         break;
     case metadata::RtArgOrLocOrFieldReduceType::Ref:
     case metadata::RtArgOrLocOrFieldReduceType::I:
-        ir = create_inst(&Transformer::emit_StIndRef);
+        ir.opcode = has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? utils::Platform::select_arch(OpCodeEnum::StIndI4Unaligned, OpCodeEnum::StIndI8Unaligned)
+                                                                     : utils::Platform::select_arch(OpCodeEnum::StIndI4, OpCodeEnum::StIndI8);
         break;
     case metadata::RtArgOrLocOrFieldReduceType::Other:
     {
-        ir = create_inst(&Transformer::emit_StObjAny);
-        ir->set_size(type_and_size.byte_size);
+        ir.opcode = OpCodeEnum::StObjAny;
+        ir.size = type_and_size.byte_size;
         break;
     }
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
-    ir->set_prefix(_prefix);
-    ir->set_var_src(val);
-    ir->set_var_dst(addr);
-    RET_VOID_OK();
+    ir.prefix = _prefix;
+    ir.first = val;
+    ir.destination = addr;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_ldstr(uint32_t user_string_index)
 {
     // Create instruction to load string
-    GeneralInst* ir = create_inst(&Transformer::emit_LdStr);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, get_module()->get_user_string(user_string_index));
+    InstructionOperands ir{};
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, str, _mod->get_user_string(user_string_index));
 
-    ir->set_user_string(str);
+    ir.string_value = str;
 
     // Push string reference to eval stack
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_LdStr(ir);
 }
 
 RtResultVoid Transformer::add_castclass(metadata::RtClass* klass)
@@ -1699,12 +1651,12 @@ RtResultVoid Transformer::add_castclass(metadata::RtClass* klass)
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, pop_eval_stack());
 
-    GeneralInst* ir = create_inst(&Transformer::emit_CastClass);
+    InstructionOperands ir{};
 
-    ir->set_class(klass);
-    ir->set_var_src(obj);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.klass = klass;
+    ir.first = obj;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_CastClass(ir);
 }
 
 RtResultVoid Transformer::add_isinst(metadata::RtClass* klass)
@@ -1717,12 +1669,12 @@ RtResultVoid Transformer::add_isinst(metadata::RtClass* klass)
     if (obj->is_not_reference())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_IsInst);
+    InstructionOperands ir{};
 
-    ir->set_class(klass);
-    ir->set_var_src(obj);
-    ir->set_var_dst(obj);
-    RET_VOID_OK();
+    ir.klass = klass;
+    ir.first = obj;
+    ir.destination = obj;
+    return emit_IsInst(ir);
 }
 
 RtResultVoid Transformer::add_box(metadata::RtClass* klass)
@@ -1737,12 +1689,12 @@ RtResultVoid Transformer::add_box(metadata::RtClass* klass)
     }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, val, pop_eval_stack());
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Box);
+    InstructionOperands ir{};
 
-    ir->set_class(klass);
-    ir->set_var_src(val);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.klass = klass;
+    ir.first = val;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_Box(ir);
 }
 
 RtResultVoid Transformer::add_unbox(metadata::RtClass* klass)
@@ -1754,12 +1706,12 @@ RtResultVoid Transformer::add_unbox(metadata::RtClass* klass)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, pop_eval_stack());
     if (!vm::Class::is_value_type(klass))
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
-    GeneralInst* ir = create_inst(&Transformer::emit_Unbox);
+    InstructionOperands ir{};
 
-    ir->set_class(klass);
-    ir->set_var_src(obj);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.klass = klass;
+    ir.first = obj;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_Unbox(ir);
 }
 
 RtResultVoid Transformer::add_unbox_any(metadata::RtClass* klass)
@@ -1772,39 +1724,35 @@ RtResultVoid Transformer::add_unbox_any(metadata::RtClass* klass)
     if (obj->is_not_reference())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_UnboxAny);
+    InstructionOperands ir{};
 
-    ir->set_class(klass);
-    ir->set_var_src(obj);
+    ir.klass = klass;
+    ir.first = obj;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(Variable*, dst, push_class_to_eval_stack(klass));
-    ir->set_var_dst(dst);
-    RET_VOID_OK();
+    ir.destination = dst;
+    return emit_UnboxAny(ir);
 }
 
 RtResultVoid Transformer::add_ldfld(const metadata::RtFieldInfo* field)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, pop_eval_stack()); // Pop object reference
-    Emitter opcode;
+
+    InstructionOperands ir{};
+    ir.first = obj;
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, dst_var, push_typesig_to_eval_stack(field->type_sig));
+    ir.destination = dst_var;
+    ir.field = field;
+    ir.prefix = _prefix;
     switch (obj->data_type)
     {
     case RtEvalStackDataType::RefOrPtr:
-        opcode = &Transformer::emit_Ldfld;
-        break;
+        return emit_Ldfld(ir);
     case RtEvalStackDataType::Other:
-        opcode = &Transformer::emit_Ldvfld;
-        break;
+        return emit_Ldvfld(ir);
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
-
-    GeneralInst* ir = create_inst(opcode);
-    ir->set_var_src(obj);
-
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, dst_var, push_typesig_to_eval_stack(field->type_sig));
-    ir->set_var_dst(dst_var);
-    ir->set_field(field);
-    ir->set_prefix(_prefix);
-    RET_VOID_OK();
 }
 
 RtResultVoid Transformer::add_ldflda(const metadata::RtFieldInfo* field)
@@ -1812,12 +1760,12 @@ RtResultVoid Transformer::add_ldflda(const metadata::RtFieldInfo* field)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, obj, pop_eval_stack());
     if (obj->is_not_reference())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
-    GeneralInst* ir = create_inst(&Transformer::emit_Ldflda);
+    InstructionOperands ir{};
 
-    ir->set_field(field);
-    ir->set_var_src(obj);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.field = field;
+    ir.first = obj;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_Ldflda(ir);
 }
 
 RtResultVoid Transformer::add_stfld(const metadata::RtFieldInfo* field)
@@ -1827,41 +1775,41 @@ RtResultVoid Transformer::add_stfld(const metadata::RtFieldInfo* field)
     if (obj->is_not_reference())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Stfld);
+    InstructionOperands ir{};
 
-    ir->set_field(field);
-    ir->set_var_arg1(obj);
-    ir->set_var_arg2(value);
-    ir->set_prefix(_prefix);
-    RET_VOID_OK();
+    ir.field = field;
+    ir.first = obj;
+    ir.second = value;
+    ir.prefix = _prefix;
+    return emit_Stfld(ir);
 }
 
 RtResultVoid Transformer::add_ldsfld(const metadata::RtFieldInfo* field)
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_Ldsfld);
+    InstructionOperands ir{};
 
-    ir->set_field(field);
+    ir.field = field;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(Variable*, dst_var, push_typesig_to_eval_stack(field->type_sig));
-    ir->set_var_dst(dst_var);
-    RET_VOID_OK();
+    ir.destination = dst_var;
+    return emit_Ldsfld(ir);
 }
 
 RtResultVoid Transformer::add_ldsflda(const metadata::RtFieldInfo* field)
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_Ldsflda);
-    ir->set_field(field);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.field = field;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_Ldsflda(ir);
 }
 
 RtResultVoid Transformer::add_stsfld(const metadata::RtFieldInfo* field)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, value, pop_eval_stack());
-    GeneralInst* ir = create_inst(&Transformer::emit_Stsfld);
+    InstructionOperands ir{};
 
-    ir->set_field(field);
-    ir->set_var_src(value);
-    RET_VOID_OK();
+    ir.field = field;
+    ir.first = value;
+    return emit_Stsfld(ir);
 }
 
 RtResultVoid Transformer::add_newarr(metadata::RtClass* ele_klass)
@@ -1870,24 +1818,25 @@ RtResultVoid Transformer::add_newarr(metadata::RtClass* ele_klass)
     if (!count->is_i32_or_native_int())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_NewArr);
+    InstructionOperands ir{};
 
-    ir->set_class(ele_klass);
-    ir->set_var_src(count);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.klass = ele_klass;
+    ir.first = count;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_NewArr(ir);
 }
 
 RtResultVoid Transformer::add_ldlen()
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, arr, pop_eval_stack());
 
-    GeneralInst* ir = create_inst(&Transformer::emit_LdLen);
+    InstructionOperands ir{};
 
-    ir->set_var_src(arr);
+    ir.first = arr;
     // in ECMA 335, ldlen always return native int, but in our runtime, we use i4 to represent array length
-    ir->set_var_dst(push_i4_to_eval_stack());
-    RET_VOID_OK();
+    ir.destination = push_i4_to_eval_stack();
+    ir.opcode = OpCodeEnum::LdLen;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_ldelema(metadata::RtClass* ele_klass)
@@ -1899,17 +1848,17 @@ RtResultVoid Transformer::add_ldelema(metadata::RtClass* ele_klass)
     if (arr->is_not_reference())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Ldelema);
+    InstructionOperands ir{};
 
-    ir->set_class(ele_klass);
-    ir->set_var_arg1(arr);
-    ir->set_var_arg2(idx);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    ir->set_prefix(_prefix);
-    RET_VOID_OK();
+    ir.klass = ele_klass;
+    ir.first = arr;
+    ir.second = idx;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    ir.prefix = _prefix;
+    return emit_Ldelema(ir);
 }
 
-RtResultVoid Transformer::add_ldelem(Emitter opcode, RtEvalStackDataType data_type)
+RtResultVoid Transformer::add_ldelem(OpCodeEnum opcode, RtEvalStackDataType data_type)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, idx, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, arr, pop_eval_stack());
@@ -1918,12 +1867,13 @@ RtResultVoid Transformer::add_ldelem(Emitter opcode, RtEvalStackDataType data_ty
     if (arr->is_not_reference())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_arg1(arr);
-    ir->set_var_arg2(idx);
-    ir->set_var_dst(push_primitive_to_eval_stack(data_type));
-    RET_VOID_OK();
+    ir.first = arr;
+    ir.second = idx;
+    ir.destination = push_primitive_to_eval_stack(data_type);
+    ir.opcode = opcode;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_ldelem_any(metadata::RtClass* ele_klass)
@@ -1933,22 +1883,22 @@ RtResultVoid Transformer::add_ldelem_any(metadata::RtClass* ele_klass)
     {
     case metadata::RtArgOrLocOrFieldReduceType::I1:
     case metadata::RtArgOrLocOrFieldReduceType::U1:
-        return add_ldelem(&Transformer::emit_LdelemI1, RtEvalStackDataType::I4);
+        return add_ldelem(OpCodeEnum::LdelemI1, RtEvalStackDataType::I4);
     case metadata::RtArgOrLocOrFieldReduceType::I2:
     case metadata::RtArgOrLocOrFieldReduceType::U2:
-        return add_ldelem(&Transformer::emit_LdelemI2, RtEvalStackDataType::I4);
+        return add_ldelem(OpCodeEnum::LdelemI2, RtEvalStackDataType::I4);
     case metadata::RtArgOrLocOrFieldReduceType::I4:
-        return add_ldelem(&Transformer::emit_LdelemI4, RtEvalStackDataType::I4);
+        return add_ldelem(OpCodeEnum::LdelemI4, RtEvalStackDataType::I4);
     case metadata::RtArgOrLocOrFieldReduceType::I8:
-        return add_ldelem(&Transformer::emit_LdelemI8, RtEvalStackDataType::I8);
+        return add_ldelem(OpCodeEnum::LdelemI8, RtEvalStackDataType::I8);
     case metadata::RtArgOrLocOrFieldReduceType::R4:
-        return add_ldelem(&Transformer::emit_LdelemR4, RtEvalStackDataType::R4);
+        return add_ldelem(OpCodeEnum::LdelemR4, RtEvalStackDataType::R4);
     case metadata::RtArgOrLocOrFieldReduceType::R8:
-        return add_ldelem(&Transformer::emit_LdelemR8, RtEvalStackDataType::R8);
+        return add_ldelem(OpCodeEnum::LdelemR8, RtEvalStackDataType::R8);
     case metadata::RtArgOrLocOrFieldReduceType::Ref:
-        return add_ldelem(&Transformer::emit_LdelemRef, RtEvalStackDataType::RefOrPtr);
+        return add_ldelem(OpCodeEnum::LdelemRef, RtEvalStackDataType::RefOrPtr);
     case metadata::RtArgOrLocOrFieldReduceType::I:
-        return add_ldelem(&Transformer::emit_LdelemI, RtEvalStackDataType::RefOrPtr);
+        return add_ldelem(OpCodeEnum::LdelemI, RtEvalStackDataType::RefOrPtr);
     case metadata::RtArgOrLocOrFieldReduceType::Other:
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, index, pop_eval_stack());
@@ -1957,21 +1907,21 @@ RtResultVoid Transformer::add_ldelem_any(metadata::RtClass* ele_klass)
             RET_ASSERT_ERR(RtErr::ExecutionEngine);
         if (arr->is_not_reference())
             RET_ASSERT_ERR(RtErr::ExecutionEngine);
-        GeneralInst* ir = create_inst(&Transformer::emit_LdelemAny);
-        ir->set_class(ele_klass);
-        ir->set_var_arg1(arr);
-        ir->set_var_arg2(index);
-        // ir->set_size(type_and_size.byte_size);
+        InstructionOperands ir{};
+        ir.klass = ele_klass;
+        ir.first = arr;
+        ir.second = index;
+        // ir.size = type_and_size.byte_size;
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(Variable*, dst, push_class_to_eval_stack(ele_klass));
-        ir->set_var_dst(dst);
-        RET_VOID_OK();
+        ir.destination = dst;
+        return emit_LdelemAny(ir);
     }
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
 }
 
-RtResultVoid Transformer::add_stelem(Emitter opcode, RtEvalStackDataType data_type)
+RtResultVoid Transformer::add_stelem(OpCodeEnum opcode, RtEvalStackDataType data_type)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, val, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, idx, pop_eval_stack());
@@ -1983,12 +1933,13 @@ RtResultVoid Transformer::add_stelem(Emitter opcode, RtEvalStackDataType data_ty
     if (val->data_type != data_type)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(opcode);
+    InstructionOperands ir{};
 
-    ir->set_var_arg1(arr);
-    ir->set_var_arg2(idx);
-    ir->set_var_arg3(val);
-    RET_VOID_OK();
+    ir.first = arr;
+    ir.second = idx;
+    ir.third = val;
+    ir.opcode = opcode;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_stelem_any(metadata::RtClass* ele_klass)
@@ -1998,22 +1949,22 @@ RtResultVoid Transformer::add_stelem_any(metadata::RtClass* ele_klass)
     {
     case metadata::RtArgOrLocOrFieldReduceType::I1:
     case metadata::RtArgOrLocOrFieldReduceType::U1:
-        return add_stelem(&Transformer::emit_StelemI1, RtEvalStackDataType::I4);
+        return add_stelem(OpCodeEnum::StelemI1, RtEvalStackDataType::I4);
     case metadata::RtArgOrLocOrFieldReduceType::I2:
     case metadata::RtArgOrLocOrFieldReduceType::U2:
-        return add_stelem(&Transformer::emit_StelemI2, RtEvalStackDataType::I4);
+        return add_stelem(OpCodeEnum::StelemI2, RtEvalStackDataType::I4);
     case metadata::RtArgOrLocOrFieldReduceType::I4:
-        return add_stelem(&Transformer::emit_StelemI4, RtEvalStackDataType::I4);
+        return add_stelem(OpCodeEnum::StelemI4, RtEvalStackDataType::I4);
     case metadata::RtArgOrLocOrFieldReduceType::I8:
-        return add_stelem(&Transformer::emit_StelemI8, RtEvalStackDataType::I8);
+        return add_stelem(OpCodeEnum::StelemI8, RtEvalStackDataType::I8);
     case metadata::RtArgOrLocOrFieldReduceType::R4:
-        return add_stelem(&Transformer::emit_StelemR4, RtEvalStackDataType::R4);
+        return add_stelem(OpCodeEnum::StelemR4, RtEvalStackDataType::R4);
     case metadata::RtArgOrLocOrFieldReduceType::R8:
-        return add_stelem(&Transformer::emit_StelemR8, RtEvalStackDataType::R8);
+        return add_stelem(OpCodeEnum::StelemR8, RtEvalStackDataType::R8);
     case metadata::RtArgOrLocOrFieldReduceType::Ref:
-        return add_stelem(&Transformer::emit_StelemRef, RtEvalStackDataType::RefOrPtr);
+        return add_stelem(OpCodeEnum::StelemRef, RtEvalStackDataType::RefOrPtr);
     case metadata::RtArgOrLocOrFieldReduceType::I:
-        return add_stelem(&Transformer::emit_StelemI, RtEvalStackDataType::RefOrPtr);
+        return add_stelem(OpCodeEnum::StelemI, RtEvalStackDataType::RefOrPtr);
     case metadata::RtArgOrLocOrFieldReduceType::Other:
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, val, pop_eval_stack());
@@ -2025,15 +1976,14 @@ RtResultVoid Transformer::add_stelem_any(metadata::RtClass* ele_klass)
             RET_ASSERT_ERR(RtErr::ExecutionEngine);
         if (val->data_type != RtEvalStackDataType::Other)
             RET_ASSERT_ERR(RtErr::ExecutionEngine);
-        GeneralInst* ir = create_inst(&Transformer::emit_StelemAny);
+        InstructionOperands ir{};
 
-        ir->set_class(ele_klass);
-        ir->set_var_arg1(arr);
-        ir->set_var_arg2(idx);
-        ir->set_var_arg3(val);
-        // ir->set_size(type_and_size.byte_size);
-        RET_VOID_OK();
-        break;
+        ir.klass = ele_klass;
+        ir.first = arr;
+        ir.second = idx;
+        ir.third = val;
+        // ir.size = type_and_size.byte_size;
+        return emit_StelemAny(ir);
     }
     default:
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
@@ -2047,13 +1997,13 @@ RtResultVoid Transformer::add_mkrefany(metadata::RtClass* klass)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     // Create mkrefany instruction - this creates a TypedRef from address and type
-    GeneralInst* ir = create_inst(&Transformer::emit_MkRefAny);
+    InstructionOperands ir{};
 
-    ir->set_class(klass);
-    ir->set_var_src(addr);
+    ir.klass = klass;
+    ir.first = addr;
     // Push TypedRef value
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_MkRefAny(ir);
 }
 
 RtResultVoid Transformer::add_refanytype()
@@ -2063,11 +2013,12 @@ RtResultVoid Transformer::add_refanytype()
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     // Create refanytype instruction - extracts type from TypedRef
-    GeneralInst* ir = create_inst(&Transformer::emit_RefAnyType);
+    InstructionOperands ir{};
 
-    ir->set_var_src(typedref_var);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.first = typedref_var;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    ir.opcode = OpCodeEnum::RefAnyType;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_refanyval(metadata::RtClass* klass)
@@ -2077,48 +2028,50 @@ RtResultVoid Transformer::add_refanyval(metadata::RtClass* klass)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
     // Create refanyval instruction - extracts address from TypedRef
-    GeneralInst* ir = create_inst(&Transformer::emit_RefAnyVal);
+    InstructionOperands ir{};
 
-    ir->set_class(klass);
-    ir->set_var_src(typedref_var);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.klass = klass;
+    ir.first = typedref_var;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_RefAnyVal(ir);
 }
 
 RtResultVoid Transformer::add_ldtoken(uint32_t token)
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtRuntimeHandle, handle, get_cached_runtime_handle(token));
 
-    GeneralInst* ir = create_inst(&Transformer::emit_LdToken);
+    InstructionOperands ir{};
 
-    ir->set_runtime_handle(metadata::RtEncodedRuntimeHandle::encode(handle));
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    ir.runtime_handle = (metadata::RtEncodedRuntimeHandle::encode(handle)).get_encoded_value();
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    return emit_LdToken(ir);
 }
 
 RtResultVoid Transformer::add_throw()
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, exe, pop_eval_stack());
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Throw);
+    InstructionOperands ir{};
 
-    ir->set_var_src(exe);
+    ir.first = exe;
     clear_eval_stack();
-    RET_VOID_OK();
+    ir.opcode = OpCodeEnum::Throw;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_rethrow()
 {
     clear_eval_stack();
-    create_inst(&Transformer::emit_Rethrow);
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.opcode = OpCodeEnum::Rethrow;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_endfinally()
 {
     clear_eval_stack();
-    create_inst(&Transformer::emit_EndFinallyOrFault);
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    return emit_EndFinallyOrFault(ir);
 }
 
 RtResultVoid Transformer::add_endfilter()
@@ -2126,10 +2079,11 @@ RtResultVoid Transformer::add_endfilter()
     if (_cur_bb->eval_stack.size() != 1)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_EndFilter);
-    ir->set_var_src(_cur_bb->eval_stack[0]);
+    InstructionOperands ir{};
+    ir.first = _cur_bb->eval_stack[0];
     clear_eval_stack();
-    RET_VOID_OK();
+    ir.opcode = OpCodeEnum::EndFilter;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_leave(size_t next_offset, ptrdiff_t target_offset)
@@ -2137,18 +2091,19 @@ RtResultVoid Transformer::add_leave(size_t next_offset, ptrdiff_t target_offset)
     const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) + target_offset);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(BasicBlock*, target_bb, get_branch_target_bb(target_il_offset));
 
-    GeneralInst* ir = create_inst(&Transformer::emit_Leave);
+    InstructionOperands ir{};
     clear_eval_stack();
-    ir->set_branch_target(target_bb);
+    ir.target = target_bb;
     RET_ERR_ON_FAIL(setup_target_branch_eval_stack(target_bb));
-    RET_VOID_OK();
+    return emit_Leave(ir);
 }
 
 RtResultVoid Transformer::add_arglist()
 {
-    GeneralInst* ir = create_inst(&Transformer::emit_Arglist);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    ir.opcode = OpCodeEnum::Arglist;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_localloc()
@@ -2156,10 +2111,11 @@ RtResultVoid Transformer::add_localloc()
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, size, pop_eval_stack());
     if (!size->is_i32_or_native_int())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
-    GeneralInst* ir = create_inst(&Transformer::emit_LocAlloc);
-    ir->set_var_src(size);
-    ir->set_var_dst(push_ref_or_ptr_to_eval_stack());
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = size;
+    ir.destination = push_ref_or_ptr_to_eval_stack();
+    ir.opcode = OpCodeEnum::LocAlloc;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_cpblk()
@@ -2171,11 +2127,12 @@ RtResultVoid Transformer::add_cpblk()
     if (size->is_not_i32_and_native_int() || src_addr->is_not_reference() || dst_addr->is_not_reference())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_CpBlk);
-    ir->set_var_arg1(dst_addr);
-    ir->set_var_arg2(src_addr);
-    ir->set_var_arg3(size);
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = dst_addr;
+    ir.second = src_addr;
+    ir.third = size;
+    ir.opcode = OpCodeEnum::CpBlk;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_initblk()
@@ -2186,11 +2143,12 @@ RtResultVoid Transformer::add_initblk()
     if (size->is_not_i32_and_native_int() || value->is_not_i32_and_native_int() || dst_addr->is_not_reference())
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
 
-    GeneralInst* ir = create_inst(&Transformer::emit_InitBlk);
-    ir->set_var_arg1(dst_addr);
-    ir->set_var_arg2(value);
-    ir->set_var_arg3(size);
-    RET_VOID_OK();
+    InstructionOperands ir{};
+    ir.first = dst_addr;
+    ir.second = value;
+    ir.third = size;
+    ir.opcode = OpCodeEnum::InitBlk;
+    return append_instruction(ir);
 }
 
 RtResultVoid Transformer::add_sizeof(const metadata::RtTypeSig* type_sig)
@@ -2215,8 +2173,6 @@ RtResultVoid Transformer::transform()
 
     // Add initialization code for locals if needed
     RET_ERR_ON_FAIL(add_init_locals());
-
-    RET_ERR_ON_FAIL(flush_pending_instructions());
 
     // Decode IL and emit final typed instructions directly
     RET_ERR_ON_FAIL(transform_body());
@@ -2278,7 +2234,7 @@ RtResultVoid Transformer::setup_locals()
         RET_VOID_OK();
     }
 
-    metadata::RtModuleDef* mod = get_module();
+    metadata::RtModuleDef* mod = _mod;
 
     _total_arg_and_local_stack_object_size = _total_arg_stack_object_size;
     utils::Vector<const metadata::RtTypeSig*> local_var_type_sigs;
@@ -2432,10 +2388,11 @@ RtResultVoid Transformer::transform_body()
         }
         bb->inited_eval_stack = true;
 #if LEANCLR_PGO_PROFILE
-        GeneralInst* profile_inst = _pool->malloc_any_zeroed<GeneralInst>();
-        profile_inst->set_opcode(ll::OpCodeEnum::ProfileAddCost);
-        profile_inst->set_il_offset(static_cast<int32_t>(bb->il_begin_offset));
-        bb->insts.push_back(profile_inst);
+        _cur_il_offset = static_cast<int32_t>(bb->il_begin_offset);
+        InstructionOperands profile_operands{};
+        profile_operands.opcode = OpCodeEnum::ProfileAddCost;
+        RET_ERR_ON_FAIL(append_instruction(profile_operands));
+        auto* profile_inst = reinterpret_cast<ll::ProfileAddCost*>(_cur_bb->insts.get(_cur_bb->insts.size() - 1)->data());
 #endif
 
         for (size_t il_offset_cur = bb->il_begin_offset, il_offset_end = bb->il_end_offset; il_offset_cur < il_offset_end;)
@@ -2744,70 +2701,80 @@ RtResultVoid Transformer::transform_body()
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_Beq));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BeqI4, OpCodeEnum::BeqI8, OpCodeEnum::BeqR4, OpCodeEnum::BeqR8}));
                 break;
             }
             case il::OpCodeValue::BgeS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_Bge));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BgeI4, OpCodeEnum::BgeI8, OpCodeEnum::BgeR4, OpCodeEnum::BgeR8}));
                 break;
             }
             case il::OpCodeValue::BgtS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_Bgt));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BgtI4, OpCodeEnum::BgtI8, OpCodeEnum::BgtR4, OpCodeEnum::BgtR8}));
                 break;
             }
             case il::OpCodeValue::BleS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_Ble));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BleI4, OpCodeEnum::BleI8, OpCodeEnum::BleR4, OpCodeEnum::BleR8}));
                 break;
             }
             case il::OpCodeValue::BltS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_Blt));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BltI4, OpCodeEnum::BltI8, OpCodeEnum::BltR4, OpCodeEnum::BltR8}));
                 break;
             }
             case il::OpCodeValue::BneUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_BneUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BneUnI4, OpCodeEnum::BneUnI8, OpCodeEnum::BneUnR4, OpCodeEnum::BneUnR8}));
                 break;
             }
             case il::OpCodeValue::BgeUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_BgeUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BgeUnI4, OpCodeEnum::BgeUnI8, OpCodeEnum::BgeUnR4, OpCodeEnum::BgeUnR8}));
                 break;
             }
             case il::OpCodeValue::BgtUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_BgtUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BgtUnI4, OpCodeEnum::BgtUnI8, OpCodeEnum::BgtUnR4, OpCodeEnum::BgtUnR8}));
                 break;
             }
             case il::OpCodeValue::BleUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_BleUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BleUnI4, OpCodeEnum::BleUnI8, OpCodeEnum::BleUnR4, OpCodeEnum::BleUnR8}));
                 break;
             }
             case il::OpCodeValue::BltUnS:
             {
                 int8_t target_byte = *(const int8_t*)(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 2;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte, &Transformer::emit_BltUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target_byte,
+                                                     NumericOpcodes{OpCodeEnum::BltUnI4, OpCodeEnum::BltUnI8, OpCodeEnum::BltUnR4, OpCodeEnum::BltUnR8}));
                 break;
             }
             case il::OpCodeValue::Br:
@@ -2835,70 +2802,80 @@ RtResultVoid Transformer::transform_body()
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_Beq));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BeqI4, OpCodeEnum::BeqI8, OpCodeEnum::BeqR4, OpCodeEnum::BeqR8}));
                 break;
             }
             case il::OpCodeValue::Bge:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_Bge));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BgeI4, OpCodeEnum::BgeI8, OpCodeEnum::BgeR4, OpCodeEnum::BgeR8}));
                 break;
             }
             case il::OpCodeValue::Bgt:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_Bgt));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BgtI4, OpCodeEnum::BgtI8, OpCodeEnum::BgtR4, OpCodeEnum::BgtR8}));
                 break;
             }
             case il::OpCodeValue::Ble:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_Ble));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BleI4, OpCodeEnum::BleI8, OpCodeEnum::BleR4, OpCodeEnum::BleR8}));
                 break;
             }
             case il::OpCodeValue::Blt:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_Blt));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BltI4, OpCodeEnum::BltI8, OpCodeEnum::BltR4, OpCodeEnum::BltR8}));
                 break;
             }
             case il::OpCodeValue::BneUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_BneUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BneUnI4, OpCodeEnum::BneUnI8, OpCodeEnum::BneUnR4, OpCodeEnum::BneUnR8}));
                 break;
             }
             case il::OpCodeValue::BgeUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_BgeUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BgeUnI4, OpCodeEnum::BgeUnI8, OpCodeEnum::BgeUnR4, OpCodeEnum::BgeUnR8}));
                 break;
             }
             case il::OpCodeValue::BgtUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_BgtUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BgtUnI4, OpCodeEnum::BgtUnI8, OpCodeEnum::BgtUnR4, OpCodeEnum::BgtUnR8}));
                 break;
             }
             case il::OpCodeValue::BleUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_BleUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BleUnI4, OpCodeEnum::BleUnI8, OpCodeEnum::BleUnR4, OpCodeEnum::BleUnR8}));
                 break;
             }
             case il::OpCodeValue::BltUn:
             {
                 int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
-                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target, &Transformer::emit_BltUn));
+                RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
+                                                     NumericOpcodes{OpCodeEnum::BltUnI4, OpCodeEnum::BltUnI8, OpCodeEnum::BltUnR4, OpCodeEnum::BltUnR8}));
                 break;
             }
             case il::OpCodeValue::Switch:
@@ -2914,188 +2891,203 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::LdIndI1:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndI1, metadata::RtArgOrLocOrFieldReduceType::I1));
+                RET_ERR_ON_FAIL(add_ldind(OpCodeEnum::LdIndI1, metadata::RtArgOrLocOrFieldReduceType::I1));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndU1:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndU1, metadata::RtArgOrLocOrFieldReduceType::U1));
+                RET_ERR_ON_FAIL(add_ldind(OpCodeEnum::LdIndU1, metadata::RtArgOrLocOrFieldReduceType::U1));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndI2:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndI2, metadata::RtArgOrLocOrFieldReduceType::I2));
+                RET_ERR_ON_FAIL(add_ldind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI2Unaligned : OpCodeEnum::LdIndI2,
+                                          metadata::RtArgOrLocOrFieldReduceType::I2));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndU2:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndU2, metadata::RtArgOrLocOrFieldReduceType::U2));
+                RET_ERR_ON_FAIL(add_ldind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndU2Unaligned : OpCodeEnum::LdIndU2,
+                                          metadata::RtArgOrLocOrFieldReduceType::U2));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndI4:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndI4, metadata::RtArgOrLocOrFieldReduceType::I4));
+                RET_ERR_ON_FAIL(add_ldind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI4Unaligned : OpCodeEnum::LdIndI4,
+                                          metadata::RtArgOrLocOrFieldReduceType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndU4:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndI4, metadata::RtArgOrLocOrFieldReduceType::I4));
+                RET_ERR_ON_FAIL(add_ldind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI4Unaligned : OpCodeEnum::LdIndI4,
+                                          metadata::RtArgOrLocOrFieldReduceType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndI8:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndI8, metadata::RtArgOrLocOrFieldReduceType::I8));
+                RET_ERR_ON_FAIL(add_ldind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI8Unaligned : OpCodeEnum::LdIndI8,
+                                          metadata::RtArgOrLocOrFieldReduceType::I8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndI:
             {
                 // FIXME: we maybe need to add LdIntI for native int type
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndRef, metadata::RtArgOrLocOrFieldReduceType::I));
+                RET_ERR_ON_FAIL(add_ldind(has_prefix(_prefix, il::OpCodePrefix::Unaligned)
+                                              ? utils::Platform::select_arch(OpCodeEnum::LdIndI4Unaligned, OpCodeEnum::LdIndI8Unaligned)
+                                              : utils::Platform::select_arch(OpCodeEnum::LdIndI4, OpCodeEnum::LdIndI8),
+                                          metadata::RtArgOrLocOrFieldReduceType::I));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndR4:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndR4, metadata::RtArgOrLocOrFieldReduceType::R4));
+                RET_ERR_ON_FAIL(add_ldind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI4Unaligned : OpCodeEnum::LdIndI4,
+                                          metadata::RtArgOrLocOrFieldReduceType::R4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndR8:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndR8, metadata::RtArgOrLocOrFieldReduceType::R8));
+                RET_ERR_ON_FAIL(add_ldind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::LdIndI8Unaligned : OpCodeEnum::LdIndI8,
+                                          metadata::RtArgOrLocOrFieldReduceType::R8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdIndRef:
             {
-                RET_ERR_ON_FAIL(add_ldind(&Transformer::emit_LdIndRef, metadata::RtArgOrLocOrFieldReduceType::Ref));
+                RET_ERR_ON_FAIL(add_ldind(has_prefix(_prefix, il::OpCodePrefix::Unaligned)
+                                              ? utils::Platform::select_arch(OpCodeEnum::LdIndI4Unaligned, OpCodeEnum::LdIndI8Unaligned)
+                                              : utils::Platform::select_arch(OpCodeEnum::LdIndI4, OpCodeEnum::LdIndI8),
+                                          metadata::RtArgOrLocOrFieldReduceType::Ref));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StIndRef:
             {
-                RET_ERR_ON_FAIL(add_stind(&Transformer::emit_StIndRef));
+                RET_ERR_ON_FAIL(add_stind(has_prefix(_prefix, il::OpCodePrefix::Unaligned)
+                                              ? utils::Platform::select_arch(OpCodeEnum::StIndI4Unaligned, OpCodeEnum::StIndI8Unaligned)
+                                              : utils::Platform::select_arch(OpCodeEnum::StIndI4, OpCodeEnum::StIndI8)));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StIndI1:
             {
-                RET_ERR_ON_FAIL(add_stind(&Transformer::emit_StIndI1));
+                RET_ERR_ON_FAIL(add_stind(OpCodeEnum::StIndI1));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StIndI2:
             {
-                RET_ERR_ON_FAIL(add_stind(&Transformer::emit_StIndI2));
+                RET_ERR_ON_FAIL(add_stind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::StIndI2Unaligned : OpCodeEnum::StIndI2));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StIndI4:
             {
-                RET_ERR_ON_FAIL(add_stind(&Transformer::emit_StIndI4));
+                RET_ERR_ON_FAIL(add_stind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::StIndI4Unaligned : OpCodeEnum::StIndI4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StIndI8:
             {
-                RET_ERR_ON_FAIL(add_stind(&Transformer::emit_StIndI8));
+                RET_ERR_ON_FAIL(add_stind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::StIndI8Unaligned : OpCodeEnum::StIndI8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StIndR4:
             {
-                RET_ERR_ON_FAIL(add_stind(&Transformer::emit_StIndR4));
+                RET_ERR_ON_FAIL(add_stind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::StIndI4Unaligned : OpCodeEnum::StIndI4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StIndR8:
             {
-                RET_ERR_ON_FAIL(add_stind(&Transformer::emit_StIndR8));
+                RET_ERR_ON_FAIL(add_stind(has_prefix(_prefix, il::OpCodePrefix::Unaligned) ? OpCodeEnum::StIndI8Unaligned : OpCodeEnum::StIndI8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::Add:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_Add));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::AddI4, OpCodeEnum::AddI8, OpCodeEnum::AddR4, OpCodeEnum::AddR8}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::Sub:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_Sub));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::SubI4, OpCodeEnum::SubI8, OpCodeEnum::SubR4, OpCodeEnum::SubR8}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::Mul:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_Mul));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::MulI4, OpCodeEnum::MulI8, OpCodeEnum::MulR4, OpCodeEnum::MulR8}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::Div:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_Div));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::DivI4, OpCodeEnum::DivI8, OpCodeEnum::DivR4, OpCodeEnum::DivR8}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::DivUn:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_DivUn));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::DivUnI4, OpCodeEnum::DivUnI8, OpCodeEnum::DivR4, OpCodeEnum::DivR8}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::Rem:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_Rem));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::RemI4, OpCodeEnum::RemI8, OpCodeEnum::RemR4, OpCodeEnum::RemR8}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::RemUn:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_RemUn));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::RemUnI4, OpCodeEnum::RemUnI8, OpCodeEnum::RemR4, OpCodeEnum::RemR8}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::And:
             {
-                RET_ERR_ON_FAIL(add_bin_bit_op(&Transformer::emit_And));
+                RET_ERR_ON_FAIL(add_bin_bit_op(NumericOpcodes{OpCodeEnum::AndI4, OpCodeEnum::AndI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::Or:
             {
-                RET_ERR_ON_FAIL(add_bin_bit_op(&Transformer::emit_Or));
+                RET_ERR_ON_FAIL(add_bin_bit_op(NumericOpcodes{OpCodeEnum::OrI4, OpCodeEnum::OrI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::Xor:
             {
-                RET_ERR_ON_FAIL(add_bin_bit_op(&Transformer::emit_Xor));
+                RET_ERR_ON_FAIL(add_bin_bit_op(NumericOpcodes{OpCodeEnum::XorI4, OpCodeEnum::XorI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::Shl:
             {
-                RET_ERR_ON_FAIL(add_bit_shift_op(&Transformer::emit_Shl));
+                RET_ERR_ON_FAIL(add_bit_shift_op(NumericOpcodes{OpCodeEnum::ShlI4, OpCodeEnum::ShlI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::Shr:
             {
-                RET_ERR_ON_FAIL(add_bit_shift_op(&Transformer::emit_Shr));
+                RET_ERR_ON_FAIL(add_bit_shift_op(NumericOpcodes{OpCodeEnum::ShrI4, OpCodeEnum::ShrI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ShrUn:
             {
-                RET_ERR_ON_FAIL(add_bit_shift_op(&Transformer::emit_ShrUn));
+                RET_ERR_ON_FAIL(add_bit_shift_op(NumericOpcodes{OpCodeEnum::ShrUnI4, OpCodeEnum::ShrUnI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
@@ -3113,49 +3105,57 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::ConvI1:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvI1, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvI1I4, OpCodeEnum::ConvI1I8, OpCodeEnum::ConvI1R4, OpCodeEnum::ConvI1R8}, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvI2:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvI2, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvI2I4, OpCodeEnum::ConvI2I8, OpCodeEnum::ConvI2R4, OpCodeEnum::ConvI2R8}, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvI4:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvI4, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::Nop, OpCodeEnum::ConvI4I8, OpCodeEnum::ConvI4R4, OpCodeEnum::ConvI4R8}, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvI8:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvI8, RtEvalStackDataType::I8));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvI8I4, OpCodeEnum::Nop, OpCodeEnum::ConvI8R4, OpCodeEnum::ConvI8R8}, RtEvalStackDataType::I8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvR4:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvR4, RtEvalStackDataType::R4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvR4I4, OpCodeEnum::ConvR4I8, OpCodeEnum::Nop, OpCodeEnum::ConvR4R8}, RtEvalStackDataType::R4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvR8:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvR8, RtEvalStackDataType::R8));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvR8I4, OpCodeEnum::ConvR8I8, OpCodeEnum::ConvR8R4, OpCodeEnum::Nop}, RtEvalStackDataType::R8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvU4:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvU4, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::Nop, OpCodeEnum::ConvU4I8, OpCodeEnum::ConvU4R4, OpCodeEnum::ConvU4R8}, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvU8:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvU8, RtEvalStackDataType::I8));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvU8I4, OpCodeEnum::Nop, OpCodeEnum::ConvU8R4, OpCodeEnum::ConvU8R8}, RtEvalStackDataType::I8));
                 il_offset_cur += 1;
                 break;
             }
@@ -3217,7 +3217,8 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::ConvRUn:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvR8, RtEvalStackDataType::R8));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvR8I4, OpCodeEnum::ConvR8I8, OpCodeEnum::ConvR8R4, OpCodeEnum::Nop}, RtEvalStackDataType::R8));
                 il_offset_cur += 1;
                 break;
             }
@@ -3298,61 +3299,82 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::ConvOvfI1Un:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfI1Un, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvOvfI1UnI4, OpCodeEnum::ConvOvfI1UnI8, OpCodeEnum::ConvOvfI1UnR4, OpCodeEnum::ConvOvfI1UnR8},
+                             RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfU1Un:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfU1Un, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvOvfU1UnI4, OpCodeEnum::ConvOvfU1UnI8, OpCodeEnum::ConvOvfU1UnR4, OpCodeEnum::ConvOvfU1UnR8},
+                             RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfI2Un:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfI2Un, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvOvfI2UnI4, OpCodeEnum::ConvOvfI2UnI8, OpCodeEnum::ConvOvfI2UnR4, OpCodeEnum::ConvOvfI2UnR8},
+                             RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfU2Un:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfU2Un, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvOvfU2UnI4, OpCodeEnum::ConvOvfU2UnI8, OpCodeEnum::ConvOvfU2UnR4, OpCodeEnum::ConvOvfU2UnR8},
+                             RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfI4Un:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfI4Un, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvOvfI4UnI4, OpCodeEnum::ConvOvfI4UnI8, OpCodeEnum::ConvOvfI4UnR4, OpCodeEnum::ConvOvfI4UnR8},
+                             RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfU4Un:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfU4Un, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::Nop, OpCodeEnum::ConvOvfU4UnI8, OpCodeEnum::ConvOvfU4UnR4, OpCodeEnum::ConvOvfU4UnR8},
+                                         RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfI8Un:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfI8Un, RtEvalStackDataType::I8));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::ConvI8U4, OpCodeEnum::ConvOvfI8UnI8, OpCodeEnum::ConvOvfI8UnR4, OpCodeEnum::ConvOvfI8UnR8},
+                                         RtEvalStackDataType::I8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfU8Un:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfU8Un, RtEvalStackDataType::I8));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::ConvI8U4, OpCodeEnum::Nop, OpCodeEnum::ConvOvfU8UnR4, OpCodeEnum::ConvOvfU8UnR8},
+                                         RtEvalStackDataType::I8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfIUn:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfIUn, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{utils::Platform::select_arch(OpCodeEnum::ConvOvfI4UnI4, OpCodeEnum::ConvI8U4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfI4UnI8, OpCodeEnum::ConvOvfI8UnI8),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfI4UnR4, OpCodeEnum::ConvOvfI8UnR4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfI4UnR8, OpCodeEnum::ConvOvfI8UnR8)},
+                                         RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfUUn:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfUUn, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{utils::Platform::select_arch(OpCodeEnum::Nop, OpCodeEnum::ConvI8U4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfU4UnI8, OpCodeEnum::Nop),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfU4UnR4, OpCodeEnum::ConvOvfU8UnR4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfU4UnR8, OpCodeEnum::ConvOvfU8UnR8)},
+                                         RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
@@ -3388,115 +3410,115 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::LdelemI1:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemI1, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemI1, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemU1:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemU1, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemU1, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemI2:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemI2, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemI2, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemU2:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemU2, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemU2, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemI4:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemI4, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemI4, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemU4:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemI4, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemI4, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemI8:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemI8, RtEvalStackDataType::I8));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemI8, RtEvalStackDataType::I8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemI:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemI, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemI, RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemR4:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemR4, RtEvalStackDataType::R4));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemR4, RtEvalStackDataType::R4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemR8:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemR8, RtEvalStackDataType::R8));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemR8, RtEvalStackDataType::R8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::LdelemRef:
             {
-                RET_ERR_ON_FAIL(add_ldelem(&Transformer::emit_LdelemRef, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_ldelem(OpCodeEnum::LdelemRef, RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StelemI1:
             {
-                RET_ERR_ON_FAIL(add_stelem(&Transformer::emit_StelemI1, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_stelem(OpCodeEnum::StelemI1, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StelemI2:
             {
-                RET_ERR_ON_FAIL(add_stelem(&Transformer::emit_StelemI2, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_stelem(OpCodeEnum::StelemI2, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StelemI4:
             {
-                RET_ERR_ON_FAIL(add_stelem(&Transformer::emit_StelemI4, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_stelem(OpCodeEnum::StelemI4, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StelemI8:
             {
-                RET_ERR_ON_FAIL(add_stelem(&Transformer::emit_StelemI8, RtEvalStackDataType::I8));
+                RET_ERR_ON_FAIL(add_stelem(OpCodeEnum::StelemI8, RtEvalStackDataType::I8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StelemI:
             {
-                RET_ERR_ON_FAIL(add_stelem(&Transformer::emit_StelemI, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_stelem(OpCodeEnum::StelemI, RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StelemR4:
             {
-                RET_ERR_ON_FAIL(add_stelem(&Transformer::emit_StelemR4, RtEvalStackDataType::R4));
+                RET_ERR_ON_FAIL(add_stelem(OpCodeEnum::StelemR4, RtEvalStackDataType::R4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StelemR8:
             {
-                RET_ERR_ON_FAIL(add_stelem(&Transformer::emit_StelemR8, RtEvalStackDataType::R8));
+                RET_ERR_ON_FAIL(add_stelem(OpCodeEnum::StelemR8, RtEvalStackDataType::R8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::StelemRef:
             {
-                RET_ERR_ON_FAIL(add_stelem(&Transformer::emit_StelemRef, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_stelem(OpCodeEnum::StelemRef, RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
@@ -3542,49 +3564,57 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::ConvOvfI1:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfI1, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::ConvOvfI1I4, OpCodeEnum::ConvOvfI1I8, OpCodeEnum::ConvOvfI1R4, OpCodeEnum::ConvOvfI1R8},
+                                         RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfU1:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfU1, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::ConvOvfU1I4, OpCodeEnum::ConvOvfU1I8, OpCodeEnum::ConvOvfU1R4, OpCodeEnum::ConvOvfU1R8},
+                                         RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfI2:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfI2, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::ConvOvfI2I4, OpCodeEnum::ConvOvfI2I8, OpCodeEnum::ConvOvfI2R4, OpCodeEnum::ConvOvfI2R8},
+                                         RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfU2:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfU2, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::ConvOvfU2I4, OpCodeEnum::ConvOvfU2I8, OpCodeEnum::ConvOvfU2R4, OpCodeEnum::ConvOvfU2R8},
+                                         RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfI4:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfI4, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::Nop, OpCodeEnum::ConvOvfI4I8, OpCodeEnum::ConvOvfI4R4, OpCodeEnum::ConvOvfI4R8},
+                                         RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfU4:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfU4, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::ConvOvfU4I4, OpCodeEnum::ConvOvfU4I8, OpCodeEnum::ConvOvfU4R4, OpCodeEnum::ConvOvfU4R8},
+                                         RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfI8:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfI8, RtEvalStackDataType::I8));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvI8I4, OpCodeEnum::Nop, OpCodeEnum::ConvOvfI8R4, OpCodeEnum::ConvOvfI8R8}, RtEvalStackDataType::I8));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfU8:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfU8, RtEvalStackDataType::I8));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{OpCodeEnum::ConvOvfU8I4, OpCodeEnum::ConvOvfU8I8, OpCodeEnum::ConvOvfU8R4, OpCodeEnum::ConvOvfU8R8},
+                                         RtEvalStackDataType::I8));
                 il_offset_cur += 1;
                 break;
             }
@@ -3646,67 +3676,81 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::ConvU1:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvU1, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvU1I4, OpCodeEnum::ConvU1I8, OpCodeEnum::ConvU1R4, OpCodeEnum::ConvU1R8}, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvU2:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvU2, RtEvalStackDataType::I4));
+                RET_ERR_ON_FAIL(
+                    add_conv(NumericOpcodes{OpCodeEnum::ConvU2I4, OpCodeEnum::ConvU2I8, OpCodeEnum::ConvU2R4, OpCodeEnum::ConvU2R8}, RtEvalStackDataType::I4));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvI:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvI, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{utils::Platform::select_arch(OpCodeEnum::Nop, OpCodeEnum::ConvI8I4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvI4I8, OpCodeEnum::Nop),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvI4R4, OpCodeEnum::ConvI8R4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvI4R8, OpCodeEnum::ConvI8R8)},
+                                         RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfI:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfI, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{utils::Platform::select_arch(OpCodeEnum::Nop, OpCodeEnum::ConvI8I4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfI4I8, OpCodeEnum::Nop),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfI4R4, OpCodeEnum::ConvOvfI8R4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfI4R8, OpCodeEnum::ConvOvfI8R8)},
+                                         RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvOvfU:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvOvfU, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{utils::Platform::select_arch(OpCodeEnum::ConvOvfU4I4, OpCodeEnum::ConvOvfU8I4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfU4I8, OpCodeEnum::ConvOvfU8I8),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfU4R4, OpCodeEnum::ConvOvfU8R4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvOvfU4R8, OpCodeEnum::ConvOvfU8R8)},
+                                         RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::AddOvf:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_AddOvf));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::AddOvfI4, OpCodeEnum::AddOvfI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::AddOvfUn:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_AddOvfUn));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::AddOvfUnI4, OpCodeEnum::AddOvfUnI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::MulOvf:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_MulOvf));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::MulOvfI4, OpCodeEnum::MulOvfI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::MulOvfUn:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_MulOvfUn));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::MulOvfUnI4, OpCodeEnum::MulOvfUnI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::SubOvf:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_SubOvf));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::SubOvfI4, OpCodeEnum::SubOvfI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::SubOvfUn:
             {
-                RET_ERR_ON_FAIL(add_bin_arith_op(&Transformer::emit_SubOvfUn));
+                RET_ERR_ON_FAIL(add_bin_arith_op(NumericOpcodes{OpCodeEnum::SubOvfUnI4, OpCodeEnum::SubOvfUnI8, OpCodeEnum::Illegal, OpCodeEnum::Illegal}));
                 il_offset_cur += 1;
                 break;
             }
@@ -3733,13 +3777,19 @@ RtResultVoid Transformer::transform_body()
             case il::OpCodeValue::StIndI:
             {
                 // FIXME: we maybe need to add StIndI for this.
-                RET_ERR_ON_FAIL(add_stind(&Transformer::emit_StIndRef));
+                RET_ERR_ON_FAIL(add_stind(has_prefix(_prefix, il::OpCodePrefix::Unaligned)
+                                              ? utils::Platform::select_arch(OpCodeEnum::StIndI4Unaligned, OpCodeEnum::StIndI8Unaligned)
+                                              : utils::Platform::select_arch(OpCodeEnum::StIndI4, OpCodeEnum::StIndI8)));
                 il_offset_cur += 1;
                 break;
             }
             case il::OpCodeValue::ConvU:
             {
-                RET_ERR_ON_FAIL(add_conv(&Transformer::emit_ConvU, RtEvalStackDataType::RefOrPtr));
+                RET_ERR_ON_FAIL(add_conv(NumericOpcodes{utils::Platform::select_arch(OpCodeEnum::Nop, OpCodeEnum::ConvU8I4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvU4I8, OpCodeEnum::Nop),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvU4R4, OpCodeEnum::ConvU8R4),
+                                                        utils::Platform::select_arch(OpCodeEnum::ConvU4R8, OpCodeEnum::ConvU8R8)},
+                                         RtEvalStackDataType::RefOrPtr));
                 il_offset_cur += 1;
                 break;
             }
@@ -3790,31 +3840,31 @@ RtResultVoid Transformer::transform_body()
                 }
                 case il::OpCodeValueExt::Ceq:
                 {
-                    RET_ERR_ON_FAIL(add_bin_compare_op(&Transformer::emit_Ceq));
+                    RET_ERR_ON_FAIL(add_bin_compare_op(NumericOpcodes{OpCodeEnum::CeqI4, OpCodeEnum::CeqI8, OpCodeEnum::CeqR4, OpCodeEnum::CeqR8}));
                     il_offset_cur += 1;
                     break;
                 }
                 case il::OpCodeValueExt::Cgt:
                 {
-                    RET_ERR_ON_FAIL(add_bin_compare_op(&Transformer::emit_Cgt));
+                    RET_ERR_ON_FAIL(add_bin_compare_op(NumericOpcodes{OpCodeEnum::CgtI4, OpCodeEnum::CgtI8, OpCodeEnum::CgtR4, OpCodeEnum::CgtR8}));
                     il_offset_cur += 1;
                     break;
                 }
                 case il::OpCodeValueExt::CgtUn:
                 {
-                    RET_ERR_ON_FAIL(add_bin_compare_op(&Transformer::emit_CgtUn));
+                    RET_ERR_ON_FAIL(add_bin_compare_op(NumericOpcodes{OpCodeEnum::CgtUnI4, OpCodeEnum::CgtUnI8, OpCodeEnum::CgtUnR4, OpCodeEnum::CgtUnR8}));
                     il_offset_cur += 1;
                     break;
                 }
                 case il::OpCodeValueExt::Clt:
                 {
-                    RET_ERR_ON_FAIL(add_bin_compare_op(&Transformer::emit_Clt));
+                    RET_ERR_ON_FAIL(add_bin_compare_op(NumericOpcodes{OpCodeEnum::CltI4, OpCodeEnum::CltI8, OpCodeEnum::CltR4, OpCodeEnum::CltR8}));
                     il_offset_cur += 1;
                     break;
                 }
                 case il::OpCodeValueExt::CltUn:
                 {
-                    RET_ERR_ON_FAIL(add_bin_compare_op(&Transformer::emit_CltUn));
+                    RET_ERR_ON_FAIL(add_bin_compare_op(NumericOpcodes{OpCodeEnum::CltUnI4, OpCodeEnum::CltUnI8, OpCodeEnum::CltUnR4, OpCodeEnum::CltUnR8}));
                     il_offset_cur += 1;
                     break;
                 }
@@ -3997,11 +4047,10 @@ RtResultVoid Transformer::transform_body()
                 RETURN_NOT_IMPLEMENTED_ERROR();
             }
             }
-            RET_ERR_ON_FAIL(flush_pending_instructions());
         }
 
 #if LEANCLR_PGO_PROFILE
-        profile_inst->set_i4(static_cast<int32_t>(bb->profile_cost));
+        profile_inst->cost = bb->profile_cost;
 #endif
         if (!bb->next_bb)
         {

@@ -8,7 +8,7 @@ namespace leanclr
 {
 namespace interp
 {
-struct GeneralInst;
+struct InstructionOperands;
 
 namespace ll
 {
@@ -3988,22 +3988,15 @@ struct GetEnumLongHashCode
 class OpCodes
 {
   public:
-    static size_t get_instruction_size(OpCodeEnum opcode, const GeneralInst& inst)
+    static size_t get_instruction_size(OpCodeEnum opcode)
     {
-        if (opcode != OpCodeEnum::Switch)
-        {
-            return s_opsizes[static_cast<size_t>(opcode)];
-        }
-        else
-        {
-            return get_switch_instruction_size(inst);
-        }
+        return s_opsizes[static_cast<size_t>(opcode)];
     }
-
-    static uint8_t* write_instruction_to_data(uint8_t* codes_cur, const GeneralInst& inst);
+    static uint8_t* write_instruction_to_data(uint8_t* codes, OpCodeEnum opcode, const InstructionOperands& operands);
+    static size_t get_branch_patch_offset(OpCodeEnum opcode);
+    static bool validate_operands(OpCodeEnum opcode, const InstructionOperands& operands);
 
   private:
-    static size_t get_switch_instruction_size(const GeneralInst& inst);
     static size_t s_opsizes[static_cast<size_t>(OpCodeEnum::__Count)];
 };
 

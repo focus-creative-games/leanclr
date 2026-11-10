@@ -23,6 +23,14 @@ scripts\test\run.bat Debug x64
 
 On Linux/macOS, use the corresponding `.sh` scripts under `scripts/test/`.
 
+The standalone instruction encoder checks require no managed assemblies:
+
+```sh
+cmake -S src/tests/interp-encoding -B out/cmake/tests/interp-encoding
+cmake --build out/cmake/tests/interp-encoding --config Release
+ctest --test-dir out/cmake/tests/interp-encoding -C Release --output-on-failure
+```
+
 ## Directory Structure
 
 ```
