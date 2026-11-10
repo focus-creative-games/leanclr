@@ -11,7 +11,7 @@ namespace icalls
 /// @icall: System.IO.Path::get_temp_path
 RtResult<vm::RtString*> SystemIOPath::get_temp_path() noexcept
 {
-    RET_OK(os::Path::get_temp_path());
+    return os::Path::get_temp_path();
 }
 
 static RtResultVoid get_temp_path_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,

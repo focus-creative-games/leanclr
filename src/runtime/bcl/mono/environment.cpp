@@ -1,3 +1,5 @@
+#include "bcl/mono/host_result.h"
+#include "utils/scope_guard.h"
 #include "vm/environment.h"
 #include "vm/rt_string.h"
 #include "vm/class.h"
@@ -18,16 +20,16 @@ static bool s_shutdown = false;
 
 static RtArray* g_cmdline_args = nullptr;
 
-static utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>& get_s_environment_variables_map()
+RtResultVoid Environment::exit(int32_t code)
 {
-    static utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare> value;
-    return value;
-}
-
-void Environment::exit(int32_t code)
-{
+    auto callback = host::Services::extended().exit_process;
+    if (!callback)
+        return RtErr::NotSupported;
     s_exit_code = code;
-    assert(false && "Environment::exit not implemented for this platform");
+    shutdown();
+    callback(code);
+    // A misbehaving host must not let managed code resume after Exit.
+    return RtErr::InvalidOperation;
 }
 
 int32_t Environment::get_exit_code()
@@ -50,42 +52,46 @@ bool Environment::has_shutdown_started()
     return s_shutdown;
 }
 
+static RtResult<RtString*> query_host_string(host::StringQuery query, const char* name = nullptr)
+{
+    const char* value = nullptr;
+    int32_t error = host::Services::query_string(query, name, &value);
+    if (error)
+        return bcl::host_error(error);
+    if (!value)
+        return static_cast<RtString*>(nullptr);
+    return String::create_string_from_utf8cstr(value);
+}
+
 RtResult<RtString*> Environment::get_machine_name()
 {
-    RET_OK(String::create_string_from_utf8cstr("leanclr-machine"));
+    return query_host_string(host::StringQuery::MachineName);
 }
 
 RtResult<RtString*> Environment::get_new_line()
 {
-#ifdef LEANCLR_PLATFORM_WIN
-    RET_OK(String::create_string_from_utf8cstr("\r\n"));
-#else
-    RET_OK(String::create_string_from_utf8cstr("\n"));
-#endif
+    return query_host_string(host::StringQuery::NewLine);
 }
 
-RtResult<vm::RtString*> Environment::get_os_version_string()
+RtResult<RtString*> Environment::get_os_version_string()
 {
-    RET_OK(vm::String::create_string_from_utf8cstr("leanclr-os"));
+    return query_host_string(host::StringQuery::OsVersion);
 }
 
-RtResult<vm::RtString*> Environment::get_user_name()
+RtResult<RtString*> Environment::get_user_name()
 {
-    RET_OK(vm::String::create_string_from_utf8cstr("leanclr-user"));
+    return query_host_string(host::StringQuery::UserName);
 }
 
-Platform Environment::get_platform()
+RtResult<Platform> Environment::get_platform()
 {
-#ifdef LEANCLR_PLATFORM_WIN
-    return Platform::Win32NT;
-#elif defined(LEANCLR_PLATFORM_MAC)
-    return Platform::MacOSX;
-#elif defined(LEANCLR_PLATFORM_LINUX) || defined(LEANCLR_PLATFORM_ANDROID) || defined(LEANCLR_PLATFORM_IOS) || defined(LEANCLR_PLATFORM_WASM) || \
-    defined(LEANCLR_PLATFORM_POSIX)
-    return Platform::Unix;
-#else
-    return Platform::Unix;
-#endif
+    int64_t value;
+    int32_t error = host::Services::query_integer(host::IntegerQuery::PlatformId, &value);
+    if (error)
+        return bcl::host_error(error);
+    if (value < 0 || value > 6)
+        return RtErr::InvalidOperation;
+    return static_cast<Platform>(value);
 }
 
 RtArray* Environment::get_command_line_args()
@@ -111,92 +117,85 @@ RtResultVoid Environment::init_cmdline_args(const char** argv, int32_t argc)
     RET_VOID_OK();
 }
 
-static void visit_environment_roots(gc::GcVisitObjectRoot visit, void* userdata)
-{
-    if (g_cmdline_args != nullptr)
-    {
-        visit(reinterpret_cast<vm::RtObject*>(g_cmdline_args), userdata);
-    }
-    for (utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>::const_iterator it = get_s_environment_variables_map().begin();
-         it != get_s_environment_variables_map().end(); ++it)
-    {
-        if (it->second != nullptr)
-        {
-            visit(reinterpret_cast<vm::RtObject*>(it->second), userdata);
-        }
-    }
-}
-
 void register_environment_gc_roots()
 {
     gc::GcRoots::register_slot(reinterpret_cast<vm::RtObject**>(&g_cmdline_args));
-    gc::GcRoots::register_visit_object_roots(visit_environment_roots);
 }
 
-RtResult<RtString*> Environment::get_environment_variable(const char* variable_name)
+RtResult<RtString*> Environment::get_environment_variable(const char* name)
 {
-    auto it = get_s_environment_variables_map().find(variable_name);
-    if (it != get_s_environment_variables_map().end())
-    {
-        RET_OK(it->second);
-    }
-    RET_OK(nullptr);
+    if (!name)
+        return RtErr::ArgumentNull;
+    return query_host_string(host::StringQuery::EnvironmentVariable, name);
 }
 
-RtResultVoid Environment::set_environment_variable(const Utf16Char* variable_name, int32_t variable_name_length, const Utf16Char* value, int32_t value_length)
+RtResultVoid Environment::set_environment_variable(const Utf16Char* name, int32_t name_length, const Utf16Char* value, int32_t value_length)
 {
-    utils::Utf8StringBuilder sb;
-    sb.append_utf16_str(variable_name, static_cast<size_t>(variable_name_length));
-    const char* key = sb.get_const_chars();
-    auto it = get_s_environment_variables_map().find(key);
-    if (it != get_s_environment_variables_map().end())
-    {
-        if (value == nullptr)
-        {
-            get_s_environment_variables_map().erase(it);
-            RET_VOID_OK();
-        }
-        else
-        {
-            utils::Utf8StringBuilder val_sb;
-            val_sb.append_utf16_str(value, static_cast<size_t>(value_length));
-            RtString* val_str = String::create_string_from_utf8chars(val_sb.get_const_chars(), static_cast<int32_t>(val_sb.length()));
-            it->second = val_str;
-            RET_VOID_OK();
-        }
-    }
-    else
-    {
-        if (value == nullptr)
-        {
-            RET_VOID_OK();
-        }
-        utils::Utf8StringBuilder val_sb;
-        val_sb.append_utf16_str(value, static_cast<size_t>(value_length));
-        const char* new_key = sb.dup_zero_terminated_chars();
-        RtString* val_str = String::create_string_from_utf8chars(val_sb.get_const_chars(), static_cast<int32_t>(val_sb.length()));
-        get_s_environment_variables_map().insert({new_key, val_str});
-        RET_VOID_OK();
-    }
+    if (!name)
+        return RtErr::ArgumentNull;
+    if (name_length <= 0 || value_length < 0)
+        return RtErr::Argument;
+    auto cb = host::Services::extended().set_environment;
+    if (!cb)
+        return RtErr::NotSupported;
+    utils::Utf8StringBuilder n, v;
+    n.append_utf16_str(name, static_cast<size_t>(name_length));
+    if (value)
+        v.append_utf16_str(value, static_cast<size_t>(value_length));
+    int32_t error = cb(n.get_const_chars(), value ? v.get_const_chars() : nullptr);
+    if (error)
+        return bcl::host_error(error);
+    RET_VOID_OK();
 }
 
 RtResult<RtArray*> Environment::get_environment_variable_names()
 {
-    metadata::RtClass* string_class = vm::Class::get_corlib_types().cls_string;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, names_array,
-                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(string_class,
-                                                                                        static_cast<int32_t>(get_s_environment_variables_map().size()),
-                                                                                        "Environment::get_environment_variable_names"));
-    size_t index = 0;
-    for (utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>::const_iterator it = get_s_environment_variables_map().begin();
-         it != get_s_environment_variables_map().end(); ++it)
+    auto cb = host::Services::extended().environment_names;
+    if (!cb)
+        return RtErr::NotSupported;
+
+    struct Names
     {
-        const char* key = it->first;
-        RtString* name_str = String::create_string_from_utf8cstr(key);
-        Array::set_array_data_at<RtString*>(names_array, static_cast<int32_t>(index), name_str);
-        ++index;
-    }
-    RET_OK(names_array);
+        utils::Vector<const char*> values;
+        bool failed = false;
+    } names;
+
+    auto cleanup = utils::make_scope_exit(
+        [&]()
+        {
+            for (auto p : names.values)
+                alloc::GeneralAllocation::free(const_cast<char*>(p));
+        });
+    int32_t error = cb(
+        [](const char* name, void* context)
+        {
+            auto& names = *static_cast<Names*>(context);
+            if (names.failed || !name)
+                return;
+            auto copy = utils::StringUtil::try_strdup(name);
+            if (copy.is_err())
+            {
+                names.failed = true;
+                return;
+            }
+            const char* p = copy.unwrap();
+            if (!names.values.try_push_back(p))
+            {
+                alloc::GeneralAllocation::free(const_cast<char*>(p));
+                names.failed = true;
+            }
+        },
+        &names);
+    if (error)
+        return bcl::host_error(error);
+    if (names.failed || names.values.size() > INT32_MAX)
+        return RtErr::OutOfMemory;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        RtArray*, result,
+        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(Class::get_corlib_types().cls_string, static_cast<int32_t>(names.values.size()), "Environment::names"));
+    for (size_t i = 0; i < names.values.size(); ++i)
+        Array::set_array_data_at<RtString*>(result, i, String::create_string_from_utf8cstr(names.values[i]));
+    return result;
 }
 
 RtResult<vm::RtString*> Environment::get_windows_folder_path(int32_t)
@@ -214,9 +213,9 @@ RtResult<vm::RtString*> Environment::get_machine_config_path()
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
 
-RtResult<vm::RtString*> Environment::get_home()
+RtResult<RtString*> Environment::get_home()
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    return query_host_string(host::StringQuery::Home);
 }
 
 RtResult<vm::RtString*> Environment::get_bundled_machine_config()
@@ -226,18 +225,29 @@ RtResult<vm::RtString*> Environment::get_bundled_machine_config()
 
 void Environment::fail_fast()
 {
-    int32_t* p = nullptr;
-    *p = 0;
+    leanclr::panic("Managed Environment.FailFast");
 }
 
-int32_t Environment::get_processor_count()
+RtResult<int32_t> Environment::get_processor_count()
 {
-    return 1;
+    int64_t value;
+    int32_t error = host::Services::query_integer(host::IntegerQuery::ProcessorCount, &value);
+    if (error)
+        return bcl::host_error(error);
+    if (value <= 0 || value > INT32_MAX)
+        return RtErr::InvalidOperation;
+    return static_cast<int32_t>(value);
 }
 
-int32_t Environment::get_page_size()
+RtResult<int32_t> Environment::get_page_size()
 {
-    return 4096;
+    int64_t value;
+    int32_t error = host::Services::query_integer(host::IntegerQuery::PageSize, &value);
+    if (error)
+        return bcl::host_error(error);
+    if (value <= 0 || value > INT32_MAX)
+        return RtErr::InvalidOperation;
+    return static_cast<int32_t>(value);
 }
 
 } // namespace vm

@@ -20,7 +20,7 @@ enum class Platform
 class Environment
 {
   public:
-    static void exit(int32_t code);
+    static RtResultVoid exit(int32_t code);
     static int32_t get_exit_code();
     static void set_exit_code(int32_t code);
     static void shutdown();
@@ -31,7 +31,7 @@ class Environment
     static RtResult<vm::RtString*> get_os_version_string();
     static RtResult<vm::RtString*> get_user_name();
 
-    static Platform get_platform();
+    static RtResult<Platform> get_platform();
 
     static RtArray* get_command_line_args();
     static RtResultVoid init_cmdline_args(const char** argv, int32_t argc);
@@ -47,8 +47,8 @@ class Environment
 
     static void fail_fast();
 
-    static int32_t get_processor_count();
-    static int32_t get_page_size();
+    static RtResult<int32_t> get_processor_count();
+    static RtResult<int32_t> get_page_size();
 };
 } // namespace vm
 } // namespace leanclr

@@ -1,4 +1,5 @@
 #include "default_services.h"
+#include "extended_services.h"
 #include "platform/rt_file.h"
 #include "platform/rt_time.h"
 #include "utils/string_builder.h"
@@ -73,6 +74,7 @@ ServiceCallbacks make_default_services()
     callbacks.debugger_log = default_debugger_log;
     callbacks.files = {os::File::get_stdin, os::File::get_stdout, os::File::get_stderr, os::File::is_standard_handle, os::File::open,         os::File::close,
                        os::File::read,      os::File::write,      os::File::seek,       os::File::get_length,         os::File::get_file_type};
+    callbacks.extended = make_default_extended_services();
     return callbacks;
 }
 } // namespace host

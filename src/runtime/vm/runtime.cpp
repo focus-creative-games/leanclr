@@ -338,6 +338,10 @@ RtResultVoid Runtime::initialize()
     runtime_state = State::Initializing;
     auto failed = utils::make_scope_exit([]() { runtime_state = State::Failed; });
     host::Services::freeze();
+    const auto memory = alloc::GeneralAllocation::get_memory_callbacks();
+    if (!memory.malloc || !memory.calloc || !memory.free || !memory.realloc || !memory.aligned_malloc || !memory.aligned_free || !memory.aligned_realloc ||
+        !host::Services::has_required_services())
+        return RtErr::NotSupported;
     // Initialize subsystems
     alloc::MetadataAllocation::init();
     Intrinsics::initialize();

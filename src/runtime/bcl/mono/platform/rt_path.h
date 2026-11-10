@@ -17,8 +17,8 @@ class Path
     static Utf16Char get_path_separator();
     static Utf16Char get_volume_separator_char();
 
-    // System temporary directory. Returns an empty string only if the platform exposes no temp path.
-    static vm::RtString* get_temp_path();
+    // Host temporary directory; missing capability returns NotSupported.
+    static RtResult<vm::RtString*> get_temp_path();
 
     // Current working directory. On failure, sets *error (MonoIOError) and returns the empty string.
     static vm::RtString* get_current_directory(int32_t* error);

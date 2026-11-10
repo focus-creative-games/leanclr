@@ -1,7 +1,7 @@
 #include "bcl/mono/managed_layouts.h"
 #include "system_consoleriver.h"
 
-#include "platform/rt_console.h"
+#include "host/services.h"
 #include "utils/string_builder.h"
 #include "vm/class.h"
 #include "vm/rt_array.h"
@@ -30,48 +30,62 @@ const char* string_to_utf8_cstr(vm::RtString* str, utils::Utf8StringBuilder& buf
 
 RtResult<bool> SystemConsoleDriver::isatty(intptr_t handle) noexcept
 {
-    RET_OK(platform::RtConsole::isatty(handle));
+    auto cb = host::Services::extended().console.isatty;
+    if (!cb)
+        return RtErr::NotSupported;
+    RET_OK(cb(handle));
 }
 
 RtResult<int32_t> SystemConsoleDriver::internal_key_available(int32_t timeout_msec) noexcept
 {
-    RET_OK(platform::RtConsole::internal_key_available(timeout_msec));
+    auto cb = host::Services::extended().console.key_available;
+    if (!cb)
+        return RtErr::NotSupported;
+    RET_OK(cb(timeout_msec));
 }
 
 RtResult<bool> SystemConsoleDriver::set_echo(bool enable) noexcept
 {
-    RET_OK(platform::RtConsole::set_echo(enable));
+    auto cb = host::Services::extended().console.set_echo;
+    if (!cb)
+        return RtErr::NotSupported;
+    RET_OK(cb(enable));
 }
 
 RtResult<bool> SystemConsoleDriver::set_break(bool enable) noexcept
 {
-    RET_OK(platform::RtConsole::set_break(enable));
+    auto cb = host::Services::extended().console.set_break;
+    if (!cb)
+        return RtErr::NotSupported;
+    RET_OK(cb(enable));
 }
 
 RtResult<bool> SystemConsoleDriver::tty_setup(vm::RtString* keypad, vm::RtString* teardown, vm::RtArray** control_chars, int32_t** size) noexcept
 {
+    auto cb = host::Services::extended().console.setup;
+    if (!cb)
+        return RtErr::NotSupported;
     utils::Utf8StringBuilder keypad_buf;
     utils::Utf8StringBuilder teardown_buf;
     const char* keypad_cstr = string_to_utf8_cstr(keypad, keypad_buf);
     const char* teardown_cstr = string_to_utf8_cstr(teardown, teardown_buf);
 
-    platform::RtConsole::TtySetupResult setup_result{};
-    if (!platform::RtConsole::tty_setup(keypad_cstr, teardown_cstr, &setup_result))
+    host::ConsoleState setup_result{};
+    if (!cb(keypad_cstr, teardown_cstr, &setup_result))
     {
         RET_OK(false);
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, control_chars_arr,
-                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_byte,
-                                                                                        platform::RtConsole::kControlCharsCount,
-                                                                                        "icalls::SystemConsoleDriver::tty_setup"));
-    for (int32_t i = 0; i < platform::RtConsole::kControlCharsCount; ++i)
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        vm::RtArray*, control_chars_arr,
+        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_byte, 17, "icalls::SystemConsoleDriver::tty_setup"));
+    for (int32_t i = 0; i < 17; ++i)
     {
         vm::Array::set_array_data_at<int8_t>(control_chars_arr, i, static_cast<int8_t>(setup_result.control_chars[i]));
     }
 
     *control_chars = control_chars_arr;
-    *size = platform::RtConsole::get_cols_and_lines_ptr();
+    *size = setup_result.columns_and_lines;
     RET_OK(true);
 }
 

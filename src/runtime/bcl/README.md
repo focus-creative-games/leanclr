@@ -159,3 +159,35 @@ subsequent Runtime invocation. It does not unload assemblies, reclaim global
 metadata/GC heaps, run finalizers, detach threads, or support reinitialization.
 Hosts must stop calling into the runtime before shutdown. Reentrant shutdown from
 an initialization callback is ignored while the initialization stack is active.
+
+## Optional host capabilities
+
+ServiceCallbacks is a C++ source-level configuration contract, not a versioned
+binary struct ABI. Recompile embedders when this table changes. Initialize it
+with `{}` and override only the capabilities owned by the host. Configure once,
+on the runtime thread, before any service use. Directory open/read/close must be
+installed together; native handles never cross backend ownership domains.
+
+Extended callbacks provide UTF-8 system/environment/path queries, integer system
+queries, directory iteration, stat/fstat, directory changes, console behavior and
+process exit. They return stable I/O codes (0 success, 2 missing, 50 unsupported,
+87 invalid argument, 259 end). Query outputs stay unchanged on failure. Returned
+strings/entry names are borrowed until the next call in that callback domain and
+must be copied before another call. Environment enumeration calls its visitor
+synchronously and must not retain the visitor or its context.
+
+CUSTOM has no default services or allocator. Missing streams return error 50;
+missing randomness fails; optional logging is discarded by contract. UTC and
+monotonic clocks and a complete allocator table are required before startup, or
+initialization returns NotSupported. Missing system/path/environment/console
+capabilities propagate NotSupported rather than invented values. Native platform
+file-system adapter operations retain their existing native fallback when no
+extended override is installed. PORTABLE cannot report cwd, OS identity, page
+size or directory/stat operations without corresponding host callbacks.
+
+Environment variables now refer to the host environment, rather than an isolated
+managed dictionary. A missing variable is a successful null result. Exit invokes
+the host's non-returning exit callback (the built-in host uses std::exit). An
+absent callback returns NotSupported; a callback that returns produces
+InvalidOperation so managed code cannot silently continue after Exit. Shutdown
+still follows the separate single-attempt runtime lifetime contract above.
