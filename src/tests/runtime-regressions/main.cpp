@@ -17,6 +17,8 @@
 #include "vm/assembly.h"
 #include "vm/method.h"
 #include "vm/rt_exception.h"
+#include "vm/object.h"
+#include "vm/field.h"
 // Until B12, the public header needs this override for a static consumer.
 #define LEANCLR_EXPORT
 #define LEANCLR_IMPORT
@@ -232,6 +234,43 @@ static void invocation_buffers()
     check(result.is_ok() && *reinterpret_cast<int64_t*>(result.unwrap()+1) == 210, "large argument and return buffers");
     check(callback_allocation_count >= 2 && callback_allocations.empty(), "invocation buffers must pair callback allocation and free");
 }
+static void weak_finalizers()
+{
+    auto assembly = vm::Assembly::load_by_name("RegressionFixtures");
+    check(assembly.is_ok(), "load finalizer fixture");
+    auto type = assembly.unwrap()->mod->get_class_by_name("FinalizerFixture", false, false);
+    check(type.is_ok() && type.unwrap(), "finalizer fixture type");
+    auto initialized = vm::Class::initialize_all(type.unwrap());
+    check(initialized.is_ok(), "initialize finalizer fixture");
+    auto* revive_field = vm::Class::get_field_for_name(type.unwrap(), "Revive", false);
+    auto* root_field = vm::Class::get_field_for_name(type.unwrap(), "Resurrected", false);
+    for (int mode = 0; mode < 4; ++mode)
+    {
+        bool revive = mode == 1;
+        auto set = vm::Field::set_static_value(revive_field, &revive);
+        check(set.is_ok(), "set resurrection mode");
+        auto allocated = LEANCLR_NEWOBJ_INTERNAL(type.unwrap(), "weak-finalizers");
+        check(allocated.is_ok(), "allocate finalizer fixture");
+        auto* object = allocated.unwrap();
+        if (mode >= 2) vm::GC::suppress_finalize(object);
+        if (mode == 3) vm::GC::reregister_for_finalize(object);
+        void* short_handle = vm::GCHandle::new_weakref_handle(object, false);
+        void* long_handle = vm::GCHandle::new_weakref_handle(object, true);
+        vm::GC::enable(); vm::GC::collect(0);
+        check(vm::GCHandle::get_target(short_handle) == nullptr, "short weak target must clear before finalization");
+        check((vm::GCHandle::get_target(long_handle) != nullptr) == (mode != 2), "long weak promotion or suppression");
+        vm::GC::wait_for_pending_finalizers();
+        vm::GC::collect(0);
+        check((vm::GCHandle::get_target(long_handle) != nullptr) == revive, "long weak resurrection semantics");
+        check(vm::GCHandle::get_target(short_handle) == nullptr, "short weak handle must stay cleared after resurrection");
+        vm::RtObject* null_object = nullptr;
+        auto clear = vm::Field::set_static_value(root_field, &null_object);
+        check(clear.is_ok(), "clear resurrection root");
+        vm::GC::collect(0); vm::GC::disable();
+        check(vm::GCHandle::get_target(long_handle) == nullptr, "long weak target must eventually clear");
+        vm::GCHandle::free_handle(short_handle); vm::GCHandle::free_handle(long_handle);
+    }
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -248,6 +287,7 @@ int main(int argc, char** argv)
     else if (std::strcmp(argv[1], "exported-types") == 0) exported_types();
     else if (std::strcmp(argv[1], "failed-initializer") == 0) failed_initializer();
     else if (std::strcmp(argv[1], "invocation-buffers") == 0) invocation_buffers();
+    else if (std::strcmp(argv[1], "weak-finalizers") == 0) weak_finalizers();
     else if (std::strcmp(argv[1], "failed-module") == 0)
     {
         auto module = vm::Assembly::load_by_name("FailedModule");

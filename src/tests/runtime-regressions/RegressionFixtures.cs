@@ -22,3 +22,9 @@ public class InvocationFixture
         return new LargeReturn { A = a+b+c+d+e+f+g+h+i+j+k+l+m+n+o+p+q+r+s+t, B = 2, C = 3, D = 4, E = 5 };
     }
 }
+public class FinalizerFixture
+{
+    public static bool Revive;
+    public static FinalizerFixture Resurrected;
+    ~FinalizerFixture() { if (Revive) Resurrected = this; }
+}

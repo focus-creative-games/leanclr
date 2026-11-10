@@ -228,12 +228,12 @@ void GCHandle::foreach_strong_handles(void (*callback)(vm::RtObject*, void*), vo
     }
 }
 
-void GCHandle::sweep_weak_handles(bool (*is_object_marked)(vm::RtObject*, void* ctx), void* ctx)
+void GCHandle::sweep_weak_handles(bool (*is_object_marked)(vm::RtObject*, void* ctx), void* ctx, bool track_resurrection)
 {
     for (auto it = s_handle_map.begin(); it != s_handle_map.end(); ++it)
     {
         HandleInfo* hi = it->second;
-        if (hi->type_ != GCHandleType::Weak && hi->type_ != GCHandleType::WeakTrackResurrection)
+        if (hi->type_ != (track_resurrection ? GCHandleType::WeakTrackResurrection : GCHandleType::Weak))
         {
             continue;
         }

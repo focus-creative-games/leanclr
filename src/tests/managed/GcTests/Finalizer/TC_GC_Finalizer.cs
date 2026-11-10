@@ -60,7 +60,8 @@ namespace GcTests.Finalizer
         {
             FinalizableObject.FinalizeCount = 0;
             FinalizableObject obj = new FinalizableObject();
-            GCHandle weak = GCHandle.Alloc(obj, GCHandleType.Weak);
+            // Re-registering after finalization requires a resurrection-tracking handle.
+            GCHandle weak = GCHandle.Alloc(obj, GCHandleType.WeakTrackResurrection);
             obj = null;
 
             GC.Collect();
@@ -76,6 +77,24 @@ namespace GcTests.Finalizer
             GC.WaitForPendingFinalizers();
             Assert.Equal(2, FinalizableObject.FinalizeCount);
             weak.Free();
+        }
+
+        [UnitTest]
+        [GcUnitTest]
+        public void Short_weak_handle_clears_before_finalizer_runs()
+        {
+            FinalizableObject obj = new FinalizableObject();
+            GCHandle weak = GCHandle.Alloc(obj, GCHandleType.Weak);
+            GCHandle longWeak = GCHandle.Alloc(obj, GCHandleType.WeakTrackResurrection);
+            obj = null;
+            GC.Collect();
+            Assert.Null(weak.Target);
+            Assert.NotNull(longWeak.Target);
+            GC.WaitForPendingFinalizers();
+            GC.Collect();
+            Assert.Null(longWeak.Target);
+            weak.Free();
+            longWeak.Free();
         }
 
         [UnitTest]

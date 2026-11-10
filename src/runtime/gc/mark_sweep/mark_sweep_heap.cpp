@@ -166,12 +166,14 @@ void MarkSweepHeap::collect()
 
     GCAliveObjectBitmap alive_object_bitmap;
     GcRoots::foreach_root(alive_object_bitmap);
+    // Short weak handles cannot observe promotion solely for finalization.
+    vm::GCHandle::sweep_weak_handles(is_object_alive, &alive_object_bitmap, false);
     GcFinalizer::promote_unreachable(alive_object_bitmap);
 
     int64_t freed_bytes = 0;
     sweep_small_objects(alive_object_bitmap, freed_bytes);
     sweep_big_objects(alive_object_bitmap, freed_bytes);
-    vm::GCHandle::sweep_weak_handles(is_object_alive, &alive_object_bitmap);
+    vm::GCHandle::sweep_weak_handles(is_object_alive, &alive_object_bitmap, true);
 
     int64_t old_heap_bytes = s_heap_bytes;
     s_used_bytes -= freed_bytes;

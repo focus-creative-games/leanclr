@@ -25,7 +25,7 @@ class GCHandle
     static void* get_addr_of_pinned_object(void* handle);
     static bool is_type_pinned(const metadata::RtClass* klass);
     static void foreach_strong_handles(void (*callback)(vm::RtObject*, void*), void* userData);
-    static void sweep_weak_handles(bool (*is_object_marked)(vm::RtObject*, void* ctx), void* ctx);
+    static void sweep_weak_handles(bool (*is_object_marked)(vm::RtObject*, void* ctx), void* ctx, bool track_resurrection);
 };
 } // namespace vm
 } // namespace leanclr
