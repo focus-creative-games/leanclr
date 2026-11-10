@@ -13,49 +13,6 @@ namespace leanclr
 namespace metadata
 {
 
-struct PEHeader
-{
-    uint16_t machine;
-    uint16_t sections;
-    uint32_t timestamp;
-    uint32_t ptr_symbol_table;
-    uint32_t num_symbols;
-    uint16_t optional_header_size;
-    uint16_t characteristics;
-};
-
-static_assert(sizeof(PEHeader) == 20, "PEHeader size mismatch");
-
-struct PESectionHeader
-{
-    char name[8];
-    uint32_t virtual_size;
-    uint32_t virtual_address;
-    uint32_t size_of_raw_data;
-    uint32_t pointer_to_raw_data;
-    uint32_t pointer_to_relocations;
-    uint32_t pointer_to_line_numbers;
-    uint16_t number_of_relocations;
-    uint16_t number_of_line_numbers;
-    uint32_t characteristics;
-};
-
-struct PEDirEntry
-{
-    uint32_t rva;
-    uint32_t size;
-};
-
-struct CLIHeader
-{
-    uint32_t cb;
-    uint16_t major_runtime_version;
-    uint16_t minor_runtime_version;
-    PEDirEntry meta_data;
-    uint32_t flags;
-    uint32_t entry_point_token;
-};
-
 constexpr uint32_t PE_LFANEW_OFFSET = 0x3c;
 constexpr uint32_t PE_SIGNATURE_SIZE = 0x4;
 constexpr uint16_t OPTIONAL_HEADER_SIZE32 = 224;
@@ -63,13 +20,13 @@ constexpr uint16_t OPTIONAL_HEADER_SIZE64 = 240;
 constexpr uint32_t CLI_HEADER_OFFSET32 = 208;
 constexpr uint32_t CLI_HEADER_OFFSET64 = 224;
 
-#define RET_BAD_IMAGE_ON_FALSE(expr)               \
-    do                                             \
-    {                                              \
-        if (!(expr))                               \
-        {                                          \
+#define RET_BAD_IMAGE_ON_FALSE(expr)        \
+    do                                      \
+    {                                       \
+        if (!(expr))                        \
+        {                                   \
             RET_ERR(RtErr::BadImageFormat); \
-        }                                          \
+        }                                   \
     } while (0)
 
 RtResult<CliImage*> PeImageReader::ReadCliImage(alloc::MemPool& imagePrivatePool)
@@ -85,7 +42,7 @@ RtResult<CliImage*> PeImageReader::ReadCliImage(alloc::MemPool& imagePrivatePool
     RET_BAD_IMAGE_ON_FALSE(reader.try_set_position(PE_LFANEW_OFFSET));
 
     uint32_t lfanew;
-    RET_BAD_IMAGE_ON_FALSE(reader.try_read_any<uint32_t>(lfanew));
+    RET_BAD_IMAGE_ON_FALSE(reader.try_read_u32(lfanew));
 
     RET_BAD_IMAGE_ON_FALSE(reader.try_set_position((size_t)lfanew));
 
@@ -94,63 +51,51 @@ RtResult<CliImage*> PeImageReader::ReadCliImage(alloc::MemPool& imagePrivatePool
     RET_BAD_IMAGE_ON_FALSE(std::memcmp(ptr_sig, "PE\0\0", PE_SIGNATURE_SIZE) == 0);
     RET_BAD_IMAGE_ON_FALSE(reader.try_advance(PE_SIGNATURE_SIZE));
 
-    RET_BAD_IMAGE_ON_FALSE(reader.is_aligned(4));
-
-    const PEHeader* pe_header;
-    RET_BAD_IMAGE_ON_FALSE(reader.try_peek_any_ptr<PEHeader>(pe_header));
+    // Decode file records field by field. File offsets do not imply native
+    // alignment, and a mapped image can itself begin at an unaligned address.
     const size_t pe_header_pos = reader.get_position();
+    uint16_t section_count, optional_header_size;
+    RET_BAD_IMAGE_ON_FALSE(reader.try_advance(2) && reader.try_read_u16(section_count));
+    RET_BAD_IMAGE_ON_FALSE(reader.try_advance(12) && reader.try_read_u16(optional_header_size) && reader.try_advance(2));
+    RET_BAD_IMAGE_ON_FALSE(optional_header_size == OPTIONAL_HEADER_SIZE32 || optional_header_size == OPTIONAL_HEADER_SIZE64);
+    RET_BAD_IMAGE_ON_FALSE(reader.try_advance(optional_header_size));
+    RET_BAD_IMAGE_ON_FALSE(section_count <= reader.remaining() / 40);
 
-    RET_BAD_IMAGE_ON_FALSE(pe_header->optional_header_size == OPTIONAL_HEADER_SIZE32 || pe_header->optional_header_size == OPTIONAL_HEADER_SIZE64);
-
-    RET_BAD_IMAGE_ON_FALSE(reader.try_advance(sizeof(PEHeader) + pe_header->optional_header_size));
-
-    RET_BAD_IMAGE_ON_FALSE(reader.is_aligned(4));
-    const PESectionHeader* headers;
-    RET_BAD_IMAGE_ON_FALSE(reader.try_peek_any_ptr_range(pe_header->sections, headers));
-
-    CliSection* sections = imagePrivatePool.calloc_any<CliSection>(pe_header->sections);
-    if (!sections && pe_header->sections != 0)
+    CliSection* sections = imagePrivatePool.calloc_any<CliSection>(section_count);
+    if (!sections && section_count != 0)
         RET_ERR(RtErr::OutOfMemory);
-
-    for (uint16_t i = 0; i < pe_header->sections; ++i)
+    for (uint16_t i = 0; i < section_count; ++i)
     {
-        const PESectionHeader& header = headers[i];
-        RET_BAD_IMAGE_ON_FALSE(header.virtual_size <= UINT32_MAX - header.virtual_address);
-        RET_BAD_IMAGE_ON_FALSE(header.pointer_to_raw_data <= _image_size && header.size_of_raw_data <= _image_size - header.pointer_to_raw_data);
+        uint32_t virtual_size, virtual_address, raw_size, raw_offset;
+        RET_BAD_IMAGE_ON_FALSE(reader.try_advance(8) && reader.try_read_u32(virtual_size) && reader.try_read_u32(virtual_address) &&
+                               reader.try_read_u32(raw_size) && reader.try_read_u32(raw_offset) && reader.try_advance(16));
+        RET_BAD_IMAGE_ON_FALSE(virtual_size <= UINT32_MAX - virtual_address);
+        RET_BAD_IMAGE_ON_FALSE(raw_offset <= _image_size && raw_size <= _image_size - raw_offset);
         CliSection& section = sections[i];
-        section.virtual_address_begin = header.virtual_address;
-        section.virtual_address_end = header.virtual_address + header.virtual_size;
-        section.raw_data_begin = header.pointer_to_raw_data;
-        section.raw_data_size = header.size_of_raw_data;
+        section.virtual_address_begin = virtual_address;
+        section.virtual_address_end = virtual_address + virtual_size;
+        section.raw_data_begin = raw_offset;
+        section.raw_data_size = raw_size;
     }
-    imagePtr->set_sections(sections, pe_header->sections);
+    imagePtr->set_sections(sections, section_count);
     imagePtr->set_image_data(_image_base, _image_size);
 
-    const uint32_t cli_header_entry = pe_header->optional_header_size == OPTIONAL_HEADER_SIZE32 ? CLI_HEADER_OFFSET32 : CLI_HEADER_OFFSET64;
-    const size_t dir_entry_pos = pe_header_pos + 20 + static_cast<size_t>(cli_header_entry);
+    const uint32_t cli_header_entry = optional_header_size == OPTIONAL_HEADER_SIZE32 ? CLI_HEADER_OFFSET32 : CLI_HEADER_OFFSET64;
+    RET_BAD_IMAGE_ON_FALSE(reader.try_set_position(pe_header_pos + 20 + cli_header_entry));
+    uint32_t cli_rva, cli_size;
+    RET_BAD_IMAGE_ON_FALSE(reader.try_read_u32(cli_rva) && reader.try_read_u32(cli_size));
+    const auto cli_offset = imagePtr->rva_to_image_offset(cli_rva);
+    RET_BAD_IMAGE_ON_FALSE(cli_offset.has_value());
+    RET_BAD_IMAGE_ON_FALSE(reader.try_set_position(cli_offset.value()));
+    uint32_t metadata_rva, metadata_size, entry_point;
+    RET_BAD_IMAGE_ON_FALSE(reader.try_advance(8) && reader.try_read_u32(metadata_rva) && reader.try_read_u32(metadata_size) && reader.try_advance(4) &&
+                           reader.try_read_u32(entry_point));
+    imagePtr->set_entry_point_token(entry_point);
 
-    RET_BAD_IMAGE_ON_FALSE(reader.try_set_position(dir_entry_pos));
-    const PEDirEntry* pedir_entries;
-    RET_BAD_IMAGE_ON_FALSE(reader.try_peek_any_ptr(pedir_entries));
-
-    std::optional<uint32_t> cli_header_file_offset = imagePtr->rva_to_image_offset(pedir_entries->rva);
-    RET_BAD_IMAGE_ON_FALSE(cli_header_file_offset.has_value());
-
-    RET_BAD_IMAGE_ON_FALSE(reader.try_set_position(cli_header_file_offset.value()));
-
-    const CLIHeader* cli_header;
-    RET_BAD_IMAGE_ON_FALSE(reader.try_peek_any_ptr<CLIHeader>(cli_header));
-
-    imagePtr->set_entry_point_token(cli_header->entry_point_token);
-
-    std::optional<uint32_t> metadata_file_offset = imagePtr->rva_to_image_offset(cli_header->meta_data.rva);
-    RET_BAD_IMAGE_ON_FALSE(metadata_file_offset.has_value());
-    RET_BAD_IMAGE_ON_FALSE(reader.try_set_position(metadata_file_offset.value()));
-
-    const uint8_t* metadata_start;
-    RET_BAD_IMAGE_ON_FALSE(reader.try_peek_any_ptr_range(cli_header->meta_data.size, metadata_start));
-
-    imagePtr->set_metadata_offset_length(metadata_file_offset.value(), cli_header->meta_data.size);
+    const auto metadata_offset = imagePtr->rva_to_image_offset(metadata_rva);
+    RET_BAD_IMAGE_ON_FALSE(metadata_offset.has_value());
+    RET_BAD_IMAGE_ON_FALSE(reader.try_set_position(metadata_offset.value()) && metadata_size <= reader.remaining());
+    imagePtr->set_metadata_offset_length(metadata_offset.value(), metadata_size);
 
     RET_OK(imagePtr);
 }

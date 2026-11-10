@@ -147,15 +147,12 @@ LEANCLR_CASE_BEGIN(LdcI8I4)
 LEANCLR_CASE_END()
 
 LEANCLR_CASE_BEGIN(LdcI8I8)
-            {
-                RtStackObject* dst = eval_stack_base + ir->dst;
-#if LEANCLR_SUPPORT_UNALIGNED_ACCESS
-                dst->i64 = *(int64_t*)&ir->value_low;
-#else
-                dst->i64 = utils::IntegerMath::from_unsigned<int64_t>(static_cast<uint64_t>(ir->value_low) | (static_cast<uint64_t>(ir->value_high) << 32));
-#endif
-            }
-            LEANCLR_CASE_END()
+{
+    RtStackObject* dst = eval_stack_base + ir->dst;
+    dst->i64 = utils::IntegerMath::from_unsigned<int64_t>(static_cast<uint64_t>(static_cast<uint32_t>(ir->value_low)) |
+                                                          (static_cast<uint64_t>(static_cast<uint32_t>(ir->value_high)) << 32));
+}
+LEANCLR_CASE_END()
 
 LEANCLR_CASE_BEGIN(LdStr)
 {
@@ -1576,7 +1573,7 @@ LEANCLR_CASE_BEGIN(InitObjI1)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->addr;
     int8_t* addr = reinterpret_cast<int8_t*>(addr_obj->ptr);
-    *addr = 0;
+    utils::MemOp::store_native(addr, 0);
 }
 LEANCLR_CASE_END()
 
@@ -1584,7 +1581,7 @@ LEANCLR_CASE_BEGIN(InitObjI2)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->addr;
     int16_t* addr = reinterpret_cast<int16_t*>(addr_obj->ptr);
-    *addr = 0;
+    utils::MemOp::store_native(addr, 0);
 }
 LEANCLR_CASE_END()
 
@@ -1592,7 +1589,7 @@ LEANCLR_CASE_BEGIN(InitObjI4)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->addr;
     int32_t* addr = reinterpret_cast<int32_t*>(addr_obj->ptr);
-    *addr = 0;
+    utils::MemOp::store_native(addr, 0);
 }
 LEANCLR_CASE_END()
 
@@ -1600,7 +1597,7 @@ LEANCLR_CASE_BEGIN(InitObjI8)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->addr;
     int64_t* addr = reinterpret_cast<int64_t*>(addr_obj->ptr);
-    *addr = 0;
+    utils::MemOp::store_native(addr, 0);
 }
 LEANCLR_CASE_END()
 
@@ -1618,7 +1615,7 @@ LEANCLR_CASE_BEGIN(CpObjI1)
     RtStackObject* src_obj = eval_stack_base + ir->src;
     int8_t* dst_addr = reinterpret_cast<int8_t*>(dst_obj->ptr);
     const int8_t* src_addr = reinterpret_cast<const int8_t*>(src_obj->ptr);
-    *dst_addr = *src_addr;
+    utils::MemOp::store_native(dst_addr, utils::MemOp::load_native(src_addr));
 }
 LEANCLR_CASE_END()
 
@@ -1628,7 +1625,7 @@ LEANCLR_CASE_BEGIN(CpObjI2)
     RtStackObject* src_obj = eval_stack_base + ir->src;
     int16_t* dst_addr = reinterpret_cast<int16_t*>(dst_obj->ptr);
     const int16_t* src_addr = reinterpret_cast<const int16_t*>(src_obj->ptr);
-    *dst_addr = *src_addr;
+    utils::MemOp::store_native(dst_addr, utils::MemOp::load_native(src_addr));
 }
 LEANCLR_CASE_END()
 
@@ -1638,7 +1635,7 @@ LEANCLR_CASE_BEGIN(CpObjI4)
     RtStackObject* src_obj = eval_stack_base + ir->src;
     int32_t* dst_addr = reinterpret_cast<int32_t*>(dst_obj->ptr);
     const int32_t* src_addr = reinterpret_cast<const int32_t*>(src_obj->ptr);
-    *dst_addr = *src_addr;
+    utils::MemOp::store_native(dst_addr, utils::MemOp::load_native(src_addr));
 }
 LEANCLR_CASE_END()
 
@@ -1648,7 +1645,7 @@ LEANCLR_CASE_BEGIN(CpObjI8)
     RtStackObject* src_obj = eval_stack_base + ir->src;
     int64_t* dst_addr = reinterpret_cast<int64_t*>(dst_obj->ptr);
     const int64_t* src_addr = reinterpret_cast<const int64_t*>(src_obj->ptr);
-    *dst_addr = *src_addr;
+    utils::MemOp::store_native(dst_addr, utils::MemOp::load_native(src_addr));
 }
 LEANCLR_CASE_END()
 
@@ -2307,7 +2304,7 @@ LEANCLR_CASE_BEGIN(LdfldI1)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const int8_t* field_addr = reinterpret_cast<const int8_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    int8_t value = *field_addr;
+    int8_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2320,7 +2317,7 @@ LEANCLR_CASE_BEGIN(LdfldU1)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const uint8_t* field_addr = reinterpret_cast<const uint8_t*>(obj) + ir->offset;
-    uint8_t value = *field_addr;
+    uint8_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2333,7 +2330,7 @@ LEANCLR_CASE_BEGIN(LdfldI2)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const int16_t* field_addr = reinterpret_cast<const int16_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    int16_t value = *field_addr;
+    int16_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2346,7 +2343,7 @@ LEANCLR_CASE_BEGIN(LdfldU2)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const uint16_t* field_addr = reinterpret_cast<const uint16_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    uint16_t value = *field_addr;
+    uint16_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2359,7 +2356,7 @@ LEANCLR_CASE_BEGIN(LdfldI4)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const int32_t* field_addr = reinterpret_cast<const int32_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    int32_t value = *field_addr;
+    int32_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -2372,7 +2369,7 @@ LEANCLR_CASE_BEGIN(LdfldI8)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const int64_t* field_addr = reinterpret_cast<const int64_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    int64_t value = *field_addr;
+    int64_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int64_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -2394,7 +2391,7 @@ LEANCLR_CASE_BEGIN(LdvfldI1)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->obj;
     const int8_t* field_addr = reinterpret_cast<const int8_t*>(reinterpret_cast<const uint8_t*>(addr_obj) + ir->offset);
-    int8_t value = *field_addr;
+    int8_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2403,7 +2400,7 @@ LEANCLR_CASE_BEGIN(LdvfldU1)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->obj;
     const uint8_t* field_addr = reinterpret_cast<const uint8_t*>(addr_obj) + ir->offset;
-    uint8_t value = *field_addr;
+    uint8_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2412,7 +2409,7 @@ LEANCLR_CASE_BEGIN(LdvfldI2)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->obj;
     const int16_t* field_addr = reinterpret_cast<const int16_t*>(reinterpret_cast<const uint8_t*>(addr_obj) + ir->offset);
-    int16_t value = *field_addr;
+    int16_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2421,7 +2418,7 @@ LEANCLR_CASE_BEGIN(LdvfldU2)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->obj;
     const uint16_t* field_addr = reinterpret_cast<const uint16_t*>(reinterpret_cast<const uint8_t*>(addr_obj) + ir->offset);
-    uint16_t value = *field_addr;
+    uint16_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2430,7 +2427,7 @@ LEANCLR_CASE_BEGIN(LdvfldI4)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->obj;
     const int32_t* field_addr = reinterpret_cast<const int32_t*>(reinterpret_cast<const uint8_t*>(addr_obj) + ir->offset);
-    int32_t value = *field_addr;
+    int32_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -2439,7 +2436,7 @@ LEANCLR_CASE_BEGIN(LdvfldI8)
 {
     RtStackObject* addr_obj = eval_stack_base + ir->obj;
     const int64_t* field_addr = reinterpret_cast<const int64_t*>(reinterpret_cast<const uint8_t*>(addr_obj) + ir->offset);
-    int64_t value = *field_addr;
+    int64_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int64_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -2474,7 +2471,7 @@ LEANCLR_CASE_BEGIN(StfldI1)
     }
     int8_t value = get_stack_value_at<int8_t>(eval_stack_base, ir->value);
     int8_t* field_addr = reinterpret_cast<int8_t*>(reinterpret_cast<uint8_t*>(obj) + ir->offset);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -2487,7 +2484,7 @@ LEANCLR_CASE_BEGIN(StfldI2)
     }
     int16_t value = get_stack_value_at<int16_t>(eval_stack_base, ir->value);
     int16_t* field_addr = reinterpret_cast<int16_t*>(reinterpret_cast<uint8_t*>(obj) + ir->offset);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -2500,7 +2497,7 @@ LEANCLR_CASE_BEGIN(StfldI4)
     }
     int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
     int32_t* field_addr = reinterpret_cast<int32_t*>(reinterpret_cast<uint8_t*>(obj) + ir->offset);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -2513,7 +2510,7 @@ LEANCLR_CASE_BEGIN(StfldI8)
     }
     int64_t value = get_stack_value_at<int64_t>(eval_stack_base, ir->value);
     int64_t* field_addr = reinterpret_cast<int64_t*>(reinterpret_cast<uint8_t*>(obj) + ir->offset);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -2535,7 +2532,7 @@ LEANCLR_CASE_BEGIN(LdsfldI1)
     const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
     TRY_RUN_CLASS_STATIC_CCTOR(field->parent);
     const int8_t* field_addr = get_static_field_address<int8_t>(field);
-    int8_t value = *field_addr;
+    int8_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2545,7 +2542,7 @@ LEANCLR_CASE_BEGIN(LdsfldU1)
     const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
     TRY_RUN_CLASS_STATIC_CCTOR(field->parent);
     const uint8_t* field_addr = get_static_field_address<uint8_t>(field);
-    uint8_t value = *field_addr;
+    uint8_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2555,7 +2552,7 @@ LEANCLR_CASE_BEGIN(LdsfldI2)
     const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
     TRY_RUN_CLASS_STATIC_CCTOR(field->parent);
     const int16_t* field_addr = get_static_field_address<int16_t>(field);
-    int16_t value = *field_addr;
+    int16_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2565,7 +2562,7 @@ LEANCLR_CASE_BEGIN(LdsfldU2)
     const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
     TRY_RUN_CLASS_STATIC_CCTOR(field->parent);
     const uint16_t* field_addr = get_static_field_address<uint16_t>(field);
-    uint16_t value = *field_addr;
+    uint16_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -2575,7 +2572,7 @@ LEANCLR_CASE_BEGIN(LdsfldI4)
     const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
     TRY_RUN_CLASS_STATIC_CCTOR(field->parent);
     const int32_t* field_addr = get_static_field_address<int32_t>(field);
-    int32_t value = *field_addr;
+    int32_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -2585,7 +2582,7 @@ LEANCLR_CASE_BEGIN(LdsfldI8)
     const metadata::RtFieldInfo* field = get_resolved_data<metadata::RtFieldInfo>(imi, ir->field_idx);
     TRY_RUN_CLASS_STATIC_CCTOR(field->parent);
     const int64_t* field_addr = get_static_field_address<int64_t>(field);
-    int64_t value = *field_addr;
+    int64_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int64_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -2624,7 +2621,7 @@ LEANCLR_CASE_BEGIN(StsfldI1)
     metadata::RtClass* klass = field->parent;
     TRY_RUN_CLASS_STATIC_CCTOR(klass);
     int8_t* field_addr = get_static_field_address<int8_t>(field);
-    *field_addr = static_cast<int8_t>(value);
+    utils::MemOp::store_native(field_addr, static_cast<int8_t>(value));
 }
 LEANCLR_CASE_END()
 
@@ -2635,7 +2632,7 @@ LEANCLR_CASE_BEGIN(StsfldI2)
     metadata::RtClass* klass = field->parent;
     TRY_RUN_CLASS_STATIC_CCTOR(klass);
     int16_t* field_addr = get_static_field_address<int16_t>(field);
-    *field_addr = static_cast<int16_t>(value);
+    utils::MemOp::store_native(field_addr, static_cast<int16_t>(value));
 }
 LEANCLR_CASE_END()
 
@@ -2646,7 +2643,7 @@ LEANCLR_CASE_BEGIN(StsfldI4)
     metadata::RtClass* klass = field->parent;
     TRY_RUN_CLASS_STATIC_CCTOR(klass);
     int32_t* field_addr = get_static_field_address<int32_t>(field);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -2657,7 +2654,7 @@ LEANCLR_CASE_BEGIN(StsfldI8)
     metadata::RtClass* klass = field->parent;
     TRY_RUN_CLASS_STATIC_CCTOR(klass);
     int64_t* field_addr = get_static_field_address<int64_t>(field);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -2721,8 +2718,7 @@ LEANCLR_CASE_BEGIN_LITE(CallVirtInterp)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const metadata::RtMethodInfo* original_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, actual_method,
-                                            vm::Method::get_virtual_method_impl(obj, original_method));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, actual_method, vm::Method::get_virtual_method_impl(obj, original_method));
     if (actual_method->invoker_type == metadata::RtInvokerType::Interpreter)
     {
         if (vm::Class::is_value_type(actual_method->parent))
@@ -2735,8 +2731,8 @@ LEANCLR_CASE_BEGIN_LITE(CallVirtInterp)
     {
         ip = reinterpret_cast<const uint8_t*>(ir + 1);
         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
-        HANDLE_RAISE_RUNTIME_ERROR_VOID(CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->invoke_method_ptr)(
-            actual_method->virtual_method_ptr, actual_method, frame_base, frame_base));
+        HANDLE_RAISE_RUNTIME_ERROR_VOID(
+            CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->invoke_method_ptr)(actual_method->virtual_method_ptr, actual_method, frame_base, frame_base));
     }
 }
 LEANCLR_CASE_END_LITE()
@@ -2866,8 +2862,7 @@ LEANCLR_CASE_BEGIN_LITE(NewValueTypeInterp)
     RtStackObject* original_frame_base = eval_stack_base + ir->frame_base;
     const size_t value_stack_objects = InterpDefs::get_stack_object_size_by_byte_size(klass->instance_size_without_header);
     RtStackObject* final_frame_base = original_frame_base + value_stack_objects;
-    std::memmove(final_frame_base + 1, original_frame_base,
-                 static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
+    std::memmove(final_frame_base + 1, original_frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
     final_frame_base->ptr = original_frame_base;
     std::memset(original_frame_base, 0, value_stack_objects * sizeof(RtStackObject));
     ENTER_INTERP_FRAME(ctor, ir->frame_base + value_stack_objects, reinterpret_cast<const uint8_t*>(ir + 1));
@@ -2915,8 +2910,7 @@ LEANCLR_CASE_BEGIN(NewValueTypeAot)
     RtStackObject* original_frame_base = eval_stack_base + ir->frame_base;
     const size_t value_stack_objects = InterpDefs::get_stack_object_size_by_byte_size(klass->instance_size_without_header);
     RtStackObject* final_frame_base = original_frame_base + value_stack_objects;
-    std::memmove(final_frame_base + 1, original_frame_base,
-                 static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
+    std::memmove(final_frame_base + 1, original_frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
     final_frame_base->ptr = original_frame_base;
     std::memset(original_frame_base, 0, value_stack_objects * sizeof(RtStackObject));
     auto invoker = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(ctor->invoke_method_ptr);
@@ -3666,8 +3660,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfI1R4)
 {
     float src = get_stack_value_at<float>(eval_stack_base, ir->src);
-    if (src < static_cast<float>(std::numeric_limits<int8_t>::min()) || src > static_cast<float>(std::numeric_limits<int8_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<float>(std::numeric_limits<int8_t>::min()) || src > static_cast<float>(std::numeric_limits<int8_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3678,8 +3671,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfI1R8)
 {
     double src = get_stack_value_at<double>(eval_stack_base, ir->src);
-    if (src < static_cast<double>(std::numeric_limits<int8_t>::min()) || src > static_cast<double>(std::numeric_limits<int8_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<double>(std::numeric_limits<int8_t>::min()) || src > static_cast<double>(std::numeric_limits<int8_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3714,8 +3706,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfU1R4)
 {
     float src = get_stack_value_at<float>(eval_stack_base, ir->src);
-    if (src < static_cast<float>(std::numeric_limits<uint8_t>::min()) || src > static_cast<float>(std::numeric_limits<uint8_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<float>(std::numeric_limits<uint8_t>::min()) || src > static_cast<float>(std::numeric_limits<uint8_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3726,8 +3717,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfU1R8)
 {
     double src = get_stack_value_at<double>(eval_stack_base, ir->src);
-    if (src < static_cast<double>(std::numeric_limits<uint8_t>::min()) || src > static_cast<double>(std::numeric_limits<uint8_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<double>(std::numeric_limits<uint8_t>::min()) || src > static_cast<double>(std::numeric_limits<uint8_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3762,8 +3752,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfI2R4)
 {
     float src = get_stack_value_at<float>(eval_stack_base, ir->src);
-    if (src < static_cast<float>(std::numeric_limits<int16_t>::min()) || src > static_cast<float>(std::numeric_limits<int16_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<float>(std::numeric_limits<int16_t>::min()) || src > static_cast<float>(std::numeric_limits<int16_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3774,8 +3763,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfI2R8)
 {
     double src = get_stack_value_at<double>(eval_stack_base, ir->src);
-    if (src < static_cast<double>(std::numeric_limits<int16_t>::min()) || src > static_cast<double>(std::numeric_limits<int16_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<double>(std::numeric_limits<int16_t>::min()) || src > static_cast<double>(std::numeric_limits<int16_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3810,8 +3798,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfU2R4)
 {
     float src = get_stack_value_at<float>(eval_stack_base, ir->src);
-    if (src < static_cast<float>(std::numeric_limits<uint16_t>::min()) || src > static_cast<float>(std::numeric_limits<uint16_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<float>(std::numeric_limits<uint16_t>::min()) || src > static_cast<float>(std::numeric_limits<uint16_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3822,8 +3809,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfU2R8)
 {
     double src = get_stack_value_at<double>(eval_stack_base, ir->src);
-    if (src < static_cast<double>(std::numeric_limits<uint16_t>::min()) ||
-        src > static_cast<double>(std::numeric_limits<uint16_t>::max()) || std::isnan(src))
+    if (src < static_cast<double>(std::numeric_limits<uint16_t>::min()) || src > static_cast<double>(std::numeric_limits<uint16_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3846,8 +3832,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfI4R4)
 {
     float src = get_stack_value_at<float>(eval_stack_base, ir->src);
-    if (src < static_cast<float>(std::numeric_limits<int32_t>::min()) || src > static_cast<float>(std::numeric_limits<int32_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<float>(std::numeric_limits<int32_t>::min()) || src > static_cast<float>(std::numeric_limits<int32_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3858,8 +3843,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfI4R8)
 {
     double src = get_stack_value_at<double>(eval_stack_base, ir->src);
-    if (src < static_cast<double>(std::numeric_limits<int32_t>::min()) || src > static_cast<double>(std::numeric_limits<int32_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<double>(std::numeric_limits<int32_t>::min()) || src > static_cast<double>(std::numeric_limits<int32_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3916,8 +3900,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfI8R4)
 {
     float src = get_stack_value_at<float>(eval_stack_base, ir->src);
-    if (src < static_cast<float>(std::numeric_limits<int64_t>::min()) || src > static_cast<float>(std::numeric_limits<int64_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<float>(std::numeric_limits<int64_t>::min()) || src > static_cast<float>(std::numeric_limits<int64_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -3928,8 +3911,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(ConvOvfI8R8)
 {
     double src = get_stack_value_at<double>(eval_stack_base, ir->src);
-    if (src < static_cast<double>(std::numeric_limits<int64_t>::min()) || src > static_cast<double>(std::numeric_limits<int64_t>::max()) ||
-        std::isnan(src))
+    if (src < static_cast<double>(std::numeric_limits<int64_t>::min()) || src > static_cast<double>(std::numeric_limits<int64_t>::max()) || std::isnan(src))
     {
         RAISE_RUNTIME_ERROR(RtErr::Overflow);
     }
@@ -4331,7 +4313,7 @@ LEANCLR_CASE_BEGIN(LdfldI1Large)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const int8_t* field_addr = reinterpret_cast<const int8_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    int8_t value = *field_addr;
+    int8_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -4344,7 +4326,7 @@ LEANCLR_CASE_BEGIN(LdfldU1Large)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const uint8_t* field_addr = reinterpret_cast<const uint8_t*>(obj) + ir->offset;
-    uint8_t value = *field_addr;
+    uint8_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -4357,7 +4339,7 @@ LEANCLR_CASE_BEGIN(LdfldI2Large)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const int16_t* field_addr = reinterpret_cast<const int16_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    int16_t value = *field_addr;
+    int16_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -4383,7 +4365,7 @@ LEANCLR_CASE_BEGIN(LdfldU2Large)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const uint16_t* field_addr = reinterpret_cast<const uint16_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    uint16_t value = *field_addr;
+    uint16_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -4409,7 +4391,7 @@ LEANCLR_CASE_BEGIN(LdfldI4Large)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const int32_t* field_addr = reinterpret_cast<const int32_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    int32_t value = *field_addr;
+    int32_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -4435,7 +4417,7 @@ LEANCLR_CASE_BEGIN(LdfldI8Large)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const int64_t* field_addr = reinterpret_cast<const int64_t*>(reinterpret_cast<const uint8_t*>(obj) + ir->offset);
-    int64_t value = *field_addr;
+    int64_t value = utils::MemOp::load_native(field_addr);
     set_stack_value_at<int64_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -4469,7 +4451,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(LdvfldI1Large)
 {
     const uint8_t* src_addr = reinterpret_cast<const uint8_t*>(eval_stack_base + ir->obj) + ir->offset;
-    int8_t value = *reinterpret_cast<const int8_t*>(src_addr);
+    int8_t value = utils::MemOp::load_native(reinterpret_cast<const int8_t*>(src_addr));
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -4477,7 +4459,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(LdvfldU1Large)
 {
     const uint8_t* src_addr = reinterpret_cast<const uint8_t*>(eval_stack_base + ir->obj) + ir->offset;
-    uint8_t value = *reinterpret_cast<const uint8_t*>(src_addr);
+    uint8_t value = utils::MemOp::load_native(reinterpret_cast<const uint8_t*>(src_addr));
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -4485,7 +4467,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(LdvfldI2Large)
 {
     const uint8_t* src_addr = reinterpret_cast<const uint8_t*>(eval_stack_base + ir->obj) + ir->offset;
-    int16_t value = *reinterpret_cast<const int16_t*>(src_addr);
+    int16_t value = utils::MemOp::load_native(reinterpret_cast<const int16_t*>(src_addr));
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -4502,7 +4484,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(LdvfldU2Large)
 {
     const uint8_t* src_addr = reinterpret_cast<const uint8_t*>(eval_stack_base + ir->obj) + ir->offset;
-    uint16_t value = *reinterpret_cast<const uint16_t*>(src_addr);
+    uint16_t value = utils::MemOp::load_native(reinterpret_cast<const uint16_t*>(src_addr));
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, static_cast<int32_t>(value));
 }
 LEANCLR_CASE_END()
@@ -4518,7 +4500,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(LdvfldI4Large)
 {
     const uint8_t* src_addr = reinterpret_cast<const uint8_t*>(eval_stack_base + ir->obj) + ir->offset;
-    int32_t value = *reinterpret_cast<const int32_t*>(src_addr);
+    int32_t value = utils::MemOp::load_native(reinterpret_cast<const int32_t*>(src_addr));
     set_stack_value_at<int32_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -4534,7 +4516,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(LdvfldI8Large)
 {
     const uint8_t* src_addr = reinterpret_cast<const uint8_t*>(eval_stack_base + ir->obj) + ir->offset;
-    int64_t value = *reinterpret_cast<const int64_t*>(src_addr);
+    int64_t value = utils::MemOp::load_native(reinterpret_cast<const int64_t*>(src_addr));
     set_stack_value_at<int64_t>(eval_stack_base, ir->dst, value);
 }
 LEANCLR_CASE_END()
@@ -4578,7 +4560,7 @@ LEANCLR_CASE_BEGIN(StfldI1Large)
     }
     int8_t value = get_stack_value_at<int8_t>(eval_stack_base, ir->value);
     int8_t* field_addr = reinterpret_cast<int8_t*>(reinterpret_cast<uint8_t*>(obj) + ir->offset);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -4591,7 +4573,7 @@ LEANCLR_CASE_BEGIN(StfldI2Large)
     }
     int16_t value = get_stack_value_at<int16_t>(eval_stack_base, ir->value);
     int16_t* field_addr = reinterpret_cast<int16_t*>(reinterpret_cast<uint8_t*>(obj) + ir->offset);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -4617,7 +4599,7 @@ LEANCLR_CASE_BEGIN(StfldI4Large)
     }
     int32_t value = get_stack_value_at<int32_t>(eval_stack_base, ir->value);
     int32_t* field_addr = reinterpret_cast<int32_t*>(reinterpret_cast<uint8_t*>(obj) + ir->offset);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -4643,7 +4625,7 @@ LEANCLR_CASE_BEGIN(StfldI8Large)
     }
     int64_t value = get_stack_value_at<int64_t>(eval_stack_base, ir->value);
     int64_t* field_addr = reinterpret_cast<int64_t*>(reinterpret_cast<uint8_t*>(obj) + ir->offset);
-    *field_addr = value;
+    utils::MemOp::store_native(field_addr, value);
 }
 LEANCLR_CASE_END()
 
@@ -4674,12 +4656,12 @@ LEANCLR_CASE_BEGIN(StfldAnyLarge)
 LEANCLR_CASE_END()
 
 LEANCLR_CASE_BEGIN(ProfileAddCost)
-            {
+{
 #if LEANCLR_PGO_PROFILE
-                profile::Profile::add_cost(frame->method, static_cast<uint64_t>(ir->cost));
+    profile::Profile::add_cost(frame->method, static_cast<uint64_t>(ir->cost));
 #endif
-            }
-            LEANCLR_CASE_END()
+}
+LEANCLR_CASE_END()
 
 LEANCLR_CASE_BEGIN(Illegal)
 {

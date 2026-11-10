@@ -1,3 +1,4 @@
+#include "utils/little_endian.h"
 #include "transformer.h"
 #include "il_opcodes.h"
 #include "metadata/module_def.h"
@@ -693,7 +694,7 @@ RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targ
     bool any_not_zero_branch = false;
     for (size_t i = 0; i < count; ++i)
     {
-        int32_t rel_offset = static_cast<int32_t>(utils::MemOp::read_u32_may_unaligned(((const int32_t*)case_targets) + i));
+        int32_t rel_offset = static_cast<int32_t>(utils::LittleEndian::read_i32(static_cast<const uint8_t*>(case_targets) + 4 * i));
         if (rel_offset != 0)
             any_not_zero_branch = true;
     }
@@ -707,8 +708,8 @@ RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targ
 
     for (size_t i = 0; i < count; ++i)
     {
-        const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) +
-                                                            static_cast<ptrdiff_t>(utils::MemOp::read_u32_may_unaligned(((const int32_t*)case_targets) + i)));
+        const size_t target_il_offset = static_cast<size_t>(
+            static_cast<ptrdiff_t>(next_offset) + static_cast<ptrdiff_t>(utils::LittleEndian::read_i32(static_cast<const uint8_t*>(case_targets) + 4 * i)));
         auto target_bb_result = get_branch_target_bb(target_il_offset);
         RET_ERR_ON_FAIL(target_bb_result);
         BasicBlock* target_bb = target_bb_result.unwrap();
@@ -2607,28 +2608,28 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::LdcI4:
             {
-                int32_t value = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t value = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 RET_ERR_ON_FAIL(add_ldci4(value));
                 il_offset_cur += 5;
                 break;
             }
             case il::OpCodeValue::LdcI8:
             {
-                int64_t value = static_cast<int64_t>(utils::MemOp::read_u64_may_unaligned(codes_begin + il_offset_cur + 1));
+                int64_t value = static_cast<int64_t>(utils::LittleEndian::read_u64(codes_begin + il_offset_cur + 1));
                 RET_ERR_ON_FAIL(add_ldci8(value));
                 il_offset_cur += 9;
                 break;
             }
             case il::OpCodeValue::LdcR4:
             {
-                float value = static_cast<float>(utils::MemOp::read_f32_may_unaligned(codes_begin + il_offset_cur + 1));
+                float value = static_cast<float>(utils::LittleEndian::read_f32(codes_begin + il_offset_cur + 1));
                 RET_ERR_ON_FAIL(add_ldcr4(value));
                 il_offset_cur += 5;
                 break;
             }
             case il::OpCodeValue::LdcR8:
             {
-                double value = static_cast<double>(utils::MemOp::read_f64_may_unaligned(codes_begin + il_offset_cur + 1));
+                double value = static_cast<double>(utils::LittleEndian::read_f64(codes_begin + il_offset_cur + 1));
                 RET_ERR_ON_FAIL(add_ldcr8(value));
                 il_offset_cur += 9;
                 break;
@@ -2655,7 +2656,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Call:
             {
-                uint32_t method_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t method_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, get_method_from_token(method_token));
                 RET_ERR_ON_FAIL(add_call(method));
                 il_offset_cur += 5;
@@ -2663,7 +2664,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Calli:
             {
-                uint32_t standalone_method_sig_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t standalone_method_sig_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 auto ret_standalone_method_sig = get_standalone_method_sig_from_token(standalone_method_sig_token);
                 RET_ERR_ON_FAIL(ret_standalone_method_sig);
                 RET_ERR_ON_FAIL(add_calli(ret_standalone_method_sig.unwrap()));
@@ -2779,28 +2780,28 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Br:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_br(static_cast<uint32_t>(il_offset_cur), target));
                 break;
             }
             case il::OpCodeValue::Brfalse:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_brtrue_or_false(static_cast<uint32_t>(il_offset_cur), target, false));
                 break;
             }
             case il::OpCodeValue::Brtrue:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_brtrue_or_false(static_cast<uint32_t>(il_offset_cur), target, true));
                 break;
             }
             case il::OpCodeValue::Beq:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BeqI4, OpCodeEnum::BeqI8, OpCodeEnum::BeqR4, OpCodeEnum::BeqR8}));
@@ -2808,7 +2809,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Bge:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BgeI4, OpCodeEnum::BgeI8, OpCodeEnum::BgeR4, OpCodeEnum::BgeR8}));
@@ -2816,7 +2817,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Bgt:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BgtI4, OpCodeEnum::BgtI8, OpCodeEnum::BgtR4, OpCodeEnum::BgtR8}));
@@ -2824,7 +2825,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ble:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BleI4, OpCodeEnum::BleI8, OpCodeEnum::BleR4, OpCodeEnum::BleR8}));
@@ -2832,7 +2833,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Blt:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BltI4, OpCodeEnum::BltI8, OpCodeEnum::BltR4, OpCodeEnum::BltR8}));
@@ -2840,7 +2841,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::BneUn:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BneUnI4, OpCodeEnum::BneUnI8, OpCodeEnum::BneUnR4, OpCodeEnum::BneUnR8}));
@@ -2848,7 +2849,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::BgeUn:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BgeUnI4, OpCodeEnum::BgeUnI8, OpCodeEnum::BgeUnR4, OpCodeEnum::BgeUnR8}));
@@ -2856,7 +2857,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::BgtUn:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BgtUnI4, OpCodeEnum::BgtUnI8, OpCodeEnum::BgtUnR4, OpCodeEnum::BgtUnR8}));
@@ -2864,7 +2865,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::BleUn:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BleUnI4, OpCodeEnum::BleUnI8, OpCodeEnum::BleUnR4, OpCodeEnum::BleUnR8}));
@@ -2872,7 +2873,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::BltUn:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_condition_branch(static_cast<uint32_t>(il_offset_cur), target,
                                                      NumericOpcodes{OpCodeEnum::BltUnI4, OpCodeEnum::BltUnI8, OpCodeEnum::BltUnR4, OpCodeEnum::BltUnR8}));
@@ -2880,7 +2881,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Switch:
             {
-                uint32_t case_count = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t case_count = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 const int8_t* cases_begin = (const int8_t*)(codes_begin + il_offset_cur);
                 il_offset_cur += case_count * 4;
@@ -3161,7 +3162,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Callvirt:
             {
-                uint32_t method_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t method_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, get_method_from_token(method_token));
                 RET_ERR_ON_FAIL(add_callvirt(method));
                 il_offset_cur += 5;
@@ -3169,7 +3170,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Cpobj:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_cpobj(klass));
                 il_offset_cur += 5;
@@ -3177,7 +3178,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ldobj:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_ldobj(klass));
                 il_offset_cur += 5;
@@ -3185,7 +3186,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ldstr:
             {
-                uint32_t str_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t str_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 uint32_t user_string_index = metadata::RtToken::decode_rid(str_token);
                 RET_ERR_ON_FAIL(add_ldstr(user_string_index));
                 il_offset_cur += 5;
@@ -3193,7 +3194,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Newobj:
             {
-                uint32_t method_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t method_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, get_method_from_token(method_token));
                 RET_ERR_ON_FAIL(add_newobj(method));
                 il_offset_cur += 5;
@@ -3201,7 +3202,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Castclass:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_castclass(klass));
                 il_offset_cur += 5;
@@ -3209,7 +3210,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Isinst:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_isinst(klass));
                 il_offset_cur += 5;
@@ -3224,7 +3225,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Unbox:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_unbox(klass));
                 il_offset_cur += 5;
@@ -3243,7 +3244,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ldfld:
             {
-                uint32_t field_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t field_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, field, get_field_from_token(field_token));
                 RET_ERR_ON_FAIL(add_ldfld(field));
                 il_offset_cur += 5;
@@ -3251,7 +3252,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ldflda:
             {
-                uint32_t field_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t field_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, field, get_field_from_token(field_token));
                 RET_ERR_ON_FAIL(add_ldflda(field));
                 il_offset_cur += 5;
@@ -3259,7 +3260,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Stfld:
             {
-                uint32_t field_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t field_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, field, get_field_from_token(field_token));
                 RET_ERR_ON_FAIL(add_stfld(field));
                 il_offset_cur += 5;
@@ -3267,7 +3268,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ldsfld:
             {
-                uint32_t field_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t field_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, field, get_field_from_token(field_token));
                 RET_ERR_ON_FAIL(add_ldsfld(field));
                 il_offset_cur += 5;
@@ -3275,7 +3276,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ldsflda:
             {
-                uint32_t field_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t field_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, field, get_field_from_token(field_token));
                 RET_ERR_ON_FAIL(add_ldsflda(field));
                 il_offset_cur += 5;
@@ -3283,7 +3284,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Stsfld:
             {
-                uint32_t field_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t field_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, field, get_field_from_token(field_token));
                 RET_ERR_ON_FAIL(add_stsfld(field));
                 il_offset_cur += 5;
@@ -3291,7 +3292,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Stobj:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_stobj(klass));
                 il_offset_cur += 5;
@@ -3380,7 +3381,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Box:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_box(klass));
                 il_offset_cur += 5;
@@ -3388,7 +3389,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Newarr:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_newarr(klass));
                 il_offset_cur += 5;
@@ -3402,7 +3403,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ldelema:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_ldelema(klass));
                 il_offset_cur += 5;
@@ -3524,7 +3525,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ldelem:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_ldelem_any(klass));
                 il_offset_cur += 5;
@@ -3532,7 +3533,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Stelem:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_stelem_any(klass));
                 il_offset_cur += 5;
@@ -3540,7 +3541,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::UnboxAny:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_unbox_any(klass));
                 il_offset_cur += 5;
@@ -3630,7 +3631,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Refanyval:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_refanyval(klass));
                 il_offset_cur += 5;
@@ -3649,7 +3650,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Mkrefany:
             {
-                uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                 RET_ERR_ON_FAIL(add_mkrefany(klass));
                 il_offset_cur += 5;
@@ -3669,7 +3670,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Ldtoken:
             {
-                uint32_t token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                uint32_t token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 RET_ERR_ON_FAIL(add_ldtoken(token));
                 il_offset_cur += 5;
                 break;
@@ -3762,7 +3763,7 @@ RtResultVoid Transformer::transform_body()
             }
             case il::OpCodeValue::Leave:
             {
-                int32_t target = (int32_t)utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                int32_t target = (int32_t)utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                 il_offset_cur += 5;
                 RET_ERR_ON_FAIL(add_leave(il_offset_cur, target));
                 break;
@@ -3870,7 +3871,7 @@ RtResultVoid Transformer::transform_body()
                 }
                 case il::OpCodeValueExt::Ldftn:
                 {
-                    uint32_t method_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint32_t method_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, get_method_from_token(method_token));
                     RET_ERR_ON_FAIL(add_ldftn(method));
                     il_offset_cur += 5;
@@ -3878,7 +3879,7 @@ RtResultVoid Transformer::transform_body()
                 }
                 case il::OpCodeValueExt::Ldvirtftn:
                 {
-                    uint32_t method_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint32_t method_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, get_method_from_token(method_token));
                     RET_ERR_ON_FAIL(add_ldvirtftn(method));
                     il_offset_cur += 5;
@@ -3890,42 +3891,42 @@ RtResultVoid Transformer::transform_body()
                 }
                 case il::OpCodeValueExt::Ldarg:
                 {
-                    uint16_t arg_index = utils::MemOp::read_u16_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint16_t arg_index = utils::LittleEndian::read_u16(codes_begin + il_offset_cur + 1);
                     RET_ERR_ON_FAIL(add_ldarg(arg_index));
                     il_offset_cur += 3;
                     break;
                 }
                 case il::OpCodeValueExt::Ldarga:
                 {
-                    uint16_t arg_index = utils::MemOp::read_u16_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint16_t arg_index = utils::LittleEndian::read_u16(codes_begin + il_offset_cur + 1);
                     RET_ERR_ON_FAIL(add_ldarga(arg_index));
                     il_offset_cur += 3;
                     break;
                 }
                 case il::OpCodeValueExt::Starg:
                 {
-                    uint16_t arg_index = utils::MemOp::read_u16_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint16_t arg_index = utils::LittleEndian::read_u16(codes_begin + il_offset_cur + 1);
                     RET_ERR_ON_FAIL(add_starg(arg_index));
                     il_offset_cur += 3;
                     break;
                 }
                 case il::OpCodeValueExt::Ldloc:
                 {
-                    uint16_t loc_index = utils::MemOp::read_u16_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint16_t loc_index = utils::LittleEndian::read_u16(codes_begin + il_offset_cur + 1);
                     RET_ERR_ON_FAIL(add_ldloc(loc_index));
                     il_offset_cur += 3;
                     break;
                 }
                 case il::OpCodeValueExt::Ldloca:
                 {
-                    uint16_t loc_index = utils::MemOp::read_u16_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint16_t loc_index = utils::LittleEndian::read_u16(codes_begin + il_offset_cur + 1);
                     RET_ERR_ON_FAIL(add_ldloca(loc_index));
                     il_offset_cur += 3;
                     break;
                 }
                 case il::OpCodeValueExt::Stloc:
                 {
-                    uint16_t loc_index = utils::MemOp::read_u16_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint16_t loc_index = utils::LittleEndian::read_u16(codes_begin + il_offset_cur + 1);
                     RET_ERR_ON_FAIL(add_stloc(loc_index));
                     il_offset_cur += 3;
                     break;
@@ -3971,7 +3972,7 @@ RtResultVoid Transformer::transform_body()
                 }
                 case il::OpCodeValueExt::Initobj:
                 {
-                    uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                     RET_ERR_ON_FAIL(add_initobj(klass));
                     il_offset_cur += 5;
@@ -3979,7 +3980,7 @@ RtResultVoid Transformer::transform_body()
                 }
                 case il::OpCodeValueExt::Constrained:
                 {
-                    uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, get_class_from_token(type_token));
                     set_constrainted_prefix(klass);
                     il_offset_cur += 5;
@@ -4016,7 +4017,7 @@ RtResultVoid Transformer::transform_body()
                 }
                 case il::OpCodeValueExt::Sizeof:
                 {
-                    uint32_t type_token = utils::MemOp::read_u32_may_unaligned(codes_begin + il_offset_cur + 1);
+                    uint32_t type_token = utils::LittleEndian::read_u32(codes_begin + il_offset_cur + 1);
                     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, type_sig, get_type_from_token(type_token));
                     RET_ERR_ON_FAIL(add_sizeof(type_sig));
                     il_offset_cur += 5;

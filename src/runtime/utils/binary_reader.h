@@ -1,6 +1,7 @@
 #pragma once
 
 #include "mem_op.h"
+#include "little_endian.h"
 
 #include <algorithm>
 #include <cstddef>
@@ -64,7 +65,8 @@ class BinaryReader
         if (offset < 0)
         {
             const size_t distance = static_cast<size_t>(-(offset + 1)) + 1;
-            if (distance > _index) return false;
+            if (distance > _index)
+                return false;
             _index -= distance;
             return true;
         }
@@ -84,14 +86,19 @@ class BinaryReader
         return true;
     }
 
-    size_t remaining() const { return _length - _index; }
+    size_t remaining() const
+    {
+        return _length - _index;
+    }
 
     bool try_peek_cstring(size_t max_length, const char*& out_value, size_t& out_length) const
     {
         const size_t limit = std::min(remaining(), max_length == SIZE_MAX ? max_length : max_length + 1);
-        if (limit == 0) return false;
+        if (limit == 0)
+            return false;
         const void* end = std::memchr(get_current_ptr(), 0, limit);
-        if (!end) return false;
+        if (!end)
+            return false;
         out_value = reinterpret_cast<const char*>(get_current_ptr());
         out_length = static_cast<const uint8_t*>(end) - get_current_ptr();
         return true;
@@ -114,15 +121,15 @@ class BinaryReader
 
     const uint8_t* get_current_ptr() const
     {
-        return _data + _index;
+        return _index == 0 ? _data : _data + _index;
     }
 
     template <typename T>
     bool try_peek_any_ptr(const T*& out_ptr) const
     {
-        if (sizeof(T) <= _length - _index)
+        if (sizeof(T) <= _length - _index && reinterpret_cast<uintptr_t>(get_current_ptr()) % alignof(T) == 0)
         {
-            out_ptr = reinterpret_cast<const T*>(_data + _index);
+            out_ptr = reinterpret_cast<const T*>(get_current_ptr());
             return true;
         }
         else
@@ -134,9 +141,9 @@ class BinaryReader
     template <typename T>
     bool try_peek_any_ptr_range(size_t count, const T*& out_ptr) const
     {
-        if (count <= (_length - _index) / sizeof(T))
+        if (count <= (_length - _index) / sizeof(T) && reinterpret_cast<uintptr_t>(get_current_ptr()) % alignof(T) == 0)
         {
-            out_ptr = reinterpret_cast<const T*>(_data + _index);
+            out_ptr = reinterpret_cast<const T*>(get_current_ptr());
             return true;
         }
         else
@@ -158,12 +165,13 @@ class BinaryReader
         }
     }
 
+    // Raw native representation only; use the scalar readers for file formats.
     template <typename T>
     bool try_read_any(T& out_value)
     {
         if (sizeof(T) <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const T*>(_data + _index));
+            std::memcpy(&out_value, get_current_ptr(), sizeof(T));
             _index += sizeof(T);
             return true;
         }
@@ -191,7 +199,7 @@ class BinaryReader
     {
         if (2 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const uint16_t*>(_data + _index));
+            out_value = LittleEndian::read_u16(get_current_ptr());
             _index += 2;
             return true;
         }
@@ -205,7 +213,7 @@ class BinaryReader
     {
         if (4 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const uint32_t*>(_data + _index));
+            out_value = LittleEndian::read_u32(get_current_ptr());
             _index += 4;
             return true;
         }
@@ -219,7 +227,7 @@ class BinaryReader
     {
         if (8 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const uint64_t*>(_data + _index));
+            out_value = LittleEndian::read_u64(get_current_ptr());
             _index += 8;
             return true;
         }
@@ -233,7 +241,7 @@ class BinaryReader
     {
         if (4 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const float*>(_data + _index));
+            out_value = LittleEndian::read_f32(get_current_ptr());
             _index += 4;
             return true;
         }
@@ -247,7 +255,7 @@ class BinaryReader
     {
         if (8 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const double*>(_data + _index));
+            out_value = LittleEndian::read_f64(get_current_ptr());
             _index += 8;
             return true;
         }
@@ -318,7 +326,8 @@ class BinaryReader
     {
         const size_t begin = _index;
         uint32_t bits;
-        if (!try_read_compressed_uint32(bits)) return false;
+        if (!try_read_compressed_uint32(bits))
+            return false;
         const size_t width = _index - begin;
         const int32_t value = static_cast<int32_t>(bits >> 1);
         // The sign bit was rotated into bit zero. Its original position is

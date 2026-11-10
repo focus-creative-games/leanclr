@@ -1,3 +1,4 @@
+#include "utils/little_endian.h"
 #include "il_opcodes.h"
 #include "utils/mem_op.h"
 
@@ -356,9 +357,7 @@ size_t OpCodes::get_opcode_size(const uint8_t* codes_cur, const OpCodeInfo* opco
         return inline_param + prefix_size;
     }
 
-    uint32_t count = 0;
-    std::memcpy(&count, codes_cur + 1, sizeof(uint32_t));
-    return 1 + sizeof(uint32_t) + (sizeof(uint32_t) * utils::MemOp::read_u32_may_unaligned(codes_cur + 1));
+    return 1 + sizeof(uint32_t) + (sizeof(uint32_t) * utils::LittleEndian::read_u32(codes_cur + 1));
 }
 
 } // namespace il

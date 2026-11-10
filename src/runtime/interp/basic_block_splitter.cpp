@@ -1,3 +1,4 @@
+#include "utils/little_endian.h"
 #include "basic_block_splitter.h"
 
 namespace leanclr
@@ -90,7 +91,7 @@ RtResultVoid BasicBlockSplitter::split_codes()
             else
             {
                 uint32_t val = 0;
-                std::memcpy(&val, pc + 1, sizeof(uint32_t));
+                val = utils::LittleEndian::read_i32(pc + 1);
                 target_offset = static_cast<uint32_t>(val);
             }
             if (target_offset != 0 || opcode_info->code2 == static_cast<uint8_t>(il::OpCodeValue::LeaveS) ||
@@ -104,13 +105,13 @@ RtResultVoid BasicBlockSplitter::split_codes()
         case il::ArgType::Switch:
         {
             int32_t case_count = 0;
-            std::memcpy(&case_count, pc + 1, sizeof(int32_t));
-            const int32_t* case_start = reinterpret_cast<const int32_t*>(pc + 5);
+            case_count = utils::LittleEndian::read_i32(pc + 1);
+            const uint8_t* case_start = pc + 5;
             bool split_any = false;
             for (int32_t i = 0; i < case_count; ++i)
             {
                 uint32_t case_offset_val = 0;
-                std::memcpy(&case_offset_val, case_start + i, sizeof(uint32_t));
+                case_offset_val = utils::LittleEndian::read_i32(case_start + 4 * i);
                 const uint32_t case_offset = case_offset_val;
                 if (case_offset != 0)
                 {

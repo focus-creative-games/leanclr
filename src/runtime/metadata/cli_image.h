@@ -1,4 +1,5 @@
 #pragma once
+#include "utils/little_endian.h"
 
 #include <algorithm>
 #include <cstring>
@@ -293,19 +294,19 @@ class CliImage
 
     static inline uint16_t read_column_u16(const uint8_t* row_data, const CliTableFieldMeta& field_meta)
     {
-        return utils::MemOp::read_u16_may_unaligned(row_data + field_meta.offset);
+        return utils::LittleEndian::read_u16(row_data + field_meta.offset);
     }
 
     static inline uint32_t read_column_u32(const uint8_t* row_data, const CliTableFieldMeta& field_meta)
     {
         if (field_meta.size == 4)
         {
-            return utils::MemOp::read_u32_may_unaligned(row_data + field_meta.offset);
+            return utils::LittleEndian::read_u32(row_data + field_meta.offset);
         }
         else
         {
             assert(field_meta.size == 2);
-            return utils::MemOp::read_u16_may_unaligned(row_data + field_meta.offset);
+            return utils::LittleEndian::read_u16(row_data + field_meta.offset);
         }
     }
 

@@ -72,14 +72,14 @@ template <typename T>
 inline T get_stack_value_at(RtStackObject* base, size_t index)
 {
     RtStackObject* obj = base + index;
-    return *reinterpret_cast<T*>(obj);
+    return utils::MemOp::load_native(reinterpret_cast<T*>(obj));
 }
 
 template <typename T>
 inline void set_stack_value_at(RtStackObject* base, size_t index, T value)
 {
     RtStackObject* obj = base + index;
-    *reinterpret_cast<T*>(obj) = value;
+    utils::MemOp::store_native(reinterpret_cast<T*>(obj), value);
 }
 
 template <typename T>
@@ -93,14 +93,14 @@ template <typename T>
 inline T get_ind_stack_value_at(RtStackObject* base, size_t index)
 {
     RtStackObject* obj = base + index;
-    return *(reinterpret_cast<T*>(obj->ptr));
+    return utils::MemOp::load_native(reinterpret_cast<T*>(obj->ptr));
 }
 
 template <typename T>
 inline void set_ind_stack_value_at(RtStackObject* base, size_t index, T value)
 {
     RtStackObject* obj = base + index;
-    *(reinterpret_cast<T*>(obj->ptr)) = value;
+    utils::MemOp::store_native(reinterpret_cast<T*>(obj->ptr), value);
 }
 
 template <typename T>
@@ -459,16 +459,36 @@ T* get_static_field_address(const metadata::RtFieldInfo* field)
 #define LEANCLR_READ_OPCODE() (*reinterpret_cast<const uint16_t*>(ip))
 #if LEANCLR_USE_COMPUTED_GOTO_DISPATCHER
 #define LEANCLR_SWITCH() goto* instruction_labels[LEANCLR_READ_OPCODE()];
-#define LEANCLR_CASE_BEGIN(code) LABEL_##code: { const auto ir = reinterpret_cast<const ll::code*>(ip);
-#define LEANCLR_CASE_BEGIN_LITE(code) LABEL_##code: {
-#define LEANCLR_CASE_END() ip = reinterpret_cast<const uint8_t*>(ir + 1); goto* instruction_labels[LEANCLR_READ_OPCODE()]; }
-#define LEANCLR_CASE_END_LITE() goto* instruction_labels[LEANCLR_READ_OPCODE()]; }
+#define LEANCLR_CASE_BEGIN(code) \
+    LABEL_##code:                \
+    {                            \
+        const auto ir = reinterpret_cast<const ll::code*>(ip);
+#define LEANCLR_CASE_BEGIN_LITE(code) \
+    LABEL_##code:                     \
+    {
+#define LEANCLR_CASE_END()                           \
+    ip = reinterpret_cast<const uint8_t*>(ir + 1);   \
+    goto* instruction_labels[LEANCLR_READ_OPCODE()]; \
+    }
+#define LEANCLR_CASE_END_LITE()                      \
+    goto* instruction_labels[LEANCLR_READ_OPCODE()]; \
+    }
 #else
 #define LEANCLR_SWITCH() switch (static_cast<ll::OpCodeEnum>(LEANCLR_READ_OPCODE()))
-#define LEANCLR_CASE_BEGIN(code) case ll::OpCodeEnum::code: { const auto ir = reinterpret_cast<const ll::code*>(ip);
-#define LEANCLR_CASE_BEGIN_LITE(code) case ll::OpCodeEnum::code: {
-#define LEANCLR_CASE_END() ip = reinterpret_cast<const uint8_t*>(ir + 1); continue; }
-#define LEANCLR_CASE_END_LITE() continue; }
+#define LEANCLR_CASE_BEGIN(code) \
+    case ll::OpCodeEnum::code:   \
+    {                            \
+        const auto ir = reinterpret_cast<const ll::code*>(ip);
+#define LEANCLR_CASE_BEGIN_LITE(code) \
+    case ll::OpCodeEnum::code:        \
+    {
+#define LEANCLR_CASE_END()                         \
+    ip = reinterpret_cast<const uint8_t*>(ir + 1); \
+    continue;                                      \
+    }
+#define LEANCLR_CASE_END_LITE() \
+    continue;                   \
+    }
 #endif
 
 RtResult<const RtStackObject*> Interpreter::execute(const metadata::RtMethodInfo* method, const interp::RtStackObject* params)

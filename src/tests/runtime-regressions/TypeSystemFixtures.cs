@@ -62,3 +62,37 @@ public class TypeSystemFixture
         return errors;
     }
 }
+
+[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential, Pack = 1)]
+public struct PackedData
+{
+    public byte Tag;
+    public long Integer;
+    public double Real;
+    public short Small;
+}
+public static class PackedMemoryFixture
+{
+    static void Change(ref long value) { value = -9223372036854775000L; }
+    public static int Run()
+    {
+        PackedData data = new PackedData();
+        data.Tag = 17;
+        data.Integer = 0x123456789ABCDEF;
+        data.Real = -3.25;
+        data.Small = -12345;
+        if (data.Integer != 0x123456789ABCDEF || data.Real != -3.25 || data.Small != -12345) return 1;
+        Change(ref data.Integer);
+        if (data.Integer != -9223372036854775000L) return 2;
+        PackedData[] array = new PackedData[3];
+        array[1] = data;
+        array[2] = array[1];
+        if (array[2].Integer != data.Integer || array[2].Real != data.Real || array[2].Tag != 17) return 3;
+        object boxed = data;
+        System.Reflection.FieldInfo integer = typeof(PackedData).GetField("Integer");
+        if ((long)integer.GetValue(boxed) != data.Integer) return 4;
+        integer.SetValue(boxed, 123456789012345L);
+        if (((PackedData)boxed).Integer != 123456789012345L) return 5;
+        return 0;
+    }
+}

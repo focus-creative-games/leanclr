@@ -39,66 +39,66 @@ RtResult<RtObject*> Object::internal_create_instance(const metadata::RtTypeSig* 
     RET_ERR_ON_FAIL(vm::Class::initialize_all(klass));
     switch (type_sig->ele_type)
     {
-        case metadata::RtElementType::Boolean:
-        case metadata::RtElementType::Char:
-        case metadata::RtElementType::I1:
-        case metadata::RtElementType::U1:
-        case metadata::RtElementType::I2:
-        case metadata::RtElementType::U2:
-        case metadata::RtElementType::I4:
-        case metadata::RtElementType::U4:
-        case metadata::RtElementType::I8:
-        case metadata::RtElementType::U8:
-        case metadata::RtElementType::R4:
-        case metadata::RtElementType::R8:
-        case metadata::RtElementType::I:
-        case metadata::RtElementType::U:
-        case metadata::RtElementType::Object:
-        {
-            break;
-        }
-        case metadata::RtElementType::ValueType:
-        case metadata::RtElementType::Class:
-        {
-            if (vm::Class::is_generic(klass))
-            {
-                RET_ERR(RtErr::Argument);
-            }
-            break;
-        }
-        case metadata::RtElementType::GenericInst:
-        {
-            if (vm::Type::contains_generic_param(type_sig))
-            {
-                RET_ERR(RtErr::Argument);
-            }
-            if (Class::is_nullable_type(klass))
-            {
-                RET_OK(nullptr);
-            }
-            break;
-        }
-        case metadata::RtElementType::String:
-        case metadata::RtElementType::SZArray:
-        case metadata::RtElementType::Array:
+    case metadata::RtElementType::Boolean:
+    case metadata::RtElementType::Char:
+    case metadata::RtElementType::I1:
+    case metadata::RtElementType::U1:
+    case metadata::RtElementType::I2:
+    case metadata::RtElementType::U2:
+    case metadata::RtElementType::I4:
+    case metadata::RtElementType::U4:
+    case metadata::RtElementType::I8:
+    case metadata::RtElementType::U8:
+    case metadata::RtElementType::R4:
+    case metadata::RtElementType::R8:
+    case metadata::RtElementType::I:
+    case metadata::RtElementType::U:
+    case metadata::RtElementType::Object:
+    {
+        break;
+    }
+    case metadata::RtElementType::ValueType:
+    case metadata::RtElementType::Class:
+    {
+        if (vm::Class::is_generic(klass))
         {
             RET_ERR(RtErr::Argument);
         }
-        // case metadata::RtElementType::String:
-        // {
-        //     RET_OK(vm::String::get_empty_string());
-        // }
-        // case metadata::RtElementType::SZArray:
-        // {
-        //     metadata::RtClass* ele_klass = vm::Class::get_array_element_class(klass);
-        //     auto ret_arr = LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(ele_klass,
-        //                                                   "ActivationServices::AllocateUninitializedClassInstance");
-        //     return ret_arr.cast<vm::RtObject*>();
-        // }
-        default:
+        break;
+    }
+    case metadata::RtElementType::GenericInst:
+    {
+        if (vm::Type::contains_generic_param(type_sig))
         {
             RET_ERR(RtErr::Argument);
         }
+        if (Class::is_nullable_type(klass))
+        {
+            RET_OK(nullptr);
+        }
+        break;
+    }
+    case metadata::RtElementType::String:
+    case metadata::RtElementType::SZArray:
+    case metadata::RtElementType::Array:
+    {
+        RET_ERR(RtErr::Argument);
+    }
+    // case metadata::RtElementType::String:
+    // {
+    //     RET_OK(vm::String::get_empty_string());
+    // }
+    // case metadata::RtElementType::SZArray:
+    // {
+    //     metadata::RtClass* ele_klass = vm::Class::get_array_element_class(klass);
+    //     auto ret_arr = LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(ele_klass,
+    //                                                   "ActivationServices::AllocateUninitializedClassInstance");
+    //     return ret_arr.cast<vm::RtObject*>();
+    // }
+    default:
+    {
+        RET_ERR(RtErr::Argument);
+    }
     }
 
     if (vm::Class::is_interface(klass) || vm::Class::is_abstract(klass))
@@ -176,43 +176,43 @@ void Object::extends_to_eval_stack(const void* src, interp::RtStackObject* dst, 
     case metadata::RtElementType::Boolean:
     case metadata::RtElementType::I1:
     {
-        int8_t v = *reinterpret_cast<const int8_t*>(src);
-        *reinterpret_cast<int32_t*>(dst) = static_cast<int32_t>(v);
+        int8_t v = utils::MemOp::load_native(reinterpret_cast<const int8_t*>(src));
+        utils::MemOp::store_native(reinterpret_cast<int32_t*>(dst), static_cast<int32_t>(v));
         break;
     }
     case metadata::RtElementType::U1:
     {
-        uint8_t v = *reinterpret_cast<const uint8_t*>(src);
-        *reinterpret_cast<int32_t*>(dst) = static_cast<int32_t>(v);
+        uint8_t v = utils::MemOp::load_native(reinterpret_cast<const uint8_t*>(src));
+        utils::MemOp::store_native(reinterpret_cast<int32_t*>(dst), static_cast<int32_t>(v));
         break;
     }
     case metadata::RtElementType::I2:
     {
-        int16_t v = *reinterpret_cast<const int16_t*>(src);
-        *reinterpret_cast<int32_t*>(dst) = static_cast<int32_t>(v);
+        int16_t v = utils::MemOp::load_native(reinterpret_cast<const int16_t*>(src));
+        utils::MemOp::store_native(reinterpret_cast<int32_t*>(dst), static_cast<int32_t>(v));
         break;
     }
     case metadata::RtElementType::U2:
     case metadata::RtElementType::Char:
     {
-        uint16_t v = *reinterpret_cast<const uint16_t*>(src);
-        *reinterpret_cast<int32_t*>(dst) = static_cast<int32_t>(v);
+        uint16_t v = utils::MemOp::load_native(reinterpret_cast<const uint16_t*>(src));
+        utils::MemOp::store_native(reinterpret_cast<int32_t*>(dst), static_cast<int32_t>(v));
         break;
     }
     case metadata::RtElementType::I4:
     case metadata::RtElementType::U4:
     case metadata::RtElementType::R4:
     {
-        int32_t v = *reinterpret_cast<const int32_t*>(src);
-        *reinterpret_cast<int32_t*>(dst) = v;
+        int32_t v = utils::MemOp::load_native(reinterpret_cast<const int32_t*>(src));
+        utils::MemOp::store_native(reinterpret_cast<int32_t*>(dst), v);
         break;
     }
     case metadata::RtElementType::I8:
     case metadata::RtElementType::U8:
     case metadata::RtElementType::R8:
     {
-        int64_t v = *reinterpret_cast<const int64_t*>(src);
-        *reinterpret_cast<int64_t*>(dst) = v;
+        int64_t v = utils::MemOp::load_native(reinterpret_cast<const int64_t*>(src));
+        utils::MemOp::store_native(reinterpret_cast<int64_t*>(dst), v);
         break;
     }
     case metadata::RtElementType::I:
@@ -220,8 +220,8 @@ void Object::extends_to_eval_stack(const void* src, interp::RtStackObject* dst, 
     case metadata::RtElementType::Ptr:
     case metadata::RtElementType::FnPtr:
     {
-        intptr_t v = *reinterpret_cast<const intptr_t*>(src);
-        *reinterpret_cast<intptr_t*>(dst) = v;
+        intptr_t v = utils::MemOp::load_native(reinterpret_cast<const intptr_t*>(src));
+        utils::MemOp::store_native(reinterpret_cast<intptr_t*>(dst), v);
         break;
     }
     case metadata::RtElementType::String:
@@ -230,8 +230,8 @@ void Object::extends_to_eval_stack(const void* src, interp::RtStackObject* dst, 
     case metadata::RtElementType::Array:
     case metadata::RtElementType::SZArray:
     {
-        const RtObject* v = *reinterpret_cast<const RtObject* const*>(src);
-        *reinterpret_cast<const RtObject**>(dst) = v;
+        const RtObject* v = utils::MemOp::load_native(reinterpret_cast<const RtObject* const*>(src));
+        utils::MemOp::store_native(reinterpret_cast<const RtObject**>(dst), v);
         break;
     }
     case metadata::RtElementType::ValueType:
@@ -250,8 +250,8 @@ void Object::extends_to_eval_stack(const void* src, interp::RtStackObject* dst, 
         }
         else
         {
-            const RtObject* v = *reinterpret_cast<const RtObject* const*>(src);
-            *reinterpret_cast<const RtObject**>(dst) = v;
+            const RtObject* v = utils::MemOp::load_native(reinterpret_cast<const RtObject* const*>(src));
+            utils::MemOp::store_native(reinterpret_cast<const RtObject**>(dst), v);
         }
         break;
     }

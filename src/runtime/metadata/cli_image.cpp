@@ -6,6 +6,7 @@
 #include "utils/binary_reader.h"
 #include "alloc/mem_pool.h"
 #include "utils/rt_vector.h"
+
 namespace leanclr
 {
 namespace metadata
@@ -54,24 +55,6 @@ static const TableType HAS_CUSTOM_DEBUG_INFORMATION[] = {
     TableType::MethodSpec,
 };
 
-// Metadata structures
-struct MetadataRootPartial
-{
-    uint32_t signature;
-    uint16_t major_version;
-    uint16_t minor_version;
-    uint32_t reserved;
-    uint32_t length;
-    uint8_t version_first_byte;
-};
-
-struct StreamHeader
-{
-    uint32_t offset;
-    uint32_t size;
-    uint8_t name[1]; // Variable length
-};
-
 RtResult<const char*> CliImage::read_assembly_name_no_ext() const
 {
     const auto opt_row = read_assembly(1);
@@ -96,16 +79,10 @@ RtResultVoid CliImage::load_streams()
 
     BinaryReader reader(image_data + metadata_offset, metadata_length);
 
-    // Read metadata root header
-    const MetadataRootPartial* meta_root = nullptr;
-    if (!reader.try_peek_any_ptr(meta_root))
+    uint32_t signature, version_length;
+    if (!reader.try_read_u32(signature) || signature != 0x424A5342 || !reader.try_advance(8) || !reader.try_read_u32(version_length))
         RET_ERR(RtErr::BadImageFormat);
-
-    if (meta_root->signature != 0x424A5342) // "BSJB"
-        RET_ERR(RtErr::BadImageFormat);
-
-    // Skip version string (aligned to 4-byte boundary)
-    if (!reader.try_advance(16) || !reader.try_advance(meta_root->length) || !reader.try_advance(2))
+    if (!reader.try_advance(version_length) || !reader.try_advance(2))
         RET_ERR(RtErr::BadImageFormat);
 
     // Read stream header count
@@ -1129,7 +1106,8 @@ std::optional<uint32_t> CliImage::rva_to_image_offset(uint32_t rva) const
         if (rva >= sec.virtual_address_begin && rva < sec.virtual_address_end)
         {
             const uint32_t delta = rva - sec.virtual_address_begin;
-            if (delta >= sec.raw_data_size || sec.raw_data_begin > image_length || delta >= image_length - sec.raw_data_begin || delta > UINT32_MAX - sec.raw_data_begin)
+            if (delta >= sec.raw_data_size || sec.raw_data_begin > image_length || delta >= image_length - sec.raw_data_begin ||
+                delta > UINT32_MAX - sec.raw_data_begin)
                 return std::nullopt;
             return delta + sec.raw_data_begin;
         }

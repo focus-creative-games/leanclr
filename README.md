@@ -19,7 +19,7 @@ LeanCLR 的定位是补足上述空白：在保持 ECMA-335 高兼容的前提�
 
 ## 核心特点
 
-- **极佳跨平台能力** — 使用AOT + Interpreter 混合执行架构，不支持JIT，使用标准 C++11 实现，无任何平台相关依赖。具有极佳的跨平台移植性，不需要任何修改就可以在所有支持标准C++ 11编译器的平台运行。
+- **极佳跨平台能力** — 使用AOT + Interpreter 混合执行架构，不支持JIT，使用标准 C++11 实现，无任何平台相关依赖。具有极佳的跨平台移植性，运行时要求小端字节序，具体目标平台仍需完成编译和测试验证。
 - **易于集成** — 集成极其简单，复杂度与lua相近，轻松嵌入到任何环境，比如app ，游戏，嵌入式，车机平台，等等
 - **高度兼容 ECMA-335**：几乎完整支持 ECMA-335 与 CoreCLR 主要扩展，覆盖泛型、异常、反射、委托等核心能力。
 - **精简高效** — 非常小巧，内存占用小，运行高效，尤其适合资源有限的硬件环境。Core 单线程版本在 X64/WebAssembly 平台不到 **600 KB**，裁剪后可低至 **300 KB**
@@ -92,7 +92,7 @@ LeanCLR 提供 **Standard** 与 **Core** 两个版本：**Core 自 Standard 裁�
 
 ### Core 版本
 
-Core 版本已经实现，可运行于所有支持 C++11 的平台。Core 适合作为嵌入式的纯脚本引擎：既可以直接纯解释执行，也可以配合 [LeanAOT](https://doc.leanclr.com/docs/aot/overview) 将热点 IL 转译为 C++，获得良好的运行性能。
+Core 版本已经实现，面向支持 C++11 的小端平台。Core 适合作为嵌入式的纯脚本引擎：既可以直接纯解释执行，也可以配合 [LeanAOT](https://doc.leanclr.com/docs/aot/overview) 将热点 IL 转译为 C++，获得良好的运行性能。
 
 ### Standard 分支
 
@@ -110,7 +110,7 @@ Standard 版本按 BCL 来源分为三个分支：
 |------|----------|------|
 | ECMA-335 | 标准实现，高兼容 | 标准 ECMA-335 规范实现 |
 | 线程模型 | 单线程（多线程规划中） | 单线程 |
-| 跨平台 | Win、Linux、macOS、Android、iOS、HarmonyOS、WebAssembly 等 | 全平台，纯 C++11，无平台相关依赖 |
+| 跨平台 | Win、Linux、macOS、Android、iOS、HarmonyOS、WebAssembly 等 | 小端平台，纯 C++11；移植需验证目标平台 |
 | BCL | mono / unity / coreclr 分支，平台相关 icall 部分实现 | mono-4.5 BCL，仅实现其中部分平台相关调用 |
 | GC | 准确式 Mark-Sweep 全量 GC | 准确式 Mark-Sweep 全量 GC |
 

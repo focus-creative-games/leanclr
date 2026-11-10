@@ -71,7 +71,16 @@ typedef double float64_t;
 #define LEANCLR_DEBUG 0
 #endif
 
-#define LEANCLR_SUPPORT_UNALIGNED_ACCESS 1
+// Runtime object storage currently requires a little-endian host (including
+// FieldRVA data and UTF-16 storage). Reject unsupported targets explicitly.
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+#error "LeanCLR currently requires a little-endian host"
+#endif
+
+// Use portable memory copies even when hardware accepts unaligned accesses.
+#ifndef LEANCLR_SUPPORT_UNALIGNED_ACCESS
+#define LEANCLR_SUPPORT_UNALIGNED_ACCESS 0
+#endif
 
 #if UINTPTR_MAX == 0xFFFFFFFF
 #define LEANCLR_ARCH_32BIT 1
