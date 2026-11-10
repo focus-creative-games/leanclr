@@ -40,6 +40,11 @@ and artifacts do not overlap native builds. `src/runtime/CMakePresets.json`
 also supplies `mono-minimal`, `mono-native`, and `mono-custom` presets.
 See [architecture and migration](../docs/architecture.md) for capabilities and limits.
 
+Isolated performance experiments and reproducible P0/P1 measurements are under
+[`src/benchmarks`](../src/benchmarks/README.md), driven by
+`scripts/benchmarks/run_protocols.py` and `run_aot.py`. The measured report is
+[`docs/performance/p0-p1.md`](../docs/performance/p0-p1.md).
+
 ## Layout
 
 ```

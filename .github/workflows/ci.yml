@@ -47,6 +47,14 @@ jobs:
         run: cmake --build out/ci --config Release --parallel 2 --target $NATIVE_TARGETS
       - name: Test on target architecture
         run: ctest --test-dir out/ci -C Release --output-on-failure -R "$NATIVE_TESTS"
+      - name: Verify experimental return protocols (not performance thresholds)
+        if: matrix.host == 'NATIVE' && matrix.arch != 'Win32'
+        run: |
+          args=()
+          if [[ '${{ matrix.arch }}' != native ]]; then args+=(-A '${{ matrix.arch }}'); fi
+          cmake -S src/benchmarks/result-abi -B out/protocols -DCMAKE_BUILD_TYPE=Release "${args[@]}"
+          cmake --build out/protocols --config Release --parallel 2
+          ctest --test-dir out/protocols -C Release --output-on-failure
 
   custom:
     runs-on: ubuntu-24.04
@@ -78,6 +86,9 @@ jobs:
           emcmake cmake -S src/tests/runtime-regressions -B out/wasm -DCMAKE_BUILD_TYPE=Release -DLEANCLR_HOST=PORTABLE
           cmake --build out/wasm --parallel 2 --target $NATIVE_TARGETS
           ctest --test-dir out/wasm --output-on-failure -R "$NATIVE_TESTS"
+          emcmake cmake -S src/benchmarks/result-abi -B out/protocols-wasm -DCMAKE_BUILD_TYPE=Release -DCMAKE_CROSSCOMPILING_EMULATOR=node
+          cmake --build out/protocols-wasm --parallel 2
+          ctest --test-dir out/protocols-wasm --output-on-failure
 
   sanitize-and-fuzz:
     runs-on: ubuntu-24.04

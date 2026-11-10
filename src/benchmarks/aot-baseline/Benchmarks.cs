@@ -1,0 +1,112 @@
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
+// The same source is used by LeanAOT and IL2CPP. No engine APIs are required.
+public static class Benchmarks
+{
+    public struct Pair { public uint X, Y; }
+    public interface ITransform { uint Apply(uint x); }
+    public sealed class Transform : ITransform
+    {
+        public uint Apply(uint x) { return unchecked(x * 1664525u + 1013904223u); }
+    }
+    public sealed class Box { public uint Value { get; set; } }
+    static readonly uint[] Data = CreateData();
+    static readonly ITransform Transformer = new Transform();
+    static readonly Box PropertyBox = new Box();
+    static uint[] CreateData()
+    {
+        uint[] data = new uint[1024];
+        for (uint i = 0; i < data.Length; ++i) data[i] = i * 17u;
+        return data;
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint Step(uint x) { return unchecked(x * 1664525u + 1013904223u); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint Chain1(uint x) { return Step(x); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint Chain2(uint x) { return Chain1(x); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static Pair PairStep(Pair p) { p.X = Step(p.X); p.Y ^= p.X; return p; }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static T Identity<T>(T x) { return x; }
+    public static uint Arithmetic(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i) seed = unchecked(seed * 1664525u + 1013904223u);
+        return seed;
+    }
+    public static uint Calls(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i) seed = Chain2(seed);
+        return seed;
+    }
+    public static uint Properties(int n, uint seed)
+    {
+        Box box = PropertyBox;
+        for (int i = 0; i < n; ++i) { box.Value = seed; seed = unchecked(box.Value * 1664525u + 1013904223u); }
+        return seed;
+    }
+    public static uint ArrayLoop(int n, uint seed)
+    {
+        uint[] data = Data;
+        for (int i = 0; i < n; ++i) seed = unchecked(seed * 1664525u + data[i & 1023]);
+        return seed;
+    }
+    public static uint Interfaces(int n, uint seed)
+    {
+        ITransform t = Transformer;
+        for (int i = 0; i < n; ++i) seed = t.Apply(seed);
+        return seed;
+    }
+    public static uint Structs(int n, uint seed)
+    {
+        Pair p = new Pair { X = seed, Y = 17 };
+        for (int i = 0; i < n; ++i) p = PairStep(p);
+        return p.X ^ p.Y;
+    }
+    public static uint Generics(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i) seed = Step(Identity<uint>(seed));
+        return seed;
+    }
+    public static uint Exceptions(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            try { if ((i & 1023) == 0) throw new ArgumentException(); seed = Step(seed); }
+            catch (ArgumentException) { seed ^= 13; }
+            finally { seed = unchecked(seed + 7); }
+        }
+        return seed;
+    }
+    public static uint Dispatch(int kind, int n, uint seed)
+    {
+        switch (kind)
+        {
+            case 0: return Arithmetic(n, seed);
+            case 1: return Calls(n, seed);
+            case 2: return Properties(n, seed);
+            case 3: return ArrayLoop(n, seed);
+            case 4: return Interfaces(n, seed);
+            case 5: return Structs(n, seed);
+            case 6: return Generics(n, seed);
+            default: return Exceptions(n, seed);
+        }
+    }
+    public static int Main(string[] args)
+    {
+        int n = args.Length > 0 ? int.Parse(args[0]) : 2000000;
+        string[] names = { "arithmetic", "calls", "properties", "array", "interfaces", "structs", "generics", "exceptions" };
+        for (int kind = 0; kind < names.Length; ++kind)
+        {
+            Dispatch(kind, n / 8 + 1, 19);
+            long start = Stopwatch.GetTimestamp();
+            uint checksum = Dispatch(kind, n, 19);
+            long end = Stopwatch.GetTimestamp();
+            double ns = (end - start) * (1000000000.0 / Stopwatch.Frequency) / n;
+            Console.WriteLine("{\"workload\":\"" + names[kind] + "\",\"iterations\":" + n + ",\"checksum\":\"" + checksum + "\",\"ns_per_op\":" + ns.ToString("F6", System.Globalization.CultureInfo.InvariantCulture) + "}");
+        }
+        return 0;
+    }
+}

@@ -1,0 +1,862 @@
+{
+  "schema": 1,
+  "target": "native",
+  "opt": "2",
+  "lto": false,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "machine": "AMD64",
+  "python": "3.12.2 | packaged by Anaconda, Inc. | (main, Feb 27 2024, 17:28:07) [MSC v.1916 64 bit (AMD64)]",
+  "node": "v22.12.0",
+  "commit": "d7e0c5610ae52c9324451c34ae3f3df4e48a9855",
+  "dirty": true,
+  "commands": [
+    [
+      "cmake",
+      "-S",
+      "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\result-abi",
+      "-B",
+      "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\native-O2\\build",
+      "-DCMAKE_BUILD_TYPE=Release",
+      "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+      "-DBENCH_OPT=2",
+      "-DBENCH_LTO=OFF",
+      "-A",
+      "x64"
+    ],
+    [
+      "cmake",
+      "--build",
+      "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\native-O2\\build",
+      "--config",
+      "Release",
+      "--parallel",
+      "4"
+    ]
+  ],
+  "build_seconds": 2.1288216000102693,
+  "summary": [
+    {
+      "protocol": "context",
+      "workload": "pointer-chain",
+      "error_period": 0,
+      "median_ns": 5.52028,
+      "min_ns": 5.13612,
+      "max_ns": 5.86208
+    },
+    {
+      "protocol": "context",
+      "workload": "pointer-chain",
+      "error_period": 1,
+      "median_ns": 1.97,
+      "min_ns": 1.965,
+      "max_ns": 2.05
+    },
+    {
+      "protocol": "context",
+      "workload": "pointer-chain",
+      "error_period": 1024,
+      "median_ns": 5.03844,
+      "min_ns": 4.91498,
+      "max_ns": 5.4665
+    },
+    {
+      "protocol": "context",
+      "workload": "struct16-chain",
+      "error_period": 0,
+      "median_ns": 3.37394,
+      "min_ns": 3.36,
+      "max_ns": 3.5528
+    },
+    {
+      "protocol": "context",
+      "workload": "struct16-chain",
+      "error_period": 1,
+      "median_ns": 2.755,
+      "min_ns": 2.75,
+      "max_ns": 2.805
+    },
+    {
+      "protocol": "context",
+      "workload": "struct16-chain",
+      "error_period": 1024,
+      "median_ns": 3.57228,
+      "min_ns": 3.5599,
+      "max_ns": 3.7095
+    },
+    {
+      "protocol": "context",
+      "workload": "u32-chain",
+      "error_period": 0,
+      "median_ns": 1.78398,
+      "min_ns": 1.73272,
+      "max_ns": 1.86704
+    },
+    {
+      "protocol": "context",
+      "workload": "u32-chain",
+      "error_period": 1,
+      "median_ns": 1.77,
+      "min_ns": 1.77,
+      "max_ns": 1.775
+    },
+    {
+      "protocol": "context",
+      "workload": "u32-chain",
+      "error_period": 1024,
+      "median_ns": 2.00904,
+      "min_ns": 1.99064,
+      "max_ns": 2.03264
+    },
+    {
+      "protocol": "context",
+      "workload": "u64-chain",
+      "error_period": 0,
+      "median_ns": 1.78278,
+      "min_ns": 1.77148,
+      "max_ns": 1.85246
+    },
+    {
+      "protocol": "context",
+      "workload": "u64-chain",
+      "error_period": 1,
+      "median_ns": 1.77,
+      "min_ns": 1.77,
+      "max_ns": 1.775
+    },
+    {
+      "protocol": "context",
+      "workload": "u64-chain",
+      "error_period": 1024,
+      "median_ns": 1.99728,
+      "min_ns": 1.99416,
+      "max_ns": 2.06852
+    },
+    {
+      "protocol": "context",
+      "workload": "void-chain",
+      "error_period": 0,
+      "median_ns": 2.57428,
+      "min_ns": 2.55742,
+      "max_ns": 2.73932
+    },
+    {
+      "protocol": "context",
+      "workload": "void-chain",
+      "error_period": 1,
+      "median_ns": 2.36,
+      "min_ns": 2.36,
+      "max_ns": 2.405
+    },
+    {
+      "protocol": "context",
+      "workload": "void-chain",
+      "error_period": 1024,
+      "median_ns": 2.92716,
+      "min_ns": 2.78292,
+      "max_ns": 3.29264
+    },
+    {
+      "protocol": "current",
+      "workload": "pointer-chain",
+      "error_period": 0,
+      "median_ns": 6.42176,
+      "min_ns": 5.65522,
+      "max_ns": 6.81892
+    },
+    {
+      "protocol": "current",
+      "workload": "pointer-chain",
+      "error_period": 1,
+      "median_ns": 2.76,
+      "min_ns": 2.755,
+      "max_ns": 2.815
+    },
+    {
+      "protocol": "current",
+      "workload": "pointer-chain",
+      "error_period": 1024,
+      "median_ns": 5.98592,
+      "min_ns": 5.67116,
+      "max_ns": 6.29704
+    },
+    {
+      "protocol": "current",
+      "workload": "struct16-chain",
+      "error_period": 0,
+      "median_ns": 4.17436,
+      "min_ns": 4.13398,
+      "max_ns": 4.37546
+    },
+    {
+      "protocol": "current",
+      "workload": "struct16-chain",
+      "error_period": 1,
+      "median_ns": 3.735,
+      "min_ns": 3.735,
+      "max_ns": 3.74
+    },
+    {
+      "protocol": "current",
+      "workload": "struct16-chain",
+      "error_period": 1024,
+      "median_ns": 4.45994,
+      "min_ns": 4.38868,
+      "max_ns": 4.6733
+    },
+    {
+      "protocol": "current",
+      "workload": "u32-chain",
+      "error_period": 0,
+      "median_ns": 3.38974,
+      "min_ns": 3.37316,
+      "max_ns": 3.5906
+    },
+    {
+      "protocol": "current",
+      "workload": "u32-chain",
+      "error_period": 1,
+      "median_ns": 3.345,
+      "min_ns": 3.34,
+      "max_ns": 3.555
+    },
+    {
+      "protocol": "current",
+      "workload": "u32-chain",
+      "error_period": 1024,
+      "median_ns": 3.68382,
+      "min_ns": 3.57728,
+      "max_ns": 3.78616
+    },
+    {
+      "protocol": "current",
+      "workload": "u64-chain",
+      "error_period": 0,
+      "median_ns": 3.79564,
+      "min_ns": 3.76634,
+      "max_ns": 4.014
+    },
+    {
+      "protocol": "current",
+      "workload": "u64-chain",
+      "error_period": 1,
+      "median_ns": 3.74,
+      "min_ns": 3.735,
+      "max_ns": 6.59
+    },
+    {
+      "protocol": "current",
+      "workload": "u64-chain",
+      "error_period": 1024,
+      "median_ns": 4.18464,
+      "min_ns": 4.13096,
+      "max_ns": 4.4257
+    },
+    {
+      "protocol": "current",
+      "workload": "void-chain",
+      "error_period": 0,
+      "median_ns": 3.46066,
+      "min_ns": 2.99666,
+      "max_ns": 4.24924
+    },
+    {
+      "protocol": "current",
+      "workload": "void-chain",
+      "error_period": 1,
+      "median_ns": 2.665,
+      "min_ns": 2.56,
+      "max_ns": 3.145
+    },
+    {
+      "protocol": "current",
+      "workload": "void-chain",
+      "error_period": 1024,
+      "median_ns": 3.42058,
+      "min_ns": 3.37032,
+      "max_ns": 4.10622
+    },
+    {
+      "protocol": "direct",
+      "workload": "pointer-chain",
+      "error_period": 0,
+      "median_ns": 5.56952,
+      "min_ns": 4.87862,
+      "max_ns": 5.71726
+    },
+    {
+      "protocol": "direct",
+      "workload": "struct16-chain",
+      "error_period": 0,
+      "median_ns": 2.56702,
+      "min_ns": 2.55994,
+      "max_ns": 2.63726
+    },
+    {
+      "protocol": "direct",
+      "workload": "u32-chain",
+      "error_period": 0,
+      "median_ns": 1.38044,
+      "min_ns": 1.3779,
+      "max_ns": 1.43788
+    },
+    {
+      "protocol": "direct",
+      "workload": "u64-chain",
+      "error_period": 0,
+      "median_ns": 1.3896,
+      "min_ns": 1.37704,
+      "max_ns": 1.41932
+    },
+    {
+      "protocol": "direct",
+      "workload": "void-chain",
+      "error_period": 0,
+      "median_ns": 1.7936,
+      "min_ns": 1.77368,
+      "max_ns": 1.82712
+    },
+    {
+      "protocol": "eh",
+      "workload": "pointer-chain",
+      "error_period": 0,
+      "median_ns": 4.4716,
+      "min_ns": 3.5308,
+      "max_ns": 4.911
+    },
+    {
+      "protocol": "eh",
+      "workload": "pointer-chain",
+      "error_period": 1,
+      "median_ns": 1781.485,
+      "min_ns": 1771.02,
+      "max_ns": 1867.375
+    },
+    {
+      "protocol": "eh",
+      "workload": "pointer-chain",
+      "error_period": 1024,
+      "median_ns": 6.7215,
+      "min_ns": 6.62942,
+      "max_ns": 6.82458
+    },
+    {
+      "protocol": "eh",
+      "workload": "struct16-chain",
+      "error_period": 0,
+      "median_ns": 3.163,
+      "min_ns": 3.152,
+      "max_ns": 3.20832
+    },
+    {
+      "protocol": "eh",
+      "workload": "struct16-chain",
+      "error_period": 1,
+      "median_ns": 1838.51,
+      "min_ns": 1824.64,
+      "max_ns": 1858.44
+    },
+    {
+      "protocol": "eh",
+      "workload": "struct16-chain",
+      "error_period": 1024,
+      "median_ns": 5.28122,
+      "min_ns": 5.16562,
+      "max_ns": 5.42212
+    },
+    {
+      "protocol": "eh",
+      "workload": "u32-chain",
+      "error_period": 0,
+      "median_ns": 1.58844,
+      "min_ns": 1.57364,
+      "max_ns": 1.6338
+    },
+    {
+      "protocol": "eh",
+      "workload": "u32-chain",
+      "error_period": 1,
+      "median_ns": 1787.965,
+      "min_ns": 1763.66,
+      "max_ns": 1866.91
+    },
+    {
+      "protocol": "eh",
+      "workload": "u32-chain",
+      "error_period": 1024,
+      "median_ns": 3.6105,
+      "min_ns": 3.53728,
+      "max_ns": 3.71772
+    },
+    {
+      "protocol": "eh",
+      "workload": "u64-chain",
+      "error_period": 0,
+      "median_ns": 1.59832,
+      "min_ns": 1.57506,
+      "max_ns": 1.67998
+    },
+    {
+      "protocol": "eh",
+      "workload": "u64-chain",
+      "error_period": 1,
+      "median_ns": 1782.605,
+      "min_ns": 1781.345,
+      "max_ns": 1817.465
+    },
+    {
+      "protocol": "eh",
+      "workload": "u64-chain",
+      "error_period": 1024,
+      "median_ns": 3.70052,
+      "min_ns": 3.59044,
+      "max_ns": 3.98554
+    },
+    {
+      "protocol": "eh",
+      "workload": "void-chain",
+      "error_period": 0,
+      "median_ns": 2.19592,
+      "min_ns": 2.17332,
+      "max_ns": 2.22984
+    },
+    {
+      "protocol": "eh",
+      "workload": "void-chain",
+      "error_period": 1,
+      "median_ns": 1785.085,
+      "min_ns": 1763.5,
+      "max_ns": 1831.97
+    },
+    {
+      "protocol": "eh",
+      "workload": "void-chain",
+      "error_period": 1024,
+      "median_ns": 4.18218,
+      "min_ns": 4.12472,
+      "max_ns": 4.28936
+    },
+    {
+      "protocol": "scalar",
+      "workload": "pointer-chain",
+      "error_period": 0,
+      "median_ns": 6.53038,
+      "min_ns": 6.17384,
+      "max_ns": 7.06108
+    },
+    {
+      "protocol": "scalar",
+      "workload": "pointer-chain",
+      "error_period": 1,
+      "median_ns": 1.98,
+      "min_ns": 1.97,
+      "max_ns": 1.98
+    },
+    {
+      "protocol": "scalar",
+      "workload": "pointer-chain",
+      "error_period": 1024,
+      "median_ns": 6.21768,
+      "min_ns": 5.8554,
+      "max_ns": 8.06518
+    },
+    {
+      "protocol": "scalar",
+      "workload": "struct16-chain",
+      "error_period": 0,
+      "median_ns": 7.98252,
+      "min_ns": 7.92262,
+      "max_ns": 8.78254
+    },
+    {
+      "protocol": "scalar",
+      "workload": "struct16-chain",
+      "error_period": 1,
+      "median_ns": 17.885,
+      "min_ns": 17.88,
+      "max_ns": 18.615
+    },
+    {
+      "protocol": "scalar",
+      "workload": "struct16-chain",
+      "error_period": 1024,
+      "median_ns": 8.1897,
+      "min_ns": 8.1083,
+      "max_ns": 8.46224
+    },
+    {
+      "protocol": "scalar",
+      "workload": "u32-chain",
+      "error_period": 0,
+      "median_ns": 1.78832,
+      "min_ns": 1.77118,
+      "max_ns": 1.90956
+    },
+    {
+      "protocol": "scalar",
+      "workload": "u32-chain",
+      "error_period": 1,
+      "median_ns": 1.97,
+      "min_ns": 1.965,
+      "max_ns": 2.09
+    },
+    {
+      "protocol": "scalar",
+      "workload": "u32-chain",
+      "error_period": 1024,
+      "median_ns": 2.01236,
+      "min_ns": 2.00122,
+      "max_ns": 2.14276
+    },
+    {
+      "protocol": "scalar",
+      "workload": "u64-chain",
+      "error_period": 0,
+      "median_ns": 8.17788,
+      "min_ns": 8.11662,
+      "max_ns": 8.43692
+    },
+    {
+      "protocol": "scalar",
+      "workload": "u64-chain",
+      "error_period": 1,
+      "median_ns": 18.08,
+      "min_ns": 18.075,
+      "max_ns": 18.82
+    },
+    {
+      "protocol": "scalar",
+      "workload": "u64-chain",
+      "error_period": 1024,
+      "median_ns": 8.39008,
+      "min_ns": 8.33662,
+      "max_ns": 8.69188
+    },
+    {
+      "protocol": "scalar",
+      "workload": "void-chain",
+      "error_period": 0,
+      "median_ns": 2.16712,
+      "min_ns": 2.16366,
+      "max_ns": 2.19034
+    },
+    {
+      "protocol": "scalar",
+      "workload": "void-chain",
+      "error_period": 1,
+      "median_ns": 1.775,
+      "min_ns": 1.77,
+      "max_ns": 1.965
+    },
+    {
+      "protocol": "scalar",
+      "workload": "void-chain",
+      "error_period": 1024,
+      "median_ns": 2.38322,
+      "min_ns": 2.38136,
+      "max_ns": 2.45578
+    },
+    {
+      "protocol": "status",
+      "workload": "pointer-chain",
+      "error_period": 0,
+      "median_ns": 5.65086,
+      "min_ns": 5.6013,
+      "max_ns": 5.78086
+    },
+    {
+      "protocol": "status",
+      "workload": "pointer-chain",
+      "error_period": 1,
+      "median_ns": 1.77,
+      "min_ns": 1.77,
+      "max_ns": 1.775
+    },
+    {
+      "protocol": "status",
+      "workload": "pointer-chain",
+      "error_period": 1024,
+      "median_ns": 5.18408,
+      "min_ns": 4.86346,
+      "max_ns": 5.3752
+    },
+    {
+      "protocol": "status",
+      "workload": "struct16-chain",
+      "error_period": 0,
+      "median_ns": 2.38944,
+      "min_ns": 2.36296,
+      "max_ns": 2.44712
+    },
+    {
+      "protocol": "status",
+      "workload": "struct16-chain",
+      "error_period": 1,
+      "median_ns": 1.77,
+      "min_ns": 1.77,
+      "max_ns": 1.775
+    },
+    {
+      "protocol": "status",
+      "workload": "struct16-chain",
+      "error_period": 1024,
+      "median_ns": 2.61704,
+      "min_ns": 2.6049,
+      "max_ns": 2.6722
+    },
+    {
+      "protocol": "status",
+      "workload": "u32-chain",
+      "error_period": 0,
+      "median_ns": 1.9855,
+      "min_ns": 1.97174,
+      "max_ns": 2.08022
+    },
+    {
+      "protocol": "status",
+      "workload": "u32-chain",
+      "error_period": 1,
+      "median_ns": 1.77,
+      "min_ns": 1.77,
+      "max_ns": 1.775
+    },
+    {
+      "protocol": "status",
+      "workload": "u32-chain",
+      "error_period": 1024,
+      "median_ns": 2.209,
+      "min_ns": 2.18478,
+      "max_ns": 2.29006
+    },
+    {
+      "protocol": "status",
+      "workload": "u64-chain",
+      "error_period": 0,
+      "median_ns": 1.98446,
+      "min_ns": 1.96676,
+      "max_ns": 2.00048
+    },
+    {
+      "protocol": "status",
+      "workload": "u64-chain",
+      "error_period": 1,
+      "median_ns": 1.77,
+      "min_ns": 1.77,
+      "max_ns": 5.11
+    },
+    {
+      "protocol": "status",
+      "workload": "u64-chain",
+      "error_period": 1024,
+      "median_ns": 2.21966,
+      "min_ns": 2.20488,
+      "max_ns": 2.27524
+    },
+    {
+      "protocol": "status",
+      "workload": "void-chain",
+      "error_period": 0,
+      "median_ns": 2.1676,
+      "min_ns": 2.16466,
+      "max_ns": 2.32092
+    },
+    {
+      "protocol": "status",
+      "workload": "void-chain",
+      "error_period": 1,
+      "median_ns": 1.965,
+      "min_ns": 1.775,
+      "max_ns": 1.97
+    },
+    {
+      "protocol": "status",
+      "workload": "void-chain",
+      "error_period": 1024,
+      "median_ns": 2.42188,
+      "min_ns": 2.38934,
+      "max_ns": 2.56716
+    },
+    {
+      "protocol": "trivial",
+      "workload": "pointer-chain",
+      "error_period": 0,
+      "median_ns": 6.94898,
+      "min_ns": 6.80026,
+      "max_ns": 7.19454
+    },
+    {
+      "protocol": "trivial",
+      "workload": "pointer-chain",
+      "error_period": 1,
+      "median_ns": 2.755,
+      "min_ns": 2.755,
+      "max_ns": 2.79
+    },
+    {
+      "protocol": "trivial",
+      "workload": "pointer-chain",
+      "error_period": 1024,
+      "median_ns": 6.40178,
+      "min_ns": 6.01038,
+      "max_ns": 6.56514
+    },
+    {
+      "protocol": "trivial",
+      "workload": "struct16-chain",
+      "error_period": 0,
+      "median_ns": 3.16604,
+      "min_ns": 3.149,
+      "max_ns": 3.299
+    },
+    {
+      "protocol": "trivial",
+      "workload": "struct16-chain",
+      "error_period": 1,
+      "median_ns": 3.11,
+      "min_ns": 3.1,
+      "max_ns": 4.065
+    },
+    {
+      "protocol": "trivial",
+      "workload": "struct16-chain",
+      "error_period": 1024,
+      "median_ns": 3.59742,
+      "min_ns": 3.56232,
+      "max_ns": 3.76064
+    },
+    {
+      "protocol": "trivial",
+      "workload": "u32-chain",
+      "error_period": 0,
+      "median_ns": 2.64704,
+      "min_ns": 2.56246,
+      "max_ns": 2.76962
+    },
+    {
+      "protocol": "trivial",
+      "workload": "u32-chain",
+      "error_period": 1,
+      "median_ns": 2.365,
+      "min_ns": 2.36,
+      "max_ns": 3.275
+    },
+    {
+      "protocol": "trivial",
+      "workload": "u32-chain",
+      "error_period": 1024,
+      "median_ns": 2.82058,
+      "min_ns": 2.79766,
+      "max_ns": 2.9242
+    },
+    {
+      "protocol": "trivial",
+      "workload": "u64-chain",
+      "error_period": 0,
+      "median_ns": 2.82164,
+      "min_ns": 2.77214,
+      "max_ns": 2.86492
+    },
+    {
+      "protocol": "trivial",
+      "workload": "u64-chain",
+      "error_period": 1,
+      "median_ns": 3.295,
+      "min_ns": 3.275,
+      "max_ns": 3.495
+    },
+    {
+      "protocol": "trivial",
+      "workload": "u64-chain",
+      "error_period": 1024,
+      "median_ns": 3.0415,
+      "min_ns": 3.0164,
+      "max_ns": 3.12738
+    },
+    {
+      "protocol": "trivial",
+      "workload": "void-chain",
+      "error_period": 0,
+      "median_ns": 2.34102,
+      "min_ns": 2.19328,
+      "max_ns": 2.86164
+    },
+    {
+      "protocol": "trivial",
+      "workload": "void-chain",
+      "error_period": 1,
+      "median_ns": 1.97,
+      "min_ns": 1.965,
+      "max_ns": 4.62
+    },
+    {
+      "protocol": "trivial",
+      "workload": "void-chain",
+      "error_period": 1024,
+      "median_ns": 2.53622,
+      "min_ns": 2.48406,
+      "max_ns": 2.61056
+    }
+  ],
+  "artifacts": {
+    "current": {
+      "executable": {
+        "bytes": 17408,
+        "gzip_bytes": 7844
+      }
+    },
+    "trivial": {
+      "executable": {
+        "bytes": 16896,
+        "gzip_bytes": 7669
+      }
+    },
+    "scalar": {
+      "executable": {
+        "bytes": 16384,
+        "gzip_bytes": 7565
+      }
+    },
+    "status": {
+      "executable": {
+        "bytes": 15872,
+        "gzip_bytes": 7270
+      }
+    },
+    "context": {
+      "executable": {
+        "bytes": 16384,
+        "gzip_bytes": 7338
+      }
+    },
+    "eh": {
+      "executable": {
+        "bytes": 17408,
+        "gzip_bytes": 7855
+      }
+    },
+    "direct": {
+      "executable": {
+        "bytes": 15872,
+        "gzip_bytes": 7250
+      }
+    }
+  },
+  "abi_definitions": [],
+  "source_hashes": {
+    "src\\benchmarks\\result-abi\\abi-probes.cpp": "032ebc8199346cdc44a3253840eb3e08772949f614c128491ecd6e66f8ac8deb",
+    "src\\benchmarks\\result-abi\\bench.h": "e05fc6d35f5046b98e3cb48cc159f4284bdbd472880f1a80647d76d6e893dc51",
+    "src\\benchmarks\\result-abi\\CMakeLists.txt": "07b6b1d3fbd9de48624e671797ea1176f3bb15870bcdfaafdd86c23aae580f4f",
+    "src\\benchmarks\\result-abi\\kernels.cpp": "9e2a510d01ffd07102a1956460850deecb35ea3cb3d79604cfa43abc5d9df9c2",
+    "src\\benchmarks\\result-abi\\main.cpp": "7b4aca6203be0a1e391cde77907223d3e2efb5b913d8eeb54ba48d93980f2928"
+  },
+  "cpu": "",
+  "result_header_sha256": "33a95f48e0f2c08dec77edcefa29f8d5e92665cbeb2d517a4d55b938bdc108a1",
+  "recorded_samples": 665,
+  "raw_samples": "out/performance/native-O2/results.json",
+  "compiler": [
+    {
+      "CMAKE_CXX_COMPILER": "d:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx86/x64/cl.exe",
+      "CMAKE_CXX_COMPILER_ID": "MSVC",
+      "CMAKE_CXX_COMPILER_VERSION": "19.44.35229.0"
+    }
+  ]
+}
