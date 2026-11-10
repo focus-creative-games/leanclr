@@ -51,7 +51,7 @@ static bool load_file(const char* name, const char* ext, vm::FileData& output)
     {
         std::string path = dll_dir + sub + name + "." + ext;
 #ifdef LEANCLR_REGRESSION_FIXTURE_DIR
-        if (std::strcmp(name, "RegressionFixtures") == 0 || std::strcmp(name, "FailedModule") == 0)
+        if (std::strcmp(name, "RegressionFixtures") == 0 || std::strcmp(name, "FailedModule") == 0 || std::strcmp(name, "InvalidLayouts") == 0)
             path = std::string(LEANCLR_REGRESSION_FIXTURE_DIR) + "/" + name + "." + ext;
 #endif
         std::ifstream input(path, std::ios::binary | std::ios::ate);
@@ -447,6 +447,7 @@ static void integer_arithmetic()
 }
 int main(int argc, char** argv)
 {
+    setvbuf(stdout, nullptr, _IONBF, 0);
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
     dll_dir = argv[2];
     vm::Settings::set_file_loader(load_file);
@@ -470,6 +471,57 @@ int main(int argc, char** argv)
     else if (std::strcmp(argv[1], "gc-accounting") == 0) gc_accounting();
     else if (std::strcmp(argv[1], "compressed-signed") == 0) compressed_signed();
     else if (std::strcmp(argv[1], "integer-arithmetic") == 0) integer_arithmetic();
+    else if (std::strcmp(argv[1], "type-system") == 0)
+    {
+        auto assembly = vm::Assembly::load_by_name("RegressionFixtures");
+        check(assembly.is_ok(), "load type fixture");
+        auto klass = assembly.unwrap()->mod->get_class_by_name("TypeSystemFixture", false, false);
+        check(klass.is_ok() && klass.unwrap(), "type fixture");
+        auto initialized_type = vm::Class::initialize_all(klass.unwrap());
+        check(initialized_type.is_ok(), "initialize type fixture");
+        auto* method = vm::Method::find_matched_method_in_class_by_name(klass.unwrap(), "Run");
+        auto result = vm::Runtime::invoke_with_run_cctor(method, nullptr, nullptr);
+        check(result.is_ok() && result.unwrap(), "type fixture invocation");
+        int32_t failures = *reinterpret_cast<int32_t*>(result.unwrap()+1);
+        std::printf("type system failure mask: %d\n", failures);
+        check(failures == 0, "type constraint/variance/layout semantics");
+    }
+    else if (std::strcmp(argv[1], "invalid-layouts") == 0)
+    {
+        auto assembly = vm::Assembly::load_by_name("InvalidLayouts");
+        check(assembly.is_ok(), "load invalid layout metadata");
+        for (auto name : {"BadAlignedRef", "BadRefOverlap", "BadNestedOverlap", "BadOffsetOverflow"})
+        {
+            auto klass = assembly.unwrap()->mod->get_class_by_name(name, false, false);
+            check(klass.is_ok() && klass.unwrap(), "resolve invalid layout type");
+            for (int i = 0; i < 2; ++i)
+            {
+                auto initialized_layout = vm::Class::initialize_fields(klass.unwrap());
+                check(initialized_layout.is_err() && initialized_layout.unwrap_err() == RtErr::TypeLoad, name);
+            }
+        }
+    }
+    else if (std::strcmp(argv[1], "nested-reference-layout") == 0)
+    {
+        auto assembly = vm::Assembly::load_by_name("RegressionFixtures");
+        check(assembly.is_ok(), "layout fixture assembly");
+        auto klass = assembly.unwrap()->mod->get_class_by_name("LayoutHolder", false, false);
+        check(klass.is_ok(), "layout holder type");
+        auto holder = LEANCLR_NEWOBJ_INTERNAL(klass.unwrap(), "layout-test");
+        auto target = LEANCLR_NEWOBJ_INTERNAL(vm::Class::get_corlib_types().cls_object, "layout-target");
+        check(holder.is_ok() && target.is_ok(), "allocate layout graph");
+        const auto* field = vm::Class::get_field_for_name(klass.unwrap(), "Value", false);
+        auto* slot = reinterpret_cast<uint8_t*>(holder.unwrap()+1) + field->offset;
+        auto* target_object = target.unwrap();
+        std::memcpy(slot, &target_object, sizeof(target_object));
+        void* keep = vm::GCHandle::new_handle(holder.unwrap(), false);
+        void* weak = vm::GCHandle::new_weakref_handle(target_object, false);
+        vm::GC::enable(); vm::GC::collect(0);
+        check(vm::GCHandle::get_target(weak) == target_object, "GC must scan nested explicit reference slots");
+        vm::GCHandle::free_handle(keep); vm::GC::collect(0); vm::GC::disable();
+        check(vm::GCHandle::get_target(weak) == nullptr, "unrooted nested graph must collect");
+        vm::GCHandle::free_handle(weak);
+    }
     else if (std::strcmp(argv[1], "failed-module") == 0)
     {
         auto module = vm::Assembly::load_by_name("FailedModule");

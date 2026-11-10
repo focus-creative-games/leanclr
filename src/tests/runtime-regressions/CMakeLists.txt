@@ -41,10 +41,11 @@ enable_testing()
 find_program(LEANCLR_CSHARP_COMPILER NAMES csc mcs HINTS "C:/Windows/Microsoft.NET/Framework64/v4.0.30319")
 if(LEANCLR_CSHARP_COMPILER)
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/RegressionFixtures.cs" fixture_source)
+    file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/TypeSystemFixtures.cs" type_fixture_source)
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/RegressionFixtures.dll" fixture_output)
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/RegressionFixtures.dll"
-        COMMAND "${LEANCLR_CSHARP_COMPILER}" -nologo -target:library "-out:${fixture_output}" "${fixture_source}"
-        DEPENDS RegressionFixtures.cs VERBATIM)
+        COMMAND "${LEANCLR_CSHARP_COMPILER}" -nologo -target:library "-out:${fixture_output}" "${fixture_source}" "${type_fixture_source}"
+        DEPENDS RegressionFixtures.cs TypeSystemFixtures.cs VERBATIM)
     add_custom_target(regression-fixtures ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/RegressionFixtures.dll")
     add_dependencies(runtime-regressions regression-fixtures)
     add_test(NAME failed-initializer COMMAND runtime-regressions failed-initializer "${LEANCLR_TEST_DLL_DIR}")
@@ -53,9 +54,19 @@ if(LEANCLR_CSHARP_COMPILER)
     add_test(NAME allocation-failures COMMAND runtime-regressions allocation-failures "${LEANCLR_TEST_DLL_DIR}")
     add_test(NAME loader-once COMMAND runtime-regressions loader-once "${LEANCLR_TEST_DLL_DIR}")
     add_test(NAME integer-arithmetic COMMAND runtime-regressions integer-arithmetic "${LEANCLR_TEST_DLL_DIR}")
+    add_test(NAME type-system COMMAND runtime-regressions type-system "${LEANCLR_TEST_DLL_DIR}")
+    add_test(NAME nested-reference-layout COMMAND runtime-regressions nested-reference-layout "${LEANCLR_TEST_DLL_DIR}")
 endif()
 find_program(LEANCLR_ILASM NAMES ilasm HINTS "C:/Windows/Microsoft.NET/Framework64/v4.0.30319")
 if(LEANCLR_ILASM)
+    file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/InvalidLayouts.il" invalid_layout_source)
+    file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/InvalidLayouts.dll" invalid_layout_output)
+    add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/InvalidLayouts.dll"
+        COMMAND "${LEANCLR_ILASM}" /dll "/output:${invalid_layout_output}" "${invalid_layout_source}"
+        DEPENDS InvalidLayouts.il VERBATIM)
+    add_custom_target(regression-invalid-layouts ALL DEPENDS "${CMAKE_CURRENT_BINARY_DIR}/InvalidLayouts.dll")
+    add_dependencies(runtime-regressions regression-invalid-layouts)
+    add_test(NAME invalid-layouts COMMAND runtime-regressions invalid-layouts "${LEANCLR_TEST_DLL_DIR}")
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/FailedModule.il" module_source)
     file(TO_NATIVE_PATH "${CMAKE_CURRENT_BINARY_DIR}/FailedModule.dll" module_output)
     add_custom_command(OUTPUT "${CMAKE_CURRENT_BINARY_DIR}/FailedModule.dll"

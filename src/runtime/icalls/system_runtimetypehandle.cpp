@@ -202,7 +202,8 @@ RtResult<bool> SystemRuntimeTypeHandle::type_is_assignable_from(vm::RtReflection
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, to_klass, vm::Class::get_class_from_typesig(to_type_sig));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, from_klass, vm::Class::get_class_from_typesig(from_type_sig));
-    RET_ERR_ON_FAIL(vm::Class::initialize_all(from_klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_super_types(from_klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_super_types(to_klass));
     RET_OK(vm::Class::is_assignable_from(from_klass, to_klass));
 }
 

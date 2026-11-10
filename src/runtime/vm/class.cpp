@@ -11,6 +11,7 @@
 #include "alloc/metadata_allocation.h"
 #include "utils/hashmap.h"
 #include "utils/hashset.h"
+#include "utils/scope_guard.h"
 #include "gc/garbage_collector.h"
 #include "gc/gc_roots.h"
 #include "array_class.h"
@@ -886,6 +887,9 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
     if (!try_set_initialized_part(klass, metadata::RtClassInitPart::Field))
         RET_VOID_OK();
 
+    utils::ScopeGuard rollback;
+    rollback.register_cleanup([klass]() { klass->init_flags &= ~static_cast<uint32_t>(metadata::RtClassInitPart::Field); });
+
     // Initialize parent fields
     if (klass->parent)
     {
@@ -929,6 +933,7 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
         break;
     }
     }
+    rollback.set_not_cleanup();
     RET_VOID_OK();
 }
 
@@ -2278,6 +2283,41 @@ RtResult<metadata::RtClass*> Class::find_nested_class_by_name(const metadata::Rt
     RET_OK(nullptr);
 }
 
+static bool is_generic_parameter_class(const metadata::RtClass* klass)
+{
+    auto kind = klass->by_val->ele_type;
+    return kind == metadata::RtElementType::Var || kind == metadata::RtElementType::MVar;
+}
+
+static bool is_definitely_reference_type(const metadata::RtClass* klass, utils::Vector<const metadata::RtClass*>& active)
+{
+    if (!is_generic_parameter_class(klass)) return Class::is_reference_type(klass);
+    for (auto* seen : active) if (seen == klass) return false;
+    const auto* parameter = klass->by_val->data.generic_param;
+    if (parameter->flags & (uint16_t)metadata::RtGenericParamAttribute::ReferenceTypeConstraint) return true;
+    if (parameter->flags & (uint16_t)metadata::RtGenericParamAttribute::NotNullableValueTypeConstraint) return false;
+    active.push_back(klass);
+    bool result = false;
+    for (uint8_t i = 0; i < parameter->constraint_type_sig_count && !result; ++i)
+    {
+        auto constraint = Class::get_class_from_typesig(parameter->constraint_type_sigs[i]);
+        if (constraint.is_err()) continue;
+        const auto* type = constraint.unwrap();
+        if (is_generic_parameter_class(type)) result = is_definitely_reference_type(type, active);
+        else result = Class::is_reference_type(type) && !Class::is_interface(type) &&
+            type != Class::get_corlib_types().cls_object && type != Class::get_corlib_types().cls_valuetype &&
+            type != Class::get_corlib_types().cls_enum;
+    }
+    active.pop_back();
+    return result;
+}
+
+static bool is_definitely_reference_type(const metadata::RtClass* klass)
+{
+    utils::Vector<const metadata::RtClass*> active;
+    return is_definitely_reference_type(klass, active);
+}
+
 bool Class::is_assignable_from_class(const metadata::RtClass* from_class, const metadata::RtClass* to_class)
 {
     assert(has_initialized_part(from_class, metadata::RtClassInitPart::SuperTypes));
@@ -2319,7 +2359,8 @@ bool Class::is_assignable_from_class(const metadata::RtClass* from_class, const 
     case metadata::RtElementType::Var:
     case metadata::RtElementType::MVar:
     {
-        // FIXME: should consider generic parameter constraints
+        // Concrete types do not cast to an open parameter. Identity and
+        // parameter-to-parameter constraint implications are handled at entry.
         return false;
     }
     case metadata::RtElementType::SZArray:
@@ -2331,7 +2372,7 @@ bool Class::is_assignable_from_class(const metadata::RtClass* from_class, const 
         }
         metadata::RtClass* fromEleClass = get_array_element_class(from_class);
         metadata::RtClass* toEleClass = get_array_element_class(to_class);
-        if (is_value_type(fromEleClass))
+        if (!is_definitely_reference_type(fromEleClass) || !is_definitely_reference_type(toEleClass))
         {
             return fromEleClass == toEleClass;
         }
@@ -2350,7 +2391,7 @@ bool Class::is_assignable_from_class(const metadata::RtClass* from_class, const 
         }
         metadata::RtClass* fromEleClass = get_array_element_class(from_class);
         metadata::RtClass* toEleClass = get_array_element_class(to_class);
-        if (is_value_type(fromEleClass))
+        if (!is_definitely_reference_type(fromEleClass) || !is_definitely_reference_type(toEleClass))
         {
             return fromEleClass == toEleClass;
         }
@@ -2443,9 +2484,9 @@ bool Class::is_assignable_from_generic_parameter_convariant0(const metadata::RtC
         }
         const metadata::RtClass* from_arg_class = ret_from_arg_class.unwrap();
         const metadata::RtClass* to_arg_class = ret_to_arg_class.unwrap();
-        if (is_value_type(from_arg_class) || is_value_type(to_arg_class))
+        if (!is_definitely_reference_type(from_arg_class) || !is_definitely_reference_type(to_arg_class))
         {
-            if (implemented_in_array)
+            if (implemented_in_array && is_value_type(from_arg_class) && is_value_type(to_arg_class))
             {
                 return ArrayClass::get_array_variance_reduce_type(from_arg_class) == ArrayClass::get_array_variance_reduce_type(to_arg_class);
             }
@@ -2555,21 +2596,40 @@ bool Class::is_assignable_from_interface(const metadata::RtClass* from_class, co
     return false;
 }
 
+static utils::Vector<ClassPair> s_active_assignability_checks;
+
 bool Class::is_assignable_from(const metadata::RtClass* from_class, const metadata::RtClass* to_class)
 {
-    assert(has_initialized_part(from_class, metadata::RtClassInitPart::SuperTypes));
-    if (from_class == to_class)
+    if (from_class == to_class) return true;
+    // Open constraints may recursively mention each other. A repeated pair is
+    // not evidence of a conversion; do not recurse indefinitely on that edge.
+    for (auto& pair : s_active_assignability_checks)
+        if (pair.from_class == from_class && pair.to_class == to_class) return false;
+    s_active_assignability_checks.push_back({from_class, to_class, false, false});
+    struct PopCheck { ~PopCheck() { s_active_assignability_checks.pop_back(); } } guard;
+    auto from_initialized = initialize_super_types(const_cast<metadata::RtClass*>(from_class));
+    auto to_initialized = initialize_super_types(const_cast<metadata::RtClass*>(to_class));
+    const bool from_ok = from_initialized.is_ok(), to_ok = to_initialized.is_ok();
+    if (!from_ok || !to_ok) return false;
+    auto from_interfaces = initialize_interfaces(const_cast<metadata::RtClass*>(from_class));
+    auto to_interfaces = initialize_interfaces(const_cast<metadata::RtClass*>(to_class));
+    const bool from_ifaces_ok = from_interfaces.is_ok(), to_ifaces_ok = to_interfaces.is_ok();
+    if (!from_ifaces_ok || !to_ifaces_ok) return false;
+    if (is_generic_parameter_class(from_class))
     {
-        return true;
+        if (to_class == get_corlib_types().cls_object) return true;
+        const auto* parameter = from_class->by_val->data.generic_param;
+        if (to_class == get_corlib_types().cls_valuetype &&
+            (parameter->flags & (uint16_t)metadata::RtGenericParamAttribute::NotNullableValueTypeConstraint)) return true;
+        for (uint8_t i = 0; i < parameter->constraint_type_sig_count; ++i)
+        {
+            auto constraint = get_class_from_typesig(parameter->constraint_type_sigs[i]);
+            if (constraint.is_ok() && is_assignable_from(constraint.unwrap(), to_class)) return true;
+        }
+        return false;
     }
-    else if (!is_interface(to_class))
-    {
-        return is_assignable_from_class(from_class, to_class);
-    }
-    else
-    {
-        return is_assignable_from_interface(from_class, to_class);
-    }
+    if (!is_interface(to_class)) return is_assignable_from_class(from_class, to_class);
+    return is_assignable_from_interface(from_class, to_class);
 }
 
 bool Class::is_subclass_of_initialized(const metadata::RtClass* from_class, const metadata::RtClass* to_class, bool checkInterfaces)
