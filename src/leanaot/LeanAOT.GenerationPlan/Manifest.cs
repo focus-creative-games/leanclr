@@ -21,9 +21,11 @@ namespace LeanAOT.GenerationPlan
         /// When non-null, profiled methods in PGO rule files are force-included even if <c>aot.xml</c> excluded them.
         /// </summary>
         public PgoMethodIncludeIndex PgoIncludeIndex;
+        public int MaxGenericInstances = 2048;
+        public int MaxGenericDepth = 32;
     }
 
-    public class Manifest
+    public partial class Manifest
     {
 
         private static readonly NLog.Logger s_logger = NLog.LogManager.GetCurrentClassLogger();
@@ -35,6 +37,7 @@ namespace LeanAOT.GenerationPlan
         private readonly List<GenericMethodPlan> _genericMethodPlans = new List<GenericMethodPlan>();
 
         public IReadOnlyList<GenericMethodPlan> GenericMethodPlans => _genericMethodPlans;
+        public List<GenericFallback> MethodFallbacks { get; } = new List<GenericFallback>();
 
         private void TryAddMonoPInvokeCallbackPlan(List<MethodDefPlan> monoPInvokeCallbackPlans, MethodDef method)
         {
@@ -82,8 +85,13 @@ namespace LeanAOT.GenerationPlan
                     {
                         if (method.IsRuntime || method.IsAbstract || method.HasGenericParameters || method.DeclaringType.HasGenericParameters)
                             continue;
-                        if (method.HasBody && method.Body.HasExceptionHandlers)
+                        string exceptionFallback = method.Body?.Instructions.Any(i => i.OpCode.Code == dnlib.DotNet.Emit.Code.Calli) == true
+                            ? "managed-calli" : AotExceptionPolicy.FallbackReason(method);
+                        if (exceptionFallback != null)
+                        {
+                            MethodFallbacks.Add(new GenericFallback { Caller = "", Token = method.MDToken.Raw, Target = method.FullName, Reason = exceptionFallback });
                             continue;
+                        }
                         // don't aot System.String's constructor, because we will handle it in a special way
                         if (!method.HasBody && method.IsConstructor && type.FullName == "System.String")
                         {
@@ -132,6 +140,7 @@ namespace LeanAOT.GenerationPlan
 
                 _assemblyPlans[assName] = assPlan;
             }
+            DiscoverGenericInstances(args);
         }
 
         private static void TryAddMethodPlan(List<MethodDefPlan> methodPlans, HashSet<IMethod> methodsInAotPlan, MethodDef method)
@@ -150,6 +159,7 @@ namespace LeanAOT.GenerationPlan
 
         public bool ShouldAOT(IMethod method)
         {
+            if (_genericKeys.Contains(GenericInstanceKey(method))) return true;
             MethodDef methodDef = method.ResolveMethodDef();
             if (methodDef != null)
             {

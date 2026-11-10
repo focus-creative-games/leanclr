@@ -9,7 +9,7 @@ namespace LeanAOT.ToCpp
     //     protected C
     // }
 
-    class ModuleRegistrationCppCodeFile
+    partial class ModuleRegistrationCppCodeFile
     {
         private readonly CodeWriter _totalWriter;
 
@@ -50,6 +50,7 @@ namespace LeanAOT.ToCpp
             AddIncludes();
             AddGlobalVariableDeclaration();
             AddModuleMethodDefDatasDeclaration();
+            AddGenericMethodEntries();
             GenerateMonoPInvokeCallbackMethods();
             AddModuleMonoPInvokeCallbackDatasDeclaration();
             if (_enableTypesLayoutValidation)
@@ -185,6 +186,8 @@ namespace LeanAOT.ToCpp
                 _implWriter.AddLine("nullptr,");
                 _implWriter.AddLine("0,");
             }
+            _implWriter.AddLine(_plan.GenericMethodPlans.Count > 0 ? GenericEntriesName + "," : "nullptr,");
+            _implWriter.AddLine($"{_plan.GenericMethodPlans.Count},");
             _implWriter.DecreaseIndent();
             _implWriter.AddLine("};");
         }

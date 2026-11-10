@@ -107,6 +107,14 @@ namespace LeanAOT.ToCpp
                 };
                 GenerateMethodDef(methodPlan, methodCtx);
             }
+            foreach (var instance in plan.GenericMethodPlans)
+            {
+                if (methodBodyCodeFile.ExceedsMaxSize()) methodBodyCodeFile = context.CreateMethodBodyCodeFileForNextFile();
+                var detail = GlobalServices.Inst.MetadataService.GetMethodDetail(instance.Method);
+                GlobalServices.Inst.InvokerService.GetInvoker(instance.Method);
+                new MethodWriter(detail, methodBodyCodeFile).WriteCode();
+                if (detail.ShouldGenerateVirtualMethod) new VirtualMethodWriter(detail, methodBodyCodeFile).WriteCode();
+            }
             context.SaveAll();
         }
         public override void GenerateMethodDef(MethodDefPlan plan, object ctx)

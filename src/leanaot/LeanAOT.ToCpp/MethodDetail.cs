@@ -89,7 +89,7 @@ namespace LeanAOT.ToCpp
 
         public bool IsGeneric => _isGeneric;
 
-        public ModuleDef Module => _isGeneric ? null : _methodDef.Module;
+        public ModuleDef Module => _methodDef.Module;
 
         public ModuleDef ModuleOfMethodDef => _methodDef.Module;
 
@@ -134,12 +134,17 @@ namespace LeanAOT.ToCpp
             {
                 return type;
             }
-            return MetaUtil.Inflate(type.ToTypeSig(), _gac).ToTypeDefOrRef();
+            var result = MetaUtil.Inflate(type.ToTypeSig(), _gac).ToTypeDefOrRef();
+            _originalTokens[result] = type.MDToken.Raw;
+            return result;
         }
 
         public IMethod InflateMethod(IMethod method)
         {
-            return !_isGeneric ? method : MetaUtil.InflateMethod(method, _gac);
+            if (!_isGeneric) return method;
+            var result = MetaUtil.InflateMethod(method, _gac);
+            _originalTokens[result] = method.MDToken.Raw;
+            return result;
         }
 
         public MethodSig InflateMethodSig(MethodSig methodSig)
@@ -149,8 +154,14 @@ namespace LeanAOT.ToCpp
 
         public IField InflateField(IField field)
         {
-            return !_isGeneric ? field : MetaUtil.InflateField(field, _gac);
+            if (!_isGeneric) return field;
+            var result = MetaUtil.InflateField(field, _gac);
+            _originalTokens[result] = field.MDToken.Raw;
+            return result;
         }
+        private readonly Dictionary<object, uint> _originalTokens = new Dictionary<object, uint>();
+        public uint GetMetadataToken(IMDTokenProvider value) => _originalTokens.TryGetValue(value, out uint token) ? token : value.MDToken.Raw;
+        public string WithMethodContext(string args, string context) => IsGeneric ? (args.Length == 0 ? context : args + ", " + context) : args;
 
         private string CreateFullQualifiedMethodName()
         {
@@ -212,7 +223,7 @@ namespace LeanAOT.ToCpp
             //{
             //    paramList = paramList.Append($"{ConstStrings.MethodInfoPtrTypeName} {ConstStrings.MethodInfoParameterName}");
             //}
-            return string.Join(", ", paramList);
+            return WithMethodContext(string.Join(", ", paramList), "const leanclr::metadata::RtMethodInfo* __aot_method");
         }
 
         public string GenerateMethodDeclaring(string overrideMethodName = null)
@@ -235,7 +246,7 @@ namespace LeanAOT.ToCpp
             return $"typedef {CreateRelaxMethodFunctionTypeDefine(cppTypedefName)}";
         }
 
-        public string CreateRelaxMethodFunctionPointerTypeForCast()
+        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null)
         {
             var sb = new StringBuilder();
             sb.Append(MethodGenerationUtil.GetResultTypeName(_retType));
@@ -249,6 +260,7 @@ namespace LeanAOT.ToCpp
                     sb.Append(", ");
                 sb.Append(MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed));
             }
+            if (genericContext ?? IsGeneric) sb.Append((first ? "" : ", ") + "const leanclr::metadata::RtMethodInfo*");
             sb.Append(')');
             sb.Append(ConstStrings.CppFunctionNoexcept);
             return sb.ToString();
@@ -299,6 +311,7 @@ namespace LeanAOT.ToCpp
                 }
                 sb.Append(MethodGenerationUtil.GetExactTypeName(param.Type));
             }
+            if (IsGeneric) sb.Append((first ? "" : ", ") + "const leanclr::metadata::RtMethodInfo*");
             sb.Append(')');
             sb.Append(ConstStrings.CppFunctionNoexcept);
             return sb.ToString();
@@ -320,6 +333,7 @@ namespace LeanAOT.ToCpp
                 }
                 sb.Append(MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed));
             }
+            if (IsGeneric) sb.Append((first ? "" : ", ") + "const leanclr::metadata::RtMethodInfo*");
             sb.Append(')');
             sb.Append(ConstStrings.CppFunctionNoexcept);
             return sb.ToString();

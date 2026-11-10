@@ -480,28 +480,25 @@ namespace LeanAOT.Core
 
         public static IMethod InflateMethod(IMethod method, GenericArgumentContext gac)
         {
-            if (method is MethodDef md)
-            {
-                return method;
-            }
-            if (method is MemberRef mr)
-            {
-                return new MemberRefUser(mr.Module, mr.Name, InflateMethodSig(mr.MethodSig, gac), Inflate(((ITypeDefOrRef)mr.Class).ToTypeSig(), gac).ToTypeDefOrRef());
-            }
-            if (method is MethodSpec ms)
-            {
-                var genericInstMethodSig = InflateGenericInstMethodSig(ms.GenericInstMethodSig, gac);
-                if (ms.Method is MethodDef methodDef)
-                {
-                    return new MethodSpecUser(methodDef, genericInstMethodSig);
-                }
-                if (ms.Method is MemberRef memerRef)
-                {
-                    var inflatedMemberRef = new MemberRefUser(memerRef.Module, memerRef.Name, InflateMethodSig(memerRef.MethodSig, gac), Inflate(((ITypeDefOrRef)memerRef.Class).ToTypeSig(), gac).ToTypeDefOrRef());
-                    return new MethodSpecUser(inflatedMemberRef, genericInstMethodSig);
-                }
-            }
-            throw new Exception($"Unsupported IMethod type for inflation: {method.FullName}");
+            return BindMethod(method, gac);
+        }
+
+        // Target signature parameters belong to the target, not the caller.
+        // Substitute only its declaring type and its MethodSpec arguments.
+        public static IMethod BindMethod(IMethod method, GenericArgumentContext gac)
+        {
+            var definition = method.ResolveMethodDef();
+            if (definition == null) return method;
+            ITypeDefOrRef declaring = method.DeclaringType;
+            if (declaring is TypeDef td && td.HasGenericParameters && gac?.typeArgsStack != null)
+                declaring = new GenericInstSig((ClassOrValueTypeSig)td.ToTypeSig(), gac.typeArgsStack).ToTypeDefOrRef();
+            else if (gac != null) declaring = Inflate(declaring.ToTypeSig(), gac).ToTypeDefOrRef();
+            IMethodDefOrRef basis = definition;
+            if (declaring is TypeSpec)
+                basis = new MemberRefUser(definition.Module, definition.Name, definition.MethodSig, declaring);
+            if (method is MethodSpec spec)
+                return new MethodSpecUser(basis, new GenericInstMethodSig(TryInflate(spec.GenericInstMethodSig.GenericArguments, gac)));
+            return basis;
         }
 
         public static MethodSig InflateMethodSig(MethodSig methodSig, GenericArgumentContext genericArgumentContext)
@@ -658,16 +655,13 @@ namespace LeanAOT.Core
 
         public static IField InflateField(IField field, GenericArgumentContext ctx)
         {
-            if (field is FieldDef fieldDef)
-            {
-                return field;
-            }
-            if (field is MemberRef memberRef)
-            {
-                var newFieldSigType = Inflate(memberRef.FieldSig.Type, new GenericArgumentContext(TryInflate(GetGenericArguments(memberRef.Class), ctx), null));
-                return new MemberRefUser(memberRef.Module, memberRef.Name, new FieldSig(newFieldSigType), Inflate(((ITypeDefOrRef)memberRef.Class).ToTypeSig(), ctx).ToTypeDefOrRef());
-            }
-            throw new Exception($"unknown field:{field}");
+            var definition = field.ResolveFieldDef();
+            if (definition == null) return field;
+            ITypeDefOrRef declaring = field.DeclaringType;
+            if (declaring is TypeDef td && td.HasGenericParameters && ctx?.typeArgsStack != null)
+                declaring = new GenericInstSig((ClassOrValueTypeSig)td.ToTypeSig(), ctx.typeArgsStack).ToTypeDefOrRef();
+            else if (ctx != null) declaring = Inflate(declaring.ToTypeSig(), ctx).ToTypeDefOrRef();
+            return declaring is TypeSpec ? new MemberRefUser(definition.Module, definition.Name, definition.FieldSig, declaring) : field;
         }
 
         public static TypeSig GetThisType(IMethod method)

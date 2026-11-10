@@ -55,12 +55,20 @@ namespace LeanAOT.ToCpp
             var parametersIncludeThis = methodDetail.ParamsIncludeThis;
             string methodVarName = "__method";
             string callvirVarName = "__callvir";
-            var castFnPtrType = methodDetail.CreateRelaxMethodFunctionPointerTypeForCast();
 
             _directCallBridgeImplWriter.AddLine($"if ({VmFunctionNames.IsAotMethod}({methodVarName}))");
             _directCallBridgeImplWriter.BeginBlock();
             _directCallBridgeImplWriter.AddLine($"{ConstStrings.ManagedMethodPointerTypeName} __method_pointer = {callvirVarName} ? {methodVarName}->{ConstStrings.VirtualMethodPointerFieldName} : {methodVarName}->{ConstStrings.MethodPointerFieldName};");
-            _directCallBridgeImplWriter.AddLine($"return (({castFnPtrType})__method_pointer)({MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(methodDetail)});");
+            // Interface/base signatures do not determine the implementation's
+            // context ABI. A generic class can implement a non-generic interface
+            // and a non-generic class can implement a closed generic interface.
+            var plainArgs = MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(methodDetail);
+            var contextArgs = plainArgs.Length == 0 ? "__method" : plainArgs + ", __method";
+            _directCallBridgeImplWriter.AddLine("if (__method->generic_method != nullptr)");
+            _directCallBridgeImplWriter.BeginBlock();
+            _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(true)})__method_pointer)({contextArgs});");
+            _directCallBridgeImplWriter.EndBlock();
+            _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(false)})__method_pointer)({plainArgs});");
             _directCallBridgeImplWriter.EndBlock();
             _directCallBridgeImplWriter.AddLine($"else");
             _directCallBridgeImplWriter.BeginBlock();

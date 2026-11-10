@@ -58,7 +58,7 @@ namespace LeanAOT.ToCpp
 
         public static string CreateRelaxedMethodFunctionTypeDeclaring(MethodDetail methodDetail)
         {
-            return $"{GetResultTypeName(methodDetail.RetType)} (*)({CreateMethodRelaxedArgs(methodDetail, true)}){ConstStrings.CppFunctionNoexcept}";
+            return $"{GetResultTypeName(methodDetail.RetType)} (*)({methodDetail.WithMethodContext(CreateMethodRelaxedArgs(methodDetail, true), "const leanclr::metadata::RtMethodInfo*")}){ConstStrings.CppFunctionNoexcept}";
         }
     }
 }

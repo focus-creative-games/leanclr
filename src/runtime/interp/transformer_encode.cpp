@@ -121,6 +121,11 @@ RtResultVoid Transformer::build_codes(RtInterpMethodInfo* interp_method)
     interp_method->code_size = static_cast<uint32_t>(byte_size);
     metadata::PdbImage* pdb = _mod->get_pdb_image();
     auto* mappings = pdb ? pool.calloc_any<metadata::IR2ILMapEntry>(instruction_count) : nullptr;
+    // Ordinary interpreted methods do not pay for AOT deoptimization metadata.
+    auto* resume_entries = !_method_body->exception_clauses.empty() && _method->invoker_type == metadata::RtInvokerType::Aot
+                               ? pool.calloc_any<RtInterpResumeEntry>(instruction_count)
+                               : nullptr;
+    uint32_t resume_count = 0;
     size_t index = 0;
     for (BasicBlock* block = _basic_blocks; block; block = block->next_bb)
     {
@@ -129,10 +134,14 @@ RtResultVoid Transformer::build_codes(RtInterpMethodInfo* interp_method)
             std::memcpy(codes + inst->ir_offset, inst->data(), inst->byte_size);
             if (mappings)
                 mappings[index++] = {inst->il_offset, inst->ir_offset};
+            if (resume_entries && inst->il_offset >= 0)
+                resume_entries[resume_count++] = {static_cast<uint32_t>(inst->il_offset), static_cast<uint32_t>(inst->ir_offset)};
         }
     }
     if (pdb)
         pdb->add_ir2il_map_for_method(_method, {{mappings, instruction_count}});
+    interp_method->exception_resume_entries = resume_entries;
+    interp_method->exception_resume_entry_count = resume_count;
     RET_VOID_OK();
 }
 

@@ -69,6 +69,12 @@ struct RtInterpExceptionClause
 };
 
 // Interpreter method info
+struct RtInterpResumeEntry
+{
+    uint32_t il_offset;
+    uint32_t code_offset;
+};
+
 struct RtInterpMethodInfo
 {
     uint8_t* codes;
@@ -79,6 +85,8 @@ struct RtInterpMethodInfo
     uint8_t exception_clause_count;
     bool init_locals;
     uint32_t code_size;
+    const RtInterpResumeEntry* exception_resume_entries;
+    uint32_t exception_resume_entry_count;
 };
 
 // Constants

@@ -1,0 +1,2888 @@
+{
+  "schema": 1,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "commit": "1d79d713e41869d895ab1d82fc5e036fec435cd4",
+  "iterations": 5000000,
+  "samples": [
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79026,
+      "engine": "native-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.3115396000066539
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.99136,
+      "engine": "native-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.3115396000066539
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79078,
+      "engine": "native-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.3115396000066539
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.7952,
+      "engine": "native-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.3115396000066539
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.13966,
+      "engine": "native-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.3115396000066539
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.14526,
+      "engine": "native-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.3115396000066539
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79496,
+      "engine": "native-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.3115396000066539
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 33.90072,
+      "engine": "native-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.3115396000066539
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 0.86392,
+      "engine": "wasm-eh-default",
+      "sample": 0,
+      "process_wall_seconds": 0.15515280001272913
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 1.3046,
+      "engine": "native-eh-default",
+      "sample": 0,
+      "process_wall_seconds": 0.038528999997652136
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 26.81758,
+      "engine": "native-eh-interpreted-loop",
+      "sample": 0,
+      "process_wall_seconds": 0.3008257999899797
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 33.61362,
+      "engine": "wasm-eh-interpreted-loop",
+      "sample": 0,
+      "process_wall_seconds": 0.5584734000003664
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.85586,
+      "engine": "native-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.49299659999087453
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.06362,
+      "engine": "native-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.49299659999087453
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.85832,
+      "engine": "native-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.49299659999087453
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.84596,
+      "engine": "native-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.49299659999087453
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 4.96498,
+      "engine": "native-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.49299659999087453
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.56788,
+      "engine": "native-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.49299659999087453
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 16.87754,
+      "engine": "native-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.49299659999087453
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 37.94176,
+      "engine": "native-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.49299659999087453
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.11802,
+      "engine": "wasm-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.5280707000056282
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.0151,
+      "engine": "wasm-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.5280707000056282
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.16122,
+      "engine": "wasm-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.5280707000056282
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.88388,
+      "engine": "wasm-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.5280707000056282
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.7772,
+      "engine": "wasm-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.5280707000056282
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 1.13596,
+      "engine": "wasm-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.5280707000056282
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 22.67814,
+      "engine": "wasm-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.5280707000056282
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 34.5267,
+      "engine": "wasm-generic-control",
+      "sample": 0,
+      "process_wall_seconds": 0.5280707000056282
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.1277,
+      "engine": "wasm-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.37276790000032634
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.06378,
+      "engine": "wasm-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.37276790000032634
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.11234,
+      "engine": "wasm-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.37276790000032634
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.86722,
+      "engine": "wasm-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.37276790000032634
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.28728,
+      "engine": "wasm-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.37276790000032634
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.84584,
+      "engine": "wasm-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.37276790000032634
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.14382,
+      "engine": "wasm-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.37276790000032634
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 32.93774,
+      "engine": "wasm-generic-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.37276790000032634
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.84482,
+      "engine": "native-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.2959190999972634
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.05168,
+      "engine": "native-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.2959190999972634
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.83426,
+      "engine": "native-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.2959190999972634
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.84738,
+      "engine": "native-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.2959190999972634
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.30462,
+      "engine": "native-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.2959190999972634
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.23762,
+      "engine": "native-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.2959190999972634
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79436,
+      "engine": "native-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.2959190999972634
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 32.52052,
+      "engine": "native-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.2959190999972634
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 27.6873,
+      "engine": "wasm-eh-interpreted-loop",
+      "sample": 1,
+      "process_wall_seconds": 0.5116860999987694
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 33.19348,
+      "engine": "native-eh-interpreted-loop",
+      "sample": 1,
+      "process_wall_seconds": 0.38643389999924693
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 0.88732,
+      "engine": "wasm-eh-default",
+      "sample": 1,
+      "process_wall_seconds": 0.1556090999947628
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 1.48344,
+      "engine": "native-eh-default",
+      "sample": 1,
+      "process_wall_seconds": 0.03715199998987373
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.16752,
+      "engine": "wasm-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.4121665000129724
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.9746,
+      "engine": "wasm-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.4121665000129724
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.13082,
+      "engine": "wasm-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.4121665000129724
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.91478,
+      "engine": "wasm-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.4121665000129724
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.83884,
+      "engine": "wasm-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.4121665000129724
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.85644,
+      "engine": "wasm-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.4121665000129724
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10924,
+      "engine": "wasm-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.4121665000129724
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 35.13716,
+      "engine": "wasm-generic-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.4121665000129724
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.85226,
+      "engine": "native-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4106494000006933
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.06296,
+      "engine": "native-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4106494000006933
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.84708,
+      "engine": "native-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4106494000006933
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.86186,
+      "engine": "native-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4106494000006933
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 4.84846,
+      "engine": "native-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4106494000006933
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.4627,
+      "engine": "native-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4106494000006933
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 17.30256,
+      "engine": "native-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4106494000006933
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 36.54732,
+      "engine": "native-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4106494000006933
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.11702,
+      "engine": "wasm-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4857773999974597
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.83058,
+      "engine": "wasm-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4857773999974597
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10798,
+      "engine": "wasm-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4857773999974597
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.84408,
+      "engine": "wasm-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4857773999974597
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.48472,
+      "engine": "wasm-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4857773999974597
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.8431,
+      "engine": "wasm-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4857773999974597
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 22.8206,
+      "engine": "wasm-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4857773999974597
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 31.83834,
+      "engine": "wasm-generic-control",
+      "sample": 1,
+      "process_wall_seconds": 0.4857773999974597
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.82882,
+      "engine": "native-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3162360999995144
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.10794,
+      "engine": "native-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3162360999995144
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.84272,
+      "engine": "native-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3162360999995144
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.831,
+      "engine": "native-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3162360999995144
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.40478,
+      "engine": "native-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3162360999995144
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.53898,
+      "engine": "native-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3162360999995144
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.8367,
+      "engine": "native-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3162360999995144
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 34.38964,
+      "engine": "native-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3162360999995144
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.83906,
+      "engine": "native-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.3891920000023674
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.04698,
+      "engine": "native-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.3891920000023674
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.8214,
+      "engine": "native-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.3891920000023674
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.83778,
+      "engine": "native-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.3891920000023674
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 4.7335,
+      "engine": "native-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.3891920000023674
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.33602,
+      "engine": "native-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.3891920000023674
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 16.14762,
+      "engine": "native-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.3891920000023674
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 34.12808,
+      "engine": "native-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.3891920000023674
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 0.80902,
+      "engine": "wasm-eh-default",
+      "sample": 2,
+      "process_wall_seconds": 0.14976559999922756
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 26.37874,
+      "engine": "native-eh-interpreted-loop",
+      "sample": 2,
+      "process_wall_seconds": 0.2973233000084292
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10922,
+      "engine": "wasm-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3315383000008296
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79008,
+      "engine": "wasm-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3315383000008296
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.1009,
+      "engine": "wasm-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3315383000008296
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.82272,
+      "engine": "wasm-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3315383000008296
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.8584,
+      "engine": "wasm-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3315383000008296
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.8046,
+      "engine": "wasm-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3315383000008296
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.1343,
+      "engine": "wasm-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3315383000008296
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 30.5968,
+      "engine": "wasm-generic-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.3315383000008296
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.12164,
+      "engine": "wasm-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.4525573999999324
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79368,
+      "engine": "wasm-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.4525573999999324
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10122,
+      "engine": "wasm-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.4525573999999324
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.8842,
+      "engine": "wasm-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.4525573999999324
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.6793,
+      "engine": "wasm-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.4525573999999324
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.79104,
+      "engine": "wasm-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.4525573999999324
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 21.05306,
+      "engine": "wasm-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.4525573999999324
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 30.52414,
+      "engine": "wasm-generic-control",
+      "sample": 2,
+      "process_wall_seconds": 0.4525573999999324
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 25.5619,
+      "engine": "wasm-eh-interpreted-loop",
+      "sample": 2,
+      "process_wall_seconds": 0.5016767000051914
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 1.28746,
+      "engine": "native-eh-default",
+      "sample": 2,
+      "process_wall_seconds": 0.03300020001188386
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.1143,
+      "engine": "wasm-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.4627199999958975
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79206,
+      "engine": "wasm-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.4627199999958975
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.1002,
+      "engine": "wasm-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.4627199999958975
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.89142,
+      "engine": "wasm-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.4627199999958975
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.63372,
+      "engine": "wasm-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.4627199999958975
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.79878,
+      "engine": "wasm-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.4627199999958975
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 20.96066,
+      "engine": "wasm-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.4627199999958975
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 31.45902,
+      "engine": "wasm-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.4627199999958975
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 1.28856,
+      "engine": "native-eh-default",
+      "sample": 3,
+      "process_wall_seconds": 0.03256350000447128
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.81386,
+      "engine": "native-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.2880314000067301
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.98418,
+      "engine": "native-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.2880314000067301
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.78972,
+      "engine": "native-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.2880314000067301
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.79896,
+      "engine": "native-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.2880314000067301
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 4.9805,
+      "engine": "native-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.2880314000067301
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.1862,
+      "engine": "native-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.2880314000067301
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.81474,
+      "engine": "native-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.2880314000067301
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 32.26932,
+      "engine": "native-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.2880314000067301
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 0.80708,
+      "engine": "wasm-eh-default",
+      "sample": 3,
+      "process_wall_seconds": 0.1395388999953866
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 25.90966,
+      "engine": "wasm-eh-interpreted-loop",
+      "sample": 3,
+      "process_wall_seconds": 0.4775792000000365
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10522,
+      "engine": "wasm-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.335532900004182
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.78942,
+      "engine": "wasm-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.335532900004182
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.09994,
+      "engine": "wasm-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.335532900004182
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.79278,
+      "engine": "wasm-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.335532900004182
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.89434,
+      "engine": "wasm-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.335532900004182
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.79516,
+      "engine": "wasm-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.335532900004182
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10016,
+      "engine": "wasm-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.335532900004182
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 31.79704,
+      "engine": "wasm-generic-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.335532900004182
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.7898,
+      "engine": "native-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.3763978000060888
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.99154,
+      "engine": "native-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.3763978000060888
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79776,
+      "engine": "native-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.3763978000060888
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.79148,
+      "engine": "native-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.3763978000060888
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 4.43972,
+      "engine": "native-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.3763978000060888
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.12672,
+      "engine": "native-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.3763978000060888
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 16.21796,
+      "engine": "native-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.3763978000060888
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 32.91094,
+      "engine": "native-generic-control",
+      "sample": 3,
+      "process_wall_seconds": 0.3763978000060888
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 26.47032,
+      "engine": "native-eh-interpreted-loop",
+      "sample": 3,
+      "process_wall_seconds": 0.2831369000050472
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 27.35482,
+      "engine": "wasm-eh-interpreted-loop",
+      "sample": 4,
+      "process_wall_seconds": 0.4836674999969546
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 0.80854,
+      "engine": "wasm-eh-default",
+      "sample": 4,
+      "process_wall_seconds": 0.1501721000095131
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.81758,
+      "engine": "native-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.3808171999990009
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.9867,
+      "engine": "native-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.3808171999990009
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79286,
+      "engine": "native-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.3808171999990009
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.82936,
+      "engine": "native-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.3808171999990009
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 4.6032,
+      "engine": "native-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.3808171999990009
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.18206,
+      "engine": "native-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.3808171999990009
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 17.66222,
+      "engine": "native-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.3808171999990009
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 32.44306,
+      "engine": "native-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.3808171999990009
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.13728,
+      "engine": "wasm-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.33558919999632053
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79182,
+      "engine": "wasm-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.33558919999632053
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.1004,
+      "engine": "wasm-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.33558919999632053
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.87066,
+      "engine": "wasm-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.33558919999632053
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.7879,
+      "engine": "wasm-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.33558919999632053
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.79236,
+      "engine": "wasm-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.33558919999632053
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10142,
+      "engine": "wasm-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.33558919999632053
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 30.8607,
+      "engine": "wasm-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.33558919999632053
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.78934,
+      "engine": "native-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.28724040000815876
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.00144,
+      "engine": "native-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.28724040000815876
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79296,
+      "engine": "native-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.28724040000815876
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.7891,
+      "engine": "native-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.28724040000815876
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.01912,
+      "engine": "native-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.28724040000815876
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.13386,
+      "engine": "native-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.28724040000815876
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.78934,
+      "engine": "native-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.28724040000815876
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 32.23366,
+      "engine": "native-generic-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.28724040000815876
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.1131,
+      "engine": "wasm-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.45105980000516865
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.82568,
+      "engine": "wasm-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.45105980000516865
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10122,
+      "engine": "wasm-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.45105980000516865
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.82222,
+      "engine": "wasm-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.45105980000516865
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.76772,
+      "engine": "wasm-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.45105980000516865
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.8007,
+      "engine": "wasm-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.45105980000516865
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 20.70734,
+      "engine": "wasm-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.45105980000516865
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 30.70178,
+      "engine": "wasm-generic-control",
+      "sample": 4,
+      "process_wall_seconds": 0.45105980000516865
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 1.28514,
+      "engine": "native-eh-default",
+      "sample": 4,
+      "process_wall_seconds": 0.03385640001215506
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 28.39334,
+      "engine": "native-eh-interpreted-loop",
+      "sample": 4,
+      "process_wall_seconds": 0.296181700003217
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 1.34,
+      "engine": "native-eh-default",
+      "sample": 5,
+      "process_wall_seconds": 0.03488880000077188
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 0.81758,
+      "engine": "wasm-eh-default",
+      "sample": 5,
+      "process_wall_seconds": 0.15625770000042394
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.2355,
+      "engine": "wasm-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.3372702000051504
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.8093,
+      "engine": "wasm-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.3372702000051504
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10252,
+      "engine": "wasm-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.3372702000051504
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.84912,
+      "engine": "wasm-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.3372702000051504
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.85054,
+      "engine": "wasm-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.3372702000051504
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.82598,
+      "engine": "wasm-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.3372702000051504
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10378,
+      "engine": "wasm-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.3372702000051504
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 30.62494,
+      "engine": "wasm-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.3372702000051504
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.16914,
+      "engine": "wasm-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.44697099999757484
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79016,
+      "engine": "wasm-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.44697099999757484
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10052,
+      "engine": "wasm-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.44697099999757484
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.81692,
+      "engine": "wasm-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.44697099999757484
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.73022,
+      "engine": "wasm-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.44697099999757484
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.7936,
+      "engine": "wasm-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.44697099999757484
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 20.88068,
+      "engine": "wasm-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.44697099999757484
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 30.4342,
+      "engine": "wasm-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.44697099999757484
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 28.07404,
+      "engine": "native-eh-interpreted-loop",
+      "sample": 5,
+      "process_wall_seconds": 0.30052050000813324
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.82742,
+      "engine": "native-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.395562500008964
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.04714,
+      "engine": "native-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.395562500008964
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.82064,
+      "engine": "native-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.395562500008964
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.83438,
+      "engine": "native-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.395562500008964
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.07824,
+      "engine": "native-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.395562500008964
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.41848,
+      "engine": "native-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.395562500008964
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 16.63134,
+      "engine": "native-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.395562500008964
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 34.1705,
+      "engine": "native-generic-control",
+      "sample": 5,
+      "process_wall_seconds": 0.395562500008964
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 26.3599,
+      "engine": "wasm-eh-interpreted-loop",
+      "sample": 5,
+      "process_wall_seconds": 0.4846105000033276
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.81258,
+      "engine": "native-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.2934947000030661
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.01958,
+      "engine": "native-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.2934947000030661
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.81234,
+      "engine": "native-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.2934947000030661
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.79122,
+      "engine": "native-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.2934947000030661
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.12538,
+      "engine": "native-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.2934947000030661
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.2561,
+      "engine": "native-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.2934947000030661
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.81228,
+      "engine": "native-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.2934947000030661
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 32.82918,
+      "engine": "native-generic-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.2934947000030661
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 0.8788,
+      "engine": "wasm-eh-default",
+      "sample": 6,
+      "process_wall_seconds": 0.15519140000105835
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "aot",
+      "checksum": "2485586387",
+      "ns_per_op": 1.34782,
+      "engine": "native-eh-default",
+      "sample": 6,
+      "process_wall_seconds": 0.0340342999988934
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.8648,
+      "engine": "native-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.29537239999626763
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 1.0462,
+      "engine": "native-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.29537239999626763
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.8572,
+      "engine": "native-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.29537239999626763
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.83698,
+      "engine": "native-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.29537239999626763
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.22468,
+      "engine": "native-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.29537239999626763
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.19784,
+      "engine": "native-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.29537239999626763
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79934,
+      "engine": "native-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.29537239999626763
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 33.0483,
+      "engine": "native-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.29537239999626763
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.11304,
+      "engine": "wasm-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.4640985999867553
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.83196,
+      "engine": "wasm-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.4640985999867553
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.10392,
+      "engine": "wasm-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.4640985999867553
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.82548,
+      "engine": "wasm-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.4640985999867553
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.85734,
+      "engine": "wasm-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.4640985999867553
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.82596,
+      "engine": "wasm-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.4640985999867553
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 21.37778,
+      "engine": "wasm-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.4640985999867553
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 31.73778,
+      "engine": "wasm-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.4640985999867553
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 28.66602,
+      "engine": "native-eh-interpreted-loop",
+      "sample": 6,
+      "process_wall_seconds": 0.30072260000451934
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.14598,
+      "engine": "wasm-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.3328987999993842
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79168,
+      "engine": "wasm-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.3328987999993842
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.1007,
+      "engine": "wasm-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.3328987999993842
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.8158,
+      "engine": "wasm-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.3328987999993842
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.62832,
+      "engine": "wasm-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.3328987999993842
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 0.79302,
+      "engine": "wasm-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.3328987999993842
+    },
+    {
+      "workload": "generics",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.09928,
+      "engine": "wasm-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.3328987999993842
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 30.5351,
+      "engine": "wasm-generic-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.3328987999993842
+    },
+    {
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "checksum": "2485586387",
+      "ns_per_op": 25.60476,
+      "engine": "wasm-eh-interpreted-loop",
+      "sample": 6,
+      "process_wall_seconds": 0.48086340000736527
+    },
+    {
+      "workload": "arithmetic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.79328,
+      "engine": "native-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.37976319999143016
+    },
+    {
+      "workload": "calls",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.99056,
+      "engine": "native-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.37976319999143016
+    },
+    {
+      "workload": "properties",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 0.78916,
+      "engine": "native-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.37976319999143016
+    },
+    {
+      "workload": "array",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1482086259",
+      "ns_per_op": 0.79514,
+      "engine": "native-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.37976319999143016
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 4.53718,
+      "engine": "native-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.37976319999143016
+    },
+    {
+      "workload": "structs",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2119634178",
+      "ns_per_op": 5.1558,
+      "engine": "native-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.37976319999143016
+    },
+    {
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 16.58004,
+      "engine": "native-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.37976319999143016
+    },
+    {
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "iterations": 5000000,
+      "checksum": "845460763",
+      "ns_per_op": 33.11624,
+      "engine": "native-generic-control",
+      "sample": 6,
+      "process_wall_seconds": 0.37976319999143016
+    }
+  ],
+  "summary": [
+    {
+      "engine": "native-generic-aot",
+      "workload": "arithmetic",
+      "execution": "aot",
+      "median_ns": 0.81386,
+      "min_ns": 0.78934,
+      "max_ns": 0.8648
+    },
+    {
+      "engine": "native-generic-aot",
+      "workload": "array",
+      "execution": "aot",
+      "median_ns": 0.79896,
+      "min_ns": 0.7891,
+      "max_ns": 0.84738
+    },
+    {
+      "engine": "native-generic-aot",
+      "workload": "calls",
+      "execution": "aot",
+      "median_ns": 1.01958,
+      "min_ns": 0.98418,
+      "max_ns": 1.10794
+    },
+    {
+      "engine": "native-generic-aot",
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "median_ns": 32.82918,
+      "min_ns": 32.23366,
+      "max_ns": 34.38964
+    },
+    {
+      "engine": "native-generic-aot",
+      "workload": "generics",
+      "execution": "aot",
+      "median_ns": 0.79934,
+      "min_ns": 0.78934,
+      "max_ns": 0.8367
+    },
+    {
+      "engine": "native-generic-aot",
+      "workload": "interfaces",
+      "execution": "aot",
+      "median_ns": 5.13966,
+      "min_ns": 4.9805,
+      "max_ns": 5.40478
+    },
+    {
+      "engine": "native-generic-aot",
+      "workload": "properties",
+      "execution": "aot",
+      "median_ns": 0.81234,
+      "min_ns": 0.78972,
+      "max_ns": 0.8572
+    },
+    {
+      "engine": "native-generic-aot",
+      "workload": "structs",
+      "execution": "aot",
+      "median_ns": 5.19784,
+      "min_ns": 5.13386,
+      "max_ns": 5.53898
+    },
+    {
+      "engine": "native-generic-control",
+      "workload": "arithmetic",
+      "execution": "aot",
+      "median_ns": 0.82742,
+      "min_ns": 0.7898,
+      "max_ns": 0.85586
+    },
+    {
+      "engine": "native-generic-control",
+      "workload": "array",
+      "execution": "aot",
+      "median_ns": 0.83438,
+      "min_ns": 0.79148,
+      "max_ns": 0.86186
+    },
+    {
+      "engine": "native-generic-control",
+      "workload": "calls",
+      "execution": "aot",
+      "median_ns": 1.04698,
+      "min_ns": 0.9867,
+      "max_ns": 1.06362
+    },
+    {
+      "engine": "native-generic-control",
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "median_ns": 34.12808,
+      "min_ns": 32.44306,
+      "max_ns": 37.94176
+    },
+    {
+      "engine": "native-generic-control",
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "median_ns": 16.63134,
+      "min_ns": 16.14762,
+      "max_ns": 17.66222
+    },
+    {
+      "engine": "native-generic-control",
+      "workload": "interfaces",
+      "execution": "aot",
+      "median_ns": 4.7335,
+      "min_ns": 4.43972,
+      "max_ns": 5.07824
+    },
+    {
+      "engine": "native-generic-control",
+      "workload": "properties",
+      "execution": "aot",
+      "median_ns": 0.82064,
+      "min_ns": 0.78916,
+      "max_ns": 0.85832
+    },
+    {
+      "engine": "native-generic-control",
+      "workload": "structs",
+      "execution": "aot",
+      "median_ns": 5.33602,
+      "min_ns": 5.12672,
+      "max_ns": 5.56788
+    },
+    {
+      "engine": "native-eh-default",
+      "workload": "eh-normal",
+      "execution": "aot",
+      "median_ns": 1.3046,
+      "min_ns": 1.28514,
+      "max_ns": 1.48344
+    },
+    {
+      "engine": "native-eh-interpreted-loop",
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "median_ns": 28.07404,
+      "min_ns": 26.37874,
+      "max_ns": 33.19348
+    },
+    {
+      "engine": "wasm-generic-aot",
+      "workload": "arithmetic",
+      "execution": "aot",
+      "median_ns": 0.13728,
+      "min_ns": 0.10522,
+      "max_ns": 0.2355
+    },
+    {
+      "engine": "wasm-generic-aot",
+      "workload": "array",
+      "execution": "aot",
+      "median_ns": 0.84912,
+      "min_ns": 0.79278,
+      "max_ns": 0.91478
+    },
+    {
+      "engine": "wasm-generic-aot",
+      "workload": "calls",
+      "execution": "aot",
+      "median_ns": 0.79182,
+      "min_ns": 0.78942,
+      "max_ns": 1.06378
+    },
+    {
+      "engine": "wasm-generic-aot",
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "median_ns": 30.8607,
+      "min_ns": 30.5351,
+      "max_ns": 35.13716
+    },
+    {
+      "engine": "wasm-generic-aot",
+      "workload": "generics",
+      "execution": "aot",
+      "median_ns": 0.10378,
+      "min_ns": 0.09928,
+      "max_ns": 0.14382
+    },
+    {
+      "engine": "wasm-generic-aot",
+      "workload": "interfaces",
+      "execution": "aot",
+      "median_ns": 6.8584,
+      "min_ns": 6.62832,
+      "max_ns": 9.83884
+    },
+    {
+      "engine": "wasm-generic-aot",
+      "workload": "properties",
+      "execution": "aot",
+      "median_ns": 0.1009,
+      "min_ns": 0.09994,
+      "max_ns": 0.13082
+    },
+    {
+      "engine": "wasm-generic-aot",
+      "workload": "structs",
+      "execution": "aot",
+      "median_ns": 0.8046,
+      "min_ns": 0.79236,
+      "max_ns": 0.85644
+    },
+    {
+      "engine": "wasm-generic-control",
+      "workload": "arithmetic",
+      "execution": "aot",
+      "median_ns": 0.11702,
+      "min_ns": 0.11304,
+      "max_ns": 0.16914
+    },
+    {
+      "engine": "wasm-generic-control",
+      "workload": "array",
+      "execution": "aot",
+      "median_ns": 0.84408,
+      "min_ns": 0.81692,
+      "max_ns": 0.89142
+    },
+    {
+      "engine": "wasm-generic-control",
+      "workload": "calls",
+      "execution": "aot",
+      "median_ns": 0.82568,
+      "min_ns": 0.79016,
+      "max_ns": 1.0151
+    },
+    {
+      "engine": "wasm-generic-control",
+      "workload": "exceptions",
+      "execution": "aot-normal/interpreter-eh",
+      "median_ns": 31.45902,
+      "min_ns": 30.4342,
+      "max_ns": 34.5267
+    },
+    {
+      "engine": "wasm-generic-control",
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "median_ns": 21.05306,
+      "min_ns": 20.70734,
+      "max_ns": 22.8206
+    },
+    {
+      "engine": "wasm-generic-control",
+      "workload": "interfaces",
+      "execution": "aot",
+      "median_ns": 6.76772,
+      "min_ns": 6.63372,
+      "max_ns": 7.7772
+    },
+    {
+      "engine": "wasm-generic-control",
+      "workload": "properties",
+      "execution": "aot",
+      "median_ns": 0.10122,
+      "min_ns": 0.1002,
+      "max_ns": 0.16122
+    },
+    {
+      "engine": "wasm-generic-control",
+      "workload": "structs",
+      "execution": "aot",
+      "median_ns": 0.8007,
+      "min_ns": 0.79104,
+      "max_ns": 1.13596
+    },
+    {
+      "engine": "wasm-eh-default",
+      "workload": "eh-normal",
+      "execution": "aot",
+      "median_ns": 0.81758,
+      "min_ns": 0.80708,
+      "max_ns": 0.88732
+    },
+    {
+      "engine": "wasm-eh-interpreted-loop",
+      "workload": "eh-normal",
+      "execution": "interpreter",
+      "median_ns": 26.3599,
+      "min_ns": 25.5619,
+      "max_ns": 33.61362
+    }
+  ],
+  "artifacts": {
+    "native-generic-aot": {
+      "path": "out\\performance\\generic-step\\native\\Release\\aot-baseline.exe",
+      "sha256": "1cd641e186ae97078835e5eb4b268f2f6b475d70c9fcfd23dccab5477e1398eb",
+      "bytes": 874496,
+      "gzip_bytes": 332607
+    },
+    "native-generic-control": {
+      "path": "out\\performance\\generic-step\\disabled-native\\Release\\aot-baseline.exe",
+      "sha256": "5cba816a2e3b34b2ca1853fefa541e34a28ac382714e0eb90fb59e2903372d8c",
+      "bytes": 874496,
+      "gzip_bytes": 332706
+    },
+    "native-eh-default": {
+      "path": "out\\aot-features\\eh\\default-native-Release-x64\\Release\\eh-aot.exe",
+      "sha256": "a0570e6e253168589d85a2114f6abcf6835f05d3530d655b1673f4e142d0ab47",
+      "bytes": 874496,
+      "gzip_bytes": 332777
+    },
+    "native-eh-interpreted-loop": {
+      "path": "out\\aot-features\\eh\\interpreted-loop-native-Release-x64\\Release\\eh-aot.exe",
+      "sha256": "063c4072c234c75fa02b5c37c9fe5de85a38f0a0810799eb78d0fe53e92a6493",
+      "bytes": 873984,
+      "gzip_bytes": 332526
+    },
+    "wasm-generic-aot": {
+      "path": "out\\performance\\generic-step\\wasm\\aot-baseline.wasm",
+      "sha256": "bb869d7afd42802b1e97009e90a7128504a8b0b4fcf6d0d862b26a0e665e6441",
+      "bytes": 827784,
+      "gzip_bytes": 263641,
+      "code_section_bytes": 663500
+    },
+    "wasm-generic-control": {
+      "path": "out\\performance\\generic-step\\disabled-wasm\\aot-baseline.wasm",
+      "sha256": "57708a0613e7d66ee69f9327cf4ee840371d9bdfd106cf5249e3b21a4fe1c3ee",
+      "bytes": 827664,
+      "gzip_bytes": 263674,
+      "code_section_bytes": 663425
+    },
+    "wasm-eh-default": {
+      "path": "out\\aot-features\\eh\\default-wasm-Release-x64\\eh-aot.wasm",
+      "sha256": "bd4ff572625299ac7241d517a9d20099bbbd7f7e1dcb8714b4395e7f864723ce",
+      "bytes": 827455,
+      "gzip_bytes": 263474,
+      "code_section_bytes": 663269
+    },
+    "wasm-eh-interpreted-loop": {
+      "path": "out\\aot-features\\eh\\interpreted-loop-wasm-Release-x64\\eh-aot.wasm",
+      "sha256": "9fd696bf5bb05b764d6d2028120da8b045407a22d430d50d09a4dd0d52b81a8f",
+      "bytes": 826949,
+      "gzip_bytes": 263245,
+      "code_section_bytes": 662781
+    }
+  },
+  "source_hashes": {
+    "src\\benchmarks\\aot-baseline\\Benchmarks.cs": "94d22c777ca02d5c500593f20c6429a5b302b2b20d7f15b7e9ee0bb5167d21eb",
+    "src\\tests\\eh-aot\\Fixtures.cs": "cf618ab1cefa433996751af05333ad707f0f980e367b7a14e8f470c76bfb51fb",
+    "src\\benchmarks\\aot-baseline\\main.cpp": "3b2ac85118ecd41caad9ecd27cbb7ca2663f6f616ff075b82ba3a7ced031b57d",
+    "src\\tests\\eh-aot\\main.cpp": "c409ff775a4d34cfd0aff55a120e6d54b05b79805bf16c9e88b38f5c27168d06"
+  },
+  "notes": [
+    "Working-tree implementation; the commit above is its parent revision.",
+    "Generic control uses the same runtime with the generic instance budget set to zero.",
+    "EH control excludes only NormalLoop using interpreted.xml, on the same runtime.",
+    "Original exceptions workload throws at iteration zero; the current invocation then stays interpreted.",
+    "Sizes include the entire test executable/runtime, excluding external BCL/IL resources.",
+    "Process wall time includes warmup, verification and output; it is not startup time.",
+    "These microbenchmarks are not end-to-end application or IL2CPP comparisons."
+  ],
+  "implementation_source_hashes": {
+    "src/leanaot/LeanAOT.Core/MetaUtil.cs": "cd2d73a21c7457f474af68b1b5ae9c511ec354d0382a1a1fbbfdf0a1bad20250",
+    "src/leanaot/LeanAOT.GenerationPlan/AotExceptionPolicy.cs": "84a66f13292acb991c545711a8b30c7461f30e1ee31bbf14a809b1cee87fbc6a",
+    "src/leanaot/LeanAOT.GenerationPlan/AotMethodRulesEvaluator.cs": "81a87f0178eb99980c50e48ebf885dd9dfa471311e8033fb81b05790a3191247",
+    "src/leanaot/LeanAOT.GenerationPlan/AssemblyPlan.cs": "5330d3cf3d96966babf32820fdb340dbb4793709ce8341acb1b8b9d034ea3bc4",
+    "src/leanaot/LeanAOT.GenerationPlan/GenericMethodPlan.cs": "8af7e2bd580b8a6a11645e0ae9f2f2540ceffd8868c9218840554150f56edee2",
+    "src/leanaot/LeanAOT.GenerationPlan/Manifest.Generics.cs": "8de94f52e4a7bedb14470d4f8c420109e04537c029cb449d8246b025bf7d1ba7",
+    "src/leanaot/LeanAOT.GenerationPlan/Manifest.cs": "0ad16f725b401bbe5ca406e5a1fb616b37ea3e9b197dbce6e206d38a40141295",
+    "src/leanaot/LeanAOT.ToCpp/CppGenerator.cs": "72b2d280fc68b867317a65d5cbbdef4d74c84b6c69e96d4311c9a57bf485e375",
+    "src/leanaot/LeanAOT.ToCpp/MethodDetail.cs": "4416c2a9d51cde4da51887e392a7add55f225f034c28419bb9a3e6d4f0e9a3ee",
+    "src/leanaot/LeanAOT.ToCpp/MethodDirectCallBridgeCodeFilePart.cs": "eb0317f524c069e378c9e4b06b6a2712cf58ebe0d2a72dbeb58859e73bfa8331",
+    "src/leanaot/LeanAOT.ToCpp/MethodGenerationUtil.cs": "66d8c37b292762a344f6dad5b6cf788263a70888b0fde1f8fa0463a9882364c0",
+    "src/leanaot/LeanAOT.ToCpp/MethodInvokerCodeFilePart.cs": "a225a1f72e57f66ebf1a9e8b235c84471ca3b90b091d554bc18e0a87c89b5b50",
+    "src/leanaot/LeanAOT.ToCpp/MethodWriterBase.Exceptions.cs": "7abc2d0fc26ffb87e9622c99f5a8496916710292f340c89083586f13fc0ad7a4",
+    "src/leanaot/LeanAOT.ToCpp/MethodWriterBase.cs": "4319f608bab9fa8736e222eef74d8f068415d9d9d809760b958fb5eedf74a549",
+    "src/leanaot/LeanAOT.ToCpp/ModuleRegistrationCppCodeFile.Generics.cs": "5df3c9aa88e0e1c5ef441e36b8f236cae9d5aaac1f90ebf1406caa5f841433d4",
+    "src/leanaot/LeanAOT.ToCpp/ModuleRegistrationCppCodeFile.cs": "d1a08b4f306f2fb2d0949a6ffc6bbdf92c9ed0ce4985e333a25b3697f3b8c176",
+    "src/leanaot/LeanAOT.ToCpp/RuntimeResolvedMetadatas.cs": "56cdf6dbabec8e92eb5f43c5aaaa632595cd8a634aa867aa2249d60dbf6d46c1",
+    "src/leanaot/LeanAOT.ToCpp/VirtualMethodWriter.cs": "9762b7dc4c49d10e2a2e0d69d866c9e720c36edb7c94dd6438a747e9b89d45e8",
+    "src/leanaot/LeanAOT/Program.cs": "1949b3366bb2b8a514c6151bdf7f3153a47761a8daef95eb262f6156943a6b6b",
+    "src/runtime/codegen/leanclr_common.h": "d294f70e2f989fa81dd02be056051764083ea0160fe20df3874ed4a740cc8857",
+    "src/runtime/interp/interp_defs.h": "1c205079ff7bd4a84a1d0274ce13b2a6d67a7481ae2b0d159d27d82cd8339a14",
+    "src/runtime/interp/interpreter.cpp": "7ceefeaeaeea02d18c7e1cbfc4e73b147f5f7450b1f29009d97fc18ca89d8439",
+    "src/runtime/interp/interpreter.h": "1a407fc17af256824b484817854f39cb76113798b911583529be6caaa84e6882",
+    "src/runtime/interp/transformer_encode.cpp": "116c9716f65d6901fd7db35c4de7be0db74773d62435295cbedb805c90a9c983",
+    "src/runtime/metadata/aot_module.cpp": "f20fb792c0b749d324eebb9c397058e472c20a9cf44f86180e686a4e0756cb87",
+    "src/runtime/metadata/rt_metadata.h": "0c2674c4d75cd0a7eb7a7e46fc73d4704c524a3a9ef48040b9de58a600dbd47b"
+  }
+}

@@ -493,6 +493,20 @@ T* get_static_field_address(const metadata::RtFieldInfo* field)
 
 RtResult<const RtStackObject*> Interpreter::execute(const metadata::RtMethodInfo* method, const interp::RtStackObject* params)
 {
+    return execute_impl(method, params, 0, 0, RtErr::None, false);
+}
+
+RtResult<const RtStackObject*> Interpreter::resume_exception(const metadata::RtMethodInfo* method, const RtStackObject* snapshot, size_t slots,
+                                                             uint32_t il_offset, RtErr error, bool explicit_throw)
+{
+    if (error == RtErr::None || !snapshot || !method || slots < method->total_arg_stack_object_size)
+        RET_ERR(RtErr::InvalidOperation);
+    return execute_impl(method, snapshot, slots, il_offset, error, explicit_throw);
+}
+
+RtResult<const RtStackObject*> Interpreter::execute_impl(const metadata::RtMethodInfo* method, const RtStackObject* params, size_t snapshot_slots,
+                                                         uint32_t il_offset, RtErr error, bool explicit_throw)
+{
     MachineState& ms = MachineState::get_global_machine_state();
     MachineStateSavePoint sp(ms);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InterpFrame*, frame, ms.enter_frame_from_native(method, params));
@@ -503,6 +517,36 @@ RtResult<const RtStackObject*> Interpreter::execute(const metadata::RtMethodInfo
 
     const uint8_t* ip = frame->ip;
     const RtStackObject* ret = frame->eval_stack_base;
+
+    if (error != RtErr::None)
+    {
+        const auto* info = frame->method->interp_data;
+        if (snapshot_slots != info->total_arg_and_local_stack_object_size)
+            RET_ERR(RtErr::InvalidOperation);
+        const RtInterpResumeEntry* entry = nullptr;
+        for (uint32_t i = 0; i < info->exception_resume_entry_count; ++i)
+            if (info->exception_resume_entries[i].il_offset == il_offset)
+            {
+                entry = &info->exception_resume_entries[i];
+                break;
+            }
+        if (!entry || entry->code_offset >= info->code_size)
+            RET_ERR(RtErr::InvalidOperation);
+        std::memcpy(frame->eval_stack_base, params, snapshot_slots * sizeof(RtStackObject));
+        ip = info->codes + entry->code_offset;
+        frame->save(ip);
+        vm::RtException* exception = vm::Exception::raise_error_as_exception(error, frame, ip);
+        if (!exception)
+            RET_ERR(RtErr::OutOfMemory);
+        if (explicit_throw && error == RtErr::ManagedException)
+        {
+            if (!vm::Class::is_exception_sub_class(reinterpret_cast<vm::RtObject*>(exception)->klass))
+                RET_ERR(RtErr::InvalidCast);
+            exception = vm::Exception::raise_exception(exception, frame, ip);
+        }
+        push_throw_flow(exception, frame, ip);
+        goto unwind_exception_handler;
+    }
 
 method_start:
 {

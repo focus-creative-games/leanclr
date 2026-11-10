@@ -928,6 +928,26 @@ struct RtAotMethodMonoPInvokeCallbackData
     RtNativeMethodPointer native_method_ptr;
 };
 
+// Closed AOT instance identities. No managed/BCL layouts or module IDs are
+// embedded: module IDs are assigned at load time. Nested arguments are immutable.
+struct RtAotTypeIdentity
+{
+    RtElementType element_type;
+    const char* module_name;
+    EncodedTokenId type_token;
+    const RtAotTypeIdentity* arguments;
+    uint32_t argument_count;
+};
+
+struct RtAotGenericMethodData
+{
+    RtAotMethodDefData implementation;
+    const RtAotTypeIdentity* class_arguments;
+    uint32_t class_argument_count;
+    const RtAotTypeIdentity* method_arguments;
+    uint32_t method_argument_count;
+};
+
 struct RtAotModuleData
 {
     const char* module_name;
@@ -937,6 +957,8 @@ struct RtAotModuleData
     uint32_t method_def_entry_count;
     const RtAotMethodMonoPInvokeCallbackData* mono_pinvoke_callback_entries;
     uint32_t mono_pinvoke_callback_entry_count;
+    const RtAotGenericMethodData* generic_method_entries;
+    uint32_t generic_method_entry_count;
 };
 
 struct RtAotModulesData

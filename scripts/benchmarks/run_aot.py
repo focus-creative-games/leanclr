@@ -104,7 +104,8 @@ def build(opts, output):
     invoke(['dotnet', 'build', ROOT / 'src/leanaot/LeanAOT/LeanAOT.csproj', '-c', 'Release'], output / 'tool-build.log')
     generator = ['dotnet', ROOT / 'out/dotnet/LeanAOT/Release/net8.0/LeanAOT.dll', '-d', stage,
                  '-d', ROOT / 'src/libraries/mono-4.5', '-a', 'AotBaseline', '-o', output / 'generated',
-                 '--leanaot-aot-rule-file', ROOT / 'src/benchmarks/aot-baseline/aot.xml']
+                 '--leanaot-aot-rule-file', ROOT / 'src/benchmarks/aot-baseline/aot.xml',
+                 '--leanaot-max-generic-instances', str(opts.max_generic_instances)]
     commands.append([str(x) for x in generator])
     invoke(generator, output / 'generate.log')
     for target in ['native'] + (['wasm'] if opts.emsdk else []):
@@ -130,6 +131,8 @@ def main():
     ap.add_argument('--unity', type=Path, help='Unity installation, e.g. D:/UnityHubs/2022.3.62f3')
     ap.add_argument('--emsdk', type=Path)
     ap.add_argument('--skip-build', action='store_true')
+    ap.add_argument('--build-only', action='store_true')
+    ap.add_argument('--max-generic-instances', type=int, default=2048)
     ap.add_argument('--samples', type=int, default=7)
     ap.add_argument('--iterations', type=int, default=5000000)
     ap.add_argument('--output', type=Path, default=ROOT / 'out/performance/aot')
@@ -140,6 +143,8 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     if not opts.skip_build:
         build(opts, output)
+    if opts.build_only:
+        return
     stage_arg = os.path.relpath(output / 'managed', ROOT).replace('\\', '/')
     if stage_arg.startswith('..'):
         ap.error('Wasm Node host mount requires --output inside the repository')
@@ -192,7 +197,7 @@ def main():
                   commit=subprocess.check_output(['git', 'rev-parse', 'HEAD'], cwd=ROOT, text=True).strip(),
                   source_sha256=hashlib.sha256(source.read_bytes()).hexdigest(),
                   notes=['IL2CPP uses Unity BCL after UnityLinker; LeanAOT uses repository Mono BCL.',
-                         'LeanAOT generic benchmark has an interpreter helper; exception benchmark runs in interpreter.',
+                         'Execution labels inspect actual entry/helper backends; AOT EH entries may hand off to interpreter on exceptions.',
                          'IL2CPP honors NoInlining; current LeanAOT output does not emit a corresponding attribute.',
                          'C++ is a computational reference, not a managed semantic equivalent.',
                          'Process wall time includes workload, warmup, verification and output; it is NOT startup time.',

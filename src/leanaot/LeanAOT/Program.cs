@@ -106,6 +106,12 @@ internal class Program
         [Option("leanaot-aot-rule-file", Required = false, HelpText = "LeanAOT-only: path to an aot.xml rule file (repeat for multiple files).")]
         public IEnumerable<string> AotMethodRuleFiles { get; set; }
 
+        [Option("leanaot-max-generic-instances", Default = 2048, HelpText = "Maximum closed generic AOT instances (0 disables discovery).")]
+        public int MaxGenericInstances { get; set; }
+
+        [Option("leanaot-max-generic-depth", Default = 32, HelpText = "Maximum closed generic call expansion depth.")]
+        public int MaxGenericDepth { get; set; }
+
         /// <summary>
         /// LeanAOT-only: PGO-generated exact include lists (repeat for multiple files).
         /// </summary>
@@ -657,8 +663,11 @@ internal class Program
             aotAssemblyNames = aotAssemblyNames,
             AotRulesEvaluator = aotRules,
             PgoIncludeIndex = pgoIncludeIndex,
+            MaxGenericInstances = il2CppOptions.MaxGenericInstances,
+            MaxGenericDepth = il2CppOptions.MaxGenericDepth,
         };
         var manifest = new Manifest(manifestArgs);
+
 
         var metaService = new MetadataService();
         var globalServices = new GlobalServices()
@@ -691,6 +700,19 @@ internal class Program
         Directory.CreateDirectory(confBuilder.outputCodeDir);
         var conf = confBuilder.Build();
         generator.Generate(conf);
+        System.IO.Directory.CreateDirectory(outputCodeDir);
+        System.IO.File.WriteAllText(System.IO.Path.Combine(outputCodeDir, "generic-aot-report.json"),
+            System.Text.Json.JsonSerializer.Serialize(new
+            {
+                schema = 1,
+                max_instances = manifestArgs.MaxGenericInstances,
+                max_depth = manifestArgs.MaxGenericDepth,
+                instances = manifest.GenericMethodPlans.Select(p => new { method = p.Method.FullName, key = p.Key, depth = p.Depth }),
+                fallbacks = manifest.GenericFallbacks,
+                method_fallbacks = manifest.MethodFallbacks,
+                normal_path_methods = manifest.AssemblyPlans.Values.SelectMany(p => p.MethodPlans)
+                    .Where(p => p.MethodDef.HasBody && p.MethodDef.Body.HasExceptionHandlers).Select(p => p.MethodDef.FullName),
+            }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
 
         Il2CppCompatibilityOutputs.EmitIfRequested(globalServices.Config, manifest, dllSearchPaths, aotAssemblyNames, metaService);
     }

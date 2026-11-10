@@ -11,6 +11,7 @@ namespace LeanAOT.GenerationPlan
         public List<ClassPlan> ClassPlans { get; }
 
         public List<MethodDefPlan> MethodPlans { get; }
+        public List<GenericMethodPlan> GenericMethodPlans { get; } = new List<GenericMethodPlan>();
 
         /// <summary>
         /// Methods carrying <c>[MonoPInvokeCallback]</c> (reverse P/Invoke entry points), sorted by method token.

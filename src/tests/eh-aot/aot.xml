@@ -1,0 +1,4 @@
+<aot>
+  <assembly fullname="*" aot="0" />
+  <assembly fullname="EhFixtures" aot="1" />
+</aot>

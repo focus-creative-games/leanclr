@@ -3,6 +3,8 @@
 #include "vm/assembly.h"
 #include "vm/class.h"
 #include "vm/method.h"
+#include "vm/generic_method.h"
+#include "metadata/metadata_cache.h"
 #include "vm/runtime.h"
 #include "vm/settings.h"
 #include <chrono>
@@ -63,6 +65,13 @@ int main(int argc, char** argv)
     auto* klass = type.unwrap();
     auto initialized_type = vm::Class::initialize_all(klass);
     require(initialized_type.is_ok(), "Benchmark class initialization failed");
+    const auto* identity_def = vm::Method::find_matched_method_in_class_by_name(klass, "Identity");
+    const metadata::RtTypeSig* identity_type = vm::Class::get_corlib_types().cls_uint32->by_val;
+    auto identity_inst = metadata::MetadataCache::get_pooled_generic_inst(&identity_type, 1);
+    require(identity_inst.is_ok(), "Generic benchmark arguments");
+    auto identity_method = vm::GenericMethod::get_method(identity_def, nullptr, identity_inst.unwrap());
+    require(identity_method.is_ok(), "Generic benchmark method");
+    const bool generic_is_aot = identity_method.unwrap()->invoker_type == metadata::RtInvokerType::Aot;
     const char* methods[] = {"Arithmetic", "Calls", "Properties", "ArrayLoop", "Interfaces", "Structs", "Generics", "Exceptions"};
     const char* workloads[] = {"arithmetic", "calls", "properties", "array", "interfaces", "structs", "generics", "exceptions"};
     for (unsigned k = 0; k < 8; ++k)
@@ -76,6 +85,8 @@ int main(int argc, char** argv)
         const void* warm_args[] = {&warm_n, &seed};
         auto warm = vm::Runtime::invoke_with_run_cctor(method, nullptr, warm_args);
         require(warm.is_ok(), "Warmup failed");
+        if (k == 7 && is_aot)
+            require(method->interp_data != nullptr, "Exception benchmark must hand off to interpreter");
         const void* args[] = {&n, &seed};
         const auto start = std::chrono::steady_clock::now();
         auto result = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
@@ -84,9 +95,10 @@ int main(int argc, char** argv)
         const uint32_t checksum = *reinterpret_cast<const uint32_t*>(result.unwrap() + 1);
         const double ns = std::chrono::duration<double, std::nano>(end - start).count() / n;
         std::printf("{\"workload\":\"%s\",\"execution\":\"%s\",\"iterations\":%d,\"checksum\":\"%u\",\"ns_per_op\":%.6f}\n", workloads[k],
-                    k == 6   ? "aot+interpreter"
-                    : is_aot ? "aot"
-                             : "interpreter",
+                    k == 6 && !generic_is_aot ? "aot+interpreter"
+                    : k == 7 && is_aot        ? "aot-normal/interpreter-eh"
+                    : is_aot                  ? "aot"
+                                              : "interpreter",
                     n, checksum, ns);
     }
     return 0;

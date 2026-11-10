@@ -23,6 +23,7 @@
 #include "vmutils/stringbuilder.h"
 #include "metadata/module_def.h"
 #include "interp/interp_defs.h"
+#include "interp/interpreter.h"
 #include "interp/execution_helper.h"
 #include "profile/profile.h"
 #include "utils/string_builder.h"
@@ -36,15 +37,15 @@
 #define LEANCLR_CODEGEN_ASSUME_NOT_NULL(ptr) LEANCLR_ASSUME_NOT_NULL(ptr)
 
 #if LEANCLR_PGO_PROFILE
-#define LEANCLR_CODEGEN_PROFILE_INC_CALL_COUNT(methodInfo) \
-    do                                                     \
-    {                                                      \
+#define LEANCLR_CODEGEN_PROFILE_INC_CALL_COUNT(methodInfo)    \
+    do                                                        \
+    {                                                         \
         leanclr::codegen::profile_inc_call_count(methodInfo); \
     } while (0)
 
-#define LEANCLR_CODEGEN_PROFILE_ADD_COST(methodInfo, cost) \
-    do                                                      \
-    {                                                       \
+#define LEANCLR_CODEGEN_PROFILE_ADD_COST(methodInfo, cost)                           \
+    do                                                                               \
+    {                                                                                \
         leanclr::codegen::profile_add_cost(methodInfo, static_cast<uint32_t>(cost)); \
     } while (0)
 #else

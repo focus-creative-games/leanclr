@@ -277,6 +277,13 @@ namespace LeanAOT.ToCpp
 
         void WriteDeferredCode()
         {
+            if (ExceptionHandoff)
+            {
+                _ = CurMethodVar;
+                _headWriter.AddLine("uint32_t ___eh_ip = 0;");
+                _headWriter.AddLine("bool ___eh_explicit_throw = false;");
+                _headWriter.AddLine("int32_t ___eh_leave = 0;");
+            }
             if (!_runtimeResolvedMetadatas.IsEmpty())
             {
                 var subVariables = _runtimeResolvedMetadatas.ResolvedVariables.SelectMany(v => v.GetSubVariables()).ToList();
@@ -311,7 +318,10 @@ namespace LeanAOT.ToCpp
                 _headWriter.SetIndent(1);
                 _headWriter.AddLine($"if (!{_runtimeResolvedMetadatas.GetResolveMetadatasInitedVariableName()})");
                 _headWriter.BeginBlock();
-                _headWriter.AddLine($"{VmFunctionNames.ResolveMetadataTokens}({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
+                if (_method.IsGeneric)
+                    _headWriter.AddLine($"leanclr::codegen::resolve_generic_metadata_tokens({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, __aot_method, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
+                else
+                    _headWriter.AddLine($"{VmFunctionNames.ResolveMetadataTokens}({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
 
                 foreach (SubRuntimeResolvedVariable subVariable in subVariables)
                 {
@@ -351,9 +361,11 @@ namespace LeanAOT.ToCpp
 
             if (__curMethodVar != null)
             {
+                if (ExceptionHandoff) WriteFinallyDispatchers();
                 _tailWriter.AddLine($"{GetHandleReturnErrorLabelName()}:");
                 _tailWriter.AddLine($"assert({GetRetErrorVariableName()} != {ConstStrings.RtErrTypeName}::None);");
-                _tailWriter.AddLine($"LEANCLR_CODEGEN_THROW_RUNTIME_ERROR({GetRetErrorVariableName()}, {CurMethodVar.GetFullReferenceVariableName()}, 0);");
+                if (ExceptionHandoff) WriteExceptionSnapshot();
+                else _tailWriter.AddLine($"LEANCLR_CODEGEN_THROW_RUNTIME_ERROR({GetRetErrorVariableName()}, {CurMethodVar.GetFullReferenceVariableName()}, 0);");
             }
             _tailWriter.DecreaseIndent();
         }
@@ -1999,7 +2011,7 @@ namespace LeanAOT.ToCpp
 
         private void EmitCheckNotNull(Instruction inst, EvalVariable objVar)
         {
-            if (!_globalConfig.EmitNullChecks)
+            if (!_globalConfig.EmitNullChecks && !ExceptionHandoff)
             {
                 return;
             }
@@ -2150,6 +2162,7 @@ namespace LeanAOT.ToCpp
             if (_manifestService.ShouldAOT(methodDetail.Method))
             {
                 var argsStr = CreateMethodFunctionArgsWithCast(methodDetail, args);
+                if (methodDetail.IsGeneric) argsStr = methodDetail.WithMethodContext(argsStr, methodVarNameProvider());
                 if (!methodDetail.IsVoidReturn)
                 {
                     EmitAssignOrThrow(inst, retVar, $"{methodDetail.UniqueName}({argsStr})");
@@ -2558,10 +2571,9 @@ namespace LeanAOT.ToCpp
         {
             if (!MetaUtil.IsValueType(targetType.ToTypeSig()))
             {
-                Pop();
-                PushStack(targetType);
-                // do nothing since it's already a reference type, just need to change the type on stack
-                // EmitCastClass(inst, targetType);
+                var source = Pop();
+                var target = PushStack(targetType);
+                _bodyWriter.AddLine($"{GetTypeName(target)} {GetEvalVariableName(target)} = ({GetTypeName(target)}){GetEvalVariableName(source)};");
                 return;
             }
             var srcObj = Pop();
@@ -2578,6 +2590,14 @@ namespace LeanAOT.ToCpp
         private void EmitThrow(Instruction inst)
         {
             var exObj = Pop();
+            if (ExceptionHandoff)
+            {
+                _bodyWriter.AddLine($"leanclr::vm::Exception::set_current_exception((leanclr::vm::RtException*){GetEvalVariableName(exObj)});");
+                _bodyWriter.AddLine($"___ret_err = {GetEvalVariableName(exObj)} ? leanclr::RtErr::ManagedException : leanclr::RtErr::NullReference;");
+                _bodyWriter.AddLine("___eh_explicit_throw = true;");
+                _bodyWriter.AddLine($"goto {GetHandleReturnErrorLabelName()};");
+                return;
+            }
             _bodyWriter.AddLine($"{VmFunctionNames.THROW_EXCEPTION}({GetEvalVariableName(exObj)}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
         }
 
@@ -2806,7 +2826,7 @@ namespace LeanAOT.ToCpp
 
         private void EmitCheckArrayIndexOutOfRange(Instruction inst, EvalVariable objVar, EvalVariable indexVar)
         {
-            if (!_globalConfig.EnableArrayBoundsCheck)
+            if (!_globalConfig.EnableArrayBoundsCheck && !ExceptionHandoff)
             {
                 return;
             }
@@ -3082,12 +3102,15 @@ namespace LeanAOT.ToCpp
 
         private void EmitLeave(Instruction inst, Instruction operand)
         {
-            throw new NotImplementedException("leave is not implemented");
+            EmitNormalLeave(inst, operand);
         }
 
         private void EmitEndfinally(Instruction inst)
         {
-            throw new NotImplementedException("endfinally is not implemented");
+            var handler = _method.MethodDef.Body.ExceptionHandlers.First(e => e.HandlerType == ExceptionHandlerType.Finally &&
+                inst.Offset >= e.HandlerStart.Offset && (e.HandlerEnd == null || inst.Offset < e.HandlerEnd.Offset));
+            if (!_finallyReturns.ContainsKey(handler.HandlerStart.Offset)) _finallyReturns[handler.HandlerStart.Offset] = new List<(int, string)>();
+            _bodyWriter.AddLine($"goto __finally_end_{handler.HandlerStart.Offset};");
         }
 
         private void EmitRefanyval(Instruction inst, ITypeDefOrRef inflatedType, uint inlineToken)
@@ -3220,6 +3243,7 @@ namespace LeanAOT.ToCpp
             bool methodHasReturnValue = !_method.IsVoidReturn;
             foreach (BasicBlock block in basicBlockCollection.Blocks)
             {
+                if (InterpreterOnlyBlock(block.StartOffset)) continue;
                 _bodyWriter.AddLine($"// Basic Block begin. IL: 0X{block.StartOffset.ToString("X8")} - 0X{(block.nextBlock != null ? block.nextBlock.StartOffset.ToString("X8") : " End")}");
 
                 EvalStackState state = _blockEvalStackStates[block];
@@ -3316,6 +3340,7 @@ namespace LeanAOT.ToCpp
                     }
                     string instComment = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(inst.ToString()));
                     _bodyWriter.AddLine($"// {instComment}");
+                    if (ExceptionHandoff) _bodyWriter.AddLine($"___eh_ip = {inst.Offset};");
                     switch (inst.OpCode.Code)
                     {
                     case Code.Nop: break;

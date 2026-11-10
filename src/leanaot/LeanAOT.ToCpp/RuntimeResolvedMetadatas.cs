@@ -216,7 +216,7 @@ namespace LeanAOT.ToCpp
 
         public RuntimeResolvedVariable GetMethodVariable(IMethod method, MethodDetail methodDetail)
         {
-            uint token = method.MDToken.ToUInt32();
+            uint token = _method.GetMetadataToken(method);
             if (!_tokenVariables.TryGetValue(token, out var variable))
             {
                 variable = NewResolvedVariable(token, method, methodDetail);
@@ -227,7 +227,7 @@ namespace LeanAOT.ToCpp
 
         public RuntimeResolvedVariable GetTypeVariable(ITypeDefOrRef type, TypeDetail typeDetail)
         {
-            uint token = type.MDToken.ToUInt32();
+            uint token = _method.GetMetadataToken(type);
             if (!_tokenVariables.TryGetValue(token, out var variable))
             {
                 variable = NewResolvedVariable(token, type, typeDetail);
@@ -238,7 +238,7 @@ namespace LeanAOT.ToCpp
 
         public RuntimeResolvedVariable GetFieldVariable(IField field, FieldDetail fieldDetail)
         {
-            uint token = field.MDToken.ToUInt32();
+            uint token = _method.GetMetadataToken(field);
             if (!_tokenVariables.TryGetValue(token, out var variable))
             {
                 variable = NewResolvedVariable(token, field, fieldDetail);

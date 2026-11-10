@@ -65,6 +65,7 @@ namespace LeanAOT.ToCpp
                 }
             }
             string args = string.Join(", ", methodDetail.ParamsIncludeThis.Select((param, index) => $"*({MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed)}*)(args + ARG{index}_OFFSET)"));
+            args = methodDetail.WithMethodContext(args, "method");
             if (methodDetail.IsVoidReturn)
             {
                 _invokerImplWriter.AddLine($"return (({castFnPtrType})method_ptr)({args});");
