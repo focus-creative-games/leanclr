@@ -125,3 +125,8 @@ add_test(NAME gc-accounting COMMAND runtime-regressions gc-accounting "${LEANCLR
 add_test(NAME compressed-signed COMMAND runtime-regressions compressed-signed "${LEANCLR_TEST_DLL_DIR}")
 
 add_test(NAME unaligned-image COMMAND runtime-regressions unaligned-image "${LEANCLR_TEST_DLL_DIR}")
+
+add_executable(string-allocation string-allocation.cpp)
+target_link_libraries(string-allocation PRIVATE leanclr)
+set_target_properties(string-allocation PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
+add_test(NAME string-allocation COMMAND string-allocation)

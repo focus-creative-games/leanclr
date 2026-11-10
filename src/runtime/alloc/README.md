@@ -104,3 +104,9 @@ identity locking. `invocation-buffers` and `allocation-failures` install one
 allocator before startup and inject failures by changing its state, never by
 replacing the allocator under live objects. Their cases cover partial invocation
 buffers and failed assembly-pool construction/rollback, followed by recovery.
+
+String duplication and concatenation expose `StringUtil::try_*` APIs that return
+`OutOfMemory` for allocation or size overflow. Null input retains optional-string
+semantics. Legacy pointer-returning wrappers use the fatal allocation policy;
+callers that need recovery must use the fallible APIs. Returned buffers belong to
+the caller and are released with `GeneralAllocation::free`.
