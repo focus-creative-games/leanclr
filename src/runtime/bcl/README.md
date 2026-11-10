@@ -3,8 +3,9 @@
 Core now compiles as three object targets, composed into the existing `leanclr`
 static/shared library. The public C API is unchanged. This checkout supplies the
 Mono 4.5 BCL adapter; `LEANCLR_BCL_ADAPTER=MONO` is explicit, and other values are
-rejected until their adapter implementation is supplied. Other branch worktrees
-are not modified by this change.
+rejected until their adapter implementation is supplied. Core and Mono now share
+this implementation; deployment differences are host compositions, not separate
+runtime editions. See [architecture and branch migration](../../../docs/architecture.md).
 
 | Layer | Target and sources | Responsibility |
 | --- | --- | --- |

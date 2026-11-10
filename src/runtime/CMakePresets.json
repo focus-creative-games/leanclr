@@ -1,0 +1,40 @@
+{
+  "version": 3,
+  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "configurePresets": [
+    {
+      "name": "mono-base",
+      "hidden": true,
+      "binaryDir": "${sourceDir}/../../out/cmake/runtime/${presetName}",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "CMAKE_TRY_COMPILE_CONFIGURATION": "Release",
+        "LEANCLR_BCL_ADAPTER": "MONO",
+        "LEANCLR_FORCE_PORTABLE": "OFF"
+      }
+    },
+    {
+      "name": "mono-minimal",
+      "displayName": "Mono BCL / portable host (formerly Core)",
+      "inherits": "mono-base",
+      "cacheVariables": { "LEANCLR_HOST": "PORTABLE" }
+    },
+    {
+      "name": "mono-native",
+      "displayName": "Mono BCL / native platform host (formerly Mono)",
+      "inherits": "mono-base",
+      "cacheVariables": { "LEANCLR_HOST": "NATIVE" }
+    },
+    {
+      "name": "mono-custom",
+      "displayName": "Mono BCL / application-supplied host",
+      "inherits": "mono-base",
+      "cacheVariables": { "LEANCLR_HOST": "CUSTOM" }
+    }
+  ],
+  "buildPresets": [
+    { "name": "mono-minimal", "configurePreset": "mono-minimal", "configuration": "Release" },
+    { "name": "mono-native", "configurePreset": "mono-native", "configuration": "Release" },
+    { "name": "mono-custom", "configurePreset": "mono-custom", "configuration": "Release" }
+  ]
+}

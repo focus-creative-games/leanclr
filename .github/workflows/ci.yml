@@ -1,17 +1,17 @@
-name: Core portability
+name: Shared runtime and Mono compositions
 
 on:
   push:
-    branches: [core, main, master]
+    branches: [core, mono, main, master]
   pull_request:
-    branches: [core, main, master]
+    branches: [core, mono, main, master]
   workflow_dispatch:
 
 permissions:
   contents: read
 
 concurrency:
-  group: core-ci-${{ github.workflow }}-${{ github.ref }}
+  group: runtime-ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 env:
@@ -25,10 +25,12 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - {name: Windows x64, os: windows-2022, arch: x64}
-          - {name: Windows x86, os: windows-2022, arch: Win32}
-          - {name: Linux x64, os: ubuntu-24.04, arch: native}
-          - {name: Linux ARM64, os: ubuntu-24.04-arm, arch: native}
+          - {name: Windows x64 native, os: windows-2022, arch: x64, host: NATIVE}
+          - {name: Windows x86 native, os: windows-2022, arch: Win32, host: NATIVE}
+          - {name: Linux x64 native, os: ubuntu-24.04, arch: native, host: NATIVE}
+          - {name: Linux ARM64 native, os: ubuntu-24.04-arm, arch: native, host: NATIVE}
+          - {name: Windows x64 minimal, os: windows-2022, arch: x64, host: PORTABLE}
+          - {name: Linux x64 minimal, os: ubuntu-24.04, arch: native, host: PORTABLE}
     runs-on: ${{ matrix.os }}
     timeout-minutes: 20
     defaults:
@@ -40,7 +42,7 @@ jobs:
         run: |
           args=()
           if [[ '${{ matrix.arch }}' != native ]]; then args+=(-A '${{ matrix.arch }}'); fi
-          cmake -S src/tests/runtime-regressions -B out/ci -DCMAKE_BUILD_TYPE=Release "${args[@]}"
+          cmake -S src/tests/runtime-regressions -B out/ci -DCMAKE_BUILD_TYPE=Release -DLEANCLR_BCL_ADAPTER=MONO -DLEANCLR_HOST=${{ matrix.host }} "${args[@]}"
       - name: Build runtime and standalone regressions
         run: cmake --build out/ci --config Release --parallel 2 --target $NATIVE_TARGETS
       - name: Test on target architecture

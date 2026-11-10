@@ -3,7 +3,7 @@
 # Usage:
 #   ./scripts/build.sh test build [Config] [Arch]
 #   ./scripts/build.sh test run [Config]
-#   ./scripts/build.sh runtime [Debug|Release]
+#   ./scripts/build.sh runtime [Debug|Release] [native|minimal|custom]
 #   ./scripts/build.sh leanaot [Debug|Release]
 #   ./scripts/build.sh aot-tester [build] [Config] [Arch]
 #   ./scripts/build.sh aot-tester gen-cpp
@@ -20,7 +20,7 @@ usage() {
 Usage:
   scripts/build.sh test build [Config] [Arch]
   scripts/build.sh test run [Config]
-  scripts/build.sh runtime [Debug|Release]
+  scripts/build.sh runtime [Debug|Release] [native|minimal|custom]
   scripts/build.sh leanaot [Debug|Release]
   scripts/build.sh aot-tester [build] [Config] [Arch]
   scripts/build.sh aot-tester gen-cpp

@@ -28,9 +28,11 @@ set(LEANCLR_GC_ALGORITHM "MARK_SWEEP")
 option(LEANCLR_GC_DEBUG "Enable GC debug (quarantine, allocation sites)" ON)
 
 set(LEANCLR_BCL_ADAPTER "MONO" CACHE STRING "Managed BCL adapter (currently MONO)")
+set_property(CACHE LEANCLR_BCL_ADAPTER PROPERTY STRINGS MONO)
 if(NOT LEANCLR_BCL_ADAPTER STREQUAL "MONO")
     message(FATAL_ERROR "Unsupported LEANCLR_BCL_ADAPTER: ${LEANCLR_BCL_ADAPTER}")
 endif()
+message(STATUS "LeanCLR composition: BCL=${LEANCLR_BCL_ADAPTER}, host=${LEANCLR_HOST}, force-portable=${LEANCLR_FORCE_PORTABLE}, threading=SINGLE")
 
 set(LEANCLR_CORE_DIRS alloc codegen core interp log metadata misc profile public_impl utils vm)
 set(core_sources)
