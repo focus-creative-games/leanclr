@@ -1,6 +1,7 @@
 #pragma once
 
 #include "core/rt_base.h"
+#include "host/services.h"
 #include "utils/rt_span.h"
 #include "rt_managed_types.h"
 #include "gc/gc_common.h"
@@ -10,17 +11,11 @@ namespace leanclr
 namespace vm
 {
 
-struct FileData
-{
-    const uint8_t* data;
-    size_t length;
-    bool shared;
-};
+using FileData = host::FileData;
+using FileLoader = host::FileLoader;
+using InternalFunctionInitializer = void (*)();
+using DebuggerLogFunc = host::DebuggerLog;
 
-typedef bool (*FileLoader)(const char* assembly_name, const char* extension, FileData& file_data);
-
-typedef void (*InternalFunctionInitializer)();
-typedef void (*DebuggerLogFunc)(int32_t level, const uint16_t* category, size_t category_len, const uint16_t* message, size_t message_len);
 typedef void (*ReportUnhandledExceptionFunc)(RtException* exception);
 
 class Settings

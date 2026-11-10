@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_argiterator.h"
 
 #include "icall_base.h"

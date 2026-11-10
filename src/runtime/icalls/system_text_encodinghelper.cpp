@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_text_encodinghelper.h"
 
 #include "vm/rt_string.h"

@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_customattributedata.h"
 
 #include "vm/customattribute.h"

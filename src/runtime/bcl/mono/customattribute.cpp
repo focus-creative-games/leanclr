@@ -1,18 +1,19 @@
+#include "managed_layouts.h"
 #include "core/stl_compat.h"
 
-#include "customattribute.h"
-#include "class.h"
-#include "assembly.h"
-#include "object.h"
-#include "field.h"
-#include "method.h"
-#include "rt_string.h"
-#include "rt_array.h"
-#include "reflection.h"
-#include "type.h"
-#include "runtime.h"
-#include "marshal.h"
-#include "rt_string.h"
+#include "vm/customattribute.h"
+#include "vm/class.h"
+#include "vm/assembly.h"
+#include "vm/object.h"
+#include "vm/field.h"
+#include "vm/method.h"
+#include "vm/rt_string.h"
+#include "vm/rt_array.h"
+#include "vm/reflection.h"
+#include "vm/type.h"
+#include "vm/runtime.h"
+#include "vm/marshal.h"
+#include "vm/rt_string.h"
 #include "utils/binary_reader.h"
 #include "utils/rt_span.h"
 #include "gc/garbage_collector.h"
@@ -296,7 +297,8 @@ static RtResult<uint64_t> read_customattribute_elem_value(metadata::RtModuleDef*
             uint8_t raw_data = 0;
             if (!reader->try_read_byte(raw_data))
                 RET_ASSERT_ERR(RtErr::BadImageFormat);
-            UNWRAP_OR_RET_ERR_ON_FAIL(obj, LEANCLR_BOX_OBJECT_INTERNAL(corlib_types.cls_boolean, &raw_data, "customattribute::read_customattribute_elem_value"));
+            UNWRAP_OR_RET_ERR_ON_FAIL(obj,
+                                      LEANCLR_BOX_OBJECT_INTERNAL(corlib_types.cls_boolean, &raw_data, "customattribute::read_customattribute_elem_value"));
             break;
         }
         case metadata::RtElementType::Char:
@@ -449,7 +451,9 @@ static RtResult<uint64_t> read_customattribute_elem_value(metadata::RtModuleDef*
                 metadata::RtTypeSig ele_type_sig{};
                 ele_type_sig.ele_type = ele_type;
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, ele_klass, Class::get_class_from_typesig(&ele_type_sig));
-                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, elem_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(ele_klass, static_cast<int32_t>(num_elems), "customattribute::read_customattribute_elem_value"));
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, elem_arr,
+                                                        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(ele_klass, static_cast<int32_t>(num_elems),
+                                                                                                    "customattribute::read_customattribute_elem_value"));
                 size_t ele_size = Array::get_array_element_size(elem_arr);
                 uint8_t* arr_data_ptr = Array::get_array_data_start_as<uint8_t>(elem_arr);
                 for (uint32_t i = 0; i < num_elems; ++i)
@@ -503,7 +507,9 @@ static RtResult<FixedArg> read_fixed_arg(metadata::RtModuleDef* mod, const metad
         {
             const metadata::RtTypeSig* ele_type_sig = param_type->data.element_type;
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, ele_klass, Class::get_class_from_typesig(ele_type_sig));
-            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, elem_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(ele_klass, static_cast<int32_t>(num_elems), "customattribute::read_customattribute_elem_value"));
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+                RtArray*, elem_arr,
+                LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(ele_klass, static_cast<int32_t>(num_elems), "customattribute::read_customattribute_elem_value"));
 
             size_t ele_size = Array::get_array_element_size(elem_arr);
             uint8_t* arr_data_ptr = Array::get_array_data_start_as<uint8_t>(elem_arr);
@@ -823,7 +829,8 @@ static RtResult<RtObject*> new_custom_attribute_typed_argument(const metadata::R
     {
         invoke_args[1] = *(const void**)data;
     }
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, typed_arg_obj, LEANCLR_NEWOBJ_INTERNAL(ctor->parent, "CustomAttribute::new_custom_attribute_typed_argument"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, typed_arg_obj,
+                                            LEANCLR_NEWOBJ_INTERNAL(ctor->parent, "CustomAttribute::new_custom_attribute_typed_argument"));
     RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(ctor, typed_arg_obj, invoke_args));
     RET_OK(typed_arg_obj);
 }
@@ -831,7 +838,8 @@ static RtResult<RtObject*> new_custom_attribute_typed_argument(const metadata::R
 static RtResult<RtObject*> new_custom_attribute_named_argument(const metadata::RtMethodInfo* ctor, RtObject* member_info, RtObject* typed_arg)
 {
     const void* invoke_args[2] = {member_info, typed_arg + 1}; // typed_arg + 1 to skip the RtObject header
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, named_arg_obj, LEANCLR_NEWOBJ_INTERNAL(ctor->parent, "CustomAttribute::new_custom_attribute_typed_argument"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, named_arg_obj,
+                                            LEANCLR_NEWOBJ_INTERNAL(ctor->parent, "CustomAttribute::new_custom_attribute_typed_argument"));
     RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(ctor, named_arg_obj, invoke_args));
     RET_OK(named_arg_obj);
 }
@@ -868,7 +876,9 @@ RtResultVoid CustomAttribute::resolve_customattribute_data_arguments(utils::Bina
         RET_ERR(RtErr::MissingMethod);
 
     uint32_t param_count = ctor_method->parameter_count;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, typed_arg_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_object, (int32_t)param_count, "CustomAttribute::resolve_customattribute_data_arguments"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        RtArray*, typed_arg_arr,
+        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_object, (int32_t)param_count, "CustomAttribute::resolve_customattribute_data_arguments"));
     *typed_arg_arr_ptr = typed_arg_arr;
 
     for (uint32_t i = 0; i < param_count; ++i)
@@ -885,7 +895,9 @@ RtResultVoid CustomAttribute::resolve_customattribute_data_arguments(utils::Bina
     if (!reader->try_read_u16(named_arg_count))
         RET_ASSERT_ERR(RtErr::BadImageFormat);
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, named_arg_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_object, (int32_t)named_arg_count, "CustomAttribute::resolve_customattribute_data_arguments"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, named_arg_arr,
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_object, (int32_t)named_arg_count,
+                                                                                        "CustomAttribute::resolve_customattribute_data_arguments"));
     *named_arg_arr_ptr = named_arg_arr;
 
     for (uint16_t i = 0; i < named_arg_count; ++i)
@@ -1128,7 +1140,9 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_on_target_token(metadat
         ca_buf.push_back(ca);
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, ca_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(types.cls_attribute, (int32_t)ca_buf.size(), "CustomAttribute::get_customattributes_on_target_token"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        RtArray*, ca_arr,
+        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(types.cls_attribute, (int32_t)ca_buf.size(), "CustomAttribute::get_customattributes_on_target_token"));
 
     for (size_t i = 0; i < ca_buf.size(); ++i)
     {
@@ -1181,7 +1195,9 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(me
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(metadata::RtCustomAttributeRidRange, rid_range, mod->get_custom_attribute_rid_range(target_token));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(const metadata::RtMethodInfo*, ca_data_ctor, get_customattribute_data_ctor());
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(RtArray*, ca_data_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(types.cls_customattributedata, (int32_t)rid_range.count, "CustomAttribute::get_customattributes_data_on_target_token"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(RtArray*, ca_data_arr,
+                                             LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(types.cls_customattributedata, (int32_t)rid_range.count,
+                                                                                         "CustomAttribute::get_customattributes_data_on_target_token"));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionAssembly*, assembly_obj, Reflection::get_assembly_reflection_object(mod->get_assembly()));
     for (uint32_t i = 0; i < rid_range.count; ++i)
     {
@@ -1202,7 +1218,8 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(me
         ctor_args[2] = &data_ptr;
         ctor_args[3] = &data_len;
 
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca_data_obj, LEANCLR_NEWOBJ_INTERNAL(ca_data_ctor->parent, "CustomAttribute::get_customattributes_data_on_target_token"));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca_data_obj,
+                                                LEANCLR_NEWOBJ_INTERNAL(ca_data_ctor->parent, "CustomAttribute::get_customattributes_data_on_target_token"));
         RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(ca_data_ctor, ca_data_obj, ctor_args));
 
         // gc::GarbageCollector::write_barrier((RtObject**)Array::get_array_data_start_as<RtObject*>(ca_data_arr) + i, ca_data_obj);
@@ -1318,7 +1335,8 @@ RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::R
     init_marshal_as_fields();
 
     const CorLibTypes& corlib_types = Class::get_corlib_types();
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, marshal_as_obj, LEANCLR_NEWOBJ_INTERNAL(corlib_types.cls_marshal_as, "CustomAttribute::get_marshal_info"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, marshal_as_obj,
+                                            LEANCLR_NEWOBJ_INTERNAL(corlib_types.cls_marshal_as, "CustomAttribute::get_marshal_info"));
     const void* ctor_args[1] = {&spec.native_type};
     RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(s_marshal_as_metadatas.ctor_int16, marshal_as_obj, ctor_args));
 
@@ -1327,67 +1345,69 @@ RtResult<RtCustomAttribute*> CustomAttribute::get_marshal_info(const metadata::R
     uint32_t num_elems = 0;
     switch (spec.native_type)
     {
-        case metadata::RtMarshalNativeType::FixedSysString:
+    case metadata::RtMarshalNativeType::FixedSysString:
+    {
+        auto& fixed_sys_string_data = spec.fixed_sys_string;
+        vm::Field::set_instance_value(s_marshal_as_metadatas.size_const, marshal_as_obj, &fixed_sys_string_data.size);
+        break;
+    }
+    case metadata::RtMarshalNativeType::SafeArray:
+    {
+        auto& safe_array_data = spec.safe_array;
+        vm::Field::set_instance_value(s_marshal_as_metadatas.safe_array_user_defined_sub_type, marshal_as_obj, &safe_array_data.variant_type);
+        vm::Field::set_instance_value(s_marshal_as_metadatas.safe_array_sub_type, marshal_as_obj, &safe_array_data.udt);
+        break;
+    }
+    case metadata::RtMarshalNativeType::FixedArray:
+    {
+        auto& fixed_array_data = spec.fixed_array;
+        vm::Field::set_instance_value(s_marshal_as_metadatas.size_const, marshal_as_obj, &fixed_array_data.size);
+        vm::Field::set_instance_value(s_marshal_as_metadatas.array_sub_type, marshal_as_obj, &fixed_array_data.array_element_type);
+        break;
+    }
+    case metadata::RtMarshalNativeType::Array:
+    {
+        auto& arr_data = spec.array;
+        vm::Field::set_instance_value(s_marshal_as_metadatas.array_sub_type, marshal_as_obj, &arr_data.array_element_type);
+        vm::Field::set_instance_value(s_marshal_as_metadatas.size_param_index, marshal_as_obj, &arr_data.param_index);
+        vm::Field::set_instance_value(s_marshal_as_metadatas.size_const, marshal_as_obj, &arr_data.element_count);
+        break;
+    }
+    case metadata::RtMarshalNativeType::CustomMarshaler:
+    {
+        auto& custom_marshaler_data = spec.custom_marshaler;
+        if (custom_marshaler_data.guid.is_valid())
         {
-            auto& fixed_sys_string_data = spec.fixed_sys_string;
-            vm::Field::set_instance_value(s_marshal_as_metadatas.size_const, marshal_as_obj, &fixed_sys_string_data.size);
-            break;
+            RtString* guid_str = create_utf8_span_string(custom_marshaler_data.guid);
+            vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_cookie, marshal_as_obj, &guid_str);
         }
-        case metadata::RtMarshalNativeType::SafeArray:
+        if (custom_marshaler_data.cookie.is_valid())
         {
-            auto& safe_array_data = spec.safe_array;
-            vm::Field::set_instance_value(s_marshal_as_metadatas.safe_array_user_defined_sub_type, marshal_as_obj, &safe_array_data.variant_type);
-            vm::Field::set_instance_value(s_marshal_as_metadatas.safe_array_sub_type, marshal_as_obj, &safe_array_data.udt);
-            break;
+            RtString* cookie_str = create_utf8_span_string(custom_marshaler_data.cookie);
+            vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_cookie, marshal_as_obj, &cookie_str);
         }
-        case metadata::RtMarshalNativeType::FixedArray:
+        if (custom_marshaler_data.type_name.is_valid())
         {
-            auto& fixed_array_data = spec.fixed_array;
-            vm::Field::set_instance_value(s_marshal_as_metadatas.size_const, marshal_as_obj, &fixed_array_data.size);
-            vm::Field::set_instance_value(s_marshal_as_metadatas.array_sub_type, marshal_as_obj, &fixed_array_data.array_element_type);
-            break;
+            RtString* type_name_str = create_utf8_span_string(custom_marshaler_data.type_name);
+            vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_type, marshal_as_obj, &type_name_str);
         }
-        case metadata::RtMarshalNativeType::Array:
+        if (custom_marshaler_data.custom_marshaler_type)
         {
-            auto& arr_data = spec.array;
-            vm::Field::set_instance_value(s_marshal_as_metadatas.array_sub_type, marshal_as_obj, &arr_data.array_element_type);
-            vm::Field::set_instance_value(s_marshal_as_metadatas.size_param_index, marshal_as_obj, &arr_data.param_index);
-            vm::Field::set_instance_value(s_marshal_as_metadatas.size_const, marshal_as_obj, &arr_data.element_count);
-            break;
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, type_obj,
+                                                    Reflection::get_type_reflection_object(custom_marshaler_data.custom_marshaler_type));
+            vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_type_ref, marshal_as_obj, &type_obj);
         }
-        case metadata::RtMarshalNativeType::CustomMarshaler:
-        {
-            auto& custom_marshaler_data = spec.custom_marshaler;
-            if (custom_marshaler_data.guid.is_valid())
-            {
-                RtString* guid_str = create_utf8_span_string(custom_marshaler_data.guid);
-                vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_cookie, marshal_as_obj, &guid_str);
-            }
-            if (custom_marshaler_data.cookie.is_valid())
-            {
-                RtString* cookie_str = create_utf8_span_string(custom_marshaler_data.cookie);
-                vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_cookie, marshal_as_obj, &cookie_str);
-            }
-            if (custom_marshaler_data.type_name.is_valid())
-            {
-                RtString* type_name_str = create_utf8_span_string(custom_marshaler_data.type_name);
-                vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_type, marshal_as_obj, &type_name_str);
-            }
-            if (custom_marshaler_data.custom_marshaler_type)
-            {
-                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, type_obj, Reflection::get_type_reflection_object(custom_marshaler_data.custom_marshaler_type));
-                vm::Field::set_instance_value(s_marshal_as_metadatas.marshal_type_ref, marshal_as_obj, &type_obj);
-            }
-            break;
-        }
-        case metadata::RtMarshalNativeType::IUnknown:
-        case metadata::RtMarshalNativeType::IDispatch:
-        case metadata::RtMarshalNativeType::IntF:
-        {
-            vm::Field::set_instance_value(s_marshal_as_metadatas.iid_parameter_index, marshal_as_obj, &spec.interface.iid_param_index);
-            break;
-        }
-        default: break;
+        break;
+    }
+    case metadata::RtMarshalNativeType::IUnknown:
+    case metadata::RtMarshalNativeType::IDispatch:
+    case metadata::RtMarshalNativeType::IntF:
+    {
+        vm::Field::set_instance_value(s_marshal_as_metadatas.iid_parameter_index, marshal_as_obj, &spec.interface.iid_param_index);
+        break;
+    }
+    default:
+        break;
     }
     RET_OK((RtCustomAttribute*)marshal_as_obj);
 }

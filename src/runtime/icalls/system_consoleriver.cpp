@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_consoleriver.h"
 
 #include "platform/rt_console.h"

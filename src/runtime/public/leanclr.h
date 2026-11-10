@@ -11,23 +11,7 @@
 #include <alloca.h>
 #endif
 
-#ifndef LEANCLR_EXPORT
-#ifdef _MSC_VER
-#define LEANCLR_EXPORT __declspec(dllexport)
-#define LEANCLR_IMPORT __declspec(dllimport)
-#else
-#define LEANCLR_EXPORT __attribute__((visibility("default")))
-#define LEANCLR_IMPORT
-#endif
-#endif
-
-#if defined(LEANCLR_STATIC)
-#define LEANCLR_API
-#elif defined(LEANCLR_DLL_EXPORTS)
-#define LEANCLR_API LEANCLR_EXPORT
-#else
-#define LEANCLR_API LEANCLR_IMPORT
-#endif
+#include "export.h"
 
 typedef struct LeanclrTypeSig LeanclrTypeSig;
 typedef struct LeanclrAssembly LeanclrAssembly;
@@ -72,18 +56,21 @@ extern "C"
     LEANCLR_API const LeanclrTypeSig* leanclr_get_class_byval_typesig(LeanclrClass* klass);
     LEANCLR_API const LeanclrTypeSig* leanclr_get_class_byref_typesig(LeanclrClass* klass);
     LEANCLR_API LeanclrClass* leanclr_get_class_parent(LeanclrClass* klass);
-    LEANCLR_API void leanclr_get_class_interfaces(LeanclrClass* klass, const LeanclrClass*** out_interfaces, size_t* out_count, LeanclrException** out_exception);
+    LEANCLR_API void leanclr_get_class_interfaces(LeanclrClass* klass, const LeanclrClass*** out_interfaces, size_t* out_count,
+                                                  LeanclrException** out_exception);
 
     LEANCLR_API LeanclrClass* leanclr_get_class_enclosing_class(LeanclrClass* klass);
     LEANCLR_API void leanclr_get_class_nested_classes(LeanclrClass* klass, const LeanclrClass*** out_nested_classes, size_t* out_count,
                                                       LeanclrException** out_exception);
 
-    LEANCLR_API void leanclr_get_class_methods(LeanclrClass* klass, const LeanclrMethodInfo*** out_methods, size_t* out_count, LeanclrException** out_exception);
+    LEANCLR_API void leanclr_get_class_methods(LeanclrClass* klass, const LeanclrMethodInfo*** out_methods, size_t* out_count,
+                                               LeanclrException** out_exception);
     LEANCLR_API const LeanclrMethodInfo* leanclr_get_class_method_by_name(LeanclrClass* klass, const char* method_name, LeanclrException** out_exception);
 
     LEANCLR_API void leanclr_get_class_field(LeanclrClass* klass, const LeanclrFieldInfo** out_fields, size_t* out_count, LeanclrException** out_exception);
     LEANCLR_API const LeanclrFieldInfo* leanclr_get_class_field_by_name(LeanclrClass* klass, const char* field_name, LeanclrException** out_exception);
-    LEANCLR_API void leanclr_get_class_properties(LeanclrClass* klass, const LeanclrPropertyInfo** out_properties, size_t* out_count, LeanclrException** out_exception);
+    LEANCLR_API void leanclr_get_class_properties(LeanclrClass* klass, const LeanclrPropertyInfo** out_properties, size_t* out_count,
+                                                  LeanclrException** out_exception);
     LEANCLR_API const LeanclrPropertyInfo* leanclr_get_class_property_by_name(LeanclrClass* klass, const char* property_name, LeanclrException** out_exception);
 
     LEANCLR_API void leanclr_get_class_events(LeanclrClass* klass, const LeanclrEventInfo** out_events, size_t* out_count, LeanclrException** out_exception);
@@ -124,30 +111,37 @@ extern "C"
 #endif
 #ifdef __cplusplus
 // Source-compatible reference overloads; the exported ABI uses C pointers.
-inline void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass**& class_buf, size_t& class_buf_capacity, LeanclrException** out_exception)
+inline void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass**& class_buf, size_t& class_buf_capacity,
+                                LeanclrException** out_exception)
 {
     leanclr_get_classes(mod, export_only, &class_buf, &class_buf_capacity, out_exception);
 }
+
 inline void leanclr_get_class_interfaces(LeanclrClass* klass, const LeanclrClass**& interfaces, size_t& count, LeanclrException** out_exception)
 {
     leanclr_get_class_interfaces(klass, &interfaces, &count, out_exception);
 }
+
 inline void leanclr_get_class_nested_classes(LeanclrClass* klass, const LeanclrClass**& nested_classes, size_t& count, LeanclrException** out_exception)
 {
     leanclr_get_class_nested_classes(klass, &nested_classes, &count, out_exception);
 }
+
 inline void leanclr_get_class_methods(LeanclrClass* klass, const LeanclrMethodInfo**& methods, size_t& count, LeanclrException** out_exception)
 {
     leanclr_get_class_methods(klass, &methods, &count, out_exception);
 }
+
 inline void leanclr_get_class_field(LeanclrClass* klass, const LeanclrFieldInfo*& fields, size_t& count, LeanclrException** out_exception)
 {
     leanclr_get_class_field(klass, &fields, &count, out_exception);
 }
+
 inline void leanclr_get_class_properties(LeanclrClass* klass, const LeanclrPropertyInfo*& properties, size_t& count, LeanclrException** out_exception)
 {
     leanclr_get_class_properties(klass, &properties, &count, out_exception);
 }
+
 inline void leanclr_get_class_events(LeanclrClass* klass, const LeanclrEventInfo*& events, size_t& count, LeanclrException** out_exception)
 {
     leanclr_get_class_events(klass, &events, &count, out_exception);

@@ -101,9 +101,11 @@ struct RtTypeSig
 {
     RtElementType ele_type;
     uint8_t field_or_param_attrs;
+
     union
     {
         uint8_t flags;
+
         struct
         {
             uint8_t by_ref : 1;
@@ -111,6 +113,7 @@ struct RtTypeSig
             uint8_t num_mods : 6;
         };
     };
+
     RtTypeSigVariantData data;
 
     bool is_void() const
@@ -510,8 +513,8 @@ using RtInvokeMethodPointer = RtResultVoid (*)(RtManagedMethodPointer, const RtM
 using RtNativeMethodPointer = void (*)();
 
 #define CAST_AS_NOEXCEP_MANAGED_METHOD_POINTER(p) ((void (*)() noexcept)(p))
-#define CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(p)                                                                        \
-    ((::leanclr::RtResultVoid(*)(::leanclr::metadata::RtManagedMethodPointer, const ::leanclr::metadata::RtMethodInfo*, \
+#define CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(p)                                                                         \
+    ((::leanclr::RtResultVoid (*)(::leanclr::metadata::RtManagedMethodPointer, const ::leanclr::metadata::RtMethodInfo*, \
                                   const ::leanclr::interp::RtStackObject*, ::leanclr::interp::RtStackObject*) noexcept)(p))
 
 // Interface offset structure
@@ -629,7 +632,7 @@ struct RtAssemblyName
     uint8_t public_key_token[8];
 };
 
-struct RtMonoAssemblyName
+struct AssemblyNameInfo
 {
     const char* name;
     const char* culture;
@@ -645,6 +648,9 @@ struct RtMonoAssemblyName
     uint16_t version_revision;
     uint16_t arch;
 };
+
+// Legacy adapter source compatibility; this is native CLI identity data.
+using RtMonoAssemblyName = AssemblyNameInfo;
 
 // Constants
 constexpr uint8_t RT_CODE_TYPE_MASK = 0x0003;

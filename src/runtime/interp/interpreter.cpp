@@ -551,11 +551,11 @@ unwind_exception_handler:
                 {
                 case metadata::RtILExceptionClauseType::Exception:
                 {
-                    if (!clause->ex_klass || vm::Class::is_assignable_from(ex->klass, clause->ex_klass))
+                    if (!clause->ex_klass || vm::Class::is_assignable_from(reinterpret_cast<vm::RtObject*>(ex)->klass, clause->ex_klass))
                     {
                         ip = imi->codes + clause->handler_begin_offset;
                         setup_catch_handler(imi, frame, clause, ip);
-                        set_stack_value_at<vm::RtObject*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
+                        set_stack_value_at<vm::RtException*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
                         handled = true;
                     }
                     break;
@@ -564,7 +564,7 @@ unwind_exception_handler:
                 {
                     ip = imi->codes + clause->handler_begin_offset;
                     setup_filter_checker(clause);
-                    set_stack_value_at<vm::RtObject*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
+                    set_stack_value_at<vm::RtException*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
                     handled = true;
                     break;
                 }
@@ -573,7 +573,7 @@ unwind_exception_handler:
                 {
                     ip = imi->codes + clause->handler_begin_offset;
                     setup_finally_or_fault_handler(imi, clause, ip);
-                    set_stack_value_at<vm::RtObject*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
+                    set_stack_value_at<vm::RtException*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
                     handled = true;
                     break;
                 }

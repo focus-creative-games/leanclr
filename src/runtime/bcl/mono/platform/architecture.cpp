@@ -1,4 +1,4 @@
-#include "architecture.h"
+#include "bcl/mono/platform/architecture.h"
 
 #include "vm/rt_string.h"
 

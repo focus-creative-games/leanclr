@@ -10,125 +10,101 @@ option(LEANCLR_ENABLE_PROFILE "Enable PGO profiling instrumentation" OFF)
 set(LEANCLR_GC_ALGORITHM "MARK_SWEEP")
 option(LEANCLR_GC_DEBUG "Enable GC debug (quarantine, allocation sites)" ON)
 
-set(RUNTIME_DIRS
-    alloc
-    codegen
-    core
-    icalls
-    interp
-    intrinsics
-    log
-    metadata
-    misc
-    pinvokes
-    platform
-    profile
-    public_impl
-    utils
-    vm
-    vmutils
-)
+set(LEANCLR_BCL_ADAPTER "MONO" CACHE STRING "Managed BCL adapter (currently MONO)")
+if(NOT LEANCLR_BCL_ADAPTER STREQUAL "MONO")
+    message(FATAL_ERROR "Unsupported LEANCLR_BCL_ADAPTER: ${LEANCLR_BCL_ADAPTER}")
+endif()
 
-set(RUNTIME_SOURCES)
-foreach(dir ${RUNTIME_DIRS})
-    file(GLOB dir_cpp_sources "${CMAKE_CURRENT_LIST_DIR}/${dir}/*.cpp")
-    list(APPEND RUNTIME_SOURCES ${dir_cpp_sources})
+set(LEANCLR_CORE_DIRS alloc codegen core interp log metadata misc profile public_impl utils vm)
+set(core_sources)
+foreach(dir ${LEANCLR_CORE_DIRS})
+    file(GLOB sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/${dir}/*.cpp")
+    list(APPEND core_sources ${sources})
 endforeach()
-
-file(GLOB dir_c_sources "${CMAKE_CURRENT_LIST_DIR}/3rd/zlib/*.c")
-# Emscripten: omit gz*.c (gzip file I/O via write/close). Runtime only uses in-memory deflate/inflate.
-if(EMSCRIPTEN)
-    list(FILTER dir_c_sources EXCLUDE REGEX "/gz[^/]*\\.c$")
-endif()
-list(APPEND RUNTIME_SOURCES ${dir_c_sources})
-
-# Third-party zlib predates -Wsign-conversion; suppress on our code only.
-if(NOT MSVC)
-    set_source_files_properties(${dir_c_sources} PROPERTIES COMPILE_OPTIONS "-Wno-sign-conversion")
-endif()
-
 file(GLOB_RECURSE gc_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/gc/*.cpp")
-list(APPEND RUNTIME_SOURCES ${gc_sources})
+list(APPEND core_sources ${gc_sources})
+file(GLOB host_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/host/*.cpp" "${CMAKE_CURRENT_LIST_DIR}/platform/*.cpp")
+file(GLOB_RECURSE bcl_sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/bcl/mono/*.cpp")
+# These source-compatible binding paths implement the selected BCL adapter.
+foreach(dir icalls intrinsics pinvokes vmutils)
+    file(GLOB sources CONFIGURE_DEPENDS "${CMAKE_CURRENT_LIST_DIR}/${dir}/*.cpp")
+    list(APPEND bcl_sources ${sources})
+endforeach()
+file(GLOB zlib_sources "${CMAKE_CURRENT_LIST_DIR}/3rd/zlib/*.c")
+if(EMSCRIPTEN)
+    list(FILTER zlib_sources EXCLUDE REGEX "/gz[^/]*\\.c$")
+endif()
+if(NOT MSVC)
+    set_source_files_properties(${zlib_sources} PROPERTIES COMPILE_OPTIONS "-Wno-sign-conversion")
+endif()
+list(APPEND bcl_sources ${zlib_sources})
 
+include("${CMAKE_CURRENT_LIST_DIR}/cmake/verify_layers.cmake")
+leanclr_verify_layers("${CMAKE_CURRENT_LIST_DIR}")
+
+# Compile the three layers independently. Their only composition point is the
+# final leanclr library, preserving the existing host-facing target and C ABI.
+add_library(leanclr-core-objects OBJECT ${core_sources})
+add_library(leanclr-host-objects OBJECT ${host_sources})
+add_library(leanclr-bcl-mono-objects OBJECT ${bcl_sources})
+set(layer_objects $<TARGET_OBJECTS:leanclr-core-objects> $<TARGET_OBJECTS:leanclr-host-objects> $<TARGET_OBJECTS:leanclr-bcl-mono-objects>)
 if(BUILD_SHARED_LEANCLR)
-    add_library(leanclr SHARED ${RUNTIME_SOURCES})
+    add_library(leanclr SHARED ${layer_objects})
 else()
-    add_library(leanclr STATIC ${RUNTIME_SOURCES})
+    add_library(leanclr STATIC ${layer_objects})
 endif()
-
-target_compile_definitions(leanclr PRIVATE LEANCLR_USE_SHIPPING_ZLIB=1)
-if(BUILD_SHARED_LEANCLR)
-    target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS)
-else()
-    target_compile_definitions(leanclr PUBLIC LEANCLR_STATIC=1)
+if(WIN32)
+    target_link_libraries(leanclr PRIVATE bcrypt)
 endif()
-
-if(LEANCLR_FORCE_PORTABLE)
-    target_compile_definitions(leanclr PRIVATE LEANCLR_FORCE_PORTABLE=1)
-endif()
-
-if(LEANCLR_GC_ALGORITHM STREQUAL "MARK_SWEEP")
-    target_compile_definitions(leanclr PUBLIC LEANCLR_GC_MARK_SWEEP=1)
-elseif(LEANCLR_GC_ALGORITHM STREQUAL "ZERO_GC")
-    target_compile_definitions(leanclr PUBLIC LEANCLR_GC_ZERO_GC=1)
-else()
-    message(FATAL_ERROR "Unknown LEANCLR_GC_ALGORITHM: ${LEANCLR_GC_ALGORITHM} (use MARK_SWEEP or ZERO_GC)")
-endif()
-if(LEANCLR_GC_DEBUG)
-    target_compile_definitions(leanclr PUBLIC LEANCLR_GC_DEBUG=1)
-endif()
-if(LEANCLR_ENABLE_PROFILE)
-    target_compile_definitions(leanclr PUBLIC LEANCLR_PGO_PROFILE=1)
-endif()
-
-target_include_directories(leanclr PUBLIC
-    ${CMAKE_CURRENT_LIST_DIR}
-)
-
-set_target_properties(leanclr PROPERTIES
-    CXX_STANDARD 11
-    CXX_STANDARD_REQUIRED ON
-)
 
 if(MSVC)
     string(REGEX REPLACE "/EHsc" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
-    if(LEANCLR_ENABLE_CPP_EXCEPTIONS)
-        target_compile_options(leanclr PRIVATE /EHsc /MP)
-    else()
-        target_compile_options(leanclr PRIVATE /EHs-c- /MP)
-    endif()
-elseif(EMSCRIPTEN)
-
-    target_compile_options(leanclr PRIVATE
-        $<$<BOOL:${LEANCLR_ENABLE_CPP_EXCEPTIONS}>:-fexceptions>
-        $<$<NOT:$<BOOL:${LEANCLR_ENABLE_CPP_EXCEPTIONS}>>:-fno-exceptions>
-        -fno-rtti
-        -O2
-    )
-
-    target_link_options(leanclr PRIVATE
-        "SHELL: -s WASM=1"
-        "SHELL: -s ALLOW_MEMORY_GROWTH=1"
-        -O2
-    )
-
-else()
-    if(LEANCLR_ENABLE_CPP_EXCEPTIONS)
-        target_compile_options(leanclr PRIVATE -fexceptions)
-    else()
-        target_compile_options(leanclr PRIVATE -fno-exceptions)
-    endif()
 endif()
-
-# Implicit narrowing conversions (truncation) may lose data.
-if(MSVC)
-    target_compile_options(leanclr PRIVATE
-        /w14244   # C4244: conversion; possible loss of data
-        /w14267   # C4267: conversion from size_t to smaller type
-    )
-else()
-    target_compile_options(leanclr PRIVATE -Wconversion)
+function(leanclr_configure_target target)
+    target_include_directories(${target} PUBLIC "${CMAKE_CURRENT_LIST_DIR}")
+    set_target_properties(${target} PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON POSITION_INDEPENDENT_CODE ON)
+    target_compile_definitions(${target} PRIVATE LEANCLR_USE_SHIPPING_ZLIB=1)
+    if(BUILD_SHARED_LEANCLR)
+        target_compile_definitions(${target} PRIVATE LEANCLR_DLL_EXPORTS)
+    else()
+        target_compile_definitions(${target} PUBLIC LEANCLR_STATIC=1)
+    endif()
+    if(LEANCLR_FORCE_PORTABLE)
+        target_compile_definitions(${target} PUBLIC LEANCLR_FORCE_PORTABLE=1)
+    endif()
+    if(LEANCLR_GC_ALGORITHM STREQUAL "MARK_SWEEP")
+        target_compile_definitions(${target} PUBLIC LEANCLR_GC_MARK_SWEEP=1)
+    elseif(LEANCLR_GC_ALGORITHM STREQUAL "ZERO_GC")
+        target_compile_definitions(${target} PUBLIC LEANCLR_GC_ZERO_GC=1)
+    else()
+        message(FATAL_ERROR "Unknown LEANCLR_GC_ALGORITHM: ${LEANCLR_GC_ALGORITHM}")
+    endif()
+    if(LEANCLR_GC_DEBUG)
+        target_compile_definitions(${target} PUBLIC LEANCLR_GC_DEBUG=1)
+    endif()
+    if(LEANCLR_ENABLE_PROFILE)
+        target_compile_definitions(${target} PUBLIC LEANCLR_PGO_PROFILE=1)
+    endif()
+    if(MSVC)
+        if(LEANCLR_ENABLE_CPP_EXCEPTIONS)
+            target_compile_options(${target} PRIVATE /EHsc /MP)
+        else()
+            target_compile_options(${target} PRIVATE /EHs-c- /MP)
+        endif()
+        target_compile_options(${target} PRIVATE /w14244 /w14267)
+    else()
+        target_compile_options(${target} PRIVATE
+            $<$<BOOL:${LEANCLR_ENABLE_CPP_EXCEPTIONS}>:-fexceptions>
+            $<$<NOT:$<BOOL:${LEANCLR_ENABLE_CPP_EXCEPTIONS}>>:-fno-exceptions>
+            -Wconversion)
+        if(EMSCRIPTEN)
+            target_compile_options(${target} PRIVATE -fno-rtti -O2)
+        endif()
+    endif()
+endfunction()
+foreach(target leanclr leanclr-core-objects leanclr-host-objects leanclr-bcl-mono-objects)
+    leanclr_configure_target(${target})
+endforeach()
+if(EMSCRIPTEN)
+    target_link_options(leanclr PRIVATE "SHELL: -s WASM=1" "SHELL: -s ALLOW_MEMORY_GROWTH=1" -O2)
 endif()
-
-# LEANCLR_PLATFORM_* macros are derived from compiler-predefined macros in
-# build_config.h so both CMake and non-CMake consumers see the same view.

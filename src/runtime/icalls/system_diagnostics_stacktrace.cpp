@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_diagnostics_stacktrace.h"
 
 #include "icall_base.h"

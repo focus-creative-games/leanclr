@@ -1,19 +1,20 @@
-#include "marshal.h"
+#include "managed_layouts.h"
+#include "vm/marshal.h"
 
 #include "alloc/general_allocation.h"
-#include "rt_string.h"
-#include "rt_array.h"
-#include "class.h"
-#include "field.h"
-#include "object.h"
-#include "type.h"
-#include "rt_exception.h"
-#include "method.h"
+#include "vm/rt_string.h"
+#include "vm/rt_array.h"
+#include "vm/class.h"
+#include "vm/field.h"
+#include "vm/object.h"
+#include "vm/type.h"
+#include "vm/rt_exception.h"
+#include "vm/method.h"
 #include "metadata/aot_module.h"
 #include "utils/string_util.h"
 #include "utils/string_builder.h"
 #include "utils/encode_conv.h"
-#include "platform/rt_sys.h"
+#include "bcl/mono/platform/rt_sys.h"
 
 namespace leanclr
 {
@@ -110,7 +111,8 @@ vm::RtString* Marshal::ptr_to_string_bstr(void* ptr)
 Utf16Char* Marshal::alloc_bstr(int32_t utf16char_count)
 {
     // make sure alignment to 4 because this str is used as bstr which is a length-prefixed(4 bytes) double byte. its length should alignment to 4
-    return (Utf16Char*)alloc::GeneralAllocation::calloc(static_cast<size_t>(utf16char_count + 2 /* length is 4 bytes */ + 1 /* null terminator */), sizeof(Utf16Char));
+    return (Utf16Char*)alloc::GeneralAllocation::calloc(static_cast<size_t>(utf16char_count + 2 /* length is 4 bytes */ + 1 /* null terminator */),
+                                                        sizeof(Utf16Char));
 }
 
 void* Marshal::buffer_to_bstr(const Utf16Char* chars, int32_t len)
@@ -247,7 +249,8 @@ RtResult<metadata::RtNativeMethodPointer> Marshal::get_function_pointer_for_dele
     {
         char msg[1024];
         const metadata::RtClass* klass = target_method->parent;
-        snprintf(msg, sizeof(msg), "To marshal delegate method, the method should contain '[MonoPInvokeCallback]' attribute. Method: %s.%s.%s", klass->namespaze, klass->name, target_method->name);
+        snprintf(msg, sizeof(msg), "To marshal delegate method, the method should contain '[MonoPInvokeCallback]' attribute. Method: %s.%s.%s",
+                 klass->namespaze, klass->name, target_method->name);
         RET_ERR_WITH_MSG(RtErr::NotSupported, msg);
     }
     RET_OK(cb->native_method_ptr);
@@ -284,31 +287,34 @@ bool read_utf8_span(utils::BinaryReader& reader, metadata::RtMarshalUtf8Span& sp
         variable_name = default_value;                           \
     }
 
-#define READ_UTF8_SPAN_OR_SET_INVALID(span_var) \
-    if (reader.not_empty())                                      \
-    {                                                            \
-        if (!read_utf8_span(reader, span_var)) \
-        { \
+#define READ_UTF8_SPAN_OR_SET_INVALID(span_var)    \
+    if (reader.not_empty())                        \
+    {                                              \
+        if (!read_utf8_span(reader, span_var))     \
+        {                                          \
             RET_ASSERT_ERR(RtErr::BadImageFormat); \
-        } \
-    } else { \
-        span_var.set_invalid(); \
+        }                                          \
+    }                                              \
+    else                                           \
+    {                                              \
+        span_var.set_invalid();                    \
     }
 
-#define READ_TYPESIG_OR_SET_NULL(variable_name) \
-    if (reader.not_empty())                                      \
-    {                                                            \
-        metadata::RtMarshalUtf8Span type_name; \
-        if (!read_utf8_span(reader, type_name)) \
-        { \
-            RET_ASSERT_ERR(RtErr::BadImageFormat); \
-        } \
+#define READ_TYPESIG_OR_SET_NULL(variable_name)                                                                                      \
+    if (reader.not_empty())                                                                                                          \
+    {                                                                                                                                \
+        metadata::RtMarshalUtf8Span type_name;                                                                                       \
+        if (!read_utf8_span(reader, type_name))                                                                                      \
+        {                                                                                                                            \
+            RET_ASSERT_ERR(RtErr::BadImageFormat);                                                                                   \
+        }                                                                                                                            \
         UNWRAP_OR_RET_ERR_ON_FAIL(variable_name, Type::parse_assembly_qualified_type(mod, type_name.data, type_name.length, false)); \
-    }                                                            \
-    else                                                         \
-    {                                                            \
-        variable_name = nullptr;                           \
+    }                                                                                                                                \
+    else                                                                                                                             \
+    {                                                                                                                                \
+        variable_name = nullptr;                                                                                                     \
     }
+
 RtResult<bool> Marshal::get_marshal_spec(const metadata::RtFieldInfo* field, metadata::RtMarshalSpec& spec) noexcept
 {
     if (!vm::Field::has_field_marshal(field))

@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_object.h"
 #include "interp/interp_defs.h"
 #include "vm/object.h"

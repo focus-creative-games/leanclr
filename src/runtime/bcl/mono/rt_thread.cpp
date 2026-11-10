@@ -1,9 +1,10 @@
+#include "managed_layouts.h"
 
-#include "rt_managed_types.h"
-#include "rt_thread.h"
-#include "object.h"
-#include "class.h"
-#include "appdomain.h"
+#include "vm/rt_managed_types.h"
+#include "vm/rt_thread.h"
+#include "vm/object.h"
+#include "vm/class.h"
+#include "vm/appdomain.h"
 #include "alloc/general_allocation.h"
 #include "gc/gc_roots.h"
 

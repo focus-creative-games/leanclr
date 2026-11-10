@@ -1,13 +1,14 @@
-#include "appdomain.h"
+#include "managed_layouts.h"
+#include "vm/appdomain.h"
 
-#include "class.h"
-#include "object.h"
-#include "rt_string.h"
-#include "rt_thread.h"
+#include "vm/class.h"
+#include "vm/object.h"
+#include "vm/rt_string.h"
+#include "vm/rt_thread.h"
 #include "utils/hashmap.h"
 #include "utils/string_util.h"
 #include "metadata/module_def.h"
-#include "settings.h"
+#include "vm/settings.h"
 #include "gc/gc_roots.h"
 
 namespace leanclr

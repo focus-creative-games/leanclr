@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_runtime_runtimeimports.h"
 #include "vm/class.h"
 #include <cstdio>
@@ -44,8 +45,7 @@ static RtResultVoid memmove_invoker(RtManagedMethodPointer method_pointer, const
 }
 
 // @icall: System.Runtime.RuntimeImports::Memmove_wbarrier(System.Byte*,System.Byte*,System.UInt32,System.IntPtr)
-RtResultVoid SystemRuntimeRuntimeImports::memmove_wbarrier(uint8_t* dest, const uint8_t* src, uint32_t len,
-                                                           const metadata::RtTypeSig* type_handle) noexcept
+RtResultVoid SystemRuntimeRuntimeImports::memmove_wbarrier(uint8_t* dest, const uint8_t* src, uint32_t len, const metadata::RtTypeSig* type_handle) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, ele_klass, vm::Class::get_class_from_typesig(type_handle));
     RET_ERR_ON_FAIL(vm::Class::initialize_fields(ele_klass));

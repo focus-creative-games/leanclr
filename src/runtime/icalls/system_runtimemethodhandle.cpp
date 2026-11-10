@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_runtimemethodhandle.h"
 
 #include "vm/shim.h"

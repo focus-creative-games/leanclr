@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_numerics_vector.h"
 #include "interp/interp_defs.h"
 #include "platform/hardware.h"

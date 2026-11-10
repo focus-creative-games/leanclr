@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_typedreference.h"
 
 #include "vm/rt_array.h"

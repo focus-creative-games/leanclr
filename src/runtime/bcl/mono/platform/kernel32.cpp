@@ -1,4 +1,4 @@
-#include "kernel32.h"
+#include "bcl/mono/platform/kernel32.h"
 
 #ifdef LEANCLR_PLATFORM_WIN
 #define WIN32_LEAN_AND_MEAN

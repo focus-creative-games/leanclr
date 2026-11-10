@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_assembly.h"
 #include "icall_base.h"
 #include "vm/assembly.h"
@@ -85,7 +86,7 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::get_entry_assembly
     RET_OK(nullptr);
 }
 
-RtResultVoid SystemReflectionAssembly::internal_get_assembly_name(vm::RtString* path, metadata::RtMonoAssemblyName* aname, vm::RtString** codebase_out) noexcept
+RtResultVoid SystemReflectionAssembly::internal_get_assembly_name(vm::RtString* path, metadata::AssemblyNameInfo* aname, vm::RtString** codebase_out) noexcept
 {
     (void)path;
     (void)aname;
@@ -98,7 +99,8 @@ RtResult<vm::RtReflectionAssembly*> SystemReflectionAssembly::load_from(vm::RtSt
     utils::Utf8StringBuilder name_buf(vm::String::get_chars_ptr(path), static_cast<size_t>(vm::String::get_length(path)));
     vm::RtAppDomain* current_app_domain = vm::AppDomain::get_default_appdomain();
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
-        metadata::RtAssembly*, loaded_ass, vm::Assembly::load_by_name(current_app_domain, name_buf.get_const_chars(), nullptr, ref_only, *(vm::RtStackCrawlMark*)mark));
+        metadata::RtAssembly*, loaded_ass,
+        vm::Assembly::load_by_name(current_app_domain, name_buf.get_const_chars(), nullptr, ref_only, *(vm::RtStackCrawlMark*)mark));
     return vm::Reflection::get_assembly_reflection_object(loaded_ass);
 }
 
@@ -126,16 +128,16 @@ RtResult<intptr_t> SystemReflectionAssembly::internal_get_referenced_assemblies(
     utils::Vector<metadata::RtAssembly*> ref_asses;
     RET_ERR_ON_FAIL(mod->get_reference_assemblies(ref_asses));
 
-    utils::Vector<const metadata::RtMonoAssemblyName*> ass_names_buf;
+    utils::Vector<const metadata::AssemblyNameInfo*> ass_names_buf;
     for (size_t i = 0; i < ref_asses.size(); ++i)
     {
         metadata::RtModuleDef* ref_mod = ref_asses[i]->mod;
-        metadata::RtMonoAssemblyName* ass_name_info = alloc::GeneralAllocation::malloc_any_zeroed<metadata::RtMonoAssemblyName>();
+        metadata::AssemblyNameInfo* ass_name_info = alloc::GeneralAllocation::malloc_any_zeroed<metadata::AssemblyNameInfo>();
         ref_mod->fill_assembly_name(*ass_name_info);
         ass_names_buf.push_back(ass_name_info);
     }
 
-    auto gptr_arr = utils::SafeGPtrArray<metadata::RtMonoAssemblyName>::create_from_data(ass_names_buf.data(), static_cast<int32_t>(ass_names_buf.size()));
+    auto gptr_arr = utils::SafeGPtrArray<metadata::AssemblyNameInfo>::create_from_data(ass_names_buf.data(), static_cast<int32_t>(ass_names_buf.size()));
     RET_OK(reinterpret_cast<intptr_t>(gptr_arr));
 }
 
@@ -203,7 +205,7 @@ static RtResultVoid internal_get_assembly_name_invoker(metadata::RtManagedMethod
     (void)method;
     (void)ret;
     auto path = EvalStackOp::get_param<vm::RtString*>(params, 0);
-    auto aname = EvalStackOp::get_param<metadata::RtMonoAssemblyName*>(params, 1);
+    auto aname = EvalStackOp::get_param<metadata::AssemblyNameInfo*>(params, 1);
     auto codebase_ref = EvalStackOp::get_param<vm::RtString**>(params, 2);
     return SystemReflectionAssembly::internal_get_assembly_name(path, aname, codebase_ref);
 }

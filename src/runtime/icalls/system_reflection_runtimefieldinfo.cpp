@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_runtimefieldinfo.h"
 #include "icall_base.h"
 #include "vm/class.h"
@@ -81,9 +82,10 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeFieldInfo::get_type_modifiers(vm::
     utils::Vector<metadata::RtClass*> modifiers;
     RET_ERR_ON_FAIL(vm::Field::get_field_modifiers(field_info, optional, modifiers));
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
-        vm::RtArray*, modifier_type_arr,
-        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_systemtype, static_cast<int32_t>(modifiers.size()), "icalls::SystemReflectionRuntimeFieldInfo::get_type_modifiers"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, modifier_type_arr,
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_systemtype,
+                                                                                        static_cast<int32_t>(modifiers.size()),
+                                                                                        "icalls::SystemReflectionRuntimeFieldInfo::get_type_modifiers"));
 
     for (size_t i = 0; i < modifiers.size(); ++i)
     {

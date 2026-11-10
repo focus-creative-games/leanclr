@@ -96,6 +96,8 @@ Core 版本已经实现，面向支持 C++11 的小端平台。Core 适合作为
 
 宿主内存回调的覆盖范围、配置时机和 OOM 策略见[内存所有权与失败处理](src/runtime/alloc/README.md)。
 
+运行时核心、宿主服务与 BCL adapter 的接口和依赖规则见[分层说明](src/runtime/bcl/README.md)。
+
 ### Standard 分支
 
 Standard 版本按 BCL 来源分为三个分支：

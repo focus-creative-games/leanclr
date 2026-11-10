@@ -1,6 +1,7 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_console_windowsconsole.h"
 
-#include "platform/kernel32.h"
+#include "bcl/mono/platform/kernel32.h"
 
 namespace leanclr
 {

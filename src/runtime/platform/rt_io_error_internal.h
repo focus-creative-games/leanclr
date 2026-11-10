@@ -1,21 +1,9 @@
 #pragma once
 
-// Platform-internal header. Provides System.IO.MonoIOError constants and
-// error-code translation helpers shared between rt_file.cpp, rt_path.cpp and
-// any other platform/ source files that surface MonoIOError values.
-//
-// Design notes:
-//  * Constants are declared `static constexpr`. In C++11 namespace-scope
-//    constexpr variables have external linkage by default, which would cause
-//    ODR violations when the header is included from multiple TUs. `static`
-//    drops them to internal linkage so each TU gets its own private copy.
-//    (In C++17 one could write `inline constexpr` instead; when the project
-//    moves to C++17 this can be simplified.)
-//  * Helper functions are declared `inline` (no `static`). `inline` alone is
-//    the idiomatic C++ way to put a function definition in a header: the
-//    linker is allowed to merge identical copies across TUs, the function's
-//    address is consistent, and il2cpp source-merging is handled correctly.
-//  * Do NOT include this header from outside the platform/ directory.
+// Native host I/O status codes, using Win32-compatible values on all targets.
+// BCL adapters translate their own error vocabulary to/from this contract (the
+// Mono adapter currently uses the identical numeric values). Shared by the
+// default native provider and native-to-managed adapter bridges.
 
 #include <cstdint>
 
@@ -63,7 +51,7 @@ inline int32_t win32_error_to_monoio(unsigned long code)
 
 #else
 
-inline int32_t errno_to_monoio(int err)
+inline int32_t errno_to_io_error(int err)
 {
     switch (err)
     {

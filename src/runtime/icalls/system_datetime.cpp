@@ -1,7 +1,8 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_datetime.h"
 
 #include "icall_base.h"
-#include "platform/rt_time.h"
+#include "host/services.h"
 
 namespace leanclr
 {
@@ -10,7 +11,7 @@ namespace icalls
 
 RtResult<int64_t> SystemDateTime::get_system_time_as_file_time() noexcept
 {
-    RET_OK(os::Time::get_system_time_as_file_time());
+    RET_OK(host::Services::utc_ticks_100ns() + INT64_C(116444736000000000));
 }
 
 /// @icall: System.DateTime::GetSystemTimeAsFileTime()

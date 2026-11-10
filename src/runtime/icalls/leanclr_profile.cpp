@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "leanclr_profile.h"
 
 #include "profile/profile.h"

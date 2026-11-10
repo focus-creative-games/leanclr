@@ -42,63 +42,75 @@ class FullyQualifiedAssemblyName
 
     RtResultVoid parse();
 
-    static RtResultVoid parse_into(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info, bool* is_version_defined,
+    static RtResultVoid parse_into(const char* input, size_t input_len, metadata::AssemblyNameInfo* assembly_name_info, bool* is_version_defined,
                                    bool* is_token_defined);
 
     const char* name() const
     {
         return _name;
     }
+
     size_t name_length() const
     {
         return _name_length;
     }
+
     const char* culture() const
     {
         return _culture;
     }
+
     size_t culture_length() const
     {
         return _culture_length;
     }
+
     bool is_culture_neutral() const
     {
         return _is_culture_neutral;
     }
+
     const char* public_key_token() const
     {
         return _public_key_token;
     }
+
     size_t public_key_token_length() const
     {
         return _public_key_token_length;
     }
+
     uint16_t version_major() const
     {
         return _version_major;
     }
+
     uint16_t version_minor() const
     {
         return _version_minor;
     }
+
     uint16_t version_build() const
     {
         return _version_build;
     }
+
     uint16_t version_revision() const
     {
         return _version_revision;
     }
+
     bool is_version_defined() const
     {
         return _is_version_defined;
     }
+
     bool is_public_key_token_defined() const
     {
         return _is_public_key_token_defined;
     }
 
-    RtResultVoid write_to(metadata::RtMonoAssemblyName* assembly_name_info) const;
+    RtResultVoid write_to(metadata::AssemblyNameInfo* assembly_name_info) const;
 
   private:
     static const char* trim_spaces(const char* start, const char* end);
@@ -138,7 +150,7 @@ class Type
     static RtResult<RtString*> get_full_name(const metadata::RtTypeSig* typeSig, bool full_name, bool assembly_qualified);
     static RtResult<metadata::RtClass*> get_declaring_type(const metadata::RtTypeSig* typeSig);
     static RtResult<const metadata::RtMethodInfo*> get_declaring_method_of_mvar(const metadata::RtTypeSig* typeSig);
-    static RtResultVoid parse_assembly_name(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info, bool* is_version_defined,
+    static RtResultVoid parse_assembly_name(const char* input, size_t input_len, metadata::AssemblyNameInfo* assembly_name_info, bool* is_version_defined,
                                             bool* is_token_defined);
     static RtResult<const metadata::RtTypeSig*> parse_assembly_qualified_type(metadata::RtModuleDef* default_mod, const char* assembly_qualified_type_name,
                                                                               size_t name_len, bool ignore_case);

@@ -45,7 +45,7 @@ using io_error_internal::set_error;
 #ifdef LEANCLR_PLATFORM_WIN
 using io_error_internal::win32_error_to_monoio;
 #elif LEANCLR_PLATFORM_POSIX
-using io_error_internal::errno_to_monoio;
+using io_error_internal::errno_to_io_error;
 #endif
 
 // System.IO.FileMode (file-local; does not conflict with other platform files).
@@ -301,7 +301,7 @@ intptr_t File::open(const Utf16Char* filename, int32_t mode, int32_t access, int
     int fd = ::open(sb.get_const_chars(), flags, 0644);
     if (fd < 0)
     {
-        set_error(error, errno_to_monoio(errno));
+        set_error(error, errno_to_io_error(errno));
         return kInvalidHandle;
     }
     return static_cast<intptr_t>(fd);
@@ -332,7 +332,7 @@ bool File::close(intptr_t handle, int32_t* error)
 #elif LEANCLR_PLATFORM_POSIX
     if (::close(static_cast<int>(handle)) != 0)
     {
-        set_error(error, errno_to_monoio(errno));
+        set_error(error, errno_to_io_error(errno));
         return false;
     }
     return true;
@@ -375,7 +375,7 @@ int32_t File::read(intptr_t handle, uint8_t* buffer, int32_t count, int32_t* err
     } while (n < 0 && errno == EINTR);
     if (n < 0)
     {
-        set_error(error, errno_to_monoio(errno));
+        set_error(error, errno_to_io_error(errno));
         return -1;
     }
     return static_cast<int32_t>(n);
@@ -415,7 +415,7 @@ int32_t File::write(intptr_t handle, const uint8_t* buffer, int32_t count, int32
         {
             if (errno == EINTR)
                 continue;
-            set_error(error, errno_to_monoio(errno));
+            set_error(error, errno_to_io_error(errno));
             return total > 0 ? static_cast<int32_t>(total) : -1;
         }
         if (n == 0)
@@ -482,7 +482,7 @@ int64_t File::seek(intptr_t handle, int64_t offset, int32_t origin, int32_t* err
     off_t pos = ::lseek(static_cast<int>(handle), static_cast<off_t>(offset), whence);
     if (pos == static_cast<off_t>(-1))
     {
-        set_error(error, errno_to_monoio(errno));
+        set_error(error, errno_to_io_error(errno));
         return -1;
     }
     return static_cast<int64_t>(pos);
@@ -511,7 +511,7 @@ int64_t File::get_length(intptr_t handle, int32_t* error)
     struct stat st;
     if (::fstat(static_cast<int>(handle), &st) != 0)
     {
-        set_error(error, errno_to_monoio(errno));
+        set_error(error, errno_to_io_error(errno));
         return 0;
     }
     return static_cast<int64_t>(st.st_size);
@@ -542,7 +542,7 @@ int32_t File::get_file_type(intptr_t handle, int32_t* error)
     struct stat st;
     if (::fstat(static_cast<int>(handle), &st) != 0)
     {
-        set_error(error, errno_to_monoio(errno));
+        set_error(error, errno_to_io_error(errno));
         return FileTypeUnknown;
     }
     if (S_ISREG(st.st_mode) || S_ISDIR(st.st_mode))

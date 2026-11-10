@@ -16,44 +16,16 @@ static const char* g_config = nullptr;
 static const char* g_commandline_arguments[1024] = {nullptr};
 static int32_t g_commandline_arguments_count = 0;
 
-static void default_debugger_log_function(int32_t level, const uint16_t* category, size_t category_len, const uint16_t* message, size_t message_len);
-
-static FileLoader g_file_loader = nullptr;
 static InternalFunctionInitializer g_internal_functions_initializer = nullptr;
 
 static size_t g_default_eval_stack_object_count = 1024 * 128;
 static size_t g_default_frame_stack_size = 1024 * 2;
-
-static DebuggerLogFunc g_debugger_log_function = default_debugger_log_function;
 
 static ReportUnhandledExceptionFunc g_report_unhandled_exception_function = nullptr;
 
 static const metadata::RtAotModulesData* g_aot_modules_data = nullptr;
 
 static gc::GCMode g_gc_mode = gc::GCMode::ENABLED;
-
-static utils::Utf8StringBuilder g_debugger_log_buffer;
-
-static void default_debugger_log_function(int32_t level, const uint16_t* category, size_t category_len, const uint16_t* message, size_t message_len)
-{
-    g_debugger_log_buffer.clear();
-    g_debugger_log_buffer.append_char('[');
-    g_debugger_log_buffer.append_u32(static_cast<uint32_t>(level));
-    g_debugger_log_buffer.append_cstr("] ");
-    if (category && category_len > 0)
-    {
-        g_debugger_log_buffer.append_utf16_str(category, category_len);
-        g_debugger_log_buffer.append_cstr(" - ");
-    }
-    if (message && message_len > 0)
-    {
-        g_debugger_log_buffer.append_utf16_str(message, message_len);
-    }
-    // g_debugger_log_buffer.sure_null_terminator_but_not_append();
-
-    // Output to standard output (could be replaced with other logging mechanisms)
-    printf("%s\n", g_debugger_log_buffer.get_const_chars());
-}
 
 const char* Settings::get_domain_name()
 {
@@ -117,12 +89,13 @@ const char* Settings::get_config()
 
 FileLoader Settings::get_file_loader()
 {
-    return g_file_loader;
+    return host::Services::get_callbacks().load_assembly;
 }
 
 void Settings::set_file_loader(FileLoader loader)
 {
-    g_file_loader = loader;
+    if (!host::Services::set_file_loader(loader))
+        leanclr::panic("Configure file loader before host services are used");
 }
 
 void Settings::set_internal_functions_initializer(InternalFunctionInitializer initializer)
@@ -137,12 +110,13 @@ InternalFunctionInitializer Settings::get_internal_functions_initializer()
 
 void Settings::set_debugger_log_function(DebuggerLogFunc log_func)
 {
-    g_debugger_log_function = log_func;
+    if (!host::Services::set_debugger_log(log_func))
+        leanclr::panic("Configure debugger logger before host services are used");
 }
 
 DebuggerLogFunc Settings::get_debugger_log_function()
 {
-    return g_debugger_log_function;
+    return host::Services::get_callbacks().debugger_log;
 }
 
 void Settings::set_report_unhandled_exception_function(ReportUnhandledExceptionFunc func)

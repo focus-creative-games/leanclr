@@ -5,7 +5,7 @@
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
 #include "metadata/metadata_name.h"
-#include "intrinsics/intrinsic_stubs.h"
+#include "bcl/adapter.h"
 
 namespace leanclr
 {
@@ -125,14 +125,7 @@ IntrinsicInvoker Intrinsics::get_intrinsic_invoker_by_id_unchecked(uint16_t id)
 // This would call into intrinsic stubs to register all intrinsics
 void Intrinsics::initialize()
 {
-    utils::Vector<vm::IntrinsicEntry> intrinsicEntries;
-    intrinsics::IntrinsicStubs::get_intrinsic_entries(intrinsicEntries);
-    for (auto entry : intrinsicEntries)
-        register_intrinsic(entry.name, entry.func, entry.invoker);
-    utils::Vector<vm::NewobjIntrinsicEntry> newobjIntrinsicEntries;
-    intrinsics::IntrinsicStubs::get_newobj_intrinsic_entries(newobjIntrinsicEntries);
-    for (auto entry : newobjIntrinsicEntries)
-        register_newobj_intrinsic(entry.name, entry.invoker);
+    bcl::Adapter::register_intrinsics();
 }
 
 } // namespace vm

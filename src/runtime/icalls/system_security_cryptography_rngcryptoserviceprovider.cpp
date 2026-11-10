@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_security_cryptography_rngcryptoserviceprovider.h"
 
 #include "misc/rng_crypto_service_provider.h"

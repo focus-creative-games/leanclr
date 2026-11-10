@@ -1,9 +1,10 @@
-#include "delegate.h"
-#include "rt_managed_types.h"
-#include "method.h"
-#include "object.h"
-#include "rt_array.h"
-#include "class.h"
+#include "managed_layouts.h"
+#include "vm/delegate.h"
+#include "vm/rt_managed_types.h"
+#include "vm/method.h"
+#include "vm/object.h"
+#include "vm/rt_array.h"
+#include "vm/class.h"
 #include "interp/eval_stack_op.h"
 
 namespace leanclr

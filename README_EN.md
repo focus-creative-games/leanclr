@@ -96,6 +96,8 @@ The Core edition is implemented for little-endian platforms with a C++11 toolcha
 
 See [memory ownership and failure policy](src/runtime/alloc/README.md) for callback coverage, configuration timing and OOM behavior.
 
+See [runtime layering](src/runtime/bcl/README.md) for runtime core, host service and BCL adapter contracts.
+
 ### Standard Branches
 
 Standard is split by BCL source:

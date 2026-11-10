@@ -1,6 +1,7 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_runtime_interopservices_runtimeinformation.h"
 
-#include "platform/architecture.h"
+#include "bcl/mono/platform/architecture.h"
 
 namespace leanclr
 {

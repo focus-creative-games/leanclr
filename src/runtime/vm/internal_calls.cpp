@@ -5,7 +5,7 @@
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
 #include "metadata/metadata_name.h"
-#include "icalls/internal_call_stubs.h"
+#include "bcl/adapter.h"
 
 namespace leanclr
 {
@@ -159,15 +159,7 @@ InternalCallInvoker InternalCalls::get_internal_call_invoker_by_id_unchecked(uin
 // Initialize internal calls system
 void InternalCalls::initialize()
 {
-    utils::Vector<vm::InternalCallEntry> entries;
-    icalls::InternalCallStubs::get_internal_call_entries(entries);
-    for (auto& entry : entries)
-        register_internal_call(entry.name, entry.func, entry.invoker);
-
-    utils::Vector<vm::NewobjInternalCallEntry> newobjEntries;
-    icalls::InternalCallStubs::get_newobj_internal_call_entries(newobjEntries);
-    for (auto& entry : newobjEntries)
-        register_newobj_internal_call(entry.name, entry.invoker);
+    bcl::Adapter::register_internal_calls();
 }
 
 } // namespace vm

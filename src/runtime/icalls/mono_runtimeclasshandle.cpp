@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "mono_runtimeclasshandle.h"
 
 #include "icall_base.h"

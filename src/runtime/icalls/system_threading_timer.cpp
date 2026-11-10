@@ -1,6 +1,7 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_timer.h"
 
-#include "platform/rt_time.h"
+#include "host/services.h"
 
 namespace leanclr
 {
@@ -9,7 +10,7 @@ namespace icalls
 
 RtResult<int64_t> SystemThreadingTimer::get_time_monotonic() noexcept
 {
-    RET_OK(os::Time::get_ticks_100nanos());
+    RET_OK(host::Services::monotonic_nanoseconds() / 100);
 }
 
 /// @icall: System.Threading.Timer::GetTimeMonotonic()

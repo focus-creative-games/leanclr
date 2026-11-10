@@ -30,7 +30,6 @@ class RtSys
     static int32_t convert_error_pal_to_platform(int32_t error);
     static int32_t convert_error_platform_to_pal(int32_t error);
     static uint8_t* str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size);
-    static void get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length);
     static int32_t copy_file(vm::RtObject* source, vm::RtObject* destination);
     static int32_t lchflags(vm::RtString* path, uint32_t flags);
     static int32_t lchflags_can_set_hidden_flag();

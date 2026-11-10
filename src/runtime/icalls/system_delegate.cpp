@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_delegate.h"
 
 #include "icall_base.h"

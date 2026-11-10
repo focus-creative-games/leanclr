@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "mono_safestringmarshal.h"
 #include "icall_base.h"
 #include "vm/rt_string.h"

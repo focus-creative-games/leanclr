@@ -2925,7 +2925,7 @@ LEANCLR_CASE_BEGIN(Throw)
     {
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
-    if (!vm::Class::is_exception_sub_class(ex->klass))
+    if (!vm::Class::is_exception_sub_class(reinterpret_cast<vm::RtObject*>(ex)->klass))
     {
         RAISE_RUNTIME_ERROR(RtErr::InvalidCast);
     }
@@ -2988,7 +2988,7 @@ LEANCLR_CASE_BEGIN_LITE(EndFilter)
         ip = reinterpret_cast<const uint8_t*>(ir + 1);
         setup_filter_handler(imi, frame, ip);
         vm::RtException* ex = get_exception_in_last_throw_flow(frame, static_cast<uint32_t>(ip - imi->codes));
-        set_stack_value_at<vm::RtObject*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
+        set_stack_value_at<vm::RtException*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
     }
     else
     {

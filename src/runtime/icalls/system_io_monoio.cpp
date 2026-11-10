@@ -1,7 +1,8 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_io_monoio.h"
 
-#include "platform/rt_file.h"
-#include "platform/rt_path.h"
+#include "host/services.h"
+#include "bcl/mono/platform/rt_path.h"
 #include "vm/rt_array.h"
 #include "vm/rt_string.h"
 
@@ -79,46 +80,46 @@ static RtResultVoid get_volume_separator_char_invoker(metadata::RtManagedMethodP
 /// @icall: System.IO.MonoIO::get_ConsoleError
 RtResult<intptr_t> SystemIOMonoIO::get_console_error() noexcept
 {
-    RET_OK(os::File::get_stderr());
+    RET_OK(host::Services::files().get_stderr());
 }
 
 static RtResultVoid get_console_error_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
                                               interp::RtStackObject* ret) noexcept
 {
-    EvalStackOp::set_return(ret, os::File::get_stderr());
+    EvalStackOp::set_return(ret, host::Services::files().get_stderr());
     RET_VOID_OK();
 }
 
 /// @icall: System.IO.MonoIO::get_ConsoleInput
 RtResult<intptr_t> SystemIOMonoIO::get_console_input() noexcept
 {
-    RET_OK(os::File::get_stdin());
+    RET_OK(host::Services::files().get_stdin());
 }
 
 static RtResultVoid get_console_input_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
                                               interp::RtStackObject* ret) noexcept
 {
-    EvalStackOp::set_return(ret, os::File::get_stdin());
+    EvalStackOp::set_return(ret, host::Services::files().get_stdin());
     RET_VOID_OK();
 }
 
 /// @icall: System.IO.MonoIO::get_ConsoleOutput
 RtResult<intptr_t> SystemIOMonoIO::get_console_output() noexcept
 {
-    RET_OK(os::File::get_stdout());
+    RET_OK(host::Services::files().get_stdout());
 }
 
 static RtResultVoid get_console_output_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
                                                interp::RtStackObject* ret) noexcept
 {
-    EvalStackOp::set_return(ret, os::File::get_stdout());
+    EvalStackOp::set_return(ret, host::Services::files().get_stdout());
     RET_VOID_OK();
 }
 
 /// @icall: System.IO.MonoIO::Close
 RtResult<bool> SystemIOMonoIO::close(intptr_t handle, int32_t* error) noexcept
 {
-    RET_OK(os::File::close(handle, error));
+    RET_OK(host::Services::files().close(handle, error));
 }
 
 static RtResultVoid close_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -126,7 +127,7 @@ static RtResultVoid close_invoker(metadata::RtManagedMethodPointer, const metada
 {
     intptr_t handle = EvalStackOp::get_param<intptr_t>(params, 0);
     int32_t* error = EvalStackOp::get_param<int32_t*>(params, 1);
-    EvalStackOp::set_return(ret, static_cast<int32_t>(os::File::close(handle, error)));
+    EvalStackOp::set_return(ret, static_cast<int32_t>(host::Services::files().close(handle, error)));
     RET_VOID_OK();
 }
 
@@ -175,7 +176,7 @@ static RtResultVoid get_current_directory_invoker(metadata::RtManagedMethodPoint
 /// @icall: System.IO.MonoIO::GetFileType
 RtResult<int32_t> SystemIOMonoIO::get_file_type(intptr_t handle, int32_t* error) noexcept
 {
-    RET_OK(os::File::get_file_type(handle, error));
+    RET_OK(host::Services::files().get_file_type(handle, error));
 }
 
 static RtResultVoid get_file_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -183,14 +184,14 @@ static RtResultVoid get_file_type_invoker(metadata::RtManagedMethodPointer, cons
 {
     intptr_t handle = EvalStackOp::get_param<intptr_t>(params, 0);
     int32_t* error = EvalStackOp::get_param<int32_t*>(params, 1);
-    EvalStackOp::set_return(ret, os::File::get_file_type(handle, error));
+    EvalStackOp::set_return(ret, host::Services::files().get_file_type(handle, error));
     RET_VOID_OK();
 }
 
 /// @icall: System.IO.MonoIO::GetLength
 RtResult<int64_t> SystemIOMonoIO::get_length(intptr_t handle, int32_t* error) noexcept
 {
-    RET_OK(os::File::get_length(handle, error));
+    RET_OK(host::Services::files().get_length(handle, error));
 }
 
 static RtResultVoid get_length_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -198,14 +199,14 @@ static RtResultVoid get_length_invoker(metadata::RtManagedMethodPointer, const m
 {
     intptr_t handle = EvalStackOp::get_param<intptr_t>(params, 0);
     int32_t* error = EvalStackOp::get_param<int32_t*>(params, 1);
-    EvalStackOp::set_return(ret, os::File::get_length(handle, error));
+    EvalStackOp::set_return(ret, host::Services::files().get_length(handle, error));
     RET_VOID_OK();
 }
 
 /// @icall: System.IO.MonoIO::Open
 RtResult<intptr_t> SystemIOMonoIO::open(const Utf16Char* filename, int32_t mode, int32_t access, int32_t share, int32_t options, int32_t* error) noexcept
 {
-    RET_OK(os::File::open(filename, mode, access, share, options, error));
+    RET_OK(host::Services::files().open(filename, mode, access, share, options, error));
 }
 
 static RtResultVoid open_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -217,7 +218,7 @@ static RtResultVoid open_invoker(metadata::RtManagedMethodPointer, const metadat
     int32_t share = EvalStackOp::get_param<int32_t>(params, 3);
     int32_t options = EvalStackOp::get_param<int32_t>(params, 4);
     int32_t* error = EvalStackOp::get_param<int32_t*>(params, 5);
-    EvalStackOp::set_return(ret, os::File::open(filename, mode, access, share, options, error));
+    EvalStackOp::set_return(ret, host::Services::files().open(filename, mode, access, share, options, error));
     RET_VOID_OK();
 }
 
@@ -242,7 +243,7 @@ RtResult<int32_t> SystemIOMonoIO::read(intptr_t handle, vm::RtArray* dest, int32
     }
 
     uint8_t* buffer = vm::Array::get_array_element_address<uint8_t>(dest, dest_offset);
-    RET_OK(os::File::read(handle, buffer, count, error));
+    RET_OK(host::Services::files().read(handle, buffer, count, error));
 }
 
 static RtResultVoid monoio_read_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -279,7 +280,7 @@ static RtResultVoid remap_path_invoker(metadata::RtManagedMethodPointer, const m
 /// @icall: System.IO.MonoIO::Seek
 RtResult<int64_t> SystemIOMonoIO::seek(intptr_t handle, int64_t offset, int32_t origin, int32_t* error) noexcept
 {
-    RET_OK(os::File::seek(handle, offset, origin, error));
+    RET_OK(host::Services::files().seek(handle, offset, origin, error));
 }
 
 static RtResultVoid seek_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -289,7 +290,7 @@ static RtResultVoid seek_invoker(metadata::RtManagedMethodPointer, const metadat
     int64_t offset = EvalStackOp::get_param<int64_t>(params, 1);
     int32_t origin = EvalStackOp::get_param<int32_t>(params, 2);
     int32_t* error = EvalStackOp::get_param<int32_t*>(params, 3);
-    EvalStackOp::set_return(ret, os::File::seek(handle, offset, origin, error));
+    EvalStackOp::set_return(ret, host::Services::files().seek(handle, offset, origin, error));
     RET_VOID_OK();
 }
 
@@ -314,7 +315,7 @@ RtResult<int32_t> SystemIOMonoIO::write(intptr_t handle, vm::RtArray* src, int32
     }
 
     const uint8_t* buffer = vm::Array::get_array_element_address<uint8_t>(src, src_offset);
-    RET_OK(os::File::write(handle, buffer, count, error));
+    RET_OK(host::Services::files().write(handle, buffer, count, error));
 }
 
 static RtResultVoid write_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,

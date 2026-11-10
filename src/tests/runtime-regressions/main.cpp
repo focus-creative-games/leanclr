@@ -1,3 +1,6 @@
+#include "fake-host-services.h"
+#include "interp/machine_state.h"
+#include "bcl/mono/managed_layouts.h"
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -566,6 +569,17 @@ static void unaligned_image()
     alloc::GeneralAllocation::free(const_cast<uint8_t*>(file.data));
 }
 
+static void host_integration_log(host::LogLevel level, const char* message)
+{
+    FakeHost::log(level, message);
+    if (level == host::LogLevel::Fatal)
+    {
+        auto frames = interp::MachineState::get_global_machine_state().get_active_frames();
+        for (size_t i = 0; i < frames.size(); ++i)
+            std::fprintf(stderr, "managed frame: %s::%s\n", frames[i].method->parent->name, frames[i].method->name);
+    }
+}
+
 int main(int argc, char** argv)
 {
     setvbuf(stdout, nullptr, _IONBF, 0);
@@ -579,6 +593,12 @@ int main(int argc, char** argv)
         tracked.calloc = tracked_calloc;
         tracked.free = tracked_free;
         check(alloc::GeneralAllocation::set_memory_callbacks(tracked), "install allocator before runtime allocations");
+    }
+    if (std::strcmp(argv[1], "managed-host-services") == 0)
+    {
+        auto callbacks = FakeHost::callbacks();
+        callbacks.log = host_integration_log;
+        check(host::Services::configure(callbacks), "install managed integration host");
     }
     vm::Settings::set_file_loader(load_file);
     const char* args[] = {"runtime-regressions"};
@@ -650,6 +670,32 @@ int main(int argc, char** argv)
         auto double_result = vm::Runtime::invoke_with_run_cctor(method, nullptr, nullptr);
         check(double_result.is_ok() && double_result.unwrap(), "execute double constant");
         check(*reinterpret_cast<double*>(double_result.unwrap() + 1) == 12345.678, "preserve constant double bits");
+    }
+    else if (std::strcmp(argv[1], "managed-host-services") == 0)
+    {
+        auto assembly = vm::Assembly::load_by_name("RegressionFixtures");
+        check(assembly.is_ok(), "load host fixture");
+        auto klass = assembly.unwrap()->mod->get_class_by_name("HostServicesFixture", false, false);
+        check(klass.is_ok() && klass.unwrap(), "host fixture type");
+        check(vm::Class::initialize_all(klass.unwrap()).is_ok(), "initialize host fixture");
+        auto* method = vm::Method::find_matched_method_in_class_by_name(klass.unwrap(), "Run");
+        const uint16_t path[] = {'m', 'e', 'm', 0};
+        int32_t error = -1;
+        intptr_t handle = host::Services::files().open(path, 3, 3, 0, 0, &error);
+        check(handle == 42 && error == 0, "open memory-backed host stream");
+        const void* args[] = {&handle};
+        auto result = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
+        check(result.is_ok() && result.unwrap(), "managed host fixture invocation");
+        auto code = *reinterpret_cast<int32_t*>(result.unwrap() + 1);
+        std::printf("managed host fixture failure: %d\n", code);
+        check(code == 0 && FakeHost::state().opens > 0 && FakeHost::state().reads > 0 && FakeHost::state().writes > 0 && FakeHost::state().closes > 0,
+              "managed file and clock calls must reach injected host");
+        check(FakeHost::state().random_calls > 0, "managed Guid entropy must reach host");
+        FakeHost::state().fail_random = true;
+        method = vm::Method::find_matched_method_in_class_by_name(klass.unwrap(), "EntropyFailure");
+        auto failed_entropy = vm::Runtime::invoke_with_run_cctor(method, nullptr, nullptr);
+        check(failed_entropy.is_ok() && failed_entropy.unwrap() && *reinterpret_cast<int32_t*>(failed_entropy.unwrap() + 1) == 0,
+              "managed entropy failure must map to BCL exception");
     }
     else if (std::strcmp(argv[1], "invalid-layouts") == 0)
     {

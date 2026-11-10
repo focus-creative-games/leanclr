@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "intrinsics/system_string.h"
 
 #include "interp/eval_stack_op.h"

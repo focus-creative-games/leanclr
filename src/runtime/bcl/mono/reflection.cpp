@@ -1,4 +1,5 @@
-#include "reflection.h"
+#include "managed_layouts.h"
+#include "vm/reflection.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -7,17 +8,17 @@
 #include "core/stl_compat.h"
 #include <vector>
 
-#include "rt_array.h"
-#include "assembly.h"
-#include "class.h"
-#include "method.h"
-#include "object.h"
+#include "vm/rt_array.h"
+#include "vm/assembly.h"
+#include "vm/class.h"
+#include "vm/method.h"
+#include "vm/object.h"
 #include "gc/gc_roots.h"
-#include "runtime.h"
-#include "type.h"
-#include "rt_string.h"
-#include "rt_exception.h"
-#include "parameter.h"
+#include "vm/runtime.h"
+#include "vm/type.h"
+#include "vm/rt_string.h"
+#include "vm/rt_exception.h"
+#include "vm/parameter.h"
 #include "alloc/general_allocation.h"
 #include "metadata/metadata_cache.h"
 #include "metadata/metadata_compare.h"
@@ -135,7 +136,7 @@ static utils::HashMap<PropertyKey, RtReflectionProperty*, PropertyKeyHash, Prope
 static utils::HashMap<EventKey, RtReflectionEventInfo*, EventKeyHash, EventKeyEqual> s_event_reflection_map;
 static utils::HashMap<const metadata::RtAssembly*, RtReflectionAssembly*> s_assembly_reflection_map;
 static utils::HashMap<const metadata::RtModuleDef*, RtReflectionModule*> s_module_reflection_map;
-static utils::HashMap<const metadata::RtAssembly*, metadata::RtMonoAssemblyName*> s_assembly_name_map;
+static utils::HashMap<const metadata::RtAssembly*, metadata::AssemblyNameInfo*> s_assembly_name_map;
 
 static RtResult<int32_t> unbox_i32(RtObject* obj, const metadata::RtClass* cls_i32)
 {
@@ -390,7 +391,7 @@ RtResult<RtReflectionAssembly*> Reflection::get_assembly_reflection_object(metad
     RET_OK(ref_obj);
 }
 
-RtResult<metadata::RtMonoAssemblyName*> Reflection::get_assembly_name_object(metadata::RtAssembly* ass)
+RtResult<metadata::AssemblyNameInfo*> Reflection::get_assembly_name_object(metadata::RtAssembly* ass)
 {
     auto found = s_assembly_name_map.find(ass);
     if (found != s_assembly_name_map.end())
@@ -398,7 +399,7 @@ RtResult<metadata::RtMonoAssemblyName*> Reflection::get_assembly_name_object(met
         RET_OK(found->second);
     }
 
-    auto name_obj = alloc::GeneralAllocation::malloc_any_zeroed<metadata::RtMonoAssemblyName>();
+    auto name_obj = alloc::GeneralAllocation::malloc_any_zeroed<metadata::AssemblyNameInfo>();
     ass->mod->fill_assembly_name(*name_obj);
     s_assembly_name_map.emplace(ass, name_obj);
     RET_OK(name_obj);

@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_monomethodinfo.h"
 #include "vm/class.h"
 #include "vm/method.h"

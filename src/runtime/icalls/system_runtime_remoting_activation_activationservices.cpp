@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_runtime_remoting_activation_activationservices.h"
 
 #include "vm/class.h"

@@ -313,7 +313,7 @@ class RtModuleDef
     // Export types
     RtResult<RtClass*> get_global_type_def();
     RtResultVoid get_types(bool exported_only, utils::Vector<RtClass*>& types);
-    void fill_assembly_name(RtMonoAssemblyName& out) const;
+    void fill_assembly_name(AssemblyNameInfo& out) const;
 
     // Reference assembly access
     // TODO: Implement reference assembly resolution

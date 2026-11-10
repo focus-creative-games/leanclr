@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_security_securitymanager.h"
 
 namespace leanclr

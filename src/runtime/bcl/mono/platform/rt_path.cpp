@@ -1,5 +1,5 @@
-#include "rt_path.h"
-#include "rt_io_error_internal.h"
+#include "bcl/mono/platform/rt_path.h"
+#include "platform/rt_io_error_internal.h"
 
 #include "vm/rt_string.h"
 #include "vm/settings.h"
@@ -17,7 +17,7 @@
 #endif
 
 #if LEANCLR_PLATFORM_PORTABLE
-#include "rt_portable_io.h"
+#include "portable_paths.h"
 #endif
 
 namespace leanclr
@@ -37,7 +37,7 @@ using io_error_internal::kErrorGenFailure;
 using io_error_internal::kErrorSuccess;
 using io_error_internal::set_error;
 #if LEANCLR_PLATFORM_POSIX
-using io_error_internal::errno_to_monoio;
+using io_error_internal::errno_to_io_error;
 #endif
 
 } // namespace
@@ -161,7 +161,7 @@ vm::RtString* Path::get_current_directory(int32_t* error)
     {
         return vm::String::create_string_from_utf8cstr(stack_buf);
     }
-    set_error(error, errno_to_monoio(errno));
+    set_error(error, errno_to_io_error(errno));
     return vm::String::get_empty_string();
 #endif
 #endif

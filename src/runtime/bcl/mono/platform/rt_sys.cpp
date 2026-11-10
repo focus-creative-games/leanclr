@@ -1,11 +1,10 @@
-#include "rt_sys.h"
+#include "bcl/mono/platform/rt_sys.h"
 
 #include "build_config.h"
 #include "vm/class.h"
 #include "vm/field.h"
 #include "vm/rt_array.h"
 #include "vm/rt_string.h"
-#include "platform/bcrypt.h"
 #include "platform/rt_io_error_internal.h"
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
@@ -632,7 +631,7 @@ int32_t RtSys::convert_error_pal_to_platform(int32_t error)
 int32_t RtSys::convert_error_platform_to_pal(int32_t error)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    return os::io_error_internal::errno_to_monoio(error);
+    return os::io_error_internal::errno_to_io_error(error);
 #else
     return error;
 #endif
@@ -671,11 +670,6 @@ uint8_t* RtSys::str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size)
     (void)buffer_size;
     return nullptr;
 #endif
-}
-
-void RtSys::get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length)
-{
-    platform::Bcrypt::gen_random(0, buffer, length, 0);
 }
 
 int32_t RtSys::copy_file(vm::RtObject* source, vm::RtObject* destination)

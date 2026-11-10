@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_span.h"
 #include "system_readonlyspan.h"
 #include "interp/interp_defs.h"

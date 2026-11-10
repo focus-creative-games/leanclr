@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_runtime_remoting_remotingservices.h"
 
 #include "metadata/module_def.h"

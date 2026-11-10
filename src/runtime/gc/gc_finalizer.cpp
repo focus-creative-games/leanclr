@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "gc/gc_finalizer.h"
 
 #include "gc/obj_scanner.h"
@@ -35,7 +36,7 @@ struct PromoteScanContext
 
 void GcFinalizer::on_object_allocated(vm::RtObject* obj)
 {
-    assert (obj != nullptr);
+    assert(obj != nullptr);
     if (!vm::Class::has_finalizer(obj->klass))
     {
         return;
@@ -45,7 +46,7 @@ void GcFinalizer::on_object_allocated(vm::RtObject* obj)
 
 void GcFinalizer::promote_unreachable(GCAliveObjectBitmap& alive_bitmap)
 {
-    assert (s_freachable.empty());
+    assert(s_freachable.empty());
     PromoteScanContext ctx{&alive_bitmap};
     ObjScanner scanner(PromoteScanContext::visit, &ctx);
     for (auto& entry : s_registry)
@@ -86,13 +87,13 @@ void GcFinalizer::run_pending_finalizers()
 
         it->second = FinalizerRegState::Finalized;
 
-        assert (vm::Class::has_finalizer(obj->klass));
+        assert(vm::Class::has_finalizer(obj->klass));
 
         const metadata::RtMethodInfo* finalizer = vm::Class::get_finalizer(obj->klass);
         auto ret = vm::Runtime::invoke_object_arguments_with_run_cctor(finalizer, obj, nullptr, 0);
         if (ret.is_err())
         {
-            printf("Failed to invoke finalizer, klass: %s.%s\n", obj->klass->namespaze, obj->klass->name);
+            host::Services::logf(host::LogLevel::Error, "Failed to invoke finalizer, klass: %s.%s\n", obj->klass->namespaze, obj->klass->name);
         }
     }
 }

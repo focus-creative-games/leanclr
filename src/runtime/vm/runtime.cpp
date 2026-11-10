@@ -1,4 +1,6 @@
 #include "runtime.h"
+#include "host/services.h"
+#include "bcl/adapter.h"
 
 #include "intrinsics.h"
 #include "internal_calls.h"
@@ -320,6 +322,7 @@ static RtResult<RtObject*> invoke_without_run_cctor(const metadata::RtMethodInfo
 
 RtResultVoid Runtime::initialize()
 {
+    host::Services::freeze();
     // Initialize subsystems
     alloc::MetadataAllocation::init();
     Intrinsics::initialize();
@@ -345,7 +348,7 @@ RtResultVoid Runtime::initialize()
     RET_ERR_ON_FAIL(Assembly::load_corlib());
     RET_ERR_ON_FAIL(Class::initialize());
     RET_ERR_ON_FAIL(ArrayClass::initialize());
-    RET_ERR_ON_FAIL(Class::verify_integrity_of_corlib_classes());
+    RET_ERR_ON_FAIL(bcl::Adapter::validate_managed_layouts());
     RET_ERR_ON_FAIL(String::initialize());
     RET_ERR_ON_FAIL(Exception::initialize());
     RET_ERR_ON_FAIL(Delegate::initialize());
@@ -388,7 +391,7 @@ void register_runtime_gc_roots()
         {
             for (auto& entry : s_initializer_failures)
                 if (entry.second.exception)
-                    visit(entry.second.exception, context);
+                    visit(reinterpret_cast<RtObject*>(entry.second.exception), context);
         });
 }
 
@@ -402,7 +405,7 @@ static RtResultVoid fail_initializer(metadata::RtClass* klass, RtErr error)
         if (wrapped.is_ok())
         {
             exception = reinterpret_cast<RtException*>(wrapped.unwrap());
-            exception->inner_exception = original;
+            Exception::set_inner_exception(exception, original);
         }
         Exception::set_current_exception(exception);
         error = RtErr::ManagedException;

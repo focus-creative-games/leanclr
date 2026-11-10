@@ -1,4 +1,5 @@
 #include "assembly.h"
+#include "host/services.h"
 
 #include <cstring>
 
@@ -55,10 +56,10 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
         RET_ERR(RtErr::FileNotFound);
     }
     FileData dllFileData = {};
-    auto result = file_loader(name, "dll", dllFileData);
+    auto result = host::Services::load_assembly(name, "dll", dllFileData);
     if (!result)
     {
-        std::printf("Failed to load assembly from file loader for %s\n", name);
+        host::Services::logf(host::LogLevel::Error, "Failed to load assembly from file loader for %s\n", name);
         RET_ERR(RtErr::FileNotFound);
     }
     AssemblyData dllData{dllFileData.data, dllFileData.length, dllFileData.shared};
@@ -66,7 +67,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
     AssemblyData* pdb_data_ptr = nullptr;
     AssemblyData pdb_data;
     FileData pdb_file_data = {};
-    if (file_loader(name, "pdb", pdb_file_data))
+    if (host::Services::load_assembly(name, "pdb", pdb_file_data))
     {
         pdb_data = AssemblyData{pdb_file_data.data, pdb_file_data.length, pdb_file_data.shared};
         pdb_data_ptr = &pdb_data;
@@ -159,7 +160,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
         [mod]()
         {
             metadata::RtModuleDef::unregister_module_def(mod);
-            std::printf("Failed to load reference assemblies of module %s\n", mod->get_name_no_ext());
+            host::Services::logf(host::LogLevel::Error, "Failed to load reference assemblies of module %s\n", mod->get_name_no_ext());
         });
     utils::Vector<metadata::RtAssembly*> ref_assemblies;
     RET_ERR_ON_FAIL(mod->get_reference_assemblies(ref_assemblies));

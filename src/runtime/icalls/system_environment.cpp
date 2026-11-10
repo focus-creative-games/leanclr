@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_environment.h"
 #include "icall_base.h"
 
@@ -7,7 +8,7 @@
 #include "vm/class.h"
 #include "vm/environment.h"
 
-#include "platform/rt_time.h"
+#include "host/services.h"
 
 namespace leanclr
 {
@@ -114,7 +115,7 @@ static RtResultVoid get_os_version_string_invoker(metadata::RtManagedMethodPoint
 
 RtResult<int32_t> SystemEnvironment::get_tick_count() noexcept
 {
-    RET_OK(os::Time::get_tick_count());
+    RET_OK(static_cast<int32_t>(static_cast<uint32_t>(host::Services::monotonic_nanoseconds() / 1000000)));
 }
 
 /// @icall: System.Environment::get_TickCount

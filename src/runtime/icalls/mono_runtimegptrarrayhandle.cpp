@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "mono_runtimegptrarrayhandle.h"
 #include "icall_base.h"
 #include "utils/safegptrarray.h"

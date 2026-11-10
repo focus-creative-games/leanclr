@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_volatile.h"
 #include "interp/eval_stack_op.h"
 

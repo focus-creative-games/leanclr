@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_osspecificsynchronizationcontext.h"
 
 namespace leanclr

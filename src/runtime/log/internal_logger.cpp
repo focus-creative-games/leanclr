@@ -1,6 +1,7 @@
 #include <cstdio>
 
 #include "internal_logger.h"
+#include "host/services.h"
 
 namespace leanclr
 {
@@ -10,35 +11,35 @@ namespace log
 void InternalLogger::debug(const char* message)
 {
 #if LEANCLR_LOG_LEVEL <= LOG_LEVEL_DEBUG
-    std::printf("[DEBUG] %s\n", message);
+    host::Services::log(host::LogLevel::Debug, message);
 #endif
 }
 
 void InternalLogger::info(const char* message)
 {
 #if LEANCLR_LOG_LEVEL <= LOG_LEVEL_INFO
-    std::printf("[INFO] %s\n", message);
+    host::Services::log(host::LogLevel::Info, message);
 #endif
 }
 
 void InternalLogger::warning(const char* message)
 {
 #if LEANCLR_LOG_LEVEL <= LOG_LEVEL_WARNING
-    std::printf("[WARNING] %s\n", message);
+    host::Services::log(host::LogLevel::Warning, message);
 #endif
 }
 
 void InternalLogger::error(const char* message)
 {
 #if LEANCLR_LOG_LEVEL <= LOG_LEVEL_ERROR
-    std::printf("[ERROR] %s\n", message);
+    host::Services::log(host::LogLevel::Error, message);
 #endif
 }
 
 void InternalLogger::fatal(const char* message)
 {
 #if LEANCLR_LOG_LEVEL <= LOG_LEVEL_FATAL
-    std::printf("[FATAL] %s\n", message);
+    host::Services::log(host::LogLevel::Fatal, message);
 #endif
 }
 

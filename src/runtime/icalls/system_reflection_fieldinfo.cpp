@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_fieldinfo.h"
 #include "icall_base.h"
 #include "vm/class.h"

@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "safehandle.h"
 #include "vm/object.h"
 #include "vm/class.h"
@@ -17,7 +18,6 @@ intptr_t SafeHandle::get_handle(vm::RtObject* o) noexcept
 {
     return reinterpret_cast<SafeHandleObject*>(o)->handle;
 }
-
 
 void SafeHandle::set_handle(vm::RtObject* o, intptr_t handle) noexcept
 {

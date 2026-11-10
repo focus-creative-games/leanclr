@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_mathf.h"
 
 #include <cmath>
@@ -11,6 +12,7 @@ RtResult<float> SystemMathF::acos(float value) noexcept
 {
     RET_OK(std::acos(value));
 }
+
 /// @icall: System.MathF::Acos(System.Single)
 static RtResultVoid acos_invoker_mathf(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                        interp::RtStackObject* ret) noexcept
@@ -25,6 +27,7 @@ RtResult<float> SystemMathF::acosh(float value) noexcept
 {
     RET_OK(static_cast<float>(std::acosh(static_cast<double>(value))));
 }
+
 /// @icall: System.MathF::Acosh(System.Single)
 static RtResultVoid acosh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                   interp::RtStackObject* ret) noexcept
@@ -39,6 +42,7 @@ RtResult<float> SystemMathF::asin(float value) noexcept
 {
     RET_OK(std::asin(value));
 }
+
 /// @icall: System.MathF::Asin(System.Single)
 static RtResultVoid asin_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* ret) noexcept
@@ -53,6 +57,7 @@ RtResult<float> SystemMathF::asinh(float value) noexcept
 {
     RET_OK(static_cast<float>(std::asinh(static_cast<double>(value))));
 }
+
 /// @icall: System.MathF::Asinh(System.Single)
 static RtResultVoid asinh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                   interp::RtStackObject* ret) noexcept
@@ -67,6 +72,7 @@ RtResult<float> SystemMathF::atan(float value) noexcept
 {
     RET_OK(std::atan(value));
 }
+
 /// @icall: System.MathF::Atan(System.Single)
 static RtResultVoid atan_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* ret) noexcept
@@ -81,6 +87,7 @@ RtResult<float> SystemMathF::atan2(float y, float x) noexcept
 {
     RET_OK(std::atan2(y, x));
 }
+
 /// @icall: System.MathF::Atan2(System.Single,System.Single)
 static RtResultVoid atan2_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                   interp::RtStackObject* ret) noexcept
@@ -96,6 +103,7 @@ RtResult<float> SystemMathF::atanh(float value) noexcept
 {
     RET_OK(static_cast<float>(std::atanh(static_cast<double>(value))));
 }
+
 /// @icall: System.MathF::Atanh(System.Single)
 static RtResultVoid atanh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                   interp::RtStackObject* ret) noexcept
@@ -110,6 +118,7 @@ RtResult<float> SystemMathF::cbrt(float value) noexcept
 {
     RET_OK(static_cast<float>(std::cbrt(static_cast<double>(value))));
 }
+
 /// @icall: System.MathF::Cbrt(System.Single)
 static RtResultVoid cbrt_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* ret) noexcept
@@ -124,6 +133,7 @@ RtResult<float> SystemMathF::ceiling(float value) noexcept
 {
     RET_OK(static_cast<float>(std::ceil(static_cast<double>(value))));
 }
+
 /// @icall: System.MathF::Ceiling(System.Single)
 static RtResultVoid ceiling_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                     interp::RtStackObject* ret) noexcept
@@ -138,6 +148,7 @@ RtResult<float> SystemMathF::cos(float value) noexcept
 {
     RET_OK(std::cos(value));
 }
+
 /// @icall: System.MathF::Cos(System.Single)
 static RtResultVoid cos_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                 interp::RtStackObject* ret) noexcept
@@ -152,6 +163,7 @@ RtResult<float> SystemMathF::cosh(float value) noexcept
 {
     RET_OK(static_cast<float>(std::cosh(static_cast<double>(value))));
 }
+
 /// @icall: System.MathF::Cosh(System.Single)
 static RtResultVoid cosh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* ret) noexcept
@@ -166,6 +178,7 @@ RtResult<float> SystemMathF::exp(float value) noexcept
 {
     RET_OK(std::exp(value));
 }
+
 /// @icall: System.MathF::Exp(System.Single)
 static RtResultVoid exp_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                 interp::RtStackObject* ret) noexcept
@@ -180,6 +193,7 @@ RtResult<float> SystemMathF::floor(float value) noexcept
 {
     RET_OK(std::floor(value));
 }
+
 /// @icall: System.MathF::Floor(System.Single)
 static RtResultVoid floor_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                   interp::RtStackObject* ret) noexcept
@@ -194,6 +208,7 @@ RtResult<float> SystemMathF::log(float value) noexcept
 {
     RET_OK(std::log(value));
 }
+
 /// @icall: System.MathF::Log(System.Single)
 static RtResultVoid log_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                 interp::RtStackObject* ret) noexcept
@@ -208,6 +223,7 @@ RtResult<float> SystemMathF::log10(float value) noexcept
 {
     RET_OK(std::log10(value));
 }
+
 /// @icall: System.MathF::Log10(System.Single)
 static RtResultVoid log10_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                   interp::RtStackObject* ret) noexcept
@@ -222,6 +238,7 @@ RtResult<float> SystemMathF::pow(float x, float y) noexcept
 {
     RET_OK(static_cast<float>(std::pow(static_cast<double>(x), static_cast<double>(y))));
 }
+
 /// @icall: System.MathF::Pow(System.Single,System.Single)
 static RtResultVoid pow_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                 interp::RtStackObject* ret) noexcept
@@ -237,6 +254,7 @@ RtResult<float> SystemMathF::sin(float value) noexcept
 {
     RET_OK(std::sin(value));
 }
+
 /// @icall: System.MathF::Sin(System.Single)
 static RtResultVoid sin_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                 interp::RtStackObject* ret) noexcept
@@ -251,6 +269,7 @@ RtResult<float> SystemMathF::sinh(float value) noexcept
 {
     RET_OK(static_cast<float>(std::sinh(static_cast<double>(value))));
 }
+
 /// @icall: System.MathF::Sinh(System.Single)
 static RtResultVoid sinh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* ret) noexcept
@@ -265,6 +284,7 @@ RtResult<float> SystemMathF::sqrt(float value) noexcept
 {
     RET_OK(static_cast<float>(std::sqrt(static_cast<double>(value))));
 }
+
 /// @icall: System.MathF::Sqrt(System.Single)
 static RtResultVoid sqrt_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* ret) noexcept
@@ -279,6 +299,7 @@ RtResult<float> SystemMathF::tan(float value) noexcept
 {
     RET_OK(std::tan(value));
 }
+
 /// @icall: System.MathF::Tan(System.Single)
 static RtResultVoid tan_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                 interp::RtStackObject* ret) noexcept
@@ -293,6 +314,7 @@ RtResult<float> SystemMathF::tanh(float value) noexcept
 {
     RET_OK(static_cast<float>(std::tanh(static_cast<double>(value))));
 }
+
 /// @icall: System.MathF::Tanh(System.Single)
 static RtResultVoid tanh_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* ret) noexcept
@@ -307,6 +329,7 @@ RtResult<float> SystemMathF::fmod(float x, float y) noexcept
 {
     RET_OK(static_cast<float>(std::fmod(static_cast<double>(x), static_cast<double>(y))));
 }
+
 /// @icall: System.MathF::FMod(System.Single,System.Single)
 static RtResultVoid fmod_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                  interp::RtStackObject* ret) noexcept

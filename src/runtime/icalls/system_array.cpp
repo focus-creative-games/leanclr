@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_array.h"
 #include "icall_base.h"
 #include "vm/rt_array.h"
@@ -287,7 +288,8 @@ RtResult<vm::RtArray*> SystemArray::create_instance_impl(vm::RtReflectionType* e
     else
     {
         // Multi-dimensional or non-zero-based array
-        return LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS_INTERNAL(ele_klass, static_cast<uint8_t>(dimension), length_indices, lower_bound_indices, "SystemArray::create_instance_impl");
+        return LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS_INTERNAL(ele_klass, static_cast<uint8_t>(dimension), length_indices, lower_bound_indices,
+                                                           "SystemArray::create_instance_impl");
     }
 }
 

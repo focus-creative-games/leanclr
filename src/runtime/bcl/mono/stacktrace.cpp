@@ -1,10 +1,11 @@
-#include "stacktrace.h"
-#include "rt_string.h"
-#include "rt_array.h"
-#include "class.h"
-#include "reflection.h"
-#include "object.h"
-#include "method.h"
+#include "managed_layouts.h"
+#include "vm/stacktrace.h"
+#include "vm/rt_string.h"
+#include "vm/rt_array.h"
+#include "vm/class.h"
+#include "vm/reflection.h"
+#include "vm/object.h"
+#include "vm/method.h"
 #include "interp/interp_defs.h"
 #include "interp/machine_state.h"
 #include "metadata/module_def.h"
@@ -44,7 +45,9 @@ RtResultVoid StackTrace::setup_trace_ips(RtException* ex)
         }
     }
     metadata::RtClass* cls_stackframe = Class::get_corlib_types().cls_stackframe;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, trace_ips, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_stackframe, static_cast<int32_t>(trace_frames.size()), "StackTrace::setup_trace_ips"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        RtArray*, trace_ips,
+        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_stackframe, static_cast<int32_t>(trace_frames.size()), "StackTrace::setup_trace_ips"));
     for (size_t i = 0, frame_count = trace_frames.size(); i < frame_count; ++i)
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, stackframe_obj, LEANCLR_NEWOBJ_INTERNAL(cls_stackframe, "StackTrace::setup_trace_ips"));
@@ -137,7 +140,8 @@ RtResult<RtArray*> StackTrace::get_stack_trace(RtException* ex, int32_t skip_fra
         return LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(cls_stackframe, "StackTrace::get_stack_trace");
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, result_array, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_stackframe, stack_count - skip_frames, "StackTrace::get_stack_trace"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        RtArray*, result_array, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_stackframe, stack_count - skip_frames, "StackTrace::get_stack_trace"));
     for (int32_t i = skip_frames; i < stack_count; ++i)
     {
         RtObject* frame_obj = Array::get_array_data_at<RtObject*>(ex->trace_ips, i);

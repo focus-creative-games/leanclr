@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_interlocked.h"
 
 #include "core/rt_err.h"

@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "intrinsic_stubs.h"
 #include "system_array.h"
 #include "system_object.h"

@@ -1,6 +1,7 @@
+#include "bcl/mono/managed_layouts.h"
 #include "system_io_path.h"
 
-#include "platform/rt_path.h"
+#include "bcl/mono/platform/rt_path.h"
 
 namespace leanclr
 {
