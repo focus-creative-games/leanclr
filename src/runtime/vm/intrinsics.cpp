@@ -13,23 +13,38 @@ namespace vm
 {
 
 // Static maps for intrinsic functions
-static utils::HashMap<const char*, IntrinsicRegistry, utils::CStrHasher, utils::CStrCompare> g_intrinsicMap;
-static utils::HashMap<const char*, IntrinsicInvoker, utils::CStrHasher, utils::CStrCompare> g_newobjIntrinsicMap;
+static utils::HashMap<const char*, IntrinsicRegistry, utils::CStrHasher, utils::CStrCompare>& get_g_intrinsicMap()
+{
+    static utils::HashMap<const char*, IntrinsicRegistry, utils::CStrHasher, utils::CStrCompare> value;
+    return value;
+}
+
+static utils::HashMap<const char*, IntrinsicInvoker, utils::CStrHasher, utils::CStrCompare>& get_g_newobjIntrinsicMap()
+{
+    static utils::HashMap<const char*, IntrinsicInvoker, utils::CStrHasher, utils::CStrCompare> value;
+    return value;
+}
+
 static utils::Vector<IntrinsicInvoker> g_intrinsicInvokerIdList;
-static utils::HashMap<IntrinsicInvoker, uint16_t> g_intrinsicInvokerIdMap;
+
+static utils::HashMap<IntrinsicInvoker, uint16_t>& get_g_intrinsicInvokerIdMap()
+{
+    static utils::HashMap<IntrinsicInvoker, uint16_t> value;
+    return value;
+}
 
 // Register an intrinsic function by name
 void Intrinsics::register_intrinsic(const char* name, IntrinsicFunction func, IntrinsicInvoker invoker)
 {
-    assert(g_intrinsicMap.find(name) == g_intrinsicMap.end() && "Intrinsic already registered");
-    g_intrinsicMap[name] = IntrinsicRegistry{func, invoker};
+    assert(get_g_intrinsicMap().find(name) == get_g_intrinsicMap().end() && "Intrinsic already registered");
+    get_g_intrinsicMap()[name] = IntrinsicRegistry{func, invoker};
 }
 
 // Get intrinsic by name and length
 const IntrinsicRegistry* Intrinsics::get_intrinsic(const char* name)
 {
-    auto it = g_intrinsicMap.find(name);
-    if (it != g_intrinsicMap.end())
+    auto it = get_g_intrinsicMap().find(name);
+    if (it != get_g_intrinsicMap().end())
         return &it->second;
     return nullptr;
 }
@@ -41,16 +56,16 @@ RtResult<const IntrinsicRegistry*> Intrinsics::get_intrinsic_by_method(const met
 
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
-        auto it = g_intrinsicMap.find(sb.get_const_chars());
-        if (it != g_intrinsicMap.end())
+        auto it = get_g_intrinsicMap().find(sb.get_const_chars());
+        if (it != get_g_intrinsicMap().end())
             RET_OK(&it->second);
     }
 
     {
         sb.clear();
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
-        auto it = g_intrinsicMap.find(sb.get_const_chars());
-        if (it != g_intrinsicMap.end())
+        auto it = get_g_intrinsicMap().find(sb.get_const_chars());
+        if (it != get_g_intrinsicMap().end())
             RET_OK(&it->second);
     }
     RET_OK(nullptr);
@@ -59,15 +74,15 @@ RtResult<const IntrinsicRegistry*> Intrinsics::get_intrinsic_by_method(const met
 // Register newobj intrinsic
 void Intrinsics::register_newobj_intrinsic(const char* name, IntrinsicInvoker invoker)
 {
-    assert(g_newobjIntrinsicMap.find(name) == g_newobjIntrinsicMap.end() && "Newobj intrinsic already registered");
-    g_newobjIntrinsicMap[name] = invoker;
+    assert(get_g_newobjIntrinsicMap().find(name) == get_g_newobjIntrinsicMap().end() && "Newobj intrinsic already registered");
+    get_g_newobjIntrinsicMap()[name] = invoker;
 }
 
 // Get newobj intrinsic by name and length
 IntrinsicInvoker Intrinsics::get_newobj_intrinsic(const char* name)
 {
-    auto it = g_newobjIntrinsicMap.find(name);
-    if (it != g_newobjIntrinsicMap.end())
+    auto it = get_g_newobjIntrinsicMap().find(name);
+    if (it != get_g_newobjIntrinsicMap().end())
         return it->second;
     return nullptr;
 }
@@ -79,16 +94,16 @@ RtResult<IntrinsicInvoker> Intrinsics::get_newobj_intrinsic_by_method(const meta
 
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
-        auto it = g_newobjIntrinsicMap.find(sb.get_const_chars());
-        if (it != g_newobjIntrinsicMap.end())
+        auto it = get_g_newobjIntrinsicMap().find(sb.get_const_chars());
+        if (it != get_g_newobjIntrinsicMap().end())
             RET_OK(it->second);
     }
 
     {
         sb.clear();
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
-        auto it = g_newobjIntrinsicMap.find(sb.get_const_chars());
-        if (it != g_newobjIntrinsicMap.end())
+        auto it = get_g_newobjIntrinsicMap().find(sb.get_const_chars());
+        if (it != get_g_newobjIntrinsicMap().end())
             RET_OK(it->second);
     }
     RET_OK((IntrinsicInvoker) nullptr);
@@ -97,8 +112,8 @@ RtResult<IntrinsicInvoker> Intrinsics::get_newobj_intrinsic_by_method(const meta
 // Get ID for an intrinsic invoker (with registration if needed)
 uint16_t Intrinsics::register_intrinsic_invoker_id(IntrinsicInvoker invoker)
 {
-    auto it = g_intrinsicInvokerIdMap.find(invoker);
-    if (it != g_intrinsicInvokerIdMap.end())
+    auto it = get_g_intrinsicInvokerIdMap().find(invoker);
+    if (it != get_g_intrinsicInvokerIdMap().end())
         return it->second;
 
     uint16_t id = static_cast<uint16_t>(g_intrinsicInvokerIdList.size());
@@ -110,7 +125,7 @@ uint16_t Intrinsics::register_intrinsic_invoker_id(IntrinsicInvoker invoker)
     }
 
     g_intrinsicInvokerIdList.push_back(invoker);
-    g_intrinsicInvokerIdMap[invoker] = id;
+    get_g_intrinsicInvokerIdMap()[invoker] = id;
     return id;
 }
 

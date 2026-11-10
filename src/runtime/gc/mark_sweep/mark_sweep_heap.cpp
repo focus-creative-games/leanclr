@@ -39,7 +39,12 @@ constexpr size_t kSizeClassPoolCount = kSizeClassPoolInfoCount * 16 + 16 /* pool
 static SizeClassPool* s_size_class_pools[kSizeClassPoolCount] = {};
 constexpr size_t kMaxSmallObejctSize = s_size_class_pool_infos[kSizeClassPoolInfoCount - 1].max_size;
 static SizeClassPool* s_map_div8_size_to_pool[kMaxSmallObejctSize / 8] = {};
-static utils::HashSet<void*> s_big_object_arenas;
+
+static utils::HashSet<void*>& get_s_big_object_arenas()
+{
+    static utils::HashSet<void*> value;
+    return value;
+}
 
 // constexpr size_t kMinSmallHeapBlockSize = 8;
 // constexpr size_t kMaxSmallHeapBlockSize = 256;
@@ -89,7 +94,7 @@ static void sweep_small_objects(const GCAliveObjectBitmap& alive_object_bitmap, 
 
 static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, int64_t& freed_bytes)
 {
-    for (auto it = s_big_object_arenas.begin(); it != s_big_object_arenas.end();)
+    for (auto it = get_s_big_object_arenas().begin(); it != get_s_big_object_arenas().end();)
     {
         vm::RtObject* obj = reinterpret_cast<vm::RtObject*>(*it);
         if (alive_object_bitmap.is_marked(obj))
@@ -105,7 +110,7 @@ static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, in
         alloc::GeneralAllocation::free(*it);
 #endif
         freed_bytes += static_cast<int64_t>(aligned_size);
-        it = s_big_object_arenas.erase(it);
+        it = get_s_big_object_arenas().erase(it);
     }
 }
 
@@ -245,7 +250,7 @@ vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, 
         obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(aligned_size);
         if (obj != nullptr)
         {
-            s_big_object_arenas.insert(obj);
+            get_s_big_object_arenas().insert(obj);
         }
         else
         {

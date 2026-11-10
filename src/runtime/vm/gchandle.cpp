@@ -31,20 +31,118 @@ struct HandleInfo
 static HandleInfo* s_freed_handle_head = nullptr;
 static GCHandleId s_last_handle_id = 0;
 
-// TODO: optimize this
-static utils::HashMap<GCHandleId, HandleInfo*> s_handle_map;
+// Fallible index: no STL allocations on the handle creation path. Empty slots
+// are null; erased slots use a stable marker so collision chains stay intact.
+class HandleIndex
+{
+    HandleInfo** slots_ = nullptr;
+    size_t capacity_ = 0, live_ = 0, used_ = 0;
+    HandleInfo deleted_{};
+
+    static size_t hash(GCHandleId id)
+    {
+        return static_cast<size_t>(id) * size_t(2654435761u);
+    }
+
+  public:
+    ~HandleIndex()
+    {
+        alloc::GeneralAllocation::free(slots_);
+    }
+
+    bool prepare_insert()
+    {
+        if (capacity_ && used_ < capacity_ - capacity_ / 4)
+            return true;
+        size_t next = capacity_ ? capacity_ : 16;
+        if (live_ >= next / 2 && !utils::CheckedSize::multiply(next, 2, next))
+            return false;
+        auto** replacement = alloc::GeneralAllocation::calloc_any<HandleInfo*>(next);
+        if (!replacement)
+            return false;
+        for (size_t i = 0; i < capacity_; ++i)
+        {
+            auto* h = slots_[i];
+            if (!h || h == &deleted_)
+                continue;
+            size_t at = hash(h->id) & (next - 1);
+            while (replacement[at])
+                at = (at + 1) & (next - 1);
+            replacement[at] = h;
+        }
+        alloc::GeneralAllocation::free(slots_);
+        slots_ = replacement;
+        capacity_ = next;
+        used_ = live_;
+        return true;
+    }
+
+    void insert(HandleInfo* h)
+    {
+        size_t at = hash(h->id) & (capacity_ - 1);
+        while (slots_[at] && slots_[at] != &deleted_)
+            at = (at + 1) & (capacity_ - 1);
+        if (!slots_[at])
+            ++used_;
+        slots_[at] = h;
+        ++live_;
+    }
+
+    HandleInfo* find(GCHandleId id) const
+    {
+        if (!id || !capacity_)
+            return nullptr;
+        size_t at = hash(id) & (capacity_ - 1);
+        while (slots_[at])
+        {
+            if (slots_[at] != &deleted_ && slots_[at]->id == id)
+                return slots_[at];
+            at = (at + 1) & (capacity_ - 1);
+        }
+        return nullptr;
+    }
+
+    void erase(GCHandleId id)
+    {
+        size_t at = hash(id) & (capacity_ - 1);
+        while (slots_[at])
+        {
+            if (slots_[at] != &deleted_ && slots_[at]->id == id)
+            {
+                slots_[at] = &deleted_;
+                --live_;
+                return;
+            }
+            at = (at + 1) & (capacity_ - 1);
+        }
+    }
+
+    size_t capacity() const
+    {
+        return capacity_;
+    }
+
+    HandleInfo* at(size_t i) const
+    {
+        return slots_[i] == &deleted_ ? nullptr : slots_[i];
+    }
+};
+
+static HandleIndex s_handle_map;
 
 // Allocate a new handle or reuse a freed one
 static HandleInfo* alloc_handle()
 {
-    if (s_last_handle_id >= INT32_MAX) return nullptr;
+    if (s_last_handle_id >= INT32_MAX || !s_handle_map.prepare_insert())
+        return nullptr;
     if (s_freed_handle_head == nullptr)
     {
         // Allocate a new handle
         HandleInfo* h = alloc::GeneralAllocation::malloc_any_zeroed<HandleInfo>();
-        if (!h) return nullptr;
+        if (!h)
+            return nullptr;
         h->id = ++s_last_handle_id;
-        s_handle_map[h->id] = h;
+        s_handle_map.insert(h);
         return h;
     }
     else
@@ -54,7 +152,7 @@ static HandleInfo* alloc_handle()
         s_freed_handle_head = h->next;
         assert(h->id == 0);
         h->id = ++s_last_handle_id;
-        s_handle_map[h->id] = h;
+        s_handle_map.insert(h);
         return h;
     }
 }
@@ -70,7 +168,7 @@ static void free_handle_impl(HandleInfo* handle)
     handle->obj = nullptr;
     handle->type_ = GCHandleType::Normal;
     handle->next = s_freed_handle_head;
-    assert(s_handle_map.find(handle->id) != s_handle_map.end());
+    assert(s_handle_map.find(handle->id) == handle);
     s_handle_map.erase(handle->id);
     handle->id = 0;
     s_freed_handle_head = handle;
@@ -97,12 +195,7 @@ GCHandleId GCHandle::get_handle_id(void* handle)
 
 void* GCHandle::get_handle_by_id(GCHandleId id)
 {
-    auto it = s_handle_map.find(id);
-    if (it != s_handle_map.end())
-    {
-        return it->second;
-    }
-    return nullptr;
+    return s_handle_map.find(id);
 }
 #endif
 
@@ -148,7 +241,8 @@ void* GCHandle::get_target_handle(RtObject* obj, void* handle, int32_t type_)
     {
         // Allocate new handle
         HandleInfo* new_handle = alloc_handle();
-        if (!new_handle) return nullptr;
+        if (!new_handle)
+            return nullptr;
         new_handle->obj = obj;
         new_handle->type_ = static_cast<GCHandleType>(type_);
         new_handle->next = nullptr;
@@ -216,9 +310,11 @@ bool GCHandle::is_type_pinned(const metadata::RtClass* klass)
 
 void GCHandle::foreach_strong_handles(void (*callback)(vm::RtObject*, void*), void* userData)
 {
-    for (auto it = s_handle_map.begin(); it != s_handle_map.end(); ++it)
+    for (size_t i = 0; i < s_handle_map.capacity(); ++i)
     {
-        HandleInfo* hi = it->second;
+        HandleInfo* hi = s_handle_map.at(i);
+        if (!hi)
+            continue;
         if (hi->type_ == GCHandleType::Weak || hi->type_ == GCHandleType::WeakTrackResurrection)
         {
             continue;
@@ -232,9 +328,11 @@ void GCHandle::foreach_strong_handles(void (*callback)(vm::RtObject*, void*), vo
 
 void GCHandle::sweep_weak_handles(bool (*is_object_marked)(vm::RtObject*, void* ctx), void* ctx, bool track_resurrection)
 {
-    for (auto it = s_handle_map.begin(); it != s_handle_map.end(); ++it)
+    for (size_t i = 0; i < s_handle_map.capacity(); ++i)
     {
-        HandleInfo* hi = it->second;
+        HandleInfo* hi = s_handle_map.at(i);
+        if (!hi)
+            continue;
         if (hi->type_ != (track_resurrection ? GCHandleType::WeakTrackResurrection : GCHandleType::Weak))
         {
             continue;

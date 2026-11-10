@@ -122,3 +122,19 @@ and `aligned_malloc`/`aligned_free` remain distinct allocation domains.
 `MemPool` aligns absolute addresses inside its ordinary backing regions and
 checks padding capacity before rollover. Requested power-of-two alignments do
 not depend on the region base alignment; size and padding overflow return null.
+
+## Standard container policy
+
+Runtime HashMap/HashSet buckets and nodes use `StlAllocator`, an explicitly fatal
+allocator backed by GeneralAllocation. It never returns null to a standard
+container. Metadata and GC registries remain in the infallible domain; an
+RtResult caller entering those caches does not promise arbitrary OOM recovery.
+Global registries construct lazily on the runtime thread, so debug STL bookkeeping
+cannot allocate and lock callbacks before the host configures them.
+
+The GC handle index instead uses a fallible open-addressed table. Growth failure
+leaves live handles intact and returns null before consuming a new ID or unlinking
+a recycled handle. No standard-container allocation occurs on that path.
+Profiling exports, standard strings and third-party library allocations remain
+outside this container migration; the callback contract does not intercept global
+operator new or the entire C/C++ library heap.

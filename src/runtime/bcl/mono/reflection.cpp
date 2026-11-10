@@ -127,16 +127,60 @@ struct EventKeyEqual
     }
 };
 
-static utils::HashMap<const metadata::RtTypeSig*, RtReflectionType*, metadata::TypeSigIgnoreAttrsHasher, metadata::TypeSigIgnoreAttrsEqual>
-    s_class_reflection_type_map;
-static utils::HashMap<MethodKey, RtReflectionMethod*, MethodKeyHash, MethodKeyEqual> s_method_reflection_map;
-static utils::HashMap<MethodKey, RtArray*, MethodKeyHash, MethodKeyEqual> s_method_params_map;
-static utils::HashMap<FieldKey, RtReflectionField*, FieldKeyHash, FieldKeyEqual> s_field_reflection_map;
-static utils::HashMap<PropertyKey, RtReflectionProperty*, PropertyKeyHash, PropertyKeyEqual> s_property_reflection_map;
-static utils::HashMap<EventKey, RtReflectionEventInfo*, EventKeyHash, EventKeyEqual> s_event_reflection_map;
-static utils::HashMap<const metadata::RtAssembly*, RtReflectionAssembly*> s_assembly_reflection_map;
-static utils::HashMap<const metadata::RtModuleDef*, RtReflectionModule*> s_module_reflection_map;
-static utils::HashMap<const metadata::RtAssembly*, metadata::AssemblyNameInfo*> s_assembly_name_map;
+static utils::HashMap<const metadata::RtTypeSig*, RtReflectionType*, metadata::TypeSigIgnoreAttrsHasher, metadata::TypeSigIgnoreAttrsEqual>&
+get_s_class_reflection_type_map()
+{
+    static utils::HashMap<const metadata::RtTypeSig*, RtReflectionType*, metadata::TypeSigIgnoreAttrsHasher, metadata::TypeSigIgnoreAttrsEqual> value;
+    return value;
+}
+
+static utils::HashMap<MethodKey, RtReflectionMethod*, MethodKeyHash, MethodKeyEqual>& get_s_method_reflection_map()
+{
+    static utils::HashMap<MethodKey, RtReflectionMethod*, MethodKeyHash, MethodKeyEqual> value;
+    return value;
+}
+
+static utils::HashMap<MethodKey, RtArray*, MethodKeyHash, MethodKeyEqual>& get_s_method_params_map()
+{
+    static utils::HashMap<MethodKey, RtArray*, MethodKeyHash, MethodKeyEqual> value;
+    return value;
+}
+
+static utils::HashMap<FieldKey, RtReflectionField*, FieldKeyHash, FieldKeyEqual>& get_s_field_reflection_map()
+{
+    static utils::HashMap<FieldKey, RtReflectionField*, FieldKeyHash, FieldKeyEqual> value;
+    return value;
+}
+
+static utils::HashMap<PropertyKey, RtReflectionProperty*, PropertyKeyHash, PropertyKeyEqual>& get_s_property_reflection_map()
+{
+    static utils::HashMap<PropertyKey, RtReflectionProperty*, PropertyKeyHash, PropertyKeyEqual> value;
+    return value;
+}
+
+static utils::HashMap<EventKey, RtReflectionEventInfo*, EventKeyHash, EventKeyEqual>& get_s_event_reflection_map()
+{
+    static utils::HashMap<EventKey, RtReflectionEventInfo*, EventKeyHash, EventKeyEqual> value;
+    return value;
+}
+
+static utils::HashMap<const metadata::RtAssembly*, RtReflectionAssembly*>& get_s_assembly_reflection_map()
+{
+    static utils::HashMap<const metadata::RtAssembly*, RtReflectionAssembly*> value;
+    return value;
+}
+
+static utils::HashMap<const metadata::RtModuleDef*, RtReflectionModule*>& get_s_module_reflection_map()
+{
+    static utils::HashMap<const metadata::RtModuleDef*, RtReflectionModule*> value;
+    return value;
+}
+
+static utils::HashMap<const metadata::RtAssembly*, metadata::AssemblyNameInfo*>& get_s_assembly_name_map()
+{
+    static utils::HashMap<const metadata::RtAssembly*, metadata::AssemblyNameInfo*> value;
+    return value;
+}
 
 static RtResult<int32_t> unbox_i32(RtObject* obj, const metadata::RtClass* cls_i32)
 {
@@ -223,8 +267,8 @@ RtResult<RtReflectionType*> Reflection::get_type_reflection_object(const metadat
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, pooled_type_sig, metadata::MetadataCache::get_pooled_typesig(canon_type_sig));
 
-    auto it2 = s_class_reflection_type_map.find(pooled_type_sig);
-    if (it2 != s_class_reflection_type_map.end())
+    auto it2 = get_s_class_reflection_type_map().find(pooled_type_sig);
+    if (it2 != get_s_class_reflection_type_map().end())
     {
         RET_OK(it2->second);
     }
@@ -233,7 +277,7 @@ RtResult<RtReflectionType*> Reflection::get_type_reflection_object(const metadat
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ref_obj_raw, LEANCLR_NEWOBJ_INTERNAL(runtime_type_klass, "Reflection::get_type_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionType*>(ref_obj_raw);
 
-    s_class_reflection_type_map.emplace(pooled_type_sig, ref_obj);
+    get_s_class_reflection_type_map().emplace(pooled_type_sig, ref_obj);
     ref_obj->type_handle = pooled_type_sig;
     RET_OK(ref_obj);
 }
@@ -246,8 +290,8 @@ RtResult<RtReflectionType*> Reflection::get_klass_reflection_object(const metada
 RtResult<RtReflectionMethod*> Reflection::get_method_reflection_object(const metadata::RtMethodInfo* method, const metadata::RtClass* reflection_at_klass)
 {
     MethodKey key{method, reflection_at_klass};
-    auto found = s_method_reflection_map.find(key);
-    if (found != s_method_reflection_map.end())
+    auto found = get_s_method_reflection_map().find(key);
+    if (found != get_s_method_reflection_map().end())
     {
         RET_OK(found->second);
     }
@@ -259,15 +303,15 @@ RtResult<RtReflectionMethod*> Reflection::get_method_reflection_object(const met
     ref_obj->method = method;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, ref_type, get_klass_reflection_object(reflection_at_klass));
     ref_obj->ref_type = ref_type;
-    s_method_reflection_map.emplace(key, ref_obj);
+    get_s_method_reflection_map().emplace(key, ref_obj);
     RET_OK(ref_obj);
 }
 
 RtResult<RtArray*> Reflection::get_param_objects(const metadata::RtMethodInfo* method, const metadata::RtClass* reflection_at_klass)
 {
     MethodKey key{method, reflection_at_klass};
-    auto found = s_method_params_map.find(key);
-    if (found != s_method_params_map.end())
+    auto found = get_s_method_params_map().find(key);
+    if (found != get_s_method_params_map().end())
     {
         RET_OK(found->second);
     }
@@ -307,15 +351,15 @@ RtResult<RtArray*> Reflection::get_param_objects(const metadata::RtMethodInfo* m
         // param_info_obj->attrs = static_cast<uint32_t>(param_type_sig->flags);
         Array::set_array_data_at<RtReflectionParameter*>(param_info_array_obj, static_cast<int32_t>(i), param_info_obj);
     }
-    s_method_params_map.emplace(key, param_info_array_obj);
+    get_s_method_params_map().emplace(key, param_info_array_obj);
     RET_OK(param_info_array_obj);
 }
 
 RtResult<RtReflectionField*> Reflection::get_field_reflection_object(const metadata::RtFieldInfo* field, const metadata::RtClass* reflection_at_klass)
 {
     FieldKey key{field, reflection_at_klass};
-    auto found = s_field_reflection_map.find(key);
-    if (found != s_field_reflection_map.end())
+    auto found = get_s_field_reflection_map().find(key);
+    if (found != get_s_field_reflection_map().end())
     {
         RET_OK(found->second);
     }
@@ -330,15 +374,15 @@ RtResult<RtReflectionField*> Reflection::get_field_reflection_object(const metad
     ref_obj->attrs = field->flags;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, type_obj, get_type_reflection_object(field->type_sig));
     ref_obj->type_ = type_obj;
-    s_field_reflection_map.emplace(key, ref_obj);
+    get_s_field_reflection_map().emplace(key, ref_obj);
     RET_OK(ref_obj);
 }
 
 RtResult<RtReflectionProperty*> Reflection::get_property_reflection_object(const metadata::RtPropertyInfo* prop, const metadata::RtClass* reflection_at_klass)
 {
     PropertyKey key{prop, reflection_at_klass};
-    auto found = s_property_reflection_map.find(key);
-    if (found != s_property_reflection_map.end())
+    auto found = get_s_property_reflection_map().find(key);
+    if (found != get_s_property_reflection_map().end())
     {
         RET_OK(found->second);
     }
@@ -349,15 +393,15 @@ RtResult<RtReflectionProperty*> Reflection::get_property_reflection_object(const
     auto ref_obj = reinterpret_cast<RtReflectionProperty*>(ref_obj_raw);
     ref_obj->property = prop;
     ref_obj->klass = reflection_at_klass;
-    s_property_reflection_map.emplace(key, ref_obj);
+    get_s_property_reflection_map().emplace(key, ref_obj);
     RET_OK(ref_obj);
 }
 
 RtResult<RtReflectionEventInfo*> Reflection::get_event_reflection_object(metadata::RtEventInfo* event_info, const metadata::RtClass* reflection_at_klass)
 {
     EventKey key{event_info, reflection_at_klass};
-    auto found = s_event_reflection_map.find(key);
-    if (found != s_event_reflection_map.end())
+    auto found = get_s_event_reflection_map().find(key);
+    if (found != get_s_event_reflection_map().end())
     {
         RET_OK(found->second);
     }
@@ -369,14 +413,14 @@ RtResult<RtReflectionEventInfo*> Reflection::get_event_reflection_object(metadat
     ref_obj->event = event_info;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, ref_type, get_klass_reflection_object(reflection_at_klass));
     ref_obj->ref_type = ref_type;
-    s_event_reflection_map.emplace(key, ref_obj);
+    get_s_event_reflection_map().emplace(key, ref_obj);
     RET_OK(ref_obj);
 }
 
 RtResult<RtReflectionAssembly*> Reflection::get_assembly_reflection_object(metadata::RtAssembly* assembly)
 {
-    auto found = s_assembly_reflection_map.find(assembly);
-    if (found != s_assembly_reflection_map.end())
+    auto found = get_s_assembly_reflection_map().find(assembly);
+    if (found != get_s_assembly_reflection_map().end())
     {
         RET_OK(found->second);
     }
@@ -387,28 +431,28 @@ RtResult<RtReflectionAssembly*> Reflection::get_assembly_reflection_object(metad
                                             LEANCLR_NEWOBJ_INTERNAL(runtime_assembly_klass, "Reflection::get_assembly_reflection_object"));
     auto ref_obj = reinterpret_cast<RtReflectionAssembly*>(ref_obj_raw);
     ref_obj->assembly = assembly;
-    s_assembly_reflection_map.emplace(assembly, ref_obj);
+    get_s_assembly_reflection_map().emplace(assembly, ref_obj);
     RET_OK(ref_obj);
 }
 
 RtResult<metadata::AssemblyNameInfo*> Reflection::get_assembly_name_object(metadata::RtAssembly* ass)
 {
-    auto found = s_assembly_name_map.find(ass);
-    if (found != s_assembly_name_map.end())
+    auto found = get_s_assembly_name_map().find(ass);
+    if (found != get_s_assembly_name_map().end())
     {
         RET_OK(found->second);
     }
 
     auto name_obj = alloc::GeneralAllocation::malloc_any_zeroed<metadata::AssemblyNameInfo>();
     ass->mod->fill_assembly_name(*name_obj);
-    s_assembly_name_map.emplace(ass, name_obj);
+    get_s_assembly_name_map().emplace(ass, name_obj);
     RET_OK(name_obj);
 }
 
 RtResult<RtReflectionModule*> Reflection::get_module_reflection_object(metadata::RtModuleDef* mod)
 {
-    auto found = s_module_reflection_map.find(mod);
-    if (found != s_module_reflection_map.end())
+    auto found = get_s_module_reflection_map().find(mod);
+    if (found != get_s_module_reflection_map().end())
     {
         RET_OK(found->second);
     }
@@ -430,7 +474,7 @@ RtResult<RtReflectionModule*> Reflection::get_module_reflection_object(metadata:
     ref_obj->name = String::create_string_from_utf8chars(name, static_cast<int32_t>(std::strlen(name)));
     ref_obj->scope_name = String::create_string_from_utf8chars(name_no_ext, static_cast<int32_t>(std::strlen(name_no_ext)));
     ref_obj->token = mod->get_assembly_token();
-    s_module_reflection_map.insert({mod, ref_obj});
+    get_s_module_reflection_map().insert({mod, ref_obj});
     RET_OK(ref_obj);
 }
 
@@ -510,14 +554,14 @@ static void visit_object_hashmap(const utils::HashMap<TKey, TValue, THash, TEqua
 
 static void visit_reflection_object_roots(gc::GcVisitObjectRoot visit, void* userdata)
 {
-    visit_object_hashmap(s_class_reflection_type_map, visit, userdata);
-    visit_object_hashmap(s_method_reflection_map, visit, userdata);
-    visit_object_hashmap(s_method_params_map, visit, userdata);
-    visit_object_hashmap(s_field_reflection_map, visit, userdata);
-    visit_object_hashmap(s_property_reflection_map, visit, userdata);
-    visit_object_hashmap(s_event_reflection_map, visit, userdata);
-    visit_object_hashmap(s_assembly_reflection_map, visit, userdata);
-    visit_object_hashmap(s_module_reflection_map, visit, userdata);
+    visit_object_hashmap(get_s_class_reflection_type_map(), visit, userdata);
+    visit_object_hashmap(get_s_method_reflection_map(), visit, userdata);
+    visit_object_hashmap(get_s_method_params_map(), visit, userdata);
+    visit_object_hashmap(get_s_field_reflection_map(), visit, userdata);
+    visit_object_hashmap(get_s_property_reflection_map(), visit, userdata);
+    visit_object_hashmap(get_s_event_reflection_map(), visit, userdata);
+    visit_object_hashmap(get_s_assembly_reflection_map(), visit, userdata);
+    visit_object_hashmap(get_s_module_reflection_map(), visit, userdata);
 }
 
 void register_reflection_gc_roots()

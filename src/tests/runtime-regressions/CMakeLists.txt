@@ -147,3 +147,8 @@ set_target_properties(lifecycle PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED
 add_test(NAME lifecycle-failure COMMAND lifecycle)
 add_test(NAME lifecycle-before-start COMMAND lifecycle stop)
 add_test(NAME lifecycle-success COMMAND runtime-regressions lifecycle "${LEANCLR_TEST_DLL_DIR}")
+
+add_executable(container-allocation container-allocation.cpp)
+target_link_libraries(container-allocation PRIVATE leanclr)
+set_target_properties(container-allocation PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
+add_test(NAME container-allocation COMMAND container-allocation)

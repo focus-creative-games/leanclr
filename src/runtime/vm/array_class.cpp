@@ -1,3 +1,4 @@
+#include "utils/hashset.h"
 #include <unordered_set>
 
 #include "array_class.h"
@@ -32,7 +33,11 @@ struct ArrayTemplateMethod
 };
 
 // Static maps for array classes and interface methods
-static HashMap<const metadata::RtTypeSig*, metadata::RtClass*> g_arrayClassMap;
+static HashMap<const metadata::RtTypeSig*, metadata::RtClass*>& get_g_arrayClassMap()
+{
+    static HashMap<const metadata::RtTypeSig*, metadata::RtClass*> value;
+    return value;
+}
 
 static Vector<ArrayTemplateMethod> g_icollectionGenericMethods;
 static Vector<ArrayTemplateMethod> g_ienumerableGenericMethods;
@@ -41,7 +46,11 @@ static Vector<ArrayTemplateMethod> g_ireadonlyListGenericMethods;
 static Vector<ArrayTemplateMethod> g_ilistGenericMethods;
 
 // Static map for caching array generic methods
-static HashMap<const RtMethodInfo*, const RtMethodInfo*> g_arrayGenericMethodCache;
+static HashMap<const RtMethodInfo*, const RtMethodInfo*>& get_g_arrayGenericMethodCache()
+{
+    static HashMap<const RtMethodInfo*, const RtMethodInfo*> value;
+    return value;
+}
 
 // Helper function to create array type name
 static const char* make_array_name(const char* ele_class_name, uint8_t rank, bool bound)
@@ -154,16 +163,15 @@ static RtResult<const RtMethodInfo*> build_array_generic_method(RtClass* klass, 
     RET_OK(new_method);
 }
 
-#define DECLAR_SZARRAY_INTERFACE_LIST(var_name, corlib_types) RtClass* to_inflate[5] = {\
-    corlib_types.cls_ilist_generic,         corlib_types.cls_icollection_generic,         corlib_types.cls_ienumerable_generic,\
-    corlib_types.cls_ireadonlylist_generic, corlib_types.cls_ireadonlycollection_generic, \
-};
-
-
+#define DECLAR_SZARRAY_INTERFACE_LIST(var_name, corlib_types)                                                                       \
+    RtClass* to_inflate[5] = {                                                                                                      \
+        corlib_types.cls_ilist_generic,         corlib_types.cls_icollection_generic,         corlib_types.cls_ienumerable_generic, \
+        corlib_types.cls_ireadonlylist_generic, corlib_types.cls_ireadonlycollection_generic,                                       \
+    };
 
 static void to_unique_element_classes(const Vector<const RtClass*>& element_classes, Vector<const RtClass*>& unique_element_classes)
 {
-    std::unordered_set<const RtClass*> unique_element_classes_set;
+    utils::HashSet<const RtClass*> unique_element_classes_set;
     for (const RtClass* element_class : element_classes)
     {
         if (unique_element_classes_set.insert(element_class).second)
@@ -207,8 +215,8 @@ RtResultVoid collect_array_interface_generic_variant_element_classes(const metad
                 DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtGenericInst*, generic_inst, MetadataCache::get_pooled_generic_inst(generic_args, 1));
                 for (const RtClass* to_inflate : to_inflate)
                 {
-                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
-                        RtClass*, generic_class, vm::GenericClass::get_class(to_inflate->by_val->data.type_def_gid, generic_inst));
+                    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, generic_class,
+                                                            vm::GenericClass::get_class(to_inflate->by_val->data.type_def_gid, generic_inst));
                     element_classes.push_back(generic_class);
                 }
             }
@@ -298,8 +306,8 @@ RtResult<RtClass*> ArrayClass::get_array_class_from_element_klass(const metadata
                                              MetadataCache::get_pooled_array_typesigs_by_element_typesig(ele_klass->by_val, rank));
     const RtTypeSig* key = types.by_val;
 
-    auto cached = g_arrayClassMap.find(key);
-    if (cached != g_arrayClassMap.end())
+    auto cached = get_g_arrayClassMap().find(key);
+    if (cached != get_g_arrayClassMap().end())
         RET_OK(cached->second);
 
     // Create new array class
@@ -313,7 +321,7 @@ RtResult<RtClass*> ArrayClass::get_array_class_from_element_klass(const metadata
 
     setup_array_class_common(array_class, ele_klass);
 
-    g_arrayClassMap.insert({key, array_class});
+    get_g_arrayClassMap().insert({key, array_class});
     RET_OK(array_class);
 }
 
@@ -333,8 +341,8 @@ RtResult<RtClass*> ArrayClass::get_szarray_class_from_element_class(const metada
     const RtTypeSig* key = types.by_val;
 
     // Check cache
-    auto cached = g_arrayClassMap.find(key);
-    if (cached != g_arrayClassMap.end())
+    auto cached = get_g_arrayClassMap().find(key);
+    if (cached != get_g_arrayClassMap().end())
         RET_OK(cached->second);
 
     // Create new szarray class
@@ -349,7 +357,7 @@ RtResult<RtClass*> ArrayClass::get_szarray_class_from_element_class(const metada
 
     setup_array_class_common(array_class, ele_class);
 
-    g_arrayClassMap.insert({key, array_class});
+    get_g_arrayClassMap().insert({key, array_class});
     RET_OK(array_class);
 }
 
@@ -373,7 +381,6 @@ RtResultVoid ArrayClass::setup_interfaces(RtClass* klass)
 
     Vector<const RtClass*> element_classes;
     RET_ERR_ON_FAIL(collect_array_interface_generic_variant_element_classes(klass->element_class, element_classes));
-
 
     size_t interface_count = element_classes.size() * (sizeof(to_inflate) / sizeof(to_inflate[0]));
     const RtClass** interfaces = klass->image->get_mem_pool().calloc_any<const RtClass*>(interface_count);
@@ -579,7 +586,7 @@ RtResultVoid ArrayClass::initialize()
 
 void ArrayClass::walk_array_classes(metadata::ClassWalkCallback callback, void* userData)
 {
-    for (auto& entry : g_arrayClassMap)
+    for (auto& entry : get_g_arrayClassMap())
     {
         callback(entry.second, userData);
     }

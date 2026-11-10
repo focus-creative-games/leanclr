@@ -21,7 +21,12 @@ namespace
 
 RtAppDomain* g_default_appdomain = nullptr;
 RtMonoAppDomain g_default_mono_domain = {};
-utils::HashMap<utils::Utf16StrWithLen, RtObject*, utils::Utf16StrHasher, utils::Utf16StrCompare> g_appdomain_private_data;
+
+static utils::HashMap<utils::Utf16StrWithLen, RtObject*, utils::Utf16StrHasher, utils::Utf16StrCompare>& get_g_appdomain_private_data()
+{
+    static utils::HashMap<utils::Utf16StrWithLen, RtObject*, utils::Utf16StrHasher, utils::Utf16StrCompare> value;
+    return value;
+}
 
 RtResult<RtObject*> create_appdomain_setup()
 {
@@ -127,8 +132,8 @@ const char* AppDomain::get_friendly_name()
 RtObject* AppDomain::get_domain_data(RtString* name)
 {
     utils::Utf16StrWithLen key(String::get_chars_ptr(name), static_cast<size_t>(String::get_length(name)));
-    auto it = g_appdomain_private_data.find(key);
-    if (it != g_appdomain_private_data.end())
+    auto it = get_g_appdomain_private_data().find(key);
+    if (it != get_g_appdomain_private_data().end())
     {
         return it->second;
     }
@@ -138,9 +143,9 @@ RtObject* AppDomain::get_domain_data(RtString* name)
 void AppDomain::set_domain_data(RtString* name, RtObject* data)
 {
     utils::Utf16StrWithLen key(String::get_chars_ptr(name), static_cast<size_t>(String::get_length(name)));
-    auto it = g_appdomain_private_data.find(key);
+    auto it = get_g_appdomain_private_data().find(key);
     ;
-    if (it != g_appdomain_private_data.end())
+    if (it != get_g_appdomain_private_data().end())
     {
         it->second = data;
         return;
@@ -148,7 +153,7 @@ void AppDomain::set_domain_data(RtString* name, RtObject* data)
 
     const Utf16Char* new_chars = utils::StringUtil::strdup_utf16_without_null_terminator(key.str, key.length);
     key.str = new_chars;
-    g_appdomain_private_data.insert({key, data});
+    get_g_appdomain_private_data().insert({key, data});
 }
 
 int32_t AppDomain::get_appdomain_id()
@@ -164,8 +169,9 @@ void AppDomain::get_modules(RtAppDomain* this_domain, utils::Vector<metadata::Rt
 
 static void visit_appdomain_private_data(gc::GcVisitObjectRoot visit, void* userdata)
 {
-    for (utils::HashMap<utils::Utf16StrWithLen, RtObject*, utils::Utf16StrHasher, utils::Utf16StrCompare>::const_iterator it = g_appdomain_private_data.begin();
-         it != g_appdomain_private_data.end(); ++it)
+    for (utils::HashMap<utils::Utf16StrWithLen, RtObject*, utils::Utf16StrHasher, utils::Utf16StrCompare>::const_iterator it =
+             get_g_appdomain_private_data().begin();
+         it != get_g_appdomain_private_data().end(); ++it)
     {
         if (it->second != nullptr)
         {

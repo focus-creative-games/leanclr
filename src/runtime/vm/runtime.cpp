@@ -405,14 +405,18 @@ struct InitializerFailure
     RtException* exception;
 };
 
-static utils::HashMap<const metadata::RtClass*, InitializerFailure> s_initializer_failures;
+static utils::HashMap<const metadata::RtClass*, InitializerFailure>& get_s_initializer_failures()
+{
+    static utils::HashMap<const metadata::RtClass*, InitializerFailure> value;
+    return value;
+}
 
 void register_runtime_gc_roots()
 {
     gc::GcRoots::register_visit_object_roots(
         [](gc::GcVisitObjectRoot visit, void* context)
         {
-            for (auto& entry : s_initializer_failures)
+            for (auto& entry : get_s_initializer_failures())
                 if (entry.second.exception)
                     visit(reinterpret_cast<RtObject*>(entry.second.exception), context);
         });
@@ -433,7 +437,7 @@ static RtResultVoid fail_initializer(metadata::RtClass* klass, RtErr error)
         Exception::set_current_exception(exception);
         error = RtErr::ManagedException;
     }
-    s_initializer_failures[klass] = {error, exception};
+    get_s_initializer_failures()[klass] = {error, exception};
     klass->cctor_status = metadata::RtCCtorStatus::Failed;
     RET_ERR(error);
 }
@@ -443,7 +447,7 @@ static RtResultVoid run_initializer(const metadata::RtClass* type, bool run_modu
     auto* klass = const_cast<metadata::RtClass*>(type);
     if (klass->cctor_status == metadata::RtCCtorStatus::Failed)
     {
-        const auto& failure = s_initializer_failures.at(klass);
+        const auto& failure = get_s_initializer_failures().at(klass);
         if (failure.exception)
             Exception::set_current_exception(failure.exception);
         RET_ERR(failure.error);

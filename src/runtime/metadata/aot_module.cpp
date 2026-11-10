@@ -7,21 +7,25 @@ namespace leanclr
 namespace metadata
 {
 
-utils::HashMap<const char*, const RtAotModuleData*, utils::CStrHasher, utils::CStrCompare> s_aotModuleMap;
+static utils::HashMap<const char*, const RtAotModuleData*, utils::CStrHasher, utils::CStrCompare>& get_s_aotModuleMap()
+{
+    static utils::HashMap<const char*, const RtAotModuleData*, utils::CStrHasher, utils::CStrCompare> value;
+    return value;
+}
 
 void AotModule::register_aot_modules(const RtAotModulesData* initData)
 {
     for (uint32_t i = 0; i < initData->module_count; i++)
     {
         const RtAotModuleData* moduleData = initData->modules[i];
-        s_aotModuleMap.insert({moduleData->module_name, moduleData});
+        get_s_aotModuleMap().insert({moduleData->module_name, moduleData});
     }
 }
 
 const RtAotModuleData* AotModule::find_aot_module_by_name(const char* module_name)
 {
-    auto it = s_aotModuleMap.find(module_name);
-    return it != s_aotModuleMap.end() ? it->second : nullptr;
+    auto it = get_s_aotModuleMap().find(module_name);
+    return it != get_s_aotModuleMap().end() ? it->second : nullptr;
 }
 
 const RtAotMethodDefData* AotModule::find_aot_method_impl(const RtMethodInfo* method)

@@ -1894,7 +1894,12 @@ RtResult<metadata::RtClass*> Class::get_class_from_typesig(const metadata::RtTyp
     }
 }
 
-static utils::HashMap<const metadata::RtTypeSig*, metadata::RtClass*, metadata::TypeSigIgnoreAttrsHasher, metadata::TypeSigIgnoreAttrsEqual> g_ptrClassCache;
+static utils::HashMap<const metadata::RtTypeSig*, metadata::RtClass*, metadata::TypeSigIgnoreAttrsHasher, metadata::TypeSigIgnoreAttrsEqual>&
+get_g_ptrClassCache()
+{
+    static utils::HashMap<const metadata::RtTypeSig*, metadata::RtClass*, metadata::TypeSigIgnoreAttrsHasher, metadata::TypeSigIgnoreAttrsEqual> value;
+    return value;
+}
 
 static const char* make_ptr_name(const char* eleName)
 {
@@ -1903,8 +1908,8 @@ static const char* make_ptr_name(const char* eleName)
 
 RtResult<metadata::RtClass*> Class::get_ptr_class_by_element_typesig(const metadata::RtTypeSig* eleTypeSig)
 {
-    auto it = g_ptrClassCache.find(eleTypeSig);
-    if (it != g_ptrClassCache.end())
+    auto it = get_g_ptrClassCache().find(eleTypeSig);
+    if (it != get_g_ptrClassCache().end())
     {
         RET_OK(it->second);
     }
@@ -1927,16 +1932,20 @@ RtResult<metadata::RtClass*> Class::get_ptr_class_by_element_typesig(const metad
     ptrClass->by_val = ptrTypeSigs.by_val;
     ptrClass->by_ref = ptrTypeSigs.by_ref;
 
-    g_ptrClassCache.insert({eleTypeSig, ptrClass});
+    get_g_ptrClassCache().insert({eleTypeSig, ptrClass});
     RET_OK(ptrClass);
 }
 
-static utils::HashMap<const metadata::RtGenericParam*, metadata::RtClass*> g_genericParamClassCache;
+static utils::HashMap<const metadata::RtGenericParam*, metadata::RtClass*>& get_g_genericParamClassCache()
+{
+    static utils::HashMap<const metadata::RtGenericParam*, metadata::RtClass*> value;
+    return value;
+}
 
 RtResult<metadata::RtClass*> Class::get_generic_param_class_by_typesig(const metadata::RtGenericParam* genericParam)
 {
-    auto it = g_genericParamClassCache.find(genericParam);
-    if (it != g_genericParamClassCache.end())
+    auto it = get_g_genericParamClassCache().find(genericParam);
+    if (it != get_g_genericParamClassCache().end())
     {
         RET_OK(it->second);
     }
@@ -1963,16 +1972,20 @@ RtResult<metadata::RtClass*> Class::get_generic_param_class_by_typesig(const met
     genericParamClass->by_val = byValTypeSig;
     genericParamClass->by_ref = byRefTypeSig;
 
-    g_genericParamClassCache.insert({genericParam, genericParamClass});
+    get_g_genericParamClassCache().insert({genericParam, genericParamClass});
     RET_OK(genericParamClass);
 }
 
-static utils::HashMap<const metadata::RtMethodSig*, metadata::RtClass*, metadata::MethodSigHash, metadata::MethodSigCompare> g_fnPtrClassCache;
+static utils::HashMap<const metadata::RtMethodSig*, metadata::RtClass*, metadata::MethodSigHash, metadata::MethodSigCompare>& get_g_fnPtrClassCache()
+{
+    static utils::HashMap<const metadata::RtMethodSig*, metadata::RtClass*, metadata::MethodSigHash, metadata::MethodSigCompare> value;
+    return value;
+}
 
 RtResult<metadata::RtClass*> Class::get_fnptr_class_by_method_sig(const metadata::RtMethodSig* method_sig)
 {
-    auto it = g_fnPtrClassCache.find(method_sig);
-    if (it != g_fnPtrClassCache.end())
+    auto it = get_g_fnPtrClassCache().find(method_sig);
+    if (it != get_g_fnPtrClassCache().end())
     {
         RET_OK(it->second);
     }
@@ -1999,7 +2012,7 @@ RtResult<metadata::RtClass*> Class::get_fnptr_class_by_method_sig(const metadata
     new_klass->by_val = by_val;
     new_klass->by_ref = by_ref;
 
-    g_fnPtrClassCache.insert({method_sig, new_klass});
+    get_g_fnPtrClassCache().insert({method_sig, new_klass});
     RET_OK(new_klass);
 }
 
@@ -2194,7 +2207,11 @@ struct ClassPairCompareHasher
     }
 };
 
-static utils::HashSet<ClassPair, ClassPairCompareHasher, ClassPairCompare> g_genericParameterCovariantCheckCache;
+static utils::HashSet<ClassPair, ClassPairCompareHasher, ClassPairCompare>& get_g_genericParameterCovariantCheckCache()
+{
+    static utils::HashSet<ClassPair, ClassPairCompareHasher, ClassPairCompare> value;
+    return value;
+}
 
 bool Class::is_assignable_from_generic_parameter_convariant0(const metadata::RtClass* from_class, const metadata::RtClass* to_class, bool implemented_in_array)
 {
@@ -2269,14 +2286,14 @@ bool Class::is_assignable_from_generic_parameter_convariant(const metadata::RtCl
 {
     bool implemented_in_array = is_array_or_szarray(implement_class) || implement_class->declaring_class == get_corlib_types().cls_array;
     auto cachePair = ClassPair{from_class, to_class, implemented_in_array, false};
-    auto it = g_genericParameterCovariantCheckCache.find(cachePair);
-    if (it != g_genericParameterCovariantCheckCache.end())
+    auto it = get_g_genericParameterCovariantCheckCache().find(cachePair);
+    if (it != get_g_genericParameterCovariantCheckCache().end())
     {
         return it->assignable;
     }
     bool assignable = is_assignable_from_generic_parameter_convariant0(from_class, to_class, implemented_in_array);
     cachePair.assignable = assignable;
-    g_genericParameterCovariantCheckCache.insert(cachePair);
+    get_g_genericParameterCovariantCheckCache().insert(cachePair);
     return assignable;
 }
 
@@ -2435,7 +2452,7 @@ bool Class::is_subclass_of_initialized(const metadata::RtClass* from_class, cons
 
 void Class::walk_ptr_classes(metadata::ClassWalkCallback callback, void* userData)
 {
-    for (auto& entry : g_ptrClassCache)
+    for (auto& entry : get_g_ptrClassCache())
     {
         callback(entry.second, userData);
     }

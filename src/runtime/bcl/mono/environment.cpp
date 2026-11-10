@@ -18,7 +18,11 @@ static bool s_shutdown = false;
 
 static RtArray* g_cmdline_args = nullptr;
 
-static utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare> s_environment_variables_map;
+static utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>& get_s_environment_variables_map()
+{
+    static utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare> value;
+    return value;
+}
 
 void Environment::exit(int32_t code)
 {
@@ -113,8 +117,8 @@ static void visit_environment_roots(gc::GcVisitObjectRoot visit, void* userdata)
     {
         visit(reinterpret_cast<vm::RtObject*>(g_cmdline_args), userdata);
     }
-    for (utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>::const_iterator it = s_environment_variables_map.begin();
-         it != s_environment_variables_map.end(); ++it)
+    for (utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>::const_iterator it = get_s_environment_variables_map().begin();
+         it != get_s_environment_variables_map().end(); ++it)
     {
         if (it->second != nullptr)
         {
@@ -131,8 +135,8 @@ void register_environment_gc_roots()
 
 RtResult<RtString*> Environment::get_environment_variable(const char* variable_name)
 {
-    auto it = s_environment_variables_map.find(variable_name);
-    if (it != s_environment_variables_map.end())
+    auto it = get_s_environment_variables_map().find(variable_name);
+    if (it != get_s_environment_variables_map().end())
     {
         RET_OK(it->second);
     }
@@ -144,12 +148,12 @@ RtResultVoid Environment::set_environment_variable(const Utf16Char* variable_nam
     utils::Utf8StringBuilder sb;
     sb.append_utf16_str(variable_name, static_cast<size_t>(variable_name_length));
     const char* key = sb.get_const_chars();
-    auto it = s_environment_variables_map.find(key);
-    if (it != s_environment_variables_map.end())
+    auto it = get_s_environment_variables_map().find(key);
+    if (it != get_s_environment_variables_map().end())
     {
         if (value == nullptr)
         {
-            s_environment_variables_map.erase(it);
+            get_s_environment_variables_map().erase(it);
             RET_VOID_OK();
         }
         else
@@ -171,7 +175,7 @@ RtResultVoid Environment::set_environment_variable(const Utf16Char* variable_nam
         val_sb.append_utf16_str(value, static_cast<size_t>(value_length));
         const char* new_key = sb.dup_zero_terminated_chars();
         RtString* val_str = String::create_string_from_utf8chars(val_sb.get_const_chars(), static_cast<int32_t>(val_sb.length()));
-        s_environment_variables_map.insert({new_key, val_str});
+        get_s_environment_variables_map().insert({new_key, val_str});
         RET_VOID_OK();
     }
 }
@@ -180,11 +184,12 @@ RtResult<RtArray*> Environment::get_environment_variable_names()
 {
     metadata::RtClass* string_class = vm::Class::get_corlib_types().cls_string;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, names_array,
-                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(string_class, static_cast<int32_t>(s_environment_variables_map.size()),
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(string_class,
+                                                                                        static_cast<int32_t>(get_s_environment_variables_map().size()),
                                                                                         "Environment::get_environment_variable_names"));
     size_t index = 0;
-    for (utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>::const_iterator it = s_environment_variables_map.begin();
-         it != s_environment_variables_map.end(); ++it)
+    for (utils::HashMap<const char*, RtString*, utils::CStrHasher, utils::CStrCompare>::const_iterator it = get_s_environment_variables_map().begin();
+         it != get_s_environment_variables_map().end(); ++it)
     {
         const char* key = it->first;
         RtString* name_str = String::create_string_from_utf8cstr(key);
