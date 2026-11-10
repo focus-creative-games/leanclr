@@ -60,23 +60,30 @@ uint8_t* MemPool::malloc_zeroed(size_t size, size_t alignment)
 {
     if (alignment == 0 || (alignment & (alignment - 1)) != 0 || size % alignment != 0)
         return nullptr;
-    if (!region_ && !add_region(size))
+    size_t required_capacity;
+    if (!utils::CheckedSize::add(size, alignment - 1, required_capacity))
         return nullptr;
 
-    size_t start_pos;
-    if (!utils::CheckedSize::align_up(region_->cur, alignment, start_pos))
-        return nullptr;
-
-    if (start_pos > region_->size || size > region_->size - start_pos)
+    size_t start_pos = 0;
+    // Align the absolute address: an ordinary allocator need not align region
+    // bases to the caller's requested (possibly extended) alignment.
+    auto fits = [&]()
     {
-        if (!add_region(size))
-        {
+        if (!region_)
+            return false;
+        const size_t base = reinterpret_cast<uintptr_t>(region_->data);
+        size_t address, aligned_address;
+        if (!utils::CheckedSize::add(base, region_->cur, address) || !utils::CheckedSize::align_up(address, alignment, aligned_address))
+            return false;
+        start_pos = aligned_address - base;
+        return start_pos <= region_->size && size <= region_->size - start_pos;
+    };
+    if (!fits())
+    {
+        if (!add_region(required_capacity) || !fits())
             return nullptr;
-        }
     }
-
     Region* reg = region_;
-    start_pos = align_up(region_->cur, alignment);
     uint8_t* ptr = reg->data + start_pos;
     reg->cur = start_pos + size;
     return ptr;

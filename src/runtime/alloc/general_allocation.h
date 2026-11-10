@@ -1,6 +1,7 @@
 #pragma once
 
 #include <cstdlib>
+#include <cstddef>
 #include <cstring>
 #include <new>
 #include <utility>
@@ -57,7 +58,7 @@ class GeneralAllocation
     template <typename T>
     static T* malloc_any()
     {
-        void* ptr = malloc(sizeof(T));
+        void* ptr = alignof(T) > alignof(std::max_align_t) ? aligned_malloc(sizeof(T), alignof(T)) : malloc(sizeof(T));
         return static_cast<T*>(ptr);
     }
 
@@ -69,8 +70,7 @@ class GeneralAllocation
     template <typename T>
     static T* malloc_any_zeroed()
     {
-        void* ptr = malloc_zeroed(sizeof(T));
-        return static_cast<T*>(ptr);
+        return calloc_any<T>(1);
     }
 
     static void* calloc(size_t count, size_t size)
@@ -85,8 +85,15 @@ class GeneralAllocation
     template <typename T>
     static T* calloc_any(size_t count)
     {
-        void* ptr = calloc(count, sizeof(T));
-        return static_cast<T*>(ptr);
+        if (alignof(T) <= alignof(std::max_align_t))
+            return static_cast<T*>(calloc(count, sizeof(T)));
+        size_t bytes;
+        if (!utils::CheckedSize::multiply(count, sizeof(T), bytes))
+            return nullptr;
+        auto* ptr = static_cast<T*>(aligned_malloc(bytes, alignof(T)));
+        if (ptr && bytes)
+            std::memset(ptr, 0, bytes);
+        return ptr;
     }
 
     static void* realloc(void* ptr, size_t size)
@@ -128,8 +135,18 @@ class GeneralAllocation
         if (ptr)
         {
             ptr->~T();
-            free(ptr);
+            free_any(ptr);
         }
+    }
+
+    // Pair typed allocations with typed release to preserve the allocator domain.
+    template <typename T>
+    static void free_any(T* ptr)
+    {
+        if (alignof(T) > alignof(std::max_align_t))
+            aligned_free(ptr);
+        else
+            free(ptr);
     }
 
     static void free(void* ptr)

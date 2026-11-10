@@ -110,3 +110,15 @@ String duplication and concatenation expose `StringUtil::try_*` APIs that return
 semantics. Legacy pointer-returning wrappers use the fatal allocation policy;
 callers that need recovery must use the fallible APIs. Returned buffers belong to
 the caller and are released with `GeneralAllocation::free`.
+
+## Alignment
+
+Ordinary memory callbacks must provide at least `alignof(std::max_align_t)`.
+`GeneralAllocator<T>` and typed `GeneralAllocation` helpers use aligned callbacks
+for types with greater alignment. Pair typed raw allocations with `free_any<T>`;
+`delete_any<T>` also selects the matching release callback. Raw `malloc`/`free`
+and `aligned_malloc`/`aligned_free` remain distinct allocation domains.
+
+`MemPool` aligns absolute addresses inside its ordinary backing regions and
+checks padding capacity before rollover. Requested power-of-two alignments do
+not depend on the region base alignment; size and padding overflow return null.

@@ -135,3 +135,8 @@ add_executable(command-line command-line.cpp)
 target_link_libraries(command-line PRIVATE leanclr)
 set_target_properties(command-line PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
 add_test(NAME command-line COMMAND command-line)
+
+add_executable(aligned-allocation aligned-allocation.cpp)
+target_link_libraries(aligned-allocation PRIVATE leanclr)
+set_target_properties(aligned-allocation PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
+add_test(NAME aligned-allocation COMMAND aligned-allocation)
