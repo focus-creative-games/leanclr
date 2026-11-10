@@ -55,6 +55,30 @@ static void zero_arrays()
     auto overflow = LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(element, 2, huge, nullptr, gc::GcAllocSite::none());
     check(overflow.is_err() && overflow.unwrap_err() == core::RtErr::Overflow, "array product overflow");
 }
+static void clone_arrays()
+{
+    auto* element = vm::Class::get_corlib_types().cls_int32;
+    const int32_t shapes[][2] = {{2,3}, {100,30}, {0,1}};
+    const int32_t lower[] = {-2,4};
+    for (auto& dims : shapes)
+    {
+        auto source = LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(element, 2, dims, lower, gc::GcAllocSite::none());
+        check(source.is_ok(), "source array allocation");
+        if (source.unwrap()->length) vm::Array::get_array_data_start_as<int32_t>(source.unwrap())[0] = 123;
+        auto clone = LEANCLR_ARRAY_CLONE(source.unwrap(), gc::GcAllocSite::none());
+        check(clone.is_ok(), "array clone");
+        check(source.unwrap()->bounds != clone.unwrap()->bounds, "clone must own its bounds");
+        void* keep = vm::GCHandle::new_handle(clone.unwrap(), false);
+        void* weak_source = vm::GCHandle::new_weakref_handle(source.unwrap(), false);
+        vm::GC::enable(); vm::GC::collect(0); vm::GC::disable();
+        check(vm::GCHandle::get_target(weak_source) == nullptr, "source must be reclaimed");
+        auto* array = reinterpret_cast<vm::RtArray*>(vm::GCHandle::get_target(keep));
+        for (int i = 0; i < 2; ++i)
+            check(array->bounds[i].length == dims[i] && array->bounds[i].lower_bound == lower[i], "clone bounds after source collection");
+        if (array->length) check(vm::Array::get_array_data_start_as<int32_t>(array)[0] == 123, "clone data");
+        vm::GCHandle::free_handle(keep); vm::GCHandle::free_handle(weak_source);
+    }
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -66,6 +90,7 @@ int main(int argc, char** argv)
     auto initialized = vm::Runtime::initialize();
     check(initialized.is_ok(), "runtime initialization failed");
     if (std::strcmp(argv[1], "zero-arrays") == 0) zero_arrays();
+    else if (std::strcmp(argv[1], "clone-arrays") == 0) clone_arrays();
     else check(false, "unknown regression case");
     return 0;
 }

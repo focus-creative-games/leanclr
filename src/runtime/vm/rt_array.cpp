@@ -18,7 +18,14 @@ size_t Array::get_array_allocation_size(const metadata::RtClass* klass, int32_t 
 {
     assert(klass && klass->element_class);
     size_t element_size = Class::get_stack_location_size(klass->element_class);
+    if (klass->by_val->ele_type == metadata::RtElementType::Array)
+        return get_array_bounds_offset(klass, length) + sizeof(ArrayBounds) * klass->by_val->data.array_type->rank;
     return sizeof(RtArray) - 8 + static_cast<size_t>(length) * element_size;
+}
+
+size_t Array::get_array_bounds_offset(const metadata::RtClass* klass, int32_t length)
+{
+    return utils::MemOp::align_up(sizeof(RtArray) - 8 + static_cast<size_t>(length) * Class::get_stack_location_size(klass->element_class), 8);
 }
 
 // Array creation methods
@@ -111,12 +118,9 @@ RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass
         RET_ERR(RtErr::Overflow);
     }
 
-    int32_t total_data_bytes = total_length * ele_size;
-
-    // Calculate layout: array header + data + bounds array
-    size_t arr_total_bytes_without_bounds = get_array_allocation_size(arr_klass, 0) + static_cast<size_t>(total_data_bytes);
-    size_t bounds_start_index = utils::MemOp::align_up(arr_total_bytes_without_bounds, 8);
-    size_t total_array_bytes = bounds_start_index + sizeof(ArrayBounds) * rank;
+    // Creation, cloning and GC use the same complete layout, including bounds.
+    size_t bounds_start_index = get_array_bounds_offset(arr_klass, total_length);
+    size_t total_array_bytes = get_array_allocation_size(arr_klass, total_length);
 
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(arr_klass, total_array_bytes LEANCLR_GC_CALL_SITE_PARAM));
 
@@ -521,6 +525,10 @@ RtResult<RtArray*> Array::__clone(RtArray* old_arr LEANCLR_GC_DECLARE_CALL_SITE_
         RET_ERR(RtErr::OutOfMemory);
     }
     std::memcpy(new_arr, old_arr, total_bytes);
+    if (old_arr->bounds != nullptr)
+    {
+        new_arr->bounds = reinterpret_cast<ArrayBounds*>(reinterpret_cast<uint8_t*>(new_arr) + get_array_bounds_offset(old_arr->klass, old_arr->length));
+    }
 
     // new_arr->length = old_arr->length;
     // size_t ele_size = get_array_element_size(old_arr);
