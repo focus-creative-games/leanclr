@@ -316,34 +316,15 @@ class BinaryReader
 
     bool try_read_compressed_int32(int32_t& out_value)
     {
-        uint32_t unsignedValue;
-        if (!try_read_compressed_uint32(unsignedValue))
-        {
-            return false;
-        }
-        uint32_t value = unsignedValue >> 1;
-        if (!(unsignedValue & 0x1))
-        {
-            out_value = static_cast<int32_t>(value);
-            return true;
-        }
-        if (value < 0x40)
-        {
-            out_value = static_cast<int32_t>(value - 0x40);
-            return true;
-        }
-        if (value < 0x2000)
-        {
-            out_value = static_cast<int32_t>(value - 0x2000);
-            return true;
-        }
-        if (value < 0x10000000)
-        {
-            out_value = static_cast<int32_t>(value - 0x10000000);
-            return true;
-        }
-        assert(value < 0x20000000);
-        out_value = static_cast<int32_t>(value - 0x20000000);
+        const size_t begin = _index;
+        uint32_t bits;
+        if (!try_read_compressed_uint32(bits)) return false;
+        const size_t width = _index - begin;
+        const int32_t value = static_cast<int32_t>(bits >> 1);
+        // The sign bit was rotated into bit zero. Its original position is
+        // determined by the encoding width, not by the decoded magnitude.
+        const int32_t sign_range = width == 1 ? 0x40 : (width == 2 ? 0x2000 : 0x10000000);
+        out_value = (bits & 1) != 0 ? value - sign_range : value;
         return true;
     }
 };

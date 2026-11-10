@@ -39,3 +39,4 @@ add_test(NAME clone-arrays COMMAND runtime-regressions clone-arrays "${LEANCLR_T
 add_test(NAME metadata-bounds COMMAND runtime-regressions metadata-bounds "${LEANCLR_TEST_DLL_DIR}")
 add_test(NAME exported-types COMMAND runtime-regressions exported-types "${LEANCLR_TEST_DLL_DIR}")
 add_test(NAME gc-accounting COMMAND runtime-regressions gc-accounting "${LEANCLR_TEST_DLL_DIR}")
+add_test(NAME compressed-signed COMMAND runtime-regressions compressed-signed "${LEANCLR_TEST_DLL_DIR}")

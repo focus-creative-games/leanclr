@@ -384,6 +384,30 @@ static void gc_accounting()
     gc::GcPressure::set_config({0,0});
     check(!gc::GcPressure::should_collect(false) && gc::GcPressure::should_collect(true), "disabled thresholds and force");
 }
+static void compressed_signed()
+{
+    struct Case { uint8_t bytes[4]; size_t width; int32_t expected; };
+    const Case cases[] = {
+        {{0x06},1,3}, {{0x7b},1,-3}, {{0x01},1,-64}, {{0x7e},1,63},
+        {{0x80,0x80},2,64}, {{0x80,0x01},2,-8192}, {{0xbf,0xfe},2,8191},
+        {{0xc0,0x00,0x40,0x00},4,8192}, {{0xc0,0,0,1},4,-268435456},
+        {{0xdf,0xff,0xff,0xfe},4,268435455}, {{0xdf,0xff,0xff,0xff},4,-1}
+    };
+    for (auto& c : cases)
+    {
+        utils::BinaryReader reader(c.bytes, c.width);
+        int32_t result;
+        check(reader.try_read_compressed_int32(result) && result == c.expected && reader.remaining() == 0, "compressed signed value and width");
+        for (size_t truncated = 0; truncated < c.width; ++truncated)
+        {
+            utils::BinaryReader short_reader(c.bytes, truncated);
+            check(!short_reader.try_read_compressed_int32(result) && short_reader.get_position() == 0, "compressed signed truncation must not consume input");
+        }
+    }
+    const uint8_t illegal[] = {0xe0,0,0,0};
+    utils::BinaryReader invalid(illegal, sizeof(illegal)); int32_t result;
+    check(!invalid.try_read_compressed_int32(result), "reserved compressed integer prefix");
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -404,6 +428,7 @@ int main(int argc, char** argv)
     else if (std::strcmp(argv[1], "allocation-failures") == 0) allocation_failures();
     else if (std::strcmp(argv[1], "loader-once") == 0) loader_once();
     else if (std::strcmp(argv[1], "gc-accounting") == 0) gc_accounting();
+    else if (std::strcmp(argv[1], "compressed-signed") == 0) compressed_signed();
     else if (std::strcmp(argv[1], "failed-module") == 0)
     {
         auto module = vm::Assembly::load_by_name("FailedModule");
