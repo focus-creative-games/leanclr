@@ -178,6 +178,7 @@ void MarkSweepHeap::collect()
     int64_t old_heap_bytes = s_heap_bytes;
     s_used_bytes -= freed_bytes;
     s_heap_bytes -= freed_bytes;
+    GcPressure::set_used_size(s_used_bytes);
     s_collection_count++;
     // printf("MarkSweepHeap::collect end, old_heap_bytes: %lld, new_heap_bytes: %lld, freed_bytes: %lld\n", old_heap_bytes, s_heap_bytes, freed_bytes);
 }
@@ -225,10 +226,13 @@ vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, 
 {
     if (size < sizeof(vm::RtObject) || size > SIZE_MAX - (GC_ALIGN - 1)) return nullptr;
     size_t aligned_size = utils::MemOp::align_up(size, GC_ALIGN);
+    size_t charged_size = aligned_size;
     vm::RtObject* obj;
     if (is_small_object(aligned_size))
     {
-        obj = (vm::RtObject*)get_size_class_pool(aligned_size)->allocate_block();
+        auto* pool = get_size_class_pool(aligned_size);
+        charged_size = pool->block_size();
+        obj = (vm::RtObject*)pool->allocate_block();
         if (obj == nullptr)
         {
             return nullptr;
@@ -251,8 +255,9 @@ vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, 
 #if LEANCLR_GC_DEBUG
     obj->__sync_block = site != nullptr ? const_cast<GcAllocSite*>(site->intern_site()) : nullptr;
 #endif
-    s_used_bytes += aligned_size;
-    s_heap_bytes += aligned_size;
+    s_used_bytes += charged_size;
+    s_heap_bytes += charged_size;
+    GcPressure::set_used_size(s_used_bytes);
     GcPressure::on_alloc(aligned_size);
     return obj;
 }

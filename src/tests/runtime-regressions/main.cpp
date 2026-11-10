@@ -353,6 +353,37 @@ static void loader_once()
     auto cached = vm::Assembly::load_by_name("RegressionFixtures");
     check(cached.is_ok() && cached.unwrap() == loaded.unwrap() && fixture_dll_loads == 2, "cached load must not invoke the callback");
 }
+static void gc_accounting()
+{
+    const int32_t dims[] = {100,30};
+    auto array = LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(vm::Class::get_corlib_types().cls_int32, 2, dims, nullptr, gc::GcAllocSite::none());
+    check(array.is_ok(), "warm accounting array class");
+    vm::GC::enable(); vm::GC::collect(0); vm::GC::collect(0);
+    const int64_t baseline = vm::GC::get_used_size();
+    for (int repeat = 0; repeat < 5; ++repeat)
+    {
+        auto before = vm::GC::get_allocated_bytes_for_current_thread();
+        for (int length : {120,250,600,1200,2500,5000}) check(vm::String::fast_allocate_string(length) != nullptr, "accounting string allocation");
+        auto large = LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(vm::Class::get_corlib_types().cls_int32, 2, dims, nullptr, gc::GcAllocSite::none());
+        check(large.is_ok(), "accounting array allocation");
+        auto after_alloc = vm::GC::get_allocated_bytes_for_current_thread();
+        check(after_alloc > before && vm::GC::get_used_size() > baseline, "account allocation bytes");
+        vm::GC::collect(0);
+        check(vm::GC::get_used_size() == baseline, "small blocks and multidimensional arrays must not drift after GC");
+        check(vm::GC::get_heap_size() == baseline, "heap statistics must match heap implementation");
+        check(vm::GC::get_allocated_bytes_for_current_thread() >= after_alloc, "lifetime allocation counter must not reset on GC");
+    }
+    gc::GcPressure::on_collect();
+    gc::GcPressure::set_config({100,0});
+    check(!gc::GcPressure::should_collect(false), "configured threshold before pressure");
+    gc::GcPressure::record_external(100);
+    check(gc::GcPressure::should_collect(false), "external pressure threshold");
+    gc::GcPressure::on_collect();
+    gc::GcPressure::set_config({0,baseline});
+    check(gc::GcPressure::should_collect(false), "soft heap limit");
+    gc::GcPressure::set_config({0,0});
+    check(!gc::GcPressure::should_collect(false) && gc::GcPressure::should_collect(true), "disabled thresholds and force");
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -372,6 +403,7 @@ int main(int argc, char** argv)
     else if (std::strcmp(argv[1], "weak-finalizers") == 0) weak_finalizers();
     else if (std::strcmp(argv[1], "allocation-failures") == 0) allocation_failures();
     else if (std::strcmp(argv[1], "loader-once") == 0) loader_once();
+    else if (std::strcmp(argv[1], "gc-accounting") == 0) gc_accounting();
     else if (std::strcmp(argv[1], "failed-module") == 0)
     {
         auto module = vm::Assembly::load_by_name("FailedModule");

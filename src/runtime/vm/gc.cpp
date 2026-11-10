@@ -16,8 +16,6 @@ namespace vm
 
 static gc::GCMode s_mode = gc::GCMode::ENABLED;
 static int64_t s_max_time_slice_ns = 0;
-static int64_t s_used_size = 0;
-static int64_t s_heap_size = 0;
 static void* s_heap_start = nullptr;
 static void* s_heap_end = nullptr;
 static void* s_heap_top = nullptr;
@@ -94,7 +92,7 @@ void GC::record_pressure(int64_t bytes)
 
 int64_t GC::get_allocated_bytes_for_current_thread()
 {
-    return gc::GcPressure::get_bytes_allocated_since_last_gc();
+    return gc::GcPressure::get_total_allocated_bytes();
 }
 
 int32_t GC::get_generation(vm::RtObject* obj)
@@ -173,12 +171,12 @@ int64_t GC::get_max_time_slice_ns()
 
 int64_t GC::get_used_size()
 {
-    return s_used_size;
+    return gc::GarbageCollector::get_used_size();
 }
 
 int64_t GC::get_heap_size()
 {
-    return s_heap_size;
+    return gc::GarbageCollector::get_heap_size();
 }
 
 void GC::foreach_heap(void (*func)(void* data, void* context), void* userData)
