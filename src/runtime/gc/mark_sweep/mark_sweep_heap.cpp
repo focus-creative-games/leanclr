@@ -122,7 +122,8 @@ static void initialize_size_class_pools()
         for (size_t j = 1; j <= (max_size - last_pool_max_size) / size_increment; j++)
         {
             size_t current_block_size = last_pool_max_size + size_increment * j;
-            auto new_pool = new SizeClassPool(arena_size, current_block_size, GC_ALIGN);
+            auto new_pool =
+                alloc::GeneralAllocation::require_allocation(alloc::GeneralAllocation::new_any<SizeClassPool>(arena_size, current_block_size, GC_ALIGN));
             for (; last_map_index < current_block_size / 8; last_map_index++)
             {
                 s_map_div8_size_to_pool[last_map_index] = new_pool;
@@ -224,7 +225,8 @@ void MarkSweepHeap::set_gc_mode(GCMode mode)
 
 vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite* site)
 {
-    if (size < sizeof(vm::RtObject) || size > SIZE_MAX - (GC_ALIGN - 1)) return nullptr;
+    if (size < sizeof(vm::RtObject) || size > SIZE_MAX - (GC_ALIGN - 1))
+        return nullptr;
     size_t aligned_size = utils::MemOp::align_up(size, GC_ALIGN);
     size_t charged_size = aligned_size;
     vm::RtObject* obj;

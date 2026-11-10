@@ -94,6 +94,8 @@ LeanCLR 提供 **Standard** 与 **Core** 两个版本：**Core 自 Standard 裁�
 
 Core 版本已经实现，面向支持 C++11 的小端平台。Core 适合作为嵌入式的纯脚本引擎：既可以直接纯解释执行，也可以配合 [LeanAOT](https://doc.leanclr.com/docs/aot/overview) 将热点 IL 转译为 C++，获得良好的运行性能。
 
+宿主内存回调的覆盖范围、配置时机和 OOM 策略见[内存所有权与失败处理](src/runtime/alloc/README.md)。
+
 ### Standard 分支
 
 Standard 版本按 BCL 来源分为三个分支：

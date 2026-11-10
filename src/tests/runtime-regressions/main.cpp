@@ -246,11 +246,17 @@ static void failed_initializer()
 static alloc::MemoryCallbacks saved_callbacks;
 static std::unordered_set<void*> callback_allocations;
 static size_t callback_allocation_count;
+static bool track_callback_allocations;
+static int allocations_before_failure = -1;
 
 static void* tracked_malloc(size_t size)
 {
+    if (allocations_before_failure == 0)
+        return nullptr;
+    if (allocations_before_failure > 0)
+        --allocations_before_failure;
     void* result = saved_callbacks.malloc(size);
-    if (result)
+    if (result && track_callback_allocations)
     {
         callback_allocations.insert(result);
         ++callback_allocation_count;
@@ -260,8 +266,12 @@ static void* tracked_malloc(size_t size)
 
 static void* tracked_calloc(size_t count, size_t size)
 {
+    if (allocations_before_failure == 0)
+        return nullptr;
+    if (allocations_before_failure > 0)
+        --allocations_before_failure;
     void* result = saved_callbacks.calloc(count, size);
-    if (result)
+    if (result && track_callback_allocations)
     {
         callback_allocations.insert(result);
         ++callback_allocation_count;
@@ -271,7 +281,8 @@ static void* tracked_calloc(size_t count, size_t size)
 
 static void tracked_free(void* ptr)
 {
-    check(callback_allocations.erase(ptr) == 1, "invocation freed memory from another allocator");
+    if (track_callback_allocations)
+        check(callback_allocations.erase(ptr) == 1, "temporary buffer must be freed by its installed allocator");
     saved_callbacks.free(ptr);
 }
 
@@ -294,14 +305,11 @@ static void invocation_buffers()
     }
     auto warm = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
     check(warm.is_ok(), "warm invocation");
-    saved_callbacks = alloc::GeneralAllocation::get_memory_callbacks();
-    auto tracked = saved_callbacks;
-    tracked.malloc = tracked_malloc;
-    tracked.calloc = tracked_calloc;
-    tracked.free = tracked_free;
-    alloc::GeneralAllocation::set_memory_callbacks(tracked);
+    track_callback_allocations = true;
+    callback_allocation_count = 0;
     auto result = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
-    alloc::GeneralAllocation::set_memory_callbacks(saved_callbacks);
+    allocations_before_failure = -1;
+    track_callback_allocations = false;
     check(result.is_ok() && *reinterpret_cast<int64_t*>(result.unwrap() + 1) == 210, "large argument and return buffers");
     check(callback_allocation_count >= 2 && callback_allocations.empty(), "invocation buffers must pair callback allocation and free");
 }
@@ -349,24 +357,6 @@ static void weak_finalizers()
     }
 }
 
-static int allocations_before_failure;
-
-static void* failing_malloc(size_t size)
-{
-    if (allocations_before_failure == 0)
-        return nullptr;
-    --allocations_before_failure;
-    return tracked_malloc(size);
-}
-
-static void* failing_calloc(size_t count, size_t size)
-{
-    if (allocations_before_failure == 0)
-        return nullptr;
-    --allocations_before_failure;
-    return tracked_calloc(count, size);
-}
-
 static void allocation_failures()
 {
     invocation_buffers(); // Resolve and warm all fixture metadata before injecting failure.
@@ -379,16 +369,13 @@ static void allocation_failures()
     const void* args[20];
     for (auto& arg : args)
         arg = &value;
-    auto callbacks = saved_callbacks;
-    callbacks.malloc = failing_malloc;
-    callbacks.calloc = failing_calloc;
-    callbacks.free = tracked_free;
     for (int allowed = 0; allowed <= 1; ++allowed)
     {
         allocations_before_failure = allowed;
-        alloc::GeneralAllocation::set_memory_callbacks(callbacks);
+        track_callback_allocations = true;
         auto result = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
-        alloc::GeneralAllocation::set_memory_callbacks(saved_callbacks);
+        allocations_before_failure = -1;
+        track_callback_allocations = false;
         check(result.is_err() && result.unwrap_err() == core::RtErr::OutOfMemory, "argument/return buffer OOM must propagate");
         check(callback_allocations.empty(), "partial invocation allocation must be freed");
     }
@@ -396,9 +383,10 @@ static void allocation_failures()
     for (int allowed = 0; allowed < 5; ++allowed)
     {
         allocations_before_failure = allowed;
-        alloc::GeneralAllocation::set_memory_callbacks(callbacks);
+        track_callback_allocations = true;
         auto loaded = vm::Assembly::load_from_data({invalid_image, sizeof(invalid_image), true}, nullptr);
-        alloc::GeneralAllocation::set_memory_callbacks(saved_callbacks);
+        allocations_before_failure = -1;
+        track_callback_allocations = false;
         check(loaded.is_err() && (loaded.unwrap_err() == RtErr::OutOfMemory || loaded.unwrap_err() == RtErr::BadImageFormat),
               "assembly allocation and parse failures must return an error");
         check(callback_allocations.empty(), "assembly rollback must free partially constructed pools");
@@ -410,7 +398,7 @@ static void allocation_failures()
     for (int i = 0; i < 8; ++i)
         vector.push_back(i);
     allocations_before_failure = 0;
-    alloc::GeneralAllocation::set_memory_callbacks(callbacks);
+    track_callback_allocations = true;
     auto string = icalls::SystemString::fast_allocate_string(10000);
     auto array = LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(warm.unwrap()->klass, dims, nullptr, gc::GcAllocSite::none());
     auto handle = icalls::SystemRuntimeInteropServicesGCHandle::get_target_handle(nullptr, 0, 2);
@@ -418,7 +406,8 @@ static void allocation_failures()
     bool appended = vector.try_push_back(9);
     gc::SizeClassPool pool(16384, 256, 8);
     void* block = pool.allocate_block();
-    alloc::GeneralAllocation::set_memory_callbacks(saved_callbacks);
+    allocations_before_failure = -1;
+    track_callback_allocations = false;
     check(string.is_err() && string.unwrap_err() == core::RtErr::OutOfMemory, "string OOM");
     check(array.is_err() && array.unwrap_err() == core::RtErr::OutOfMemory, "array OOM");
     check(handle.is_err() && handle.unwrap_err() == core::RtErr::OutOfMemory, "handle OOM");
@@ -582,6 +571,15 @@ int main(int argc, char** argv)
     setvbuf(stdout, nullptr, _IONBF, 0);
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
     dll_dir = argv[2];
+    if (std::strcmp(argv[1], "invocation-buffers") == 0 || std::strcmp(argv[1], "allocation-failures") == 0)
+    {
+        saved_callbacks = alloc::GeneralAllocation::get_memory_callbacks();
+        auto tracked = saved_callbacks;
+        tracked.malloc = tracked_malloc;
+        tracked.calloc = tracked_calloc;
+        tracked.free = tracked_free;
+        check(alloc::GeneralAllocation::set_memory_callbacks(tracked), "install allocator before runtime allocations");
+    }
     vm::Settings::set_file_loader(load_file);
     const char* args[] = {"runtime-regressions"};
     vm::Settings::set_command_line_arguments(1, args);

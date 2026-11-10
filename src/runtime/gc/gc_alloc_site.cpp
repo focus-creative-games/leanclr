@@ -109,7 +109,7 @@ const GcAllocSite* GcAllocSite::intern_site() const
     {
         return *it;
     }
-    const GcAllocSite* new_site = new GcAllocSite(*this);
+    const GcAllocSite* new_site = alloc::GeneralAllocation::require_allocation(alloc::GeneralAllocation::new_any<GcAllocSite>(*this));
     s_sites.insert(new_site);
     return new_site;
 #else

@@ -17,8 +17,38 @@ static void check(bool value, const char* message)
     }
 }
 
+static alloc::MemoryCallbacks original_callbacks;
+static bool fail_allocations;
+static size_t allocations, frees;
+
+static void* test_calloc(size_t count, size_t size)
+{
+    if (fail_allocations)
+        return nullptr;
+    void* ptr = original_callbacks.calloc(count, size);
+    if (ptr)
+        ++allocations;
+    return ptr;
+}
+
+static void test_free(void* ptr)
+{
+    ++frees;
+    original_callbacks.free(ptr);
+}
+
 int main()
 {
+    original_callbacks = alloc::GeneralAllocation::get_memory_callbacks();
+    auto invalid = original_callbacks;
+    invalid.free = nullptr;
+    check(!alloc::GeneralAllocation::set_memory_callbacks(invalid), "reject incomplete callback table");
+    auto installed = original_callbacks;
+    installed.calloc = test_calloc;
+    installed.free = test_free;
+    check(alloc::GeneralAllocation::set_memory_callbacks(installed), "install callbacks before allocation");
+    check(alloc::GeneralAllocation::set_memory_callbacks(original_callbacks) && alloc::GeneralAllocation::set_memory_callbacks(installed),
+          "callback configuration is mutable before first allocation");
     size_t value = 17;
     check(!utils::CheckedSize::add(SIZE_MAX, 1, value) && value == 17, "addition overflow preserves output");
     check(!utils::CheckedSize::multiply(SIZE_MAX, 2, value) && value == 17, "multiplication overflow preserves output");
@@ -48,9 +78,24 @@ int main()
     buffer.data()[0] = 42;
     auto* inline_data = buffer.data();
     check(!buffer.try_allocate_zeroed(SIZE_MAX) && buffer.data() == inline_data && buffer.data()[0] == 42, "scratch overflow preserves buffer");
+    fail_allocations = true;
+    check(!buffer.try_allocate_zeroed(20) && buffer.data() == inline_data && buffer.data()[0] == 42, "scratch allocator failure preserves inline contents");
+    check(!alloc::GeneralAllocation::set_memory_callbacks(original_callbacks), "allocation attempt locks callback identity");
+    check(alloc::GeneralAllocation::set_memory_callbacks(installed), "identical callback installation remains valid");
+    fail_allocations = false;
     check(buffer.try_allocate_zeroed(20) && buffer.data() != inline_data && buffer.data()[19] == 0, "heap scratch buffer");
+    auto* heap_data = buffer.data();
+    heap_data[0] = 123;
+    fail_allocations = true;
+    check(!buffer.try_allocate_zeroed(40) && buffer.data() == heap_data && buffer.data()[0] == 123 && buffer.size() == 20,
+          "scratch replacement failure preserves heap ownership");
+    fail_allocations = false;
     check(buffer.try_allocate_zeroed(1) && buffer.data() == inline_data && buffer.data()[0] == 0, "heap to inline ownership transition");
     check(buffer.try_allocate_zeroed(0) && buffer.size() == 0, "empty scratch buffer");
+    check(allocations == frees && allocations == 1, "callback allocation/free ownership balances");
+    check(!alloc::GeneralAllocation::set_memory_callbacks(original_callbacks), "callbacks remain locked after buffers are freed");
+    check(alloc::GeneralAllocation::aligned_malloc(32, 3) == nullptr && alloc::GeneralAllocation::aligned_realloc(nullptr, 32, 0) == nullptr,
+          "invalid aligned requests fail without assertion");
     int cleanups = 0;
     {
         auto guard = utils::make_scope_exit([&cleanups]() { ++cleanups; });

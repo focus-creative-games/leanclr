@@ -94,6 +94,8 @@ LeanCLR provides **Standard** and **Core** editions: **Core is trimmed from Stan
 
 The Core edition is implemented for little-endian platforms with a C++11 toolchain. Core is designed as an embeddable pure scripting engine: you can run C# purely via the interpreter, or combine it with [LeanAOT](https://doc.leanclr.com/docs/aot/overview) to transpile hot IL to C++ for strong runtime performance.
 
+See [memory ownership and failure policy](src/runtime/alloc/README.md) for callback coverage, configuration timing and OOM behavior.
+
 ### Standard Branches
 
 Standard is split by BCL source:

@@ -41,9 +41,11 @@ static void* generic_aligned_malloc(size_t size, size_t alignment)
         alignment = alignof(void*);
     }
     assert(is_power_of_two(alignment) && "alignment must be a non-zero power of two");
-    if (!is_power_of_two(alignment) || alignment - 1 > SIZE_MAX - sizeof(AlignedAllocHeader)) return nullptr;
+    if (!is_power_of_two(alignment) || alignment - 1 > SIZE_MAX - sizeof(AlignedAllocHeader))
+        return nullptr;
     const size_t overhead = sizeof(AlignedAllocHeader) + (alignment - 1);
-    if (size > SIZE_MAX - overhead) return nullptr;
+    if (size > SIZE_MAX - overhead)
+        return nullptr;
     void* raw = std::malloc(size + overhead);
     if (!raw)
     {
@@ -214,6 +216,24 @@ static void* default_aligned_realloc(void* ptr, size_t size, size_t alignment)
 }
 #endif
 } // namespace
+
+bool GeneralAllocation::s_callbacks_locked = false;
+
+bool GeneralAllocation::set_memory_callbacks(MemoryCallbacks callbacks)
+{
+    if (!callbacks.malloc || !callbacks.calloc || !callbacks.realloc || !callbacks.free || !callbacks.aligned_malloc || !callbacks.aligned_realloc ||
+        !callbacks.aligned_free)
+        return false;
+    const auto& current = s_memory_callbacks;
+    if (s_callbacks_locked)
+    {
+        return callbacks.malloc == current.malloc && callbacks.calloc == current.calloc && callbacks.realloc == current.realloc &&
+               callbacks.free == current.free && callbacks.aligned_malloc == current.aligned_malloc && callbacks.aligned_realloc == current.aligned_realloc &&
+               callbacks.aligned_free == current.aligned_free;
+    }
+    s_memory_callbacks = callbacks;
+    return true;
+}
 
 MemoryCallbacks GeneralAllocation::s_memory_callbacks = {default_malloc, default_aligned_malloc, default_free,           default_aligned_free,
                                                          default_calloc, default_realloc,        default_aligned_realloc};

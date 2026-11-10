@@ -2,6 +2,8 @@
 
 #include <cstdlib>
 #include <cstring>
+#include <new>
+#include <utility>
 
 #include "core/rt_base.h"
 #include "utils/checked_size.h"
@@ -25,11 +27,20 @@ class GeneralAllocation
 {
   private:
     static MemoryCallbacks s_memory_callbacks;
+    static bool s_callbacks_locked;
 
   public:
-    static void set_memory_callbacks(MemoryCallbacks callbacks)
+    // Configure on the single host/runtime thread before the first allocation
+    // attempt. Invalid tables and later changes are rejected without mutation.
+    // Reinstalling the exact same function pointers is an idempotent success.
+    static bool set_memory_callbacks(MemoryCallbacks callbacks);
+
+    template <typename T>
+    static T* require_allocation(T* ptr)
     {
-        s_memory_callbacks = callbacks;
+        if (!ptr)
+            leanclr::panic("Infallible runtime allocation failed");
+        return ptr;
     }
 
     static MemoryCallbacks get_memory_callbacks()
@@ -39,6 +50,7 @@ class GeneralAllocation
 
     static void* malloc(size_t size)
     {
+        s_callbacks_locked = true;
         return s_memory_callbacks.malloc(size);
     }
 
@@ -51,7 +63,7 @@ class GeneralAllocation
 
     static void* malloc_zeroed(size_t size)
     {
-        return s_memory_callbacks.calloc(1, size);
+        return calloc(1, size);
     }
 
     template <typename T>
@@ -66,6 +78,7 @@ class GeneralAllocation
         size_t total;
         if (!utils::CheckedSize::multiply(count, size, total))
             return nullptr;
+        s_callbacks_locked = true;
         return s_memory_callbacks.calloc(count, size);
     }
 
@@ -78,16 +91,23 @@ class GeneralAllocation
 
     static void* realloc(void* ptr, size_t size)
     {
+        s_callbacks_locked = true;
         return s_memory_callbacks.realloc(ptr, size);
     }
 
     static void* aligned_malloc(size_t size, size_t alignment)
     {
+        if (alignment == 0 || (alignment & (alignment - 1)) != 0)
+            return nullptr;
+        s_callbacks_locked = true;
         return s_memory_callbacks.aligned_malloc(size, alignment);
     }
 
     static void* aligned_realloc(void* ptr, size_t size, size_t alignment)
     {
+        if (alignment == 0 || (alignment & (alignment - 1)) != 0)
+            return nullptr;
+        s_callbacks_locked = true;
         return s_memory_callbacks.aligned_realloc(ptr, size, alignment);
     }
 
