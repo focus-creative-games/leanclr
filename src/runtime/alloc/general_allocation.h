@@ -31,6 +31,11 @@ class GeneralAllocation
         s_memory_callbacks = callbacks;
     }
 
+    static MemoryCallbacks get_memory_callbacks()
+    {
+        return s_memory_callbacks;
+    }
+
     static void* malloc(size_t size)
     {
         return s_memory_callbacks.malloc(size);

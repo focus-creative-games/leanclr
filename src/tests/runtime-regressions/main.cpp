@@ -3,6 +3,7 @@
 #include <cstring>
 #include <fstream>
 #include <string>
+#include <unordered_set>
 #include "alloc/general_allocation.h"
 #include "vm/runtime.h"
 #include "vm/settings.h"
@@ -188,6 +189,49 @@ static void failed_initializer()
     auto initialized = vm::Runtime::run_class_static_constructor(recursive.unwrap());
     check(initialized.is_ok(), "recursive cctor must not deadlock or fail");
 }
+static alloc::MemoryCallbacks saved_callbacks;
+static std::unordered_set<void*> callback_allocations;
+static size_t callback_allocation_count;
+static void* tracked_malloc(size_t size)
+{
+    void* result = saved_callbacks.malloc(size);
+    if (result) { callback_allocations.insert(result); ++callback_allocation_count; }
+    return result;
+}
+static void* tracked_calloc(size_t count, size_t size)
+{
+    void* result = saved_callbacks.calloc(count, size);
+    if (result) { callback_allocations.insert(result); ++callback_allocation_count; }
+    return result;
+}
+static void tracked_free(void* ptr)
+{
+    check(callback_allocations.erase(ptr) == 1, "invocation freed memory from another allocator");
+    saved_callbacks.free(ptr);
+}
+static void invocation_buffers()
+{
+    auto assembly = vm::Assembly::load_by_name("RegressionFixtures");
+    check(assembly.is_ok(), "load invocation fixture");
+    auto type = assembly.unwrap()->mod->get_class_by_name("InvocationFixture", false, false);
+    check(type.is_ok() && type.unwrap(), "invocation fixture type");
+    auto initialized = vm::Class::initialize_all(type.unwrap());
+    check(initialized.is_ok(), "initialize invocation fixture");
+    auto* method = vm::Method::find_matched_method_in_class_by_name(type.unwrap(), "ManyArguments");
+    check(method != nullptr, "invocation fixture method");
+    int32_t values[20]; const void* args[20];
+    for (int i = 0; i < 20; ++i) { values[i] = i+1; args[i] = &values[i]; }
+    auto warm = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
+    check(warm.is_ok(), "warm invocation");
+    saved_callbacks = alloc::GeneralAllocation::get_memory_callbacks();
+    auto tracked = saved_callbacks;
+    tracked.malloc = tracked_malloc; tracked.calloc = tracked_calloc; tracked.free = tracked_free;
+    alloc::GeneralAllocation::set_memory_callbacks(tracked);
+    auto result = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
+    alloc::GeneralAllocation::set_memory_callbacks(saved_callbacks);
+    check(result.is_ok() && *reinterpret_cast<int64_t*>(result.unwrap()+1) == 210, "large argument and return buffers");
+    check(callback_allocation_count >= 2 && callback_allocations.empty(), "invocation buffers must pair callback allocation and free");
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -203,6 +247,7 @@ int main(int argc, char** argv)
     else if (std::strcmp(argv[1], "metadata-bounds") == 0) metadata_bounds();
     else if (std::strcmp(argv[1], "exported-types") == 0) exported_types();
     else if (std::strcmp(argv[1], "failed-initializer") == 0) failed_initializer();
+    else if (std::strcmp(argv[1], "invocation-buffers") == 0) invocation_buffers();
     else if (std::strcmp(argv[1], "failed-module") == 0)
     {
         auto module = vm::Assembly::load_by_name("FailedModule");

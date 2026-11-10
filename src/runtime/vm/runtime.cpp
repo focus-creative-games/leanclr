@@ -102,8 +102,8 @@ struct ScopeBufferGuard
         }
         else
         {
-            args_buffer = new interp::RtStackObject[total_args_size];
-            std::memset(args_buffer, 0, total_args_size * sizeof(interp::RtStackObject));
+            args_buffer = alloc::GeneralAllocation::calloc_any<interp::RtStackObject>(total_args_size);
+            if (!args_buffer) RET_ERR(RtErr::OutOfMemory);
         }
         args_size = total_args_size;
         args = args_buffer;
@@ -116,8 +116,8 @@ struct ScopeBufferGuard
         }
         else
         {
-            ret_buffer = new interp::RtStackObject[ret_size_val];
-            std::memset(ret_buffer, 0, ret_size_val * sizeof(interp::RtStackObject));
+            ret_buffer = alloc::GeneralAllocation::calloc_any<interp::RtStackObject>(ret_size_val);
+            if (!ret_buffer) RET_ERR(RtErr::OutOfMemory);
         }
         ret_size = ret_size_val;
         ret = ret_buffer;
