@@ -76,10 +76,23 @@ RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass
     const metadata::RtArrayType* arr_type = arr_klass->by_val->data.array_type;
     uint8_t rank = arr_type->rank;
 
-    // Calculate total length by multiplying all dimensions
-    int32_t total_length = 1;
+    // Validate every dimension before multiplying: an empty dimension makes
+    // the entire array empty, but must not hide a later negative length.
+    bool empty = false;
     for (uint8_t i = 0; i < rank; ++i)
     {
+        if (lengths[i] < 0 || (lower_bounds != nullptr &&
+            static_cast<int64_t>(lower_bounds[i]) + lengths[i] - 1 > INT32_MAX))
+        {
+            RET_ERR(RtErr::Overflow);
+        }
+        empty = empty || lengths[i] == 0;
+    }
+    int32_t total_length = empty ? 0 : 1;
+    for (uint8_t i = 0; i < rank; ++i)
+    {
+        if (empty)
+            break;
         int32_t dimension_length = lengths[i];
         // Check for overflow
         if (static_cast<uint32_t>(dimension_length) > static_cast<uint32_t>(RT_MAX_ARRAY_INDEX) / static_cast<uint32_t>(total_length))
@@ -93,7 +106,7 @@ RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass
     const metadata::RtClass* ele_klass = arr_klass->element_class;
     int32_t ele_size = static_cast<int32_t>(Class::get_stack_location_size(ele_klass));
 
-    if (ele_size > RT_MAX_ARRAY_INDEX / total_length)
+    if (total_length != 0 && ele_size > RT_MAX_ARRAY_INDEX / total_length)
     {
         RET_ERR(RtErr::Overflow);
     }
