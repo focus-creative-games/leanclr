@@ -64,6 +64,7 @@ vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t
 {
     assert(size >= sizeof(vm::RtObject));
     auto obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(size);
+    if (!obj) return nullptr;
     obj->klass = const_cast<metadata::RtClass*>(klass);
     GcFinalizer::on_object_allocated(obj);
     s_used_bytes += size;

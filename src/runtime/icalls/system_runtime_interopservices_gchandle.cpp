@@ -24,7 +24,7 @@ RtResult<vm::GCHandleId> SystemRuntimeInteropServicesGCHandle::get_target_handle
     void* result = vm::GCHandle::get_target_handle(obj, handle_ptr, handle_type);
     if (result == nullptr)
     {
-        RET_OK(0);
+        RET_ERR(RtErr::OutOfMemory);
     }
     RET_OK(vm::GCHandle::get_handle_id(result));
 }

@@ -11,12 +11,10 @@ RtErr fatal_on_not_implemented_error()
     return RtErr::NotImplemented;
 }
 
-void panic(const char* errMsg)
+[[noreturn]] void panic(const char* errMsg)
 {
     printf("Panic: %s\n", errMsg);
-    int* p = (int*)-1;
-    *p = 0;
-    // crash the program
+    std::abort();
 }
 
 void print_not_implemented_error(const char* errMsg)

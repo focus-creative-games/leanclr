@@ -37,11 +37,12 @@ static utils::HashMap<GCHandleId, HandleInfo*> s_handle_map;
 // Allocate a new handle or reuse a freed one
 static HandleInfo* alloc_handle()
 {
+    if (s_last_handle_id >= INT32_MAX) return nullptr;
     if (s_freed_handle_head == nullptr)
     {
         // Allocate a new handle
         HandleInfo* h = alloc::GeneralAllocation::malloc_any_zeroed<HandleInfo>();
-        assert(s_last_handle_id < INT32_MAX);
+        if (!h) return nullptr;
         h->id = ++s_last_handle_id;
         s_handle_map[h->id] = h;
         return h;
@@ -91,7 +92,7 @@ void* GCHandle::get_handle_by_id(GCHandleId id)
 GCHandleId GCHandle::get_handle_id(void* handle)
 {
     HandleInfo* h = reinterpret_cast<HandleInfo*>(handle);
-    return h->id;
+    return h ? h->id : 0;
 }
 
 void* GCHandle::get_handle_by_id(GCHandleId id)
@@ -147,6 +148,7 @@ void* GCHandle::get_target_handle(RtObject* obj, void* handle, int32_t type_)
     {
         // Allocate new handle
         HandleInfo* new_handle = alloc_handle();
+        if (!new_handle) return nullptr;
         new_handle->obj = obj;
         new_handle->type_ = static_cast<GCHandleType>(type_);
         new_handle->next = nullptr;

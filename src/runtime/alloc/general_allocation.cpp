@@ -41,7 +41,9 @@ static void* generic_aligned_malloc(size_t size, size_t alignment)
         alignment = alignof(void*);
     }
     assert(is_power_of_two(alignment) && "alignment must be a non-zero power of two");
+    if (!is_power_of_two(alignment) || alignment - 1 > SIZE_MAX - sizeof(AlignedAllocHeader)) return nullptr;
     const size_t overhead = sizeof(AlignedAllocHeader) + (alignment - 1);
+    if (size > SIZE_MAX - overhead) return nullptr;
     void* raw = std::malloc(size + overhead);
     if (!raw)
     {

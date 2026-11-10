@@ -36,6 +36,10 @@ RtResult<RtArray*> Array::__new_szarray_from_array_klass(const metadata::RtClass
 
     RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
 
+    const size_t element_size = Class::get_stack_location_size(klass->element_class);
+    if (length < 0) RET_ERR(RtErr::Overflow);
+    if (element_size != 0 && static_cast<size_t>(length) > (SIZE_MAX - sizeof(RtArray) - 7) / element_size)
+        RET_ERR(RtErr::OutOfMemory);
     size_t arr_length = get_array_allocation_size(klass, length);
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length LEANCLR_GC_CALL_SITE_PARAM));
 
@@ -59,6 +63,10 @@ RtResult<RtArray*> Array::__new_szarray_from_ele_klass(const metadata::RtClass* 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, ArrayClass::get_szarray_class_from_element_class(ele_class));
     RET_ERR_ON_FAIL(Class::initialize_all(klass));
 
+    const size_t element_size = Class::get_stack_location_size(klass->element_class);
+    if (length < 0) RET_ERR(RtErr::Overflow);
+    if (element_size != 0 && static_cast<size_t>(length) > (SIZE_MAX - sizeof(RtArray) - 7) / element_size)
+        RET_ERR(RtErr::OutOfMemory);
     size_t arr_length = get_array_allocation_size(klass, length);
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length LEANCLR_GC_CALL_SITE_PARAM));
 
@@ -123,6 +131,8 @@ RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass
     size_t total_array_bytes = get_array_allocation_size(arr_klass, total_length);
 
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(arr_klass, total_array_bytes LEANCLR_GC_CALL_SITE_PARAM));
+
+    if (!arr_obj) RET_ERR(RtErr::OutOfMemory);
 
     // Set up bounds
     ArrayBounds* bounds = reinterpret_cast<ArrayBounds*>(reinterpret_cast<uint8_t*>(arr_obj) + bounds_start_index);

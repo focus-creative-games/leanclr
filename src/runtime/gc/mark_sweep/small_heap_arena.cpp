@@ -254,6 +254,7 @@ void* SizeClassPool::allocate_block()
         return _current_arena->allocate_block();
     }
 
+    if (!_arenas.try_reserve(_arenas.size() + 1)) return nullptr;
     _current_arena = allocate_arena();
     if (_current_arena == nullptr)
     {

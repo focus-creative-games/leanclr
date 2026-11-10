@@ -19,6 +19,10 @@
 #include "vm/rt_exception.h"
 #include "vm/object.h"
 #include "vm/field.h"
+#include "vm/rt_string.h"
+#include "icalls/system_string.h"
+#include "icalls/system_runtime_interopservices_gchandle.h"
+#include "gc/mark_sweep/small_heap_arena.h"
 // Until B12, the public header needs this override for a static consumer.
 #define LEANCLR_EXPORT
 #define LEANCLR_IMPORT
@@ -271,6 +275,66 @@ static void weak_finalizers()
         vm::GCHandle::free_handle(short_handle); vm::GCHandle::free_handle(long_handle);
     }
 }
+static int allocations_before_failure;
+static void* failing_malloc(size_t size)
+{
+    if (allocations_before_failure == 0) return nullptr;
+    --allocations_before_failure;
+    return tracked_malloc(size);
+}
+static void* failing_calloc(size_t count, size_t size)
+{
+    if (allocations_before_failure == 0) return nullptr;
+    --allocations_before_failure;
+    return tracked_calloc(count, size);
+}
+static void allocation_failures()
+{
+    invocation_buffers(); // Resolve and warm all fixture metadata before injecting failure.
+    auto assembly = vm::Assembly::load_by_name("RegressionFixtures");
+    check(assembly.is_ok(), "load OOM fixture");
+    auto type = assembly.unwrap()->mod->get_class_by_name("InvocationFixture", false, false);
+    check(type.is_ok(), "OOM fixture type");
+    auto* method = vm::Method::find_matched_method_in_class_by_name(type.unwrap(), "ManyArguments");
+    int32_t value = 1; const void* args[20];
+    for (auto& arg : args) arg = &value;
+    auto callbacks = saved_callbacks;
+    callbacks.malloc = failing_malloc; callbacks.calloc = failing_calloc; callbacks.free = tracked_free;
+    for (int allowed = 0; allowed <= 1; ++allowed)
+    {
+        allocations_before_failure = allowed;
+        alloc::GeneralAllocation::set_memory_callbacks(callbacks);
+        auto result = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
+        alloc::GeneralAllocation::set_memory_callbacks(saved_callbacks);
+        check(result.is_err() && result.unwrap_err() == core::RtErr::OutOfMemory, "argument/return buffer OOM must propagate");
+        check(callback_allocations.empty(), "partial invocation allocation must be freed");
+    }
+    const int32_t dims[] = {100,100};
+    auto warm = LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(vm::Class::get_corlib_types().cls_int32, 2, dims, nullptr, gc::GcAllocSite::none());
+    check(warm.is_ok(), "warm multidimensional array class");
+    utils::Vector<int> vector;
+    for (int i = 0; i < 8; ++i) vector.push_back(i);
+    allocations_before_failure = 0;
+    alloc::GeneralAllocation::set_memory_callbacks(callbacks);
+    auto string = icalls::SystemString::fast_allocate_string(10000);
+    auto array = LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS(warm.unwrap()->klass, dims, nullptr, gc::GcAllocSite::none());
+    auto handle = icalls::SystemRuntimeInteropServicesGCHandle::get_target_handle(nullptr, 0, 2);
+    bool grew = vector.try_reserve(16);
+    bool appended = vector.try_push_back(9);
+    gc::SizeClassPool pool(16384, 256, 8);
+    void* block = pool.allocate_block();
+    alloc::GeneralAllocation::set_memory_callbacks(saved_callbacks);
+    check(string.is_err() && string.unwrap_err() == core::RtErr::OutOfMemory, "string OOM");
+    check(array.is_err() && array.unwrap_err() == core::RtErr::OutOfMemory, "array OOM");
+    check(handle.is_err() && handle.unwrap_err() == core::RtErr::OutOfMemory, "handle OOM");
+    check(!grew && !appended && vector.size() == 8 && vector[7] == 7, "vector failure must preserve contents");
+    check(vector.try_push_back(vector[7]) && vector.size() == 9 && vector[8] == 7, "fallible growth must preserve an aliased element");
+    check(block == nullptr, "small heap arena registry OOM");
+    check(alloc::GeneralAllocation::calloc(SIZE_MAX, 2) == nullptr, "allocation multiplication overflow");
+    check(vm::String::fast_allocate_string(-1) == nullptr && vm::String::fast_allocate_string(INT32_MAX) == nullptr, "invalid string allocation size");
+    auto recovered = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
+    check(recovered.is_ok(), "runtime must recover after failed allocation");
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -288,6 +352,7 @@ int main(int argc, char** argv)
     else if (std::strcmp(argv[1], "failed-initializer") == 0) failed_initializer();
     else if (std::strcmp(argv[1], "invocation-buffers") == 0) invocation_buffers();
     else if (std::strcmp(argv[1], "weak-finalizers") == 0) weak_finalizers();
+    else if (std::strcmp(argv[1], "allocation-failures") == 0) allocation_failures();
     else if (std::strcmp(argv[1], "failed-module") == 0)
     {
         auto module = vm::Assembly::load_by_name("FailedModule");

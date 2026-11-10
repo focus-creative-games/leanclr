@@ -76,7 +76,12 @@ struct ScopeBufferGuard
     void* alloc_zeroed_temp_value_type_buffer(size_t size)
     {
         void* buffer = alloc::GeneralAllocation::malloc_zeroed(size);
-        temp_byref_valuetype_args_buffer.push_back(buffer);
+        if (!buffer) return nullptr;
+        if (!temp_byref_valuetype_args_buffer.try_push_back(buffer))
+        {
+            alloc::GeneralAllocation::free(buffer);
+            return nullptr;
+        }
         return buffer;
     }
 
@@ -275,6 +280,7 @@ struct ScopeBufferGuard
                 if (Class::is_value_type(param_klass))
                 {
                     void* buffer = alloc_zeroed_temp_value_type_buffer(param_klass->instance_size_without_header);
+                    if (!buffer) RET_ERR(RtErr::OutOfMemory);
                     RET_ERR_ON_FAIL(Object::unbox_any(param, param_klass, buffer, false));
                     dst.ptr = buffer;
                 }

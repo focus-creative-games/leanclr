@@ -223,7 +223,7 @@ void MarkSweepHeap::set_gc_mode(GCMode mode)
 
 vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite* site)
 {
-    assert(size >= sizeof(vm::RtObject));
+    if (size < sizeof(vm::RtObject) || size > SIZE_MAX - (GC_ALIGN - 1)) return nullptr;
     size_t aligned_size = utils::MemOp::align_up(size, GC_ALIGN);
     vm::RtObject* obj;
     if (is_small_object(aligned_size))

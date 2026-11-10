@@ -62,6 +62,7 @@ class GeneralAllocation
 
     static void* calloc(size_t count, size_t size)
     {
+        if (size != 0 && count > SIZE_MAX / size) return nullptr;
         return s_memory_callbacks.calloc(count, size);
     }
 

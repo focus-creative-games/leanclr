@@ -58,6 +58,7 @@ static RtResultVoid init_static_empty_string(metadata::RtClass* stringClass)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     g_empty_string = String::fast_allocate_string(0);
+    if (!g_empty_string) RET_ERR(RtErr::OutOfMemory);
     RET_ERR_ON_FAIL(Field::set_static_value(emptyField, &g_empty_string));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, empty_str, Field::get_value_object(emptyField, nullptr));
     assert(empty_str == g_empty_string);
@@ -120,17 +121,21 @@ const metadata::RtMethodInfo* String::get_redirected_ctor_method()
 
 RtString* String::create_string_from_utf16chars(const Utf16Char* str, int32_t length)
 {
+    if (length < 0 || (length != 0 && str == nullptr)) return nullptr;
     RtString* newString = fast_allocate_string(length);
+    if (!newString) return nullptr;
 
-    std::memcpy(&newString->first_char, str, static_cast<size_t>(length) * sizeof(Utf16Char));
+    if (length != 0) std::memcpy(&newString->first_char, str, static_cast<size_t>(length) * sizeof(Utf16Char));
     return newString;
 }
 
 RtString* String::create_string_from_utf8chars(const char* str, int32_t length)
 {
+    if (length < 0 || (length != 0 && str == nullptr)) return nullptr;
     // First, convert UTF-8 to UTF-16 and count characters
     utils::Vector<Utf16Char> utf16_buffer;
-    utf16_buffer.reserve(static_cast<size_t>(length)); // Reserve space (UTF-16 could be shorter or longer)
+    if (length == 0) return fast_allocate_string(0);
+    if (!utf16_buffer.try_reserve(static_cast<size_t>(length))) return nullptr;
 
     const char* start = str;
     const char* end = str + static_cast<size_t>(length);
@@ -163,6 +168,7 @@ int32_t String::get_hash_code(RtString* str)
 
 int32_t String::get_string_allocation_size(int32_t length)
 {
+    if (length < 0 || static_cast<size_t>(length) > (INT32_MAX - (sizeof(RtString) - OVER_SIZE_OF_STRING + sizeof(Utf16Char))) / sizeof(Utf16Char)) return 0;
     const size_t bytes = sizeof(RtString) - OVER_SIZE_OF_STRING + sizeof(Utf16Char) /* extra one character*/ + static_cast<size_t>(length) * sizeof(Utf16Char);
     return static_cast<int32_t>(bytes);
 }
@@ -173,12 +179,14 @@ RtString* String::fast_allocate_string(int32_t length)
     // TODO: can we optimize it out? we have redirected String::GetHashCode and String::GetLegacyNonRandomizedHashCode to
     // the intrinsic implementation which does not require zero-termination.
     size_t allocation_size = static_cast<size_t>(get_string_allocation_size(length));
+    if (allocation_size == 0) return nullptr;
 #if LEANCLR_GC_DEBUG
     RtString* newString = (RtString*)gc::GarbageCollector::allocate_object(
         g_stringClass, allocation_size, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, "String::fast_allocate_string"));
 #else
     RtString* newString = (RtString*)gc::GarbageCollector::allocate_object(g_stringClass, allocation_size);
 #endif
+    if (!newString) return nullptr;
     newString->length = static_cast<int32_t>(length);
     return newString;
 }

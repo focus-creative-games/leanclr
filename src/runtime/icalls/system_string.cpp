@@ -23,6 +23,7 @@ RtResult<vm::RtString*> SystemString::newobj_char_array(vm::RtArray* charArray) 
     int32_t length = vm::Array::get_array_length(charArray);
     const uint16_t* chars = vm::Array::get_array_data_start_as<uint16_t>(charArray);
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(chars, length);
+    if (!utf16_string) RET_ERR(RtErr::OutOfMemory);
     RET_OK(utf16_string);
 }
 
@@ -51,6 +52,7 @@ RtResult<vm::RtString*> SystemString::newobj_char_array_range(vm::RtArray* charA
 
     const uint16_t* chars_start = vm::Array::get_array_data_start_as<uint16_t>(charArray) + startIndex;
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(chars_start, length);
+    if (!utf16_string) RET_ERR(RtErr::OutOfMemory);
     RET_OK(utf16_string);
 }
 
@@ -71,6 +73,7 @@ RtResult<vm::RtString*> SystemString::newobj_utf16chars(const Utf16Char* chars) 
     // Determine length of null-terminated UTF-16 string
     int32_t length = static_cast<int32_t>(utils::StringUtil::get_utf16chars_length(chars));
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(chars), length);
+    if (!utf16_string) RET_ERR(RtErr::OutOfMemory);
     RET_OK(utf16_string);
 }
 
@@ -91,6 +94,7 @@ RtResult<vm::RtString*> SystemString::newobj_utf16chars_range(const Utf16Char* c
         RET_ERR(RtErr::ArgumentOutOfRange);
     const Utf16Char* chars_start = chars + static_cast<size_t>(startIndex);
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(chars_start), length);
+    if (!utf16_string) RET_ERR(RtErr::OutOfMemory);
     RET_OK(utf16_string);
 }
 
@@ -110,6 +114,7 @@ RtResult<vm::RtString*> SystemString::newobj_utf8chars(const int8_t* chars) noex
 {
     int32_t utf8_length = static_cast<int32_t>(std::strlen(reinterpret_cast<const char*>(chars)));
     vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(reinterpret_cast<const char*>(chars), utf8_length);
+    if (!utf16_string) RET_ERR(RtErr::OutOfMemory);
     RET_OK(utf16_string);
 }
 
@@ -129,6 +134,7 @@ RtResult<vm::RtString*> SystemString::newobj_utf8chars_range(const int8_t* chars
         RET_ERR(RtErr::ArgumentOutOfRange);
     const char* chars_start = reinterpret_cast<const char*>(chars) + static_cast<size_t>(start_index);
     vm::RtString* utf16_string = vm::String::create_string_from_utf8chars(chars_start, length);
+    if (!utf16_string) RET_ERR(RtErr::OutOfMemory);
     RET_OK(utf16_string);
 }
 
@@ -149,8 +155,10 @@ RtResult<vm::RtString*> SystemString::newobj_char_count(Utf16Char c, int32_t cha
     if (charCount < 0)
         RET_ERR(RtErr::ArgumentOutOfRange);
     utils::Vector<Utf16Char> buf;
+    if (!buf.try_reserve(static_cast<size_t>(charCount))) RET_ERR(RtErr::OutOfMemory);
     buf.resize(static_cast<size_t>(charCount), c);
     vm::RtString* string_obj = vm::String::create_string_from_utf16chars(buf.data(), charCount);
+    if (!string_obj) RET_ERR(RtErr::OutOfMemory);
     RET_OK(string_obj);
 }
 
@@ -168,6 +176,7 @@ static RtResultVoid newobj_char_count_invoker(metadata::RtManagedMethodPointer m
 RtResult<vm::RtString*> SystemString::newobj_readonlyspan(const vm::RtReadOnlySpan<Utf16Char> span) noexcept
 {
     vm::RtString* utf16_string = vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(span.pointer), span.length);
+    if (!utf16_string) RET_ERR(RtErr::OutOfMemory);
     RET_OK(utf16_string);
 }
 
@@ -187,6 +196,7 @@ RtResult<vm::RtString*> SystemString::fast_allocate_string(int32_t length) noexc
     if (static_cast<uint32_t>(length) > (std::numeric_limits<uint32_t>::max() / 2))
         RET_ERR(RtErr::ArgumentOutOfRange);
     vm::RtString* string_obj = vm::String::fast_allocate_string(length);
+    if (!string_obj) RET_ERR(RtErr::OutOfMemory);
     RET_OK(string_obj);
 }
 

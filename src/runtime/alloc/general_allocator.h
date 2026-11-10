@@ -40,7 +40,7 @@ class GeneralAllocator
 
     pointer allocate(size_type n)
     {
-        if (n == 0)
+        if (n == 0 || n > SIZE_MAX / sizeof(T))
         {
             return nullptr;
         }
