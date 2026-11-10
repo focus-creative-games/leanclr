@@ -56,7 +56,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
     }
     FileData dllFileData = {};
     auto result = file_loader(name, "dll", dllFileData);
-    if (!file_loader(name, "dll", dllFileData))
+    if (!result)
     {
         std::printf("Failed to load assembly from file loader for %s\n", name);
         RET_ERR(RtErr::FileNotFound);

@@ -34,12 +34,19 @@
 
 using namespace leanclr;
 static std::string dll_dir;
+static int fixture_dll_loads;
+static bool reject_fixture_load;
 static void check(bool condition, const char* message)
 {
     if (!condition) { std::fprintf(stderr, "%s\n", message); std::exit(1); }
 }
 static bool load_file(const char* name, const char* ext, vm::FileData& output)
 {
+    if (std::strcmp(name, "RegressionFixtures") == 0 && std::strcmp(ext, "dll") == 0)
+    {
+        ++fixture_dll_loads;
+        if (reject_fixture_load) return false;
+    }
     for (const char* sub : {"/", "/mono-4.5/"})
     {
         std::string path = dll_dir + sub + name + "." + ext;
@@ -335,6 +342,17 @@ static void allocation_failures()
     auto recovered = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
     check(recovered.is_ok(), "runtime must recover after failed allocation");
 }
+static void loader_once()
+{
+    reject_fixture_load = true;
+    auto failed = vm::Assembly::load_by_name("RegressionFixtures");
+    check(failed.is_err() && fixture_dll_loads == 1, "failed load must invoke the DLL callback once");
+    reject_fixture_load = false;
+    auto loaded = vm::Assembly::load_by_name("RegressionFixtures");
+    check(loaded.is_ok() && fixture_dll_loads == 2, "successful load must invoke the DLL callback once");
+    auto cached = vm::Assembly::load_by_name("RegressionFixtures");
+    check(cached.is_ok() && cached.unwrap() == loaded.unwrap() && fixture_dll_loads == 2, "cached load must not invoke the callback");
+}
 int main(int argc, char** argv)
 {
     check(argc >= 3, "usage: runtime-regressions CASE DLL_DIRECTORY");
@@ -353,6 +371,7 @@ int main(int argc, char** argv)
     else if (std::strcmp(argv[1], "invocation-buffers") == 0) invocation_buffers();
     else if (std::strcmp(argv[1], "weak-finalizers") == 0) weak_finalizers();
     else if (std::strcmp(argv[1], "allocation-failures") == 0) allocation_failures();
+    else if (std::strcmp(argv[1], "loader-once") == 0) loader_once();
     else if (std::strcmp(argv[1], "failed-module") == 0)
     {
         auto module = vm::Assembly::load_by_name("FailedModule");
