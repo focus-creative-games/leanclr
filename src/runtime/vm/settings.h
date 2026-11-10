@@ -33,6 +33,12 @@ class Settings
     static void set_config(const char* executablePath);
     static const char* get_config();
 
+    // Startup configuration on the runtime thread. At most 1024 non-null arguments.
+    // Failure preserves the previous owned argument snapshot; argc == 0 clears it.
+    static RtResultVoid try_set_command_line_arguments(int32_t argc, const char** argv);
+    static RtResultVoid try_set_command_line_arguments_utf16(int32_t argc, const Utf16Char** argv);
+
+    // Legacy setters use fatal policy on invalid input or allocation failure.
     static void set_command_line_arguments_utf16(int32_t argc, const Utf16Char** argv);
 
     static FileLoader get_file_loader();

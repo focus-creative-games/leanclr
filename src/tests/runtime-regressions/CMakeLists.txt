@@ -130,3 +130,8 @@ add_executable(string-allocation string-allocation.cpp)
 target_link_libraries(string-allocation PRIVATE leanclr)
 set_target_properties(string-allocation PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
 add_test(NAME string-allocation COMMAND string-allocation)
+
+add_executable(command-line command-line.cpp)
+target_link_libraries(command-line PRIVATE leanclr)
+set_target_properties(command-line PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
+add_test(NAME command-line COMMAND command-line)
