@@ -682,7 +682,7 @@ class OpCodes
   public:
     static const OpCodeInfo* get_opcode_info(OpCodeEnum opcode);
     static bool try_decode_opcode_info(const uint8_t* codes_cur, const uint8_t* codes_end, const OpCodeInfo*& out_opcode_info);
-    static size_t get_opcode_size(const uint8_t* codes_cur, const OpCodeInfo* opcode_info);
+    static bool try_get_opcode_size(const uint8_t* codes_cur, const uint8_t* codes_end, const OpCodeInfo* opcode_info, size_t& out_size);
 };
 } // namespace il
 } // namespace interp

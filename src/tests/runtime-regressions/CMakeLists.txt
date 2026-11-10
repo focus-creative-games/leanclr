@@ -32,6 +32,10 @@ set_target_properties(core-boundary PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQU
 add_test(NAME core-boundary COMMAND core-boundary)
 add_test(NAME layer-boundaries COMMAND ${CMAKE_COMMAND}
     "-DLEANCLR_LAYER_ROOT=${CMAKE_CURRENT_LIST_DIR}/../../runtime" -P "${CMAKE_CURRENT_LIST_DIR}/../../runtime/cmake/verify_layers.cmake")
+add_executable(il-bounds il-bounds.cpp)
+target_link_libraries(il-bounds PRIVATE leanclr)
+set_target_properties(il-bounds PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
+add_test(NAME il-bounds COMMAND il-bounds)
 add_executable(foundation foundation.cpp)
 target_link_libraries(foundation PRIVATE leanclr)
 set_target_properties(foundation PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)

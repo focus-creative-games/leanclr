@@ -24,7 +24,7 @@ class BasicBlockSplitter
     bool is_valid_il_offset(uint32_t offset) const;
 
     RtResultVoid split_codes();
-    void split_exception_clauses();
+    RtResultVoid split_exception_clauses();
     bool validate_offsets() const;
 
     const metadata::RtMethodBody* _method_body;
