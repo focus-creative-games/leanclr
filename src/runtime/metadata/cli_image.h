@@ -28,6 +28,7 @@ struct CliSection
     uint32_t virtual_address_begin;
     uint32_t virtual_address_end;
     uint32_t raw_data_begin;
+    uint32_t raw_data_size;
 };
 
 struct CliHeap

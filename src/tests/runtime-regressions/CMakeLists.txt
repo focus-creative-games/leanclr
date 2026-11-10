@@ -8,3 +8,4 @@ set(LEANCLR_TEST_DLL_DIR "${CMAKE_CURRENT_LIST_DIR}/../../../out/cmake/tests/bas
 enable_testing()
 add_test(NAME zero-arrays COMMAND runtime-regressions zero-arrays "${LEANCLR_TEST_DLL_DIR}")
 add_test(NAME clone-arrays COMMAND runtime-regressions clone-arrays "${LEANCLR_TEST_DLL_DIR}")
+add_test(NAME metadata-bounds COMMAND runtime-regressions metadata-bounds "${LEANCLR_TEST_DLL_DIR}")

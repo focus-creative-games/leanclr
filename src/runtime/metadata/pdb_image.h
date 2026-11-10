@@ -24,7 +24,7 @@ struct MethodIR2ILMapInfo
 class PdbImage
 {
   public:
-    PdbImage(alloc::MemPool& pool, const uint8_t* data, size_t length) : _pool(pool), _cli_image(), _default_section{0, static_cast<uint32_t>(length), 0}
+    PdbImage(alloc::MemPool& pool, const uint8_t* data, size_t length) : _pool(pool), _cli_image(), _default_section{0, static_cast<uint32_t>(length), 0, static_cast<uint32_t>(length)}
     {
         _cli_image.set_image_data(data, length);
         _cli_image.set_metadata_offset_length(0, static_cast<uint32_t>(length));

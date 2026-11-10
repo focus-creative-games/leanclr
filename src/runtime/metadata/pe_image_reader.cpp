@@ -68,7 +68,7 @@ constexpr uint32_t CLI_HEADER_OFFSET64 = 224;
     {                                              \
         if (!(expr))                               \
         {                                          \
-            RET_ASSERT_ERR(RtErr::BadImageFormat); \
+            RET_ERR(RtErr::BadImageFormat); \
         }                                          \
     } while (0)
 
@@ -109,14 +109,19 @@ RtResult<CliImage*> PeImageReader::ReadCliImage(alloc::MemPool& imagePrivatePool
     RET_BAD_IMAGE_ON_FALSE(reader.try_peek_any_ptr_range(pe_header->sections, headers));
 
     CliSection* sections = imagePrivatePool.calloc_any<CliSection>(pe_header->sections);
+    if (!sections && pe_header->sections != 0)
+        RET_ERR(RtErr::OutOfMemory);
 
     for (uint16_t i = 0; i < pe_header->sections; ++i)
     {
         const PESectionHeader& header = headers[i];
+        RET_BAD_IMAGE_ON_FALSE(header.virtual_size <= UINT32_MAX - header.virtual_address);
+        RET_BAD_IMAGE_ON_FALSE(header.pointer_to_raw_data <= _image_size && header.size_of_raw_data <= _image_size - header.pointer_to_raw_data);
         CliSection& section = sections[i];
         section.virtual_address_begin = header.virtual_address;
         section.virtual_address_end = header.virtual_address + header.virtual_size;
         section.raw_data_begin = header.pointer_to_raw_data;
+        section.raw_data_size = header.size_of_raw_data;
     }
     imagePtr->set_sections(sections, pe_header->sections);
     imagePtr->set_image_data(_image_base, _image_size);
