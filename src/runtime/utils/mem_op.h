@@ -212,8 +212,19 @@ class MemOp
         return static_cast<size_t>(__builtin_ctzll(word));
 #elif defined(_MSC_VER)
         unsigned long index;
+#if LEANCLR_ARCH_64BIT
         _BitScanForward64(&index, word);
         return static_cast<size_t>(index);
+#else
+        const unsigned long low = static_cast<unsigned long>(word);
+        if (low != 0)
+        {
+            _BitScanForward(&index, low);
+            return static_cast<size_t>(index);
+        }
+        _BitScanForward(&index, static_cast<unsigned long>(word >> 32));
+        return static_cast<size_t>(index) + 32;
+#endif
 #else
         size_t n = 0;
         while ((word & static_cast<uint64_t>(1)) == 0)
