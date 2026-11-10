@@ -8,15 +8,7 @@ namespace interp
 {
 // Extra value union for instruction data
 
-namespace hl
-{
 struct BasicBlock;
-}
-
-namespace ll
-{
-struct BasicBlock;
-}
 
 struct Variable;
 
@@ -37,10 +29,8 @@ union IRExtraValue
     double r8;
     const void* ptr;
     const Variable* var;
-    const hl::BasicBlock* hl_bb;
-    const hl::BasicBlock** hl_bbs;
-    const ll::BasicBlock* ll_bb;
-    const ll::BasicBlock** ll_bbs;
+    const BasicBlock* bb;
+    const BasicBlock** bbs;
     metadata::RtClass* klass;
     const metadata::RtMethodInfo* method;
     const metadata::RtFieldInfo* field;
