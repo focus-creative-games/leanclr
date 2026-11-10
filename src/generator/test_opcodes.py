@@ -21,7 +21,7 @@ class OpcodeTests(unittest.TestCase):
         self.assertEqual([op.code for op in ops], list(range(len(ops))))
         self.assertFalse(any(op.name.endswith("Short") for op in ops))
         cases = re.findall(r"^\s+LEANCLR_CASE_BEGIN(?:_LITE)?\((\w+)\)",
-                           (INTERP / "interpreter.cpp").read_text(), re.M)
+                           (INTERP / "interpreter_handlers.inc").read_text(), re.M)
         self.assertEqual(Counter(cases), Counter(op.name for op in ops))
         # Parsing twice must not consume a process-global opcode allocator.
         again = parser.parse_low_level_opcode_file(HERE / "ll-opcodes.xml")
@@ -49,17 +49,21 @@ class OpcodeTests(unittest.TestCase):
 
     def test_checked_in_generation_is_reproducible(self):
         with tempfile.TemporaryDirectory() as temp:
-            outputs = [Path(temp) / name for name in ("ll_opcodes.h", "ll_opcodes.cpp", "interpreter.cpp")]
-            for output in outputs:
-                output.write_bytes((INTERP / output.name).read_bytes())
             command = [sys.executable, str(HERE / "gen_low_level_opcodes.py"),
-                       str(HERE / "ll-opcodes.xml"), *map(str, outputs)]
+                       str(HERE / "ll-opcodes.xml"), temp]
             subprocess.run(command, check=True)
+            outputs = sorted(Path(temp).glob("*.inc"))
+            checked_in = INTERP / "generated"
+            self.assertEqual({p.name for p in outputs}, {p.name for p in checked_in.glob("*.inc")})
             for output in outputs:
-                self.assertEqual(output.read_text(), (INTERP / output.name).read_text(), output.name)
+                # Git may check text out as CRLF on Windows.
+                self.assertEqual(output.read_text(encoding="utf-8"),
+                                 (checked_in / output.name).read_text(encoding="utf-8"), output.name)
             first = [output.read_bytes() for output in outputs]
+            timestamps = [output.stat().st_mtime_ns for output in outputs]
             subprocess.run(command, check=True)
             self.assertEqual(first, [output.read_bytes() for output in outputs])
+            self.assertEqual(timestamps, [output.stat().st_mtime_ns for output in outputs])
 
 
 if __name__ == "__main__":
