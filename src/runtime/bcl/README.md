@@ -135,3 +135,13 @@ The regression suite includes:
 Run with the instructions in [runtime regression tests](../../tests/runtime-regressions/README.md).
 `LEANCLR_FORCE_PORTABLE=ON` exercises the C++ portable provider path on the current
 machine; it is not evidence of ARM hardware or another BCL adapter being validated.
+
+## Host selection
+
+Configure `-DLEANCLR_HOST=NATIVE` (default), `PORTABLE`, or `CUSTOM`.
+PORTABLE uses only C/C++ library host implementations, without Windows/POSIX SDK
+headers or bcrypt. CUSTOM excludes the default file/time/random/heap sources and
+starts with empty service and memory tables. Install complete MemoryCallbacks and
+the required ServiceCallbacks before initialization. C/C++ standard library and
+Mono adapter shims are still required; CUSTOM does not mean freestanding C++.
+No native OS ABI is selected in PORTABLE or CUSTOM, even on a Windows compiler.

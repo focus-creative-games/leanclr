@@ -27,7 +27,7 @@ struct MemoryCallbacks
 class GeneralAllocation
 {
   private:
-    static MemoryCallbacks s_memory_callbacks;
+    static MemoryCallbacks& memory_callbacks();
     static bool s_callbacks_locked;
 
   public:
@@ -46,13 +46,13 @@ class GeneralAllocation
 
     static MemoryCallbacks get_memory_callbacks()
     {
-        return s_memory_callbacks;
+        return memory_callbacks();
     }
 
     static void* malloc(size_t size)
     {
         s_callbacks_locked = true;
-        return s_memory_callbacks.malloc(size);
+        return memory_callbacks().malloc ? memory_callbacks().malloc(size) : nullptr;
     }
 
     template <typename T>
@@ -79,7 +79,7 @@ class GeneralAllocation
         if (!utils::CheckedSize::multiply(count, size, total))
             return nullptr;
         s_callbacks_locked = true;
-        return s_memory_callbacks.calloc(count, size);
+        return memory_callbacks().calloc ? memory_callbacks().calloc(count, size) : nullptr;
     }
 
     template <typename T>
@@ -99,7 +99,7 @@ class GeneralAllocation
     static void* realloc(void* ptr, size_t size)
     {
         s_callbacks_locked = true;
-        return s_memory_callbacks.realloc(ptr, size);
+        return memory_callbacks().realloc ? memory_callbacks().realloc(ptr, size) : nullptr;
     }
 
     static void* aligned_malloc(size_t size, size_t alignment)
@@ -107,7 +107,7 @@ class GeneralAllocation
         if (alignment == 0 || (alignment & (alignment - 1)) != 0)
             return nullptr;
         s_callbacks_locked = true;
-        return s_memory_callbacks.aligned_malloc(size, alignment);
+        return memory_callbacks().aligned_malloc ? memory_callbacks().aligned_malloc(size, alignment) : nullptr;
     }
 
     static void* aligned_realloc(void* ptr, size_t size, size_t alignment)
@@ -115,7 +115,7 @@ class GeneralAllocation
         if (alignment == 0 || (alignment & (alignment - 1)) != 0)
             return nullptr;
         s_callbacks_locked = true;
-        return s_memory_callbacks.aligned_realloc(ptr, size, alignment);
+        return memory_callbacks().aligned_realloc ? memory_callbacks().aligned_realloc(ptr, size, alignment) : nullptr;
     }
 
     template <typename T, typename... Args>
@@ -153,7 +153,7 @@ class GeneralAllocation
     {
         if (ptr)
         {
-            s_memory_callbacks.free(ptr);
+            memory_callbacks().free(ptr);
         }
     }
 
@@ -161,7 +161,7 @@ class GeneralAllocation
     {
         if (ptr)
         {
-            s_memory_callbacks.aligned_free(ptr);
+            memory_callbacks().aligned_free(ptr);
         }
     }
 
@@ -169,7 +169,7 @@ class GeneralAllocation
     {
         if (ptr_location)
         {
-            s_memory_callbacks.free(ptr_location);
+            memory_callbacks().free(ptr_location);
             ptr_location = nullptr;
         }
     }
