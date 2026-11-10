@@ -2,6 +2,14 @@
 
 #include <stdint.h>
 #include <stddef.h>
+#ifndef __cplusplus
+#include <stdbool.h>
+#endif
+#if defined(_MSC_VER)
+#include <malloc.h>
+#elif defined(__GNUC__)
+#include <alloca.h>
+#endif
 
 #ifndef LEANCLR_EXPORT
 #ifdef _MSC_VER
@@ -13,22 +21,24 @@
 #endif
 #endif
 
-#ifdef LEANCLR_DLL_EXPORTS
+#if defined(LEANCLR_STATIC)
+#define LEANCLR_API
+#elif defined(LEANCLR_DLL_EXPORTS)
 #define LEANCLR_API LEANCLR_EXPORT
 #else
 #define LEANCLR_API LEANCLR_IMPORT
 #endif
 
-struct LeanclrTypeSig;
-struct LeanclrAssembly;
-struct LeanclrModuleDef;
-struct LeanclrClass;
-struct LeanclrMethodInfo;
-struct LeanclrFieldInfo;
-struct LeanclrPropertyInfo;
-struct LeanclrEventInfo;
-struct LeanclrException;
-struct LeanclrStackObject;
+typedef struct LeanclrTypeSig LeanclrTypeSig;
+typedef struct LeanclrAssembly LeanclrAssembly;
+typedef struct LeanclrModuleDef LeanclrModuleDef;
+typedef struct LeanclrClass LeanclrClass;
+typedef struct LeanclrMethodInfo LeanclrMethodInfo;
+typedef struct LeanclrFieldInfo LeanclrFieldInfo;
+typedef struct LeanclrPropertyInfo LeanclrPropertyInfo;
+typedef struct LeanclrEventInfo LeanclrEventInfo;
+typedef struct LeanclrException LeanclrException;
+typedef struct LeanclrStackObject LeanclrStackObject;
 
 #define LEANCLR_STACK_OBJECT_SIZE 8
 
@@ -39,10 +49,10 @@ extern "C"
 {
 #endif
 
-    LEANCLR_API int32_t leanclr_initialize_runtime();
-    LEANCLR_API void leanclr_shutdown_runtime();
+    LEANCLR_API int32_t leanclr_initialize_runtime(void);
+    LEANCLR_API void leanclr_shutdown_runtime(void);
 
-    LEANCLR_API size_t leanclr_get_assembly_count();
+    LEANCLR_API size_t leanclr_get_assembly_count(void);
     LEANCLR_API size_t leanclr_get_assemblies(LeanclrAssembly** out_assemblies, size_t out_assemblies_capacity, LeanclrException** out_exception);
     LEANCLR_API LeanclrAssembly* leanclr_get_assembly(const char* assembly_name);
     LEANCLR_API LeanclrAssembly* leanclr_load_assembly(const char* assembly_name, LeanclrException** out_exception);
@@ -52,7 +62,7 @@ extern "C"
     LEANCLR_API const char* leanclr_get_module_name_noext(LeanclrModuleDef* mod);
 
     LEANCLR_API size_t leanclr_get_class_count(LeanclrModuleDef* mod);
-    LEANCLR_API void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass**& class_buf, size_t& class_buf_capacity,
+    LEANCLR_API void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass*** out_class_buf, size_t* out_class_buf_capacity,
                                          LeanclrException** out_exception);
     LEANCLR_API LeanclrClass* leanclr_get_class_by_name(LeanclrModuleDef* mod, const char* full_name, bool ignore_case, LeanclrException** out_exception);
 
@@ -62,21 +72,21 @@ extern "C"
     LEANCLR_API const LeanclrTypeSig* leanclr_get_class_byval_typesig(LeanclrClass* klass);
     LEANCLR_API const LeanclrTypeSig* leanclr_get_class_byref_typesig(LeanclrClass* klass);
     LEANCLR_API LeanclrClass* leanclr_get_class_parent(LeanclrClass* klass);
-    LEANCLR_API void leanclr_get_class_interfaces(LeanclrClass* klass, const LeanclrClass**& interfaces, size_t& count, LeanclrException** out_exception);
+    LEANCLR_API void leanclr_get_class_interfaces(LeanclrClass* klass, const LeanclrClass*** out_interfaces, size_t* out_count, LeanclrException** out_exception);
 
     LEANCLR_API LeanclrClass* leanclr_get_class_enclosing_class(LeanclrClass* klass);
-    LEANCLR_API void leanclr_get_class_nested_classes(LeanclrClass* klass, const LeanclrClass**& nested_classes, size_t& count,
+    LEANCLR_API void leanclr_get_class_nested_classes(LeanclrClass* klass, const LeanclrClass*** out_nested_classes, size_t* out_count,
                                                       LeanclrException** out_exception);
 
-    LEANCLR_API void leanclr_get_class_methods(LeanclrClass* klass, const LeanclrMethodInfo**& methods, size_t& count, LeanclrException** out_exception);
+    LEANCLR_API void leanclr_get_class_methods(LeanclrClass* klass, const LeanclrMethodInfo*** out_methods, size_t* out_count, LeanclrException** out_exception);
     LEANCLR_API const LeanclrMethodInfo* leanclr_get_class_method_by_name(LeanclrClass* klass, const char* method_name, LeanclrException** out_exception);
 
-    LEANCLR_API void leanclr_get_class_field(LeanclrClass* klass, const LeanclrFieldInfo*& fields, size_t& count, LeanclrException** out_exception);
+    LEANCLR_API void leanclr_get_class_field(LeanclrClass* klass, const LeanclrFieldInfo** out_fields, size_t* out_count, LeanclrException** out_exception);
     LEANCLR_API const LeanclrFieldInfo* leanclr_get_class_field_by_name(LeanclrClass* klass, const char* field_name, LeanclrException** out_exception);
-    LEANCLR_API void leanclr_get_class_properties(LeanclrClass* klass, const LeanclrPropertyInfo*& properties, size_t& count, LeanclrException** out_exception);
+    LEANCLR_API void leanclr_get_class_properties(LeanclrClass* klass, const LeanclrPropertyInfo** out_properties, size_t* out_count, LeanclrException** out_exception);
     LEANCLR_API const LeanclrPropertyInfo* leanclr_get_class_property_by_name(LeanclrClass* klass, const char* property_name, LeanclrException** out_exception);
 
-    LEANCLR_API void leanclr_get_class_events(LeanclrClass* klass, const LeanclrEventInfo*& events, size_t& count, LeanclrException** out_exception);
+    LEANCLR_API void leanclr_get_class_events(LeanclrClass* klass, const LeanclrEventInfo** out_events, size_t* out_count, LeanclrException** out_exception);
 
     LEANCLR_API const LeanclrEventInfo* leanclr_get_class_event_by_name(LeanclrClass* klass, const char* event_name, LeanclrException** out_exception);
 
@@ -89,7 +99,7 @@ extern "C"
     LEANCLR_API size_t leanclr_get_total_arg_stack_object_size(const LeanclrMethodInfo* method);
     LEANCLR_API size_t leanclr_get_return_value_stack_object_size(const LeanclrMethodInfo* method);
 
-    typedef void (*LeanclrMethodPointer)();
+    typedef void (*LeanclrMethodPointer)(void);
     typedef void (*LeanclrMethodInvoker)(LeanclrMethodPointer method_ptr, const LeanclrMethodInfo* method, const LeanclrStackObject* args,
                                          LeanclrStackObject* ret, LeanclrException** exception);
 
@@ -110,5 +120,36 @@ extern "C"
     LeanclrStackObject* ret_buff_name = (LeanclrStackObject*)alloca(leanclr_get_return_value_stack_object_size(method) * LEANCLR_STACK_OBJECT_SIZE);
 
 #ifdef __cplusplus
+}
+#endif
+#ifdef __cplusplus
+// Source-compatible reference overloads; the exported ABI uses C pointers.
+inline void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass**& class_buf, size_t& class_buf_capacity, LeanclrException** out_exception)
+{
+    leanclr_get_classes(mod, export_only, &class_buf, &class_buf_capacity, out_exception);
+}
+inline void leanclr_get_class_interfaces(LeanclrClass* klass, const LeanclrClass**& interfaces, size_t& count, LeanclrException** out_exception)
+{
+    leanclr_get_class_interfaces(klass, &interfaces, &count, out_exception);
+}
+inline void leanclr_get_class_nested_classes(LeanclrClass* klass, const LeanclrClass**& nested_classes, size_t& count, LeanclrException** out_exception)
+{
+    leanclr_get_class_nested_classes(klass, &nested_classes, &count, out_exception);
+}
+inline void leanclr_get_class_methods(LeanclrClass* klass, const LeanclrMethodInfo**& methods, size_t& count, LeanclrException** out_exception)
+{
+    leanclr_get_class_methods(klass, &methods, &count, out_exception);
+}
+inline void leanclr_get_class_field(LeanclrClass* klass, const LeanclrFieldInfo*& fields, size_t& count, LeanclrException** out_exception)
+{
+    leanclr_get_class_field(klass, &fields, &count, out_exception);
+}
+inline void leanclr_get_class_properties(LeanclrClass* klass, const LeanclrPropertyInfo*& properties, size_t& count, LeanclrException** out_exception)
+{
+    leanclr_get_class_properties(klass, &properties, &count, out_exception);
+}
+inline void leanclr_get_class_events(LeanclrClass* klass, const LeanclrEventInfo*& events, size_t& count, LeanclrException** out_exception)
+{
+    leanclr_get_class_events(klass, &events, &count, out_exception);
 }
 #endif

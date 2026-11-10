@@ -56,7 +56,12 @@ else()
     add_library(leanclr STATIC ${RUNTIME_SOURCES})
 endif()
 
-target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS LEANCLR_USE_SHIPPING_ZLIB=1)
+target_compile_definitions(leanclr PRIVATE LEANCLR_USE_SHIPPING_ZLIB=1)
+if(BUILD_SHARED_LEANCLR)
+    target_compile_definitions(leanclr PRIVATE LEANCLR_DLL_EXPORTS)
+else()
+    target_compile_definitions(leanclr PUBLIC LEANCLR_STATIC=1)
+endif()
 
 if(LEANCLR_FORCE_PORTABLE)
     target_compile_definitions(leanclr PRIVATE LEANCLR_FORCE_PORTABLE=1)

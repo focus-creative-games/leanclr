@@ -23,9 +23,6 @@
 #include "icalls/system_string.h"
 #include "icalls/system_runtime_interopservices_gchandle.h"
 #include "gc/mark_sweep/small_heap_arena.h"
-// Until B12, the public header needs this override for a static consumer.
-#define LEANCLR_EXPORT
-#define LEANCLR_IMPORT
 #include "public/leanclr.h"
 #ifdef _WIN32
 #define NOMINMAX
