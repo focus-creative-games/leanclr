@@ -2136,10 +2136,16 @@ RtResultVoid Transformer::add_leave(size_t next_offset, ptrdiff_t target_offset)
 
 RtResultVoid Transformer::add_arglist()
 {
+#if LEANCLR_BCL_CORECLR_NET10
+    // Minimal net10 has no ArgIterator/calling-convention bridge. Do not expose
+    // Mono frame layouts or a fabricated argument list.
+    return RtErr::NotSupported;
+#else
     InstructionOperands ir{};
     ir.destination = push_ref_or_ptr_to_eval_stack();
     ir.opcode = OpCodeEnum::Arglist;
     return append_instruction(ir);
+#endif
 }
 
 RtResultVoid Transformer::add_localloc()

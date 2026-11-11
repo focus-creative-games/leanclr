@@ -76,7 +76,7 @@ namespace LeanAOT.GenerationPlan
                 string reason = null;
                 if (!def.HasBody || def.IsAbstract || def.IsRuntime || def.IsPinvokeImpl || def.IsInternalCall) reason = "unsupported-body";
                 else if (def.Body.Instructions.Any(i => i.OpCode.Code == dnlib.DotNet.Emit.Code.Calli)) reason = "managed-calli";
-                else if (def.CallingConvention == CallingConvention.VarArg) reason = "vararg";
+                else if (def.CallingConvention == CallingConvention.VarArg) reason = "vararg-calling-convention";
                 else if ((ctx.typeArgsStack?.Count ?? 0) != def.DeclaringType.GenericParameters.Count ||
                          (ctx.methodArgsStack?.Count ?? 0) != def.GenericParameters.Count ||
                          (ctx.typeArgsStack?.Count ?? 0) > 255 || (ctx.methodArgsStack?.Count ?? 0) > 255 ||

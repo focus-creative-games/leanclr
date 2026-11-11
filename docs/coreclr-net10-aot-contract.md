@@ -70,3 +70,7 @@ The first Wasm build exposes unguarded Windows QCall bindings and pointer-size f
 assumptions in the imported adapter. Those are tracked by the platform stage, not
 hidden by native passes. Linux/ARM64 and UBSan have not passed locally: WSL's
 registered ext4.vhdx is missing.
+
+## Varargs boundary regression
+
+Minimal net10 deliberately rejects `arglist` before interpreting a Mono-specific frame layout. The planner emits `vararg-calling-convention` in method/generic fallbacks; `TestVarargsRejected` verifies managed NotSupportedException rather than fabricated arguments or a native crash. This brings the independent smoke/GC/API gate to 98 entries, passed on Windows x64 under MSVC ASan and Wasm32 with matching 32-bit CoreLib. Full native vararg lowering remains outside this minimal profile; it requires an independently specified calling-convention/GC contract.

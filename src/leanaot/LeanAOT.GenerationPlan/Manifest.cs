@@ -105,6 +105,7 @@ namespace LeanAOT.GenerationPlan
                         }
                         if (method.CallingConvention == CallingConvention.VarArg)
                         {
+                            MethodFallbacks.Add(new GenericFallback { Caller = "", Token = method.MDToken.Raw, Target = method.FullName, Reason = "vararg-calling-convention" });
                             s_logger.Warn($"Skip method with vararg calling convention: {method.FullName} token: {method.MDToken}");
                             continue;
                         }

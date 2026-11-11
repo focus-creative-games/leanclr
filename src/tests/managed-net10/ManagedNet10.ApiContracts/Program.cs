@@ -2,7 +2,7 @@ namespace ManagedNet10.ApiContracts;
 internal static class Program
 {
     private static void Check(bool condition, string message) { if (!condition) throw new Exception(message); }
-    public static void Main() { TestArrayLayout(); TestArrayInterfaces(); TestSpanAndCollections(); TestWorkerThreadRejected(); TestStructReturn(); }
+    public static void Main() { TestArrayLayout(); TestArrayInterfaces(); TestSpanAndCollections(); TestWorkerThreadRejected(); TestStructReturn(); TestVarargsRejected(); }
     public static void TestArrayLayout()
     {
         var values = new int[2, 3];
@@ -46,6 +46,13 @@ internal static class Program
     }
     [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
     private static (long First, long Second) Pair(long value) => (value, value + 1);
+    [System.Runtime.CompilerServices.MethodImpl(System.Runtime.CompilerServices.MethodImplOptions.NoInlining)]
+    private static int VarargsTarget(__arglist) => new ArgIterator(__arglist).GetRemainingCount();
+    public static void TestVarargsRejected()
+    {
+        try { _ = VarargsTarget(__arglist()); throw new Exception("varargs incorrectly succeeded"); }
+        catch (NotSupportedException) { }
+    }
     public static void TestStructReturn()
     {
         var result = Pair(41);
