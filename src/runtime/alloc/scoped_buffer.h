@@ -31,7 +31,7 @@ class ScopedBuffer
         GeneralAllocation::free(heap_);
     }
 
-    bool try_allocate_zeroed(size_t count)
+    [[nodiscard]] bool try_allocate_zeroed(size_t count)
     {
         size_t bytes;
         if (!utils::CheckedSize::multiply(count, sizeof(T), bytes))

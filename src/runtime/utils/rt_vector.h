@@ -130,7 +130,8 @@ class Vector
 
     void push_range(const T* begin, size_t count)
     {
-        if (count > SIZE_MAX - size_) leanclr::panic("Vector size overflow");
+        if (count > SIZE_MAX - size_)
+            leanclr::panic("Vector size overflow");
         reserve(size_ + count);
         std::memcpy(&data_[size_], begin, count * sizeof(T));
         size_ += count;
@@ -204,14 +205,19 @@ class Vector
     }
 
     // Fallible growth preserves the original buffer on allocation failure.
-    bool try_reserve(size_t new_capacity)
+    [[nodiscard]] bool try_reserve(size_t new_capacity)
     {
-        if (new_capacity <= capacity_) return true;
-        if (new_capacity > SIZE_MAX / sizeof(T)) return false;
+        if (new_capacity <= capacity_)
+            return true;
+        if (new_capacity > SIZE_MAX / sizeof(T))
+            return false;
         T* new_data = allocator_.allocate(new_capacity);
-        if (!new_data) return false;
-        if (size_ != 0) std::memcpy(new_data, data_, size_ * sizeof(T));
-        if (data_) allocator_.deallocate(data_, capacity_);
+        if (!new_data)
+            return false;
+        if (size_ != 0)
+            std::memcpy(new_data, data_, size_ * sizeof(T));
+        if (data_)
+            allocator_.deallocate(data_, capacity_);
         data_ = new_data;
         capacity_ = new_capacity;
         return true;
@@ -221,20 +227,22 @@ class Vector
     {
         // Infallible metadata/container callers have no error return channel.
         // Fail explicitly rather than continuing with a null buffer.
-        if (!try_reserve(new_capacity)) leanclr::panic("Vector allocation failed");
+        if (!try_reserve(new_capacity))
+            leanclr::panic("Vector allocation failed");
     }
 
-    bool try_push_back(const T& value)
+    [[nodiscard]] bool try_push_back(const T& value)
     {
         // value may refer to an element in the buffer that growth releases.
         const T copy = value;
         if (size_ == capacity_)
         {
             const size_t maximum = SIZE_MAX / sizeof(T);
-            if (capacity_ == maximum) return false;
-            const size_t next = capacity_ == 0 ? std::min(size_t(8), maximum) :
-                (capacity_ > maximum / 2 ? maximum : capacity_ * 2);
-            if (!try_reserve(next)) return false;
+            if (capacity_ == maximum)
+                return false;
+            const size_t next = capacity_ == 0 ? std::min(size_t(8), maximum) : (capacity_ > maximum / 2 ? maximum : capacity_ * 2);
+            if (!try_reserve(next))
+                return false;
         }
         data_[size_++] = copy;
         return true;
@@ -322,7 +330,8 @@ class Vector
     void grow()
     {
         const size_t maximum = SIZE_MAX / sizeof(T);
-        if (capacity_ == maximum) leanclr::panic("Vector capacity overflow");
+        if (capacity_ == maximum)
+            leanclr::panic("Vector capacity overflow");
         size_t new_capacity = capacity_ == 0 ? std::min(size_t(8), maximum) : (capacity_ > maximum / 2 ? maximum : capacity_ * 2);
         reserve(new_capacity);
     }
