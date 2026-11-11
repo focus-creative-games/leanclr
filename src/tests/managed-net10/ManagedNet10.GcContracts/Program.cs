@@ -9,7 +9,7 @@ internal static class Program
     private static int finalized;
     private static Buffer? buffer;
     private static void Check(bool value, string message) { if (!value) throw new Exception(message); }
-    public static void Main() { TestLiveObject(); TestInlineArrayReferences(); TestDeadEphemeronCycle(); TestLiveEphemeronChain(); TestFinalizer(); TestInteriorByRef(); TestLargeInteriorByRef(); TestValueTypeReferences(); TestExceptionRoots(); TestFinalizerClosure(); TestStaticConstructorRoots(); }
+    public static void Main() { TestLiveObject(); TestInlineArrayReferences(); TestDeadEphemeronCycle(); TestLiveEphemeronChain(); TestFinalizer(); TestInteriorByRef(); TestLargeInteriorByRef(); TestValueTypeReferences(); TestExceptionRoots(); TestFinalizerClosure(); TestStaticConstructorRoots(); TestNestedCatchInFinally(); TestThrowAtTryEnd(); }
     public static void TestLiveObject()
     {
         var value = new Box { Reference = new object() };
@@ -152,4 +152,27 @@ internal static class Program
     [MethodImpl(MethodImplOptions.NoInlining)] private static int ReadInitializer() => CollectingInitializer.Value;
     [MethodImpl(MethodImplOptions.NoInlining)] private static void Consume(Box box, int value) => Check(box.Value == value, "cctor lost a live stack root");
     public static void TestStaticConstructorRoots() => Consume(new Box(), ReadInitializer());
+
+    public static void TestNestedCatchInFinally()
+    {
+        int count = 0;
+        try { count++; }
+        finally
+        {
+            try { count += 10; throw new Exception(); }
+            catch { count += 20; }
+            finally { count += 100; }
+            count += 1000;
+        }
+        Check(count == 1131, "catch nested in finally resumed the handled throw");
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)] private static void ThrowLastCall() => throw new PayloadException();
+    public static void TestThrowAtTryEnd()
+    {
+        int count = 0;
+        try { ThrowLastCall(); }
+        catch (PayloadException) { count++; }
+        finally { count += 10; }
+        Check(count == 11, "call at try boundary escaped its handler");
+    }
 }

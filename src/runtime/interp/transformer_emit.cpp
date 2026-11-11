@@ -93,7 +93,12 @@ Transformer::LeaveSurroundingBlockType Transformer::get_leave_surrounding_block_
         }
         else if (clause.is_in_handler_block(il_src) && !clause.is_in_handler_block(il_target))
         {
-            result = LeaveSurroundingBlockType::CatchOrFilter;
+            if (clause.flags == metadata::RtILExceptionClauseType::Exception || clause.flags == metadata::RtILExceptionClauseType::Filter)
+            {
+                // Exiting an enclosing try must not overwrite the requirement
+                // to pop the handled exception before running its finally.
+                return LeaveSurroundingBlockType::CatchOrFilter;
+            }
         }
     }
 

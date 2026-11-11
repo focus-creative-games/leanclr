@@ -685,7 +685,9 @@ unwind_exception_handler:
                     vm::Exception::set_current_exception(ex);
                     RET_ERR(RtErr::ManagedException);
                 }
-                push_throw_flow(ex, frame, frame->ip);
+                // ip is the return address, possibly exactly outside the try.
+                // Its preceding byte belongs to the suspended call instruction.
+                push_throw_flow(ex, frame, frame->ip - 1);
                 // unwind to previous frame to continue searching
                 continue;
             }

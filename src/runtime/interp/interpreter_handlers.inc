@@ -2739,10 +2739,10 @@ LEANCLR_CASE_BEGIN_LITE(CallVirtInterp)
     }
     else
     {
-        ip = reinterpret_cast<const uint8_t*>(ir + 1);
         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
         HANDLE_RAISE_RUNTIME_ERROR_VOID(
             CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->invoke_method_ptr)(actual_method->virtual_method_ptr, actual_method, frame_base, frame_base));
+        ip = reinterpret_cast<const uint8_t*>(ir + 1);
     }
 }
 LEANCLR_CASE_END_LITE()
@@ -2756,9 +2756,9 @@ LEANCLR_CASE_BEGIN_LITE(CallInternalCall)
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
     }
-    ip = reinterpret_cast<const uint8_t*>(ir + 1);
     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
     HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+    ip = reinterpret_cast<const uint8_t*>(ir + 1);
 }
 LEANCLR_CASE_END_LITE()
 
@@ -2771,9 +2771,9 @@ LEANCLR_CASE_BEGIN_LITE(CallIntrinsic)
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
     }
-    ip = reinterpret_cast<const uint8_t*>(ir + 1);
     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
     HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+    ip = reinterpret_cast<const uint8_t*>(ir + 1);
 }
 LEANCLR_CASE_END_LITE()
 
@@ -2786,9 +2786,9 @@ LEANCLR_CASE_BEGIN_LITE(CallPInvoke)
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
     }
-    ip = reinterpret_cast<const uint8_t*>(ir + 1);
     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
     HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+    ip = reinterpret_cast<const uint8_t*>(ir + 1);
 }
 LEANCLR_CASE_END_LITE()
 
@@ -2801,9 +2801,9 @@ LEANCLR_CASE_BEGIN_LITE(CallAot)
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
     }
-    ip = reinterpret_cast<const uint8_t*>(ir + 1);
     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
     HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+    ip = reinterpret_cast<const uint8_t*>(ir + 1);
 }
 LEANCLR_CASE_END_LITE()
 
@@ -2816,9 +2816,9 @@ LEANCLR_CASE_BEGIN_LITE(CallRuntimeImplemented)
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
     }
-    ip = reinterpret_cast<const uint8_t*>(ir + 1);
     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
     HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+    ip = reinterpret_cast<const uint8_t*>(ir + 1);
 }
 LEANCLR_CASE_END_LITE()
 
@@ -2840,9 +2840,9 @@ LEANCLR_CASE_BEGIN_LITE(CalliInterp)
     }
     else
     {
-        ip = reinterpret_cast<const uint8_t*>(ir + 1);
         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
         HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+        ip = reinterpret_cast<const uint8_t*>(ir + 1);
     }
 }
 LEANCLR_CASE_END_LITE()
