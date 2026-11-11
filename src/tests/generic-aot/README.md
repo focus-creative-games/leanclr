@@ -67,3 +67,8 @@ Add `--packed-int32-returns` to either test runner for the independent int/uint
 return trial. `scripts/test/int32-returns.py --emsdk ...` archives all four
 protocol combinations and mixed-target ABI checks. See
 [the integer return report](../../../docs/performance/aot-int32-returns.md).
+
+Closed generic EH methods now use the same conservative normal-path/handoff
+policy after signature and local inflation. The formal suite adds thirteen
+generic EH cases; see [the generic EH report](../../../docs/performance/aot-generic-eh.md)
+and scripts/test/generic-eh.py for the archived protocol/platform matrix.

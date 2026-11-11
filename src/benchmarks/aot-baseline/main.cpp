@@ -90,7 +90,9 @@ int main(int argc, char** argv)
                              "InterfacesPhaseChange",
                              "InterfacesManySites",
                              "UInt32Returns",
-                             "Int32Returns"};
+                             "Int32Returns",
+                             "GenericEhInt",
+                             "GenericEhString"};
     const char* workloads[] = {"arithmetic",
                                "calls",
                                "properties",
@@ -108,7 +110,10 @@ int main(int argc, char** argv)
                                "interfaces-phase-change",
                                "interfaces-many-sites",
                                "uint32-returns",
-                               "int32-returns"};
+                               "int32-returns",
+                               "generic-eh-int",
+                               "generic-eh-string"};
+    const bool generic_eh_mode = argc > 3 && std::strcmp(argv[3], "generic-eh") == 0;
     const bool integer_mode = argc > 3 && std::strcmp(argv[3], "integer-returns") == 0;
     const bool interface2_mode = argc > 3 && std::strcmp(argv[3], "interfaces2") == 0;
     const bool interface_mode = interface2_mode || (argc > 3 && std::strcmp(argv[3], "interfaces") == 0);
@@ -133,19 +138,35 @@ int main(int argc, char** argv)
                 "Generic interface benchmark implementation must be AOT");
     }
     const unsigned workload_count = argc > 3 && std::strcmp(argv[3], "returns") == 0 ? 10 : 8;
-    for (unsigned index = 0; index < (integer_mode ? 12 : interface_mode ? (interface2_mode ? 7 : 4) : workload_count); ++index)
+    for (unsigned index = 0; index < (generic_eh_mode ? 2 : integer_mode ? 12 : interface_mode ? (interface2_mode ? 7 : 4) : workload_count); ++index)
     {
         const unsigned interface_indices[] = {4, 10, 11, 12, 13, 14, 15};
-        const unsigned k = integer_mode ? (index < 10 ? index : index + 6) : interface_mode ? interface_indices[index] : index;
+        const unsigned k = generic_eh_mode ? 18 + index : integer_mode ? (index < 10 ? index : index + 6) : interface_mode ? interface_indices[index] : index;
         const auto* method = vm::Method::find_matched_method_in_class_by_name(klass, methods[k]);
         require(method != nullptr, "Benchmark method missing");
         const bool is_aot = method->invoker_type == metadata::RtInvokerType::Aot;
         require(is_aot || k == 7, "Non-EH benchmark must use generated AOT code");
+        const metadata::RtMethodInfo* eh_loop = nullptr;
+        bool eh_loop_aot = false;
+        if (generic_eh_mode)
+        {
+            const auto* definition = vm::Method::find_matched_method_in_class_by_name(klass, "GenericEhLoop");
+            const auto* argument = index == 0 ? vm::Class::get_corlib_types().cls_int32->by_val : vm::Class::get_corlib_types().cls_string->by_val;
+            auto inst = metadata::MetadataCache::get_pooled_generic_inst(&argument, 1);
+            require(definition && inst.is_ok(), "generic EH benchmark arguments");
+            auto closed = vm::GenericMethod::get_method(definition, nullptr, inst.unwrap());
+            require(closed.is_ok(), "generic EH benchmark method");
+            eh_loop = closed.unwrap();
+            eh_loop_aot = eh_loop->invoker_type == metadata::RtInvokerType::Aot;
+            require(eh_loop->interp_data == nullptr, "generic EH must not eagerly translate IR");
+        }
         uint32_t seed = 19;
         int warm_n = n / 8 + 1;
         const void* warm_args[] = {&warm_n, &seed};
         auto warm = vm::Runtime::invoke_with_run_cctor(method, nullptr, warm_args);
         require(warm.is_ok(), "Warmup failed");
+        if (eh_loop_aot)
+            require(eh_loop->interp_data == nullptr, "normal generic EH warmup created IR");
         if (k == 7 && is_aot)
             require(method->interp_data != nullptr, "Exception benchmark must hand off to interpreter");
         const void* args[] = {&n, &seed};
@@ -153,13 +174,16 @@ int main(int argc, char** argv)
         auto result = vm::Runtime::invoke_with_run_cctor(method, nullptr, args);
         const auto end = std::chrono::steady_clock::now();
         require(result.is_ok() && result.unwrap(), "Benchmark invocation failed");
+        if (eh_loop_aot)
+            require(eh_loop->interp_data == nullptr, "normal generic EH loop created IR");
         const uint32_t checksum = *reinterpret_cast<const uint32_t*>(result.unwrap() + 1);
         const double ns = std::chrono::duration<double, std::nano>(end - start).count() / n;
         std::printf("{\"workload\":\"%s\",\"execution\":\"%s\",\"iterations\":%d,\"checksum\":\"%u\",\"ns_per_op\":%.6f}\n", workloads[k],
-                    k == 6 && !generic_is_aot ? "aot+interpreter"
-                    : k == 7 && is_aot        ? "aot-normal/interpreter-eh"
-                    : is_aot                  ? "aot"
-                                              : "interpreter",
+                    generic_eh_mode             ? (eh_loop_aot ? "aot-normal" : "aot+interpreter")
+                    : k == 6 && !generic_is_aot ? "aot+interpreter"
+                    : k == 7 && is_aot          ? "aot-normal/interpreter-eh"
+                    : is_aot                    ? "aot"
+                                                : "interpreter",
                     n, checksum, ns);
     }
     return 0;

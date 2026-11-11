@@ -110,6 +110,12 @@ def main():
         if not opts.interface_call_cache:
             assert not any(methods.values()), 'cache flag must be opt-in'
         assert bool(report['instances']) == (variant == 'default')
+        assert bool(report['generic_normal_path_methods']) == (variant == 'default')
+        if variant == 'default':
+            for reason in ['eh-snapshot-type', 'eh-value-this', 'eh-filter-or-fault', 'eh-handler-inside-finally', 'eh-address-or-native-control']:
+                assert any(row['Reason'] == reason for row in report['fallbacks']), reason
+            generic_cpp = '\n'.join(cpp.read_text() for cpp in generated.glob('generic_methods_part*.cpp'))
+            assert 'resume_exception(__aot_method,' in generic_cpp
         assert not list(generated.glob('Common.module_registration.*')), 'generic definition must not require module registration'
         if variant == 'default':
             assert any('Common,' in x['key'] for x in report['instances'])

@@ -43,6 +43,7 @@
   <ItemGroup>
     <Compile Include="AotMethodAttribute.cs" />
     <Compile Include="GenericAotLibrary.cs" />
+    <Compile Include="GenericEhLibrary.cs" />
     <Compile Include="CoversIcallAttribute.cs" />
     <Compile Include="Assert.cs" />
     <Compile Include="TestCaseBase.cs" />

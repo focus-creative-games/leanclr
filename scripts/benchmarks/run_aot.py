@@ -107,7 +107,7 @@ def build(opts, output, managed_input=None):
     invoke(['dotnet', 'build', ROOT / 'src/leanaot/LeanAOT/LeanAOT.csproj', '-c', 'Release'], output / 'tool-build.log')
     generator = ['dotnet', ROOT / 'out/dotnet/LeanAOT/Release/net8.0/LeanAOT.dll', '-d', stage,
                  '-d', ROOT / 'src/libraries/mono-4.5', '-a', 'AotBaseline', '-o', output / 'generated',
-                 '--leanaot-aot-rule-file', ROOT / 'src/benchmarks/aot-baseline/aot.xml',
+                 '--leanaot-aot-rule-file', getattr(opts, 'aot_rule_file', ROOT / 'src/benchmarks/aot-baseline/aot.xml'),
                  '--leanaot-max-generic-instances', str(opts.max_generic_instances)]
     if opts.lightweight_returns:
         generator += ['--leanaot-lightweight-returns']

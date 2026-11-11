@@ -1,0 +1,1792 @@
+{
+  "schema": 1,
+  "parent_commit": "6f324934424a7d0fd88abd0dcd445d55338ac30c",
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "Intel64 Family 6 Model 183 Stepping 1, GenuineIntel",
+  "node_version": "v22.12.0",
+  "iterations": 5000000,
+  "samples": [
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 17.96378,
+      "engine": "native-interpreted",
+      "sample": 0,
+      "process_wall_seconds": 0.29637369999545626
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.1147,
+      "engine": "native-interpreted",
+      "sample": 0,
+      "process_wall_seconds": 0.29637369999545626
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 1.28896,
+      "engine": "native-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.07996309999725781
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 1.28034,
+      "engine": "native-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.07996309999725781
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 37.40966,
+      "engine": "wasm-interpreted",
+      "sample": 0,
+      "process_wall_seconds": 0.4268985000089742
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 19.0683,
+      "engine": "wasm-interpreted",
+      "sample": 0,
+      "process_wall_seconds": 0.4268985000089742
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 0.83216,
+      "engine": "wasm-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.14705010000034235
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 0.80008,
+      "engine": "wasm-aot",
+      "sample": 0,
+      "process_wall_seconds": 0.14705010000034235
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 18.12948,
+      "engine": "native-interpreted",
+      "sample": 1,
+      "process_wall_seconds": 0.23297340000863187
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.34886,
+      "engine": "native-interpreted",
+      "sample": 1,
+      "process_wall_seconds": 0.23297340000863187
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 1.27936,
+      "engine": "native-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.03982979999273084
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 1.33518,
+      "engine": "native-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.03982979999273084
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 0.81822,
+      "engine": "wasm-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.14447289999225177
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 0.82582,
+      "engine": "wasm-aot",
+      "sample": 1,
+      "process_wall_seconds": 0.14447289999225177
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 37.76692,
+      "engine": "wasm-interpreted",
+      "sample": 1,
+      "process_wall_seconds": 0.4275474000023678
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 19.12558,
+      "engine": "wasm-interpreted",
+      "sample": 1,
+      "process_wall_seconds": 0.4275474000023678
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 37.37272,
+      "engine": "wasm-interpreted",
+      "sample": 2,
+      "process_wall_seconds": 0.4221237000019755
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 19.08626,
+      "engine": "wasm-interpreted",
+      "sample": 2,
+      "process_wall_seconds": 0.4221237000019755
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 1.28138,
+      "engine": "native-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.04000729997642338
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 1.28938,
+      "engine": "native-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.04000729997642338
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 0.80192,
+      "engine": "wasm-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.14591170000494458
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 0.82044,
+      "engine": "wasm-aot",
+      "sample": 2,
+      "process_wall_seconds": 0.14591170000494458
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 18.10886,
+      "engine": "native-interpreted",
+      "sample": 2,
+      "process_wall_seconds": 0.23019669999484904
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.29182,
+      "engine": "native-interpreted",
+      "sample": 2,
+      "process_wall_seconds": 0.23019669999484904
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 0.88764,
+      "engine": "wasm-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.15787160000763834
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 0.94602,
+      "engine": "wasm-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.15787160000763834
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 1.3453,
+      "engine": "native-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.040793899999698624
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 1.35874,
+      "engine": "native-aot",
+      "sample": 3,
+      "process_wall_seconds": 0.040793899999698624
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 38.11784,
+      "engine": "wasm-interpreted",
+      "sample": 3,
+      "process_wall_seconds": 0.42727450001984835
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.95796,
+      "engine": "wasm-interpreted",
+      "sample": 3,
+      "process_wall_seconds": 0.42727450001984835
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 18.0451,
+      "engine": "native-interpreted",
+      "sample": 3,
+      "process_wall_seconds": 0.23135289998026565
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.46642,
+      "engine": "native-interpreted",
+      "sample": 3,
+      "process_wall_seconds": 0.23135289998026565
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 0.94742,
+      "engine": "wasm-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.14655259999562986
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 0.82564,
+      "engine": "wasm-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.14655259999562986
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 37.87842,
+      "engine": "wasm-interpreted",
+      "sample": 4,
+      "process_wall_seconds": 0.4214677000127267
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.89974,
+      "engine": "wasm-interpreted",
+      "sample": 4,
+      "process_wall_seconds": 0.4214677000127267
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 17.87224,
+      "engine": "native-interpreted",
+      "sample": 4,
+      "process_wall_seconds": 0.22859210000024177
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.1609,
+      "engine": "native-interpreted",
+      "sample": 4,
+      "process_wall_seconds": 0.22859210000024177
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 1.28872,
+      "engine": "native-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.040249899990158156
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 1.32938,
+      "engine": "native-aot",
+      "sample": 4,
+      "process_wall_seconds": 0.040249899990158156
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 0.89834,
+      "engine": "wasm-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.16378030000487342
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 0.82664,
+      "engine": "wasm-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.16378030000487342
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 38.5417,
+      "engine": "wasm-interpreted",
+      "sample": 5,
+      "process_wall_seconds": 0.4349361000058707
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.94506,
+      "engine": "wasm-interpreted",
+      "sample": 5,
+      "process_wall_seconds": 0.4349361000058707
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 18.09438,
+      "engine": "native-interpreted",
+      "sample": 5,
+      "process_wall_seconds": 0.23311470000771806
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.89848,
+      "engine": "native-interpreted",
+      "sample": 5,
+      "process_wall_seconds": 0.23311470000771806
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 1.30002,
+      "engine": "native-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.04125779998139478
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 1.30452,
+      "engine": "native-aot",
+      "sample": 5,
+      "process_wall_seconds": 0.04125779998139478
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 0.84244,
+      "engine": "wasm-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.14631049998570234
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 0.83402,
+      "engine": "wasm-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.14631049998570234
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 1.30426,
+      "engine": "native-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.04029040000750683
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot-normal",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 1.30192,
+      "engine": "native-aot",
+      "sample": 6,
+      "process_wall_seconds": 0.04029040000750683
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 18.01648,
+      "engine": "native-interpreted",
+      "sample": 6,
+      "process_wall_seconds": 0.2292357999831438
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 18.1014,
+      "engine": "native-interpreted",
+      "sample": 6,
+      "process_wall_seconds": 0.2292357999831438
+    },
+    {
+      "workload": "generic-eh-int",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "2876235155",
+      "ns_per_op": 37.71766,
+      "engine": "wasm-interpreted",
+      "sample": 6,
+      "process_wall_seconds": 0.4239338999905158
+    },
+    {
+      "workload": "generic-eh-string",
+      "execution": "aot+interpreter",
+      "iterations": 5000000,
+      "checksum": "4139777171",
+      "ns_per_op": 19.25524,
+      "engine": "wasm-interpreted",
+      "sample": 6,
+      "process_wall_seconds": 0.4239338999905158
+    }
+  ],
+  "summary": [
+    {
+      "engine": "native-interpreted",
+      "workload": "generic-eh-int",
+      "median_ns": 18.0451,
+      "min_ns": 17.87224,
+      "max_ns": 18.12948
+    },
+    {
+      "engine": "wasm-interpreted",
+      "workload": "generic-eh-int",
+      "median_ns": 37.76692,
+      "min_ns": 37.37272,
+      "max_ns": 38.5417
+    },
+    {
+      "engine": "native-aot",
+      "workload": "generic-eh-int",
+      "median_ns": 1.28896,
+      "min_ns": 1.27936,
+      "max_ns": 1.3453
+    },
+    {
+      "engine": "wasm-aot",
+      "workload": "generic-eh-int",
+      "median_ns": 0.84244,
+      "min_ns": 0.80192,
+      "max_ns": 0.94742
+    },
+    {
+      "engine": "native-interpreted",
+      "workload": "generic-eh-string",
+      "median_ns": 18.29182,
+      "min_ns": 18.1014,
+      "max_ns": 18.89848
+    },
+    {
+      "engine": "wasm-interpreted",
+      "workload": "generic-eh-string",
+      "median_ns": 19.0683,
+      "min_ns": 18.89974,
+      "max_ns": 19.25524
+    },
+    {
+      "engine": "native-aot",
+      "workload": "generic-eh-string",
+      "median_ns": 1.30452,
+      "min_ns": 1.28034,
+      "max_ns": 1.35874
+    },
+    {
+      "engine": "wasm-aot",
+      "workload": "generic-eh-string",
+      "median_ns": 0.82582,
+      "min_ns": 0.80008,
+      "max_ns": 0.94602
+    }
+  ],
+  "reports": {
+    "interpreted": {
+      "schema": 1,
+      "max_instances": 0,
+      "max_depth": 32,
+      "return_protocol": "result",
+      "packed_int32_returns": false,
+      "return_protocol_flags": 0,
+      "interface_call_cache": false,
+      "interface_call_cache_entries": 0,
+      "generic_registry": "global-sorted-fnv1a64",
+      "instances": [],
+      "fallbacks": [
+        {
+          "Caller": "System.UInt32 Benchmarks::GenericEhInt(System.Int32,System.UInt32)",
+          "Token": 721420289,
+          "Target": "System.UInt32 Benchmarks::GenericEhLoop<System.Int32>(System.Int32,System.UInt32,System.Int32)",
+          "Reason": "instance-budget"
+        },
+        {
+          "Caller": "System.UInt32 Benchmarks::GenericEhString(System.Int32,System.UInt32)",
+          "Token": 721420290,
+          "Target": "System.UInt32 Benchmarks::GenericEhLoop<System.String>(System.Int32,System.UInt32,System.Int32)",
+          "Reason": "instance-budget"
+        }
+      ],
+      "method_fallbacks": [],
+      "normal_path_methods": [],
+      "generic_normal_path_methods": []
+    },
+    "aot": {
+      "schema": 1,
+      "max_instances": 2048,
+      "max_depth": 32,
+      "return_protocol": "result",
+      "packed_int32_returns": false,
+      "return_protocol_flags": 0,
+      "interface_call_cache": false,
+      "interface_call_cache_entries": 0,
+      "generic_registry": "global-sorted-fnv1a64",
+      "instances": [
+        {
+          "method": "System.UInt32 Benchmarks::GenericEhLoop<System.Int32>(System.Int32,System.UInt32,System.Int32)",
+          "key": "66:AotBaseline, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null06000001::88:8:75:mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e0890200012A",
+          "depth": 1
+        },
+        {
+          "method": "System.UInt32 Benchmarks::GenericEhLoop<System.String>(System.Int32,System.UInt32,System.Int32)",
+          "key": "66:AotBaseline, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null06000001::89:14:75:mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e08902000168",
+          "depth": 1
+        }
+      ],
+      "fallbacks": [],
+      "method_fallbacks": [],
+      "normal_path_methods": [],
+      "generic_normal_path_methods": [
+        {
+          "method": "System.UInt32 Benchmarks::GenericEhLoop<System.Int32>(System.Int32,System.UInt32,System.Int32)",
+          "key": "66:AotBaseline, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null06000001::88:8:75:mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e0890200012A"
+        },
+        {
+          "method": "System.UInt32 Benchmarks::GenericEhLoop<System.String>(System.Int32,System.UInt32,System.Int32)",
+          "key": "66:AotBaseline, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null06000001::89:14:75:mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e08902000168"
+        }
+      ]
+    }
+  },
+  "artifacts": {
+    "native-interpreted": {
+      "path": "out/performance/generic-eh/interpreted/native/Release/aot-baseline.exe",
+      "sha256": "b3ae60e337b039e4ff4fa1318fd55262493f0b1b466f35d624b4a9a78c99ea17",
+      "bytes": 869888,
+      "gzip_bytes": 330059
+    },
+    "wasm-interpreted": {
+      "path": "out/performance/generic-eh/interpreted/wasm/aot-baseline.wasm",
+      "sha256": "090eac0e9269ae2f863b0878647f8f06bb050622a2eef1c7501f36f2305e47b8",
+      "bytes": 824450,
+      "gzip_bytes": 264424,
+      "code_section_bytes": 659692
+    },
+    "native-aot": {
+      "path": "out/performance/generic-eh/aot/native/Release/aot-baseline.exe",
+      "sha256": "e43c718fc3918864cb8e038d3f62cc63dc3d737312c2f2c2ef611c9a40704b4c",
+      "bytes": 871936,
+      "gzip_bytes": 331128
+    },
+    "wasm-aot": {
+      "path": "out/performance/generic-eh/aot/wasm/aot-baseline.wasm",
+      "sha256": "0a6123ca89f66070de4643da3e5975759e21cb52fda1c663ab765469998c9e15",
+      "bytes": 826019,
+      "gzip_bytes": 263628,
+      "code_section_bytes": 661103
+    }
+  },
+  "managed_inputs": {
+    "interpreted": "160e1fde844d0c53c5b10451e5375b611dbb07574baa0dbcf245998e660fa23c",
+    "aot": "160e1fde844d0c53c5b10451e5375b611dbb07574baa0dbcf245998e660fa23c"
+  },
+  "source_hashes": {
+    "src/leanaot/LeanAOT.ToCpp/MethodWriterBase.InterfaceCache.cs": "4f9f4588a0cfc2557b2c756421e1782b8b6b26bc8098322d46080da3e7c47fc2"
+  },
+  "build_manifests": {
+    "interpreted": {
+      "commands": [
+        [
+          "C:\\WINDOWS\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe",
+          "/nologo",
+          "/noconfig",
+          "/optimize+",
+          "/nostdlib+",
+          "/target:exe",
+          "/out:D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\interpreted\\managed\\AotBaseline.dll",
+          "/r:D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5\\mscorlib.dll",
+          "/r:D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5\\System.dll",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\Benchmarks.cs"
+        ],
+        [
+          "dotnet",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\interpreted\\managed",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5",
+          "-a",
+          "AotBaseline",
+          "-o",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\interpreted\\generated",
+          "--leanaot-aot-rule-file",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\generic-eh.xml",
+          "--leanaot-max-generic-instances",
+          "0"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\interpreted\\native",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\interpreted\\generated",
+          "-A",
+          "x64"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\interpreted\\native",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\interpreted\\wasm",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\interpreted\\generated",
+          "-G",
+          "Ninja",
+          "-DLEANCLR_HOST=PORTABLE",
+          "-DCMAKE_TOOLCHAIN_FILE=D:\\workspace\\wasmclr\\emsdk\\upstream\\emscripten\\cmake\\Modules\\Platform\\Emscripten.cmake"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\interpreted\\wasm",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ]
+      ],
+      "standalone_thread_hook": null
+    },
+    "aot": {
+      "commands": [
+        [
+          "dotnet",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\aot\\managed",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5",
+          "-a",
+          "AotBaseline",
+          "-o",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\aot\\generated",
+          "--leanaot-aot-rule-file",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\generic-eh.xml",
+          "--leanaot-max-generic-instances",
+          "2048"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\aot\\native",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\aot\\generated",
+          "-A",
+          "x64"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\aot\\native",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\aot\\wasm",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\aot\\generated",
+          "-G",
+          "Ninja",
+          "-DLEANCLR_HOST=PORTABLE",
+          "-DCMAKE_TOOLCHAIN_FILE=D:\\workspace\\wasmclr\\emsdk\\upstream\\emscripten\\cmake\\Modules\\Platform\\Emscripten.cmake"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\generic-eh\\aot\\wasm",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ]
+      ],
+      "standalone_thread_hook": null
+    }
+  },
+  "generated_hashes": {
+    "out/performance/generic-eh/interpreted/generated/AotBaseline.method_body_part1.cpp": "92d53d4c73a63dbe84698e9969e9c3d63cbed65810658b442aefd723cac96225",
+    "out/performance/generic-eh/interpreted/generated/AotBaseline.module_registration.cpp": "1291d9b6bcd9db69404fb38d66048cba693a4bac72c1759943d6899be48bb5de",
+    "out/performance/generic-eh/interpreted/generated/generic_registration.cpp": "c45cc903af63ee7d3e15013922987ad979955cd44042ee9f054ea40b4dbbfb0c",
+    "out/performance/generic-eh/interpreted/generated/method_direct_call_bridges_part0.cpp": "5628d4f5ae902ffaf7d86e4ed6b9bba01424bbcd27d423ad9bb6e1495fd61447",
+    "out/performance/generic-eh/interpreted/generated/method_invokers_part0.cpp": "66abce8d05710868860ac65e6375b338f1f485a70207a6f89e1cbc940fe45c09",
+    "out/performance/generic-eh/interpreted/generated/modules_registration.cpp": "47d43b30b44087c964345fb334bb18880e750b2735bc16cccfda301180deb7c8",
+    "out/performance/generic-eh/aot/generated/AotBaseline.method_body_part1.cpp": "3b7adc175c6984a2578b0adad912fa24465c56dbce8758407d49e981ddbba0bb",
+    "out/performance/generic-eh/aot/generated/AotBaseline.module_registration.cpp": "1291d9b6bcd9db69404fb38d66048cba693a4bac72c1759943d6899be48bb5de",
+    "out/performance/generic-eh/aot/generated/generic_methods_part0.cpp": "cfcfb65736baddf6b991f50d1e8e90383c60f998201ded829b2e1a0cdbc071af",
+    "out/performance/generic-eh/aot/generated/generic_registration.cpp": "7ba320938941f35392c3bef3f7a213d1c3a3bead8f46ed8bab2a870357acf78b",
+    "out/performance/generic-eh/aot/generated/method_direct_call_bridges_part0.cpp": "6d238dd2fb2c48cc706e7d7bee291292b7592dd4af393bb0520c42c58ff03655",
+    "out/performance/generic-eh/aot/generated/method_invokers_part0.cpp": "71ddcb2efc82e974cece8b9bf6dde51525b90009344a01b21b66b0ce267d53eb",
+    "out/performance/generic-eh/aot/generated/modules_registration.cpp": "1e85e97c5ed8d9d6217d5623ce261d894829d410e4c74038922150861d5abf76"
+  },
+  "toolchains": {
+    "native-interpreted": {
+      "CMAKE_CXX_COMPILER": "d:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx86/x64/cl.exe",
+      "CMAKE_CXX_COMPILER_ID": "MSVC",
+      "CMAKE_CXX_COMPILER_VERSION": "19.44.35229.0"
+    },
+    "wasm-interpreted": {
+      "CMAKE_CXX_COMPILER": "D:/workspace/wasmclr/emsdk/upstream/emscripten/em++.bat",
+      "CMAKE_CXX_COMPILER_ID": "Clang",
+      "CMAKE_CXX_COMPILER_VERSION": "22.0.0"
+    },
+    "native-aot": {
+      "CMAKE_CXX_COMPILER": "d:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx86/x64/cl.exe",
+      "CMAKE_CXX_COMPILER_ID": "MSVC",
+      "CMAKE_CXX_COMPILER_VERSION": "19.44.35229.0"
+    },
+    "wasm-aot": {
+      "CMAKE_CXX_COMPILER": "D:/workspace/wasmclr/emsdk/upstream/emscripten/em++.bat",
+      "CMAKE_CXX_COMPILER_ID": "Clang",
+      "CMAKE_CXX_COMPILER_VERSION": "22.0.0"
+    }
+  },
+  "notes": [
+    "Working-tree implementation based on parent_commit; byte-identical managed DLLs and matched compiler settings.",
+    "Selected wrappers remain AOT in both modes; only the two closed GenericEhLoop instances differ in execution backend.",
+    "No return-protocol or interface-cache trial enabled; noinline generic loop, success-only path, finally count checked each invocation.",
+    "The host checks that AOT normal paths never initialize interpreter IR.",
+    "Results compare native compilation/optimization with interpretation, not individual generic-call overhead or IL2CPP parity.",
+    "Seven interleaved process samples by default, after builds; no controlled frequency/background load.",
+    "Node/Wasm and Windows native; no browser/game or first-exception latency measurement. Sizes exclude external BCL/IL/resources."
+  ],
+  "validation": {
+    "matrix": [
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/all/generic-default-native.log",
+        "sha256": "d2596b95b98f317dc9e4896d7b9c642c39f4d572ca6b8f9483bc15e38e1981f9"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-0/all/generic-default-wasm.log",
+        "sha256": "31096bbe89ac938f7c795ffe0d391114eab8f216f239feac0dbd57edfd7ca4e8"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/all/generic-disabled-native.log",
+        "sha256": "ffa0ab15941bfe914eda5445163fd78a4d5dde06e4fd3fdcfa8293a5c6d74c49"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-0/all/generic-disabled-wasm.log",
+        "sha256": "775eef644d5f67793fa62f41033b0220e765c044530767cc9d86d77940cabe70"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/all/eh-default-native.log",
+        "sha256": "fd2d70c3eb7602b6a4c3c2675ea2bebef644daf97d8c814c38ce021f4a6c5ccd"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-0/all/eh-default-wasm.log",
+        "sha256": "c50d24118bbef102274b9ad821d8ccb520c74b13066974ba2032b67db7adfac5"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/all/eh-interpreted-loop-native.log",
+        "sha256": "e5881b55d4189df50001f6cea8868190f8743c76f07622613d3024c8b4e71e6a"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-0/all/eh-interpreted-loop-wasm.log",
+        "sha256": "e04ce83be7e890bd93a6747905757de49389d746616ec6bfeb7f06e81f727108"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/all/formal-default-native.log",
+        "sha256": "ba00a2cd81352e35ae5fee078b304fd68aab162b983c3ad090c109bb3c16c7c4"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-0/all/formal-default-wasm.log",
+        "sha256": "9a0d8e335a529bd4f9523ea4815eeb0ac0fccd2a9a9e0a075832c263df206c29"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/all/formal-disabled-native.log",
+        "sha256": "8bc30e09a5e733175051a90f05277249e0d933400b54460e439c6252140dc387"
+      },
+      {
+        "flags": 0,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-0/all/formal-disabled-wasm.log",
+        "sha256": "aaa748d21d79789cf981f6df59f112143f656babe033645ed042268ab3e1a0cb"
+      },
+      {
+        "flags": 0,
+        "configuration": "Debug",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Debug/generic-default-native.log",
+        "sha256": "61cdec0be3d1582f5c73fb05d016fb1a609cbce9a08bdf4e80844c925e76dd19"
+      },
+      {
+        "flags": 0,
+        "configuration": "Debug",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Debug/generic-disabled-native.log",
+        "sha256": "5fcb6867ed5d06a0ef8159fd1009944fc0af55eab9e8d69e675418a169ffed32"
+      },
+      {
+        "flags": 0,
+        "configuration": "Debug",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Debug/eh-default-native.log",
+        "sha256": "c9a721dadeab2735a6ff988eded8b04d4296df87d5b4d6f490175791708f531b"
+      },
+      {
+        "flags": 0,
+        "configuration": "Debug",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Debug/eh-interpreted-loop-native.log",
+        "sha256": "4e0e5dd2f1bfd33971ce2910363c27c3cb0eee85c804a2b1357ca5f83eff517b"
+      },
+      {
+        "flags": 0,
+        "configuration": "Debug",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Debug/formal-default-native.log",
+        "sha256": "5ab612b3223ffa13ae75143755018f0825471c2ce34b22807750ee75f1411772"
+      },
+      {
+        "flags": 0,
+        "configuration": "Debug",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Debug/formal-disabled-native.log",
+        "sha256": "441336e8fe6492f49b5a442e6ada69dffae73c8d7d2624b6bd7d3ee39d1b3f51"
+      },
+      {
+        "flags": 0,
+        "configuration": "Win32",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Win32/generic-default-native.log",
+        "sha256": "f37e85203fc46b21e044992c7dfa3c9e6eed326ace33331ef00f3092cec53e29"
+      },
+      {
+        "flags": 0,
+        "configuration": "Win32",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Win32/generic-disabled-native.log",
+        "sha256": "628ea4c039b78ccf3ecef1e0d2e718ebf99f01e98749f4daa8b05a3acc3c9303"
+      },
+      {
+        "flags": 0,
+        "configuration": "Win32",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Win32/eh-default-native.log",
+        "sha256": "3eae8246e83490e184ecc8d205c1fa4ac324c23b2146a690fdf804acfdf12d79"
+      },
+      {
+        "flags": 0,
+        "configuration": "Win32",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Win32/eh-interpreted-loop-native.log",
+        "sha256": "2cb69fee06aed5fa3a3f0abfd1b297cab11f6ff2cf6f7e96d3b7651dd1270c5e"
+      },
+      {
+        "flags": 0,
+        "configuration": "Win32",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Win32/formal-default-native.log",
+        "sha256": "e42258299f510b978877efbb04be84fa19aab76808ce37263197de2fdcddc0ea"
+      },
+      {
+        "flags": 0,
+        "configuration": "Win32",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-0/Win32/formal-disabled-native.log",
+        "sha256": "46cf1a34d1a06cbf813a87d4f1f2daf6a86cb98f7127d5e1e7ef988815efbd11"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/all/generic-default-native.log",
+        "sha256": "59fd2e66c0798c6b01be6df572a223fff466f63fde9d3990138c7376c5e60bb7"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-1/all/generic-default-wasm.log",
+        "sha256": "43d2160e9e9a6f779fa5c7b7d88b96fa55fceb2c83fb57e23a05934b81a8b111"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/all/generic-disabled-native.log",
+        "sha256": "040cb6c74c0cb734314c4bc54795b6e83b2f8bb37c2e4979c4fda5b95fb1af22"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-1/all/generic-disabled-wasm.log",
+        "sha256": "597d6f1585fd5168fd7ad5685acbe74e41cd73034ef76737347b4977a064b0db"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/all/eh-default-native.log",
+        "sha256": "d550c6d6787be8bab59a72757959949f1028c2cb92af034316e1f0f5309860cd"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-1/all/eh-default-wasm.log",
+        "sha256": "c590e09cf948fadf3cc83b8df6d046f3fb7f44b91886712240f20ea594101e46"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/all/eh-interpreted-loop-native.log",
+        "sha256": "f95d2139699864dfd2fcf94431be27c512ce42aa3af07c47086c7e16e4879fdd"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-1/all/eh-interpreted-loop-wasm.log",
+        "sha256": "27b8a00a38f07a554efbad647306351ee1463fb8236443adb7cd3b4d4a6b10b7"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/all/formal-default-native.log",
+        "sha256": "b2819dc54b3d7fa54a3b43fb31feaa90d250681da9b0c501f509155a7017dc14"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-1/all/formal-default-wasm.log",
+        "sha256": "bcc336af64127b11941ff57d77c863410b12746eaae32392336272dea48a53dd"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/all/formal-disabled-native.log",
+        "sha256": "f2eb8545c047b393793147eae9564854752e61395d5c4dde5b6d8bb1e60cf498"
+      },
+      {
+        "flags": 1,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-1/all/formal-disabled-wasm.log",
+        "sha256": "c3dbd44234be76757d841c083b0121f2b97e75f5ff2248cda45b9726f1ae1d75"
+      },
+      {
+        "flags": 1,
+        "configuration": "Debug",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Debug/generic-default-native.log",
+        "sha256": "17d75da5cc9a5dce489566a14e63a4af4b8e308fdd26f6ff4459c5dae1fcfeac"
+      },
+      {
+        "flags": 1,
+        "configuration": "Debug",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Debug/generic-disabled-native.log",
+        "sha256": "363d816f75734e382a1eef12cd8c4c56ef7e2b7ae43dc48674d439757cf64131"
+      },
+      {
+        "flags": 1,
+        "configuration": "Debug",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Debug/eh-default-native.log",
+        "sha256": "ab97a9b6853938b948408374cf9d24b02b9a4fdc9f5ab32a16585a83632e6540"
+      },
+      {
+        "flags": 1,
+        "configuration": "Debug",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Debug/eh-interpreted-loop-native.log",
+        "sha256": "a9360cdb407ed053a01f8ecc064797934370d8bf9c134e936eb736de5407ada7"
+      },
+      {
+        "flags": 1,
+        "configuration": "Debug",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Debug/formal-default-native.log",
+        "sha256": "6f2c1643d2e74fbadd71e954f12f7641953bce42b6872940f6471413e0dd6b4d"
+      },
+      {
+        "flags": 1,
+        "configuration": "Debug",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Debug/formal-disabled-native.log",
+        "sha256": "cb6987d4892bb7cc14a38f4179dff783aafe9fe60a61025dedd93fa80ba3839c"
+      },
+      {
+        "flags": 1,
+        "configuration": "Win32",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Win32/generic-default-native.log",
+        "sha256": "d79910a1ddd0bf15eb0f9c01abbe869a97f79d87f0abe07832123b11a32ac694"
+      },
+      {
+        "flags": 1,
+        "configuration": "Win32",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Win32/generic-disabled-native.log",
+        "sha256": "d29776bbf6bd1e7ff27bd1adba229535588e7dfcb7f8c570abba1472e113c699"
+      },
+      {
+        "flags": 1,
+        "configuration": "Win32",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Win32/eh-default-native.log",
+        "sha256": "cee71de7b471bab9fdd0426d1dca13bfcaaa01c06dd4df7b3b503fac3e02079b"
+      },
+      {
+        "flags": 1,
+        "configuration": "Win32",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Win32/eh-interpreted-loop-native.log",
+        "sha256": "a925864fa4334f644de28b5d8eea14032fca3581a26bfa2bd6268732a21797ae"
+      },
+      {
+        "flags": 1,
+        "configuration": "Win32",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Win32/formal-default-native.log",
+        "sha256": "2b9d3fd6dfdc102b23f4643449abd91f84ef92ff52d6759837112f6e31d75694"
+      },
+      {
+        "flags": 1,
+        "configuration": "Win32",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-1/Win32/formal-disabled-native.log",
+        "sha256": "0bf990c9fde1291504675668568e0ad9236affec8824dda78263adfcfac61f95"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/all/generic-default-native.log",
+        "sha256": "cee88b0c8a151ff710d41a7b5c14569ec26ed8205dc37191789fd489d7ca065e"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-2/all/generic-default-wasm.log",
+        "sha256": "ef5f841dab7384c71d1eb0ab4ea35665b568282c1197064d86076bc39d7051a8"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/all/generic-disabled-native.log",
+        "sha256": "8e2fe14c949d7c2d353832afe69c091485ea1c6b1fae791168e1cca01eb7b126"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-2/all/generic-disabled-wasm.log",
+        "sha256": "3c2a340e9769f6ad2746bb2747a5057f3306a736de475ec5de401d2033089541"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/all/eh-default-native.log",
+        "sha256": "bb5ba1ddf83629fe82b1ca9f826ce591736bd9efa6090d3967cb9fb6d2847c44"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-2/all/eh-default-wasm.log",
+        "sha256": "f0f99c63d188c399202683c0dd2ef0eeb62ce93019ee5df77ed34dde9a05ddc9"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/all/eh-interpreted-loop-native.log",
+        "sha256": "9612338b210f64d20481e970f784ceedc1ee44a5866612994dfeb551e4f909b4"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-2/all/eh-interpreted-loop-wasm.log",
+        "sha256": "2a299a0878d16b9fd778aae057b6a5ecabe133e157e71d5ac5b8f5a784fbf07d"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/all/formal-default-native.log",
+        "sha256": "eda749e912d6a06d66bd65c6a9c14b3cbb35c6ccc8582082d189e578c380df99"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-2/all/formal-default-wasm.log",
+        "sha256": "58475f90e1825a204f88c99cfe645040e6752c7ac5f80a0dc4f2f823ffd3fc79"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/all/formal-disabled-native.log",
+        "sha256": "2652a9b9b359538acc13d17f343d234940139d9b1e795b818160f46b2e8c7f43"
+      },
+      {
+        "flags": 2,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-2/all/formal-disabled-wasm.log",
+        "sha256": "97e59678cee5bd46280d417d2d3f116274b448a4bf773e69c5e4e44e2affb275"
+      },
+      {
+        "flags": 2,
+        "configuration": "Debug",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Debug/generic-default-native.log",
+        "sha256": "60050a78aa8c2935dd8e302ff30268496e68d9495d2033902c1c4a5db1dce708"
+      },
+      {
+        "flags": 2,
+        "configuration": "Debug",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Debug/generic-disabled-native.log",
+        "sha256": "187596f81a24ddd13b323446581cca7b4335a357143ace2f3e4575b5736ed8ca"
+      },
+      {
+        "flags": 2,
+        "configuration": "Debug",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Debug/eh-default-native.log",
+        "sha256": "bebf6c99d0bd1625edb71b068a6c2cc29487ec73e67d893ab0d16b53bcaf4ffb"
+      },
+      {
+        "flags": 2,
+        "configuration": "Debug",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Debug/eh-interpreted-loop-native.log",
+        "sha256": "52e9f381230585621e8a1a5b73c60195457c0a327412d07e7bdb68ed61c310ee"
+      },
+      {
+        "flags": 2,
+        "configuration": "Debug",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Debug/formal-default-native.log",
+        "sha256": "fa45497500221a5994d1370be36d87d35254069d6d2ea18d86efafbf8bdf9a93"
+      },
+      {
+        "flags": 2,
+        "configuration": "Debug",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Debug/formal-disabled-native.log",
+        "sha256": "8425ab4273ecac9a879cd803d42833799444ab103081107e48e58330aba2e87f"
+      },
+      {
+        "flags": 2,
+        "configuration": "Win32",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Win32/generic-default-native.log",
+        "sha256": "4b025405c6a488b6c4497351a4b43215041d4dcce248aff43121de87c7dd2f93"
+      },
+      {
+        "flags": 2,
+        "configuration": "Win32",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Win32/generic-disabled-native.log",
+        "sha256": "e00c2e84ad963d25b2d89c9e73a588faac05917447c5918321fa8f7577577779"
+      },
+      {
+        "flags": 2,
+        "configuration": "Win32",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Win32/eh-default-native.log",
+        "sha256": "48a122705560644acd4ab5e734bfdc1a8f43b992c958a1b5a5579e6bbde9124d"
+      },
+      {
+        "flags": 2,
+        "configuration": "Win32",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Win32/eh-interpreted-loop-native.log",
+        "sha256": "efc9eb76857992cc797b3f154cdb6eb26bba620c0a651d6129cda02a2c71ed17"
+      },
+      {
+        "flags": 2,
+        "configuration": "Win32",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Win32/formal-default-native.log",
+        "sha256": "d470812116c49ba011431b00b124807af05128c49c0e4a249ddeb4c568f9aa8a"
+      },
+      {
+        "flags": 2,
+        "configuration": "Win32",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-2/Win32/formal-disabled-native.log",
+        "sha256": "15d96922baa64895d3b5c6a10ee94869c7a050463823e1ab264b8bf945a9f8e6"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/all/generic-default-native.log",
+        "sha256": "2b1f3b385a804e695cccd57dd4a3ee3d244eb4159189ef4a0559ad71b52bc79a"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-3/all/generic-default-wasm.log",
+        "sha256": "24f7ce776188b50fd4707a8e7f22be530e7146d6e58ef66f1ffa0c5b21087f05"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/all/generic-disabled-native.log",
+        "sha256": "2e06fb54d15e7b63781ae089f11011fe6fa619f269e52ccb646c5f0a3f3a29f7"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-3/all/generic-disabled-wasm.log",
+        "sha256": "a1b4208b49b18908c7a5d58fbe494051f4190bcff9e88e5b0cb1ebeab97656a1"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/all/eh-default-native.log",
+        "sha256": "d5925b8e66b05b54eb48f921ae59578eeee7487d05179ed8b393f7a6e6c50a84"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-3/all/eh-default-wasm.log",
+        "sha256": "e2af7a528befbae7db56445f25c89c5bda03f077eb01a6cf07f2df2778bd5994"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/all/eh-interpreted-loop-native.log",
+        "sha256": "4bd85ea05b84acd18781c7f77286c43664204e7737e0b4952c1db1614949b17a"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-3/all/eh-interpreted-loop-wasm.log",
+        "sha256": "f29c0f66ea205483b9d4d5b2d630342d9fbf03e4ba1c538d555ab10b85cb03e5"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/all/formal-default-native.log",
+        "sha256": "9e937db4a0e6c1f4d5bef82af48d5b4c84d85474df58213fc62c55a065d9d351"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "default",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-3/all/formal-default-wasm.log",
+        "sha256": "05a6078f0f20478db7c2ab36770291f94d2c9be6b94ea4ff3fa0d9d8e9c58e5a"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/all/formal-disabled-native.log",
+        "sha256": "c5d9bc1f3ac29c95fda406adde250b65356aa55ee48b540237ef977ae8a38161"
+      },
+      {
+        "flags": 3,
+        "configuration": "all",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "wasm",
+        "path": "out/generic-eh-validation/flags-3/all/formal-disabled-wasm.log",
+        "sha256": "b561a2f5f06f4b563432a013dae1ccd522c7437c7b77ff55341e75787ba37c95"
+      },
+      {
+        "flags": 3,
+        "configuration": "Debug",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Debug/generic-default-native.log",
+        "sha256": "f526b778d56d906828ac007013c5ecf4f67a1163734a274b5250828c4de28e08"
+      },
+      {
+        "flags": 3,
+        "configuration": "Debug",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Debug/generic-disabled-native.log",
+        "sha256": "ee118c401fa778512ba6ccf621509c79612d6ad97f4d6541665fe3704d37d9fc"
+      },
+      {
+        "flags": 3,
+        "configuration": "Debug",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Debug/eh-default-native.log",
+        "sha256": "28961d753ec0c79117ce645db6469e45e31d857914ee4fdd2dd3720bc1876d12"
+      },
+      {
+        "flags": 3,
+        "configuration": "Debug",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Debug/eh-interpreted-loop-native.log",
+        "sha256": "351eaf9cb1f1c7661dcee8ea9f4b1d9cf0504fca8fac69c843f6681b09e3b03b"
+      },
+      {
+        "flags": 3,
+        "configuration": "Debug",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Debug/formal-default-native.log",
+        "sha256": "540dfdd3f5154c0a541d3190838a04ce2cae196874eff1ecc98a5fe98586300a"
+      },
+      {
+        "flags": 3,
+        "configuration": "Debug",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Debug/formal-disabled-native.log",
+        "sha256": "6fec9b716e4c658a8b10dd0b4ae72ee31a64e8fb95ed96fdea2981dcce801523"
+      },
+      {
+        "flags": 3,
+        "configuration": "Win32",
+        "family": "generic",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Win32/generic-default-native.log",
+        "sha256": "a587a882930ede4aa4b01d414bce2102f03c057578b752cc85c24fa7734ea8c1"
+      },
+      {
+        "flags": 3,
+        "configuration": "Win32",
+        "family": "generic",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Win32/generic-disabled-native.log",
+        "sha256": "af2722c065270736f6433e40ab3e270210be65e754c4c1e3171351c0c5f1a390"
+      },
+      {
+        "flags": 3,
+        "configuration": "Win32",
+        "family": "eh",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Win32/eh-default-native.log",
+        "sha256": "fdec5915ca1258a5b1dac2afa32bcfed13d9450ab952f852f2c36d0f7a824807"
+      },
+      {
+        "flags": 3,
+        "configuration": "Win32",
+        "family": "eh",
+        "variant": "interpreted-loop",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Win32/eh-interpreted-loop-native.log",
+        "sha256": "61c4ce55595e2c285e4f3c879e177c425d2eb29b52e3b54c0f9f34404341b2cb"
+      },
+      {
+        "flags": 3,
+        "configuration": "Win32",
+        "family": "formal",
+        "variant": "default",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Win32/formal-default-native.log",
+        "sha256": "ae7c14db2fc9269f5526b9b66e2f1600a7557c05ba0c79b3e551a2c4b70fe752"
+      },
+      {
+        "flags": 3,
+        "configuration": "Win32",
+        "family": "formal",
+        "variant": "disabled",
+        "target": "native",
+        "path": "out/generic-eh-validation/flags-3/Win32/formal-disabled-native.log",
+        "sha256": "042f504fbf830652b2c427f02c59958fa9078b0ccf038cb54158710ebf9d9140"
+      }
+    ],
+    "runtime_ctest": {
+      "passed": 41,
+      "failed": 0
+    }
+  }
+}

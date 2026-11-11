@@ -75,7 +75,6 @@ namespace LeanAOT.GenerationPlan
                 if (_genericKeys.Contains(key) || rejected.Contains(key)) return;
                 string reason = null;
                 if (!def.HasBody || def.IsAbstract || def.IsRuntime || def.IsPinvokeImpl || def.IsInternalCall) reason = "unsupported-body";
-                else if (def.Body.HasExceptionHandlers) reason = "exception-handlers";
                 else if (def.Body.Instructions.Any(i => i.OpCode.Code == dnlib.DotNet.Emit.Code.Calli)) reason = "managed-calli";
                 else if (def.CallingConvention == CallingConvention.VarArg) reason = "vararg";
                 else if ((ctx.typeArgsStack?.Count ?? 0) != def.DeclaringType.GenericParameters.Count ||
@@ -90,6 +89,7 @@ namespace LeanAOT.GenerationPlan
                         !args.AotRulesEvaluator.ShouldIncludeByRules(def.Module.Assembly.Name, def) &&
                         !(args.PgoIncludeIndex?.Contains(def.Module.Assembly.Name, def) ?? false)) reason = "rule-excluded";
                 }
+                if (reason == null) reason = AotExceptionPolicy.FallbackReason(def, ctx);
                 if (reason == null && depth > args.MaxGenericDepth) reason = "depth-budget";
                 if (reason == null && _genericMethodPlans.Count >= args.MaxGenericInstances) reason = "instance-budget";
                 if (reason != null)

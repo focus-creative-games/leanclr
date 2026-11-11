@@ -41,7 +41,7 @@ namespace LeanAOT.ToCpp
             _tailWriter.AddLine($"leanclr::interp::RtStackObject __eh_snapshot[__eh_offset_{values.Count} ? __eh_offset_{values.Count} : 1] = {{}};");
             for (int i = 0; i < values.Count; ++i)
                 _tailWriter.AddLine($"leanclr::codegen::expand_argument_to_eval_stack({values[i].name}, __eh_snapshot + __eh_offset_{i});");
-            _tailWriter.AddLine($"auto __eh_result = leanclr::interp::Interpreter::resume_exception({CurMethodVar.GetFullReferenceVariableName()}, __eh_snapshot, __eh_offset_{values.Count}, ___eh_ip, ___ret_err, ___eh_explicit_throw);");
+            _tailWriter.AddLine($"auto __eh_result = leanclr::interp::Interpreter::resume_exception({CurrentMethodReference}, __eh_snapshot, __eh_offset_{values.Count}, ___eh_ip, ___ret_err, ___eh_explicit_throw);");
             _tailWriter.AddLine("if (__eh_result.is_err()) return __eh_result.unwrap_err();");
             if (_method.IsVoidReturn) _tailWriter.AddLine("return leanclr::core::Unit{};");
             else _tailWriter.AddLine($"return leanclr::codegen::get_eval_stack_value_as_type<{MethodGenerationUtil.GetAbiRelaxedTypeName(_method.RetType)}>(__eh_result.unwrap());");

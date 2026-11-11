@@ -91,6 +91,7 @@ public static class GenericFixtures
         if (CallReader(new VirtualOnly<int>()) != 71) return 24;
         if (IntegerBridge(new IntegerReader(), int.MinValue) != int.MinValue) return 25;
         if (UnsignedBridge(new UnsignedReader(), uint.MaxValue) != uint.MaxValue) return 26;
+        if (WithCatch<GenericPair<long>>(pair).Value != pair.Value) return 27;
         return 0;
     }
 }

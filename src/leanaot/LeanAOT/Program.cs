@@ -4,6 +4,7 @@ using LeanAOT.GenerationPlan;
 using LeanAOT.ToCpp;
 using NLog;
 using CommandLine;
+using dnlib.DotNet;
 using CommandLine.Text;
 
 namespace LeanAOT;
@@ -740,6 +741,8 @@ internal class Program
                 method_fallbacks = manifest.MethodFallbacks,
                 normal_path_methods = manifest.AssemblyPlans.Values.SelectMany(p => p.MethodPlans)
                     .Where(p => p.MethodDef.HasBody && p.MethodDef.Body.HasExceptionHandlers).Select(p => p.MethodDef.FullName),
+                generic_normal_path_methods = manifest.GenericMethodPlans.Where(p => p.Method.ResolveMethodDef().Body.HasExceptionHandlers)
+                    .Select(p => new { method = p.Method.FullName, key = p.Key }),
             }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
 
         Il2CppCompatibilityOutputs.EmitIfRequested(globalServices.Config, manifest, dllSearchPaths, aotAssemblyNames, metaService);

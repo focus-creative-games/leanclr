@@ -36,6 +36,33 @@ public static class Benchmarks
     static readonly ITransform[] PhaseTransformers = { new Transform(), new OtherTransform(), new ThirdTransform(), new FourthTransform() };
     static readonly GenericTransform GenericTransformer = new GenericTransform();
     static readonly Box PropertyBox = new Box();
+    public static uint GenericEhFinals;
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint GenericEhLoop<T>(int n, uint seed, int divisor)
+    {
+        uint tag = typeof(T) == typeof(int) ? 3u : 7u;
+        try
+        {
+            for (int i = 0; i < n; ++i) seed = unchecked(seed * 1664525u + (uint)(12345 / divisor) + tag);
+            return seed;
+        }
+        catch (DivideByZeroException) { return seed ^ 0xBADF00Du; }
+        finally { ++GenericEhFinals; }
+    }
+    public static uint GenericEhInt(int n, uint seed)
+    {
+        uint before = GenericEhFinals;
+        uint result = GenericEhLoop<int>(n, seed, 7);
+        if (GenericEhFinals != before + 1) throw new Exception("generic finally count");
+        return result;
+    }
+    public static uint GenericEhString(int n, uint seed)
+    {
+        uint before = GenericEhFinals;
+        uint result = GenericEhLoop<string>(n, seed, 7);
+        if (GenericEhFinals != before + 1) throw new Exception("generic finally count");
+        return result;
+    }
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static uint UInt32ReturnLeaf(uint x, int divisor) { return unchecked(x * 1664525u + (uint)(12345 / divisor)); }
     [MethodImpl(MethodImplOptions.NoInlining)]

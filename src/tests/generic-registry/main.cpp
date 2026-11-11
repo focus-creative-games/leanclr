@@ -1,5 +1,7 @@
 #include "../aot-returns/test_assert.h"
 #include "registry_checks.h"
+#include "interp/machine_state.h"
+#include "interp/interpreter.h"
 #include "codegen/interface_dispatch.h"
 #include "alloc/general_allocation.h"
 #include "metadata/aot_module.h"
@@ -20,6 +22,7 @@
 #include <fstream>
 #include <string>
 #include <type_traits>
+#include <vector>
 
 using namespace leanclr;
 extern metadata::RtAotModulesData g_aot_modules_data;
@@ -273,6 +276,109 @@ static void integer_cases()
     std::puts("Formal managed integer return tests passed: 7");
 }
 
+static void generic_eh_cases(bool expected)
+{
+    auto* functions = type("Common", "GenericAotLibrary.Eh");
+    check(functions->image->get_aot_module_data() == nullptr, "generic EH definition assembly stays outside ordinary roots");
+    const auto& corlib = vm::Class::get_corlib_types();
+    const auto* echo = inflate(functions, "Echo", corlib.cls_int32->by_val);
+    backend(echo, expected, "scalar generic EH backend");
+    if (expected)
+        check(echo->interp_data == nullptr, "generic EH must not eagerly translate interpreter IR");
+    int32_t value = INT32_MIN, divisor = 3;
+    const void* args[] = {&value, &divisor};
+    const auto top = interp::MachineState::get_global_machine_state().get_frame_stack_top();
+    for (unsigned step = 0; step < 3; ++step)
+    {
+        divisor = step == 0 ? 3 : 0;
+        auto result = vm::Runtime::invoke_with_run_cctor(echo, nullptr, args);
+        check(result.is_ok() && result.unwrap() && *reinterpret_cast<const int32_t*>(result.unwrap() + 1) == INT32_MIN, "generic EH scalar result");
+        check(interp::MachineState::get_global_machine_state().get_frame_stack_top() == top, "generic handoff leaked frames");
+        if (expected)
+            check((echo->interp_data != nullptr) == (step != 0), "IR must be created only at first exception");
+    }
+    auto* tests = type("AotTests", "AotTests.TC_GenericEh");
+    auto object = LEANCLR_NEWOBJ(tests, gc::GcAllocSite::make_internal(__FILE__, __LINE__, "generic EH tests"));
+    check(object.is_ok(), "generic EH test allocation");
+    const char* cases[] = {"Scalars",
+                           "References",
+                           "ConstructedReferences",
+                           "MutatedArguments",
+                           "TypedCatches",
+                           "NestedFinally",
+                           "FinallyReplacesReturn",
+                           "Rethrow",
+                           "ClassAndMethodContexts",
+                           "ConstructorHandoff",
+                           "VoidAndArrays",
+                           "PostCatchContinuation",
+                           "ConservativeFallbacks"};
+    for (const char* name : cases)
+    {
+        const auto* method = vm::Method::find_matched_method_in_class_by_name(tests, name);
+        check(method && method->invoker_type == metadata::RtInvokerType::Aot, "generic EH test wrapper backend");
+        auto result = vm::Runtime::invoke_with_run_cctor(method, object.unwrap(), nullptr);
+        if (result.is_err())
+        {
+            std::fprintf(stderr, "Generic EH case failed: %s, error %u\n", name, static_cast<unsigned>(result.unwrap_err()));
+            auto* exception = vm::Exception::get_current_exception();
+            if (exception)
+            {
+                utils::Utf8StringBuilder message;
+                vm::Exception::format_exception(exception, message);
+                std::fprintf(stderr, "%.*s\n", static_cast<int>(message.length()), message.get_const_chars());
+            }
+            std::exit(1);
+        }
+        check(interp::MachineState::get_global_machine_state().get_frame_stack_top() == top, "generic EH case leaked frames");
+        std::printf("Passed: AotTests.TC_GenericEh.%s\n", name);
+    }
+    for (const char* name : {"Mutate", "TypedCatch", "FinallyThrows", "Void", "Continuation"})
+    {
+        const auto* method = inflate(functions, name, corlib.cls_int32->by_val);
+        backend(method, expected, "safe generic EH specialization backend");
+    }
+    auto* foreign_value = type("GenericAotArguments", "GenericCollision.Payload");
+    backend(inflate(functions, "Echo", foreign_value->by_val), false, "value snapshot must stay interpreted");
+    for (const char* name : {"ByRef", "Address", "Filter", "ComplexFinally"})
+        backend(inflate(functions, name, corlib.cls_int32->by_val), false, "unsafe generic EH shape must stay interpreted");
+    auto* holder_definition = type("Common", "GenericAotLibrary.EhHolder`1");
+    const auto* reference_type = type("GenericAotArguments", "GenericAotArguments.ReferenceValue")->by_val;
+    auto class_args = metadata::MetadataCache::get_pooled_generic_inst(&reference_type, 1);
+    check(class_args.is_ok(), "EH holder class arguments");
+    auto holder = vm::GenericClass::get_class(vm::Class::get_type_def_gid(holder_definition), class_args.unwrap());
+    check(holder.is_ok() && vm::Class::initialize_all(holder.unwrap()).is_ok(), "EH holder class metadata");
+    for (const char* name : {".ctor", ".cctor"})
+    {
+        const auto* method = vm::Method::find_matched_method_in_class_by_name(holder.unwrap(), name);
+        backend(method, expected, "generic EH constructor backend");
+        if (expected)
+            check(method->interp_data == nullptr, "normal generic constructors must not translate IR");
+    }
+    const auto* combine_definition = vm::Method::find_matched_method_in_class_by_name(holder_definition, "Combine");
+    for (const auto* argument : {corlib.cls_uint32->by_val, corlib.cls_double->by_val})
+    {
+        auto method_args = metadata::MetadataCache::get_pooled_generic_inst(&argument, 1);
+        check(method_args.is_ok(), "EH holder method arguments");
+        auto method = vm::GenericMethod::get_method(combine_definition, class_args.unwrap(), method_args.unwrap());
+        check(method.is_ok(), "class and method EH context");
+        backend(method.unwrap(), expected, "class/method generic EH backend");
+        if (expected)
+            check((method.unwrap()->interp_data != nullptr) == (argument == corlib.cls_uint32->by_val), "independent specialization handoff state");
+    }
+    if (expected)
+    {
+        const size_t slots = echo->interp_data->total_arg_and_local_stack_object_size;
+        std::vector<interp::RtStackObject> invalid(slots + 1);
+        auto wrong_size = interp::Interpreter::resume_exception(echo, invalid.data(), invalid.size(), 0, RtErr::DivideByZero);
+        check(wrong_size.is_err() && wrong_size.unwrap_err() == RtErr::InvalidOperation, "closed EH snapshot size must be checked");
+        auto wrong_ip = interp::Interpreter::resume_exception(echo, invalid.data(), slots, UINT32_MAX, RtErr::DivideByZero);
+        check(wrong_ip.is_err() && wrong_ip.unwrap_err() == RtErr::InvalidOperation, "closed EH resume IP must be checked");
+        check(interp::MachineState::get_global_machine_state().get_frame_stack_top() == top, "invalid generic resume leaked frames");
+    }
+    std::puts("Formal managed generic EH tests passed: 13");
+}
+
 int main(int argc, char** argv)
 {
     configure_test_assertions();
@@ -372,7 +478,7 @@ int main(int argc, char** argv)
     auto inherited_type = vm::GenericClass::get_class(vm::Class::get_type_def_gid(inherited.unwrap()), inherited_args.unwrap());
     check(inherited_type.is_ok() && vm::Class::initialize_all(inherited_type.unwrap()).is_ok(), "closed derived generic class");
     backend(vm::Method::find_matched_method_in_class_by_name(inherited_type.unwrap(), "ReadValue"), expected, "generic class virtual override binding");
-    backend(inflate(functions, "WithCatch", corlib.cls_int32->by_val), false, "generic EH fallback");
+    backend(inflate(functions, "WithCatch", corlib.cls_int32->by_val), expected, "safe generic EH binding");
     backend(inflate(functions, "Excluded", corlib.cls_int32->by_val), false, "attribute exclusion");
     auto derived = vm::Class::find_nested_class_by_name(tests, "Derived", false);
     check(derived.is_ok() && vm::Class::initialize_all(derived.unwrap()).is_ok(), "derived generic method class");
@@ -394,4 +500,5 @@ int main(int argc, char** argv)
     std::puts("Formal managed AOT generic tests passed: 24");
     interface_cases(expected);
     integer_cases();
+    generic_eh_cases(expected);
 }

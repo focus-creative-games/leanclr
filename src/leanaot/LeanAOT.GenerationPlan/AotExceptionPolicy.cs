@@ -1,5 +1,6 @@
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
+using LeanAOT.Core;
 
 namespace LeanAOT.GenerationPlan
 {
@@ -7,6 +8,8 @@ namespace LeanAOT.GenerationPlan
     {
         private static bool SnapshotType(TypeSig type)
         {
+            while (type.ElementType == ElementType.CModOpt || type.ElementType == ElementType.CModReqd) type = type.Next;
+            if (type.ContainsGenericParameter) return false;
             switch (type.ElementType)
             {
                 case ElementType.Void: case ElementType.Boolean: case ElementType.Char:
@@ -14,19 +17,23 @@ namespace LeanAOT.GenerationPlan
                 case ElementType.I4: case ElementType.U4: case ElementType.I8: case ElementType.U8:
                 case ElementType.R4: case ElementType.R8: case ElementType.String: case ElementType.Object:
                 case ElementType.Class: case ElementType.SZArray: case ElementType.Array: return true;
+                case ElementType.GenericInst: return !((GenericInstSig)type).GenericType.IsValueType;
                 default: return false;
             }
         }
 
-        public static string FallbackReason(MethodDef method)
+        public static string FallbackReason(MethodDef method, GenericArgumentContext context = null)
         {
             if (!method.HasBody || !method.Body.HasExceptionHandlers) return null;
-            if (method.HasGenericParameters || method.DeclaringType.HasGenericParameters) return "eh-generic-context";
+            if ((method.HasGenericParameters || method.DeclaringType.HasGenericParameters) &&
+                (context == null || (context.typeArgsStack?.Count ?? 0) != method.DeclaringType.GenericParameters.Count ||
+                 (context.methodArgsStack?.Count ?? 0) != method.GenericParameters.Count)) return "eh-generic-context";
             if (method.DeclaringType.IsValueType && !method.IsStatic) return "eh-value-this";
             if (method.Body.Variables.Count > 0 && !method.Body.InitLocals) return "eh-uninitialized-locals";
             if (method.Parameters.Count + method.Body.Variables.Count > 128) return "eh-snapshot-budget";
-            if (!SnapshotType(method.ReturnType) || method.MethodSig.Params.Any(p => !SnapshotType(p)) ||
-                method.Body.Variables.Any(l => !SnapshotType(l.Type))) return "eh-snapshot-type";
+            bool Safe(TypeSig type) => SnapshotType(MetaUtil.Inflate(type, context));
+            if (!Safe(method.ReturnType) || method.MethodSig.Params.Any(p => !Safe(p)) ||
+                method.Body.Variables.Any(l => !Safe(l.Type))) return "eh-snapshot-type";
             foreach (var eh in method.Body.ExceptionHandlers)
             {
                 if (eh.HandlerType != ExceptionHandlerType.Catch && eh.HandlerType != ExceptionHandlerType.Finally) return "eh-filter-or-fault";

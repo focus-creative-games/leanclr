@@ -1,4 +1,5 @@
 # Agent rules
 
+- Git commit messages (subjects and bodies) must always be written in English.
 - LeanCLR 对稳定性、性能和内存占用要求很高。核心及热点代码的实现与修改必须同时考虑这三点，评估正确性与边界条件、时间复杂度及调用开销、内存分配及占用，避免只满足功能而忽略这些要求。
 - 修改 C++ 代码后，必须使用仓库中的 `tools/clang-format/clang-format.exe` 和 `.clang-format` 配置格式化所有修改过的 C++ 源文件及头文件，然后再验证和提交。
