@@ -19,12 +19,18 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RefNetstandard", "RefNetsta
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GcTests", "GcTests\GcTests.csproj", "{C4D5E6F7-8A9B-4CDE-90F1-23456789ABCD}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GenericAotArguments", "GenericAotArguments\GenericAotArguments.csproj", "{6957D370-C94A-4A44-BF9D-0CB9CB3DAE82}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{6957D370-C94A-4A44-BF9D-0CB9CB3DAE82}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6957D370-C94A-4A44-BF9D-0CB9CB3DAE82}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6957D370-C94A-4A44-BF9D-0CB9CB3DAE82}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6957D370-C94A-4A44-BF9D-0CB9CB3DAE82}.Release|Any CPU.Build.0 = Release|Any CPU
 		{A098E4A9-8B0E-4612-A75E-0AE2061E70FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{A098E4A9-8B0E-4612-A75E-0AE2061E70FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{A098E4A9-8B0E-4612-A75E-0AE2061E70FF}.Release|Any CPU.ActiveCfg = Release|Any CPU

@@ -26,7 +26,7 @@ jobs:
       matrix:
         protocol: [result, lightweight]
     runs-on: windows-2022
-    timeout-minutes: 60
+    timeout-minutes: 90
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -53,11 +53,20 @@ jobs:
         run: python scripts/test/aot-features.py --target native --config Debug ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
       - name: Verify 32-bit native context and snapshot ABI
         run: python scripts/test/aot-features.py --target native --arch Win32 ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+      - name: Verify formal AotTests generic registry on native and Wasm
+        run: python scripts/test/global-generics.py --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+      - name: Verify generic registry Debug and 32-bit layouts
+        run: |
+          python scripts/test/global-generics.py --target native --config Debug ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/test/global-generics.py --target native --arch Win32 ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
           name: aot-feature-failures-${{ matrix.protocol }}
-          path: out/aot-features*/*.log
+          path: |
+            out/aot-features*/*.log
+            out/global-generics/*/*.log
 
   native:
     name: ${{ matrix.name }}

@@ -53,7 +53,6 @@ def main():
                        '-d', stage, '-d', bcl, '-a', assembly, '-o', generated,
                        '--leanaot-aot-rule-file', ROOT / f'src/tests/{family}-aot/{"interpreted.xml" if variant == "interpreted-loop" else "aot.xml"}']
             if family == 'eh': command += ['-a', 'FilterFixture']
-            else: command += ['-a', 'GenericLibrary']
             if variant == 'disabled': command += ['--leanaot-max-generic-instances', '0']
             if opts.lightweight_returns: command += ['--leanaot-lightweight-returns']
             run(command, output / f'{family}-{variant}-generate.log')

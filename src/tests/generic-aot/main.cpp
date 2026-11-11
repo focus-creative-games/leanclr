@@ -128,18 +128,18 @@ int main(int argc, char** argv)
     check(reader.is_ok(), "allocate reference reader");
     const void* reader_args[] = {reader.unwrap()};
     auto* get = const_cast<metadata::RtMethodInfo*>(vm::Method::find_matched_method_in_class_by_name(reader_type.unwrap(), "Get"));
-    auto* module_data = const_cast<metadata::RtAotModuleData*>(assembly.unwrap()->mod->get_aot_module_data());
-    const uint32_t original_protocol = module_data->return_protocol;
+    const auto original_protocol = get->aot_return_protocol;
     const auto original_method = get->method_ptr;
     const auto original_virtual = get->virtual_method_ptr;
     auto* touch = const_cast<metadata::RtMethodInfo*>(vm::Method::find_matched_method_in_class_by_name(reader_type.unwrap(), "Touch"));
     const auto original_touch = touch->method_ptr;
     const auto original_touch_virtual = touch->virtual_method_ptr;
+    const auto original_touch_protocol = touch->aot_return_protocol;
     const auto* bridge = vm::Method::find_matched_method_in_class_by_name(klass, "ReferenceBridge");
     const auto* void_bridge = vm::Method::find_matched_method_in_class_by_name(klass, "VoidBridge");
     for (uint32_t protocol = 0; protocol < 2; ++protocol)
     {
-        module_data->return_protocol = protocol;
+        get->aot_return_protocol = touch->aot_return_protocol = static_cast<uint8_t>(protocol);
         get->method_ptr = get->virtual_method_ptr = protocol ? reinterpret_cast<metadata::RtManagedMethodPointer>(scalar_reference)
                                                              : reinterpret_cast<metadata::RtManagedMethodPointer>(legacy_reference);
         touch->method_ptr = touch->virtual_method_ptr =
@@ -160,7 +160,8 @@ int main(int argc, char** argv)
     get->virtual_method_ptr = original_virtual;
     touch->method_ptr = original_touch;
     touch->virtual_method_ptr = original_touch_virtual;
-    module_data->return_protocol = original_protocol;
+    get->aot_return_protocol = original_protocol;
+    touch->aot_return_protocol = original_touch_protocol;
     const auto* null_method = vm::Method::find_matched_method_in_class_by_name(klass, "NullReferenceResult");
     auto null_result = vm::Runtime::invoke_with_run_cctor(null_method, nullptr, nullptr);
     check(null_result.is_ok() && null_result.unwrap() == nullptr, "successful null reference through AOT invoker");
@@ -201,6 +202,7 @@ int main(int argc, char** argv)
     check(invoke_int(forward, args) == 73, "dynamic invocation on generic class");
     auto library = vm::Assembly::load_by_name("GenericLibrary");
     check(library.is_ok(), "load generic library");
+    check(library.unwrap()->mod->get_aot_module_data() == nullptr, "generic-only dependency must not need a per-module AOT table");
     auto library_type = library.unwrap()->mod->get_class_by_name("GenericLibrary", false, false);
     check(library_type.is_ok() && vm::Class::initialize_all(library_type.unwrap()).is_ok(), "generic library type");
     auto* library_identity = inflate(library_type.unwrap(), "Identity", corlib.cls_int32->by_val);

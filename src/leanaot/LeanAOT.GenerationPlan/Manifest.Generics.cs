@@ -21,18 +21,20 @@ namespace LeanAOT.GenerationPlan
             var def = method.ResolveMethodDef();
             if (def == null) return "";
             var ctx = MetaUtil.GetMethodGenericArgumentContext(method);
-            return def.Module.Assembly.FullName + ":" + def.MDToken.Raw.ToString("X8") + ":" +
-                string.Join(";", (ctx.typeArgsStack ?? new List<TypeSig>()).Select(TypeKey)) + ":" +
-                string.Join(";", (ctx.methodArgsStack ?? new List<TypeSig>()).Select(TypeKey));
+            return Atom(def.Module.Assembly.FullName) + def.MDToken.Raw.ToString("X8") + ":" +
+                string.Join(";", (ctx.typeArgsStack ?? new List<TypeSig>()).Select(t => Atom(TypeKey(t)))) + ":" +
+                string.Join(";", (ctx.methodArgsStack ?? new List<TypeSig>()).Select(t => Atom(TypeKey(t))));
         }
 
+        private static string Atom(string value) => value.Length + ":" + value;
+        public static string TypeIdentityKey(TypeSig type) => TypeKey(type);
         private static string TypeKey(TypeSig type)
         {
             if (type is GenericInstSig gi)
-                return TypeKey(gi.GenericType) + "<" + string.Join(",", gi.GenericArguments.Select(TypeKey)) + ">";
+                return TypeKey(gi.GenericType) + "<" + string.Join(",", gi.GenericArguments.Select(t => Atom(TypeKey(t)))) + ">";
             if (type.Next != null) return type.ElementType + "(" + TypeKey(type.Next) + ")" + (type is ArraySig a ? a.Rank.ToString() : "");
             var def = type.ToTypeDefOrRef()?.ResolveTypeDef();
-            return def == null ? type.FullName : def.Module.Assembly.FullName + ":" + def.FullName;
+            return def == null ? type.FullName : ((int)type.ElementType) + ":" + Atom(def.Module.Assembly.FullName) + def.MDToken.Raw.ToString("X8");
         }
 
         public static bool SupportedGenericType(TypeSig type, int depth = 0)
@@ -62,6 +64,7 @@ namespace LeanAOT.GenerationPlan
             foreach (var plan in _assemblyPlans.Values)
                 foreach (var root in plan.MethodPlans) queue.Enqueue((root.MethodDef, 0));
             var rejected = new HashSet<string>(StringComparer.Ordinal);
+            var virtualClasses = new HashSet<string>(StringComparer.Ordinal);
             void Consider(IMethod target, IMethod caller, uint token, int depth)
             {
                 var def = target.ResolveMethodDef();
@@ -71,13 +74,13 @@ namespace LeanAOT.GenerationPlan
                 string key = GenericInstanceKey(target);
                 if (_genericKeys.Contains(key) || rejected.Contains(key)) return;
                 string reason = null;
-                if (!_assemblyPlans.TryGetValue(def.Module.Assembly.Name, out var owner)) reason = "assembly-not-selected";
-                else if (!def.HasBody || def.IsAbstract || def.IsRuntime || def.IsPinvokeImpl || def.IsInternalCall) reason = "unsupported-body";
+                if (!def.HasBody || def.IsAbstract || def.IsRuntime || def.IsPinvokeImpl || def.IsInternalCall) reason = "unsupported-body";
                 else if (def.Body.HasExceptionHandlers) reason = "exception-handlers";
                 else if (def.Body.Instructions.Any(i => i.OpCode.Code == dnlib.DotNet.Emit.Code.Calli)) reason = "managed-calli";
                 else if (def.CallingConvention == CallingConvention.VarArg) reason = "vararg";
                 else if ((ctx.typeArgsStack?.Count ?? 0) != def.DeclaringType.GenericParameters.Count ||
                          (ctx.methodArgsStack?.Count ?? 0) != def.GenericParameters.Count ||
+                         (ctx.typeArgsStack?.Count ?? 0) > 255 || (ctx.methodArgsStack?.Count ?? 0) > 255 ||
                          !(ctx.typeArgsStack ?? new List<TypeSig>()).Concat(ctx.methodArgsStack ?? new List<TypeSig>()).All(t => SupportedGenericType(t))) reason = "open-or-unsupported-arguments";
                 else
                 {
@@ -98,11 +101,18 @@ namespace LeanAOT.GenerationPlan
                 _genericKeys.Add(key);
                 var instance = new GenericMethodPlan { Method = target, Key = key, Depth = depth };
                 _genericMethodPlans.Add(instance);
-                owner.GenericMethodPlans.Add(instance);
                 queue.Enqueue((target, depth));
                 var cctor = def.DeclaringType.FindStaticConstructor();
                 if (cctor != null && ctx.typeArgsStack != null && cctor != def)
                     Consider(MetaUtil.BindMethod(cctor, ctx), target, cctor.MDToken.Raw, depth + 1);
+                // A constructed generic class needs its concrete vtable methods,
+                // even when C# emits the call operand as the base declaration.
+                // Open generic virtual methods still need concrete method args.
+                if (def.IsInstanceConstructor && ctx.typeArgsStack != null &&
+                    virtualClasses.Add(TypeIdentityKey(target.DeclaringType.ToTypeSig())))
+                    foreach (var member in def.DeclaringType.Methods)
+                        if (member.IsVirtual && !member.IsAbstract && !member.HasGenericParameters)
+                            Consider(MetaUtil.BindMethod(member, new GenericArgumentContext(ctx.typeArgsStack, null)), target, member.MDToken.Raw, depth + 1);
             }
             while (queue.Count > 0)
             {
@@ -111,8 +121,22 @@ namespace LeanAOT.GenerationPlan
                 if (def?.Body == null) continue;
                 var ctx = MetaUtil.GetMethodGenericArgumentContext(caller);
                 foreach (var instruction in def.Body.Instructions)
-                    if (instruction.Operand is IMethod target)
+                {
+                    if (instruction.Operand is IMethod target && target.IsMethod)
                         Consider(MetaUtil.BindMethod(target, ctx), caller, target.MDToken.Raw, depth + 1);
+                    else if (instruction.Operand is IField field && field.IsField)
+                    {
+                        // A generic type can be used only through a static field;
+                        // its cctor still needs its own closed AOT instance.
+                        var bound = MetaUtil.InflateField(field, ctx);
+                        if (bound.DeclaringType.ToTypeSig() is GenericInstSig type && !type.ContainsGenericParameter)
+                        {
+                            var cctor = type.GenericType.TypeDefOrRef.ResolveTypeDef()?.FindStaticConstructor();
+                            if (cctor != null)
+                                Consider(MetaUtil.BindMethod(cctor, new GenericArgumentContext(type.GenericArguments, null)), caller, field.MDToken.Raw, depth + 1);
+                        }
+                    }
+                }
             }
         }
     }

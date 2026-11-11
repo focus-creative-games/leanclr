@@ -16,6 +16,8 @@ public class GenericHolder<T>
     public T Echo(T value) { Count++; Value = value; return GenericFixtures.Identity<T>(Value); }
     public static T Forward(T value) { return GenericFixtures.Identity<T>(value); }
 }
+public class FieldOnly<T> { public static int Value = 1; }
+public sealed class VirtualOnly<T> : GenericFixtures.IRead { public int Read() { return typeof(T) == typeof(int) ? 71 : 73; } }
 public static class GenericFixtures
 {
     public static object NullReferenceResult() { return null; }
@@ -75,6 +77,8 @@ public static class GenericFixtures
         if ((string)GenericLibrary.Reference("cross-module") != "cross-module") return 21;
         if (GenericLibrary.Identity<string>("cross-generic") != "cross-generic") return 22;
         GenericLibrary.Touch(3);
+        if (FieldOnly<ulong>.Value != 1) return 23;
+        if (CallReader(new VirtualOnly<int>()) != 71) return 24;
         return 0;
     }
 }

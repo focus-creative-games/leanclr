@@ -319,7 +319,7 @@ namespace LeanAOT.ToCpp
                 _headWriter.AddLine($"if (!{_runtimeResolvedMetadatas.GetResolveMetadatasInitedVariableName()})");
                 _headWriter.BeginBlock();
                 if (_method.IsGeneric)
-                    _headWriter.AddLine($"leanclr::codegen::resolve_generic_metadata_tokens({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, __aot_method, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
+                    _headWriter.AddLine($"leanclr::codegen::resolve_generic_metadata_tokens(__aot_method->parent->image, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, __aot_method, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
                 else
                     _headWriter.AddLine($"{VmFunctionNames.ResolveMetadataTokens}({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
 

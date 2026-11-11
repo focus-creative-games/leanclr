@@ -19,11 +19,17 @@ static class PlannerTests
         var noArgs = full.GenericMethodPlans.Where(p => p.Method.Name == "NoArguments").ToList();
         Check(noArgs.Count == 2 && noArgs[0].Key != noArgs[1].Key, "same signature, different generic arguments collided");
         Check(full.GenericMethodPlans.Count(p => p.Method.Name == "Recurse") == 1, "recursive instance not deduplicated");
+        Check(full.GenericMethodPlans.Any(p => p.Method.Name == ".cctor" && p.Method.ResolveMethodDef().DeclaringType.Name == "FieldOnly`1"),
+            "field-only generic static constructor was not discovered");
+        Check(full.GenericMethodPlans.Any(p => p.Method.Name == "Read" && p.Method.ResolveMethodDef().DeclaringType.Name == "VirtualOnly`1"),
+            "constructed generic class virtual implementation was not discovered");
         Check(full.GenericMethodPlans.Any(p => p.Method.ResolveMethodDef().DeclaringType.Name == "GenericHolder`1" &&
             MetaUtil.GetMethodGenericArgumentContext(p.Method).typeArgsStack[0].ElementType == ElementType.I4), "generic declaring type missing");
         Check(full.GenericFallbacks.Any(f => f.Reason == "exception-handlers"), "EH fallback not reported");
         Check(full.GenericFallbacks.Any(f => f.Reason == "attribute-excluded"), "attribute exclusion ignored");
-        Check(full.GenericFallbacks.Any(f => f.Reason == "assembly-not-selected"), "unselected assembly must not be compiled implicitly");
+        Check(!full.AssemblyPlans.ContainsKey("GenericLibrary") &&
+            full.GenericMethodPlans.Any(p => p.Method.ResolveMethodDef().Module.Assembly.Name == "GenericLibrary"),
+            "closed dependencies must not require ordinary AOT selection");
         var bounded = Build(4);
         Check(bounded.GenericMethodPlans.Count == 4 && bounded.GenericFallbacks.Any(f => f.Reason == "instance-budget"), "instance budget ineffective");
         var shallow = Build(2048, 2);

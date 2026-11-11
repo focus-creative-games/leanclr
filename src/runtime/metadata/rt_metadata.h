@@ -576,6 +576,7 @@ struct RtMethodInfo
     uint16_t total_arg_stack_object_size;
     uint16_t ret_stack_object_size;
     RtInvokerType invoker_type;
+    uint8_t aot_return_protocol; // Fits existing padding; bound once with the method pointers.
 #if LEANCLR_PGO_PROFILE
     uint32_t profile_slot;
 #endif
@@ -941,11 +942,14 @@ struct RtAotTypeIdentity
 
 struct RtAotGenericMethodData
 {
+    uint64_t key_hash;
+    const char* definition_module;
     RtAotMethodDefData implementation;
     const RtAotTypeIdentity* class_arguments;
-    uint32_t class_argument_count;
     const RtAotTypeIdentity* method_arguments;
-    uint32_t method_argument_count;
+    uint8_t class_argument_count;
+    uint8_t method_argument_count;
+    uint8_t return_protocol;
 };
 
 struct RtAotModuleData
@@ -957,8 +961,6 @@ struct RtAotModuleData
     uint32_t method_def_entry_count;
     const RtAotMethodMonoPInvokeCallbackData* mono_pinvoke_callback_entries;
     uint32_t mono_pinvoke_callback_entry_count;
-    const RtAotGenericMethodData* generic_method_entries;
-    uint32_t generic_method_entry_count;
     // 0: ordinary Result; 1: opt-in scalar void / aligned managed reference ABI.
     uint32_t return_protocol;
 };
@@ -967,6 +969,8 @@ struct RtAotModulesData
 {
     const RtAotModuleData** modules;
     uint32_t module_count;
+    const RtAotGenericMethodData* generic_method_entries;
+    uint32_t generic_method_entry_count;
 };
 
 typedef void (*ClassWalkCallback)(RtClass* klass, void* userData);

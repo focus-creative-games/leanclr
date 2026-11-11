@@ -203,7 +203,7 @@ static metadata::RtInvokeMethodPointer try_setup_array_or_szarray_invoke(const m
 }
 
 // Get invoker for a method
-RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* method)
+static RtResult<InvokeTypeAndMethod> get_invoker(const metadata::RtMethodInfo* method, const metadata::RtAotMethodDefData* aot_data)
 {
     const metadata::RtClass* klass = method->parent;
 
@@ -239,7 +239,6 @@ RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* me
             RET_OK(InvokeTypeAndMethod(RtInvokerType::Intrinsic, intrinsic_entry->invoker));
         }
 
-        const metadata::RtAotMethodDefData* aot_data = metadata::AotModule::find_aot_method_impl(method);
         if (aot_data != nullptr)
         {
             RET_OK(InvokeTypeAndMethod(RtInvokerType::Aot, aot_data->invoke_method_ptr));
@@ -317,22 +316,30 @@ RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* me
 }
 
 // Get method pointer (for native/unmanaged methods)
-MethodAndVirtualMethod Shim::get_method_pointer(const metadata::RtMethodInfo* method)
+static MethodAndVirtualMethod get_method_pointer(const metadata::RtMethodInfo* method, const metadata::RtAotMethodDefData* aot_data)
 {
-    const metadata::RtAotModuleData* aotModuleData = method->parent->image->get_aot_module_data();
-    if (aotModuleData != nullptr)
+    if (aot_data != nullptr)
     {
-        const metadata::RtAotMethodDefData* aot_data = metadata::AotModule::find_aot_method_impl(method);
-        if (aot_data != nullptr)
-        {
-            return MethodAndVirtualMethod(aot_data->method_ptr, aot_data->virtual_method_ptr);
-        }
+        return MethodAndVirtualMethod(aot_data->method_ptr, aot_data->virtual_method_ptr);
     }
     metadata::RtManagedMethodPointer method_pointer = reinterpret_cast<metadata::RtManagedMethodPointer>(fn_not_implemented_method_pointer);
     metadata::RtManagedMethodPointer virtual_method_pointer = reinterpret_cast<metadata::RtManagedMethodPointer>(
         Method::is_static(method) || !Class::is_value_type(method->parent) ? fn_not_implemented_method_pointer : fn_not_implemented_virtual_method_pointer);
 
     return MethodAndVirtualMethod(method_pointer, virtual_method_pointer);
+}
+
+RtResultVoid Shim::setup_method(metadata::RtMethodInfo* method)
+{
+    const auto binding = metadata::AotModule::find_aot_method_binding(method);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InvokeTypeAndMethod, invoke, get_invoker(method, binding.implementation));
+    const auto pointers = get_method_pointer(method, binding.implementation);
+    method->invoke_method_ptr = invoke.invoker;
+    method->invoker_type = invoke.invoker_type;
+    method->method_ptr = pointers.method_ptr;
+    method->virtual_method_ptr = pointers.virtual_method_ptr;
+    method->aot_return_protocol = binding.return_protocol;
+    RET_VOID_OK();
 }
 
 } // namespace vm

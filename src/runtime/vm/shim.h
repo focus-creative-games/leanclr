@@ -22,11 +22,11 @@ struct InvokeTypeAndMethod
     }
 };
 
-
 struct MethodAndVirtualMethod
 {
     metadata::RtManagedMethodPointer method_ptr;
     metadata::RtManagedMethodPointer virtual_method_ptr;
+
     MethodAndVirtualMethod(metadata::RtManagedMethodPointer method_ptr, metadata::RtManagedMethodPointer virtual_method_ptr)
         : method_ptr(method_ptr), virtual_method_ptr(virtual_method_ptr)
     {
@@ -37,8 +37,7 @@ class Shim
 {
   public:
     // Public functions
-    static RtResult<InvokeTypeAndMethod> get_invoker(const metadata::RtMethodInfo* method);
-    static MethodAndVirtualMethod get_method_pointer(const metadata::RtMethodInfo* method);
+    static RtResultVoid setup_method(metadata::RtMethodInfo* method);
 };
 
 } // namespace vm

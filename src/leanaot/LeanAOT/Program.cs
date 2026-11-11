@@ -712,6 +712,7 @@ internal class Program
                 max_instances = manifestArgs.MaxGenericInstances,
                 max_depth = manifestArgs.MaxGenericDepth,
                 return_protocol = globalServices.Config.LightweightAotReturns ? "lightweight-void-reference" : "result",
+                generic_registry = "global-sorted-fnv1a64",
                 instances = manifest.GenericMethodPlans.Select(p => new { method = p.Method.FullName, key = p.Key, depth = p.Depth }),
                 fallbacks = manifest.GenericFallbacks,
                 method_fallbacks = manifest.MethodFallbacks,

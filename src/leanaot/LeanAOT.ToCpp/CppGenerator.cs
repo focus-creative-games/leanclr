@@ -107,14 +107,6 @@ namespace LeanAOT.ToCpp
                 };
                 GenerateMethodDef(methodPlan, methodCtx);
             }
-            foreach (var instance in plan.GenericMethodPlans)
-            {
-                if (methodBodyCodeFile.ExceedsMaxSize()) methodBodyCodeFile = context.CreateMethodBodyCodeFileForNextFile();
-                var detail = GlobalServices.Inst.MetadataService.GetMethodDetail(instance.Method);
-                GlobalServices.Inst.InvokerService.GetInvoker(instance.Method);
-                new MethodWriter(detail, methodBodyCodeFile).WriteCode();
-                if (detail.ShouldGenerateVirtualMethod) new VirtualMethodWriter(detail, methodBodyCodeFile).WriteCode();
-            }
             context.SaveAll();
         }
         public override void GenerateMethodDef(MethodDefPlan plan, object ctx)
@@ -182,9 +174,32 @@ namespace LeanAOT.ToCpp
 
         public override void GenerateGlobalInitializationCpp()
         {
+            GenerateGlobalGenericMethods();
             GenerateAllModuleRegistrationCpp();
             GenerateAllMethodInvokerCpp();
             GenerateAllDirectCallBridgeCpp();
+        }
+
+        private void GenerateGlobalGenericMethods()
+        {
+            ModuleMethodBodyCodeFilePart body = null;
+            int part = 0;
+            foreach (var instance in _config.manifest.GenericMethodPlans.OrderBy(p => p.Key, StringComparer.Ordinal))
+            {
+                if (body == null || body.ExceedsMaxSize())
+                {
+                    body?.Save();
+                    body = new ModuleMethodBodyCodeFilePart($"{_config.outputCodeDir}/generic_methods_part{part++}.cpp", null);
+                }
+                var detail = GlobalServices.Inst.MetadataService.GetMethodDetail(instance.Method);
+                GlobalServices.Inst.InvokerService.GetInvoker(instance.Method);
+                new MethodWriter(detail, body).WriteCode();
+                if (detail.ShouldGenerateVirtualMethod) new VirtualMethodWriter(detail, body).WriteCode();
+            }
+            body?.Save();
+            var registration = new GenericRegistrationCppCodeFile($"{_config.outputCodeDir}/generic_registration.cpp", _config.manifest.GenericMethodPlans);
+            registration.Generate();
+            registration.Save();
         }
 
         private void GenerateAllModuleRegistrationCpp()

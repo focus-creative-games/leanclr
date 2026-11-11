@@ -64,6 +64,11 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\GenericAotArguments\GenericAotArguments.csproj">
+      <Project>{6957D370-C94A-4A44-BF9D-0CB9CB3DAE82}</Project>
+      <Name>GenericAotArguments</Name>
+      <Aliases>GenericArguments</Aliases>
+    </ProjectReference>
     <ProjectReference Include="..\Common\Common.csproj">
       <Project>{aa467143-bba4-4b54-95e5-1d0f1099f380}</Project>
       <Name>Common</Name>

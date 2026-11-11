@@ -453,8 +453,7 @@ inline bool is_aot_method(const metadata::RtMethodInfo* method) noexcept
 
 inline bool uses_lightweight_aot_returns(const metadata::RtMethodInfo* method) noexcept
 {
-    const auto* module = method->parent->image->get_aot_module_data();
-    return module && module->return_protocol == 1;
+    return method->aot_return_protocol == 1;
 }
 
 inline RtResultVoid invoke_with_run_class_static_constructor(const metadata::RtMethodInfo* method, interp::RtStackObject* arg_buff,
