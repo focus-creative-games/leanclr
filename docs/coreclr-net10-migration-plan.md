@@ -58,6 +58,8 @@
 | P1：跨平台与资源预算 | Windows/Linux/ARM64/Wasm 验收；限制 facade 注册及布局缓存；优化 GC membership 查询与 slot 反查 | 各目标原生构建和最小测试通过；Wasm 对照耗时、二进制大小、峰值内存；无未经解释的基线退化；热路径不按程序集/方法总量线性搜索 |
 | P2：引擎最小接入 | 完善自有 host bridge、Godot/UE 宿主生命周期及错误契约 | 独立宿主重复初始化/失败/退出可复现；宿主 API 不暴露 BCL 私有对象；引擎测试与 runtime 测试分开 |
 
+当前实现与实测更新：上述阶段的运行时、AOT、预算控制和独立宿主生命周期实现已分阶段提交。Windows/Wasm 的 98 项 AOT/GC/API 矩阵、默认 Mono 41 项及 native/Wasm 泛型/EH 回归、14 项独立宿主契约均已验证。最新提交、命令、CoreLib 指纹、历史 25 项兼容性失败及资源对照见 [开发状态](coreclr-net10-development-status.md)。Linux/ARM64、UBSan 与真实 Godot/UE SDK 的验收尚未完成；当前机器的 WSL 磁盘缺失且没有对应执行环境，新增 CI 配置不能视为这些目标已经通过。引擎交付范围是 SDK 无关的宿主生命周期与错误契约，实际 SDK 模块注册、打包和编辑器运行仍须在相应环境单独验收。
+
 每阶段交付实现、边界说明、可复现命令和英文 commit；每阶段复杂度足够时拆成多个提交。性能、内存与稳定性必须同时评估。对 GC 对象归属的候选检查目前可能扫描 arena，slot 反查可能扫描 handle 索引；先记录实际规模及热点采样，再设计索引，不将本次功能通过视为性能验收。
 
 ## 可复现入口
@@ -68,8 +70,8 @@ cmake -S src/tests/runtime-regressions -B out/net10-merge-mono -A x64
 cmake --build out/net10-merge-mono --config Release --parallel 4
 ctest --test-dir out/net10-merge-mono -C Release --output-on-failure
 
-# .NET 10 集成门禁：20 个 managed 入口 + 独立句柄契约
-./scripts/dotnet10/integration-baseline.ps1
+# .NET 10 完整本机门禁：77 smoke + 15 GC/EH + 6 API + 3 native contracts
+./scripts/dotnet10/integration-baseline.ps1 -AllSmokeEntries
 
 # 最新 Mono 泛型 AOT、禁用 AOT 对照及 EH 回退
 python scripts/test/aot-features.py --target native --config Release
