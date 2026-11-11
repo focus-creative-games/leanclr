@@ -26,6 +26,20 @@ class GCHandle
     static bool is_type_pinned(const metadata::RtClass* klass);
     static void foreach_strong_handles(void (*callback)(vm::RtObject*, void*), void* userData);
     static void sweep_weak_handles(bool (*is_object_marked)(vm::RtObject*, void* ctx), void* ctx, bool track_resurrection);
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static RtObject** get_target_slot(void* handle);
+    static void* get_handle_by_target_slot(RtObject** slot);
+    static void* new_dependent_handle(RtObject* target, RtObject* dependent);
+    static RtObject* get_dependent_handle_target(void* handle);
+    static RtObject* get_dependent_handle_dependent(void* handle);
+    static RtObject* get_dependent_handle_target_and_dependent(void* handle, RtObject** dependent);
+    static void set_dependent_handle_target_to_null(void* handle);
+    static void set_dependent_handle_dependent(void* handle, RtObject* dependent);
+    static bool free_dependent_handle(void* handle);
+    static bool visit_dependent_handles(bool (*is_marked)(RtObject*, void*), void (*visit)(RtObject*, void*), void* context);
+#endif
 };
 } // namespace vm
 } // namespace leanclr

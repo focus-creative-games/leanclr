@@ -2228,7 +2228,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(RefAnyType)
 {
     vm::RtTypedReference* src = get_ptr_stack_value_at<vm::RtTypedReference>(eval_stack_base, ir->src);
-    set_stack_value_at<const metadata::RtTypeSig*>(eval_stack_base, ir->dst, src->type_handle);
+    set_stack_value_at<const void*>(eval_stack_base, ir->dst, src->type_handle);
 }
 LEANCLR_CASE_END()
 

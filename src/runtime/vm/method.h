@@ -82,6 +82,12 @@ class Method
     static RtResult<vm::RtReflectionMethodBody*> create_reflection_method_body(const metadata::RtMethodInfo* method);
     static RtResultVoid get_parameter_modifiers(const metadata::RtMethodInfo* method, int32_t index, bool optional,
                                                 utils::Vector<metadata::RtClass*>& modifiers);
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static RtResult<const metadata::RtMethodInfo*> get_static_interface_method_impl_on_klass(const metadata::RtClass* klass,
+                                                                                             const metadata::RtMethodInfo* interface_method);
+#endif
 };
 } // namespace vm
 } // namespace leanclr

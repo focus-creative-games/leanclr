@@ -1,0 +1,37 @@
+{
+  "assemblyNames": [
+    "ManagedNet10.LegacyTests",
+    "ManagedNet10.NkgSmoke",
+    "ManagedNet10.Smoke",
+    "NKGGameFramework",
+    "NKGGameFramework.Sampler",
+    "OdinSerializer",
+    "System.Collections",
+    "System.Console",
+    "System.Linq",
+    "System.Private.CoreLib",
+    "System.Runtime",
+    "System.Threading",
+    "System.Threading.Tasks",
+    "UniTask"
+  ],
+  "assemblyPrefixes": [
+    "System."
+  ],
+  "typeNames": [],
+  "typePrefixes": [
+    "Cysharp.Threading.Tasks.",
+    "ManagedNet10.",
+    "NKGGameFramework.",
+    "OdinSerializer.",
+    "System."
+  ],
+  "memberNames": [],
+  "memberPrefixes": [
+    "Cysharp.Threading.Tasks.",
+    "ManagedNet10.",
+    "NKGGameFramework.",
+    "OdinSerializer.",
+    "System."
+  ]
+}

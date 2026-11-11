@@ -29,6 +29,12 @@ class Delegate
                                                     const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
     static RtResultVoid newobj_delegate_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static const metadata::RtMethodInfo* get_target_method(const RtDelegate* del) noexcept;
+    static void set_target_method(RtDelegate* del, const metadata::RtMethodInfo* method) noexcept;
+#endif
 };
 } // namespace vm
 } // namespace leanclr

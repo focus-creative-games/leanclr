@@ -1,0 +1,13 @@
+{
+  "name": "mono-4.5",
+  "coreLibraryModules": [
+    "mscorlib",
+    "System",
+    "System.Core",
+    "System.Xml",
+    "System.Configuration",
+    "System.Security",
+    "System.Numerics",
+    "Mono.Security"
+  ]
+}

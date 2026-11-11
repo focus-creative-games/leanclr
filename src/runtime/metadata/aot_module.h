@@ -25,6 +25,11 @@ class AotModule
     static const RtAotMethodDefData* find_aot_method_impl(const RtMethodInfo* method);
     static const RtAotMethodDefData* find_aot_method_def_impl(const RtModuleDef* module, EncodedTokenId token);
     static const RtAotMethodMonoPInvokeCallbackData* find_mono_pinvoke_callback_method(const RtModuleDef* module, EncodedTokenId token);
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static RtResult<const RtMethodInfo*> find_mono_pinvoke_callback_method_by_native_ptr(RtNativeMethodPointer ptr);
+#endif
 };
 } // namespace metadata
 } // namespace leanclr

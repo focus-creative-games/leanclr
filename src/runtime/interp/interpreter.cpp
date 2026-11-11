@@ -258,7 +258,8 @@ void setup_filter_checker(const RtInterpExceptionClause* clause)
 void setup_filter_handler(const RtInterpMethodInfo* imi, InterpFrame* frame, const void* handler_start_ip)
 {
     assert(!s_exception_flows.empty());
-    ExceptionFlow& flow = s_exception_flows.back();
+    ExceptionFlow flow = s_exception_flows.back();
+    s_exception_flows.pop_back();
     assert(flow.throw_flow);
     auto& data = flow.throw_data;
     assert(!data.handled);
@@ -272,7 +273,7 @@ void setup_filter_handler(const RtInterpMethodInfo* imi, InterpFrame* frame, con
     new_data.frame = data.frame;
     new_data.ip = data.ip;
     new_data.next_search_clause_idx = data.next_search_clause_idx;
-    new_data.cur_clause = nullptr;
+    new_data.cur_clause = data.cur_clause;
     new_data.handled = true;
     pop_outscope_flows(imi, frame, handler_start_ip);
     s_exception_flows.push_back(new_flow);
@@ -606,7 +607,7 @@ unwind_exception_handler:
                 }
                 case metadata::RtILExceptionClauseType::Filter:
                 {
-                    ip = imi->codes + clause->handler_begin_offset;
+                    ip = imi->codes + clause->filter_begin_offset;
                     setup_filter_checker(clause);
                     set_stack_value_at<vm::RtException*>(eval_stack_base, imi->total_arg_and_local_stack_object_size, ex);
                     handled = true;

@@ -1,4 +1,4 @@
-
+﻿
 using dnlib.DotNet;
 using dnlib.DotNet.Emit;
 using LeanAOT.Core;
@@ -2230,7 +2230,7 @@ namespace LeanAOT.ToCpp
                 // for interface, we should check value type at runtime since it can be implemented by value type
                 return true;
             }
-            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(declaringTypeDef.Module))
+            if (!GlobalServices.Inst.IsCoreLibraryModule(declaringTypeDef.Module))
             {
                 return false;
             }

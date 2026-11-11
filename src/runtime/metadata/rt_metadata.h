@@ -748,6 +748,9 @@ struct RtCustomAttributeRawData
 {
     const RtMethodInfo* ctor;
     uint32_t dataBlobIndex;
+#if LEANCLR_BCL_CORECLR_NET10
+    EncodedTokenId ctor_token;
+#endif
 };
 
 class RtModuleDef;

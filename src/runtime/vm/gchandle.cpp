@@ -16,6 +16,9 @@ enum class GCHandleType : int32_t
     WeakTrackResurrection = 1,
     Normal = 2,
     Pinned = 3,
+#if LEANCLR_BCL_CORECLR_NET10
+    Dependent = 4,
+#endif
 };
 
 // HandleInfo struct for managing GC handles
@@ -25,6 +28,9 @@ struct HandleInfo
     HandleInfo* next;
     GCHandleType type_;
     GCHandleId id;
+#if LEANCLR_BCL_CORECLR_NET10
+    RtObject* dependent;
+#endif
 };
 
 // Head of the freed handle list
@@ -166,6 +172,9 @@ static void free_handle_impl(HandleInfo* handle)
     }
     // Reset handle and add to freed list
     handle->obj = nullptr;
+#if LEANCLR_BCL_CORECLR_NET10
+    handle->dependent = nullptr;
+#endif
     handle->type_ = GCHandleType::Normal;
     handle->next = s_freed_handle_head;
     assert(s_handle_map.find(handle->id) == handle);
@@ -319,6 +328,10 @@ void GCHandle::foreach_strong_handles(void (*callback)(vm::RtObject*, void*), vo
         {
             continue;
         }
+#if LEANCLR_BCL_CORECLR_NET10
+        if (hi->type_ == GCHandleType::Dependent)
+            continue;
+#endif
         if (hi->obj != nullptr)
         {
             callback(hi->obj, userData);
@@ -333,6 +346,17 @@ void GCHandle::sweep_weak_handles(bool (*is_object_marked)(vm::RtObject*, void* 
         HandleInfo* hi = s_handle_map.at(i);
         if (!hi)
             continue;
+#if LEANCLR_BCL_CORECLR_NET10
+        if (hi->type_ == GCHandleType::Dependent && !track_resurrection)
+        {
+            if (hi->obj && !is_object_marked(hi->obj, ctx))
+            {
+                hi->obj = nullptr;
+                hi->dependent = nullptr;
+            }
+            continue;
+        }
+#endif
         if (hi->type_ != (track_resurrection ? GCHandleType::WeakTrackResurrection : GCHandleType::Weak))
         {
             continue;
@@ -346,3 +370,102 @@ void GCHandle::sweep_weak_handles(bool (*is_object_marked)(vm::RtObject*, void* 
 
 } // namespace vm
 } // namespace leanclr
+
+#if LEANCLR_BCL_CORECLR_NET10
+namespace leanclr
+{
+namespace vm
+{
+RtObject** GCHandle::get_target_slot(void* handle)
+{
+    auto* info = static_cast<HandleInfo*>(handle);
+    return info ? &info->obj : nullptr;
+}
+
+void* GCHandle::get_handle_by_target_slot(RtObject** slot)
+{
+    for (size_t i = 0; i < s_handle_map.capacity(); ++i)
+    {
+        auto* info = s_handle_map.at(i);
+        if (info && &info->obj == slot)
+            return info;
+    }
+    return nullptr;
+}
+
+void* GCHandle::new_dependent_handle(RtObject* target, RtObject* dependent)
+{
+    auto* info = alloc_handle();
+    if (!info)
+        return nullptr;
+    info->obj = target;
+    info->dependent = target ? dependent : nullptr;
+    info->type_ = GCHandleType::Dependent;
+    info->next = nullptr;
+    return info;
+}
+
+RtObject* GCHandle::get_dependent_handle_target(void* handle)
+{
+    auto* info = static_cast<HandleInfo*>(handle);
+    return info && info->type_ == GCHandleType::Dependent ? info->obj : nullptr;
+}
+
+RtObject* GCHandle::get_dependent_handle_dependent(void* handle)
+{
+    auto* info = static_cast<HandleInfo*>(handle);
+    return info && info->type_ == GCHandleType::Dependent && info->obj ? info->dependent : nullptr;
+}
+
+RtObject* GCHandle::get_dependent_handle_target_and_dependent(void* handle, RtObject** dependent)
+{
+    auto* target = get_dependent_handle_target(handle);
+    if (dependent)
+        *dependent = target ? get_dependent_handle_dependent(handle) : nullptr;
+    return target;
+}
+
+void GCHandle::set_dependent_handle_target_to_null(void* handle)
+{
+    auto* info = static_cast<HandleInfo*>(handle);
+    if (info && info->type_ == GCHandleType::Dependent)
+    {
+        info->obj = nullptr;
+        info->dependent = nullptr;
+    }
+}
+
+void GCHandle::set_dependent_handle_dependent(void* handle, RtObject* dependent)
+{
+    auto* info = static_cast<HandleInfo*>(handle);
+    if (info && info->type_ == GCHandleType::Dependent)
+        info->dependent = info->obj ? dependent : nullptr;
+}
+
+bool GCHandle::free_dependent_handle(void* handle)
+{
+    auto* info = static_cast<HandleInfo*>(handle);
+    if (!info || info->type_ != GCHandleType::Dependent)
+        return false;
+    free_handle_impl(info);
+    return true;
+}
+
+bool GCHandle::visit_dependent_handles(bool (*is_marked)(RtObject*, void*), void (*visit)(RtObject*, void*), void* context)
+{
+    bool changed = false;
+    for (size_t i = 0; i < s_handle_map.capacity(); ++i)
+    {
+        auto* info = s_handle_map.at(i);
+        if (info && info->type_ == GCHandleType::Dependent && info->obj && info->dependent && is_marked(info->obj, context) &&
+            !is_marked(info->dependent, context))
+        {
+            visit(info->dependent, context);
+            changed = true;
+        }
+    }
+    return changed;
+}
+} // namespace vm
+} // namespace leanclr
+#endif

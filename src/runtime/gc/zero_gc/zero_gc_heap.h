@@ -54,6 +54,11 @@ class ZeroGcHeap
     static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size);
     // static vm::RtObject* allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size);
     static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes);
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static bool is_allocated_object(const vm::RtObject* obj);
+#endif
 };
 
 } // namespace gc

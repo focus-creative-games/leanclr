@@ -43,7 +43,7 @@ namespace LeanAOT.ToCpp
                 return false;
             }
 
-            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(methodDef.Module))
+            if (!GlobalServices.Inst.IsCoreLibraryModule(methodDef.Module))
             {
                 return false;
             }
@@ -136,7 +136,7 @@ namespace LeanAOT.ToCpp
             {
                 return false;
             }
-            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(methodDef.Module))
+            if (!GlobalServices.Inst.IsCoreLibraryModule(methodDef.Module))
             {
                 return false;
             }
@@ -187,7 +187,7 @@ namespace LeanAOT.ToCpp
                 }
                 return false;
             }
-            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(methodDef.Module))
+            if (!GlobalServices.Inst.IsCoreLibraryModule(methodDef.Module))
             {
                 return false;
             }

@@ -46,6 +46,11 @@ class Exception
     // static metadata::RtClass* get_class_invalid_cast_exception();
     // static RtException* new_exception(metadata::RtClass* ex_class, RtException* inner_exception, RtString* message);
     // static RtResultVoid raise_null_reference_exception(interp::InterpFrame* frame, const void* ip);
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static void clear_current_exception_if_matches(RtException* ex);
+#endif
 };
 
 #define RET_ERR_WITH_MSG(err, msg)                                                   \

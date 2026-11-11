@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "interp_defs.h"
+#include "gc/gc_roots.h"
 #include "utils/rt_span.h"
 
 namespace leanclr
@@ -11,12 +12,24 @@ namespace leanclr
 namespace interp
 {
 
+enum class InterpFrameRootScanMode : uint8_t
+{
+    InterpreterFrame,
+    ExplicitObjectRoots,
+    MethodArguments,
+    None,
+};
+
 struct InterpFrame
 {
     const metadata::RtMethodInfo* method;
     RtStackObject* eval_stack_base;
     uint32_t eval_stack_size;
     uint32_t old_eval_stack_top;
+#if LEANCLR_BCL_CORECLR_NET10
+    int32_t vararg_count;
+    InterpFrameRootScanMode root_scan_mode;
+#endif
     const uint8_t* ip;
 
     void save(const uint8_t* next_ip)
@@ -31,6 +44,7 @@ class MachineState
 {
   public:
     static void initialize();
+
     static MachineState& get_global_machine_state()
     {
         static MachineState machine_state;
@@ -63,6 +77,9 @@ class MachineState
         _frame_stack_top = new_top;
     }
 
+#if LEANCLR_BCL_CORECLR_NET10
+    void visit_roots(gc::GcVisitObjectRoot visit, void* userdata) const;
+#endif
     InterpFrame* get_executing_frame_stack()
     {
         if (_frame_stack_top == 0)
@@ -94,7 +111,8 @@ class MachineState
     RtResult<InterpFrame*> enter_frame_from_interp(const metadata::RtMethodInfo* method, RtStackObject* frame_base);
     InterpFrame* leave_frame(const MachineStateSavePoint& sp, InterpFrame* frame);
 
-    uint32_t enter_frame_from_icall_or_intrinsic(const metadata::RtMethodInfo* method);
+    uint32_t enter_frame_from_icall_or_intrinsic(const metadata::RtMethodInfo* method, RtStackObject* eval_stack_base = nullptr, uint32_t eval_stack_size = 0,
+                                                 InterpFrameRootScanMode root_scan_mode = InterpFrameRootScanMode::None);
     void leave_frame_from_icall_or_intrinsic(uint32_t old_frame_top);
 
   private:

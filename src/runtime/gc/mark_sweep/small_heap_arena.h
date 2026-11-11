@@ -61,6 +61,11 @@ class SmallHeapArena
     bool is_empty() const;
     size_t get_block_size() const;
     size_t sweep(const GCAliveObjectBitmap& alive_object_bitmap);
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    bool contains_allocated_block(const void* ptr) const;
+#endif
 };
 
 class SizeClassPool
@@ -82,10 +87,16 @@ class SizeClassPool
 
     void* allocate_block();
     void sweep(const GCAliveObjectBitmap& alive_object_bitmap, int64_t& freed_bytes);
+
     size_t block_size() const
     {
         return _block_size;
     }
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    bool contains_allocated_block(const void* ptr) const;
+#endif
 };
 
 } // namespace gc

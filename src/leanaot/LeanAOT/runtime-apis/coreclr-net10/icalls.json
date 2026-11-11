@@ -1,0 +1,697 @@
+[
+  {
+    "name": "Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)",
+    "func": "Interop::bcrypt_gen_random",
+    "header": "bcl/coreclr-net10/icalls/interop.h"
+  },
+  {
+    "name": "System.Array::GetLength",
+    "func": "SystemArray::get_length",
+    "header": "bcl/coreclr-net10/icalls/system_array.h"
+  },
+  {
+    "name": "System.Array::GetLowerBound",
+    "func": "SystemArray::get_lower_bound",
+    "header": "bcl/coreclr-net10/icalls/system_array.h"
+  },
+  {
+    "name": "System.Enum::GetEnumValuesAndNames",
+    "func": "SystemEnum::get_enum_values_and_names",
+    "header": "bcl/coreclr-net10/icalls/system_enum.h"
+  },
+  {
+    "name": "System.Environment::get_ExitCode",
+    "func": "SystemEnvironment::get_exit_code",
+    "header": "bcl/coreclr-net10/icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::set_ExitCode",
+    "func": "SystemEnvironment::set_exit_code",
+    "header": "bcl/coreclr-net10/icalls/system_environment.h"
+  },
+  {
+    "name": "System.Environment::get_CurrentManagedThreadId",
+    "func": "SystemEnvironment::get_current_managed_thread_id",
+    "header": "bcl/coreclr-net10/icalls/system_environment.h"
+  },
+  {
+    "name": "System.Exception::IsImmutableAgileException(System.Exception)",
+    "func": "SystemException::is_immutable_agile_exception",
+    "header": "bcl/coreclr-net10/icalls/system_exception.h"
+  },
+  {
+    "name": "System.Exception::PrepareForForeignExceptionRaise()",
+    "func": "SystemException::prepare_for_foreign_exception_raise",
+    "header": "bcl/coreclr-net10/icalls/system_exception.h"
+  },
+  {
+    "name": "System.Exception::GetFrozenStackTrace(System.Exception)",
+    "func": "SystemException::get_frozen_stack_trace",
+    "header": "bcl/coreclr-net10/icalls/system_exception.h"
+  },
+  {
+    "name": "System.Exception::GetExceptionCount()",
+    "func": "SystemException::get_exception_count",
+    "header": "bcl/coreclr-net10/icalls/system_exception.h"
+  },
+  {
+    "name": "System.GC::GetAllocatedBytesForCurrentThread()",
+    "func": "SystemGC::get_allocated_bytes_for_current_thread",
+    "header": "bcl/coreclr-net10/icalls/system_gc.h"
+  },
+  {
+    "name": "System.GC::_CollectionCount(System.Int32,System.Int32)",
+    "func": "SystemGC::get_collection_count",
+    "header": "bcl/coreclr-net10/icalls/system_gc.h"
+  },
+  {
+    "name": "System.GC::SuppressFinalizeInternal(System.Object)",
+    "func": "SystemGC::suppress_finalize",
+    "header": "bcl/coreclr-net10/icalls/system_gc.h"
+  },
+  {
+    "name": "System.GC::GetMaxGeneration()",
+    "func": "SystemGC::get_max_generation",
+    "header": "bcl/coreclr-net10/icalls/system_gc.h"
+  },
+  {
+    "name": "System.GC::GetTotalMemory(System.Boolean)",
+    "func": "SystemGC::get_total_memory",
+    "header": "bcl/coreclr-net10/icalls/system_gc.h"
+  },
+  {
+    "name": "System.Math::Abs(System.Double)",
+    "func": "SystemMath::abs_f64",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Abs(System.Single)",
+    "func": "SystemMath::abs_f32",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Acos(System.Double)",
+    "func": "SystemMath::acos",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Acosh(System.Double)",
+    "func": "SystemMath::acosh",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Asin(System.Double)",
+    "func": "SystemMath::asin",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Asinh(System.Double)",
+    "func": "SystemMath::asinh",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Atan(System.Double)",
+    "func": "SystemMath::atan",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Atan2(System.Double,System.Double)",
+    "func": "SystemMath::atan2",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Atanh(System.Double)",
+    "func": "SystemMath::atanh",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Cbrt(System.Double)",
+    "func": "SystemMath::cbrt",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Ceiling(System.Double)",
+    "func": "SystemMath::ceiling",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Cos(System.Double)",
+    "func": "SystemMath::cos",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Cosh(System.Double)",
+    "func": "SystemMath::cosh",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Exp(System.Double)",
+    "func": "SystemMath::exp",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Floor(System.Double)",
+    "func": "SystemMath::floor",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Log(System.Double)",
+    "func": "SystemMath::log",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Log10(System.Double)",
+    "func": "SystemMath::log10",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::ModF(System.Double,System.Double*)",
+    "func": "SystemMath::modf",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Pow(System.Double,System.Double)",
+    "func": "SystemMath::pow",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Round(System.Double)",
+    "func": "SystemMath::round",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Sin(System.Double)",
+    "func": "SystemMath::sin",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Sinh(System.Double)",
+    "func": "SystemMath::sinh",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Sqrt(System.Double)",
+    "func": "SystemMath::sqrt",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Tan(System.Double)",
+    "func": "SystemMath::tan",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.Math::Tanh(System.Double)",
+    "func": "SystemMath::tanh",
+    "header": "bcl/coreclr-net10/icalls/system_math.h"
+  },
+  {
+    "name": "System.MathF::Acos(System.Single)",
+    "func": "SystemMathF::acos",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Acosh(System.Single)",
+    "func": "SystemMathF::acosh",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Asin(System.Single)",
+    "func": "SystemMathF::asin",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Asinh(System.Single)",
+    "func": "SystemMathF::asinh",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Atan(System.Single)",
+    "func": "SystemMathF::atan",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Atan2(System.Single,System.Single)",
+    "func": "SystemMathF::atan2",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Atanh(System.Single)",
+    "func": "SystemMathF::atanh",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Cbrt(System.Single)",
+    "func": "SystemMathF::cbrt",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Ceiling(System.Single)",
+    "func": "SystemMathF::ceiling",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Cos(System.Single)",
+    "func": "SystemMathF::cos",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Cosh(System.Single)",
+    "func": "SystemMathF::cosh",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Exp(System.Single)",
+    "func": "SystemMathF::exp",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Floor(System.Single)",
+    "func": "SystemMathF::floor",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Log(System.Single)",
+    "func": "SystemMathF::log",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Log10(System.Single)",
+    "func": "SystemMathF::log10",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::ModF(System.Single,System.Single*)",
+    "func": "SystemMathF::modf",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Pow(System.Single,System.Single)",
+    "func": "SystemMathF::pow",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Sin(System.Single)",
+    "func": "SystemMathF::sin",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Sinh(System.Single)",
+    "func": "SystemMathF::sinh",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Sqrt(System.Single)",
+    "func": "SystemMathF::sqrt",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Tan(System.Single)",
+    "func": "SystemMathF::tan",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.MathF::Tanh(System.Single)",
+    "func": "SystemMathF::tanh",
+    "header": "bcl/coreclr-net10/icalls/system_mathf.h"
+  },
+  {
+    "name": "System.Delegate::GetInvokeMethod(System.Runtime.CompilerServices.MethodTable*)",
+    "func": "SystemDelegate::get_invoke_method",
+    "header": "bcl/coreclr-net10/icalls/system_delegate.h"
+  },
+  {
+    "name": "System.Delegate::GetMulticastInvoke(System.Runtime.CompilerServices.MethodTable*)",
+    "func": "SystemDelegate::get_multicast_invoke",
+    "header": "bcl/coreclr-net10/icalls/system_delegate.h"
+  },
+  {
+    "name": "System.Object::GetType",
+    "func": "SystemObject::get_type",
+    "header": "bcl/coreclr-net10/icalls/system_object.h"
+  },
+  {
+    "name": "System.Object::MemberwiseClone",
+    "func": "SystemObject::memberwise_clone",
+    "header": "bcl/coreclr-net10/icalls/system_object.h"
+  },
+  {
+    "name": "System.Reflection.MethodBase::GetCurrentMethod",
+    "func": "SystemReflectionMethodBase::get_current_method",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_methodbase.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetClassLayout(System.IntPtr,System.Int32,System.Int32&,System.Int32&)",
+    "func": "metadata_import_get_class_layout",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetCustomAttributeProps(System.IntPtr,System.Int32,System.Int32&,System.Reflection.ConstArray&)",
+    "func": "metadata_import_get_custom_attribute_props",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetDefaultValue(System.IntPtr,System.Int32,System.Int64&,System.Char*&,System.Int32&,System.Int32&)",
+    "func": "metadata_import_get_default_value",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetFieldDefProps(System.IntPtr,System.Int32,System.Int32&)",
+    "func": "metadata_import_get_field_def_props",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetFieldMarshal(System.IntPtr,System.Int32,System.Reflection.ConstArray&)",
+    "func": "metadata_import_get_field_marshal",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetFieldOffset(System.IntPtr,System.Int32,System.Int32,System.Int32&,System.Boolean&)",
+    "func": "metadata_import_get_field_offset",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetMetadataImport(System.Reflection.RuntimeModule)",
+    "func": "get_metadata_import",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetMemberRefProps(System.IntPtr,System.Int32,System.Reflection.ConstArray&)",
+    "func": "metadata_import_get_member_ref_props",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetName(System.IntPtr,System.Int32,System.Byte*&)",
+    "func": "metadata_import_get_name",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetNamespace(System.IntPtr,System.Int32,System.Byte*&)",
+    "func": "metadata_import_get_namespace",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetParentToken(System.IntPtr,System.Int32,System.Int32&)",
+    "func": "metadata_import_get_parent_token",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetParamDefProps(System.IntPtr,System.Int32,System.Int32&,System.Int32&)",
+    "func": "metadata_import_get_param_def_props",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetPropertyProps(System.IntPtr,System.Int32,System.Void*&,System.Int32&,System.Reflection.ConstArray&)",
+    "func": "metadata_import_get_property_props",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetEventProps(System.IntPtr,System.Int32,System.Void*&,System.Int32&)",
+    "func": "metadata_import_get_event_props",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetScopeProps(System.IntPtr,System.Guid&)",
+    "func": "metadata_import_get_scope_props",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetSigOfFieldDef(System.IntPtr,System.Int32,System.Reflection.ConstArray&)",
+    "func": "metadata_import_get_sig_of_field_def",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetSigOfMethodDef(System.IntPtr,System.Int32,System.Reflection.ConstArray&)",
+    "func": "metadata_import_get_sig_of_method_def",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetSignatureFromToken(System.IntPtr,System.Int32,System.Reflection.ConstArray&)",
+    "func": "metadata_import_get_signature_from_token",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::GetUserString(System.IntPtr,System.Int32,System.Char*&,System.Int32&)",
+    "func": "metadata_import_get_user_string",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.MetadataImport::IsValidToken(System.IntPtr,System.Int32)",
+    "func": "metadata_import_is_valid_token",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimemodule.h"
+  },
+  {
+    "name": "System.Reflection.RuntimeAssembly::GetManifestResourceNames",
+    "func": "SystemReflectionRuntimeAssembly::get_manifest_resource_names",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimeassembly.h"
+  },
+  {
+    "name": "System.Reflection.RuntimeAssembly::GetManifestModule(System.Reflection.RuntimeAssembly)",
+    "func": "SystemReflectionRuntimeAssembly::get_manifest_module_internal",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimeassembly.h"
+  },
+  {
+    "name": "System.Reflection.RuntimeAssembly::GetTokenInternal(System.Reflection.RuntimeAssembly)",
+    "func": "SystemReflectionRuntimeAssembly::get_token_internal",
+    "header": "bcl/coreclr-net10/icalls/system_reflection_runtimeassembly.h"
+  },
+  {
+    "name": "System.Runtime.CompilerServices.RuntimeHelpers::InitializeArray",
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::initialize_array",
+    "header": "bcl/coreclr-net10/icalls/system_runtime_compilerservices_runtimehelpers.h"
+  },
+  {
+    "name": "System.Runtime.CompilerServices.RuntimeHelpers::RunClassConstructor(System.IntPtr)",
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::run_class_constructor",
+    "header": "bcl/coreclr-net10/icalls/system_runtime_compilerservices_runtimehelpers.h"
+  },
+  {
+    "name": "System.Runtime.CompilerServices.RuntimeHelpers::RunModuleConstructor(System.IntPtr)",
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::run_module_constructor",
+    "header": "bcl/coreclr-net10/icalls/system_runtime_compilerservices_runtimehelpers.h"
+  },
+  {
+    "name": "System.Runtime.CompilerServices.RuntimeHelpers::TryEnsureSufficientExecutionStack",
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::sufficient_execution_stack",
+    "header": "bcl/coreclr-net10/icalls/system_runtime_compilerservices_runtimehelpers.h"
+  },
+  {
+    "name": "System.Runtime.InteropServices.Marshal::GetDelegateForFunctionPointerInternal(System.IntPtr,System.Type)",
+    "func": "SystemRuntimeInteropServicesMarshal::get_delegate_for_function_pointer_internal",
+    "header": "bcl/coreclr-net10/icalls/system_runtime_interopservices_marshal.h"
+  },
+  {
+    "name": "System.Runtime.InteropServices.Marshal::GetFunctionPointerForDelegateInternal(System.Delegate)",
+    "func": "SystemRuntimeInteropServicesMarshal::get_function_pointer_for_delegate_internal",
+    "header": "bcl/coreclr-net10/icalls/system_runtime_interopservices_marshal.h"
+  },
+  {
+    "name": "System.Runtime.InteropServices.Marshal::GetLastPInvokeError()",
+    "func": "SystemRuntimeInteropServicesMarshal::get_last_win32_error",
+    "header": "bcl/coreclr-net10/icalls/system_runtime_interopservices_marshal.h"
+  },
+  {
+    "name": "System.Runtime.InteropServices.Marshal::OffsetOf(System.Type,System.String)",
+    "func": "SystemRuntimeInteropServicesMarshal::offset_of",
+    "header": "bcl/coreclr-net10/icalls/system_runtime_interopservices_marshal.h"
+  },
+  {
+    "name": "System.Runtime.InteropServices.Marshal::SetLastPInvokeError(System.Int32)",
+    "func": "SystemRuntimeInteropServicesMarshal::set_last_win32_error",
+    "header": "bcl/coreclr-net10/icalls/system_runtime_interopservices_marshal.h"
+  },
+  {
+    "name": "System.RuntimeFieldHandle::GetValueDirect(System.Reflection.RuntimeFieldInfo,System.RuntimeType,System.Void*,System.RuntimeType)",
+    "func": "SystemRuntimeFieldHandle::get_value_direct",
+    "header": "bcl/coreclr-net10/icalls/system_runtimefieldhandle.h"
+  },
+  {
+    "name": "System.RuntimeFieldHandle::SetValueDirect(System.Reflection.RuntimeFieldInfo,System.RuntimeType,System.Void*,System.Object,System.RuntimeType)",
+    "func": "SystemRuntimeFieldHandle::set_value_direct",
+    "header": "bcl/coreclr-net10/icalls/system_runtimefieldhandle.h"
+  },
+  {
+    "name": "System.RuntimeFieldHandle::GetStaticFieldForGenericType(System.RuntimeFieldHandleInternal,System.Runtime.CompilerServices.MethodTable*)",
+    "func": "SystemRuntimeFieldHandle::get_static_field_for_generic_type",
+    "header": "bcl/coreclr-net10/icalls/system_runtimefieldhandle.h"
+  },
+  {
+    "name": "System.RuntimeFieldHandle::IsFastPathSupported(System.Reflection.RtFieldInfo)",
+    "func": "SystemRuntimeFieldHandle::is_fast_path_supported",
+    "header": "bcl/coreclr-net10/icalls/system_runtimefieldhandle.h"
+  },
+  {
+    "name": "System.RuntimeMethodHandle::GetFunctionPointer(System.IntPtr)",
+    "func": "SystemRuntimeMethodHandle::get_function_pointer",
+    "header": "bcl/coreclr-net10/icalls/system_runtimemethodhandle.h"
+  },
+  {
+    "name": "System.Signature::GetParameterOffsetInternal(System.Void*,System.Int32,System.Int32)",
+    "func": "SystemSignature::get_parameter_offset_internal",
+    "header": "bcl/coreclr-net10/icalls/system_signature.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetArrayRank(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::get_array_rank",
+    "header": "bcl/coreclr-net10/icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetElementTypeHandle(System.IntPtr)",
+    "func": "SystemRuntimeTypeHandle::get_element_type_handle",
+    "header": "bcl/coreclr-net10/icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetUtf8NameInternal(System.Runtime.CompilerServices.MethodTable*)",
+    "func": "SystemRuntimeTypeHandle::get_utf8_name",
+    "header": "bcl/coreclr-net10/icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::GetAttributes",
+    "func": "SystemRuntimeTypeHandle::get_attributes",
+    "header": "bcl/coreclr-net10/icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::IsPrimitive(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::is_primitive",
+    "header": "bcl/coreclr-net10/icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::IsByRef(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::is_by_ref",
+    "header": "bcl/coreclr-net10/icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::IsPointer(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::is_pointer",
+    "header": "bcl/coreclr-net10/icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::IsGenericVariable",
+    "func": "SystemRuntimeTypeHandle::is_generic_variable",
+    "header": "bcl/coreclr-net10/icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.RuntimeTypeHandle::ContainsGenericVariables(System.RuntimeType)",
+    "func": "SystemRuntimeTypeHandle::contains_generic_variables",
+    "header": "bcl/coreclr-net10/icalls/system_runtimetypehandle.h"
+  },
+  {
+    "name": "System.String::FastAllocateString",
+    "func": "SystemString::fast_allocate_string",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::CompareExchange(System.Double&,System.Double,System.Double)",
+    "func": "SystemThreadingInterlocked::compare_exchange_f64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::CompareExchange(System.Int32&,System.Int32,System.Int32)",
+    "func": "SystemThreadingInterlocked::compare_exchange_i32",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::CompareExchange(System.Int32&,System.Int32,System.Int32,System.Boolean&)",
+    "func": "SystemThreadingInterlocked::compare_exchange2_i32",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::CompareExchange(System.Int64&,System.Int64,System.Int64)",
+    "func": "SystemThreadingInterlocked::compare_exchange_i64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::CompareExchange(System.IntPtr&,System.IntPtr,System.IntPtr)",
+    "func": "SystemThreadingInterlocked::compare_exchange_intptr",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::CompareExchange(System.Object&,System.Object&,System.Object&,System.Object&)",
+    "func": "SystemThreadingInterlocked::compare_exchange_object2",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::CompareExchange(System.Object&,System.Object,System.Object)",
+    "func": "SystemThreadingInterlocked::compare_exchange_object",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::CompareExchange(System.Single&,System.Single,System.Single)",
+    "func": "SystemThreadingInterlocked::compare_exchange_f32",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::Exchange(System.Double&,System.Double)",
+    "func": "SystemThreadingInterlocked::exchange_f64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::Exchange(System.Int32&,System.Int32)",
+    "func": "SystemThreadingInterlocked::exchange_i32",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::Exchange(System.Int64&,System.Int64)",
+    "func": "SystemThreadingInterlocked::exchange_i64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::Exchange(System.IntPtr&,System.IntPtr)",
+    "func": "SystemThreadingInterlocked::exchange_intptr",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::Exchange(System.Object&,System.Object&,System.Object&)",
+    "func": "SystemThreadingInterlocked::exchange_object",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Interlocked::Exchange(System.Single&,System.Single)",
+    "func": "SystemThreadingInterlocked::exchange_f32",
+    "header": "bcl/coreclr-net10/icalls/system_threading_interlocked.h"
+  },
+  {
+    "name": "System.Threading.Thread::InternalFinalize()",
+    "func": "SystemThreadingThread::internal_finalize",
+    "header": "bcl/coreclr-net10/icalls/system_threading_thread.h"
+  },
+  {
+    "name": "System.Threading.Thread::SleepInternal(System.Int32)",
+    "func": "SystemThreadingThread::sleep_internal",
+    "header": "bcl/coreclr-net10/icalls/system_threading_thread.h"
+  },
+  {
+    "name": "System.Threading.Thread::YieldInternal",
+    "func": "SystemThreadingThread::yield_internal",
+    "header": "bcl/coreclr-net10/icalls/system_threading_thread.h"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.Double&)",
+    "func": "SystemThreadingVolatile::read_f64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_volatile.h"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.Int64&)",
+    "func": "SystemThreadingVolatile::read_i64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_volatile.h"
+  },
+  {
+    "name": "System.Threading.Volatile::Read(System.UInt64&)",
+    "func": "SystemThreadingVolatile::read_u64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_volatile.h"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.Double&,System.Double)",
+    "func": "SystemThreadingVolatile::write_f64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_volatile.h"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.Int64&,System.Int64)",
+    "func": "SystemThreadingVolatile::write_i64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_volatile.h"
+  },
+  {
+    "name": "System.Threading.Volatile::Write(System.UInt64&,System.UInt64)",
+    "func": "SystemThreadingVolatile::write_u64",
+    "header": "bcl/coreclr-net10/icalls/system_threading_volatile.h"
+  }
+]

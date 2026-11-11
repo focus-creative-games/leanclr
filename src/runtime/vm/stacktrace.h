@@ -16,6 +16,16 @@ class StackTrace
                                          RtString** file_name, int32_t* line_number, int32_t* column_number);
 
     static RtResult<RtArray*> get_stack_trace(RtException* ex, int32_t skip_frames, bool need_file_info);
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static RtResultVoid set_stack_frame_data(RtObject* stack_frame, const metadata::RtMethodInfo* method, int32_t native_offset, int32_t il_offset,
+                                             RtString* file_name, int32_t line_number, int32_t column_number,
+                                             bool is_last_frame_from_foreign_exception_stack_trace);
+    static RtResultVoid get_stack_frame_data(RtObject* stack_frame, RtReflectionMethod** method, int32_t* native_offset, int32_t* il_offset,
+                                             RtString** file_name, int32_t* line_number, int32_t* column_number,
+                                             bool* is_last_frame_from_foreign_exception_stack_trace);
+#endif
 };
 } // namespace vm
 } // namespace leanclr

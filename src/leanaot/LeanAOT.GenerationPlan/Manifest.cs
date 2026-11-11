@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using System.Linq;
 using dnlib.DotNet;
 using LeanAOT.Core;
@@ -23,6 +23,11 @@ namespace LeanAOT.GenerationPlan
         public PgoMethodIncludeIndex PgoIncludeIndex;
         public int MaxGenericInstances = 2048;
         public int MaxGenericDepth = 32;
+
+        /// <summary>
+        /// Optional runtime-profile gate for methods that must stay on the interpreter path.
+        /// </summary>
+        public Func<MethodDef, bool> ShouldSkipUnsupportedRuntimeMethod;
     }
 
     public partial class Manifest
@@ -119,6 +124,12 @@ namespace LeanAOT.GenerationPlan
                         {
                             // aot or intrinsic methods must be aot
                             TryAddMethodPlan(methodPlans, methodsInAotPlan, method);
+                            continue;
+                        }
+
+                        if (args.ShouldSkipUnsupportedRuntimeMethod?.Invoke(method) == true)
+                        {
+                            s_logger.Debug($"[Manifest] Skip method (unsupported runtime intrinsic): {method.FullName} token: {method.MDToken}");
                             continue;
                         }
 

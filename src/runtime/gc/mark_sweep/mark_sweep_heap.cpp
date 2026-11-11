@@ -294,3 +294,36 @@ vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, s
 } // namespace leanclr
 
 #endif // LEANCLR_GC_MARK_SWEEP
+
+#if LEANCLR_BCL_CORECLR_NET10
+namespace leanclr
+{
+namespace gc
+{
+bool MarkSweepHeap::is_allocated_object(const vm::RtObject* obj)
+{
+    if (obj == nullptr || (reinterpret_cast<uintptr_t>(obj) % GC_ALIGN) != 0)
+    {
+        return false;
+    }
+
+    void* ptr = const_cast<vm::RtObject*>(obj);
+    if (get_s_big_object_arenas().find(ptr) != get_s_big_object_arenas().end())
+    {
+        return obj->klass != nullptr;
+    }
+
+    for (size_t i = 0; i < kSizeClassPoolCount; ++i)
+    {
+        SizeClassPool* pool = s_size_class_pools[i];
+        if (pool != nullptr && pool->contains_allocated_block(ptr))
+        {
+            return obj->klass != nullptr;
+        }
+    }
+
+    return false;
+}
+} // namespace gc
+} // namespace leanclr
+#endif

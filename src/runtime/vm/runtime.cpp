@@ -331,6 +331,18 @@ Runtime::State Runtime::get_state()
     return runtime_state;
 }
 
+template <typename Result>
+static Result check_initialization_step(const char* step, Result result)
+{
+    if (result.is_err())
+    {
+        char message[256];
+        std::snprintf(message, sizeof(message), "Runtime initialization failed at %s (error %u)", step, static_cast<unsigned>(result.unwrap_err()));
+        host::Services::log(host::LogLevel::Error, message);
+    }
+    return result;
+}
+
 RtResultVoid Runtime::initialize()
 {
     if (runtime_state != State::Uninitialized)
@@ -364,21 +376,22 @@ RtResultVoid Runtime::initialize()
     interp::MachineState::initialize();
     GC::initialize();
 
-    RET_ERR_ON_FAIL(Assembly::load_corlib());
-    RET_ERR_ON_FAIL(Class::initialize());
-    RET_ERR_ON_FAIL(ArrayClass::initialize());
-    RET_ERR_ON_FAIL(bcl::Adapter::validate_managed_layouts());
-    RET_ERR_ON_FAIL(String::initialize());
-    RET_ERR_ON_FAIL(Exception::initialize());
-    RET_ERR_ON_FAIL(Delegate::initialize());
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtAppDomain*, defaultAppDomain, AppDomain::init_default_app_domain());
+    RET_ERR_ON_FAIL(check_initialization_step("Assembly::load_corlib", Assembly::load_corlib()));
+    RET_ERR_ON_FAIL(check_initialization_step("Class::initialize", Class::initialize()));
+    RET_ERR_ON_FAIL(check_initialization_step("ArrayClass::initialize", ArrayClass::initialize()));
+    RET_ERR_ON_FAIL(check_initialization_step("BCL layout validation", bcl::Adapter::validate_managed_layouts()));
+    RET_ERR_ON_FAIL(check_initialization_step("String::initialize", String::initialize()));
+    RET_ERR_ON_FAIL(check_initialization_step("Exception::initialize", Exception::initialize()));
+    RET_ERR_ON_FAIL(check_initialization_step("Delegate::initialize", Delegate::initialize()));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtAppDomain*, defaultAppDomain,
+                                            check_initialization_step("AppDomain::init_default_app_domain", AppDomain::init_default_app_domain()));
     Thread::attach_current_thread(defaultAppDomain);
-    RET_ERR_ON_FAIL(AppDomain::initialize_context());
+    RET_ERR_ON_FAIL(check_initialization_step("AppDomain::initialize_context", AppDomain::initialize_context()));
 
     int32_t argc;
     const char** argv;
     Settings::get_command_line_arguments(argc, argv);
-    RET_ERR_ON_FAIL(Environment::init_cmdline_args(argv, argc));
+    RET_ERR_ON_FAIL(check_initialization_step("Environment::init_cmdline_args", Environment::init_cmdline_args(argv, argc)));
 
     metadata::RtModuleDef* corlib_mod = Assembly::get_corlib()->mod;
     auto corlib_aot_module_data = corlib_mod->get_aot_module_data();

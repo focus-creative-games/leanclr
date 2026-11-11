@@ -80,7 +80,7 @@ namespace Analysis
             icallsLines.Sort(compareFunc);
             pinvokeLines.Sort(compareFunc);
             intrinsicLines.Sort(compareFunc);
-            string outputDir = Path.GetDirectoryName(outputFile);
+            string? outputDir = Path.GetDirectoryName(outputFile);
             if (!string.IsNullOrEmpty(outputDir))
             {
                 Directory.CreateDirectory(outputDir);

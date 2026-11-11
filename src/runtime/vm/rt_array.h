@@ -165,6 +165,16 @@ class Array
 
     // Array cloning
     static RtResult<RtArray*> __clone(RtArray* old_arr LEANCLR_GC_DECLARE_CALL_SITE_PARAM) noexcept;
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static RtResultVoid szarray_interface_count_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
+                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
+    static RtResultVoid szarray_interface_copy_to_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
+                                                          const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
+    static RtResultVoid szarray_generic_get_enumerator_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
+                                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept;
+#endif
 };
 
 #if LEANCLR_GC_DEBUG

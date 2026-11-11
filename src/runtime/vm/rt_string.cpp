@@ -68,13 +68,23 @@ static RtResultVoid init_static_empty_string(metadata::RtClass* stringClass)
     if (!g_empty_string)
         RET_ERR(RtErr::OutOfMemory);
     RET_ERR_ON_FAIL(Field::set_static_value(emptyField, &g_empty_string));
+#if LEANCLR_BCL_CORECLR_NET10
+    // CoreLib's bootstrap value is supplied by the runtime. Reading it through
+    // reflection here would prematurely execute managed initialization.
+    RET_VOID_OK();
+#else
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, empty_str, Field::get_value_object(emptyField, nullptr));
     assert(empty_str == g_empty_string);
     RET_VOID_OK();
+#endif
 }
 
 static RtResultVoid init_redirected_ctor_method(metadata::RtClass* stringClass)
 {
+#if LEANCLR_BCL_CORECLR_NET10
+    g_redirectedCtorMethod = nullptr;
+    RET_VOID_OK();
+#else
     for (uint16_t i = 0; i < stringClass->method_count; ++i)
     {
         const metadata::RtMethodInfo* method = stringClass->methods[i];
@@ -87,12 +97,16 @@ static RtResultVoid init_redirected_ctor_method(metadata::RtClass* stringClass)
     }
     assert(false && "String directcted ctor method not found");
     RET_ASSERT_ERR(RtErr::ExecutionEngine);
+#endif
 }
 
 RtResultVoid String::initialize()
 {
     metadata::RtClass* stringClass = Class::get_corlib_types().cls_string;
     g_stringClass = stringClass;
+#if LEANCLR_BCL_CORECLR_NET10
+    RET_ERR_ON_FAIL(Class::initialize_all(stringClass));
+#endif
     RET_ERR_ON_FAIL(init_static_empty_string(stringClass));
     RET_ERR_ON_FAIL(init_redirected_ctor_method(stringClass));
     RET_VOID_OK();
@@ -228,3 +242,21 @@ bool String::is_interned_string(RtString* s)
 
 } // namespace vm
 } // namespace leanclr
+
+#if LEANCLR_BCL_CORECLR_NET10
+namespace leanclr
+{
+namespace vm
+{
+RtString* String::get_interned_string(RtString* s)
+{
+    if (s == nullptr)
+        return nullptr;
+    auto it = get_g_internTable().find(s);
+    if (it == get_g_internTable().end())
+        return nullptr;
+    return *it;
+}
+} // namespace vm
+} // namespace leanclr
+#endif

@@ -88,6 +88,15 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
         std::exit(-1);
     }
 
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    // Reporting an execution failure must not recursively execute the BCL's
+    // stack-trace machinery while that adapter is still being brought up.
+    utils::Utf8StringBuilder diagnostic;
+    vm::Exception::format_exception(ex, diagnostic);
+    std::cerr.write(diagnostic.get_const_chars(), static_cast<std::streamsize>(diagnostic.length()));
+    std::cerr << std::endl;
+    std::exit(-1);
+#endif
     auto* exception_object = reinterpret_cast<vm::RtObject*>(ex);
     const metadata::RtPropertyInfo* prop = vm::Class::get_property_for_name(exception_object->klass, "StackTrace", true);
     if (!prop || !prop->get_method)

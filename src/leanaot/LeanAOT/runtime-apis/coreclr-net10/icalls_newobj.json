@@ -1,0 +1,47 @@
+[
+  {
+    "name": "System.String::.ctor(System.Char*)",
+    "func": "newobj_utf16chars",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.Char*,System.Int32,System.Int32)",
+    "func": "newobj_utf16chars_range",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.Char,System.Int32)",
+    "func": "newobj_char_count",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.Char[])",
+    "func": "newobj_char_array",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.Char[],System.Int32,System.Int32)",
+    "func": "newobj_char_array_range",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.ReadOnlySpan`1<System.Char>)",
+    "func": "newobj_readonlyspan",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.SByte*)",
+    "func": "newobj_utf8chars",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.SByte*,System.Int32,System.Int32)",
+    "func": "newobj_utf8chars_range",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.SByte*,System.Int32,System.Int32,System.Text.Encoding)",
+    "func": "newobj_utf8chars_range_encoding",
+    "header": "bcl/coreclr-net10/icalls/system_string.h"
+  }
+]

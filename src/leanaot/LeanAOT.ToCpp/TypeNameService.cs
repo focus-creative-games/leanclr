@@ -33,7 +33,8 @@ namespace LeanAOT.ToCpp
 
         public bool IsPtrLikeSystemValueType(TypeDef typeDef)
         {
-            return MetaUtil.IsCorlibOrSystemOrSystemCore(typeDef.Module) && _ptrLikeTypeNames.Contains(typeDef.FullName);
+            return (GlobalServices.Inst?.IsCoreLibraryModule(typeDef.Module) ?? MetaUtil.IsCorlibOrSystemOrSystemCore(typeDef.Module))
+                && _ptrLikeTypeNames.Contains(typeDef.FullName);
         }
 
         public string GetCppTypeNameAsFieldOrArgOrLoc(TypeSig typeSig, TypeNameRelaxLevel relaxLevel)

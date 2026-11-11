@@ -1,0 +1,42 @@
+[
+  {
+    "name": "System.String::.ctor(System.Char*)",
+    "func": "newobj_utf16chars",
+    "header": "icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.Char*,System.Int32,System.Int32)",
+    "func": "newobj_utf16chars_range",
+    "header": "icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.Char,System.Int32)",
+    "func": "newobj_char_count",
+    "header": "icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.Char[])",
+    "func": "newobj_char_array",
+    "header": "icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.Char[],System.Int32,System.Int32)",
+    "func": "newobj_char_array_range",
+    "header": "icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.ReadOnlySpan`1<System.Char>)",
+    "func": "newobj_readonlyspan",
+    "header": "icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.SByte*)",
+    "func": "newobj_utf8chars",
+    "header": "icalls/system_string.h"
+  },
+  {
+    "name": "System.String::.ctor(System.SByte*,System.Int32,System.Int32)",
+    "func": "newobj_utf8chars_range",
+    "header": "icalls/system_string.h"
+  }
+]

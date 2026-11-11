@@ -2,9 +2,9 @@ name: Shared runtime and Mono compositions
 
 on:
   push:
-    branches: [core, mono, main, master]
+    branches: [core, mono, coreclr-net10, main, master]
   pull_request:
-    branches: [core, mono, main, master]
+    branches: [core, mono, coreclr-net10, main, master]
   workflow_dispatch:
 
 permissions:
@@ -39,7 +39,9 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: '8.0.x'
+          dotnet-version: |
+            8.0.x
+            10.0.204
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -197,3 +199,20 @@ jobs:
             out/fuzz-artifacts/
             out/sanitize/Testing/Temporary/LastTest.log
           if-no-files-found: ignore
+
+  net10-integration:
+    name: Minimal net10 integration baseline (Windows x64)
+    runs-on: windows-2022
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.204
+      - name: Build LeanAOT with both runtime catalogs
+        run: dotnet build src/leanaot/LeanAOT/LeanAOT.csproj -c Release
+      - name: Verify net10 interpreter and handle contracts
+        shell: pwsh
+        run: ./scripts/dotnet10/integration-baseline.ps1

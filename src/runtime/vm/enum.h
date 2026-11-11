@@ -20,6 +20,11 @@ class Enum
 
     // Get hash code of enum object
     static RtResult<int32_t> get_hash_code(RtObject* obj);
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static RtResult<std::tuple<bool, RtArray*, RtArray*>> get_enum_storage_values_and_names(metadata::RtClass* klass, bool get_names);
+#endif
 };
 } // namespace vm
 } // namespace leanclr

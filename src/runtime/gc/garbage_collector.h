@@ -37,6 +37,12 @@ class GarbageCollector
         GcHeapImpl::initialize(config);
     }
 
+#if LEANCLR_BCL_CORECLR_NET10
+    static bool is_allocated_object(const vm::RtObject* obj)
+    {
+        return GcHeapImpl::is_allocated_object(obj);
+    }
+#endif
     static void collect()
     {
         GcHeapImpl::collect();

@@ -3,6 +3,7 @@
 #include <unordered_set>
 
 #include "array_class.h"
+#include "method.h"
 #include "class.h"
 #include "metadata/metadata_cache.h"
 #include "alloc/metadata_allocation.h"
@@ -231,6 +232,36 @@ RtResultVoid ArrayClass::initialize_array_interface_methods()
     const CorLibTypes& corlib = Class::get_corlib_types();
     RET_ERR_ON_FAIL(Class::initialize_methods(corlib.cls_array));
 
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, helper, corlib.cls_array->image->get_class_by_name2("System", "SZArrayHelper", false, true));
+    RET_ERR_ON_FAIL(Class::initialize_methods(helper));
+
+    struct InterfaceTemplates
+    {
+        const char* name;
+        Vector<ArrayTemplateMethod>* methods;
+    };
+
+    InterfaceTemplates templates[] = {{"IList`1", &g_ilistGenericMethods},
+                                      {"ICollection`1", &g_icollectionGenericMethods},
+                                      {"IEnumerable`1", &g_ienumerableGenericMethods},
+                                      {"IReadOnlyList`1", &g_ireadonlyListGenericMethods},
+                                      {"IReadOnlyCollection`1", &g_ireadonlyCollectionGenericMethods}};
+    for (auto& target : templates)
+        for (uint16_t i = 0; i < helper->method_count; ++i)
+        {
+            const auto* method = helper->methods[i];
+            if (Method::is_static(method) || std::strcmp(method->name, STR_CTOR) == 0)
+                continue;
+            Utf8StringBuilder name;
+            name.append_cstr("System.Collections.Generic.");
+            name.append_cstr(target.name);
+            name.append_char('.');
+            name.append_cstr(method->name);
+            target.methods->push_back({method->name, name.dup_zero_terminated_chars(), method});
+        }
+    RET_VOID_OK();
+#else
     Utf8StringBuilder sb(128);
     for (size_t i = 0; i < corlib.cls_array->method_count; ++i)
     {
@@ -283,6 +314,7 @@ RtResultVoid ArrayClass::initialize_array_interface_methods()
         }
     }
     RET_VOID_OK();
+#endif
 }
 
 // Get array class from element type signature
@@ -544,8 +576,10 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
         else
             RET_ASSERT_ERR(RtErr::BadImageFormat);
 
+#if !defined(LEANCLR_BCL_CORECLR_NET10)
         if (iface->vtable_count != method_list->size())
             RET_ASSERT_ERR(RtErr::BadImageFormat);
+#endif
 
         for (size_t j = 0; j < iface->vtable_count; ++j)
         {

@@ -53,7 +53,12 @@ struct RtThread;
 
 using RtReflectionMonoType = RtReflectionRuntimeType;
 using RtReflectionGenericMethod = RtReflectionMethod;
+#if LEANCLR_BCL_CORECLR_NET10
+struct RtReflectionConstructor;
+struct RtSignature;
+#else
 using RtReflectionConstructor = RtReflectionMethod;
+#endif
 
 struct RtObject
 {
@@ -76,7 +81,11 @@ struct RtString : RtObject
 
 struct RtTypedReference
 {
+#if LEANCLR_BCL_CORECLR_NET10
+    const void* type_handle;
+#else
     const metadata::RtTypeSig* type_handle;
+#endif
     const void* value;
     const metadata::RtClass* klass;
 };
@@ -167,6 +176,10 @@ LEANCLR_OPAQUE_RESULT_ALIGNMENT(RtReflectionType, 2)
 LEANCLR_OPAQUE_RESULT_ALIGNMENT(RtReflectionRuntimeType, 2)
 LEANCLR_OPAQUE_RESULT_ALIGNMENT(RtReflectionField, 2)
 LEANCLR_OPAQUE_RESULT_ALIGNMENT(RtReflectionMethod, 2)
+#if LEANCLR_BCL_CORECLR_NET10
+LEANCLR_OPAQUE_RESULT_ALIGNMENT(RtReflectionConstructor, 2)
+LEANCLR_OPAQUE_RESULT_ALIGNMENT(RtSignature, 2)
+#endif
 LEANCLR_OPAQUE_RESULT_ALIGNMENT(RtMonoMethodInfo, 2)
 LEANCLR_OPAQUE_RESULT_ALIGNMENT(RtMonoPropertyInfo, 2)
 LEANCLR_OPAQUE_RESULT_ALIGNMENT(RtReflectionProperty, 2)

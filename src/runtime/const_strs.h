@@ -7,7 +7,12 @@ constexpr const char* STR_MODULE = "<Module>";
 constexpr const char* STR_SYSTEM = "System";
 constexpr const char* STR_VALUETYPE = "ValueType";
 constexpr const char* STR_ENUM = "Enum";
+#if LEANCLR_BCL_CORECLR_NET10
+constexpr const char* STR_SYSTEM_PRIVATE_CORELIB_NAME = "System.Private.CoreLib";
+constexpr const char* STR_CORLIB_NAME = "System.Private.CoreLib";
+#else
 constexpr const char* STR_CORLIB_NAME = "mscorlib";
+#endif
 
 constexpr const char* STR_SYSTEM_RUNTIME_INTEROPSERVICES = "System.Runtime.InteropServices";
 

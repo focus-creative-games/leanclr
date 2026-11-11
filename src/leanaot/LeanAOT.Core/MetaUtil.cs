@@ -27,6 +27,17 @@ namespace LeanAOT.Core
 
     public static class MetaUtil
     {
+        private static readonly HashSet<string> s_defaultCoreLibraryModules = new HashSet<string>(StringComparer.Ordinal)
+        {
+            "mscorlib",
+            "System",
+            "System.Core",
+            "System.Private.CoreLib",
+            "System.Runtime",
+            "netstandard",
+            "LeanCLR",
+        };
+
         public static string GetModuleNameWithoutExt(string moduleName)
         {
             return Path.GetFileNameWithoutExtension(moduleName);
@@ -930,8 +941,28 @@ namespace LeanAOT.Core
 
         public static bool IsCorlibOrSystemOrSystemCore(ModuleDef module)
         {
-            UTF8String moduleName = module.Assembly.Name;
-            return module.IsCoreLibraryModule == true || moduleName == "mscorlib" || moduleName == "System" || moduleName == "System.Core";
+            return IsCoreLibraryModule(module, s_defaultCoreLibraryModules);
+        }
+
+        public static bool IsCoreLibraryModule(ModuleDef module, IEnumerable<string> coreLibraryModules)
+        {
+            if (module == null)
+            {
+                return false;
+            }
+
+            if (module.IsCoreLibraryModule == true)
+            {
+                return true;
+            }
+
+            string moduleName = module.Assembly?.Name?.ToString();
+            if (string.IsNullOrEmpty(moduleName))
+            {
+                moduleName = GetModuleNameWithoutExt(module.Name?.ToString());
+            }
+
+            return !string.IsNullOrEmpty(moduleName) && coreLibraryModules.Contains(moduleName);
         }
 
         public static bool IsMonoPInvokeCallbackAttribute(CustomAttribute ca)

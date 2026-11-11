@@ -42,8 +42,10 @@ RtResult<std::tuple<bool, RtArray*, RtArray*>> Enum::get_enum_values_and_names(m
 
     // Create arrays for values and names
     const auto& corlib_types = Class::get_corlib_types();
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, values, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_uint64, enum_item_count, "Enum::get_enum_values_and_names"));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, names, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_string, enum_item_count, "Enum::get_enum_values_and_names"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        RtArray*, values, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_uint64, enum_item_count, "Enum::get_enum_values_and_names"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        RtArray*, names, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_string, enum_item_count, "Enum::get_enum_values_and_names"));
 
     // Fill arrays
     int32_t index = 0;
@@ -204,3 +206,164 @@ RtResult<int32_t> Enum::get_hash_code(RtObject* obj)
 
 } // namespace vm
 } // namespace leanclr
+
+#if LEANCLR_BCL_CORECLR_NET10
+namespace leanclr
+{
+namespace vm
+{
+static RtResult<int32_t> get_enum_item_count(metadata::RtClass* klass)
+{
+    int32_t count = 0;
+    for (uint16_t index = 0; index < klass->field_count; ++index)
+        if (is_enum_item_field(&klass->fields[index]))
+            ++count;
+    return count;
+}
+
+static RtResult<const metadata::RtClass*> get_unsigned_storage_class(metadata::RtElementType enum_item_type)
+{
+    const auto& corlib_types = Class::get_corlib_types();
+    switch (enum_item_type)
+    {
+    case metadata::RtElementType::Boolean:
+    case metadata::RtElementType::I1:
+    case metadata::RtElementType::U1:
+        RET_OK(corlib_types.cls_byte);
+    case metadata::RtElementType::I2:
+    case metadata::RtElementType::U2:
+        RET_OK(corlib_types.cls_uint16);
+    case metadata::RtElementType::Char:
+        RET_OK(corlib_types.cls_char);
+    case metadata::RtElementType::I4:
+    case metadata::RtElementType::U4:
+        RET_OK(corlib_types.cls_uint32);
+    case metadata::RtElementType::I8:
+    case metadata::RtElementType::U8:
+        RET_OK(corlib_types.cls_uint64);
+    case metadata::RtElementType::I:
+    case metadata::RtElementType::U:
+        RET_OK(corlib_types.cls_uintptr);
+    default:
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
+    }
+}
+
+static RtResult<uint64_t> get_enum_const_data_as_raw_unsigned(const void* rva_data, metadata::RtElementType enum_item_type)
+{
+    if (rva_data == nullptr)
+    {
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
+    }
+
+    switch (enum_item_type)
+    {
+    case metadata::RtElementType::Boolean:
+    case metadata::RtElementType::I1:
+    case metadata::RtElementType::U1:
+        RET_OK(static_cast<uint64_t>(*static_cast<const uint8_t*>(rva_data)));
+    case metadata::RtElementType::I2:
+    case metadata::RtElementType::Char:
+    case metadata::RtElementType::U2:
+        RET_OK(static_cast<uint64_t>(*static_cast<const uint16_t*>(rva_data)));
+    case metadata::RtElementType::I4:
+    case metadata::RtElementType::U4:
+        RET_OK(static_cast<uint64_t>(*static_cast<const uint32_t*>(rva_data)));
+    case metadata::RtElementType::I8:
+    case metadata::RtElementType::U8:
+        RET_OK(*static_cast<const uint64_t*>(rva_data));
+    case metadata::RtElementType::I:
+    case metadata::RtElementType::U:
+        RET_OK(static_cast<uint64_t>(*static_cast<const uintptr_t*>(rva_data)));
+    default:
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
+    }
+}
+
+static RtResultVoid set_unsigned_storage_value(RtArray* values, int32_t index, uint64_t value, metadata::RtElementType enum_item_type)
+{
+    switch (enum_item_type)
+    {
+    case metadata::RtElementType::Boolean:
+    case metadata::RtElementType::I1:
+    case metadata::RtElementType::U1:
+        Array::set_array_data_at<uint8_t>(values, index, static_cast<uint8_t>(value));
+        RET_VOID_OK();
+    case metadata::RtElementType::I2:
+    case metadata::RtElementType::Char:
+    case metadata::RtElementType::U2:
+        Array::set_array_data_at<uint16_t>(values, index, static_cast<uint16_t>(value));
+        RET_VOID_OK();
+    case metadata::RtElementType::I4:
+    case metadata::RtElementType::U4:
+        Array::set_array_data_at<uint32_t>(values, index, static_cast<uint32_t>(value));
+        RET_VOID_OK();
+    case metadata::RtElementType::I8:
+    case metadata::RtElementType::U8:
+        Array::set_array_data_at<uint64_t>(values, index, value);
+        RET_VOID_OK();
+    case metadata::RtElementType::I:
+    case metadata::RtElementType::U:
+        Array::set_array_data_at<uintptr_t>(values, index, static_cast<uintptr_t>(value));
+        RET_VOID_OK();
+    default:
+        RET_ASSERT_ERR(RtErr::ExecutionEngine);
+    }
+}
+
+RtResult<std::tuple<bool, RtArray*, RtArray*>> Enum::get_enum_storage_values_and_names(metadata::RtClass* klass, bool get_names)
+{
+    assert(Class::is_enum_type(klass));
+    RET_ERR_ON_FAIL(Class::initialize_all(klass));
+
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, enum_item_count, get_enum_item_count(klass));
+
+    metadata::RtElementType enum_item_type = Class::get_enum_element_type(klass);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtClass*, storage_class, get_unsigned_storage_class(enum_item_type));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        RtArray*, values, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(storage_class, enum_item_count, "Enum::get_enum_storage_values_and_names"));
+
+    RtArray* names = nullptr;
+    if (get_names)
+    {
+        const auto& corlib_types = Class::get_corlib_types();
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+            RtArray*, names_array,
+            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_string, enum_item_count, "Enum::get_enum_storage_values_and_names"));
+        names = names_array;
+    }
+
+    int32_t index = 0;
+    bool sorted = true;
+    uint64_t last_value = 0;
+    for (uint16_t i = 0; i < klass->field_count; i++)
+    {
+        const metadata::RtFieldInfo* field = &klass->fields[i];
+        if (!is_enum_item_field(field))
+        {
+            continue;
+        }
+
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const void*, rva_data, Field::get_field_const_data(field));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint64_t, value, get_enum_const_data_as_raw_unsigned(rva_data, enum_item_type));
+
+        if (index > 0 && value < last_value)
+        {
+            sorted = false;
+        }
+        last_value = value;
+
+        RET_ERR_ON_FAIL(set_unsigned_storage_value(values, index, value, enum_item_type));
+        if (names)
+        {
+            Array::set_array_data_at<RtString*>(names, index, String::create_string_from_utf8cstr(field->name));
+        }
+        index++;
+    }
+
+    assert(index == enum_item_count);
+    RET_OK(std::make_tuple(sorted, values, names));
+}
+} // namespace vm
+} // namespace leanclr
+#endif

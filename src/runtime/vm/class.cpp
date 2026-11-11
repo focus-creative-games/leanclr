@@ -1,6 +1,7 @@
 #include <functional>
 
 #include "class.h"
+#include "host/services.h"
 #include "bcl/adapter.h"
 #include "const_strs.h"
 #include "rt_managed_types.h"
@@ -422,6 +423,24 @@ RtResultVoid Class::initialize_all(metadata::RtClass* klass)
     if (!try_set_initialized_part(klass, metadata::RtClassInitPart::All))
         RET_VOID_OK();
 
+#if LEANCLR_BCL_CORECLR_NET10
+    const auto check_part = [klass](const char* part, RtResultVoid result)
+    {
+        if (result.is_err())
+            host::Services::logf(host::LogLevel::Error, "Type initialization failed: %s.%s / %s (error %u)", klass->namespaze, klass->name, part,
+                                 static_cast<unsigned>(result.unwrap_err()));
+        return result;
+    };
+    RET_ERR_ON_FAIL(check_part("super types", initialize_super_types(klass)));
+    RET_ERR_ON_FAIL(check_part("interfaces", initialize_interfaces(klass)));
+    RET_ERR_ON_FAIL(check_part("nested classes", initialize_nested_classes(klass)));
+    RET_ERR_ON_FAIL(check_part("fields", initialize_fields(klass)));
+    RET_ERR_ON_FAIL(check_part("methods", initialize_methods(klass)));
+    RET_ERR_ON_FAIL(check_part("properties", initialize_properties(klass)));
+    RET_ERR_ON_FAIL(check_part("events", initialize_events(klass)));
+    RET_ERR_ON_FAIL(check_part("vtables", initialize_vtables(klass)));
+#else
+
     RET_ERR_ON_FAIL(initialize_super_types(klass));
     RET_ERR_ON_FAIL(initialize_interfaces(klass));
     RET_ERR_ON_FAIL(initialize_nested_classes(klass));
@@ -430,6 +449,7 @@ RtResultVoid Class::initialize_all(metadata::RtClass* klass)
     RET_ERR_ON_FAIL(initialize_properties(klass));
     RET_ERR_ON_FAIL(initialize_events(klass));
     RET_ERR_ON_FAIL(initialize_vtables(klass));
+#endif
 
     RET_VOID_OK();
 }
@@ -1268,7 +1288,13 @@ RtResultVoid Class::setup_properties_typedef(metadata::RtClass* klass)
         UNWRAP_OR_RET_ERR_ON_FAIL(property->name, mod->get_string(propertyRow.name));
         property->token = metadata::RtToken::encode(metadata::TableType::Property, propertyRid);
         property->flags = propertyRow.flags;
-        UNWRAP_OR_RET_ERR_ON_FAIL(property->property_sig, mod->read_property_sig(propertyRow.type_, get_generic_container_context(klass), nullptr));
+        auto property_signature = mod->read_property_sig(propertyRow.type_, get_generic_container_context(klass), nullptr);
+        if (property_signature.is_err())
+        {
+            host::Services::logf(host::LogLevel::Error, "Invalid property signature: %s.%s::%s", klass->namespaze, klass->name, property->name);
+            return property_signature.unwrap_err();
+        }
+        property->property_sig = std::move(property_signature.unwrap());
 
         uint32_t associationEncodedIdx = metadata::RtMetadata::encode_has_semantics_coded_index(metadata::TableType::Property, propertyRid);
         auto optMethodSemanticsRange = cliImage.find_row_range_of_owner_at_sorted_table(metadata::TableType::MethodSemantics, 2, associationEncodedIdx);
@@ -1280,7 +1306,14 @@ RtResultVoid Class::setup_properties_typedef(metadata::RtClass* klass)
                 auto optMethodSemanticsRow = cliImage.read_method_semantics(methodSemanticsRid);
                 assert(optMethodSemanticsRow && "MethodSemantics row should exist");
                 const metadata::RowMethodSemantics& methodSemanticsRow = optMethodSemanticsRow.value();
-                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, mod->get_method_by_rid(methodSemanticsRow.method));
+                auto method_result = mod->get_method_by_rid(methodSemanticsRow.method);
+                if (method_result.is_err())
+                {
+                    host::Services::logf(host::LogLevel::Error, "Invalid property accessor: %s.%s::%s (method row %u)", klass->namespaze, klass->name,
+                                         property->name, methodSemanticsRow.method);
+                    return method_result.unwrap_err();
+                }
+                const metadata::RtMethodInfo* method = method_result.unwrap();
                 if ((methodSemanticsRow.semantics & (uint16_t)metadata::RtMethodSemanticsAttributes::Getter) != 0)
                 {
                     property->get_method = method;
@@ -1500,6 +1533,11 @@ static RtResultVoid setup_methodimpl_vtable(metadata::RtClass* klass, const meta
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, declaration_method,
                                                     method_impl_declaring_klass->image->get_method_by_token(decl_token, gcc, nullptr));
 
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+            // Static interface implementations do not occupy instance vtable slots.
+            if (Method::is_static(declaration_method) && Method::is_static(body_method))
+                continue;
+#endif
             if (!Method::is_virtual(declaration_method) || !Method::is_virtual(body_method))
                 RET_ASSERT_ERR(RtErr::BadImageFormat);
 

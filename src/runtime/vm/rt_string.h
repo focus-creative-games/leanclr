@@ -14,14 +14,19 @@ class String
     static RtString* get_empty_string();
     static RtString* create_string_from_utf16chars(const Utf16Char* str, int32_t length);
     static RtString* create_string_from_utf8chars(const char* str, int32_t length);
+
     static RtString* create_string_from_utf8cstr(const char* str)
     {
-        if (!str) return nullptr;
+        if (!str)
+            return nullptr;
         const size_t length = std::strlen(str);
-        if (length > INT32_MAX) return nullptr;
+        if (length > INT32_MAX)
+            return nullptr;
         return create_string_from_utf8chars(str, static_cast<int32_t>(length));
     }
+
     static const metadata::RtMethodInfo* get_redirected_ctor_method();
+
     static constexpr int32_t get_offset_to_string_data()
     {
         return RT_STRING_FIRST_CHAR_OFFSET;
@@ -59,6 +64,11 @@ class String
     static RtString* fast_allocate_string(int32_t length);
     static RtString* intern_string(RtString* s);
     static bool is_interned_string(RtString* s);
+
+  public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static RtString* get_interned_string(RtString* s);
+#endif
 };
 } // namespace vm
 } // namespace leanclr

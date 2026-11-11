@@ -50,8 +50,7 @@ struct GcMarkContext
         return ctx->alive_object_bitmap.mark(obj);
     }
 
-    explicit GcMarkContext(GCAliveObjectBitmap& alive_object_bitmap)
-        : alive_object_bitmap(alive_object_bitmap), scanner(visit, this)
+    explicit GcMarkContext(GCAliveObjectBitmap& alive_object_bitmap) : alive_object_bitmap(alive_object_bitmap), scanner(visit, this)
     {
     }
 };
@@ -80,6 +79,15 @@ void GcRoots::foreach_root(GCAliveObjectBitmap& alive_object_bitmap)
     vm::GCHandle::foreach_strong_handles(on_visit_object, &ctx);
     ctx.scanner.visit_all_classes_static_data();
     ctx.scanner.finish_visit();
+#if LEANCLR_BCL_CORECLR_NET10
+    // Ephemerons do not root their keys. Mark values only after their keys are
+    // reachable, iterating until values can no longer make another key live.
+    while (vm::GCHandle::visit_dependent_handles(
+        [](vm::RtObject* object, void* context) { return static_cast<GcMarkContext*>(context)->alive_object_bitmap.is_marked(object); }, on_visit_object, &ctx))
+    {
+        ctx.scanner.finish_visit();
+    }
+#endif
 }
 
 } // namespace gc

@@ -1844,6 +1844,9 @@ RtResult<RtCustomAttributeRawData> RtModuleDef::get_custom_attribute_raw_data(ui
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtMethodInfo*, constructorMethod,
                                             get_method_by_token(constructorToken, RtGenericContainerContext{}, nullptr));
     auto ret = RtCustomAttributeRawData{constructorMethod, row.value};
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    ret.ctor_token = constructorToken.to_encoded_id();
+#endif
     RET_OK(ret);
 }
 
@@ -1896,13 +1899,22 @@ RtResult<const RtMethodInfo*> RtModuleDef::get_method_by_rid(uint32_t rid)
     }
     uint32_t typeDefRid = opt_typeDefRid.value();
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, klass, get_class_by_type_def_rid(typeDefRid));
+#if LEANCLR_BCL_CORECLR_NET10
+    // Resolving a metadata accessor must not recursively construct its owner's
+    // dispatch tables while that type's properties are still being loaded.
+    RET_ERR_ON_FAIL(vm::Class::initialize_methods(klass));
+#else
     RET_ERR_ON_FAIL(vm::Class::initialize_vtables(klass));
+#endif
     assert(klass->method_count > 0);
     uint32_t firstMethodRid = RtToken::decode_rid(klass->methods[0]->token);
     assert(rid >= firstMethodRid && rid < firstMethodRid + klass->method_count);
     method = klass->methods[rid - firstMethodRid];
     assert(method != nullptr);
     assert(RtToken::decode_rid(method->token) == rid);
+#if LEANCLR_BCL_CORECLR_NET10
+    _methods[rid - 1] = method;
+#endif
     RET_OK(method);
 }
 

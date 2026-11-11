@@ -254,7 +254,8 @@ void* SizeClassPool::allocate_block()
         return _current_arena->allocate_block();
     }
 
-    if (!_arenas.try_reserve(_arenas.size() + 1)) return nullptr;
+    if (!_arenas.try_reserve(_arenas.size() + 1))
+        return nullptr;
     _current_arena = allocate_arena();
     if (_current_arena == nullptr)
     {
@@ -306,3 +307,55 @@ void SizeClassPool::sweep(const GCAliveObjectBitmap& alive_object_bitmap, int64_
 } // namespace leanclr
 
 #endif // LEANCLR_GC_MARK_SWEEP
+
+#if LEANCLR_BCL_CORECLR_NET10
+namespace leanclr
+{
+namespace gc
+{
+bool SmallHeapArena::contains_allocated_block(const void* ptr) const
+{
+    if (ptr == nullptr || _data == nullptr)
+    {
+        return false;
+    }
+
+    uintptr_t block_addr = reinterpret_cast<uintptr_t>(ptr);
+    uintptr_t data_addr = reinterpret_cast<uintptr_t>(_data);
+    uintptr_t data_end = data_addr + _block_count * _block_size;
+    if (block_addr < data_addr || block_addr >= data_end)
+    {
+        return false;
+    }
+
+    uintptr_t offset = block_addr - data_addr;
+    if (offset % _block_size != 0)
+    {
+        return false;
+    }
+
+    return is_block_in_use(static_cast<size_t>(offset / _block_size));
+}
+} // namespace gc
+} // namespace leanclr
+#endif
+
+#if LEANCLR_BCL_CORECLR_NET10
+namespace leanclr
+{
+namespace gc
+{
+bool SizeClassPool::contains_allocated_block(const void* ptr) const
+{
+    for (size_t i = 0; i < _arenas.size(); ++i)
+    {
+        if (_arenas[i]->contains_allocated_block(ptr))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace gc
+} // namespace leanclr
+#endif

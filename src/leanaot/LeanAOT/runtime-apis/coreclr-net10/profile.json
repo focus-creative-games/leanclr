@@ -1,0 +1,16 @@
+{
+  "name": "coreclr-net10",
+  "coreLibraryModules": [
+    "System.Private.CoreLib",
+    "System.Runtime",
+    "System.Console",
+    "System.Collections",
+    "System.Linq",
+    "System.Threading",
+    "System.Runtime.InteropServices",
+    "System.Reflection",
+    "System.Private.Uri",
+    "netstandard",
+    "LeanCLR"
+  ]
+}
