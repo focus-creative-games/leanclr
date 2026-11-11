@@ -3,6 +3,7 @@ import argparse
 import hashlib
 import json
 import random
+import platform
 import statistics
 import subprocess
 from pathlib import Path
@@ -67,6 +68,8 @@ def main():
     artifacts = dict(native_probe=output / 'probe-native/Release/core-standard.exe', wasm_probe=output / 'probe-wasm/core-standard.wasm',
                      native_aot=output / 'aot/native/Release/aot-baseline.exe', wasm_aot=output / 'aot/wasm/aot-baseline.wasm')
     result = dict(stage=opts.stage, commit=subprocess.check_output(['git','rev-parse','HEAD'],cwd=ROOT,text=True).strip(), samples=rows, summary=summaries,
+                  platform=platform.platform(), cpu=platform.processor(), node_version=subprocess.check_output(['node', '--version'], text=True).strip(),
+                  source_hashes={str(p.relative_to(ROOT)):sha(p) for p in [ROOT / 'src/benchmarks/core-standard/main.cpp', ROOT / 'src/runtime/core/stl_compat.h', ROOT / 'src/runtime/build_config.h', ROOT / 'src/runtime/interp/transformer.h']},
                   managed_sha256=sha(output / 'aot/managed/AotBaseline.dll'), artifacts={k:dict(sha256=sha(v),**sizes(v)) for k,v in artifacts.items()},
                   manifest=json.loads((output / 'aot/build-manifest.json').read_text()),
                   probe_toolchains={p.relative_to(ROOT).as_posix():p.read_text() for p in output.glob('probe-*/CMakeFiles/*/CMakeCXXCompiler.cmake')},
@@ -75,6 +78,21 @@ def main():
                          'String-view inputs outlive the map. Optional moves are checked for ownership without assuming moved-from disengagement.',
                          'Seven process samples after builds; uncontrolled CPU frequency/background activity, not a universal performance claim.',
                          'AOT arithmetic/calls/arrays/interfaces/structs/generics/EH/returns use legacy protocol and disabled callsite caches.'])
+    if opts.stage == 'upgraded':
+        before = json.loads((ROOT / 'out/performance/cpp-standard/baseline/results.json').read_text())
+        assert before['managed_sha256'] == result['managed_sha256'], 'Managed benchmark input changed'
+        identity = lambda row: (row['engine'], row.get('workload', 'string-view-map'))
+        checksums = {identity(row):row['checksum'] for row in before['samples']}
+        assert all(checksums[identity(row)] == row['checksum'] for row in rows), 'Benchmark results changed'
+        comparison = []
+        for row in summaries:
+            old = next(r for r in before['summary'] if identity(r) == identity(row))
+            comparison.append(dict(engine=row['engine'], workload=row['workload'], before=old, after=row,
+                                   median_delta_percent=(row['median_ns']/old['median_ns']-1)*100,
+                                   ranges_overlap=max(old['min_ns'],row['min_ns']) <= min(old['max_ns'],row['max_ns'])))
+        result['comparison'] = comparison
+        for row in rows:
+            if row['engine'].endswith('probe'): assert row['standard'] == 201703
     (output / 'results.json').write_text(json.dumps(result,indent=2)+'\n')
 
 
