@@ -185,7 +185,7 @@ namespace LeanAOT.ToCpp
                 _implWriter.AddLine("nullptr,");
                 _implWriter.AddLine("0,");
             }
-            _implWriter.AddLine(GlobalServices.Inst.Config.LightweightAotReturns ? "1," : "0,");
+            _implWriter.AddLine($"{ReturnProtocol.Flags},");
             _implWriter.DecreaseIndent();
             _implWriter.AddLine("};");
         }

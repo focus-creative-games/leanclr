@@ -37,6 +37,29 @@ public static class Benchmarks
     static readonly GenericTransform GenericTransformer = new GenericTransform();
     static readonly Box PropertyBox = new Box();
     [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint UInt32ReturnLeaf(uint x, int divisor) { return unchecked(x * 1664525u + (uint)(12345 / divisor)); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint UInt32ReturnMiddle(uint x, int divisor) { uint y = UInt32ReturnLeaf(x, divisor); return unchecked((y ^ 0xFEDCBA98u) + 17u); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint UInt32ReturnTop(uint x, int divisor) { uint y = UInt32ReturnMiddle(x, divisor); return unchecked(y * 17u + 19u); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int Int32ReturnLeaf(int x, int divisor) { return unchecked(x * 1664525 + 12345 / divisor); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int Int32ReturnMiddle(int x, int divisor) { int y = Int32ReturnLeaf(x, divisor); return unchecked((y ^ -19088744) + 17); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int Int32ReturnTop(int x, int divisor) { int y = Int32ReturnMiddle(x, divisor); return unchecked(y * 17 + 19); }
+    public static uint UInt32Returns(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i) seed = UInt32ReturnTop(seed, 7);
+        return seed;
+    }
+    public static uint Int32Returns(int n, uint seed)
+    {
+        int value = unchecked((int)seed);
+        for (int i = 0; i < n; ++i) value = Int32ReturnTop(value, 7);
+        return unchecked((uint)value);
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
     public static void VoidReturnLeaf(Box box, int divisor) { box.Value = unchecked(box.Value * 1664525u + (uint)(12345 / divisor)); }
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void VoidReturnMiddle(Box box, int divisor) { VoidReturnLeaf(box, divisor); box.Value ^= 19u; }

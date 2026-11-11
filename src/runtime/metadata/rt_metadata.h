@@ -576,7 +576,7 @@ struct RtMethodInfo
     uint16_t total_arg_stack_object_size;
     uint16_t ret_stack_object_size;
     RtInvokerType invoker_type;
-    uint8_t aot_return_protocol; // Fits existing padding; bound once with the method pointers.
+    uint8_t aot_return_protocol; // Flags: bit 0 void/reference, bit 1 packed int32. Fits existing padding; bound once.
 #if LEANCLR_PGO_PROFILE
     uint32_t profile_slot;
 #endif

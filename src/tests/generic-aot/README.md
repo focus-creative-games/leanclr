@@ -62,3 +62,8 @@ it verifies the original resolver path. Add `--interface-cache-entries 2` to
 select two receivers per site under the same total per-method storage budget.
 See [the two-entry report](../../../docs/performance/aot-interface-dispatch-two.md) and
 [the interface dispatch report](../../../docs/performance/aot-interface-dispatch.md).
+
+Add `--packed-int32-returns` to either test runner for the independent int/uint
+return trial. `scripts/test/int32-returns.py --emsdk ...` archives all four
+protocol combinations and mixed-target ABI checks. See
+[the integer return report](../../../docs/performance/aot-int32-returns.md).

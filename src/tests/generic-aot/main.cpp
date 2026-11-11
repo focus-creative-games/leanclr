@@ -10,6 +10,7 @@
 #include "vm/settings.h"
 #include "vm/object.h"
 #include "vm/rt_string.h"
+#include "vm/rt_exception.h"
 #include "codegen/aot_result.h"
 #include "../aot-returns/test_assert.h"
 #include <cstdio>
@@ -99,6 +100,105 @@ static int32_t invoke_int(const metadata::RtMethodInfo* method, const void** arg
     return *reinterpret_cast<const int32_t*>(result.unwrap() + 1);
 }
 
+template <typename T>
+static RtResult<T> legacy_integer(vm::RtObject*, T value) noexcept
+{
+    if (injected_error)
+        return RtErr::OutOfMemory;
+    return value;
+}
+
+template <typename T>
+static codegen::AotInt32Result<T> packed_integer(vm::RtObject* object, T value) noexcept
+{
+    return legacy_integer(object, value);
+}
+
+static RtResult<int32_t> legacy_generic_integer(vm::RtObject*, const metadata::RtMethodInfo* context) noexcept
+{
+    check(context && context->generic_method && context->generic_method->generic_context.class_inst, "generic mixed ABI context missing");
+    if (injected_error)
+        return RtErr::OutOfMemory;
+    return INT32_MIN;
+}
+
+static codegen::AotInt32Result<int32_t> packed_generic_integer(vm::RtObject* object, const metadata::RtMethodInfo* context) noexcept
+{
+    return legacy_generic_integer(object, context);
+}
+
+static void integer_bridge_checks(metadata::RtClass* fixture)
+{
+    for (const char* name : {"CodeReader", "IntegerReader", "UnsignedReader"})
+    {
+        auto nested = vm::Class::find_nested_class_by_name(fixture, name, false);
+        check(nested.is_ok() && nested.unwrap() && vm::Class::initialize_all(nested.unwrap()).is_ok(), "integer reader type");
+        auto object = LEANCLR_NEWOBJ(nested.unwrap(), gc::GcAllocSite::make_internal(__FILE__, __LINE__, "mixed integer ABI"));
+        check(object.is_ok(), "integer reader allocation");
+        auto* target = const_cast<metadata::RtMethodInfo*>(vm::Method::find_matched_method_in_class_by_name(nested.unwrap(), "Read"));
+        const auto original = *target;
+        const bool enumeration = std::strcmp(name, "CodeReader") == 0;
+        const bool unsigned_value = std::strcmp(name, "UnsignedReader") == 0;
+        const auto* bridge = vm::Method::find_matched_method_in_class_by_name(fixture, enumeration      ? "EnumBridge"
+                                                                                       : unsigned_value ? "UnsignedBridge"
+                                                                                                        : "IntegerBridge");
+        for (uint8_t flags = 0; flags < 4; ++flags)
+        {
+            target->aot_return_protocol = flags;
+            const bool packed = !enumeration && (flags & 2);
+            target->method_ptr = target->virtual_method_ptr = unsigned_value
+                                                                  ? (packed ? reinterpret_cast<metadata::RtManagedMethodPointer>(packed_integer<uint32_t>)
+                                                                            : reinterpret_cast<metadata::RtManagedMethodPointer>(legacy_integer<uint32_t>))
+                                                                  : (packed ? reinterpret_cast<metadata::RtManagedMethodPointer>(packed_integer<int32_t>)
+                                                                            : reinterpret_cast<metadata::RtManagedMethodPointer>(legacy_integer<int32_t>));
+            for (uint32_t value : {0u, 1u, 0x7FFFFFFFu, 0x80000000u, 0xFFFFFFFFu})
+            {
+                const void* args[] = {object.unwrap(), &value};
+                injected_error = false;
+                auto success = vm::Runtime::invoke_with_run_cctor(bridge, nullptr, args);
+                check(success.is_ok() && success.unwrap() && *reinterpret_cast<const uint32_t*>(success.unwrap() + 1) == value,
+                      "mixed integer/enum value lost");
+                injected_error = true;
+                auto failure = vm::Runtime::invoke_with_run_cctor(bridge, nullptr, args);
+                check(failure.is_err() && failure.unwrap_err() == RtErr::ManagedException && vm::Exception::get_current_exception() &&
+                          reinterpret_cast<vm::RtObject*>(vm::Exception::get_current_exception())->klass ==
+                              vm::Class::get_corlib_types().cls_out_of_memory_exception,
+                      "mixed integer OOM propagation");
+            }
+        }
+        *target = original;
+    }
+    auto generic_def = vm::Class::find_nested_class_by_name(fixture, "GenericReader`1", false);
+    check(generic_def.is_ok() && generic_def.unwrap(), "generic mixed ABI reader");
+    const auto* argument = vm::Class::get_corlib_types().cls_int32->by_val;
+    auto inst = metadata::MetadataCache::get_pooled_generic_inst(&argument, 1);
+    check(inst.is_ok(), "generic mixed ABI arguments");
+    auto closed = vm::GenericClass::get_class(vm::Class::get_type_def_gid(generic_def.unwrap()), inst.unwrap());
+    check(closed.is_ok() && vm::Class::initialize_all(closed.unwrap()).is_ok(), "generic mixed ABI class");
+    auto object = LEANCLR_NEWOBJ(closed.unwrap(), gc::GcAllocSite::make_internal(__FILE__, __LINE__, "generic mixed integer ABI"));
+    check(object.is_ok(), "generic integer reader allocation");
+    auto* target = const_cast<metadata::RtMethodInfo*>(vm::Method::find_matched_method_in_class_by_name(closed.unwrap(), "Read"));
+    const auto original = *target;
+    const auto* bridge = vm::Method::find_matched_method_in_class_by_name(fixture, "CallReader");
+    const void* args[] = {object.unwrap()};
+    for (uint8_t flags = 0; flags < 4; ++flags)
+    {
+        target->invoker_type = metadata::RtInvokerType::Aot;
+        target->aot_return_protocol = flags;
+        target->method_ptr = target->virtual_method_ptr = (flags & 2) ? reinterpret_cast<metadata::RtManagedMethodPointer>(packed_generic_integer)
+                                                                      : reinterpret_cast<metadata::RtManagedMethodPointer>(legacy_generic_integer);
+        injected_error = false;
+        check(invoke_int(bridge, args) == INT32_MIN, "generic target ABI/context");
+        injected_error = true;
+        auto failure = vm::Runtime::invoke_with_run_cctor(bridge, nullptr, args);
+        check(failure.is_err() && failure.unwrap_err() == RtErr::ManagedException && vm::Exception::get_current_exception() &&
+                  reinterpret_cast<vm::RtObject*>(vm::Exception::get_current_exception())->klass == vm::Class::get_corlib_types().cls_out_of_memory_exception,
+              "generic mixed integer OOM");
+    }
+    *target = original;
+    injected_error = false;
+}
+
 int main(int argc, char** argv)
 {
     configure_test_assertions();
@@ -119,6 +219,7 @@ int main(int argc, char** argv)
     if (code)
         std::fprintf(stderr, "Fixture failure code: %d\n", code);
     check(code == 0, "managed fixture behavior");
+    integer_bridge_checks(klass);
     // Drive the generated interface bridge against both actual return ABIs,
     // independently of the caller's generation mode (also catches Wasm traps).
     auto reader_type = vm::Class::find_nested_class_by_name(klass, "ReferenceReader", false);
@@ -137,13 +238,13 @@ int main(int argc, char** argv)
     const auto original_touch_protocol = touch->aot_return_protocol;
     const auto* bridge = vm::Method::find_matched_method_in_class_by_name(klass, "ReferenceBridge");
     const auto* void_bridge = vm::Method::find_matched_method_in_class_by_name(klass, "VoidBridge");
-    for (uint32_t protocol = 0; protocol < 2; ++protocol)
+    for (uint32_t protocol = 0; protocol < 4; ++protocol)
     {
         get->aot_return_protocol = touch->aot_return_protocol = static_cast<uint8_t>(protocol);
-        get->method_ptr = get->virtual_method_ptr = protocol ? reinterpret_cast<metadata::RtManagedMethodPointer>(scalar_reference)
-                                                             : reinterpret_cast<metadata::RtManagedMethodPointer>(legacy_reference);
+        get->method_ptr = get->virtual_method_ptr = (protocol & 1) ? reinterpret_cast<metadata::RtManagedMethodPointer>(scalar_reference)
+                                                                   : reinterpret_cast<metadata::RtManagedMethodPointer>(legacy_reference);
         touch->method_ptr = touch->virtual_method_ptr =
-            protocol ? reinterpret_cast<metadata::RtManagedMethodPointer>(scalar_void) : reinterpret_cast<metadata::RtManagedMethodPointer>(legacy_void);
+            (protocol & 1) ? reinterpret_cast<metadata::RtManagedMethodPointer>(scalar_void) : reinterpret_cast<metadata::RtManagedMethodPointer>(legacy_void);
         injected_error = false;
         auto ok = vm::Runtime::invoke_with_run_cctor(bridge, nullptr, reader_args);
         check(ok.is_ok() && ok.unwrap() == nullptr, "mixed return ABI successful null");

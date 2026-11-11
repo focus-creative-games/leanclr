@@ -247,10 +247,10 @@ namespace LeanAOT.ToCpp
             return $"typedef {CreateRelaxMethodFunctionTypeDefine(cppTypedefName)}";
         }
 
-        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null, bool? lightweight = null)
+        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null, bool? lightweight = null, bool? packedInt32 = null)
         {
             var sb = new StringBuilder();
-            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType, lightweight));
+            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType, lightweight, packedInt32));
             sb.Append(" (*)(");
             bool first = true;
             foreach (var param in _paramsIncludeThis)

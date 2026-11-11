@@ -24,7 +24,11 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        protocol: [result, lightweight]
+        include:
+          - {protocol: result, flags: ''}
+          - {protocol: lightweight, flags: '--lightweight-returns'}
+          - {protocol: packed, flags: '--packed-int32-returns'}
+          - {protocol: packed-lightweight, flags: '--packed-int32-returns --lightweight-returns'}
     runs-on: windows-2022
     timeout-minutes: 90
     steps:
@@ -48,22 +52,24 @@ jobs:
           .emsdk/emsdk.bat activate 4.0.12
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
       - name: Verify native and Wasm AOT/fallback paths
-        run: python scripts/test/aot-features.py --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+        run: python scripts/test/aot-features.py --target all --emsdk .emsdk ${{ matrix.flags }}
       - name: Verify debug Result and frame invariants
-        run: python scripts/test/aot-features.py --target native --config Debug ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+        run: python scripts/test/aot-features.py --target native --config Debug ${{ matrix.flags }}
       - name: Verify 32-bit native context and snapshot ABI
-        run: python scripts/test/aot-features.py --target native --arch Win32 ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+        run: python scripts/test/aot-features.py --target native --arch Win32 ${{ matrix.flags }}
       - name: Verify formal AotTests with two-entry interface caches
-        run: python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+        run: python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target all --emsdk .emsdk ${{ matrix.flags }}
       - name: Verify two-entry cache Debug and 32-bit layouts
         run: |
-          python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target native --config Debug ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+          python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target native --config Debug ${{ matrix.flags }}
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target native --arch Win32 ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+          python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target native --arch Win32 ${{ matrix.flags }}
       - name: Verify single-entry interface cache control
-        run: python scripts/test/global-generics.py --interface-call-cache --output out/interface-dispatch/cached --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+        run: python scripts/test/global-generics.py --interface-call-cache --output out/interface-dispatch/cached --target all --emsdk .emsdk ${{ matrix.flags }}
       - name: Verify cache-disabled native and Wasm control
-        run: python scripts/test/global-generics.py --interface-cache-entries 2 --output out/interface-dispatch/baseline --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+        run: python scripts/test/global-generics.py --interface-cache-entries 2 --output out/interface-dispatch/baseline --target all --emsdk .emsdk ${{ matrix.flags }}
+      - name: Verify scalar integer ABI in Wasm Release and Debug
+        run: python scripts/benchmarks/compare_int32_returns.py --abi-only --emsdk .emsdk
       - uses: actions/upload-artifact@v4
         if: failure()
         with:

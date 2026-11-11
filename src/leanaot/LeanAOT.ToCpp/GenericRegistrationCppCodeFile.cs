@@ -112,7 +112,7 @@ namespace LeanAOT.ToCpp
                 var invoker = GlobalServices.Inst.InvokerService.GetInvoker(method);
                 _declarations.AddInvokerForwardDeclaration(invoker);
                 string owner = Utf8Literal(detail.MethodDef.Module.Assembly.Name);
-                entries.Add($"{{ 0x{Key(method):X16}ULL, {owner}, {{ 0x{detail.MethodDef.MDToken.Raw:X8}, (leanclr::metadata::RtManagedMethodPointer){detail.UniqueName}, (leanclr::metadata::RtManagedMethodPointer){(detail.ShouldGenerateVirtualMethod ? detail.VirtualMethodUniqueName : detail.UniqueName)}, {invoker.name} }}, {classes}, {methods}, {ctx.typeArgsStack?.Count ?? 0}, {ctx.methodArgsStack?.Count ?? 0}, {(GlobalServices.Inst.Config.LightweightAotReturns ? 1 : 0)} }}");
+                entries.Add($"{{ 0x{Key(method):X16}ULL, {owner}, {{ 0x{detail.MethodDef.MDToken.Raw:X8}, (leanclr::metadata::RtManagedMethodPointer){detail.UniqueName}, (leanclr::metadata::RtManagedMethodPointer){(detail.ShouldGenerateVirtualMethod ? detail.VirtualMethodUniqueName : detail.UniqueName)}, {invoker.name} }}, {classes}, {methods}, {ctx.typeArgsStack?.Count ?? 0}, {ctx.methodArgsStack?.Count ?? 0}, {ReturnProtocol.Flags} }}");
             }
             _body.AddLine("extern const leanclr::metadata::RtAotGenericMethodData g_aot_generic_methods[] = {");
             foreach (string entry in entries) _body.AddLine(entry + ",");

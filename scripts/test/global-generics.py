@@ -41,6 +41,7 @@ def main():
     ap.add_argument('--emsdk', type=Path)
     ap.add_argument('--msbuild', type=Path)
     ap.add_argument('--lightweight-returns', action='store_true')
+    ap.add_argument('--packed-int32-returns', action='store_true')
     ap.add_argument('--interface-call-cache', action='store_true')
     ap.add_argument('--interface-cache-entries', type=int, choices=[1, 2], default=1)
     ap.add_argument('--output', type=Path, default=ROOT / 'out/global-generics')
@@ -75,14 +76,18 @@ def main():
             command += ['--leanaot-max-generic-instances', '0']
         if opts.lightweight_returns:
             command += ['--leanaot-lightweight-returns']
+        if opts.packed_int32_returns:
+            command += ['--leanaot-packed-int32-returns']
         if opts.interface_call_cache:
             command += ['--leanaot-interface-call-cache']
         run(command, output / f'{variant}-generate.log')
         report = json.loads((generated / 'generic-aot-report.json').read_text())
+        assert report['packed_int32_returns'] == opts.packed_int32_returns
         assert report['interface_call_cache'] == opts.interface_call_cache
         assert report['interface_call_cache_entries'] == (opts.interface_cache_entries if opts.interface_call_cache else 0)
         budget = 2 if opts.interface_cache_entries == 2 else 4
         methods = {}
+        integer_signatures = {}
         for cpp in generated.glob('*method*part*.cpp'):
             for section in cpp.read_text().split('// Method: ')[1:]:
                 name = section.splitlines()[0]
@@ -92,6 +97,13 @@ def main():
                 assert count <= budget and single * 3 + double * 6 <= 12, name
                 assert not (single if opts.interface_cache_entries == 2 else double), name
                 methods[name] = count
+                if 'TC_Int32Returns::' in name:
+                    integer_signatures[name.split('TC_Int32Returns::', 1)[1].split('(', 1)[0]] = section.splitlines()[1]
+        for method, value in [('SignedLeaf', 'int32_t'), ('UnsignedLeaf', 'uint32_t')]:
+            expected = f'leanclr::codegen::AotInt32Result<{value}>' if opts.packed_int32_returns else f'leanclr::RtResult<{value}>'
+            assert expected in integer_signatures[method], method
+        for method, value in [('EnumLeaf', 'int32_t'), ('UnsignedEnumLeaf', 'uint32_t'), ('ByRef', 'void*'), ('Wide', 'int64_t'), ('Floating', 'float64_t')]:
+            assert f'leanclr::RtResult<{value}>' in integer_signatures[method], method
         for name, expected in [('StraightLine', 0), ('Sum', 1), ('Budget', budget)]:
             matches = [count for method, count in methods.items() if re.search(r'TC_InterfaceDispatch::' + name + r'\(', method)]
             assert matches == [expected if opts.interface_call_cache else 0], (name, matches)

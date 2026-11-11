@@ -23,6 +23,8 @@ def main():
     ap.add_argument('--config', choices=['Debug', 'Release'], default='Release')
     ap.add_argument('--arch', choices=['x64', 'Win32'], default='x64')
     ap.add_argument('--lightweight-returns', action='store_true')
+    ap.add_argument('--packed-int32-returns', action='store_true')
+    ap.add_argument('--generic-only', action='store_true')
     opts = ap.parse_args()
     if opts.target != 'native' and not opts.emsdk:
         ap.error('--emsdk is required for wasm')
@@ -34,6 +36,8 @@ def main():
     run(['dotnet', 'build', 'src/leanaot/LeanAOT/LeanAOT.csproj', '-c', 'Release'], output / 'tool.log')
     import shutil
     for family, assembly in [('generic', 'GenericFixtures'), ('eh', 'EhFixtures')]:
+        if opts.generic_only and family != 'generic':
+            continue
         stage = output / family / 'managed'
         stage.mkdir(parents=True, exist_ok=True)
         if family == 'generic':
@@ -45,6 +49,9 @@ def main():
              *(['/r:' + str(stage / 'GenericLibrary.dll')] if family == 'generic' else []),
              ROOT / f'src/tests/{family}-aot/Fixtures.cs'], output / f'{family}-csc.log')
         shutil.copy2(bcl / 'mscorlib.dll', stage)
+        if family == 'generic':
+            run(['dotnet', 'run', '--project', ROOT / 'src/tests/generic-aot/SignatureFixture.csproj', '-c', 'Release', '--',
+                 stage / 'GenericFixtures.dll'], output / 'generic-signatures.log')
         if family == 'eh':
             run([ilasm, '/DLL', '/OUTPUT:' + str(stage / 'FilterFixture.dll'), ROOT / 'src/tests/eh-aot/FilterFixture.il'], output / 'filter-ilasm.log')
         for variant in ['default', 'disabled'] if family == 'generic' else ['default', 'interpreted-loop']:
@@ -55,9 +62,11 @@ def main():
             if family == 'eh': command += ['-a', 'FilterFixture']
             if variant == 'disabled': command += ['--leanaot-max-generic-instances', '0']
             if opts.lightweight_returns: command += ['--leanaot-lightweight-returns']
+            if opts.packed_int32_returns: command += ['--leanaot-packed-int32-returns']
             run(command, output / f'{family}-{variant}-generate.log')
             report = json.loads((generated / 'generic-aot-report.json').read_text())
             assert report['return_protocol'] == ('lightweight-void-reference' if opts.lightweight_returns else 'result')
+            assert report['packed_int32_returns'] == opts.packed_int32_returns
             if family == 'eh':
                 assert any(x['Reason'] == 'eh-filter-or-fault' for x in report['method_fallbacks'])
                 assert any(x['Reason'] == 'eh-handler-inside-finally' for x in report['method_fallbacks'])

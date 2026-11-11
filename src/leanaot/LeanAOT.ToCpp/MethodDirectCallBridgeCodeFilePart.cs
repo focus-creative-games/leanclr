@@ -64,19 +64,26 @@ namespace LeanAOT.ToCpp
             // and a non-generic class can implement a closed generic interface.
             var plainArgs = MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(methodDetail);
             var contextArgs = plainArgs.Length == 0 ? "__method" : plainArgs + ", __method";
-            void WriteAotCall(bool lightweight)
+            void WriteAotCall(bool lightweight, bool packedInt32 = false)
             {
                 _directCallBridgeImplWriter.AddLine("if (__method->generic_method != nullptr)");
                 _directCallBridgeImplWriter.BeginBlock();
-                _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(true, lightweight)})__method_pointer)({contextArgs});");
+                _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(true, lightweight, packedInt32)})__method_pointer)({contextArgs});");
                 _directCallBridgeImplWriter.EndBlock();
-                _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(false, lightweight)})__method_pointer)({plainArgs});");
+                _directCallBridgeImplWriter.AddLine($"return (({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(false, lightweight, packedInt32)})__method_pointer)({plainArgs});");
             }
             if (ReturnProtocol.IsLightweight(methodDetail.RetType, true))
             {
                 _directCallBridgeImplWriter.AddLine("if (leanclr::codegen::uses_lightweight_aot_returns(__method))");
                 _directCallBridgeImplWriter.BeginBlock();
                 WriteAotCall(true);
+                _directCallBridgeImplWriter.EndBlock();
+            }
+            if (ReturnProtocol.IsInt32(methodDetail.RetType))
+            {
+                _directCallBridgeImplWriter.AddLine("if (leanclr::codegen::uses_packed_int32_aot_returns(__method))");
+                _directCallBridgeImplWriter.BeginBlock();
+                WriteAotCall(false, true);
                 _directCallBridgeImplWriter.EndBlock();
             }
             WriteAotCall(false);

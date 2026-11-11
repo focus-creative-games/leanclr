@@ -7,9 +7,12 @@ namespace LeanAOT.ToCpp
 
     static class MethodGenerationUtil
     {
-        public static string GetResultTypeName(TypeSig typeSig, bool? lightweight = null)
+        public static string GetResultTypeName(TypeSig typeSig, bool? lightweight = null, bool? packedInt32 = null)
         {
-            return ReturnProtocol.ResultType(typeSig, lightweight ?? GlobalServices.Inst.Config.LightweightAotReturns);
+            // An explicit protocol override denotes a runtime/foreign ABI;
+            // packed integers must also be explicitly selected in that case.
+            return ReturnProtocol.ResultType(typeSig, lightweight ?? GlobalServices.Inst.Config.LightweightAotReturns,
+                packedInt32 ?? (!lightweight.HasValue && GlobalServices.Inst.Config.PackedInt32AotReturns));
         }
 
         public static string GetParameterName(Parameter param)

@@ -88,7 +88,9 @@ int main(int argc, char** argv)
                              "InterfacesStraightLine",
                              "InterfacesThreeTypes",
                              "InterfacesPhaseChange",
-                             "InterfacesManySites"};
+                             "InterfacesManySites",
+                             "UInt32Returns",
+                             "Int32Returns"};
     const char* workloads[] = {"arithmetic",
                                "calls",
                                "properties",
@@ -104,7 +106,10 @@ int main(int argc, char** argv)
                                "interfaces-straight-line",
                                "interfaces-three-types",
                                "interfaces-phase-change",
-                               "interfaces-many-sites"};
+                               "interfaces-many-sites",
+                               "uint32-returns",
+                               "int32-returns"};
+    const bool integer_mode = argc > 3 && std::strcmp(argv[3], "integer-returns") == 0;
     const bool interface2_mode = argc > 3 && std::strcmp(argv[3], "interfaces2") == 0;
     const bool interface_mode = interface2_mode || (argc > 3 && std::strcmp(argv[3], "interfaces") == 0);
     if (interface_mode)
@@ -128,10 +133,10 @@ int main(int argc, char** argv)
                 "Generic interface benchmark implementation must be AOT");
     }
     const unsigned workload_count = argc > 3 && std::strcmp(argv[3], "returns") == 0 ? 10 : 8;
-    for (unsigned index = 0; index < (interface_mode ? (interface2_mode ? 7 : 4) : workload_count); ++index)
+    for (unsigned index = 0; index < (integer_mode ? 12 : interface_mode ? (interface2_mode ? 7 : 4) : workload_count); ++index)
     {
         const unsigned interface_indices[] = {4, 10, 11, 12, 13, 14, 15};
-        const unsigned k = interface_mode ? interface_indices[index] : index;
+        const unsigned k = integer_mode ? (index < 10 ? index : index + 6) : interface_mode ? interface_indices[index] : index;
         const auto* method = vm::Method::find_matched_method_in_class_by_name(klass, methods[k]);
         require(method != nullptr, "Benchmark method missing");
         const bool is_aot = method->invoker_type == metadata::RtInvokerType::Aot;

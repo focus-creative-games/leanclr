@@ -115,6 +115,9 @@ internal class Program
         [Option("leanaot-lightweight-returns", HelpText = "Opt-in scalar ABI for AOT void and aligned managed reference returns; runtime APIs keep Result.")]
         public bool LightweightAotReturns { get; set; }
 
+        [Option("leanaot-packed-int32-returns", HelpText = "Opt-in 64-bit scalar result ABI for AOT int/uint returns; independent of lightweight void/reference returns.")]
+        public bool PackedInt32AotReturns { get; set; }
+
         [Option("leanaot-interface-call-cache", HelpText = "Opt-in bounded stack-local target caches for interface callsites in loops.")]
         public bool InterfaceCallCache { get; set; }
 
@@ -544,6 +547,7 @@ internal class Program
         config.EnableAnalytics = options.EnableAnalytics;
         config.EmitNullChecks = options.EmitNullChecks;
         config.LightweightAotReturns = options.LightweightAotReturns;
+        config.PackedInt32AotReturns = options.PackedInt32AotReturns;
         config.InterfaceCallCache = options.InterfaceCallCache;
         config.InterfaceCallCacheEntries = options.InterfaceCallCacheEntries;
         config.EnableArrayBoundsCheck = options.EnableArrayBoundsCheck;
@@ -726,6 +730,8 @@ internal class Program
                 max_instances = manifestArgs.MaxGenericInstances,
                 max_depth = manifestArgs.MaxGenericDepth,
                 return_protocol = globalServices.Config.LightweightAotReturns ? "lightweight-void-reference" : "result",
+                packed_int32_returns = globalServices.Config.PackedInt32AotReturns,
+                return_protocol_flags = (globalServices.Config.LightweightAotReturns ? 1 : 0) | (globalServices.Config.PackedInt32AotReturns ? 2 : 0),
                 interface_call_cache = globalServices.Config.InterfaceCallCache,
                 interface_call_cache_entries = globalServices.Config.InterfaceCallCache ? globalServices.Config.InterfaceCallCacheEntries : 0,
                 generic_registry = "global-sorted-fnv1a64",

@@ -251,6 +251,28 @@ static void backend(const metadata::RtMethodInfo* method, bool expected, const c
     }
 }
 
+static void integer_cases()
+{
+    auto* tests = type("AotTests", "AotTests.TC_Int32Returns");
+    auto object = LEANCLR_NEWOBJ(tests, gc::GcAllocSite::make_internal(__FILE__, __LINE__, "integer return tests"));
+    check(object.is_ok(), "allocate integer tests");
+    for (const char* name : {"Borders", "Contexts", "DispatchAndEnums", "Errors", "RuntimeBoundaries", "OtherReturns", "Delegates"})
+    {
+        const auto* method = vm::Method::find_matched_method_in_class_by_name(tests, name);
+        check(method && method->invoker_type == metadata::RtInvokerType::Aot, "integer test must be AOT");
+        auto result = vm::Runtime::invoke_with_run_cctor(method, object.unwrap(), nullptr);
+        if (result.is_err())
+        {
+            std::fprintf(stderr, "Integer return case failed: %s, error %u\n", name, static_cast<unsigned>(result.unwrap_err()));
+            std::exit(1);
+        }
+        std::printf("Passed: AotTests.TC_Int32Returns.%s\n", name);
+    }
+    const auto* catcher = vm::Method::find_matched_method_in_class_by_name(tests, "CatchDivide");
+    check(catcher && catcher->invoker_type == metadata::RtInvokerType::Aot && catcher->interp_data, "integer EH must use normal-path AOT and handoff");
+    std::puts("Formal managed integer return tests passed: 7");
+}
+
 int main(int argc, char** argv)
 {
     configure_test_assertions();
@@ -371,4 +393,5 @@ int main(int argc, char** argv)
                             argc > 3 ? static_cast<unsigned>(std::atoi(argv[3])) : 20000);
     std::puts("Formal managed AOT generic tests passed: 24");
     interface_cases(expected);
+    integer_cases();
 }

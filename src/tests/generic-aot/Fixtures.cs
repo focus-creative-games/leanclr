@@ -28,6 +28,16 @@ public static class GenericFixtures
     public static object ReferenceBridge(IReference value) { return value.Get(); }
     public static void VoidBridge(IVoid value) { value.Touch(); }
     public interface IRead { int Read(); }
+    public enum IntCode : int { High = int.MinValue }
+    public interface ICode { IntCode Read(int value); }
+    public sealed class CodeReader : ICode { public IntCode Read(int value) { return (IntCode)value; } }
+    public static IntCode EnumBridge(ICode value, int input) { return value.Read(input); }
+    public interface IInteger { int Read(int value); }
+    public sealed class IntegerReader : IInteger { public int Read(int value) { return value; } }
+    public static int IntegerBridge(IInteger value, int input) { return value.Read(input); }
+    public interface IUnsigned { uint Read(uint value); }
+    public sealed class UnsignedReader : IUnsigned { public uint Read(uint value) { return value; } }
+    public static uint UnsignedBridge(IUnsigned value, uint input) { return value.Read(input); }
     public interface IGenericRead<T> { T Read(); }
     public sealed class GenericReader<T> : IRead { public int Read() { return typeof(T) == typeof(int) ? 19 : 23; } }
     public sealed class PlainReader : IGenericRead<int> { public int Read() { return 29; } }
@@ -79,6 +89,8 @@ public static class GenericFixtures
         GenericLibrary.Touch(3);
         if (FieldOnly<ulong>.Value != 1) return 23;
         if (CallReader(new VirtualOnly<int>()) != 71) return 24;
+        if (IntegerBridge(new IntegerReader(), int.MinValue) != int.MinValue) return 25;
+        if (UnsignedBridge(new UnsignedReader(), uint.MaxValue) != uint.MaxValue) return 26;
         return 0;
     }
 }

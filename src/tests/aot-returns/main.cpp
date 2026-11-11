@@ -3,6 +3,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <limits>
+#include <initializer_list>
 
 struct alignas(8) Object
 {
@@ -55,9 +56,70 @@ extern "C" leanclr::core::ResultVoid ordinary_void_probe(uint8_t error)
     return Unit{};
 }
 
+extern "C" leanclr::codegen::AotInt32Result<int32_t> aot_int32_probe(int32_t value, uint8_t error)
+{
+    if (error)
+        return static_cast<RtErr>(error);
+    return value;
+}
+
+extern "C" leanclr::codegen::AotInt32Result<uint32_t> aot_uint32_probe(uint32_t value, uint8_t error)
+{
+    if (error)
+        return static_cast<RtErr>(error);
+    return value;
+}
+
+extern "C" leanclr::core::Result<int32_t> ordinary_int32_probe(int32_t value, uint8_t error)
+{
+    if (error)
+        return static_cast<RtErr>(error);
+    return value;
+}
+
+template <typename T>
+static void integer_boundaries(T value)
+{
+    leanclr::codegen::AotInt32Result<T> packed(value);
+    check(packed.is_ok() && packed.unwrap() == value, "integer payload including sign/high bit");
+    leanclr::core::Result<T> ordinary = packed;
+    check(ordinary.is_ok() && ordinary.unwrap() == value, "integer legacy boundary");
+    leanclr::codegen::AotInt32Result<T> back(std::move(ordinary));
+    check(back.is_ok() && back.unwrap() == value, "integer packed boundary");
+}
+
 int main()
 {
     configure_test_assertions();
+    for (unsigned code = 1; code <= 255; ++code)
+    {
+        auto signed_error = aot_int32_probe(std::numeric_limits<int32_t>::min(), static_cast<uint8_t>(code));
+        auto unsigned_error = aot_uint32_probe(std::numeric_limits<uint32_t>::max(), static_cast<uint8_t>(code));
+        check(signed_error.is_err() && signed_error.unwrap_err() == static_cast<RtErr>(code), "signed error code encoding");
+        leanclr::core::Result<uint32_t> old = unsigned_error;
+        check(old.is_err() && old.unwrap_err() == static_cast<RtErr>(code), "unsigned error legacy boundary");
+        leanclr::codegen::AotInt32Result<uint32_t> back(std::move(old));
+        check(back.is_err() && back.unwrap_err() == static_cast<RtErr>(code), "unsigned error reverse boundary");
+    }
+    uint32_t bits = 0;
+    for (unsigned i = 0; i < 4096; ++i)
+    {
+        int32_t signed_value;
+        std::memcpy(&signed_value, &bits, sizeof(bits));
+        integer_boundaries(signed_value);
+        integer_boundaries(bits);
+        bits = bits * 1664525u + 1013904223u;
+    }
+    for (uint32_t value : {0u, 1u, 0x7FFFFFFFu, 0x80000000u, 0xFFFFFFFFu})
+    {
+        int32_t signed_value;
+        std::memcpy(&signed_value, &value, sizeof(value));
+        integer_boundaries(signed_value);
+        integer_boundaries(value);
+    }
+    leanclr::codegen::AotInt32Result<uint32_t> outer_integer(UINT32_MAX);
+    auto inner_integer = aot_int32_probe(0, static_cast<uint8_t>(RtErr::OutOfMemory));
+    check(inner_integer.is_err() && outer_integer.unwrap() == UINT32_MAX, "nested integer result independence");
     Object object{};
     const uintptr_t addresses[] = {0, reinterpret_cast<uintptr_t>(&object), std::numeric_limits<uintptr_t>::max() & ~uintptr_t(7),
                                    uintptr_t(1) << (sizeof(uintptr_t) * 8 - 1)};

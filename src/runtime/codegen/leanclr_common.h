@@ -454,7 +454,12 @@ inline bool is_aot_method(const metadata::RtMethodInfo* method) noexcept
 
 inline bool uses_lightweight_aot_returns(const metadata::RtMethodInfo* method) noexcept
 {
-    return method->aot_return_protocol == 1;
+    return (method->aot_return_protocol & 1) != 0;
+}
+
+inline bool uses_packed_int32_aot_returns(const metadata::RtMethodInfo* method) noexcept
+{
+    return (method->aot_return_protocol & 2) != 0;
 }
 
 inline RtResultVoid invoke_with_run_class_static_constructor(const metadata::RtMethodInfo* method, interp::RtStackObject* arg_buff,
