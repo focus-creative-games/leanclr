@@ -130,6 +130,8 @@ internal class Program
 
         [Option("leanaot-interface-cache-entries", Default = 1, HelpText = "Receiver capacity per cached interface callsite: 1 (up to four sites) or 2 (up to two sites); requires --leanaot-interface-call-cache to enable.")]
         public int InterfaceCallCacheEntries { get; set; }
+        [Option("leanaot-profiled-interface-caches", HelpText = "Use fingerprint-validated PGO receiver hints for bounded per-site interface cache capacities.")]
+        public bool ProfiledInterfaceCaches { get; set; }
 
         /// <summary>
         /// LeanAOT-only: PGO-generated exact include lists (repeat for multiple files).
@@ -559,6 +561,7 @@ internal class Program
         config.ShareReferenceGenerics = options.ShareReferenceGenerics;
         config.InterfaceCallCache = options.InterfaceCallCache;
         config.InterfaceCallCacheEntries = options.InterfaceCallCacheEntries;
+        config.ProfiledInterfaceCaches = options.ProfiledInterfaceCaches;
         config.EnableArrayBoundsCheck = options.EnableArrayBoundsCheck;
         config.EmitMethodMap = options.EmitMethodMap;
         config.EmitSourceMapping = options.EmitSourceMapping;
@@ -713,6 +716,9 @@ internal class Program
             RuntimeApiCatalog = runtimeApiCatalog,
         };
         ApplyIl2CppOptionsToGlobalConfig(globalServices.Config, il2CppOptions);
+        globalServices.Config.PgoIncludeIndex = pgoIncludeIndex;
+        if (il2CppOptions.ProfiledInterfaceCaches && (!il2CppOptions.InterfaceCallCache || pgoRulePaths.Count == 0))
+            throw new ArgumentException("--leanaot-profiled-interface-caches requires --leanaot-interface-call-cache and a PGO rule file.");
         GlobalServices.Inst = globalServices;
 
         EnsureEmptyProfilerOutputFile(globalServices.Config);
@@ -744,6 +750,8 @@ internal class Program
                 return_protocol_flags = (globalServices.Config.LightweightAotReturns ? 1 : 0) | (globalServices.Config.PackedInt32AotReturns ? 2 : 0) | (globalServices.Config.StatusOutAotReturns ? 4 : 0),
                 interface_call_cache = globalServices.Config.InterfaceCallCache,
                 interface_call_cache_entries = globalServices.Config.InterfaceCallCache ? globalServices.Config.InterfaceCallCacheEntries : 0,
+                profiled_interface_caches = globalServices.Config.ProfiledInterfaceCaches,
+                interface_cache_decisions = globalServices.Config.InterfaceCacheDecisions,
                 generic_registry = "global-sorted-fnv1a64",
                 reference_generic_sharing = globalServices.Config.ShareReferenceGenerics,
                 shared_reference_bindings = globalServices.ReferenceSharing.Bindings.Select(p => new { instance = p.Instance, body = p.Body }),

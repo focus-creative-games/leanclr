@@ -117,6 +117,12 @@ def build(opts, output, managed_input=None):
         generator += ['--leanaot-status-out-returns']
     if getattr(opts, 'share_reference_generics', False):
         generator += ['--leanaot-share-reference-generics']
+    if getattr(opts, 'enable_profile', False):
+        generator += ['--leanaot-enable-pgo-profile']
+    if getattr(opts, 'pgo_rule_file', None):
+        generator += ['--leanaot-pgo-rule-file', str(opts.pgo_rule_file)]
+    if getattr(opts, 'profiled_interface_caches', False):
+        generator += ['--leanaot-profiled-interface-caches']
     if opts.interface_call_cache:
         generator += ['--leanaot-interface-call-cache', '--leanaot-interface-cache-entries', str(opts.interface_cache_entries)]
     commands.append([str(x) for x in generator])
@@ -125,6 +131,7 @@ def build(opts, output, managed_input=None):
         cmd = ['cmake', '-S', ROOT / 'src/benchmarks/aot-baseline', '-B', output / target,
                '-DCMAKE_BUILD_TYPE=Release', '-DCMAKE_TRY_COMPILE_CONFIGURATION=Release',
                f'-DLEANCLR_BENCH_GENERATED_DIR={output / "generated"}']
+        cmd += [f'-DLEANCLR_ENABLE_PROFILE={"ON" if getattr(opts, "enable_profile", False) else "OFF"}']
         if target == 'native':
             cmd += ['-A', 'x64']
         else:
@@ -150,6 +157,9 @@ def main():
     ap.add_argument('--packed-int32-returns', action='store_true')
     ap.add_argument('--status-out-returns', action='store_true')
     ap.add_argument('--share-reference-generics', action='store_true')
+    ap.add_argument('--enable-profile', action='store_true')
+    ap.add_argument('--pgo-rule-file', type=Path)
+    ap.add_argument('--profiled-interface-caches', action='store_true')
     ap.add_argument('--interface-call-cache', action='store_true')
     ap.add_argument('--interface-cache-entries', type=int, choices=[1, 2], default=1)
     ap.add_argument('--samples', type=int, default=7)

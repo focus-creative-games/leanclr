@@ -2,6 +2,7 @@
 #include "registry_checks.h"
 #include "interp/machine_state.h"
 #include "interp/interpreter.h"
+#include "profile/profile.h"
 #include "codegen/interface_dispatch.h"
 #include "alloc/general_allocation.h"
 #include "metadata/aot_module.h"
@@ -607,4 +608,10 @@ int main(int argc, char** argv)
     std::puts("Formal managed wide return tests passed: 7");
     mixed_wide_returns();
     reference_sharing_cases(expected);
+    const auto* pgo = vm::Method::find_matched_method_in_class_by_name(type("AotTests", "AotTests.TC_PgoCaches"), "Run");
+    check(pgo && pgo->invoker_type == metadata::RtInvokerType::Aot, "PGO scenario must be AOT");
+    check(vm::Runtime::invoke_with_run_cctor(pgo, nullptr, nullptr).is_ok(), "PGO cache scenario behavior");
+    std::puts("PGO mono/bi/mega/mixed/hot-site scenarios passed");
+    if (argc > 3 && std::strcmp(argv[2], "profile") == 0)
+        check(profile::Profile::export_global_stats_json(argv[3]).is_ok(), "export receiver profile");
 }

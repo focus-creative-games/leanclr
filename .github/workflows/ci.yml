@@ -34,7 +34,7 @@ jobs:
           - {protocol: status-out-packed, flags: '--status-out-returns --packed-int32-returns'}
           - {protocol: all-returns, flags: '--status-out-returns --packed-int32-returns --lightweight-returns'}
     runs-on: windows-2022
-    timeout-minutes: 90
+    timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-dotnet@v4
@@ -74,6 +74,17 @@ jobs:
         run: python scripts/test/global-generics.py --interface-cache-entries 2 --output out/interface-dispatch/baseline --target all --emsdk .emsdk ${{ matrix.flags }}
       - name: Verify scalar integer ABI in Wasm Release and Debug
         run: python scripts/benchmarks/compare_int32_returns.py --abi-only --emsdk .emsdk
+      - name: Verify receiver feedback, stale profiles and budgets
+        if: matrix.protocol == 'result'
+        run: python scripts/test/pgo-caches.py --emsdk .emsdk
+      - name: Verify bounded receiver profiler
+        if: matrix.protocol == 'result'
+        run: |
+          cmake -S src/tests/runtime-regressions -B out/ci-profile -A x64 -DLEANCLR_ENABLE_PROFILE=ON
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build out/ci-profile --config Release --target profile-receivers --parallel 4
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ctest --test-dir out/ci-profile -C Release -R '^profile-receivers$' --output-on-failure
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -83,6 +94,8 @@ jobs:
             out/global-generics/*/*.log
             out/interface-dispatch/baseline/*/*.log
             out/interface-dispatch/cached/*/*.log
+            out/pgo-cache-validation/*.log
+            out/pgo-cache-*/*/*.log
 
   native:
     name: ${{ matrix.name }}

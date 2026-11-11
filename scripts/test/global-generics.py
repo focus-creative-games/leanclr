@@ -44,6 +44,9 @@ def main():
     ap.add_argument('--packed-int32-returns', action='store_true')
     ap.add_argument('--status-out-returns', action='store_true')
     ap.add_argument('--share-reference-generics', action='store_true')
+    ap.add_argument('--profile', action='store_true')
+    ap.add_argument('--pgo-rule-file', type=Path)
+    ap.add_argument('--profiled-interface-caches', action='store_true')
     ap.add_argument('--interface-call-cache', action='store_true')
     ap.add_argument('--interface-cache-entries', type=int, choices=[1, 2], default=1)
     ap.add_argument('--output', type=Path, default=ROOT / 'out/global-generics')
@@ -79,6 +82,9 @@ def main():
         if opts.lightweight_returns:
             command += ['--leanaot-lightweight-returns']
         if opts.share_reference_generics: command += ['--leanaot-share-reference-generics']
+        if opts.profile: command += ['--leanaot-enable-pgo-profile']
+        if opts.pgo_rule_file: command += ['--leanaot-pgo-rule-file', str(opts.pgo_rule_file.resolve())]
+        if opts.profiled_interface_caches: command += ['--leanaot-profiled-interface-caches']
         if opts.status_out_returns: command += ['--leanaot-status-out-returns']
         if opts.packed_int32_returns:
             command += ['--leanaot-packed-int32-returns']
@@ -97,7 +103,7 @@ def main():
             assert not report['shared_reference_bindings']
         assert report['interface_call_cache'] == opts.interface_call_cache
         assert report['interface_call_cache_entries'] == (opts.interface_cache_entries if opts.interface_call_cache else 0)
-        budget = 2 if opts.interface_cache_entries == 2 else 4
+        budget = 2 if opts.interface_cache_entries == 2 and not opts.profiled_interface_caches else 4
         methods = {}
         integer_signatures = {}
         for cpp in generated.glob('*method*part*.cpp'):
@@ -107,7 +113,8 @@ def main():
                 double = section.count('leanclr::codegen::InterfaceCallCache2 ')
                 count = single + double
                 assert count <= budget and single * 3 + double * 6 <= 12, name
-                assert not (single if opts.interface_cache_entries == 2 else double), name
+                if not opts.profiled_interface_caches:
+                    assert not (single if opts.interface_cache_entries == 2 else double), name
                 methods[name] = count
                 if 'TC_Int32Returns::' in name:
                     integer_signatures[name.split('TC_Int32Returns::', 1)[1].split('(', 1)[0]] = section.splitlines()[1]
@@ -117,7 +124,7 @@ def main():
         for method, value in [('EnumLeaf', 'int32_t'), ('UnsignedEnumLeaf', 'uint32_t'), ('ByRef', 'void*'), ('Wide', 'int64_t'), ('Floating', 'float64_t')]:
             expected = 'leanclr::RtErr' if opts.status_out_returns and method in ['Wide', 'Floating'] else f'leanclr::RtResult<{value}>'
             assert expected in integer_signatures[method], method
-        for name, expected in [('StraightLine', 0), ('Sum', 1), ('Budget', budget)]:
+        for name, expected in ([] if opts.profiled_interface_caches else [('StraightLine', 0), ('Sum', 1), ('Budget', budget)]):
             matches = [count for method, count in methods.items() if re.search(r'TC_InterfaceDispatch::' + name + r'\(', method)]
             assert matches == [expected if opts.interface_call_cache else 0], (name, matches)
         if not opts.interface_call_cache:
@@ -144,6 +151,8 @@ def main():
                        f'-DGENERIC_REGISTRY_CPP={generated}', f'-DGENERIC_REGISTRY_DLLS:STRING={stage.relative_to(ROOT).as_posix()}',
                        f'-DGENERIC_REGISTRY_DISABLED={"ON" if variant == "disabled" else "OFF"}',
                        f'-DGENERIC_REGISTRY_SHARED_REFERENCES={"ON" if opts.share_reference_generics and variant == "default" else "OFF"}']
+            command += [f'-DLEANCLR_ENABLE_PROFILE={"ON" if opts.profile else "OFF"}',
+                        f'-DGENERIC_REGISTRY_PROFILE_OUTPUT={(output / (label + "-profile.json")).relative_to(ROOT).as_posix() if opts.profile else ""}']
             if target == 'native':
                 command += ['-A', opts.arch]
             else:

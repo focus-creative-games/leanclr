@@ -27,6 +27,18 @@ struct ProfileEntry
     uint64_t cost;
 };
 
+struct InterfaceProfileEntry
+{
+    const metadata::RtMethodInfo* method;
+    uint32_t il_offset;
+    const metadata::RtClass* receiver_types[4];
+    uint64_t receiver_calls[4];
+    uint64_t other_calls;
+    uint64_t cache_observations;
+    uint64_t one_entry_hits;
+    uint64_t two_entry_hits;
+};
+
 struct ExportOptions
 {
     uint64_t min_calls = 1;
@@ -44,6 +56,11 @@ class Profile
 
     static void inc_call_count(const metadata::RtMethodInfo* method, uint64_t delta = 1) noexcept;
     static void add_cost(const metadata::RtMethodInfo* method, uint64_t cost) noexcept;
+    static uint64_t next_invocation_id() noexcept;
+    static void observe_interface_receiver(const metadata::RtMethodInfo* caller, uint32_t il_offset, const metadata::RtClass* receiver,
+                                           uint64_t invocation = 0) noexcept;
+    static size_t get_interface_entries(InterfaceProfileEntry* out, size_t capacity, bool global) noexcept;
+    static uint64_t get_dropped_interface_observations(bool global) noexcept;
 
     static void end_period() noexcept;
     static void reset_period() noexcept;

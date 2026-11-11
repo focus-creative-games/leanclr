@@ -7,6 +7,7 @@
 #include "metadata/metadata_cache.h"
 #include "vm/runtime.h"
 #include "vm/settings.h"
+#include "profile/profile.h"
 #include <chrono>
 #include <cstdio>
 #include <cstdlib>
@@ -213,5 +214,7 @@ int main(int argc, char** argv)
                                                 : "interpreter",
                     n, checksum, ns);
     }
+    if (argc > 4)
+        require(profile::Profile::export_global_stats_json(argv[4]).is_ok(), "Export benchmark receiver profile");
     return 0;
 }

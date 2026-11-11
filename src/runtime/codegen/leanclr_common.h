@@ -39,6 +39,13 @@
 #define LEANCLR_CODEGEN_ASSUME_NOT_NULL(ptr) LEANCLR_ASSUME_NOT_NULL(ptr)
 
 #if LEANCLR_PGO_PROFILE
+#define LEANCLR_CODEGEN_PROFILE_BEGIN_INVOCATION() leanclr::profile::Profile::next_invocation_id()
+#define LEANCLR_CODEGEN_PROFILE_INTERFACE_RECEIVER(receiver, caller, offset)                                                \
+    do                                                                                                                      \
+    {                                                                                                                       \
+        if (receiver)                                                                                                       \
+            leanclr::profile::Profile::observe_interface_receiver(caller, offset, (receiver)->klass, __profile_invocation); \
+    } while (0)
 #define LEANCLR_CODEGEN_PROFILE_INC_CALL_COUNT(methodInfo)    \
     do                                                        \
     {                                                         \
@@ -51,6 +58,8 @@
         leanclr::codegen::profile_add_cost(methodInfo, static_cast<uint32_t>(cost)); \
     } while (0)
 #else
+#define LEANCLR_CODEGEN_PROFILE_BEGIN_INVOCATION() uint64_t(0)
+#define LEANCLR_CODEGEN_PROFILE_INTERFACE_RECEIVER(receiver, caller, offset) ((void)0)
 #define LEANCLR_CODEGEN_PROFILE_INC_CALL_COUNT(methodInfo) ((void)0)
 #define LEANCLR_CODEGEN_PROFILE_ADD_COST(methodInfo, cost) ((void)0)
 #endif

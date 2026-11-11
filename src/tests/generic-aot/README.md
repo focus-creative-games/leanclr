@@ -81,3 +81,7 @@ remains unchanged; see [the measured wide-return trial](../../../docs/performanc
 bodies (`--leanaot-share-reference-generics` for generation). Real contexts and
 registered identities remain distinct. See [the sharing trial and measured
 scope](../../../docs/performance/aot-reference-sharing.md).
+
+PGO can choose per-site 0/1/2-entry caches using invocation-aware receiver
+feedback and IL fingerprints. See [the PGO report](../../../docs/performance/aot-pgo-caches.md)
+and `scripts/test/pgo-caches.py` for the complete feedback pipeline.

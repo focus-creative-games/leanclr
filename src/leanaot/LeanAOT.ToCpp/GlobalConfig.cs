@@ -21,6 +21,9 @@ namespace LeanAOT.ToCpp
 
         public bool InterfaceCallCache { get; set; }
         public int InterfaceCallCacheEntries { get; set; } = 1;
+        public bool ProfiledInterfaceCaches { get; set; }
+        public LeanAOT.GenerationPlan.PgoMethodIncludeIndex PgoIncludeIndex { get; set; }
+        public List<object> InterfaceCacheDecisions { get; } = new List<object>();
 
         public bool EnableArrayBoundsCheck { get; set; }
 

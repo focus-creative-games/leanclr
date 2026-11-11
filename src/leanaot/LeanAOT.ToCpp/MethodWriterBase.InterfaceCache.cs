@@ -1,4 +1,6 @@
 using dnlib.DotNet.Emit;
+using dnlib.DotNet;
+using LeanAOT.GenerationPlan;
 
 namespace LeanAOT.ToCpp
 {
@@ -10,6 +12,27 @@ namespace LeanAOT.ToCpp
         // hotness. Never allocate caches for straight-line interface calls.
         private int _interfaceCacheCount;
         private List<(uint start, uint end)> _interfaceLoopRanges;
+        private Dictionary<uint, int> _profiledInterfaceSites;
+
+        private int ProfiledCapacity(Instruction inst)
+        {
+            if (_profiledInterfaceSites == null)
+            {
+                _profiledInterfaceSites = new Dictionary<uint, int>();
+                var hints = _globalConfig.PgoIncludeIndex?.GetInterfaceHints(_method.MethodDef) ?? Array.Empty<PgoMethodIncludeIndex.InterfaceHint>();
+                int words = 0;
+                foreach (var hint in hints.OrderByDescending(h => h.Calls).ThenBy(h => h.Offset))
+                {
+                    var instruction = _method.MethodDef.Body.Instructions.FirstOrDefault(i => i.Offset == hint.Offset);
+                    if (hint.Entries == 0 || words + hint.Entries * 3 > 12 || instruction == null ||
+                        instruction.OpCode.Code != Code.Callvirt || instruction.Operand is not IMethod target ||
+                        target.ResolveMethodDef()?.DeclaringType.IsInterface != true || !IsInterfaceLoopCandidate(instruction)) continue;
+                    _profiledInterfaceSites.Add(hint.Offset, hint.Entries);
+                    words += hint.Entries * 3;
+                }
+            }
+            return _profiledInterfaceSites.TryGetValue(inst.Offset, out int entries) ? entries : 0;
+        }
 
         private bool IsInterfaceLoopCandidate(Instruction inst)
         {
@@ -31,11 +54,17 @@ namespace LeanAOT.ToCpp
 
         private string InterfaceResolution(Instruction inst, MethodDetail method, EvalVariable receiver, RuntimeResolvedVariable declaration)
         {
+            if (_globalConfig.EnableProfileInstrumentation && method.MethodDef.DeclaringType.IsInterface)
+                _bodyWriter.AddLine($"LEANCLR_CODEGEN_PROFILE_INTERFACE_RECEIVER({GetEvalVariableName(receiver)}, {CurrentMethodReference}, {inst.Offset}u);");
             string args = $"{GetEvalVariableName(receiver)}, {declaration.GetFullReferenceVariableName()}";
-            bool twoEntries = _globalConfig.InterfaceCallCacheEntries == 2;
+            int capacity = _globalConfig.ProfiledInterfaceCaches ? ProfiledCapacity(inst) : _globalConfig.InterfaceCallCacheEntries;
+            bool twoEntries = capacity == 2;
             int siteBudget = twoEntries ? 2 : 4;
-            if (!_globalConfig.InterfaceCallCache || !method.MethodDef.DeclaringType.IsInterface ||
-                _interfaceCacheCount >= siteBudget || !IsInterfaceLoopCandidate(inst))
+            bool eligible = _globalConfig.InterfaceCallCache && capacity > 0 && method.MethodDef.DeclaringType.IsInterface &&
+                (_globalConfig.ProfiledInterfaceCaches || _interfaceCacheCount < siteBudget) && IsInterfaceLoopCandidate(inst);
+            if (_globalConfig.ProfiledInterfaceCaches && method.MethodDef.DeclaringType.IsInterface)
+                _globalConfig.InterfaceCacheDecisions.Add(new { method = _method.FullName, il_offset = inst.Offset, entries = eligible ? capacity : 0 });
+            if (!eligible)
                 return $"{VmFunctionNames.GetVirtualMethodOnObj}({args})";
             string cache = $"__interface_cache_{_interfaceCacheCount++}";
             _localsWriter.AddLine($"leanclr::codegen::InterfaceCallCache{(twoEntries ? "2" : "")} {cache} = {{}};");

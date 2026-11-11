@@ -74,7 +74,7 @@ namespace Pgo2Aot
             }
 
             List<ProfileEntry> sorted = SortEntries(entries, sortBy);
-            ulong totalMetric = 0;
+            decimal totalMetric = 0;
             foreach (ProfileEntry entry in sorted)
             {
                 totalMetric += entry.GetMetric(sortBy);
@@ -85,8 +85,8 @@ namespace Pgo2Aot
                 return sorted.Take(1).ToList();
             }
 
-            ulong target = (ulong)Math.Ceiling(totalMetric * paretoRatio);
-            ulong accumulated = 0;
+            decimal target = Math.Ceiling(totalMetric * (decimal)paretoRatio);
+            decimal accumulated = 0;
             var selected = new List<ProfileEntry>(sorted.Count);
             foreach (ProfileEntry entry in sorted)
             {

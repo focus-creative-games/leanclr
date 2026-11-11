@@ -288,6 +288,8 @@ namespace LeanAOT.ToCpp
 
         void WriteDeferredCode()
         {
+            if (_globalConfig.EnableProfileInstrumentation)
+                _headWriter.AddLine("const uint64_t __profile_invocation = LEANCLR_CODEGEN_PROFILE_BEGIN_INVOCATION();");
             if (ExceptionHandoff)
             {
                 _ = CurrentMethodReference;
