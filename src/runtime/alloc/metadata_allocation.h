@@ -27,6 +27,12 @@ class MetadataAllocation
     }
 
     template <typename T>
+    static T* try_malloc_any_zeroed()
+    {
+        return s_memPool != nullptr ? s_memPool->malloc_any_zeroed<T>() : nullptr;
+    }
+
+    template <typename T>
     static T* malloc_any()
     {
         return GeneralAllocation::require_allocation(s_memPool->malloc_any_zeroed<T>());

@@ -52,6 +52,12 @@ class Settings
 
     static size_t get_default_frame_stack_size();
     static void set_default_frame_stack_size(size_t size);
+#if LEANCLR_BCL_CORECLR_NET10
+    // Configure on the runtime thread. Existing canonical identities remain valid
+    // when the limit is reached; new identities return OutOfMemory.
+    static size_t get_max_runtime_type_handles();
+    static void set_max_runtime_type_handles(size_t count);
+#endif
 
     static InternalFunctionInitializer get_internal_functions_initializer();
     static void set_internal_functions_initializer(InternalFunctionInitializer initializer);

@@ -39,15 +39,33 @@ static GCHandleId s_last_handle_id = 0;
 
 // Fallible index: no STL allocations on the handle creation path. Empty slots
 // are null; erased slots use a stable marker so collision chains stay intact.
+template <bool AddressKey = false>
 class HandleIndex
 {
     HandleInfo** slots_ = nullptr;
     size_t capacity_ = 0, live_ = 0, used_ = 0;
     HandleInfo deleted_{};
 
-    static size_t hash(GCHandleId id)
+    static uintptr_t key(const HandleInfo* handle)
     {
-        return static_cast<size_t>(id) * size_t(2654435761u);
+        if constexpr (AddressKey)
+            return reinterpret_cast<uintptr_t>(&handle->obj);
+        else
+            return static_cast<uintptr_t>(handle->id);
+    }
+
+    static size_t hash(uintptr_t value)
+    {
+        if constexpr (AddressKey)
+        {
+            value >>= 3;
+            value ^= value >> 16;
+            value *= uintptr_t{0x85ebca6b};
+            value ^= value >> 13;
+            return static_cast<size_t>(value);
+        }
+        else
+            return static_cast<size_t>(value) * size_t(2654435761u);
     }
 
   public:
@@ -71,7 +89,7 @@ class HandleIndex
             auto* h = slots_[i];
             if (!h || h == &deleted_)
                 continue;
-            size_t at = hash(h->id) & (next - 1);
+            size_t at = hash(key(h)) & (next - 1);
             while (replacement[at])
                 at = (at + 1) & (next - 1);
             replacement[at] = h;
@@ -85,7 +103,7 @@ class HandleIndex
 
     void insert(HandleInfo* h)
     {
-        size_t at = hash(h->id) & (capacity_ - 1);
+        size_t at = hash(key(h)) & (capacity_ - 1);
         while (slots_[at] && slots_[at] != &deleted_)
             at = (at + 1) & (capacity_ - 1);
         if (!slots_[at])
@@ -94,26 +112,26 @@ class HandleIndex
         ++live_;
     }
 
-    HandleInfo* find(GCHandleId id) const
+    HandleInfo* find(uintptr_t id) const
     {
         if (!id || !capacity_)
             return nullptr;
         size_t at = hash(id) & (capacity_ - 1);
         while (slots_[at])
         {
-            if (slots_[at] != &deleted_ && slots_[at]->id == id)
+            if (slots_[at] != &deleted_ && key(slots_[at]) == id)
                 return slots_[at];
             at = (at + 1) & (capacity_ - 1);
         }
         return nullptr;
     }
 
-    void erase(GCHandleId id)
+    void erase(uintptr_t id)
     {
         size_t at = hash(id) & (capacity_ - 1);
         while (slots_[at])
         {
-            if (slots_[at] != &deleted_ && slots_[at]->id == id)
+            if (slots_[at] != &deleted_ && key(slots_[at]) == id)
             {
                 slots_[at] = &deleted_;
                 --live_;
@@ -134,13 +152,22 @@ class HandleIndex
     }
 };
 
-static HandleIndex s_handle_map;
+static HandleIndex<> s_handle_map;
+#if LEANCLR_BCL_CORECLR_NET10
+// Exact slot addresses are validated without dereferencing caller-provided
+// pointers. Both indices are prepared before publishing an allocation.
+static HandleIndex<true> s_handle_address_map;
+#endif
 
 // Allocate a new handle or reuse a freed one
 static HandleInfo* alloc_handle()
 {
     if (s_last_handle_id >= INT32_MAX || !s_handle_map.prepare_insert())
         return nullptr;
+#if LEANCLR_BCL_CORECLR_NET10
+    if (!s_handle_address_map.prepare_insert())
+        return nullptr;
+#endif
     if (s_freed_handle_head == nullptr)
     {
         // Allocate a new handle
@@ -149,6 +176,9 @@ static HandleInfo* alloc_handle()
             return nullptr;
         h->id = ++s_last_handle_id;
         s_handle_map.insert(h);
+#if LEANCLR_BCL_CORECLR_NET10
+        s_handle_address_map.insert(h);
+#endif
         return h;
     }
     else
@@ -159,6 +189,9 @@ static HandleInfo* alloc_handle()
         assert(h->id == 0);
         h->id = ++s_last_handle_id;
         s_handle_map.insert(h);
+#if LEANCLR_BCL_CORECLR_NET10
+        s_handle_address_map.insert(h);
+#endif
         return h;
     }
 }
@@ -179,6 +212,9 @@ static void free_handle_impl(HandleInfo* handle)
     handle->next = s_freed_handle_head;
     assert(s_handle_map.find(handle->id) == handle);
     s_handle_map.erase(handle->id);
+#if LEANCLR_BCL_CORECLR_NET10
+    s_handle_address_map.erase(reinterpret_cast<uintptr_t>(&handle->obj));
+#endif
     handle->id = 0;
     s_freed_handle_head = handle;
 }
@@ -384,13 +420,7 @@ RtObject** GCHandle::get_target_slot(void* handle)
 
 void* GCHandle::get_handle_by_target_slot(RtObject** slot)
 {
-    for (size_t i = 0; i < s_handle_map.capacity(); ++i)
-    {
-        auto* info = s_handle_map.at(i);
-        if (info && &info->obj == slot)
-            return info;
-    }
-    return nullptr;
+    return s_handle_address_map.find(reinterpret_cast<uintptr_t>(slot));
 }
 
 void* GCHandle::new_dependent_handle(RtObject* target, RtObject* dependent)

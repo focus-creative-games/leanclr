@@ -29,6 +29,7 @@ class Reflection
     static RtResult<RtObject*> normalize_coreclr_reflection_object(RtObject* obj);
     static RtResult<const metadata::RtTypeSig*> get_net10_type_handle(const metadata::RtTypeSig* type_sig);
     static RtResult<const void*> get_net10_method_table(const metadata::RtTypeSig* type_sig);
+    static size_t get_net10_type_handle_count();
     static RtResult<const metadata::RtTypeSig*> get_type_sig_from_net10_method_table(const void* method_table);
     static RtResult<const metadata::RtTypeSig*> get_type_sig_from_net10_type_handle(const void* type_handle);
     static RtResult<const metadata::RtClass*> get_class_from_net10_method_table(const void* method_table);

@@ -22,6 +22,19 @@ static InternalFunctionInitializer g_internal_functions_initializer = nullptr;
 
 static size_t g_default_eval_stack_object_count = 1024 * 128;
 static size_t g_default_frame_stack_size = 1024 * 2;
+#if LEANCLR_BCL_CORECLR_NET10
+static size_t g_max_runtime_type_handles = 16384;
+
+size_t Settings::get_max_runtime_type_handles()
+{
+    return g_max_runtime_type_handles;
+}
+
+void Settings::set_max_runtime_type_handles(size_t count)
+{
+    g_max_runtime_type_handles = count;
+}
+#endif
 
 static ReportUnhandledExceptionFunc g_report_unhandled_exception_function = nullptr;
 

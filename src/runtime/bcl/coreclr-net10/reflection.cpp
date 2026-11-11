@@ -1,5 +1,7 @@
 #include "managed_layouts.h"
 #include "vm/reflection.h"
+#include "vm/settings.h"
+#include "utils/scope_guard.h"
 
 #include <cstddef>
 #include <cstdint>
@@ -232,6 +234,8 @@ struct Net10MethodTableFacade
     void* reserved_interface_map;
     const metadata::RtClass* klass;
     const metadata::RtTypeSig* type_sig;
+    uint32_t cached_class_flags;
+    uint8_t initialization_state;
 };
 
 struct Net10MethodTableAuxiliaryData
@@ -243,10 +247,13 @@ struct Net10MethodTableAuxiliaryData
 
 static_assert(offsetof(Net10MethodTableFacade, parent_method_table) == 0x10,
               "net10 MethodTable facade must expose ParentMethodTable at CoreLib's expected offset");
-static_assert(offsetof(Net10MethodTableFacade, auxiliary_data) == 0x20, "net10 MethodTable facade must expose AuxiliaryData at CoreLib's expected offset");
-static_assert(offsetof(Net10MethodTableFacade, element_method_table) == 0x30, "net10 MethodTable facade must expose ElementType at CoreLib's expected offset");
-static_assert(offsetof(Net10MethodTableFacade, reserved_interface_map) == 0x38, "net10 MethodTable facade must preserve CoreLib's InterfaceMap offset");
-static_assert(offsetof(Net10MethodTableAuxiliaryData, exposed_class_object_raw) == 0x10,
+static_assert(offsetof(Net10MethodTableFacade, auxiliary_data) == 0x10 + 2 * PTR_SIZE,
+              "net10 MethodTable facade must expose AuxiliaryData at CoreLib's expected offset");
+static_assert(offsetof(Net10MethodTableFacade, element_method_table) == 0x10 + 4 * PTR_SIZE,
+              "net10 MethodTable facade must expose ElementType at CoreLib's expected offset");
+static_assert(offsetof(Net10MethodTableFacade, reserved_interface_map) == 0x10 + 5 * PTR_SIZE,
+              "net10 MethodTable facade must preserve CoreLib's InterfaceMap offset");
+static_assert(offsetof(Net10MethodTableAuxiliaryData, exposed_class_object_raw) == 2 * PTR_SIZE,
               "net10 MethodTable auxiliary data must expose ExposedClassObjectRaw at CoreLib's expected offset");
 
 static utils::HashMap<const metadata::RtTypeSig*, Net10MethodTableFacade*> s_net10_method_table_by_type_sig;
@@ -811,6 +818,11 @@ static bool has_legacy_reflection_field_layout(const metadata::RtClass* runtime_
 
 static RtResultVoid ensure_net10_method_table_facade_initialized(Net10MethodTableFacade* method_table, const metadata::RtTypeSig* pooled_type_sig) noexcept;
 
+size_t Reflection::get_net10_type_handle_count()
+{
+    return s_net10_method_table_by_type_sig.size();
+}
+
 RtResult<const metadata::RtTypeSig*> Reflection::get_net10_type_handle(const metadata::RtTypeSig* type_sig)
 {
     if (type_sig == nullptr)
@@ -828,8 +840,20 @@ RtResult<const metadata::RtTypeSig*> Reflection::get_net10_type_handle(const met
         RET_OK(reinterpret_cast<const metadata::RtTypeSig*>(found->second));
     }
 
-    auto method_table = alloc::MetadataAllocation::malloc_any_zeroed<Net10MethodTableFacade>();
-    auto auxiliary_data = alloc::MetadataAllocation::malloc_any_zeroed<Net10MethodTableAuxiliaryData>();
+    if (s_net10_method_table_by_type_sig.size() >= Settings::get_max_runtime_type_handles())
+        RET_ERR(RtErr::OutOfMemory);
+
+    struct Storage
+    {
+        Net10MethodTableFacade table;
+        Net10MethodTableAuxiliaryData auxiliary;
+    };
+
+    auto* storage = alloc::MetadataAllocation::try_malloc_any_zeroed<Storage>();
+    if (storage == nullptr)
+        RET_ERR(RtErr::OutOfMemory);
+    auto* method_table = &storage->table;
+    auto* auxiliary_data = &storage->auxiliary;
     method_table->type_sig = pooled_type_sig;
     method_table->auxiliary_data = auxiliary_data;
     s_net10_method_table_by_type_sig.emplace(pooled_type_sig, method_table);
@@ -875,6 +899,12 @@ static RtResultVoid ensure_net10_method_table_facade_initialized(Net10MethodTabl
         RET_ERR(RtErr::ArgumentNull);
     }
 
+    if (method_table->initialization_state == 1 ||
+        (method_table->initialization_state == 2 && method_table->klass != nullptr && method_table->cached_class_flags == method_table->klass->extra_flags))
+        RET_VOID_OK();
+    method_table->initialization_state = 1;
+    auto failed = utils::make_scope_exit([method_table]() { method_table->initialization_state = 0; });
+
     if (method_table->auxiliary_data == nullptr)
     {
         method_table->auxiliary_data = alloc::MetadataAllocation::malloc_any_zeroed<Net10MethodTableAuxiliaryData>();
@@ -889,6 +919,9 @@ static RtResultVoid ensure_net10_method_table_facade_initialized(Net10MethodTabl
         }
     }
 
+    // Field layout can complete after an early recursive type-handle request.
+    // Refresh flags when the class's reference/layout flags change.
+    const uint32_t observed_class_flags = method_table->klass != nullptr ? method_table->klass->extra_flags : 0;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, flags, get_net10_method_table_flags(pooled_type_sig, method_table->klass));
     method_table->flags = flags;
     method_table->base_size = 0;
@@ -924,6 +957,9 @@ static RtResultVoid ensure_net10_method_table_facade_initialized(Net10MethodTabl
         }
     }
 
+    method_table->initialization_state = 2;
+    method_table->cached_class_flags = observed_class_flags;
+    failed.dismiss();
     RET_VOID_OK();
 }
 
