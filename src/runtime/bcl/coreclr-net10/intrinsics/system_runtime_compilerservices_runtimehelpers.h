@@ -9,6 +9,7 @@ namespace intrinsics
 class SystemRuntimeCompilerServicesRuntimeHelpers
 {
   public:
+    static RtResultVoid prepare_method(const void* handle) noexcept;
     static utils::Span<vm::IntrinsicEntry> get_intrinsic_entries() noexcept;
 
     static RtResult<const void*> get_method_table(vm::RtObject* obj) noexcept;

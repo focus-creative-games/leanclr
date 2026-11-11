@@ -39,7 +39,8 @@ try {
         "TestBoxingMetadata", "TestReflectionTypeOnly", "TestTypeEqualityOnly",
         "TestNestedThrowCatchOnly", "TestThrowTargetInvocationCatchOnly", "TestSpan",
         "TestSpanStackalloc", "TestExceptionFilterControlFlow",
-        "TestCommandLineArguments", "TestCommandLineCopies", "TestUnsupportedNativeEntry"
+        "TestCommandLineArguments", "TestCommandLineCopies", "TestUnsupportedNativeEntry",
+        "TestRuntimeHelpers", "TestStaticInterfaceDispatch", "TestHardwareFallbackAndUtf8Count", "TestPrepareMethodDoesNotExecute"
     )
     foreach ($entry in $entries) {
         Write-Host "Running $entry"

@@ -6,6 +6,12 @@ namespace leanclr
 namespace metadata
 {
 class RtModuleDef;
+struct RtMethodInfo;
+} // namespace metadata
+
+namespace vm
+{
+struct IntrinsicRegistry;
 }
 
 namespace bcl
@@ -20,6 +26,7 @@ class Adapter
     static void register_internal_calls();
     static void register_intrinsics();
     static void register_pinvokes();
+    static const vm::IntrinsicRegistry* resolve_intrinsic(const metadata::RtMethodInfo* method);
 };
 } // namespace bcl
 } // namespace leanclr

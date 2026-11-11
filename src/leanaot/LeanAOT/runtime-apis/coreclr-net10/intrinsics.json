@@ -238,5 +238,10 @@
     "name": "System.Threading.Volatile::Write<>",
     "func": "SystemThreadingVolatile::write_ref",
     "header": "bcl/coreclr-net10/intrinsics/system_threading_volatile.h"
+  },
+  {
+    "name": "System.Runtime.CompilerServices.RuntimeHelpers::PrepareMethod(System.RuntimeMethodHandle)",
+    "func": "SystemRuntimeCompilerServicesRuntimeHelpers::prepare_method",
+    "header": "bcl/coreclr-net10/intrinsics/system_runtime_compilerservices_runtimehelpers.h"
   }
 ]

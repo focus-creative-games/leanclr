@@ -41,6 +41,9 @@ class Method
                                                                                               size_t parameter_count);
 
     // Attribute/flag helpers
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    static RtResult<const metadata::RtMethodInfo*> resolve_static_interface_method(metadata::RtClass* klass, const metadata::RtMethodInfo* declaration);
+#endif
     static bool is_virtual(const metadata::RtMethodInfo* method);
     static bool is_devirtualed(const metadata::RtMethodInfo* method);
     static bool is_abstract(const metadata::RtMethodInfo* method);

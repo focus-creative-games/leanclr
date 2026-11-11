@@ -625,7 +625,11 @@ RtResultVoid Transformer::setup_next_and_target_branch_eval_stack(BasicBlock* ta
 RtResultVoid Transformer::add_br(uint32_t next_offset, int32_t target_offset)
 {
     if (target_offset == 0)
+    {
+        if (_cur_bb->next_bb)
+            RET_ERR_ON_FAIL(setup_target_branch_eval_stack(_cur_bb->next_bb));
         RET_VOID_OK();
+    }
     // according to ECMA-335, the eval stack of branch target before current instruction should be empty.
     // but coreclr relaxes this rule, so we also relax it here.
     // if (target_offset < 0 && !_cur_bb->eval_stack.is_empty())
@@ -644,7 +648,11 @@ RtResultVoid Transformer::add_brtrue_or_false(uint32_t next_offset, int32_t targ
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, cond_var, pop_eval_stack());
     if (target_offset == 0)
+    {
+        if (_cur_bb->next_bb)
+            RET_ERR_ON_FAIL(setup_target_branch_eval_stack(_cur_bb->next_bb));
         RET_VOID_OK();
+    }
 
     const size_t target_il_offset = static_cast<size_t>(static_cast<ptrdiff_t>(next_offset) + static_cast<ptrdiff_t>(target_offset));
     auto target_bb_result = get_branch_target_bb(target_il_offset);
@@ -666,7 +674,11 @@ RtResultVoid Transformer::add_condition_branch(uint32_t next_offset, int32_t tar
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, right_var, pop_eval_stack());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, left_var, pop_eval_stack());
     if (target_offset == 0)
+    {
+        if (_cur_bb->next_bb)
+            RET_ERR_ON_FAIL(setup_target_branch_eval_stack(_cur_bb->next_bb));
         RET_VOID_OK();
+    }
 
     if (left_var->data_type != right_var->data_type)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
@@ -701,7 +713,11 @@ RtResultVoid Transformer::add_switch(uint32_t next_offset, const void* case_targ
 
     // return directly if all branches are zero offset
     if (!any_not_zero_branch)
+    {
+        if (_cur_bb->next_bb)
+            RET_ERR_ON_FAIL(setup_target_branch_eval_stack(_cur_bb->next_bb));
         RET_VOID_OK();
+    }
 
     InstructionOperands ir{};
     ir.first = key_var;
@@ -1171,6 +1187,14 @@ RtResultVoid Transformer::add_call_common(const metadata::RtMethodInfo* method, 
 
 RtResultVoid Transformer::add_call(const metadata::RtMethodInfo* method)
 {
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    if (_constrained_class && vm::Method::is_static(method) && vm::Class::is_interface(method->parent))
+    {
+        auto* constrained = _constrained_class;
+        _constrained_class = nullptr;
+        UNWRAP_OR_RET_ERR_ON_FAIL(method, vm::Method::resolve_static_interface_method(constrained, method));
+    }
+#endif
     return add_call_common(method, method->invoker_type, method->invoke_method_ptr, false, false);
 }
 

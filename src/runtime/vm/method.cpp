@@ -221,6 +221,65 @@ const RtMethodInfo* Method::find_matched_method_in_class_by_name_and_param_count
     return nullptr;
 }
 
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+RtResult<const RtMethodInfo*> Method::resolve_static_interface_method(RtClass* klass, const RtMethodInfo* declaration)
+{
+    if (!klass || !declaration || !is_static(declaration) || !Class::is_interface(declaration->parent))
+        RET_ERR(RtErr::BadImageFormat);
+    RET_ERR_ON_FAIL(Class::initialize_methods(klass));
+    const RtClass* definition = klass;
+    RtGenericContext context{};
+    if (Class::is_generic_inst(klass))
+    {
+        const auto* generic = klass->by_val->data.generic_class;
+        UNWRAP_OR_RET_ERR_ON_FAIL(definition, Class::get_class_by_type_def_gid(generic->base_type_def_gid));
+        context.class_inst = generic->class_inst;
+    }
+    const auto& image = definition->image->get_cli_image();
+    auto range = image.find_row_range_of_owner_at_sorted_table(TableType::MethodImpl, 0, RtToken::decode_rid(definition->token));
+    if (range)
+    {
+        auto gcc = Class::get_generic_container_context(definition);
+        for (uint32_t rid = range->ridBegin; rid < range->ridEnd; ++rid)
+        {
+            auto row = image.read_method_impl(rid);
+            if (!row)
+                RET_ERR(RtErr::BadImageFormat);
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+                const RtMethodInfo*, declared,
+                definition->image->get_method_by_token(RtMetadata::decode_method_def_or_ref_coded_index(row->method_declaration), gcc, &context));
+            if (declared->parent != declaration->parent || !MetadataCompare::is_method_signature_equal(declared, declaration, true, true))
+                continue;
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+                const RtMethodInfo*, body,
+                definition->image->get_method_by_token(RtMetadata::decode_method_def_or_ref_coded_index(row->method_body), gcc, &context));
+            if (!is_static(body) || is_abstract(body))
+                RET_ERR(RtErr::BadImageFormat);
+            RET_OK(body);
+        }
+    }
+    const RtMethodInfo* match = nullptr;
+    for (uint16_t i = 0; i < klass->method_count; ++i)
+    {
+        const auto* candidate = klass->methods[i];
+        if (is_static(candidate) && is_public(candidate) && !is_abstract(candidate) &&
+            MetadataCompare::is_method_signature_equal(candidate, declaration, true, true))
+        {
+            if (match)
+                RET_ERR(RtErr::BadImageFormat);
+            match = candidate;
+        }
+    }
+    if (match)
+        RET_OK(match);
+    if (klass->parent)
+        return resolve_static_interface_method(const_cast<RtClass*>(klass->parent), declaration);
+    if (!is_abstract(declaration))
+        RET_OK(declaration);
+    RET_ERR(RtErr::MissingMethod);
+}
+#endif
+
 bool Method::is_virtual(const RtMethodInfo* method)
 {
     return (method->flags & static_cast<uint16_t>(RtMethodAttribute::Virtual)) != 0;

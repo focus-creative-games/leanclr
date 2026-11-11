@@ -9,11 +9,35 @@
 #include "vm/field.h"
 #include "vm/reflection.h"
 #include "vm/rt_array.h"
+#include "vm/method.h"
+#include "interp/interpreter.h"
 
 namespace leanclr
 {
 namespace intrinsics
 {
+
+RtResultVoid SystemRuntimeCompilerServicesRuntimeHelpers::prepare_method(const void* handle) noexcept
+{
+    if (!handle)
+        RET_ERR(RtErr::Argument);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method, vm::Reflection::get_method_info_from_handle_arg(handle));
+    if (!method || vm::Method::is_abstract(method))
+        RET_ERR(RtErr::Argument);
+    if (method->generic_container && !method->generic_method)
+        RET_ERR(RtErr::NotSupported);
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(const_cast<metadata::RtClass*>(method->parent)));
+    if ((method->invoker_type == metadata::RtInvokerType::Interpreter || method->invoker_type == metadata::RtInvokerType::InterpreterVirtualAdjustThunk) &&
+        !method->interp_data)
+        RET_ERR_ON_FAIL(interp::Interpreter::init_interpreter_method(method));
+    RET_VOID_OK();
+}
+
+static RtResultVoid prepare_method_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* args,
+                                           interp::RtStackObject*) noexcept
+{
+    return SystemRuntimeCompilerServicesRuntimeHelpers::prepare_method(interp::EvalStackOp::get_param<const void*>(args, 0));
+}
 
 static RtResult<const metadata::RtTypeSig*> get_single_method_generic_arg(const metadata::RtMethodInfo* method) noexcept
 {
@@ -447,6 +471,8 @@ static RtResultVoid is_reference_or_contains_references_invoker(metadata::RtMana
 }
 
 static vm::IntrinsicEntry s_intrinsic_entries_system_runtime_compilerservices_runtimehelpers[] = {
+    {"System.Runtime.CompilerServices.RuntimeHelpers::PrepareMethod(System.RuntimeMethodHandle)",
+     reinterpret_cast<vm::IntrinsicFunction>(SystemRuntimeCompilerServicesRuntimeHelpers::prepare_method), prepare_method_invoker},
     {"System.Runtime.CompilerServices.RuntimeHelpers::GetMethodTable(System.Object)",
      (vm::IntrinsicFunction)&SystemRuntimeCompilerServicesRuntimeHelpers::get_method_table, get_method_table_invoker},
     {"System.Runtime.CompilerServices.RuntimeHelpers::GetRawData(System.Object)",

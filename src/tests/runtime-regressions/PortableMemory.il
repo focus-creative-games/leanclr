@@ -31,4 +31,33 @@
         ldc.r8 12345.678
         ret
     }
+
+    .method public static int32 BranchToNext() cil managed {
+        .maxstack 3
+        ldc.i4.s 42
+        br.s next
+    next: ret
+    }
+    .method public static int32 ConditionalBranchToNext() cil managed {
+        .maxstack 3
+        ldc.i4.s 42
+        ldc.i4.0
+        brtrue.s next
+    next: ret
+    }
+    .method public static int32 ComparisonBranchToNext() cil managed {
+        .maxstack 3
+        ldc.i4.s 42
+        ldc.i4.1
+        ldc.i4.2
+        beq.s next
+    next: ret
+    }
+    .method public static int32 SwitchToNext() cil managed {
+        .maxstack 3
+        ldc.i4.s 42
+        ldc.i4.0
+        switch(next)
+    next: ret
+    }
 }

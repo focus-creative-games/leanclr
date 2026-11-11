@@ -1,5 +1,7 @@
 # CoreCLR .NET 10 迁移计划与验收标准
 
+执行进展见 [开发状态](coreclr-net10-development-status.md)。下列“本次集成实测”保留首次合并时的基线结果。
+
 日期：2026-11-11。目标分支：`coreclr-net10`。本文用于审阅后续 minimal .NET 10 开发范围。
 
 ## 分支与合并方式

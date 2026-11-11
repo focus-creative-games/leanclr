@@ -1,6 +1,7 @@
 #include "transformer.h"
 #include "vm/class.h"
 #include "vm/field.h"
+#include "vm/reflection.h"
 #include "vm/rt_string.h"
 #include "vm/assembly.h"
 #include "vm/array_class.h"
@@ -701,7 +702,15 @@ RtResultVoid Transformer::emit_RefAnyVal(InstructionOperands& output)
 RtResultVoid Transformer::emit_LdToken(InstructionOperands& output)
 {
     output.opcode = OpCodeEnum::LdToken;
-    setup_inst_resolved_data(output, (const void*)metadata::RtEncodedRuntimeHandle{output.runtime_handle}.get_handle_without_type());
+    auto handle = metadata::RtEncodedRuntimeHandle::decode(output.runtime_handle);
+    const void* value = handle.value;
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    if (handle.is_type())
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(value, vm::Reflection::get_net10_method_table(handle.typeSig));
+    }
+#endif
+    setup_inst_resolved_data(output, value);
     return append_instruction(output);
 }
 

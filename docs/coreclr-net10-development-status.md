@@ -1,0 +1,15 @@
+# Minimal .NET 10 development status
+
+This file tracks execution of `coreclr-net10-migration-plan.md`, not a claim of full framework compatibility.
+
+| Stage | Status | Evidence / remaining work |
+| --- | --- | --- |
+| P0 baseline | Passed on Windows x64 | `421aecfd` registers native bindings, clones argv and makes unsupported calls fail explicitly. Both previously failing smoke methods now pass. 27 managed checks and handle contracts pass in Release and Debug. Static interface dispatch, zero-offset branch stack propagation, hardware fallback and real method preparation have regressions; Mono 41/41 and native generic/EH AOT checks pass. |
+| P0 ABI / handles | In progress | Type ldtoken now creates a MethodTable facade during translation. Full field checks, canonical handle validation and typed references remain. |
+| P0 GC / exceptions | Pending | Real-heap ephemeron/finalization pressure and native/byref root coverage required. |
+| P1 minimal API catalog | Pending | Full imported matrix and negative API contracts required. |
+| P1 net10 AOT | Pending | Profile ABI, roots, inline arrays, varargs and fallback matrix required. |
+| P1 platforms / budgets | Pending | Local WSL cannot start: its registered ext4.vhdx is missing. No Linux, ARM64 or Wasm pass is claimed from Windows-only testing. |
+| P2 engine host | Pending | Self-owned host bridge, lifecycle and engine-specific tests required. |
+
+The original migration report records the pre-development baseline; this ledger records later progress. Every completed stage must link its commits and reproducible test results.

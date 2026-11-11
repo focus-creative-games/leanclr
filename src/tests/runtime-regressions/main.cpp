@@ -670,6 +670,13 @@ int main(int argc, char** argv)
         auto double_result = vm::Runtime::invoke_with_run_cctor(method, nullptr, nullptr);
         check(double_result.is_ok() && double_result.unwrap(), "execute double constant");
         check(*reinterpret_cast<double*>(double_result.unwrap() + 1) == 12345.678, "preserve constant double bits");
+        for (const char* name : {"BranchToNext", "ConditionalBranchToNext", "ComparisonBranchToNext", "SwitchToNext"})
+        {
+            method = vm::Method::find_matched_method_in_class_by_name(klass.unwrap(), name);
+            auto branch_result = vm::Runtime::invoke_with_run_cctor(method, nullptr, nullptr);
+            check(branch_result.is_ok() && branch_result.unwrap(), "execute branch to next instruction");
+            check(*reinterpret_cast<int32_t*>(branch_result.unwrap() + 1) == 42, "preserve stack across zero-offset branch");
+        }
     }
     else if (std::strcmp(argv[1], "managed-host-services") == 0)
     {

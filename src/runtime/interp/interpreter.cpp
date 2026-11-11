@@ -3,6 +3,7 @@
 #include "utils/integer_math.h"
 
 #include "interpreter.h"
+#include "host/services.h"
 #include "vm/class.h"
 #include "metadata/module_def.h"
 #include "metadata/aot_module.h"
@@ -41,7 +42,13 @@ static RtResult<const RtInterpMethodInfo*> transform(const metadata::RtMethodInf
     size_t pageSize = 1024;
     alloc::MemPool pool(guessSize, pageSize, utils::MemOp::align_up(guessSize, pageSize));
     Transformer transformer(mod, method, methodBody, pool);
-    RET_ERR_ON_FAIL(transformer.transform());
+    auto transformed = transformer.transform();
+    if (transformed.is_err())
+    {
+        host::Services::logf(host::LogLevel::Error, "IL translation failed: %s.%s::%s token:0x%x il:%d error:%d", klass->namespaze, klass->name, method->name,
+                             method->token, transformer.current_il_offset(), static_cast<int>(transformed.unwrap_err()));
+        return transformed.unwrap_err();
+    }
     return transformer.build_interp_method_info();
 }
 

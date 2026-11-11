@@ -136,6 +136,12 @@ class Transformer
     Transformer(metadata::RtModuleDef* mod, const metadata::RtMethodInfo* method_info, const metadata::RtMethodBody& method_body, alloc::MemPool& mem_pool);
 
     RtResultVoid transform();
+
+    int32_t current_il_offset() const
+    {
+        return _cur_il_offset;
+    }
+
     RtResult<const RtInterpMethodInfo*> build_interp_method_info();
 
   private:

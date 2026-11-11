@@ -1,5 +1,6 @@
 #include "bcl/coreclr-net10/managed_layouts.h"
 #include "coreclr_qcall.h"
+#include "intrinsics/system_runtime_compilerservices_runtimehelpers.h"
 
 #include <cstdio>
 #include <cstdlib>
@@ -3949,11 +3950,18 @@ RtResultVoid runtime_helpers_run_module_constructor_invoker(metadata::RtManagedM
     RET_VOID_OK();
 }
 
-RtResultVoid runtime_helpers_compile_method_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+RtResultVoid runtime_helpers_compile_method_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                     interp::RtStackObject*) noexcept
 {
-    (void)interp::EvalStackOp::get_param<const void*>(params, 0);
-    RET_VOID_OK();
+    if (method->parameter_count == 3)
+    {
+        int32_t count = interp::EvalStackOp::get_param<int32_t>(params, 2);
+        if (count < 0)
+            RET_ERR(RtErr::ArgumentOutOfRange);
+        if (count != 0)
+            RET_ERR(RtErr::NotSupported);
+    }
+    return intrinsics::SystemRuntimeCompilerServicesRuntimeHelpers::prepare_method(interp::EvalStackOp::get_param<const void*>(params, 0));
 }
 
 RtResultVoid arg_iterator_init_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,

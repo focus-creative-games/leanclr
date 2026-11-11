@@ -68,7 +68,7 @@ RtResult<const IntrinsicRegistry*> Intrinsics::get_intrinsic_by_method(const met
         if (it != get_g_intrinsicMap().end())
             RET_OK(&it->second);
     }
-    RET_OK(nullptr);
+    RET_OK(bcl::Adapter::resolve_intrinsic(method));
 }
 
 // Register newobj intrinsic

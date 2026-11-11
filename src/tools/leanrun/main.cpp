@@ -1,3 +1,6 @@
+#if defined(_MSC_VER) && defined(_DEBUG)
+#include <crtdbg.h>
+#endif
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -258,6 +261,12 @@ static int run(const std::string& dll_name, const std::vector<std::string>& dll_
 
 int main(int argc, char* argv[])
 {
+#if defined(_MSC_VER) && defined(_DEBUG)
+    // This command-line runner must fail in its log instead of opening a modal
+    // assertion dialog that blocks unattended regression and CI runs.
+    _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+    _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+#endif
 #ifdef _WIN32
     // 设置 Windows 控制台为 UTF-8 编码
     SetConsoleOutputCP(CP_UTF8);

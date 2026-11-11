@@ -21,6 +21,11 @@ void Adapter::register_internal_calls()
         vm::InternalCalls::register_newobj_internal_call(entry.name, entry.invoker);
 }
 
+const vm::IntrinsicRegistry* Adapter::resolve_intrinsic(const metadata::RtMethodInfo*)
+{
+    return nullptr;
+}
+
 void Adapter::register_pinvokes()
 {
 }

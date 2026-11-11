@@ -163,6 +163,18 @@ internal struct InlineArrayHolder
     public int[]? Large;
 }
 
+internal interface IStaticProbe<T> where T : IStaticProbe<T>
+{
+    static abstract int Read(int value);
+}
+internal readonly struct ImplicitStaticProbe : IStaticProbe<ImplicitStaticProbe>
+{
+    public static int Read(int value) => value + 2;
+}
+internal readonly struct ExplicitStaticProbe : IStaticProbe<ExplicitStaticProbe>
+{
+    static int IStaticProbe<ExplicitStaticProbe>.Read(int value) => value + 3;
+}
 internal static class Program
 {
     private const int ConstNumber = 1234;
@@ -840,6 +852,40 @@ internal static class Program
         holder.Large = [7, 42];
         Require(holder.Buffer[15] == 42, "inline array element was clobbered");
         Require(holder.Large[1] == 42, "inline array tail reference read failed");
+    }
+
+    private static int StaticRead<T>(int value) where T : IStaticProbe<T> => T.Read(value);
+    private static void TestStaticInterfaceDispatch()
+    {
+        Require(StaticRead<ImplicitStaticProbe>(40) == 42, "implicit static interface dispatch");
+        Require(StaticRead<ExplicitStaticProbe>(39) == 42, "explicit static interface dispatch");
+        ArgumentOutOfRangeException.ThrowIfNegative(1);
+        try { ArgumentOutOfRangeException.ThrowIfNegative(-1); }
+        catch (ArgumentOutOfRangeException) { return; }
+        throw new Exception("generic numeric predicate failed");
+    }
+
+    private static void TestHardwareFallbackAndUtf8Count()
+    {
+        Require(!System.Runtime.Intrinsics.X86.Sse2.IsSupported && !System.Runtime.Intrinsics.X86.Sse2.X64.IsSupported, "unimplemented hardware advertised");
+        Require(System.Text.Encoding.UTF8.GetByteCount("Aé😀") == 7, "scalar UTF8 byte count");
+    }
+
+    private static int preparedInitializers;
+    private static class PreparedTarget
+    {
+        static PreparedTarget() { preparedInitializers++; }
+        public static int Read() => 42;
+    }
+    private static void TestPrepareMethodDoesNotExecute()
+    {
+        var method = typeof(PreparedTarget).GetMethod(nameof(PreparedTarget.Read))!;
+        RuntimeHelpers.PrepareMethod(method.MethodHandle);
+        Require(preparedInitializers == 0, "PrepareMethod ran target initializer");
+        Require(PreparedTarget.Read() == 42 && preparedInitializers == 1, "prepared method execution");
+        try { RuntimeHelpers.PrepareMethod(default); }
+        catch (ArgumentException) { return; }
+        throw new Exception("PrepareMethod accepted empty handle");
     }
 
     private static void TestRuntimeHelpers()
