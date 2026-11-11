@@ -163,7 +163,7 @@ bool close_registered_kernel32_event_handle(intptr_t handle)
 
 void set_last_error_from_errno(int err)
 {
-    RtSys::set_last_win32_error(os::io_error_internal::errno_to_monoio(err));
+    RtSys::set_last_win32_error(os::io_error_internal::errno_to_io_error(err));
 }
 
 bool utf16_path_to_utf8(const Utf16Char* path, utils::Utf8StringBuilder& utf8)
@@ -416,6 +416,7 @@ bool copy_file_contents(const char* src, const char* dst, uint32_t flags)
     int input = -1;
     int output = -1;
     bool ok = false;
+    int out_flags = O_WRONLY | O_CREAT | O_TRUNC;
 
     input = ::open(src, O_RDONLY);
     if (input < 0)
@@ -424,7 +425,6 @@ bool copy_file_contents(const char* src, const char* dst, uint32_t flags)
         goto done;
     }
 
-    int out_flags = O_WRONLY | O_CREAT | O_TRUNC;
     if ((flags & kCopyFileFailIfExists) != 0)
     {
         out_flags |= O_EXCL;

@@ -14,7 +14,8 @@ int main()
     metadata::RtClass first{}, second{};
     first.image = reinterpret_cast<metadata::RtModuleDef*>(uintptr_t{0x1000});
     second.image = reinterpret_cast<metadata::RtModuleDef*>(uintptr_t{0x2000});
-    metadata::RtMethodInfo methods[1024]{};
+    // Keep the stress fixture off the default 64 KiB Wasm stack.
+    static metadata::RtMethodInfo methods[1024]{};
     for (size_t i = 0; i < 1024; ++i)
     {
         methods[i].parent = i % 2 ? &first : &second;

@@ -7,6 +7,7 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="SignatureFixture.cs" />
+    <Compile Include="FilterFixtureGenerator.cs" />
     <ProjectReference Include="../../leanaot/LeanAOT.Core/LeanAOT.Core.csproj" />
   </ItemGroup>
 </Project>

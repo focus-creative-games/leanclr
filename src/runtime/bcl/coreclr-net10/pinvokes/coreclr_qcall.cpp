@@ -2607,6 +2607,8 @@ static void LEANCLR_PINVOKE_CALL_WINAPI kernel32_set_last_error_native(uint32_t 
 RtResultVoid kernel32_query_performance_frequency_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                           interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     int64_t* frequency = interp::EvalStackOp::get_param<int64_t*>(params, 0);
 #if LEANCLR_PLATFORM_WIN
     int32_t result = platform::Kernel32::query_performance_frequency(frequency) ? 1 : 0;
@@ -2616,11 +2618,17 @@ RtResultVoid kernel32_query_performance_frequency_invoker(metadata::RtManagedMet
 #endif
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_query_performance_counter_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                         interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     int64_t* counter = interp::EvalStackOp::get_param<int64_t*>(params, 0);
 #if LEANCLR_PLATFORM_WIN
     int32_t result = platform::Kernel32::query_performance_counter(counter) ? 1 : 0;
@@ -2630,6 +2638,10 @@ RtResultVoid kernel32_query_performance_counter_invoker(metadata::RtManagedMetho
 #endif
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_get_console_cp_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
@@ -2884,17 +2896,25 @@ RtResultVoid wait_handle_wait_multiple_invoker(metadata::RtManagedMethodPointer,
 RtResultVoid native_library_load_from_path_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                    interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     auto library_name = interp::EvalStackOp::get_param<const Utf16Char*>(params, 0);
     (void)interp::EvalStackOp::get_param<int32_t>(params, 1);
 
     intptr_t result = platform::Kernel32::load_library_ex(library_name, 0, 0);
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid native_library_load_by_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                  interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     auto library_name = interp::EvalStackOp::get_param<const Utf16Char*>(params, 0);
     (void)interp::EvalStackOp::get_param<void*>(params, 1);
     (void)interp::EvalStackOp::get_param<int32_t>(params, 2);
@@ -2904,6 +2924,10 @@ RtResultVoid native_library_load_by_name_invoker(metadata::RtManagedMethodPointe
     intptr_t result = platform::Kernel32::load_library_ex(library_name, 0, static_cast<int32_t>(dll_import_search_path_flag));
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid native_get_temp_path_w_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -2930,6 +2954,8 @@ const metadata::RtMethodInfo* get_native_get_temp_path_w_method() noexcept
 RtResultVoid native_library_get_symbol_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     intptr_t handle = interp::EvalStackOp::get_param<intptr_t>(params, 0);
     auto symbol_name = interp::EvalStackOp::get_param<const Utf16Char*>(params, 1);
     (void)interp::EvalStackOp::get_param<int32_t>(params, 2);
@@ -2950,14 +2976,24 @@ RtResultVoid native_library_get_symbol_invoker(metadata::RtManagedMethodPointer,
     }
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid native_library_free_lib_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                              interp::RtStackObject*) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     intptr_t handle = interp::EvalStackOp::get_param<intptr_t>(params, 0);
     (void)platform::Kernel32::free_library(handle);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid ole32_co_create_guid_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -3165,65 +3201,109 @@ RtResultVoid kernel32_set_file_pointer_ex_invoker(metadata::RtManagedMethodPoint
 RtResultVoid kernel32_initialize_critical_section_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                           interp::RtStackObject*) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     void* critical_section = interp::EvalStackOp::get_param<void*>(params, 0);
     platform::Kernel32::initialize_critical_section(critical_section);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_delete_critical_section_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                       interp::RtStackObject*) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     void* critical_section = interp::EvalStackOp::get_param<void*>(params, 0);
     platform::Kernel32::delete_critical_section(critical_section);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_enter_critical_section_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                      interp::RtStackObject*) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     void* critical_section = interp::EvalStackOp::get_param<void*>(params, 0);
     platform::Kernel32::enter_critical_section(critical_section);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_leave_critical_section_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                      interp::RtStackObject*) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     void* critical_section = interp::EvalStackOp::get_param<void*>(params, 0);
     platform::Kernel32::leave_critical_section(critical_section);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_initialize_condition_variable_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                             const interp::RtStackObject* params, interp::RtStackObject*) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     void* condition_variable = interp::EvalStackOp::get_param<void*>(params, 0);
     platform::Kernel32::initialize_condition_variable(condition_variable);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_sleep_condition_variable_cs_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                           interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     void* condition_variable = interp::EvalStackOp::get_param<void*>(params, 0);
     void* critical_section = interp::EvalStackOp::get_param<void*>(params, 1);
     int32_t milliseconds = interp::EvalStackOp::get_param<int32_t>(params, 2);
     int32_t result = platform::Kernel32::sleep_condition_variable_cs(condition_variable, critical_section, milliseconds) ? 1 : 0;
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_wake_condition_variable_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                       interp::RtStackObject*) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     void* condition_variable = interp::EvalStackOp::get_param<void*>(params, 0);
     platform::Kernel32::wake_condition_variable(condition_variable);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_create_io_completion_port_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                         interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     intptr_t file_handle = interp::EvalStackOp::get_param<intptr_t>(params, 0);
     intptr_t existing_completion_port = interp::EvalStackOp::get_param<intptr_t>(params, 1);
     uintptr_t completion_key = interp::EvalStackOp::get_param<uintptr_t>(params, 2);
@@ -3231,11 +3311,17 @@ RtResultVoid kernel32_create_io_completion_port_invoker(metadata::RtManagedMetho
     intptr_t result = platform::Kernel32::create_io_completion_port(file_handle, existing_completion_port, completion_key, number_of_concurrent_threads);
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_post_queued_completion_status_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                             const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     intptr_t completion_port = interp::EvalStackOp::get_param<intptr_t>(params, 0);
     uint32_t number_of_bytes_transferred = interp::EvalStackOp::get_param<uint32_t>(params, 1);
     uintptr_t completion_key = interp::EvalStackOp::get_param<uintptr_t>(params, 2);
@@ -3243,11 +3329,17 @@ RtResultVoid kernel32_post_queued_completion_status_invoker(metadata::RtManagedM
     int32_t result = platform::Kernel32::post_queued_completion_status(completion_port, number_of_bytes_transferred, completion_key, overlapped) ? 1 : 0;
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_get_queued_completion_status_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                            interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     intptr_t completion_port = interp::EvalStackOp::get_param<intptr_t>(params, 0);
     uint32_t* number_of_bytes_transferred = interp::EvalStackOp::get_param<uint32_t*>(params, 1);
     uintptr_t* completion_key = interp::EvalStackOp::get_param<uintptr_t*>(params, 2);
@@ -3257,11 +3349,17 @@ RtResultVoid kernel32_get_queued_completion_status_invoker(metadata::RtManagedMe
         platform::Kernel32::get_queued_completion_status(completion_port, number_of_bytes_transferred, completion_key, overlapped, milliseconds) ? 1 : 0;
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_get_queued_completion_status_ex_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                               const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
+#if LEANCLR_PLATFORM_WIN
+
     intptr_t completion_port = interp::EvalStackOp::get_param<intptr_t>(params, 0);
     void* completion_port_entries = interp::EvalStackOp::get_param<void*>(params, 1);
     int32_t count = interp::EvalStackOp::get_param<int32_t>(params, 2);
@@ -3274,6 +3372,10 @@ RtResultVoid kernel32_get_queued_completion_status_ex_invoker(metadata::RtManage
             : 0;
     interp::EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
+
+#else
+    RET_ERR(RtErr::NotSupported);
+#endif
 }
 
 RtResultVoid kernel32_get_environment_variable_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
@@ -3798,6 +3900,9 @@ struct QCallTypeHandleNative
     intptr_t native_handle;
 };
 
+// QCall pairs occupy one CLI slot on 32-bit targets and two on 64-bit targets.
+constexpr size_t kQCallSlotAdjustment = 2 - sizeof(QCallTypeHandleNative) / sizeof(interp::RtStackObject);
+
 struct ObjectHandleOnStackNative
 {
     void* handle_slot;
@@ -3879,8 +3984,9 @@ RtResultVoid file_load_exception_get_message_invoker(metadata::RtManagedMethodPo
 RtResultVoid runtime_helpers_run_class_constructor_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                            interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, type_sig,
                                             vm::Reflection::get_type_sig_from_qcall_type_handle(qcall_type_handle, native_handle));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
@@ -3891,8 +3997,9 @@ RtResultVoid runtime_helpers_run_class_constructor_invoker(metadata::RtManagedMe
 RtResultVoid runtime_helpers_run_module_constructor_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                             const interp::RtStackObject* params, interp::RtStackObject*) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtModuleDef*, module, vm::Reflection::get_module_from_qcall_module(qcall_module, native_handle));
     RET_ERR_ON_FAIL(vm::Runtime::run_module_static_constructor(module));
     RET_VOID_OK();
@@ -4044,13 +4151,14 @@ RtResultVoid assembly_get_loaded_assemblies_invoker(metadata::RtManagedMethodPoi
 RtResultVoid array_create_instance_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                            interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    int32_t rank = interp::EvalStackOp::get_param<int32_t>(params, 2);
-    auto lengths = interp::EvalStackOp::get_param<int32_t*>(params, 3);
-    auto lower_bounds = interp::EvalStackOp::get_param<int32_t*>(params, 4);
-    bool from_array_type = interp::EvalStackOp::get_param<int32_t>(params, 5) != 0;
-    auto ret_array = interp::EvalStackOp::get_param<vm::RtArray**>(params, 6);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    int32_t rank = interp::EvalStackOp::get_param<int32_t>(params, 2 - kQCallSlotAdjustment);
+    auto lengths = interp::EvalStackOp::get_param<int32_t*>(params, 3 - kQCallSlotAdjustment);
+    auto lower_bounds = interp::EvalStackOp::get_param<int32_t*>(params, 4 - kQCallSlotAdjustment);
+    bool from_array_type = interp::EvalStackOp::get_param<int32_t>(params, 5 - kQCallSlotAdjustment) != 0;
+    auto ret_array = interp::EvalStackOp::get_param<vm::RtArray**>(params, 6 - kQCallSlotAdjustment);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, array,
                                             create_array_instance(qcall_type_handle, native_handle, rank, lengths, lower_bounds, from_array_type));
@@ -4094,11 +4202,12 @@ RtResultVoid gc_reregister_for_finalize_invoker(metadata::RtManagedMethodPointer
 RtResultVoid enum_get_values_and_names_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto values = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2);
-    auto names = interp::EvalStackOp::get_param<vm::RtArray**>(params, 3);
-    bool get_names = interp::EvalStackOp::get_param<int32_t>(params, 4) != 0;
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto values = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2 - kQCallSlotAdjustment);
+    auto names = interp::EvalStackOp::get_param<vm::RtArray**>(params, 3 - kQCallSlotAdjustment);
+    bool get_names = interp::EvalStackOp::get_param<int32_t>(params, 4 - kQCallSlotAdjustment) != 0;
     RET_ERR_ON_FAIL(icalls::SystemEnum::get_enum_values_and_names_qcall(qcall_type_handle, native_handle, values, names, get_names));
     RET_VOID_OK();
 }
@@ -4116,9 +4225,10 @@ RtResultVoid method_table_can_compare_bits_or_use_fast_get_hash_code_invoker(met
 RtResultVoid marshal_size_of_helper_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                             interp::RtStackObject* ret) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    (void)interp::EvalStackOp::get_param<int32_t>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    (void)interp::EvalStackOp::get_param<int32_t>(params, 2 - kQCallSlotAdjustment);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, type_sig,
                                             vm::Reflection::get_type_sig_from_qcall_type_handle(qcall_type_handle, native_handle));
@@ -4145,9 +4255,10 @@ RtResultVoid marshal_get_delegate_for_function_pointer_qcall_invoker(metadata::R
                                                                      const interp::RtStackObject* params, interp::RtStackObject*) noexcept
 {
     auto ptr = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 2);
-    auto result_slot = interp::EvalStackOp::get_param<vm::RtObject**>(params, 3);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 1);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto result_slot = interp::EvalStackOp::get_param<vm::RtObject**>(params, 3 - kQCallSlotAdjustment);
     if (result_slot == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4410,10 +4521,11 @@ RtResultVoid delegate_bind_to_method_info_invoker(metadata::RtManagedMethodPoint
 RtResultVoid construct_runtime_type_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                  interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    int32_t format_flags = interp::EvalStackOp::get_param<int32_t>(params, 2);
-    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 3);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    int32_t format_flags = interp::EvalStackOp::get_param<int32_t>(params, 2 - kQCallSlotAdjustment);
+    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 3 - kQCallSlotAdjustment);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtString*, name, construct_type_name(qcall_type_handle, native_handle, format_flags));
     *ret_string = name;
@@ -4538,9 +4650,10 @@ RtResultVoid get_declaring_type_handle_invoker(metadata::RtManagedMethodPointer,
 RtResultVoid get_generic_type_definition_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                  interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2 - kQCallSlotAdjustment);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionRuntimeType*, generic_type_definition,
                                             get_generic_type_definition(qcall_type_handle, native_handle));
@@ -4566,10 +4679,11 @@ RtResultVoid runtime_type_handle_get_module_slow_invoker(metadata::RtManagedMeth
 RtResultVoid runtime_type_handle_get_instantiation_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                            interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto types_slot = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2);
-    bool runtime_array = interp::EvalStackOp::get_param<int32_t>(params, 3) != 0;
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto types_slot = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2 - kQCallSlotAdjustment);
+    bool runtime_array = interp::EvalStackOp::get_param<int32_t>(params, 3 - kQCallSlotAdjustment) != 0;
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, instantiation, get_type_instantiation(qcall_type_handle, native_handle, runtime_array));
     if (types_slot != nullptr)
@@ -4734,11 +4848,12 @@ RtResultVoid runtime_type_handle_get_method_at_invoker(metadata::RtManagedMethod
 RtResultVoid runtime_type_handle_instantiate_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                      interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto type_handles = interp::EvalStackOp::get_param<void**>(params, 2);
-    int32_t type_handle_count = interp::EvalStackOp::get_param<int32_t>(params, 3);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 4);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto type_handles = interp::EvalStackOp::get_param<void**>(params, 2 - kQCallSlotAdjustment);
+    int32_t type_handle_count = interp::EvalStackOp::get_param<int32_t>(params, 3 - kQCallSlotAdjustment);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 4 - kQCallSlotAdjustment);
     if (ret_type == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4753,10 +4868,11 @@ RtResultVoid runtime_type_handle_instantiate_invoker(metadata::RtManagedMethodPo
 RtResultVoid runtime_type_handle_make_array_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                     interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    int32_t rank = interp::EvalStackOp::get_param<int32_t>(params, 2);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 3);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    int32_t rank = interp::EvalStackOp::get_param<int32_t>(params, 2 - kQCallSlotAdjustment);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 3 - kQCallSlotAdjustment);
     if (ret_type == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4770,9 +4886,10 @@ RtResultVoid runtime_type_handle_make_array_invoker(metadata::RtManagedMethodPoi
 RtResultVoid runtime_type_handle_make_szarray_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                       interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2 - kQCallSlotAdjustment);
     if (ret_type == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4786,9 +4903,10 @@ RtResultVoid runtime_type_handle_make_szarray_invoker(metadata::RtManagedMethodP
 RtResultVoid runtime_type_handle_make_byref_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                     interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2 - kQCallSlotAdjustment);
     if (ret_type == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4802,9 +4920,10 @@ RtResultVoid runtime_type_handle_make_byref_invoker(metadata::RtManagedMethodPoi
 RtResultVoid runtime_type_handle_make_pointer_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                       interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2 - kQCallSlotAdjustment);
     if (ret_type == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4818,9 +4937,10 @@ RtResultVoid runtime_type_handle_make_pointer_invoker(metadata::RtManagedMethodP
 RtResultVoid get_module_types_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                       interp::RtStackObject* ret) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto types_slot = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto types_slot = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2 - kQCallSlotAdjustment);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, types, get_module_types(qcall_module, native_handle));
     if (types_slot != nullptr)
@@ -4834,8 +4954,9 @@ RtResultVoid get_module_types_invoker(metadata::RtManagedMethodPointer, const me
 RtResultVoid module_handle_get_md_stream_version_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                          interp::RtStackObject* ret) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, version, get_module_md_stream_version(qcall_module, native_handle));
     interp::EvalStackOp::set_return(ret, version);
     RET_VOID_OK();
@@ -4844,9 +4965,10 @@ RtResultVoid module_handle_get_md_stream_version_invoker(metadata::RtManagedMeth
 RtResultVoid assembly_get_modules_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                           interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto modules_slot = interp::EvalStackOp::get_param<vm::RtArray**>(params, 4);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto modules_slot = interp::EvalStackOp::get_param<vm::RtArray**>(params, 4 - kQCallSlotAdjustment);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, modules, get_assembly_modules(qcall_assembly, native_handle));
     if (modules_slot != nullptr)
@@ -4859,9 +4981,10 @@ RtResultVoid assembly_get_modules_invoker(metadata::RtManagedMethodPointer, cons
 RtResultVoid assembly_get_full_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                             interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2 - kQCallSlotAdjustment);
     if (ret_string == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4875,9 +4998,10 @@ RtResultVoid assembly_get_full_name_invoker(metadata::RtManagedMethodPointer, co
 RtResultVoid assembly_get_image_runtime_version_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                         interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2 - kQCallSlotAdjustment);
     if (ret_string == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4891,9 +5015,10 @@ RtResultVoid assembly_get_image_runtime_version_invoker(metadata::RtManagedMetho
 RtResultVoid assembly_get_location_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                            interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2 - kQCallSlotAdjustment);
     if (ret_string == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4907,9 +5032,10 @@ RtResultVoid assembly_get_location_invoker(metadata::RtManagedMethodPointer, con
 RtResultVoid assembly_get_entry_point_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                               interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_method = interp::EvalStackOp::get_param<vm::RtObject**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_method = interp::EvalStackOp::get_param<vm::RtObject**>(params, 2 - kQCallSlotAdjustment);
     if (ret_method == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4923,9 +5049,10 @@ RtResultVoid assembly_get_entry_point_invoker(metadata::RtManagedMethodPointer, 
 RtResultVoid assembly_get_manifest_resource_names_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                           interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_resource_names = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_resource_names = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2 - kQCallSlotAdjustment);
     if (ret_resource_names == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4939,9 +5066,10 @@ RtResultVoid assembly_get_manifest_resource_names_invoker(metadata::RtManagedMet
 RtResultVoid assembly_get_simple_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                               interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2 - kQCallSlotAdjustment);
     if (ret_string == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4955,9 +5083,10 @@ RtResultVoid assembly_get_simple_name_invoker(metadata::RtManagedMethodPointer, 
 RtResultVoid assembly_get_locale_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                          interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2 - kQCallSlotAdjustment);
     if (ret_string == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4971,9 +5100,10 @@ RtResultVoid assembly_get_locale_invoker(metadata::RtManagedMethodPointer, const
 RtResultVoid assembly_get_public_key_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                              interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_public_key = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_public_key = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2 - kQCallSlotAdjustment);
     if (ret_public_key == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -4987,12 +5117,13 @@ RtResultVoid assembly_get_public_key_invoker(metadata::RtManagedMethodPointer, c
 RtResultVoid assembly_get_version_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                           interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto major = interp::EvalStackOp::get_param<int32_t*>(params, 2);
-    auto minor = interp::EvalStackOp::get_param<int32_t*>(params, 3);
-    auto build = interp::EvalStackOp::get_param<int32_t*>(params, 4);
-    auto revision = interp::EvalStackOp::get_param<int32_t*>(params, 5);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto major = interp::EvalStackOp::get_param<int32_t*>(params, 2 - kQCallSlotAdjustment);
+    auto minor = interp::EvalStackOp::get_param<int32_t*>(params, 3 - kQCallSlotAdjustment);
+    auto build = interp::EvalStackOp::get_param<int32_t*>(params, 4 - kQCallSlotAdjustment);
+    auto revision = interp::EvalStackOp::get_param<int32_t*>(params, 5 - kQCallSlotAdjustment);
     if (major == nullptr || minor == nullptr || build == nullptr || revision == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5009,8 +5140,9 @@ RtResultVoid assembly_get_version_invoker(metadata::RtManagedMethodPointer, cons
 RtResultVoid assembly_get_flags_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                         interp::RtStackObject* ret) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtAssemblyName*, assembly_name, get_qcall_assembly_name(qcall_assembly, native_handle));
     interp::EvalStackOp::set_return(ret, static_cast<int32_t>(assembly_name->flags));
     RET_VOID_OK();
@@ -5019,8 +5151,9 @@ RtResultVoid assembly_get_flags_invoker(metadata::RtManagedMethodPointer, const 
 RtResultVoid assembly_get_hash_algorithm_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                  interp::RtStackObject* ret) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtAssemblyName*, assembly_name, get_qcall_assembly_name(qcall_assembly, native_handle));
     interp::EvalStackOp::set_return(ret, static_cast<int32_t>(assembly_name->hash_algorithm));
     RET_VOID_OK();
@@ -5042,9 +5175,10 @@ RtResultVoid assembly_get_code_base_invoker(metadata::RtManagedMethodPointer, co
 RtResultVoid assembly_get_referenced_assemblies_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                         interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto referenced_assemblies_slot = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto referenced_assemblies_slot = interp::EvalStackOp::get_param<vm::RtArray**>(params, 2 - kQCallSlotAdjustment);
     if (referenced_assemblies_slot == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5248,12 +5382,13 @@ RtResultVoid runtime_type_handle_is_collectible_invoker(metadata::RtManagedMetho
 RtResultVoid runtime_type_box_cache_get_box_info_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                          interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto allocator_slot = interp::EvalStackOp::get_param<void**>(params, 2);
-    auto allocator_data_slot = interp::EvalStackOp::get_param<void**>(params, 3);
-    auto nullable_value_offset = interp::EvalStackOp::get_param<int32_t*>(params, 4);
-    auto value_type_size = interp::EvalStackOp::get_param<uint32_t*>(params, 5);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto allocator_slot = interp::EvalStackOp::get_param<void**>(params, 2 - kQCallSlotAdjustment);
+    auto allocator_data_slot = interp::EvalStackOp::get_param<void**>(params, 3 - kQCallSlotAdjustment);
+    auto nullable_value_offset = interp::EvalStackOp::get_param<int32_t*>(params, 4 - kQCallSlotAdjustment);
+    auto value_type_size = interp::EvalStackOp::get_param<uint32_t*>(params, 5 - kQCallSlotAdjustment);
     if (allocator_slot == nullptr || allocator_data_slot == nullptr || nullable_value_offset == nullptr || value_type_size == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5292,10 +5427,11 @@ RtResultVoid runtime_type_box_cache_get_box_info_invoker(metadata::RtManagedMeth
 RtResultVoid runtime_type_create_uninitialized_info_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                             const interp::RtStackObject* params, interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto create_func_slot = interp::EvalStackOp::get_param<void**>(params, 2);
-    auto data_slot = interp::EvalStackOp::get_param<void**>(params, 3);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto create_func_slot = interp::EvalStackOp::get_param<void**>(params, 2 - kQCallSlotAdjustment);
+    auto data_slot = interp::EvalStackOp::get_param<void**>(params, 3 - kQCallSlotAdjustment);
     if (create_func_slot == nullptr || data_slot == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5317,8 +5453,9 @@ RtResultVoid runtime_type_create_uninitialized_info_invoker(metadata::RtManagedM
 RtResultVoid module_handle_get_token_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                              interp::RtStackObject* ret) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, token, get_module_token(qcall_module, native_handle));
     interp::EvalStackOp::set_return(ret, token);
@@ -5328,9 +5465,10 @@ RtResultVoid module_handle_get_token_invoker(metadata::RtManagedMethodPointer, c
 RtResultVoid module_handle_get_module_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                    interp::RtStackObject*) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 2 - kQCallSlotAdjustment);
     if (ret_type == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5511,9 +5649,10 @@ RtResultVoid module_handle_get_dynamic_method_invoker(metadata::RtManagedMethodP
 RtResultVoid runtime_module_get_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                              interp::RtStackObject*) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto ret_string = interp::EvalStackOp::get_param<vm::RtString**>(params, 2 - kQCallSlotAdjustment);
     if (ret_string == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5527,12 +5666,13 @@ RtResultVoid runtime_module_get_name_invoker(metadata::RtManagedMethodPointer, c
 RtResultVoid assembly_get_type_core_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                             interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto type_name = interp::EvalStackOp::get_param<const char*>(params, 2);
-    auto nested_type_names = interp::EvalStackOp::get_param<void**>(params, 3);
-    int32_t nested_type_names_length = interp::EvalStackOp::get_param<int32_t>(params, 4);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionType**>(params, 5);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto type_name = interp::EvalStackOp::get_param<const char*>(params, 2 - kQCallSlotAdjustment);
+    auto nested_type_names = interp::EvalStackOp::get_param<void**>(params, 3 - kQCallSlotAdjustment);
+    int32_t nested_type_names_length = interp::EvalStackOp::get_param<int32_t>(params, 4 - kQCallSlotAdjustment);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionType**>(params, 5 - kQCallSlotAdjustment);
     if (ret_type == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5548,12 +5688,13 @@ RtResultVoid assembly_get_type_core_invoker(metadata::RtManagedMethodPointer, co
 RtResultVoid assembly_get_type_core_ignore_case_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                         interp::RtStackObject*) noexcept
 {
-    auto qcall_assembly = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto type_name = interp::EvalStackOp::get_param<const Utf16Char*>(params, 2);
-    auto nested_type_names = interp::EvalStackOp::get_param<void**>(params, 3);
-    int32_t nested_type_names_length = interp::EvalStackOp::get_param<int32_t>(params, 4);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionType**>(params, 5);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_assembly = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto type_name = interp::EvalStackOp::get_param<const Utf16Char*>(params, 2 - kQCallSlotAdjustment);
+    auto nested_type_names = interp::EvalStackOp::get_param<void**>(params, 3 - kQCallSlotAdjustment);
+    int32_t nested_type_names_length = interp::EvalStackOp::get_param<int32_t>(params, 4 - kQCallSlotAdjustment);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionType**>(params, 5 - kQCallSlotAdjustment);
     if (ret_type == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5586,13 +5727,14 @@ RtResultVoid metadata_import_enum_invoker(metadata::RtManagedMethodPointer, cons
 RtResultVoid module_handle_resolve_method_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                   interp::RtStackObject* ret) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    int32_t method_token = interp::EvalStackOp::get_param<int32_t>(params, 2);
-    auto type_inst_args = interp::EvalStackOp::get_param<void**>(params, 3);
-    int32_t type_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 4);
-    auto method_inst_args = interp::EvalStackOp::get_param<void**>(params, 5);
-    int32_t method_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 6);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    int32_t method_token = interp::EvalStackOp::get_param<int32_t>(params, 2 - kQCallSlotAdjustment);
+    auto type_inst_args = interp::EvalStackOp::get_param<void**>(params, 3 - kQCallSlotAdjustment);
+    int32_t type_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 4 - kQCallSlotAdjustment);
+    auto method_inst_args = interp::EvalStackOp::get_param<void**>(params, 5 - kQCallSlotAdjustment);
+    int32_t method_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 6 - kQCallSlotAdjustment);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
         const metadata::RtMethodInfo*, method,
@@ -5604,14 +5746,15 @@ RtResultVoid module_handle_resolve_method_invoker(metadata::RtManagedMethodPoint
 RtResultVoid module_handle_resolve_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                 interp::RtStackObject*) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    int32_t type_token = interp::EvalStackOp::get_param<int32_t>(params, 2);
-    auto type_inst_args = interp::EvalStackOp::get_param<void**>(params, 3);
-    int32_t type_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 4);
-    auto method_inst_args = interp::EvalStackOp::get_param<void**>(params, 5);
-    int32_t method_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 6);
-    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 7);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    int32_t type_token = interp::EvalStackOp::get_param<int32_t>(params, 2 - kQCallSlotAdjustment);
+    auto type_inst_args = interp::EvalStackOp::get_param<void**>(params, 3 - kQCallSlotAdjustment);
+    int32_t type_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 4 - kQCallSlotAdjustment);
+    auto method_inst_args = interp::EvalStackOp::get_param<void**>(params, 5 - kQCallSlotAdjustment);
+    int32_t method_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 6 - kQCallSlotAdjustment);
+    auto ret_type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType**>(params, 7 - kQCallSlotAdjustment);
     if (ret_type == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5627,14 +5770,15 @@ RtResultVoid module_handle_resolve_type_invoker(metadata::RtManagedMethodPointer
 RtResultVoid module_handle_resolve_field_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                  interp::RtStackObject*) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    int32_t field_token = interp::EvalStackOp::get_param<int32_t>(params, 2);
-    auto type_inst_args = interp::EvalStackOp::get_param<void**>(params, 3);
-    int32_t type_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 4);
-    auto method_inst_args = interp::EvalStackOp::get_param<void**>(params, 5);
-    int32_t method_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 6);
-    auto ret_field = interp::EvalStackOp::get_param<vm::RtObject**>(params, 7);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    int32_t field_token = interp::EvalStackOp::get_param<int32_t>(params, 2 - kQCallSlotAdjustment);
+    auto type_inst_args = interp::EvalStackOp::get_param<void**>(params, 3 - kQCallSlotAdjustment);
+    int32_t type_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 4 - kQCallSlotAdjustment);
+    auto method_inst_args = interp::EvalStackOp::get_param<void**>(params, 5 - kQCallSlotAdjustment);
+    int32_t method_inst_count = interp::EvalStackOp::get_param<int32_t>(params, 6 - kQCallSlotAdjustment);
+    auto ret_field = interp::EvalStackOp::get_param<vm::RtObject**>(params, 7 - kQCallSlotAdjustment);
     if (ret_field == nullptr)
     {
         RET_ERR(RtErr::ArgumentNull);
@@ -5651,11 +5795,12 @@ RtResultVoid module_handle_resolve_field_invoker(metadata::RtManagedMethodPointe
 RtResultVoid create_instance_for_another_generic_parameter_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                                    const interp::RtStackObject* params, interp::RtStackObject*) noexcept
 {
-    auto qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto type_handles = interp::EvalStackOp::get_param<void**>(params, 2);
-    int32_t type_handle_count = interp::EvalStackOp::get_param<int32_t>(params, 3);
-    auto ret_obj = interp::EvalStackOp::get_param<vm::RtObject**>(params, 4);
+    const auto qcall = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_type_handle = qcall.qcall_type_handle;
+    auto native_handle = reinterpret_cast<void*>(qcall.native_handle);
+    auto type_handles = interp::EvalStackOp::get_param<void**>(params, 2 - kQCallSlotAdjustment);
+    int32_t type_handle_count = interp::EvalStackOp::get_param<int32_t>(params, 3 - kQCallSlotAdjustment);
+    auto ret_obj = interp::EvalStackOp::get_param<vm::RtObject**>(params, 4 - kQCallSlotAdjustment);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj,
                                             create_instance_for_generic_parameters(qcall_type_handle, native_handle, type_handles, type_handle_count));
@@ -5771,13 +5916,16 @@ RtResultVoid runtime_method_handle_get_method_body_invoker(metadata::RtManagedMe
 RtResultVoid runtime_method_handle_is_ca_visible_from_decorated_type_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                                              const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-    auto attr_qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto attr_native_handle = interp::EvalStackOp::get_param<void*>(params, 1);
-    auto attr_ctor_arg = interp::EvalStackOp::get_param<const void*>(params, 2);
-    auto source_qcall_type_handle = interp::EvalStackOp::get_param<void*>(params, 3);
-    auto source_native_handle = interp::EvalStackOp::get_param<void*>(params, 4);
-    auto source_qcall_module = interp::EvalStackOp::get_param<void*>(params, 5);
-    auto source_native_module = interp::EvalStackOp::get_param<void*>(params, 6);
+    const auto qcall0 = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto attr_qcall_type_handle = qcall0.qcall_type_handle;
+    auto attr_native_handle = reinterpret_cast<void*>(qcall0.native_handle);
+    auto attr_ctor_arg = interp::EvalStackOp::get_param<const void*>(params, 2 - 1 * kQCallSlotAdjustment);
+    const auto qcall1 = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 3 - 1 * kQCallSlotAdjustment);
+    auto source_qcall_type_handle = qcall1.qcall_type_handle;
+    auto source_native_handle = reinterpret_cast<void*>(qcall1.native_handle);
+    const auto qcall2 = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 5 - 2 * kQCallSlotAdjustment);
+    auto source_qcall_module = qcall2.qcall_type_handle;
+    auto source_native_module = reinterpret_cast<void*>(qcall2.native_handle);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, attr_ctor, vm::Reflection::get_method_info_from_handle_arg(attr_ctor_arg));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, visible,
@@ -5790,14 +5938,15 @@ RtResultVoid runtime_method_handle_is_ca_visible_from_decorated_type_invoker(met
 RtResultVoid custom_attribute_create_custom_attribute_instance_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                                        const interp::RtStackObject* params, interp::RtStackObject*) noexcept
 {
-    auto qcall_module = interp::EvalStackOp::get_param<void*>(params, 0);
-    auto native_module = interp::EvalStackOp::get_param<void*>(params, 1);
-    (void)interp::EvalStackOp::get_param<vm::RtObject**>(params, 2);
-    auto ctor_slot = interp::EvalStackOp::get_param<vm::RtObject**>(params, 3);
-    auto blob_start = interp::EvalStackOp::get_param<void**>(params, 4);
-    auto blob_end = interp::EvalStackOp::get_param<void*>(params, 5);
-    auto named_arg_count = interp::EvalStackOp::get_param<int32_t*>(params, 6);
-    auto instance_slot = interp::EvalStackOp::get_param<vm::RtObject**>(params, 7);
+    const auto qcall0 = interp::EvalStackOp::get_param<QCallTypeHandleNative>(params, 0);
+    auto qcall_module = qcall0.qcall_type_handle;
+    auto native_module = reinterpret_cast<void*>(qcall0.native_handle);
+    (void)interp::EvalStackOp::get_param<vm::RtObject**>(params, 2 - 1 * kQCallSlotAdjustment);
+    auto ctor_slot = interp::EvalStackOp::get_param<vm::RtObject**>(params, 3 - 1 * kQCallSlotAdjustment);
+    auto blob_start = interp::EvalStackOp::get_param<void**>(params, 4 - 1 * kQCallSlotAdjustment);
+    auto blob_end = interp::EvalStackOp::get_param<void*>(params, 5 - 1 * kQCallSlotAdjustment);
+    auto named_arg_count = interp::EvalStackOp::get_param<int32_t*>(params, 6 - 1 * kQCallSlotAdjustment);
+    auto instance_slot = interp::EvalStackOp::get_param<vm::RtObject**>(params, 7 - 1 * kQCallSlotAdjustment);
 
     if (ctor_slot == nullptr || *ctor_slot == nullptr || instance_slot == nullptr)
     {

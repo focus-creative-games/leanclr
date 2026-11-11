@@ -194,6 +194,31 @@ RtResultVoid Class::verify_integrity_of_corlib_classes()
     if (corlib != nullptr && std::strcmp(corlib->get_name_no_ext(), STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0)
     {
         RET_ERR_ON_FALSE(sizeof(RtObject) == RT_OBJECT_HEADER_SIZE, RtErr::BadImageFormat);
+        // CoreLib is architecture-specific: IL such as reflection's byref array
+        // stride embeds its build-time pointer size, even if IntPtr is intrinsic.
+        RET_ERR_ON_FAIL(initialize_methods(t.cls_intptr));
+        const auto* pointer_size = get_method_for_name(t.cls_intptr, "get_Size", 0, false);
+        RET_ERR_ON_FALSE(pointer_size != nullptr, RtErr::BadImageFormat);
+        auto body_result = corlib->read_method_body(pointer_size->token);
+        if (body_result.is_err())
+            return body_result.unwrap_err();
+        const auto& body = body_result.unwrap();
+        int embedded_size = 0;
+        if (body && body->code_size == 6 && body->code[0] == 0x20 && body->code[5] == 0x2a)
+        {
+            int32_t value;
+            std::memcpy(&value, body->code + 1, sizeof(value));
+            embedded_size = value;
+        }
+        else if (body && body->code_size == 2 && body->code[1] == 0x2a && body->code[0] >= 0x16 && body->code[0] <= 0x1e)
+            embedded_size = body->code[0] - 0x16;
+        else if (body && body->code_size == 3 && body->code[0] == 0x1f && body->code[2] == 0x2a)
+            embedded_size = body->code[1];
+        if (embedded_size != PTR_SIZE)
+        {
+            host::Services::logf(host::LogLevel::Error, "CoreLib pointer size %d is incompatible with runtime pointer size %d", embedded_size, PTR_SIZE);
+            return RtErr::BadImageFormat;
+        }
         // Validate native views before any adapter writes managed fields.
         // Reflection types with dynamic layouts use field metadata at access time.
         RET_ERR_ON_FAIL(

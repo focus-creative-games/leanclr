@@ -93,40 +93,35 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
         std::exit(-1);
     }
 
+    utils::Utf8StringBuilder sb;
+
+    // Print the fixed message chain before invoking managed stack-trace code,
+    // which can itself fail when diagnosing an incomplete runtime binding.
+    auto* detail = ex;
+    for (unsigned depth = 0; detail && depth < 16; ++depth, detail = detail->inner_exception)
+    {
+        sb.clear();
+        metadata::MetadataName::append_klass_full_name_without_generic_params(sb, detail->klass, metadata::TypeNameFormat::IL).is_ok();
+        sb.append_cstr(": ");
+        if (detail->message)
+            sb.append_utf16_str(&detail->message->first_char, detail->message->length);
+        sb.sure_null_terminator_but_not_append();
+        std::cerr << sb.get_const_chars() << std::endl;
+    }
+
     const metadata::RtPropertyInfo* prop = vm::Class::get_property_for_name(ex->klass, "StackTrace", true);
-    assert(prop);
+    if (!prop)
+        std::exit(-1);
     auto ret = vm::Runtime::invoke_with_run_cctor(prop->get_method, ex, nullptr);
     if (ret.is_err())
     {
         std::cerr << "Failed to get exception stack trace" << std::endl;
         std::exit(-1);
     }
-
-    std::cerr << std::endl;
-    std::cerr << std::endl;
-
-    utils::Utf8StringBuilder sb;
-
-    metadata::MetadataName::append_klass_full_name_without_generic_params(sb, ex->klass, metadata::TypeNameFormat::IL).is_ok();
-    sb.append_cstr(": ");
-    sb.sure_null_terminator_but_not_append();
-    std::cerr << sb.get_const_chars();
-
-    sb.clear();
-    vm::RtString* message = ex->message;
-    if (message)
-    {
-        sb.append_utf16_str(&message->first_char, message->length);
-    }
-    else
-    {
-        sb.sure_null_terminator_but_not_append();
-    }
-    std::cerr << sb.get_const_chars() << std::endl << std::endl;
-
     sb.clear();
     vm::RtString* stack_trace_str = reinterpret_cast<vm::RtString*>(ret.unwrap());
-    sb.append_utf16_str(&stack_trace_str->first_char, stack_trace_str->length);
+    if (stack_trace_str)
+        sb.append_utf16_str(&stack_trace_str->first_char, stack_trace_str->length);
     std::cerr << sb.get_const_chars() << std::endl << std::endl;
 
     std::exit(-1);

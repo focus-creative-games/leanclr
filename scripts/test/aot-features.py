@@ -30,12 +30,13 @@ def main():
     ap.add_argument('--profile', choices=['mono-4.5', 'coreclr-net10'], default='mono-4.5')
     ap.add_argument('--runtime-dir', type=Path)
     opts = ap.parse_args()
+    if opts.profile == 'coreclr-net10' and opts.target == 'all':
+        ap.error('Run net10 native and Wasm separately, each with a matching-width CoreLib')
     if opts.target != 'native' and not opts.emsdk:
         ap.error('--emsdk is required for wasm')
     output = ROOT / (('out/net10-aot-features' if opts.profile == 'coreclr-net10' else 'out/aot-features') + ('-lightweight' if opts.lightweight_returns else ''))
     output.mkdir(parents=True, exist_ok=True)
     csc = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
-    ilasm = csc.with_name('ilasm.exe')
     bcl = ROOT / 'src/libraries/mono-4.5'
     csc_command = [csc]
     corelib_name = 'mscorlib.dll'
@@ -44,6 +45,7 @@ def main():
             ap.error('--runtime-dir is required for coreclr-net10')
         bcl = opts.runtime_dir.resolve()
         corelib_name = 'System.Private.CoreLib.dll'
+    if opts.profile == 'coreclr-net10' or os.name != 'nt':
         version = subprocess.check_output(['dotnet', '--version'], cwd=ROOT, text=True).strip()
         sdk = next(line for line in subprocess.check_output(['dotnet', '--list-sdks'], text=True).splitlines() if line.startswith(version + ' '))
         sdk_root = Path(sdk.split('[', 1)[1].split(']', 1)[0])
@@ -69,14 +71,8 @@ def main():
             run(['dotnet', 'run', '--project', ROOT / 'src/tests/generic-aot/SignatureFixture.csproj', '-c', 'Release', '--',
                  stage / 'GenericFixtures.dll'], output / 'generic-signatures.log')
         if family == 'eh':
-            filter_source = ROOT / 'src/tests/eh-aot/FilterFixture.il'
-            if opts.profile == 'coreclr-net10':
-                source_text = filter_source.read_text(encoding='utf-8').replace('[mscorlib]', '[System.Private.CoreLib]').replace('.assembly extern mscorlib', '.assembly extern System.Private.CoreLib')
-                filter_source = stage / 'FilterFixture.il'
-                filter_source.write_text(source_text, encoding='utf-8')
-            run([ilasm, '/DLL', '/OUTPUT:' + str(stage / 'FilterFixture.dll'), filter_source], output / 'filter-ilasm.log')
-            if opts.profile == 'coreclr-net10':
-                run(['dotnet', 'run', '--project', ROOT / 'src/tests/generic-aot/SignatureFixture.csproj', '-c', 'Release', '--', stage / 'FilterFixture.dll', '--rewrite-only'], output / 'filter-retarget.log')
+            run(['dotnet', 'run', '--project', ROOT / 'src/tests/generic-aot/SignatureFixture.csproj', '-c', 'Release', '--',
+                 '--filter', bcl / corelib_name, stage / 'FilterFixture.dll'], output / 'filter-generate.log')
         for variant in ['default', 'disabled'] if family == 'generic' else ['default', 'interpreted-loop']:
             generated = output / family / variant
             command = ['dotnet', ROOT / 'out/dotnet/LeanAOT/Release/net8.0/LeanAOT.dll',
@@ -106,8 +102,8 @@ def main():
                            f'-DCMAKE_BUILD_TYPE={opts.config}', '-DCMAKE_TRY_COMPILE_CONFIGURATION=Release',
                            f'-D{prefix}_AOT_CPP={generated}', f'-D{prefix}_AOT_DLLS:STRING={stage.relative_to(ROOT).as_posix()}']
                 if family == 'generic': command += [f'-DGENERIC_AOT_DISABLED={"ON" if variant == "disabled" else "OFF"}']
-                if target == 'native': command += ['-A', opts.arch]
-                else:
+                if target == 'native' and os.name == 'nt': command += ['-A', opts.arch]
+                elif target == 'wasm':
                     command += ['-G', 'Ninja', '-DLEANCLR_HOST=PORTABLE', '-DCMAKE_CROSSCOMPILING_EMULATOR=node',
                                 f'-DCMAKE_TOOLCHAIN_FILE={opts.emsdk.resolve() / "upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"}']
                 label = f'{family}-{variant}-{target}-{opts.config}-{opts.arch}'

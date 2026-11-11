@@ -4,10 +4,10 @@
 
 Windows x64, Microsoft.NETCore.App 10.0.8:
 
-- 77 smoke, 15 real-heap GC/EH, and 5 positive/negative API entries pass.
-- The same 97 entries pass with lightweight reference/void returns, packed int32
+- 77 smoke, 15 real-heap GC/EH, and 6 positive/negative API entries pass.
+- The same 98 entries pass with lightweight reference/void returns, packed int32
   returns, wide/struct status-out returns, and reference generic sharing enabled together.
-- All 97 default-protocol entries pass under MSVC AddressSanitizer.
+- All 98 default-protocol entries pass under MSVC AddressSanitizer.
 - Closed generic, disabled-generic comparison, mixed return ABI and normal-path EH
   harnesses pass for .NET 10. The Mono versions retain the same harnesses.
 
@@ -64,12 +64,13 @@ planner/runtime rejection rather than guessing an ABI; complete ArgIterator/nati
 varargs execution is outside the minimal profile. Platform-specific calli work must
 provide separate Windows, SysV, ARM64 and Wasm contracts before enabling it.
 
-## Remaining platform gate
+## Platform gate
 
-The first Wasm build exposes unguarded Windows QCall bindings and pointer-size facade
-assumptions in the imported adapter. Those are tracked by the platform stage, not
-hidden by native passes. Linux/ARM64 and UBSan have not passed locally: WSL's
-registered ext4.vhdx is missing.
+Windows x64 and Wasm32 pass 98 independent AOT/GC/API entries. Wasm passes both default and all optimized return protocols with reference generic sharing; Windows defaults pass MSVC ASan. The net10 and Mono specialized generic/disabled/return-ABI/EH harnesses also run under Node. Windows QCalls are guarded on other platforms and QCall aggregate parameter reads account for one CLI slot on 32-bit targets / two on 64-bit targets, including multi-pair signatures.
+
+CoreLib must match target pointer width. Its IL contains architecture-specific constants, including reflection's byref buffer stride, so overriding IntPtr intrinsics is insufficient. Startup validates the embedded IntPtr.Size implementation and rejects foreign-width CoreLib before managed entry. Wasm uses the pinned 10.0.8 x86 CoreCLR runtime package's managed libraries, not the host x64 CoreLib and not a Mono CoreLib. `fetch-corelib.py` records package and CoreLib SHA256. Both native and Wasm foreign-width rejection have local negative tests. Target OS APIs beyond the minimal supported boundary still fail explicitly.
+
+Linux/ARM64 and UBSan have not passed locally: WSL's registered ext4.vhdx is missing. `net10-platforms.yml` supplies independent native, sanitizer and Wasm CI jobs; configuration is not a remote CI pass. See the resource and engine host contracts for separate acceptance.
 
 ## Varargs boundary regression
 

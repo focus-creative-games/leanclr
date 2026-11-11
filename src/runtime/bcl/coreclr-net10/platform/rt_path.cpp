@@ -34,7 +34,7 @@ using io_error_internal::kErrorGenFailure;
 using io_error_internal::kErrorSuccess;
 using io_error_internal::set_error;
 #ifndef LEANCLR_PLATFORM_WIN
-using io_error_internal::errno_to_monoio;
+using io_error_internal::errno_to_io_error;
 #endif
 
 } // namespace
@@ -153,7 +153,7 @@ vm::RtString* Path::get_current_directory(int32_t* error)
     {
         return vm::String::create_string_from_utf8cstr(stack_buf);
     }
-    set_error(error, errno_to_monoio(errno));
+    set_error(error, errno_to_io_error(errno));
     return vm::String::get_empty_string();
 #endif
 }

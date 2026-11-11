@@ -31,7 +31,9 @@
       "System.Void System.Threading.Thread::Start",
       "System.Threading.Tasks.Task System.Threading.Tasks.Task::Run",
       "System.Type System.Reflection.Emit.",
-      "System.Reflection.Emit."
+      "System.Reflection.Emit.",
+      "System.Void System.ArgIterator::.ctor(",
+      "System.Int32 System.ArgIterator::GetRemainingCount("
     ]
   },
   "pending": {
