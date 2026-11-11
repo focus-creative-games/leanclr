@@ -1,5 +1,7 @@
 #pragma once
 
+#include <type_traits>
+
 #include "transform_defs.h"
 #include "il_opcodes.h"
 #include "ll_opcodes.h"
@@ -74,6 +76,12 @@ struct alignas(8) EncodedInstruction
 
 struct InstructionOperands
 {
+    // Keep value-initialization rather than C++17 aggregate initialization.
+    // A defaulted explicit constructor retains typed member defaults while
+    // letting Wasm lower the initial zero-fill to memory.fill instead of
+    // repeating stores at every emission site. It must not be user-provided.
+    explicit InstructionOperands() = default;
+
     // Stack-local emission state. Named fields keep registers, metadata and
     // immediates distinct; none of these construction pointers enter bytecode.
     ll::OpCodeEnum opcode = ll::OpCodeEnum::Illegal;
@@ -114,6 +122,8 @@ struct InstructionOperands
     size_t field_offset = 0;
     size_t field_size = 0;
 };
+
+static_assert(!std::is_aggregate<InstructionOperands>::value, "Keep compact value-initialization for instruction operands");
 
 struct NumericOpcodes
 {
