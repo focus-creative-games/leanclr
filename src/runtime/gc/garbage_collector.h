@@ -42,6 +42,11 @@ class GarbageCollector
     {
         return GcHeapImpl::is_allocated_object(obj);
     }
+
+    static vm::RtObject* find_object_containing(const void* ptr)
+    {
+        return GcHeapImpl::find_object_containing(ptr);
+    }
 #endif
     static void collect()
     {

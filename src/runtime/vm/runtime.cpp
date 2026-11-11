@@ -312,6 +312,9 @@ static RtResult<RtObject*> invoke_without_run_cctor(const metadata::RtMethodInfo
     interp::RtStackObject* arg_buffer = buffers.args_buffer;
     interp::RtStackObject* ret_buffer = buffers.ret_buffer;
 
+#if LEANCLR_BCL_CORECLR_NET10
+    interp::MethodArgumentRoots native_roots(method, arg_buffer);
+#endif
     // Invoke the method
     auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
     RET_ERR_ON_FAIL(invoke_ptr(method->method_ptr, method, arg_buffer, ret_buffer));
@@ -597,6 +600,9 @@ RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const met
     interp::RtStackObject* arg_buffer = buffers.args_buffer;
     interp::RtStackObject* ret_buffer = buffers.ret_buffer;
 
+#if LEANCLR_BCL_CORECLR_NET10
+    interp::MethodArgumentRoots native_roots(actual_method, arg_buffer);
+#endif
     // Invoke the method
     auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->invoke_method_ptr);
     RET_ERR_ON_FAIL(invoke_ptr(actual_method->method_ptr, actual_method, arg_buffer, ret_buffer));
@@ -662,6 +668,9 @@ RtResultVoid Runtime::invoke_stackobject_arguments_without_run_cctor(const metad
     if (runtime_state != State::Running && runtime_state != State::Initializing)
         return RtErr::InvalidOperation;
     assert(method);
+#if LEANCLR_BCL_CORECLR_NET10
+    interp::MethodArgumentRoots native_roots(method, params);
+#endif
 
     auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
     return invoke_ptr(method->method_ptr, method, params, ret);
@@ -673,6 +682,9 @@ RtResultVoid Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(con
     if (runtime_state != State::Running && runtime_state != State::Initializing)
         return RtErr::InvalidOperation;
     assert(method);
+#if LEANCLR_BCL_CORECLR_NET10
+    interp::MethodArgumentRoots native_roots(method, params);
+#endif
 
     auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
     return invoke_ptr(method->virtual_method_ptr, method, params, ret);
@@ -684,6 +696,9 @@ RtResultVoid Runtime::invoke_stackobject_arguments_with_run_cctor(const metadata
     if (runtime_state != State::Running && runtime_state != State::Initializing)
         return RtErr::InvalidOperation;
     assert(method);
+#if LEANCLR_BCL_CORECLR_NET10
+    interp::MethodArgumentRoots native_roots(method, params);
+#endif
 
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))
     {

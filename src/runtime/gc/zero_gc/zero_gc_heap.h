@@ -58,6 +58,12 @@ class ZeroGcHeap
   public:
 #if LEANCLR_BCL_CORECLR_NET10
     static bool is_allocated_object(const vm::RtObject* obj);
+
+    // A noncollecting heap does not need to discover conservative roots.
+    static vm::RtObject* find_object_containing(const void*)
+    {
+        return nullptr;
+    }
 #endif
 };
 

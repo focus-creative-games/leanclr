@@ -12,6 +12,7 @@ namespace leanclr
 {
 namespace gc
 {
+class SmallHeapArena;
 
 // Mark-sweep heap (active when LEANCLR_GC_MARK_SWEEP is defined).
 class MarkSweepHeap
@@ -52,6 +53,9 @@ class MarkSweepHeap
   public:
 #if LEANCLR_BCL_CORECLR_NET10
     static bool is_allocated_object(const vm::RtObject* obj);
+    static vm::RtObject* find_object_containing(const void* ptr);
+    static bool register_arena(void* start, size_t size, SmallHeapArena* arena);
+    static void unregister_arena(void* start);
 #endif
 };
 

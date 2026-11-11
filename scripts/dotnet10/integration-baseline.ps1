@@ -51,10 +51,20 @@ try {
         Write-Host "Running $entry"
         Invoke-Checked $runner -l $assemblyDir -l $RuntimeDir -e "ManagedNet10.Smoke.Program::$entry" ManagedNet10.Smoke
     }
+    Invoke-Checked dotnet build src/tests/managed-net10/ManagedNet10.GcContracts/ManagedNet10.GcContracts.csproj -c $Configuration
+    $gcDir = "out/dotnet/ManagedNet10.GcContracts/$Configuration/net10.0"
+    $gcSource = Get-Content src/tests/managed-net10/ManagedNet10.GcContracts/Program.cs -Raw
+    $gcEntries = @([regex]::Matches($gcSource, 'public static void (Test\w+)\(\)') | ForEach-Object { $_.Groups[1].Value })
+    foreach ($entry in $gcEntries) {
+        Write-Host "Running GC contract $entry"
+        Invoke-Checked $runner -l $gcDir -l $RuntimeDir -e "ManagedNet10.GcContracts.Program::$entry" ManagedNet10.GcContracts
+    }
+    # Differential reference: execute the same contracts on the installed .NET 10.
+    Invoke-Checked dotnet "$gcDir/ManagedNet10.GcContracts.dll"
     $contracts = if ($ContractsBuildDir) { $ContractsBuildDir } else { "$BuildDir-contracts" }
     Invoke-Checked cmake -S src/tests/net10-contracts -B $contracts -A x64
     Invoke-Checked cmake --build $contracts --config $Configuration --parallel 4
     Invoke-Checked ctest --test-dir $contracts -C $Configuration --output-on-failure
-    Write-Host "$($entries.Count) managed smoke entries and dependent-handle contracts passed"
+    Write-Host "$($entries.Count) managed smoke entries, $($gcEntries.Count) real-heap GC entries, and native contracts passed"
 }
 finally { Pop-Location }

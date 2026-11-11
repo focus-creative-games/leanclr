@@ -12,7 +12,10 @@ using namespace leanclr::metadata;
 
 RtResult<void*> SystemRuntimeDependentHandle::internal_alloc(vm::RtObject* target, vm::RtObject* dependent) noexcept
 {
-    RET_OK(vm::GCHandle::new_dependent_handle(target, dependent));
+    void* handle = vm::GCHandle::new_dependent_handle(target, dependent);
+    if (handle == nullptr)
+        RET_ERR(RtErr::OutOfMemory);
+    RET_OK(handle);
 }
 
 RtResult<vm::RtObject*> SystemRuntimeDependentHandle::internal_get_dependent(void* handle) noexcept

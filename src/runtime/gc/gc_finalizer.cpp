@@ -27,6 +27,18 @@ static utils::HashMap<vm::RtObject*, FinalizerRegState>& get_s_registry()
 }
 
 static utils::Vector<vm::RtObject*> s_freachable;
+#if LEANCLR_BCL_CORECLR_NET10
+static const utils::Vector<vm::RtObject*>* s_running_finalizers = nullptr;
+
+static void visit_finalizer_roots(GcVisitObjectRoot visit, void* userdata)
+{
+    for (auto* object : s_freachable)
+        visit(object, userdata);
+    if (s_running_finalizers != nullptr)
+        for (auto* object : *s_running_finalizers)
+            visit(object, userdata);
+}
+#endif
 
 struct PromoteScanContext
 {
@@ -46,6 +58,14 @@ void GcFinalizer::on_object_allocated(vm::RtObject* obj)
     {
         return;
     }
+#if LEANCLR_BCL_CORECLR_NET10
+    static bool roots_registered = false;
+    if (!roots_registered)
+    {
+        GcRoots::register_visit_object_roots(visit_finalizer_roots);
+        roots_registered = true;
+    }
+#endif
     get_s_registry()[obj] = FinalizerRegState::Active;
 }
 
@@ -74,6 +94,10 @@ void GcFinalizer::promote_unreachable(GCAliveObjectBitmap& alive_bitmap)
 
 void GcFinalizer::run_pending_finalizers()
 {
+#if LEANCLR_BCL_CORECLR_NET10
+    if (s_running_finalizers != nullptr)
+        return;
+#endif
     if (s_freachable.empty())
     {
         return;
@@ -81,6 +105,9 @@ void GcFinalizer::run_pending_finalizers()
 
     utils::Vector<vm::RtObject*> pending(s_freachable);
     s_freachable.clear();
+#if LEANCLR_BCL_CORECLR_NET10
+    s_running_finalizers = &pending;
+#endif
 
     for (vm::RtObject* obj : pending)
     {
@@ -101,6 +128,9 @@ void GcFinalizer::run_pending_finalizers()
             host::Services::logf(host::LogLevel::Error, "Failed to invoke finalizer, klass: %s.%s\n", obj->klass->namespaze, obj->klass->name);
         }
     }
+#if LEANCLR_BCL_CORECLR_NET10
+    s_running_finalizers = nullptr;
+#endif
 }
 
 void GcFinalizer::wait_for_pending_finalizers()

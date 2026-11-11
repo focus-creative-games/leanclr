@@ -65,6 +65,12 @@ class SmallHeapArena
   public:
 #if LEANCLR_BCL_CORECLR_NET10
     bool contains_allocated_block(const void* ptr) const;
+    vm::RtObject* find_object_containing(const void* ptr) const;
+
+    void* data() const
+    {
+        return _data;
+    }
 #endif
 };
 

@@ -29,6 +29,7 @@ struct InterpFrame
 #if LEANCLR_BCL_CORECLR_NET10
     int32_t vararg_count;
     InterpFrameRootScanMode root_scan_mode;
+    uint32_t gc_live_stack_size;
 #endif
     const uint8_t* ip;
 
@@ -39,6 +40,32 @@ struct InterpFrame
 };
 
 struct MachineStateSavePoint;
+
+#if LEANCLR_BCL_CORECLR_NET10
+// Stack-linked native roots do not allocate and cannot exhaust the interpreter
+// frame reserve. Their lifetime covers callbacks and nested managed invocations.
+struct MethodArgumentRoots
+{
+    const metadata::RtMethodInfo* method;
+    RtStackObject* args;
+    MethodArgumentRoots* previous;
+    static MethodArgumentRoots* current;
+
+    MethodArgumentRoots(const metadata::RtMethodInfo* method, const RtStackObject* args)
+        : method(method), args(const_cast<RtStackObject*>(args)), previous(current)
+    {
+        current = this;
+    }
+
+    ~MethodArgumentRoots()
+    {
+        current = previous;
+    }
+
+    MethodArgumentRoots(const MethodArgumentRoots&) = delete;
+    MethodArgumentRoots& operator=(const MethodArgumentRoots&) = delete;
+};
+#endif
 
 class MachineState
 {

@@ -2708,6 +2708,7 @@ LEANCLR_CASE_BEGIN_LITE(CallInterp)
 {
     const auto* ir = reinterpret_cast<const ll::CallInterp*>(ip);
     const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
     if (vm::Method::is_static(target_method))
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
@@ -2726,6 +2727,7 @@ LEANCLR_CASE_BEGIN_LITE(CallVirtInterp)
         RAISE_RUNTIME_ERROR(RtErr::NullReference);
     }
     const metadata::RtMethodInfo* original_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, original_method);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, actual_method, vm::Method::get_virtual_method_impl(obj, original_method));
     if (actual_method->invoker_type == metadata::RtInvokerType::Interpreter)
     {
@@ -2749,6 +2751,7 @@ LEANCLR_CASE_BEGIN_LITE(CallInternalCall)
 {
     const auto* ir = reinterpret_cast<const ll::CallInternalCall*>(ip);
     const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
     if (vm::Method::is_static(target_method))
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
@@ -2763,6 +2766,7 @@ LEANCLR_CASE_BEGIN_LITE(CallIntrinsic)
 {
     const auto* ir = reinterpret_cast<const ll::CallIntrinsic*>(ip);
     const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
     if (vm::Method::is_static(target_method))
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
@@ -2777,6 +2781,7 @@ LEANCLR_CASE_BEGIN_LITE(CallPInvoke)
 {
     const auto* ir = reinterpret_cast<const ll::CallPInvoke*>(ip);
     const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
     if (vm::Method::is_static(target_method))
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
@@ -2791,6 +2796,7 @@ LEANCLR_CASE_BEGIN_LITE(CallAot)
 {
     const auto* ir = reinterpret_cast<const ll::CallAot*>(ip);
     const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
     if (vm::Method::is_static(target_method))
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
@@ -2805,6 +2811,7 @@ LEANCLR_CASE_BEGIN_LITE(CallRuntimeImplemented)
 {
     const auto* ir = reinterpret_cast<const ll::CallRuntimeImplemented*>(ip);
     const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
     if (vm::Method::is_static(target_method))
     {
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
@@ -2821,6 +2828,7 @@ LEANCLR_CASE_BEGIN_LITE(CalliInterp)
     const metadata::RtMethodSig* method_sig = get_resolved_data<const metadata::RtMethodSig>(imi, ir->method_sig_idx);
     const uint8_t* next_ip = reinterpret_cast<const uint8_t*>(ir + 1);
     const metadata::RtMethodInfo* target_method = get_stack_value_at<const metadata::RtMethodInfo*>(eval_stack_base, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
     if (target_method->parameter_count != method_sig->params.size())
     {
         RAISE_RUNTIME_ERROR(RtErr::ExecutionEngine);
@@ -2852,6 +2860,7 @@ LEANCLR_CASE_BEGIN_LITE(NewObjInterp)
 {
     const auto* ir = reinterpret_cast<const ll::NewObjInterp*>(ip);
     const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, ctor);
     const metadata::RtClass* klass = ctor->parent;
     TRY_RUN_CLASS_STATIC_CCTOR(klass);
     HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, LEANCLR_NEWOBJ_INTERP(klass));
@@ -2866,11 +2875,13 @@ LEANCLR_CASE_BEGIN_LITE(NewValueTypeInterp)
 {
     const auto* ir = reinterpret_cast<const ll::NewValueTypeInterp*>(ip);
     const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, ctor);
     const metadata::RtClass* klass = ctor->parent;
     RtStackObject* original_frame_base = eval_stack_base + ir->frame_base;
     const size_t value_stack_objects = InterpDefs::get_stack_object_size_by_byte_size(klass->instance_size_without_header);
     RtStackObject* final_frame_base = original_frame_base + value_stack_objects;
     std::memmove(final_frame_base + 1, original_frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
+    SAVE_GC_CALL_STACK(ir->frame_base + value_stack_objects, ctor);
     final_frame_base->ptr = original_frame_base;
     std::memset(original_frame_base, 0, value_stack_objects * sizeof(RtStackObject));
     ENTER_INTERP_FRAME(ctor, ir->frame_base + value_stack_objects, reinterpret_cast<const uint8_t*>(ir + 1));
@@ -2880,6 +2891,7 @@ LEANCLR_CASE_END_LITE()
 LEANCLR_CASE_BEGIN(NewObjInternalCall)
 {
     const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
     TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
     vm::InternalCallInvoker invoker = vm::InternalCalls::get_internal_call_invoker_by_id_unchecked(ir->invoker_idx);
     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
@@ -2890,6 +2902,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(NewObjIntrinsic)
 {
     const metadata::RtMethodInfo* target_method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
     TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
     vm::InternalCallInvoker invoker = vm::Intrinsics::get_intrinsic_invoker_by_id_unchecked(ir->invoker_idx);
     RtStackObject* frame_base = eval_stack_base + ir->frame_base;
@@ -2900,6 +2913,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(NewObjAot)
 {
     const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, ctor);
     const metadata::RtClass* klass = ctor->parent;
     TRY_RUN_CLASS_STATIC_CCTOR(klass);
     HANDLE_RAISE_RUNTIME_ERROR(vm::RtObject*, obj, LEANCLR_NEWOBJ_INTERP(klass));
@@ -2914,11 +2928,13 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(NewValueTypeAot)
 {
     const metadata::RtMethodInfo* ctor = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    SAVE_GC_CALL_STACK(ir->frame_base, ctor);
     const metadata::RtClass* klass = ctor->parent;
     RtStackObject* original_frame_base = eval_stack_base + ir->frame_base;
     const size_t value_stack_objects = InterpDefs::get_stack_object_size_by_byte_size(klass->instance_size_without_header);
     RtStackObject* final_frame_base = original_frame_base + value_stack_objects;
     std::memmove(final_frame_base + 1, original_frame_base, static_cast<size_t>(ir->total_params_stack_object_size) * sizeof(RtStackObject));
+    SAVE_GC_CALL_STACK(ir->frame_base + value_stack_objects, ctor);
     final_frame_base->ptr = original_frame_base;
     std::memset(original_frame_base, 0, value_stack_objects * sizeof(RtStackObject));
     auto invoker = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(ctor->invoke_method_ptr);

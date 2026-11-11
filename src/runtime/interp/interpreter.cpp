@@ -149,6 +149,17 @@ struct ExceptionFlow
 
 static utils::Vector<ExceptionFlow> s_exception_flows;
 
+#if LEANCLR_BCL_CORECLR_NET10
+void Interpreter::visit_exception_roots(gc::GcVisitObjectRoot visit, void* userdata)
+{
+    for (const auto& flow : s_exception_flows)
+    {
+        if (flow.throw_flow && flow.throw_data.ex != nullptr)
+            visit(reinterpret_cast<vm::RtObject*>(flow.throw_data.ex), userdata);
+    }
+}
+#endif
+
 ExceptionFlow* peek_top_exception_flow()
 {
     assert(!s_exception_flows.empty());
@@ -433,10 +444,40 @@ vm::RtException* get_exception_in_last_throw_flow(InterpFrame* frame, uint32_t i
         }                                             \
     }
 
+#if LEANCLR_BCL_CORECLR_NET10
+// Collections are synchronous in this profile. Publish the live extent before
+// entering a callee; scanning the reserved maximum retains stale callee slots.
+#define SAVE_GC_CALL_STACK(base, callee)                                                                                        \
+    frame->gc_live_stack_size = std::min(frame->eval_stack_size, std::max<uint32_t>(imi->total_arg_and_local_stack_object_size, \
+                                                                                    static_cast<uint32_t>((base) + (callee)->total_arg_stack_object_size)))
+
+struct StaticConstructorRootScope
+{
+    InterpFrame* frame;
+    uint32_t old_size;
+
+    explicit StaticConstructorRootScope(InterpFrame* value) : frame(value), old_size(value->gc_live_stack_size)
+    {
+        frame->gc_live_stack_size = frame->eval_stack_size;
+    }
+
+    ~StaticConstructorRootScope()
+    {
+        frame->gc_live_stack_size = old_size;
+    }
+};
+
+#define STATIC_CONSTRUCTOR_ROOT_SCOPE() StaticConstructorRootScope cctor_roots(frame)
+#else
+#define SAVE_GC_CALL_STACK(base, callee) ((void)0)
+#define STATIC_CONSTRUCTOR_ROOT_SCOPE() ((void)0)
+#endif
+
 #define TRY_RUN_CLASS_STATIC_CCTOR(klass)                                                      \
     {                                                                                          \
         if (vm::Class::is_cctor_not_finished(klass))                                           \
         {                                                                                      \
+            STATIC_CONSTRUCTOR_ROOT_SCOPE();                                                   \
             HANDLE_RAISE_RUNTIME_ERROR_VOID(vm::Runtime::run_class_static_constructor(klass)); \
         }                                                                                      \
     }

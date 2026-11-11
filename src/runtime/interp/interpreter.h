@@ -2,6 +2,7 @@
 
 #include "interp_defs.h"
 #include "vm/rt_managed_types.h"
+#include "gc/gc_roots.h"
 
 namespace leanclr
 {
@@ -10,6 +11,9 @@ namespace interp
 class Interpreter
 {
   public:
+#if LEANCLR_BCL_CORECLR_NET10
+    static void visit_exception_roots(gc::GcVisitObjectRoot visit, void* userdata);
+#endif
     // Execute method by method info and parameters
     static RtResult<const RtInterpMethodInfo*> init_interpreter_method(const metadata::RtMethodInfo* method);
     static RtResult<const interp::RtStackObject*> execute(const metadata::RtMethodInfo* method, const interp::RtStackObject* params);

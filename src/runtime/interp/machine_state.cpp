@@ -14,6 +14,8 @@ namespace leanclr
 namespace interp
 {
 #if LEANCLR_BCL_CORECLR_NET10
+MethodArgumentRoots* MethodArgumentRoots::current = nullptr;
+
 static void visit_machine_state_roots(gc::GcVisitObjectRoot visit, void* userdata)
 {
     MachineState::get_global_machine_state().visit_roots(visit, userdata);
@@ -21,7 +23,8 @@ static void visit_machine_state_roots(gc::GcVisitObjectRoot visit, void* userdat
 
 static void visit_object_if_valid(vm::RtObject* obj, gc::GcVisitObjectRoot visit, void* userdata)
 {
-    if (gc::GarbageCollector::is_allocated_object(obj))
+    obj = gc::GarbageCollector::find_object_containing(obj);
+    if (obj != nullptr)
     {
         visit(obj, userdata);
     }
@@ -75,6 +78,9 @@ static void visit_typed_argument_roots(const metadata::RtTypeSig* type_sig, RtSt
     const metadata::RtTypeSig* value_type_sig = type_sig;
     if (type_sig->by_ref)
     {
+        // A scalar or reference field byref must retain its owning heap object,
+        // in addition to any references stored in the field itself.
+        visit_object_if_valid(reinterpret_cast<vm::RtObject*>(slot->ptr), visit, userdata);
         byval_type_sig = type_sig->to_canonized_without_byref();
         value_type_sig = &byval_type_sig;
     }
@@ -147,6 +153,8 @@ static void visit_stack_object_roots(RtStackObject* scan_begin, RtStackObject* s
 
 void MachineState::visit_roots(gc::GcVisitObjectRoot visit, void* userdata) const
 {
+    for (auto* roots = MethodArgumentRoots::current; roots != nullptr; roots = roots->previous)
+        visit_method_argument_roots(roots->method, roots->args, roots->method->total_arg_stack_object_size, visit, userdata);
     for (uint32_t frame_idx = 0; frame_idx < _frame_stack_top; ++frame_idx)
     {
         const InterpFrame& frame = _frame_stack_base[frame_idx];
@@ -167,9 +175,8 @@ void MachineState::visit_roots(gc::GcVisitObjectRoot visit, void* userdata) cons
         }
 
         const RtInterpMethodInfo* imi = frame.method != nullptr ? frame.method->interp_data : nullptr;
-        const uint32_t scan_size = frame.root_scan_mode == InterpFrameRootScanMode::ExplicitObjectRoots || imi == nullptr
-                                       ? frame.eval_stack_size
-                                       : imi->total_arg_and_local_stack_object_size;
+        const uint32_t scan_size =
+            frame.root_scan_mode == InterpFrameRootScanMode::ExplicitObjectRoots || imi == nullptr ? frame.eval_stack_size : frame.gc_live_stack_size;
 
         RtStackObject* const scan_begin = frame.eval_stack_base;
         RtStackObject* scan_end = scan_begin + scan_size;
@@ -218,6 +225,7 @@ void MachineState::initialize()
     if (!roots_registered)
     {
         gc::GcRoots::register_visit_object_roots(visit_machine_state_roots);
+        gc::GcRoots::register_visit_object_roots(Interpreter::visit_exception_roots);
         roots_registered = true;
     }
 #endif
@@ -281,6 +289,7 @@ RtResult<InterpFrame*> MachineState::enter_frame_from_native(const metadata::RtM
 #if LEANCLR_BCL_CORECLR_NET10
     frame->vararg_count = 0;
     frame->root_scan_mode = InterpFrameRootScanMode::InterpreterFrame;
+    frame->gc_live_stack_size = imi->total_arg_and_local_stack_object_size;
 #endif
     frame->ip = imi->codes;
 #if LEANCLR_PGO_PROFILE
@@ -316,6 +325,7 @@ RtResult<InterpFrame*> MachineState::enter_frame_from_interp(const metadata::RtM
 #if LEANCLR_BCL_CORECLR_NET10
     frame->vararg_count = 0;
     frame->root_scan_mode = InterpFrameRootScanMode::InterpreterFrame;
+    frame->gc_live_stack_size = imi->total_arg_and_local_stack_object_size;
 #endif
 #if LEANCLR_DEBUG
     const size_t arg_size = method->total_arg_stack_object_size;
@@ -365,6 +375,7 @@ uint32_t MachineState::enter_frame_from_icall_or_intrinsic(const metadata::RtMet
 
 #if LEANCLR_BCL_CORECLR_NET10
         frame->root_scan_mode = root_scan_mode;
+        frame->gc_live_stack_size = eval_stack_size;
 #endif
 #if LEANCLR_BCL_CORECLR_NET10 || LEANCLR_DEBUG
         frame->ip = nullptr;
