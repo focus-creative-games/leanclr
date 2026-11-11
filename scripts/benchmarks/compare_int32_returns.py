@@ -59,7 +59,7 @@ def main():
     abi = {}
     for config in ['Release', 'Debug']:
         ir = output / f'abi-{config}.ll'
-        invoke([opts.emsdk.resolve() / 'upstream/emscripten/em++.bat', '-std=c++11', '-O2', '-S', '-emit-llvm',
+        invoke([opts.emsdk.resolve() / 'upstream/emscripten/em++.bat', '-std=c++17', '-O2', '-S', '-emit-llvm',
                 '-Wno-return-type-c-linkage', '-DNDEBUG' if config == 'Release' else '-DDEBUG', '-I' + str(ROOT / 'src/runtime'),
                 ROOT / 'src/tests/aot-returns/main.cpp', '-o', ir], output / f'abi-{config}.log')
         lines = [line for line in ir.read_text().splitlines() if re.match(r'define .*@(aot_int32_probe|aot_uint32_probe|ordinary_int32_probe)\(', line)]

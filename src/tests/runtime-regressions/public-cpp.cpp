@@ -1,6 +1,14 @@
 #include "host/services.h"
 #include "public/leanclr.h"
 
+#if defined(LEANCLR_EXPECT_CPP20)
+#if defined(_MSVC_LANG)
+static_assert(_MSVC_LANG >= 202002L, "The consumer must actually compile as C++20");
+#else
+static_assert(__cplusplus >= 202002L, "The consumer must actually compile as C++20");
+#endif
+#endif
+
 int main()
 {
     // Verify both the C pointer signature and the legacy C++ overload link.

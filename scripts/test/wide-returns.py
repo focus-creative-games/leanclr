@@ -47,7 +47,7 @@ def main():
                 for step in [command, ['cmake', '--build', str(directory), '--config', cfg], ['ctest', '--test-dir', str(directory), '-C', cfg, '--output-on-failure']]:
                     subprocess.run(step, cwd=ROOT, stdout=stream, stderr=subprocess.STDOUT, check=True)
     ir = output / 'wide-abi.ll'
-    subprocess.run([str(opts.emsdk.resolve() / 'upstream/emscripten/em++.bat'), '-std=c++11', '-O2', '-I', 'src/runtime', '-S', '-emit-llvm', 'src/tests/aot-returns/main.cpp', '-o', str(ir)], cwd=ROOT, check=True)
+    subprocess.run([str(opts.emsdk.resolve() / 'upstream/emscripten/em++.bat'), '-std=c++17', '-O2', '-I', 'src/runtime', '-S', '-emit-llvm', 'src/tests/aot-returns/main.cpp', '-o', str(ir)], cwd=ROOT, check=True)
     import re
     signature = re.search(r'^define .*@aot_wide_probe\(.*$', ir.read_text(), re.M).group()
     assert re.search(r'\bi8 @aot_wide_probe', signature) and 'sret' not in signature, signature

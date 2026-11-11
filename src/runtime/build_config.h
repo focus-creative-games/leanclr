@@ -1,5 +1,17 @@
 #pragma once
 
+// Non-CMake integrations must obey the same minimum as the exported CMake
+// usage requirement. MSVC may retain the historical __cplusplus value.
+#if defined(__cplusplus)
+#if defined(_MSVC_LANG)
+#if _MSVC_LANG < 201703L
+#error "LeanCLR requires C++17 or newer"
+#endif
+#elif __cplusplus < 201703L
+#error "LeanCLR requires C++17 or newer"
+#endif
+#endif
+
 #include <stdint.h>
 #include <stddef.h>
 
@@ -18,7 +30,7 @@ typedef double float64_t;
 // POSIX platforms additionally define LEANCLR_PLATFORM_POSIX.
 //
 // LEANCLR_FORCE_PORTABLE (CMake option) forces the unknown/portable code path for
-// testing: no Win32 or POSIX OS headers, only C++11 standard library I/O.
+// testing: no Win32 or POSIX OS headers, only standard library I/O.
 // ---------------------------------------------------------------------------
 #if defined(LEANCLR_FORCE_PORTABLE)
 #define LEANCLR_PLATFORM_UNKNOWN 1

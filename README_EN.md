@@ -19,7 +19,7 @@ LeanCLR is designed to fill this gap: maintain high ECMA-335 compatibility while
 
 ## Key Features
 
-- **Strong cross-platform support** — AOT + Interpreter hybrid execution model with no JIT, implemented in standard C++11. The runtime requires a little-endian host; each target still needs build and runtime validation.
+- **Strong cross-platform support** — AOT + Interpreter hybrid execution model with no JIT, implemented in standard C++17. The runtime requires a little-endian host; each target still needs build and runtime validation.
 - **Easy integration** — Integration complexity is close to Lua; easy to embed into apps, games, embedded devices, IVI/automotive platforms, and more.
 - **High ECMA-335 compatibility** — Near-complete support for ECMA-335 and major CoreCLR extensions, including generics, exceptions, reflection, and delegates.
 - **Compact and efficient** — Small binary size, low memory usage, and high runtime efficiency; single-thread core build is under **600 KB** on x64/WebAssembly and can be reduced to around **300 KB** after trimming.
@@ -100,7 +100,7 @@ build configuration selects deployment capabilities.
 
 All compositions share the type system, interpreter, LeanAOT and GC. Minimal
 retains standard-library I/O; choose Custom to take ownership of host services.
-Runtime hosts require little-endian storage and a C++11 toolchain; new targets
+Runtime hosts require little-endian storage and a C++17 toolchain; new targets
 still require validation. Native does not imply multithreading or complete OS API coverage.
 
 ```powershell

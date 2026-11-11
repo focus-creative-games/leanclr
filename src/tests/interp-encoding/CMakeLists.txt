@@ -7,6 +7,6 @@ add_executable(interp-encoding-tests
     ../../runtime/interp/ll_opcodes.cpp
 )
 target_include_directories(interp-encoding-tests PRIVATE ../../runtime)
-set_target_properties(interp-encoding-tests PROPERTIES CXX_STANDARD 11 CXX_STANDARD_REQUIRED ON)
+target_compile_features(interp-encoding-tests PRIVATE cxx_std_17)
 enable_testing()
 add_test(NAME interp-encoding COMMAND interp-encoding-tests)

@@ -91,7 +91,7 @@ def main():
     invoke(['ctest', '--test-dir', build, '-C', 'Release', '--output-on-failure'], output / 'verify.log')
     abi = []
     if opts.target == 'wasm':
-        probe = [sys.executable, emscripten / 'em++.py', '-std=c++11', '-DNDEBUG',
+        probe = [sys.executable, emscripten / 'em++.py', '-std=c++17', '-DNDEBUG',
                  f'-O{opts.opt}', '-Wno-return-type-c-linkage', '-S', '-emit-llvm',
                  '-I', ROOT / 'src/runtime', ROOT / 'src/benchmarks/result-abi/abi-probes.cpp',
                  '-o', output / 'abi.ll']

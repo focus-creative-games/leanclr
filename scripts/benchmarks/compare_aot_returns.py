@@ -38,7 +38,7 @@ def main():
         compiler = opts.emsdk.resolve() / 'upstream/emscripten/em++.bat'
         for mode in ['Release', 'Debug']:
             ir = output / f'abi-{mode}.ll'
-            invoke([compiler, '-std=c++11', '-O2', '-S', '-emit-llvm', '-Wno-return-type-c-linkage',
+            invoke([compiler, '-std=c++17', '-O2', '-S', '-emit-llvm', '-Wno-return-type-c-linkage',
                     '-DNDEBUG' if mode == 'Release' else '-DDEBUG', '-I' + str(ROOT / 'src/runtime'),
                     ROOT / 'src/tests/aot-returns/main.cpp', '-o', ir], output / f'abi-{mode}.log')
             lines = [line for line in ir.read_text().splitlines() if re.match(
