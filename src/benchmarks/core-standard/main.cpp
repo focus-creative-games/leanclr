@@ -1,3 +1,4 @@
+#include <cstdint>
 #include "core/stl_compat.h"
 #include "core/rt_result.h"
 #include "metadata/rt_metadata.h"
