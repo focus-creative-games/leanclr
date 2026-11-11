@@ -1,3 +1,4 @@
+#include "interp/eval_stack_op.h"
 #include "interp/transformer.h"
 #include <cstdio>
 #include <cstdlib>
@@ -18,6 +19,24 @@ static void require(bool value, const char* message)
 
 int main()
 {
+    {
+        leanclr::interp::RtStackObject slot{};
+        slot.i64 = -1;
+        leanclr::interp::EvalStackOp::set_return(&slot, false);
+        if (slot.i32 != 0)
+            return 101;
+        slot.i64 = -1;
+        leanclr::interp::EvalStackOp::set_return(&slot, true);
+        if (slot.i32 != 1)
+            return 102;
+        leanclr::interp::EvalStackOp::set_return(&slot, int8_t{-7});
+        if (slot.i32 != -7)
+            return 103;
+        leanclr::interp::EvalStackOp::set_return(&slot, uint16_t{65535});
+        if (slot.i32 != 65535)
+            return 104;
+    }
+
     static_assert(sizeof(OpCodeEnum) == 2, "The instruction ID must be 16 bits");
     Variable first{}, second{}, third{}, destination{};
     InstructionOperands operands;

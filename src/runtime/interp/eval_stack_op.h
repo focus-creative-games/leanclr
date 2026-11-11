@@ -32,7 +32,13 @@ class EvalStackOp
     template <typename T>
     static void set_return(RtStackObject* ret, const T& value)
     {
-        *reinterpret_cast<T*>(ret) = value;
+        // CLI evaluation-stack scalars narrower than Int32 are represented as
+        // Int32. A byte-only write leaves stale argument bits in the return
+        // slot and can turn false into true in the caller's branch instruction.
+        if constexpr (std::is_integral_v<T> && sizeof(T) < sizeof(int32_t))
+            ret->i32 = static_cast<int32_t>(value);
+        else
+            *reinterpret_cast<T*>(ret) = value;
     }
 };
 
