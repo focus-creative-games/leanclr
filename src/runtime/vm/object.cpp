@@ -401,7 +401,7 @@ RtResult<RtObject*> Object::__clone(RtObject* obj LEANCLR_GC_DECLARE_CALL_SITE_P
 
     RtObject* result = nullptr;
 
-    if (Class::is_szarray_class(klass))
+    if (Class::is_array_or_szarray(klass))
     {
         auto ret_clone = Array::__clone(reinterpret_cast<RtArray*>(obj) LEANCLR_GC_CALL_SITE_PARAM);
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, array_clone, ret_clone);

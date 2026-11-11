@@ -22,6 +22,51 @@ RtResult<int64_t> SystemArray::get_long_length(vm::RtArray* arr) noexcept
     RET_OK(static_cast<int64_t>(vm::Array::get_array_length(arr)));
 }
 
+RtResult<intptr_t> SystemArray::get_flattened_index(vm::RtArray* arr, vm::RtReadOnlySpan<int32_t> indices) noexcept
+{
+    if (arr == nullptr)
+        RET_ERR(RtErr::NullReference);
+    const int32_t rank = vm::Class::get_rank(arr->klass);
+    if (indices.length != rank || indices.pointer == nullptr)
+        RET_ERR(RtErr::Argument);
+    intptr_t offset = 0;
+    for (int32_t i = 0; i < rank; ++i)
+    {
+        const int32_t length = arr->bounds != nullptr ? arr->bounds[i].length : arr->length;
+        const int32_t lower = arr->bounds != nullptr ? arr->bounds[i].lower_bound : 0;
+        const uint32_t index = static_cast<uint32_t>(indices.pointer[i]) - static_cast<uint32_t>(lower);
+        if (index >= static_cast<uint32_t>(length))
+            RET_ERR(RtErr::IndexOutOfRange);
+        offset = offset * length + index;
+    }
+    RET_OK(offset);
+}
+
+RtResult<intptr_t> SystemArray::get_flattened_index_single(vm::RtArray* arr, int32_t index) noexcept
+{
+    return get_flattened_index(arr, {&index, 1});
+}
+
+static RtResultVoid flattened_index_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                            interp::RtStackObject* ret) noexcept
+{
+    auto* array = interp::EvalStackOp::get_param<vm::RtArray*>(params, 0);
+    auto indices = interp::EvalStackOp::get_param<vm::RtReadOnlySpan<int32_t>>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, index, SystemArray::get_flattened_index(array, indices));
+    interp::EvalStackOp::set_return(ret, index);
+    RET_VOID_OK();
+}
+
+static RtResultVoid flattened_index_single_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                   interp::RtStackObject* ret) noexcept
+{
+    auto* array = interp::EvalStackOp::get_param<vm::RtArray*>(params, 0);
+    auto raw_index = interp::EvalStackOp::get_param<int32_t>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, index, SystemArray::get_flattened_index_single(array, raw_index));
+    interp::EvalStackOp::set_return(ret, index);
+    RET_VOID_OK();
+}
+
 RtResultVoid SystemArray::get_generic_value_impl(vm::RtArray* arr, int32_t index, void* value) noexcept
 {
     if (vm::Array::is_out_of_range(arr, index))
@@ -337,6 +382,8 @@ static RtResultVoid clear_invoker(metadata::RtManagedMethodPointer methodPtr, co
 
 // Intrinsic registry
 static vm::IntrinsicEntry s_intrinsic_entries_system_array[] = {
+    {"System.Array::GetFlattenedIndex(System.ReadOnlySpan`1<System.Int32>)", (vm::IntrinsicFunction)&SystemArray::get_flattened_index, flattened_index_invoker},
+    {"System.Array::GetFlattenedIndex(System.Int32)", (vm::IntrinsicFunction)&SystemArray::get_flattened_index_single, flattened_index_single_invoker},
     {"System.Array::get_Length()", (vm::IntrinsicFunction)&SystemArray::get_length, get_length_invoker_intrinsics_system_array},
     {"System.Array::get_Length", (vm::IntrinsicFunction)&SystemArray::get_length, get_length_invoker_intrinsics_system_array},
     {"System.Array::get_LongLength()", (vm::IntrinsicFunction)&SystemArray::get_long_length, get_long_length_invoker},

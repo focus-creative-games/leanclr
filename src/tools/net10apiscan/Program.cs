@@ -15,6 +15,14 @@ internal sealed class ApiWhitelist
     public List<string> MemberPrefixes { get; set; } = [];
 }
 
+internal sealed class ApiCatalog
+{
+    public int SchemaVersion { get; set; }
+    public ApiWhitelist Validated { get; set; } = new();
+    public ApiWhitelist Unsupported { get; set; } = new();
+    public ApiWhitelist Pending { get; set; } = new();
+}
+
 internal sealed class ScanOptions
 {
     public List<string> Inputs { get; } = [];
@@ -36,16 +44,17 @@ internal static class Program
             var assemblies = ResolveInputs(options.Inputs);
             var skipped = new List<string>();
             var items = assemblies.SelectMany(path => ReadScanItems(path, skipped)).Distinct().OrderBy(i => i.Kind).ThenBy(i => i.Name).ToList();
-            var unsupported = items.Where(i => !IsAllowed(i, whitelist)).ToList();
+            var unsupported = items.Where(i => Classify(i, whitelist) == "unsupported").ToList();
+            var pending = items.Where(i => Classify(i, whitelist) == "pending").ToList();
 
-            WriteReport(options.ReportPath, assemblies, skipped, items, unsupported);
+            WriteReport(options.ReportPath, assemblies, skipped, items, unsupported, pending);
 
             Console.WriteLine($"Scanned {assemblies.Count} assembly file(s).");
             if (skipped.Count > 0)
             {
                 Console.WriteLine($"Skipped {skipped.Count} file(s) without readable .NET metadata.");
             }
-            Console.WriteLine($"Metadata refs: {items.Count}; unsupported: {unsupported.Count}.");
+            Console.WriteLine($"Metadata refs: {items.Count}; unsupported: {unsupported.Count}; pending: {pending.Count}.");
             if (unsupported.Count > 0)
             {
                 foreach (var item in unsupported.Take(50))
@@ -58,7 +67,7 @@ internal static class Program
                 }
             }
 
-            return unsupported.Count == 0 || options.WarnOnly ? 0 : 2;
+            return (unsupported.Count == 0 && pending.Count == 0 && skipped.Count == 0) || options.WarnOnly ? 0 : 2;
         }
         catch (Exception ex)
         {
@@ -125,21 +134,23 @@ internal static class Program
         Console.WriteLine("Usage: dotnet run --project src/tools/net10apiscan -- --input <dll-or-dir> [--whitelist file] [--report file] [--warn-only]");
     }
 
-    private static ApiWhitelist LoadWhitelist(string? path)
+    private static ApiCatalog LoadWhitelist(string? path)
     {
         if (string.IsNullOrWhiteSpace(path))
         {
-            return new ApiWhitelist();
+            return new ApiCatalog { SchemaVersion = 2 };
         }
 
         using var stream = File.OpenRead(path);
-        var whitelist = JsonSerializer.Deserialize<ApiWhitelist>(stream, new JsonSerializerOptions
+        var whitelist = JsonSerializer.Deserialize<ApiCatalog>(stream, new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true,
             ReadCommentHandling = JsonCommentHandling.Skip,
             AllowTrailingCommas = true,
         });
-        return whitelist ?? new ApiWhitelist();
+        if (whitelist?.SchemaVersion != 2)
+            throw new InvalidDataException("API catalog schemaVersion 2 is required; broad legacy allowlists cannot establish compatibility.");
+        return whitelist;
     }
 
     private static List<string> ResolveInputs(IEnumerable<string> inputs)
@@ -222,16 +233,19 @@ internal static class Program
         };
     }
 
+    private static string Classify(ScanItem item, ApiCatalog catalog)
+    {
+        // Explicit exclusions win; allowing an assembly/type never implies its members.
+        if (IsAllowed(item, catalog.Unsupported)) return "unsupported";
+        if (IsAllowed(item, catalog.Pending)) return "pending";
+        return IsAllowed(item, catalog.Validated) ? "validated" : "pending";
+    }
+
     private static bool IsAllowed(ScanItem item, ApiWhitelist whitelist)
     {
         if (item.Kind == "AssemblyRef")
         {
             return Matches(item.Name, whitelist.AssemblyNames, whitelist.AssemblyPrefixes);
-        }
-
-        if (Matches(item.Scope, whitelist.AssemblyNames, whitelist.AssemblyPrefixes))
-        {
-            return true;
         }
 
         if (item.Kind == "TypeRef")
@@ -241,8 +255,7 @@ internal static class Program
 
         if (item.Kind == "MemberRef")
         {
-            return Matches(item.Name, whitelist.MemberNames, whitelist.MemberPrefixes) ||
-                   Matches(GetDeclaringTypeName(item.Name), whitelist.TypeNames, whitelist.TypePrefixes);
+            return Matches(item.Name, whitelist.MemberNames, whitelist.MemberPrefixes);
         }
 
         return false;
@@ -268,7 +281,7 @@ internal static class Program
     }
 
     private static void WriteReport(string? reportPath, IReadOnlyList<string> assemblies, IReadOnlyList<string> skippedAssemblies,
-                                    IReadOnlyList<ScanItem> items, IReadOnlyList<ScanItem> unsupported)
+                                    IReadOnlyList<ScanItem> items, IReadOnlyList<ScanItem> unsupported, IReadOnlyList<ScanItem> pending)
     {
         if (string.IsNullOrWhiteSpace(reportPath))
         {
@@ -289,6 +302,8 @@ internal static class Program
             TotalReferenceCount = items.Count,
             UnsupportedReferenceCount = unsupported.Count,
             UnsupportedReferences = unsupported,
+            PendingReferenceCount = pending.Count,
+            PendingReferences = pending,
             References = items,
         };
         File.WriteAllText(fullPath, JsonSerializer.Serialize(report, new JsonSerializerOptions

@@ -2468,61 +2468,9 @@ RtResultVoid thread_set_priority_invoker(metadata::RtManagedMethodPointer, const
 RtResultVoid thread_start_internal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                            interp::RtStackObject*) noexcept
 {
-    intptr_t thread_handle = interp::EvalStackOp::get_param<intptr_t>(params, 0);
-    (void)interp::EvalStackOp::get_param<int32_t>(params, 1);
-    int32_t priority = interp::EvalStackOp::get_param<int32_t>(params, 2);
-    int32_t is_thread_pool = interp::EvalStackOp::get_param<int32_t>(params, 3);
-    (void)interp::EvalStackOp::get_param<Utf16Char*>(params, 4);
-    vm::RtInternalThread* thread = get_coreclr_internal_thread_from_handle(thread_handle);
-    if (thread == nullptr)
-    {
-        RET_ERR(RtErr::ArgumentNull);
-    }
-
-    int32_t state = static_cast<int32_t>(thread->state);
-    state &= ~static_cast<int32_t>(vm::RtThreadState::Unstarted);
-    thread->state = static_cast<vm::RtThreadState>(state);
-    thread->priority = priority;
-    thread->threadpool_thread = is_thread_pool != 0;
-    vm::RtObject* managed_thread = thread->coreclr_managed_thread;
-    if (managed_thread == nullptr || managed_thread->klass == nullptr)
-    {
-        RET_VOID_OK();
-    }
-
-    const metadata::RtMethodInfo* start_method = nullptr;
-    vm::RtObject* start_target = managed_thread;
-    if (is_thread_pool != 0)
-    {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, work_queue_klass,
-                                                managed_thread->klass->image->get_class_by_name("System.Threading.ThreadPoolWorkQueue", false, true));
-        start_method = vm::Class::get_method_for_name(work_queue_klass, "Dispatch", 0, true);
-        start_target = nullptr;
-    }
-    else
-    {
-        start_method = vm::Class::get_method_for_name(managed_thread->klass, "StartCallback", 0, true);
-    }
-
-    if (start_method == nullptr)
-    {
-        RET_VOID_OK();
-    }
-
-    if (is_thread_pool != 0)
-    {
-        RET_ERR_ON_FAIL(dispatch_thread_pool_work_queue(managed_thread->klass->image, start_method));
-    }
-    else
-    {
-        RET_ERR_ON_FAIL(vm::Runtime::invoke_object_arguments_with_run_cctor(start_method, start_target, nullptr, 0));
-    }
-    state = static_cast<int32_t>(thread->state);
-    state &= ~static_cast<int32_t>(vm::RtThreadState::Running);
-    state |= static_cast<int32_t>(vm::RtThreadState::Stopped);
-    thread->state = static_cast<vm::RtThreadState>(state);
-    set_instance_bool_field_if_present(managed_thread, "_isDead", true);
-    RET_VOID_OK();
+    // Running a worker inline changes scheduling, ordering and deadlock behavior.
+    // The minimal profile does not implement native managed threads.
+    RET_ERR(RtErr::NotSupported);
 }
 
 RtResultVoid thread_inform_thread_name_change_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,

@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedNet10.Benchmarks", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedNet10.GcContracts", "ManagedNet10.GcContracts\ManagedNet10.GcContracts.csproj", "{44E1E9C2-A349-4680-B283-769DFCC8FC93}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ManagedNet10.ApiContracts", "ManagedNet10.ApiContracts\ManagedNet10.ApiContracts.csproj", "{580242DB-560A-413D-9AEC-2B75664346CE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -83,6 +85,18 @@ Global
 		{44E1E9C2-A349-4680-B283-769DFCC8FC93}.Release|x64.Build.0 = Release|Any CPU
 		{44E1E9C2-A349-4680-B283-769DFCC8FC93}.Release|x86.ActiveCfg = Release|Any CPU
 		{44E1E9C2-A349-4680-B283-769DFCC8FC93}.Release|x86.Build.0 = Release|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Debug|x64.Build.0 = Debug|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Debug|x86.Build.0 = Debug|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Release|x64.ActiveCfg = Release|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Release|x64.Build.0 = Release|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Release|x86.ActiveCfg = Release|Any CPU
+		{580242DB-560A-413D-9AEC-2B75664346CE}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

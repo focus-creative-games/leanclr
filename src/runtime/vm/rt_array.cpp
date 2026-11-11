@@ -18,6 +18,9 @@ RtResult<ArrayLayout> Array::get_array_layout(const metadata::RtClass* klass, in
     assert(klass && klass->element_class);
     if (length < 0)
         RET_ERR(RtErr::Overflow);
+    // A synthesized array class may precede its value-type element's layout.
+    // Using a zero element size overlaps the bounds with the element storage.
+    RET_ERR_ON_FAIL(Class::initialize_fields(const_cast<metadata::RtClass*>(klass->element_class)));
     const size_t rank = klass->by_val->ele_type == metadata::RtElementType::Array ? klass->by_val->data.array_type->rank : 0;
     ArrayLayout layout;
     if (!ArrayLayout::try_compute(Class::get_stack_location_size(klass->element_class), static_cast<size_t>(length), rank, layout))

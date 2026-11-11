@@ -61,6 +61,8 @@ try {
     }
     # Differential reference: execute the same contracts on the installed .NET 10.
     Invoke-Checked dotnet "$gcDir/ManagedNet10.GcContracts.dll"
+    Invoke-Checked dotnet build src/tests/managed-net10/ManagedNet10.ApiContracts/ManagedNet10.ApiContracts.csproj -c $Configuration
+    Invoke-Checked $runner -l "out/dotnet/ManagedNet10.ApiContracts/$Configuration/net10.0" -l $RuntimeDir ManagedNet10.ApiContracts
     $contracts = if ($ContractsBuildDir) { $ContractsBuildDir } else { "$BuildDir-contracts" }
     Invoke-Checked cmake -S src/tests/net10-contracts -B $contracts -A x64
     Invoke-Checked cmake --build $contracts --config $Configuration --parallel 4

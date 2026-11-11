@@ -17,6 +17,8 @@ class SystemArray
 
     // Returns the length of the array as a 64-bit integer.
     static RtResult<int64_t> get_long_length(vm::RtArray* arr) noexcept;
+    static RtResult<intptr_t> get_flattened_index(vm::RtArray* arr, vm::RtReadOnlySpan<int32_t> indices) noexcept;
+    static RtResult<intptr_t> get_flattened_index_single(vm::RtArray* arr, int32_t index) noexcept;
 
     // Gets the value at the specified index and copies it to the destination pointer.
     static RtResultVoid get_generic_value_impl(vm::RtArray* arr, int32_t index, void* value) noexcept;

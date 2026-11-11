@@ -2,9 +2,12 @@ namespace ManagedNet10.LegacyTests
 {
     internal static partial class Program
     {
-        private static void Main()
+        private static void Main(string[] args)
         {
-            RunAll();
+            if (args.Length == 0) { RunAll(); return; }
+            var entry = typeof(Program).GetMethod(args[0], System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            if (entry == null || entry.GetParameters().Length != 0) throw new System.ArgumentException("Unknown legacy matrix entry: " + args[0]);
+            entry.Invoke(null, null);
         }
 
         public static void RunAll()

@@ -2699,7 +2699,8 @@ LEANCLR_CASE_END()
 
 LEANCLR_CASE_BEGIN(RetAny)
 {
-    std::memcpy(eval_stack_base, eval_stack_base + ir->src, ir->size * sizeof(RtStackObject));
+    // Struct results can start one slot above the return buffer.
+    std::memmove(eval_stack_base, eval_stack_base + ir->src, ir->size * sizeof(RtStackObject));
     LEAVE_FRAME();
 }
 LEANCLR_CASE_END()

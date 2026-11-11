@@ -14,6 +14,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Include="HistoricalFixtures\TC_stsfld_interp_threadstatic.cs" />
+    <Compile Include="HistoricalFixtures\TC_ldsfld_interp_threadstatic.cs" />
     <Compile Include="BranchTestEntries.cs" />
     <Compile Include="ArrayBoxingTestEntries.cs" />
     <Compile Include="CompareTestEntries.cs" />
@@ -71,7 +73,7 @@
     <Compile Include="..\..\managed\Common\GcUnitTestAttribute.cs" Link="Common\GcUnitTestAttribute.cs" />
     <Compile Include="..\..\managed\Common\IgnoreTestAttribute.cs" Link="Common\IgnoreTestAttribute.cs" />
     <Compile Include="..\..\managed\Common\MonoPInvokeCallbackAttribute.cs" Link="Common\MonoPInvokeCallbackAttribute.cs" />
-    <Compile Include="..\..\managed\Common\TestCaseBase.cs" Link="Common\TestCaseBase.cs" />
+    <Compile Include="HistoricalFixtures\TestCaseBase.cs" Link="Common\TestCaseBase.cs" />
     <Compile Include="..\..\managed\Common\UnitTestAttribute.cs" Link="Common\UnitTestAttribute.cs" />
     <Compile Include="GcTestEntries.cs" />
     <Compile Include="..\..\managed\SharedTests\Fixtures\AOTExplicitStruct.cs" Link="Fixtures\AOTExplicitStruct.cs" />
@@ -93,7 +95,7 @@
     <Compile Include="..\..\managed\SharedTests\Fixtures\MethodRefs.cs" Link="Fixtures\MethodRefs.cs" />
     <Compile Include="..\..\managed\SharedTests\Fixtures\NativeArrayParam.cs" Link="Fixtures\NativeArrayParam.cs" />
     <Compile Include="..\..\managed\SharedTests\Fixtures\NullableTypeUtil.cs" Link="Fixtures\NullableTypeUtil.cs" />
-    <Compile Include="..\..\managed\SharedTests\Fixtures\PreserveMethodBridges.cs" Link="Fixtures\PreserveMethodBridges.cs" />
+    <Compile Include="HistoricalFixtures\PreserveMethodBridges.cs" Link="Fixtures\PreserveMethodBridges.cs" />
     <Compile Include="..\..\managed\SharedTests\Fixtures\RefTypes.cs" Link="Fixtures\RefTypes.cs" />
     <Compile Include="..\..\managed\SharedTests\Fixtures\Test.cs" Link="Fixtures\Test.cs" />
     <Compile Include="..\..\managed\SharedTests\Fixtures\TestAOTCtorParam.cs" Link="Fixtures\TestAOTCtorParam.cs" />
@@ -178,7 +180,7 @@
     <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_calli.cs" Link="Instructions\Funcs\TC_calli.cs" />
     <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_call_interp.cs" Link="Instructions\Funcs\TC_call_interp.cs" />
     <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_callvir_aot.cs" Link="Instructions\Funcs\TC_callvir_aot.cs" />
-    <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_callvir_interp.cs" Link="Instructions\Funcs\TC_callvir_interp.cs" />
+    <Compile Include="HistoricalFixtures\TC_callvir_interp.cs" Link="Instructions\Funcs\TC_callvir_interp.cs" />
     <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_ldftn.cs" Link="Instructions\Funcs\TC_ldftn.cs" />
     <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_ldvirftn.cs" Link="Instructions\Funcs\TC_ldvirftn.cs" />
     <Compile Include="..\..\managed\SharedTests\Instructions\Funcs\TC_newobj_aot.cs" Link="Instructions\Funcs\TC_newobj_aot.cs" />
@@ -281,7 +283,7 @@
     <Compile Include="..\..\managed\SharedTests\Runtime\MonoPInvokeWrapperPreserves.cs" Link="Runtime\MonoPInvokeWrapperPreserves.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\TC_AOTGeneric.cs" Link="Runtime\TC_AOTGeneric.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\TC_AOTStructLayout.cs" Link="Runtime\TC_AOTStructLayout.cs" />
-    <Compile Include="..\..\managed\SharedTests\Runtime\TC_async.cs" Link="Runtime\TC_async.cs" />
+    <Compile Include="HistoricalFixtures\TC_async.cs" Link="Runtime\TC_async.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\TC_CrashReport.cs" Link="Runtime\TC_CrashReport.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\TC_Delegate_BeginEndInvoke.cs" Link="Runtime\TC_Delegate_BeginEndInvoke.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\TC_explicit_implement.cs" Link="Runtime\TC_explicit_implement.cs" />
@@ -292,9 +294,9 @@
     <Compile Include="..\..\managed\SharedTests\Runtime\TC_MonoPInvokeWrapper.cs" Link="Runtime\TC_MonoPInvokeWrapper.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\TC_MultiCastDelegate.cs" Link="Runtime\TC_MultiCastDelegate.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_InnerType.cs" Link="Runtime\Misc\TC_InnerType.cs" />
-    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_MethodBridge.cs" Link="Runtime\Misc\TC_MethodBridge.cs" />
-    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_MethodBridgeAOTStruct.cs" Link="Runtime\Misc\TC_MethodBridgeAOTStruct.cs" />
-    <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_MethodBridgeInterpStruct.cs" Link="Runtime\Misc\TC_MethodBridgeInterpStruct.cs" />
+    <Compile Include="HistoricalFixtures\TC_MethodBridge.cs" Link="Runtime\Misc\TC_MethodBridge.cs" />
+    <Compile Include="HistoricalFixtures\TC_MethodBridgeAOTStruct.cs" Link="Runtime\Misc\TC_MethodBridgeAOTStruct.cs" />
+    <Compile Include="HistoricalFixtures\TC_MethodBridgeInterpStruct.cs" Link="Runtime\Misc\TC_MethodBridgeInterpStruct.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_PreJit.cs" Link="Runtime\Misc\TC_PreJit.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_RefOtherAssembly.cs" Link="Runtime\Misc\TC_RefOtherAssembly.cs" />
     <Compile Include="..\..\managed\SharedTests\Runtime\Misc\TC_RuntimeApi.cs" Link="Runtime\Misc\TC_RuntimeApi.cs" />

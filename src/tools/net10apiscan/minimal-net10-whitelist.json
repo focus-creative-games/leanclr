@@ -1,37 +1,45 @@
 {
-  "assemblyNames": [
-    "ManagedNet10.LegacyTests",
-    "ManagedNet10.NkgSmoke",
-    "ManagedNet10.Smoke",
-    "NKGGameFramework",
-    "NKGGameFramework.Sampler",
-    "OdinSerializer",
-    "System.Collections",
-    "System.Console",
-    "System.Linq",
-    "System.Private.CoreLib",
-    "System.Runtime",
-    "System.Threading",
-    "System.Threading.Tasks",
-    "UniTask"
-  ],
-  "assemblyPrefixes": [
-    "System."
-  ],
-  "typeNames": [],
-  "typePrefixes": [
-    "Cysharp.Threading.Tasks.",
-    "ManagedNet10.",
-    "NKGGameFramework.",
-    "OdinSerializer.",
-    "System."
-  ],
-  "memberNames": [],
-  "memberPrefixes": [
-    "Cysharp.Threading.Tasks.",
-    "ManagedNet10.",
-    "NKGGameFramework.",
-    "OdinSerializer.",
-    "System."
-  ]
+  "schemaVersion": 2,
+  "validated": {
+    "assemblyNames": [
+      "System.Runtime",
+      "System.Private.CoreLib",
+      "System.Collections"
+    ],
+    "typeNames": [
+      "System.Object",
+      "System.String",
+      "System.Array",
+      "System.Exception",
+      "System.Type",
+      "System.RuntimeTypeHandle",
+      "System.TypedReference"
+    ],
+    "memberNames": [
+      "System.Void System.Object::.ctor()",
+      "System.Type System.Object::GetType()",
+      "System.Void System.GC::Collect()",
+      "System.Void System.GC::KeepAlive(System.Object)",
+      "System.Void System.GC::WaitForPendingFinalizers()",
+      "System.Int32 System.String::get_Length()",
+      "System.Char System.String::get_Chars(System.Int32)",
+      "System.Type System.Type::GetTypeFromHandle(System.RuntimeTypeHandle)"
+    ]
+  },
+  "unsupported": {
+    "memberPrefixes": [
+      "System.Void System.Threading.Thread::Start",
+      "System.Threading.Tasks.Task System.Threading.Tasks.Task::Run",
+      "System.Type System.Reflection.Emit.",
+      "System.Reflection.Emit."
+    ]
+  },
+  "pending": {
+    "typePrefixes": [
+      "System.IO.",
+      "System.Console",
+      "System.Threading.",
+      "System.Reflection.Emit."
+    ]
+  }
 }
