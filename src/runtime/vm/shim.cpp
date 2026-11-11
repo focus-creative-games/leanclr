@@ -143,12 +143,14 @@ RtResultVoid fn_not_implemented_invoker(metadata::RtManagedMethodPointer method_
 // Method pointer placeholder
 void fn_not_implemented_method_pointer() noexcept
 {
-    // Placeholder - would panic in debug builds
+    // The interpreter invoker uses distinct marker identities to distinguish
+    // boxed receivers. Identical empty functions can be folded by the linker.
+    leanclr::panic("Unimplemented managed method pointer");
 }
 
 void fn_not_implemented_virtual_method_pointer() noexcept
 {
-    // Placeholder - would panic in debug builds
+    leanclr::panic("Unimplemented boxed virtual method pointer");
 }
 
 } // anonymous namespace

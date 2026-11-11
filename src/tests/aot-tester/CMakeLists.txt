@@ -6,14 +6,16 @@ add_subdirectory(../../runtime runtime_build)
 
 # aot-tester executable
 
-if(MSVC)
-    set(AOT_GENERATED_CPP_DIR "cpp")
-else()
-    set(AOT_GENERATED_CPP_DIR "cpp-posix")
+if(NOT DEFINED AOT_GENERATED_CPP_DIR)
+    if(MSVC)
+        set(AOT_GENERATED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cpp" CACHE PATH "Generated AOT C++ sources")
+    else()
+        set(AOT_GENERATED_CPP_DIR "${CMAKE_CURRENT_SOURCE_DIR}/cpp-posix" CACHE PATH "Generated AOT C++ sources")
+    endif()
 endif()
 message(STATUS "AOT generated sources: ${AOT_GENERATED_CPP_DIR}")
 
-file(GLOB CPP_SOURCES "${AOT_GENERATED_CPP_DIR}/*.cpp")
+file(GLOB CPP_SOURCES CONFIGURE_DEPENDS "${AOT_GENERATED_CPP_DIR}/*.cpp")
 add_executable(aot-tester main.cpp pinvoke_impl.cpp ${CPP_SOURCES})
 
 target_link_libraries(aot-tester PRIVATE leanclr)

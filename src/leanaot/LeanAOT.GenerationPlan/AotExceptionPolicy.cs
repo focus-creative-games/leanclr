@@ -43,6 +43,12 @@ namespace LeanAOT.GenerationPlan
                             (eh.HandlerEnd == null || other.TryStart.Offset < eh.HandlerEnd.Offset)) return "eh-handler-inside-finally";
             }
             foreach (var inst in method.Body.Instructions)
+            {
+                // Catch handlers execute only after interpreter handoff. Their
+                // address-taking instructions do not create aliases on the AOT
+                // normal path and must not disqualify an otherwise safe snapshot.
+                if (method.Body.ExceptionHandlers.Any(eh => eh.HandlerType == ExceptionHandlerType.Catch &&
+                    inst.Offset >= eh.HandlerStart.Offset && (eh.HandlerEnd == null || inst.Offset < eh.HandlerEnd.Offset))) continue;
                 switch (inst.OpCode.Code)
                 {
                     case Code.Ldloca: case Code.Ldloca_S: case Code.Ldarga: case Code.Ldarga_S:
@@ -51,6 +57,7 @@ namespace LeanAOT.GenerationPlan
                     case Code.Mkrefany: case Code.Refanyval: case Code.Arglist: case Code.Jmp:
                     case Code.Tailcall: return "eh-address-or-native-control";
                 }
+            }
             return null;
         }
     }

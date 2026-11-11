@@ -9,7 +9,7 @@ internal static class Program
     private static int finalized;
     private static Buffer? buffer;
     private static void Check(bool value, string message) { if (!value) throw new Exception(message); }
-    public static void Main() { TestLiveObject(); TestInlineArrayReferences(); TestDeadEphemeronCycle(); TestLiveEphemeronChain(); TestFinalizer(); TestInteriorByRef(); TestLargeInteriorByRef(); TestValueTypeReferences(); TestExceptionRoots(); TestFinalizerClosure(); TestStaticConstructorRoots(); TestNestedCatchInFinally(); TestThrowAtTryEnd(); }
+    public static void Main() { TestLiveObject(); TestInlineArrayReferences(); TestDeadEphemeronCycle(); TestLiveEphemeronChain(); TestFinalizer(); TestInteriorByRef(); TestLargeInteriorByRef(); TestValueTypeReferences(); TestExceptionRoots(); TestFinalizerClosure(); TestStaticConstructorRoots(); TestNestedCatchInFinally(); TestThrowAtTryEnd(); TestByRefReplacement(); TestReflectionArguments(); }
     public static void TestLiveObject()
     {
         var value = new Box { Reference = new object() };
@@ -174,5 +174,29 @@ internal static class Program
         catch (PayloadException) { count++; }
         finally { count += 10; }
         Check(count == 11, "call at try boundary escaped its handler");
+    }
+
+    [MethodImpl(MethodImplOptions.NoInlining)] private static void ReplaceAndCollect(ref Box? value)
+    {
+        value = new Box { Reference = new Box() };
+        GC.Collect();
+        Check(value.Value == 42 && ((Box)value.Reference!).Value == 42, "callee lost replacement through a byref argument");
+    }
+    public static void TestByRefReplacement()
+    {
+        Box? value = null;
+        ReplaceAndCollect(ref value);
+        GC.Collect();
+        Check(value!.Value == 42, "byref replacement did not survive return");
+    }
+    public static void CollectArgument(object value)
+    {
+        GC.Collect();
+        Check(((Box)value).Value == 42, "reflection invocation lost native argument roots");
+    }
+    public static void TestReflectionArguments()
+    {
+        var method = typeof(Program).GetMethod(nameof(CollectArgument))!;
+        for (int i = 0; i < 8; i++) method.Invoke(null, new object[] { new Box() });
     }
 }

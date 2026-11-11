@@ -1,3 +1,6 @@
+#if defined(_MSC_VER) && defined(_DEBUG)
+#include <crtdbg.h>
+#endif
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -15,6 +18,9 @@
 #include "vm/settings.h"
 #include "vm/type.h"
 #include "vm/rt_exception.h"
+#if LEANCLR_BCL_CORECLR_NET10
+#include "bcl/coreclr-net10/managed_layouts.h"
+#endif
 #include "vm/property.h"
 #include "vm/field.h"
 #include "metadata/metadata_name.h"
@@ -254,6 +260,10 @@ extern leanclr::metadata::RtAotModulesData g_aot_modules_data;
 
 int main(int argc, char* argv[])
 {
+#if defined(_MSC_VER) && defined(_DEBUG)
+    _CrtSetReportMode(_CRT_ASSERT, _CRTDBG_MODE_FILE);
+    _CrtSetReportFile(_CRT_ASSERT, _CRTDBG_FILE_STDERR);
+#endif
 #ifdef _WIN32
     SetConsoleOutputCP(CP_UTF8);
     SetConsoleCP(CP_UTF8);

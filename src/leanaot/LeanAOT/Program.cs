@@ -725,6 +725,7 @@ internal class Program
             MaxGenericInstances = il2CppOptions.MaxGenericInstances,
             MaxGenericDepth = il2CppOptions.MaxGenericDepth,
             ShouldSkipUnsupportedRuntimeMethod = method => ShouldSkipUnsupportedRuntimeIntrinsic(method, runtimeApiCatalog),
+            RuntimeMethodFallbackReason = method => runtimeApiCatalog.IsRuntimeImplemented(method) ? "runtime-native-binding" : null,
         };
         var manifest = new Manifest(manifestArgs);
 

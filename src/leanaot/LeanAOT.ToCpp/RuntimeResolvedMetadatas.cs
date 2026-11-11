@@ -121,6 +121,18 @@ namespace LeanAOT.ToCpp
             return $"{owner.GetResolveMetadatasVariableName()}.{GetVariableName()}";
         }
 
+        public SubRuntimeResolvedVariable GetStaticInterfaceMethodSubVariable(RuntimeResolvedVariable declaration)
+        {
+            string key = $"static_interface_{declaration.varId}";
+            if (subVariables.TryGetValue(key, out var variable)) return variable;
+            string name = $"{GetVariableName()}_{key}";
+            variable = new SubRuntimeResolvedVariable(key, name, $"{owner.GetSubResolveMetadatasVariableName()}.{name}",
+                "leanclr::codegen::AotResolvedMethod",
+                $"leanclr::codegen::resolve_static_interface_method({GetFullReferenceVariableName()}, {declaration.GetFullReferenceVariableName()})");
+            subVariables.Add(key, variable);
+            return variable;
+        }
+
         // public string ResolveCode()
         // {
         //     if (value is string str)

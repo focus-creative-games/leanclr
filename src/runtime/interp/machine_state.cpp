@@ -5,6 +5,7 @@
 #include "profile/profile.h"
 #include "vm/settings.h"
 #include "interpreter.h"
+#include "codegen/leanclr_common.h"
 #include "gc/garbage_collector.h"
 #include "vm/class.h"
 #include "vm/method.h"
@@ -226,6 +227,7 @@ void MachineState::initialize()
     {
         gc::GcRoots::register_visit_object_roots(visit_machine_state_roots);
         gc::GcRoots::register_visit_object_roots(Interpreter::visit_exception_roots);
+        gc::GcRoots::register_visit_object_roots(codegen::AotRootScope::visit_roots);
         roots_registered = true;
     }
 #endif

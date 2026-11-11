@@ -14,6 +14,50 @@ namespace leanclr
 {
 namespace codegen
 {
+#if LEANCLR_BCL_CORECLR_NET10
+AotRootScope* AotRootScope::current = nullptr;
+
+void AotRootScope::visit_roots(gc::GcVisitObjectRoot visit, void* userdata)
+{
+    const auto scan_range = [visit, userdata](const void* address, size_t size)
+    {
+        if (address == nullptr)
+            return;
+        const auto* bytes = static_cast<const uint8_t*>(address);
+        for (size_t offset = 0; offset + sizeof(uintptr_t) <= size; offset += sizeof(uintptr_t))
+        {
+            uintptr_t value;
+            std::memcpy(&value, bytes + offset, sizeof(value));
+            if (auto* object = gc::GarbageCollector::find_object_containing(reinterpret_cast<const void*>(value)))
+                visit(object, userdata);
+        }
+    };
+    for (auto* scope = current; scope != nullptr; scope = scope->previous)
+    {
+        for (size_t i = 0; i < scope->stable_range_count; ++i)
+        {
+            const auto& range = scope->stable_ranges[i];
+            const void* address = range.address;
+            if (range.indirect)
+                std::memcpy(&address, address, sizeof(address));
+            scan_range(address, range.size);
+        }
+        for (size_t i = 0; i < scope->count; ++i)
+            if (auto* object = gc::GarbageCollector::find_object_containing(reinterpret_cast<const void*>(scope->buffer[i])))
+                visit(object, userdata);
+    }
+}
+#endif
+
+RtResult<intptr_t> get_runtime_type_handle(const metadata::RtClass* klass) noexcept
+{
+#if LEANCLR_BCL_CORECLR_NET10
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const void*, handle, vm::Reflection::get_net10_method_table(klass->by_val));
+    RET_OK(reinterpret_cast<intptr_t>(handle));
+#else
+    RET_OK(reinterpret_cast<intptr_t>(klass->by_val));
+#endif
+}
 
 namespace
 {
@@ -335,7 +379,11 @@ RtErr raise_pinvoke_entry_not_found_error(const char* dll_name_no_ext, const cha
 {
     char err_msg[1024];
     snprintf(err_msg, sizeof(err_msg), "P/Invoke entry not found: dll=%s, function=%s", dll_name_no_ext, function_name);
+#if LEANCLR_BCL_CORECLR_NET10
+    RET_ERR_WITH_MSG(RtErr::NotSupported, err_msg);
+#else
     RET_ERR_WITH_MSG(RtErr::EntryPointNotFound, err_msg);
+#endif
 }
 
 RtMarshalHandle marshal_safe_handle_to_handle(vm::RtObject* obj) noexcept

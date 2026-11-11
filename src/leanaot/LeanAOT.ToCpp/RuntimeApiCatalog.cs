@@ -34,6 +34,7 @@ namespace LeanAOT.ToCpp
 
     public sealed class RuntimeApiCatalog
     {
+        private readonly HashSet<string> _runtimeImplemented = new(StringComparer.Ordinal);
         private readonly IReadOnlyDictionary<string, RuntimeApiEntry> _icalls;
         private readonly IReadOnlyDictionary<string, RuntimeApiEntry> _intrinsics;
         private readonly IReadOnlyDictionary<string, RuntimeApiEntry> _icallsNewobj;
@@ -96,6 +97,15 @@ namespace LeanAOT.ToCpp
 
         public bool IsCoreLibraryModule(ModuleDef module) => MetaUtil.IsCoreLibraryModule(module, _coreLibModules);
 
+        public bool IsRuntimeImplemented(MethodDef method)
+        {
+            if (_runtimeImplemented.Count == 0 || method == null || !IsCoreLibraryModule(method.Module)) return false;
+            string brief = GetBriefMethodName(method);
+            string genericSuffix = method.GenericParameters.Count == 0 ? "" : "<" + new string(',', method.GenericParameters.Count - 1) + ">";
+            return _runtimeImplemented.Contains(brief) || _runtimeImplemented.Contains(brief + genericSuffix) ||
+                (!method.HasGenericParameters && !method.DeclaringType.HasGenericParameters && _runtimeImplemented.Contains(GetFullMethodName(method)));
+        }
+
         private string GetFullMethodName(MethodDef methodDef)
         {
             return NameUtil.GetICallFullMethodName(methodDef);
@@ -148,6 +158,8 @@ namespace LeanAOT.ToCpp
             Debug.Assert(methodDef.IsConstructor, "methodDef must be a constructor");
             entry = null;
             methodKind = MethodKind.Normal;
+            if (methodDef.HasGenericParameters || methodDef.DeclaringType.HasGenericParameters)
+                return false;
             if (!IsCoreLibraryModule(methodDef.Module))
             {
                 return false;
@@ -199,7 +211,7 @@ namespace LeanAOT.ToCpp
             var intrinsicsNewobj = LoadEntries(Path.Combine(catalogDirectory, "intrinsics_newobj.json"), options, MethodKind.IntrinsicNewObj);
             var staticLinkedMethods = LoadStaticLinkedMethods(Path.Combine(catalogDirectory, "pinvokes.json"), options);
 
-            return new RuntimeApiCatalog(
+            var catalog = new RuntimeApiCatalog(
                 effectiveProfileName,
                 catalogDirectory,
                 coreLibraryModules,
@@ -208,6 +220,10 @@ namespace LeanAOT.ToCpp
                 icallsNewobj,
                 intrinsicsNewobj,
                 staticLinkedMethods);
+            string implementedPath = Path.Combine(catalogDirectory, "runtime-implemented.json");
+            if (File.Exists(implementedPath))
+                catalog._runtimeImplemented.UnionWith(JsonSerializer.Deserialize<List<string>>(File.ReadAllText(implementedPath), options) ?? new());
+            return catalog;
         }
 
         private static string ResolveCatalogDirectory(string baseDirectory, string profileName)

@@ -5,6 +5,8 @@
 #include <cstdlib>
 #include <cstring>
 #include <limits>
+#include <initializer_list>
+#include <algorithm>
 #include "utils/integer_math.h"
 #include "vm/rt_managed_types.h"
 #include "vm/rt_exception.h"
@@ -340,6 +342,102 @@ namespace leanclr
 {
 namespace codegen
 {
+#if LEANCLR_BCL_CORECLR_NET10
+struct AotRootRange
+{
+    const void* address;
+    size_t size;
+    bool indirect = false;
+
+    template <typename T>
+    static AotRootRange from(const T& value)
+    {
+        return {&value, sizeof(T)};
+    }
+
+    template <typename T>
+    static AotRootRange target(const void* pointer_address)
+    {
+        return {pointer_address, sizeof(T), true};
+    }
+};
+
+struct AotRootScopeNoop
+{
+    void assign(std::initializer_list<AotRootRange>)
+    {
+    }
+};
+
+class AotRootScope
+{
+    AotRootScope* previous;
+    uintptr_t* buffer;
+    size_t capacity;
+    const AotRootRange* stable_ranges;
+    size_t stable_range_count;
+    size_t count = 0;
+    static AotRootScope* current;
+
+  public:
+    AotRootScope(uintptr_t* buffer, size_t capacity, const AotRootRange* stable_ranges, size_t stable_range_count)
+        : previous(current), buffer(buffer), capacity(capacity), stable_ranges(stable_ranges), stable_range_count(stable_range_count)
+    {
+        current = this;
+    }
+
+    ~AotRootScope()
+    {
+        current = previous;
+    }
+
+    AotRootScope(const AotRootScope&) = delete;
+    AotRootScope& operator=(const AotRootScope&) = delete;
+
+    void assign(std::initializer_list<AotRootRange> ranges)
+    {
+        count = 0;
+        for (const auto& range : ranges)
+        {
+            const size_t slots = (range.size + sizeof(uintptr_t) - 1) / sizeof(uintptr_t);
+            assert(slots <= capacity - count);
+            if (slots != 0)
+            {
+                buffer[count + slots - 1] = 0;
+                std::memcpy(buffer + count, range.address, range.size);
+                count += slots;
+            }
+        }
+    }
+
+    static void visit_roots(gc::GcVisitObjectRoot visit, void* userdata);
+};
+#endif
+
+RtResult<intptr_t> get_runtime_type_handle(const metadata::RtClass* klass) noexcept;
+
+#if LEANCLR_BCL_CORECLR_NET10
+struct AotResolvedMethod
+{
+    const metadata::RtMethodInfo* method = nullptr;
+    RtErr error = RtErr::MissingMethod;
+
+    RtResult<const metadata::RtMethodInfo*> result() const
+    {
+        if (error != RtErr::None)
+            return error;
+        return method;
+    }
+};
+
+inline AotResolvedMethod resolve_static_interface_method(metadata::RtClass* klass, const metadata::RtMethodInfo* declaration)
+{
+    auto resolved = vm::Method::resolve_static_interface_method(klass, declaration);
+    if (resolved.is_err())
+        return {nullptr, resolved.unwrap_err()};
+    return {resolved.unwrap(), RtErr::None};
+}
+#endif
 
 template <typename T>
 static T select_arch(T v32, T v64)

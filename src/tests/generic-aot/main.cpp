@@ -208,6 +208,21 @@ int main(int argc, char** argv)
     vm::Settings::set_file_loader(load);
     vm::Settings::set_aot_modules_data(&g_aot_modules_data);
     check(vm::Runtime::initialize().is_ok(), "initialize runtime");
+    // A boxed virtual call into an interpreted value type must unbox exactly
+    // once, including Release builds with identical-code folding enabled.
+    auto* int_class = vm::Class::get_corlib_types().cls_int32;
+    check(vm::Class::initialize_all(int_class).is_ok(), "initialize integer formatting");
+    const auto* format_integer = vm::Method::find_matched_method_in_class_by_name_and_param_count(int_class, "ToString", 0);
+    check(format_integer != nullptr, "integer formatter");
+    int32_t integer_value = 42;
+    auto boxed_integer = LEANCLR_BOX_OBJECT_INTERNAL(int_class, &integer_value, "boxed virtual formatting regression");
+    check(boxed_integer.is_ok(), "box integer formatter receiver");
+    interp::RtStackObject format_args[1]{}, format_ret[1]{};
+    format_args[0].obj = boxed_integer.unwrap();
+    check(vm::Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(format_integer, format_args, format_ret).is_ok(), "boxed integer formatting");
+    auto* formatted = reinterpret_cast<vm::RtString*>(format_ret[0].obj);
+    check(formatted && formatted->length == 2 && vm::String::get_chars_ptr(formatted)[0] == '4' && vm::String::get_chars_ptr(formatted)[1] == '2',
+          "boxed virtual call read object header instead of integer payload");
     auto assembly = vm::Assembly::load_by_name("GenericFixtures");
     check(assembly.is_ok(), "load fixtures");
     auto type = assembly.unwrap()->mod->get_class_by_name("GenericFixtures", false, false);

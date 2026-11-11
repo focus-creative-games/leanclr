@@ -27,14 +27,27 @@ def main():
     ap.add_argument('--status-out-returns', action='store_true')
     ap.add_argument('--share-reference-generics', action='store_true')
     ap.add_argument('--generic-only', action='store_true')
+    ap.add_argument('--profile', choices=['mono-4.5', 'coreclr-net10'], default='mono-4.5')
+    ap.add_argument('--runtime-dir', type=Path)
     opts = ap.parse_args()
     if opts.target != 'native' and not opts.emsdk:
         ap.error('--emsdk is required for wasm')
-    output = ROOT / ('out/aot-features-lightweight' if opts.lightweight_returns else 'out/aot-features')
+    output = ROOT / (('out/net10-aot-features' if opts.profile == 'coreclr-net10' else 'out/aot-features') + ('-lightweight' if opts.lightweight_returns else ''))
     output.mkdir(parents=True, exist_ok=True)
     csc = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
     ilasm = csc.with_name('ilasm.exe')
     bcl = ROOT / 'src/libraries/mono-4.5'
+    csc_command = [csc]
+    corelib_name = 'mscorlib.dll'
+    if opts.profile == 'coreclr-net10':
+        if not opts.runtime_dir:
+            ap.error('--runtime-dir is required for coreclr-net10')
+        bcl = opts.runtime_dir.resolve()
+        corelib_name = 'System.Private.CoreLib.dll'
+        version = subprocess.check_output(['dotnet', '--version'], cwd=ROOT, text=True).strip()
+        sdk = next(line for line in subprocess.check_output(['dotnet', '--list-sdks'], text=True).splitlines() if line.startswith(version + ' '))
+        sdk_root = Path(sdk.split('[', 1)[1].split(']', 1)[0])
+        csc_command = ['dotnet', sdk_root / version / 'Roslyn/bincore/csc.dll']
     run(['dotnet', 'build', 'src/leanaot/LeanAOT/LeanAOT.csproj', '-c', 'Release'], output / 'tool.log')
     import shutil
     for family, assembly in [('generic', 'GenericFixtures'), ('eh', 'EhFixtures')]:
@@ -43,23 +56,31 @@ def main():
         stage = output / family / 'managed'
         stage.mkdir(parents=True, exist_ok=True)
         if family == 'generic':
-            run([csc, '/nologo', '/noconfig', '/optimize+', '/nostdlib+', '/target:library',
-                 '/out:' + str(stage / 'GenericLibrary.dll'), '/r:' + str(bcl / 'mscorlib.dll'),
+            run([*csc_command, '/nologo', '/noconfig', '/optimize+', '/nostdlib+', '/target:library',
+                 '/out:' + str(stage / 'GenericLibrary.dll'), '/r:' + str(bcl / corelib_name),
                  ROOT / 'src/tests/generic-aot/Library.cs'], output / 'generic-library-csc.log')
-        run([csc, '/nologo', '/noconfig', '/optimize+', '/nostdlib+', '/target:library',
-             '/out:' + str(stage / (assembly + '.dll')), '/r:' + str(bcl / 'mscorlib.dll'),
+        run([*csc_command, '/nologo', '/noconfig', '/optimize+', '/nostdlib+', '/target:library',
+             '/out:' + str(stage / (assembly + '.dll')), '/r:' + str(bcl / corelib_name),
              *(['/r:' + str(stage / 'GenericLibrary.dll')] if family == 'generic' else []),
              ROOT / f'src/tests/{family}-aot/Fixtures.cs'], output / f'{family}-csc.log')
-        shutil.copy2(bcl / 'mscorlib.dll', stage)
+        for filename in ([corelib_name, 'mscorlib.dll', 'System.Runtime.dll'] if opts.profile == 'coreclr-net10' else [corelib_name]):
+            shutil.copy2(bcl / filename, stage)
         if family == 'generic':
             run(['dotnet', 'run', '--project', ROOT / 'src/tests/generic-aot/SignatureFixture.csproj', '-c', 'Release', '--',
                  stage / 'GenericFixtures.dll'], output / 'generic-signatures.log')
         if family == 'eh':
-            run([ilasm, '/DLL', '/OUTPUT:' + str(stage / 'FilterFixture.dll'), ROOT / 'src/tests/eh-aot/FilterFixture.il'], output / 'filter-ilasm.log')
+            filter_source = ROOT / 'src/tests/eh-aot/FilterFixture.il'
+            if opts.profile == 'coreclr-net10':
+                source_text = filter_source.read_text(encoding='utf-8').replace('[mscorlib]', '[System.Private.CoreLib]').replace('.assembly extern mscorlib', '.assembly extern System.Private.CoreLib')
+                filter_source = stage / 'FilterFixture.il'
+                filter_source.write_text(source_text, encoding='utf-8')
+            run([ilasm, '/DLL', '/OUTPUT:' + str(stage / 'FilterFixture.dll'), filter_source], output / 'filter-ilasm.log')
+            if opts.profile == 'coreclr-net10':
+                run(['dotnet', 'run', '--project', ROOT / 'src/tests/generic-aot/SignatureFixture.csproj', '-c', 'Release', '--', stage / 'FilterFixture.dll', '--rewrite-only'], output / 'filter-retarget.log')
         for variant in ['default', 'disabled'] if family == 'generic' else ['default', 'interpreted-loop']:
             generated = output / family / variant
             command = ['dotnet', ROOT / 'out/dotnet/LeanAOT/Release/net8.0/LeanAOT.dll',
-                       '-d', stage, '-d', bcl, '-a', assembly, '-o', generated,
+                       '--leanaot-runtime-api-profile', opts.profile, '-d', stage, '-d', bcl, '-a', assembly, '-o', generated,
                        '--leanaot-aot-rule-file', ROOT / f'src/tests/{family}-aot/{"interpreted.xml" if variant == "interpreted-loop" else "aot.xml"}']
             if family == 'eh': command += ['-a', 'FilterFixture']
             if variant == 'disabled': command += ['--leanaot-max-generic-instances', '0']
@@ -81,6 +102,7 @@ def main():
                 build = output / family / f'{variant}-{target}-{opts.config}-{opts.arch}'
                 prefix = 'GENERIC' if family == 'generic' else 'EH'
                 command = ['cmake', '-S', ROOT / f'src/tests/{family}-aot', '-B', build,
+                           f'-DLEANCLR_BCL_ADAPTER={"CORECLR_NET10" if opts.profile == "coreclr-net10" else "MONO"}',
                            f'-DCMAKE_BUILD_TYPE={opts.config}', '-DCMAKE_TRY_COMPILE_CONFIGURATION=Release',
                            f'-D{prefix}_AOT_CPP={generated}', f'-D{prefix}_AOT_DLLS:STRING={stage.relative_to(ROOT).as_posix()}']
                 if family == 'generic': command += [f'-DGENERIC_AOT_DISABLED={"ON" if variant == "disabled" else "OFF"}']

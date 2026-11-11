@@ -28,6 +28,7 @@ namespace LeanAOT.GenerationPlan
         /// Optional runtime-profile gate for methods that must stay on the interpreter path.
         /// </summary>
         public Func<MethodDef, bool> ShouldSkipUnsupportedRuntimeMethod;
+        public Func<MethodDef, string> RuntimeMethodFallbackReason;
     }
 
     public partial class Manifest
@@ -127,6 +128,12 @@ namespace LeanAOT.GenerationPlan
                             continue;
                         }
 
+                        string runtimeReason = args.RuntimeMethodFallbackReason?.Invoke(method);
+                        if (runtimeReason != null)
+                        {
+                            MethodFallbacks.Add(new GenericFallback { Caller = "", Token = method.MDToken.Raw, Target = method.FullName, Reason = runtimeReason });
+                            continue;
+                        }
                         if (args.ShouldSkipUnsupportedRuntimeMethod?.Invoke(method) == true)
                         {
                             s_logger.Debug($"[Manifest] Skip method (unsupported runtime intrinsic): {method.FullName} token: {method.MDToken}");

@@ -89,6 +89,8 @@ namespace LeanAOT.GenerationPlan
                         !args.AotRulesEvaluator.ShouldIncludeByRules(def.Module.Assembly.Name, def) &&
                         !(args.PgoIncludeIndex?.Contains(def.Module.Assembly.Name, def) ?? false)) reason = "rule-excluded";
                 }
+                if (reason == null) reason = args.RuntimeMethodFallbackReason?.Invoke(def);
+                if (reason == null && args.ShouldSkipUnsupportedRuntimeMethod?.Invoke(def) == true) reason = "unsupported-runtime-intrinsic";
                 if (reason == null) reason = AotExceptionPolicy.FallbackReason(def, ctx);
                 if (reason == null && depth > args.MaxGenericDepth) reason = "depth-budget";
                 if (reason == null && _genericMethodPlans.Count >= args.MaxGenericInstances) reason = "instance-budget";

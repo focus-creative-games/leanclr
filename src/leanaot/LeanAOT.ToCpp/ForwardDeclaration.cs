@@ -147,9 +147,13 @@ namespace LeanAOT.ToCpp
             {
                 return;
             }
-            if (type.HasObjectHeader || type.InstanceFieldsExcludeParent.Count != 1 || inlineArrayLength.Value == 1)
+            if (type.HasObjectHeader || type.InstanceFieldsExcludeParent.Count != 1)
             {
                 throw new NotSupportedException($"Invalid inline array type shape: {type.TypeDef.FullName}");
+            }
+            if (inlineArrayLength.Value == 1)
+            {
+                return;
             }
 
             FieldDetail elementField = type.InstanceFieldsExcludeParent[0];
