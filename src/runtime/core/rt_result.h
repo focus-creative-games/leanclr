@@ -168,27 +168,18 @@ class Result
     template <typename U>
     Result<U> cast()
     {
-        // Use tag dispatch so only the well-formed branch is instantiated.
-        // `if constexpr` would be cleaner but requires C++17.
-        return cast_impl<U>(std::integral_constant < bool, std::is_same<U, RtErr>::value&& std::is_same<T, RtErr>::value > {});
-    }
-
-  private:
-    // Fast path: when T == U == RtErr the storage is already the desired Result<RtErr>,
-    // so we can just move ourselves to avoid touching the payload.
-    template <typename U>
-    Result<U> cast_impl(std::true_type)
-    {
-        return std::move(*this);
-    }
-
-    // General path: rebuild a Result<U> from the current ok/err state.
-    template <typename U>
-    Result<U> cast_impl(std::false_type)
-    {
-        if (is_ok())
-            return Result<U>::Ok((U)(unwrap()));
-        return Result<U>::Err(unwrap_err());
+        if constexpr (std::is_same_v<T, RtErr> && std::is_same_v<U, RtErr>)
+        {
+            // Preserve the active state without instantiating the ambiguous
+            // payload/error construction path of Result<RtErr>.
+            return std::move(*this);
+        }
+        else
+        {
+            if (is_ok())
+                return Result<U>::Ok((U)(unwrap()));
+            return Result<U>::Err(unwrap_err());
+        }
     }
 };
 

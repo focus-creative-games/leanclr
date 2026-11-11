@@ -3,6 +3,8 @@
 #include "alloc/scoped_buffer.h"
 #include "utils/binary_reader.h"
 #include "vm/array_layout.h"
+#include "core/rt_base.h"
+#include <limits>
 #include <cstdio>
 #include <cstdlib>
 
@@ -20,6 +22,34 @@ static void check(bool value, const char* message)
 static alloc::MemoryCallbacks original_callbacks;
 static bool fail_allocations;
 static size_t allocations, frees;
+
+// Compile this specialization: its discarded branch must not instantiate the
+// ambiguous value/error constructors of Result<RtErr>.
+core::Result<core::RtErr> forward_error_payload(core::Result<core::RtErr>& source)
+{
+    return source.cast<core::RtErr>();
+}
+
+static void verify_result_casts()
+{
+    const int32_t values[] = {INT32_MIN, -1, 0, 1, INT32_MAX};
+    for (int32_t value : values)
+    {
+        core::Result<int32_t> source(value);
+        auto result = source.cast<int64_t>();
+        check(result.is_ok() && result.unwrap() == value, "signed Result cast preserves payload");
+    }
+    core::Result<uint32_t> source(std::numeric_limits<uint32_t>::max());
+    auto result = source.cast<uint64_t>();
+    check(result.is_ok() && result.unwrap() == UINT32_MAX, "unsigned Result cast preserves full payload");
+    for (unsigned code = 1; code <= UINT8_MAX; ++code)
+    {
+        const auto error = static_cast<core::RtErr>(code);
+        core::Result<int32_t> failed(error);
+        auto converted = failed.cast<uint64_t>();
+        check(converted.is_err() && converted.unwrap_err() == error, "Result cast preserves error bytes");
+    }
+}
 
 static void* test_calloc(size_t count, size_t size)
 {
@@ -39,6 +69,7 @@ static void test_free(void* ptr)
 
 int main()
 {
+    verify_result_casts();
     original_callbacks = alloc::GeneralAllocation::get_memory_callbacks();
     auto invalid = original_callbacks;
     invalid.free = nullptr;
