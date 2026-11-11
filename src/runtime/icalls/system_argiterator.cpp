@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_argiterator.h"
 
@@ -83,7 +84,7 @@ utils::Span<vm::InternalCallEntry> SystemArgIterator::get_internal_call_entries(
          int_get_next_arg_with_type_invoker},
         {"System.ArgIterator::IntGetNextArgType()", (vm::InternalCallFunction)&SystemArgIterator::int_get_next_arg_type, int_get_next_arg_type_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_reflection_runtimeeventinfo.h"
 
@@ -102,7 +103,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeEventInfo::get_interna
         {"System.Reflection.RuntimeEventInfo::get_metadata_token(System.Reflection.RuntimeEventInfo)",
          (vm::InternalCallFunction)&SystemReflectionRuntimeEventInfo::get_metadata_token, get_metadata_token_invoker_system_reflection_runtimeeventinfo},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

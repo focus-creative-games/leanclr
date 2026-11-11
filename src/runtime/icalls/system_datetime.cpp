@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_datetime.h"
 
@@ -32,7 +33,7 @@ utils::Span<vm::InternalCallEntry> SystemDateTime::get_internal_call_entries() n
         {"System.DateTime::GetSystemTimeAsFileTime()", (vm::InternalCallFunction)&SystemDateTime::get_system_time_as_file_time,
          get_system_time_as_file_time_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

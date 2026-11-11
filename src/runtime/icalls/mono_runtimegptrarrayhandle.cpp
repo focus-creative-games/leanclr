@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "mono_runtimegptrarrayhandle.h"
 #include "icall_base.h"
@@ -34,7 +35,7 @@ static vm::InternalCallEntry s_internal_call_entries_mono_runtimegptrarrayhandle
 utils::Span<vm::InternalCallEntry> MonoRuntimeGPtrArrayHandle::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_mono_runtimegptrarrayhandle,
-                                              sizeof(s_internal_call_entries_mono_runtimegptrarrayhandle) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_mono_runtimegptrarrayhandle));
 }
 
 } // namespace icalls

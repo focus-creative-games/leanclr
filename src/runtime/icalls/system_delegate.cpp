@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_delegate.h"
 
@@ -100,7 +101,7 @@ utils::Span<vm::InternalCallEntry> SystemDelegate::get_internal_call_entries() n
         {"System.Delegate::AllocDelegateLike_internal(System.Delegate)", (vm::InternalCallFunction)&SystemDelegate::alloc_delegate_like_internal,
          alloc_delegate_like_internal_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

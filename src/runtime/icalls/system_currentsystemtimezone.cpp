@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_currentsystemtimezone.h"
 
@@ -56,7 +57,7 @@ utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_cal
         {"System.CurrentSystemTimeZone::GetTimeZoneData(System.Int32,System.Int64[]&,System.String[]&,System.Boolean&)",
          (vm::InternalCallFunction)&SystemCurrentSystemTimeZone::get_time_zone_data, get_time_zone_data_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 #else
 utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_call_entries() noexcept

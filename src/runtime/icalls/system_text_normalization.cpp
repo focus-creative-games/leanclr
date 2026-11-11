@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_text_normalization.h"
 
@@ -41,7 +42,7 @@ utils::Span<vm::InternalCallEntry> SystemTextNormalization::get_internal_call_en
          "System.IntPtr&)",
          (vm::InternalCallFunction)&SystemTextNormalization::load_normalization_resource, load_normalization_resource_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

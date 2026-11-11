@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_reflection_customattributedata.h"
 
@@ -48,7 +49,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionCustomAttributeData::get_inte
          "UInt32,System.Object[]&,System.Object[]&)",
          (vm::InternalCallFunction)&SystemReflectionCustomAttributeData::resolve_arguments_internal, resolve_arguments_internal_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

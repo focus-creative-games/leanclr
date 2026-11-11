@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_reflection_assemblyname.h"
 
@@ -89,7 +90,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionAssemblyName::get_internal_ca
         {"System.Reflection.AssemblyName::GetNativeName(System.IntPtr)", (vm::InternalCallFunction)&SystemReflectionAssemblyName::get_native_name,
          get_native_name_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

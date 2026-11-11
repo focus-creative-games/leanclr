@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_globalization_cultureinfo.h"
 #include "icall_base.h"
@@ -297,7 +298,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultur
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_cultureinfo,
-                                              sizeof(s_internal_call_entries_system_globalization_cultureinfo) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_globalization_cultureinfo));
 }
 
 } // namespace icalls

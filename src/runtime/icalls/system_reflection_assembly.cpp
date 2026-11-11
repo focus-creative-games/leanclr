@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_reflection_assembly.h"
 #include "icall_base.h"
@@ -297,7 +298,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_assembly[
 
 utils::Span<vm::InternalCallEntry> SystemReflectionAssembly::get_internal_call_entries() noexcept
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_reflection_assembly) / sizeof(s_internal_call_entries_system_reflection_assembly[0]);
+    constexpr size_t entry_count = std::size(s_internal_call_entries_system_reflection_assembly);
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_assembly, entry_count);
 }
 

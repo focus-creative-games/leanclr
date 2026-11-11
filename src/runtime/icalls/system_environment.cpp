@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_environment.h"
 #include "bcl/mono/host_result.h"
@@ -385,8 +386,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_environment[] = {
 
 utils::Span<vm::InternalCallEntry> SystemEnvironment::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_environment,
-                                              sizeof(s_internal_call_entries_system_environment) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_environment, std::size(s_internal_call_entries_system_environment));
 }
 
 } // namespace icalls

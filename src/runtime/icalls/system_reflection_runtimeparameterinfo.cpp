@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_reflection_runtimeparameterinfo.h"
 
@@ -99,7 +100,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeParameterInfo::get_int
         {"System.Reflection.RuntimeParameterInfo::GetTypeModifiers(System.Type,System.Reflection.MemberInfo,System.Int32,System.Boolean)",
          (vm::InternalCallFunction)&SystemReflectionRuntimeParameterInfo::get_type_modifiers, runtimeparameterinfo_get_type_modifiers_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

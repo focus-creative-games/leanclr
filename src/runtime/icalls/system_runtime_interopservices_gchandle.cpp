@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_runtime_interopservices_gchandle.h"
 #include "vm/gchandle.h"
@@ -117,7 +118,7 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesGCHandle::get_int
         {"System.Runtime.InteropServices.GCHandle::GetAddrOfPinnedObject(System.Int32)",
          (vm::InternalCallFunction)&SystemRuntimeInteropServicesGCHandle::get_addr_of_pinned_object, get_addr_of_pinned_object_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

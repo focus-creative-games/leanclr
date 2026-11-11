@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_span.h"
 #include "system_readonlyspan.h"
@@ -50,7 +51,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_span[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemSpan::get_intrinsic_entries() noexcept
 {
-    constexpr size_t entry_count = sizeof(s_intrinsic_entries_system_span) / sizeof(s_intrinsic_entries_system_span[0]);
+    constexpr size_t entry_count = std::size(s_intrinsic_entries_system_span);
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_span, entry_count);
 }
 

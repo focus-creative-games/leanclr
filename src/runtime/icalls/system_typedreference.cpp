@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_typedreference.h"
 
@@ -102,8 +103,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_typedreference[] = {
 
 utils::Span<vm::InternalCallEntry> SystemTypedReference::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_typedreference,
-                                              sizeof(s_internal_call_entries_system_typedreference) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_typedreference, std::size(s_internal_call_entries_system_typedreference));
 }
 
 } // namespace icalls

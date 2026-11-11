@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include <limits>
 #include "icalls/system_string.h"
@@ -281,14 +282,12 @@ static vm::NewobjInternalCallEntry s_newobj_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> SystemString::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_string,
-                                              sizeof(s_internal_call_entries_system_string) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_string, std::size(s_internal_call_entries_system_string));
 }
 
 utils::Span<vm::NewobjInternalCallEntry> SystemString::get_newobj_internal_call_entries()
 {
-    return utils::Span<vm::NewobjInternalCallEntry>(s_newobj_internal_call_entries,
-                                                    sizeof(s_newobj_internal_call_entries) / sizeof(vm::NewobjInternalCallEntry));
+    return utils::Span<vm::NewobjInternalCallEntry>(s_newobj_internal_call_entries, std::size(s_newobj_internal_call_entries));
 }
 
 } // namespace icalls

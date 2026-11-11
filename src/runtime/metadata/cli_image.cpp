@@ -1,3 +1,4 @@
+#include <iterator>
 #include <algorithm>
 #include <cstring>
 
@@ -555,7 +556,7 @@ void CliImage::init_table_field_metas(alloc::MemPool& pool)
         auto fields = pool.calloc_any<CliTableFieldMeta>(FIELD_COUNT);
         if (fields)
         {
-            fields[0].size = compute_table_index_bytes(HAS_CUSTOM_ATTRIBUTE_ASSOCIATE_TABLES, sizeof(HAS_CUSTOM_ATTRIBUTE_ASSOCIATE_TABLES) / sizeof(TableType),
+            fields[0].size = compute_table_index_bytes(HAS_CUSTOM_ATTRIBUTE_ASSOCIATE_TABLES, std::size(HAS_CUSTOM_ATTRIBUTE_ASSOCIATE_TABLES),
                                                        TagBits::HAS_CUSTOM_ATTRIBUTE);
             fields[1].size = compute_table_index_byte2(TableType::Method, TableType::MemberRef, TagBits::CUSTOM_ATTRIBUTE_TYPE);
             fields[2].size = compute_blob_index_byte();
@@ -1088,8 +1089,8 @@ void CliImage::init_table_field_metas(alloc::MemPool& pool)
         auto fields = pool.calloc_any<CliTableFieldMeta>(FIELD_COUNT);
         if (fields)
         {
-            fields[0].size = compute_table_index_bytes(HAS_CUSTOM_DEBUG_INFORMATION, sizeof(HAS_CUSTOM_DEBUG_INFORMATION) / sizeof(TableType),
-                                                       TagBits::HAS_CUSTOM_DEBUG_INFORMATION);
+            fields[0].size =
+                compute_table_index_bytes(HAS_CUSTOM_DEBUG_INFORMATION, std::size(HAS_CUSTOM_DEBUG_INFORMATION), TagBits::HAS_CUSTOM_DEBUG_INFORMATION);
             fields[1].size = compute_guid_index_byte();
             fields[2].size = compute_blob_index_byte();
             tables[static_cast<size_t>(TableType::CustomDebugInformation)].row_field_count = FIELD_COUNT;

@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_enum.h"
 #include "icall_base.h"
@@ -248,8 +249,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_enum[] = {
 
 utils::Span<vm::InternalCallEntry> SystemEnum::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_enum,
-                                              sizeof(s_internal_call_entries_system_enum) / sizeof(s_internal_call_entries_system_enum[0]));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_enum, std::size(s_internal_call_entries_system_enum));
 }
 
 } // namespace icalls

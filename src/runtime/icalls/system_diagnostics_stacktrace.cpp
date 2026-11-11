@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_diagnostics_stacktrace.h"
 
@@ -32,7 +33,7 @@ utils::Span<vm::InternalCallEntry> SystemDiagnosticsStackTrace::get_internal_cal
         {"System.Diagnostics.StackTrace::get_trace(System.Exception,System.Int32,System.Boolean)",
          (vm::InternalCallFunction)&SystemDiagnosticsStackTrace::get_trace, get_trace_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

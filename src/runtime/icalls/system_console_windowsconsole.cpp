@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_console_windowsconsole.h"
 
@@ -45,7 +46,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_console_windowsconso
 utils::Span<vm::InternalCallEntry> SystemConsoleWindowsConsole::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_console_windowsconsole,
-                                              sizeof(s_internal_call_entries_system_console_windowsconsole) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_console_windowsconsole));
 }
 
 } // namespace icalls

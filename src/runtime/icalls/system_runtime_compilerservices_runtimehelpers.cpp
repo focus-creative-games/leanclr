@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_runtime_compilerservices_runtimehelpers.h"
 
@@ -144,7 +145,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtime_compilerserv
 utils::Span<vm::InternalCallEntry> SystemRuntimeCompilerServicesRuntimeHelpers::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers,
-                                              sizeof(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_runtime_compilerservices_runtimehelpers));
 }
 
 } // namespace icalls

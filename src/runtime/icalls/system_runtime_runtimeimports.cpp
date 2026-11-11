@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_runtime_runtimeimports.h"
 #include "vm/class.h"
@@ -131,7 +132,7 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeRuntimeImports::get_internal_cal
          (vm::InternalCallFunction)&SystemRuntimeRuntimeImports::memmove_wbarrier, memmove_wbarrier_invoker},
         {"System.Runtime.RuntimeImports::_ecvt_s", (vm::InternalCallFunction)&SystemRuntimeRuntimeImports::ecvt_s, ecvt_s_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

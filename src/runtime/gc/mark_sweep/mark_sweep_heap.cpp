@@ -1,3 +1,4 @@
+#include <iterator>
 #include "gc/mark_sweep/mark_sweep_heap.h"
 
 #if LEANCLR_GC_MARK_SWEEP
@@ -34,7 +35,7 @@ static constexpr SizeClassPoolInfo s_size_class_pool_infos[] = {
     {256, 8, 16 * 1024}, {512, 16, 32 * 1024}, {1024, 32, 64 * 1024}, {2048, 64, 128 * 1024}, {4096, 128, 256 * 1024}, {8192, 256, 512 * 1024},
 };
 
-constexpr size_t kSizeClassPoolInfoCount = sizeof(s_size_class_pool_infos) / sizeof(s_size_class_pool_infos[0]);
+constexpr size_t kSizeClassPoolInfoCount = std::size(s_size_class_pool_infos);
 constexpr size_t kSizeClassPoolCount = kSizeClassPoolInfoCount * 16 + 16 /* pool0 has extra 16 size classes for small objects */;
 static SizeClassPool* s_size_class_pools[kSizeClassPoolCount] = {};
 constexpr size_t kMaxSmallObejctSize = s_size_class_pool_infos[kSizeClassPoolInfoCount - 1].max_size;

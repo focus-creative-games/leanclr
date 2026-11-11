@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_diagnostics_stopwatch.h"
 
@@ -31,7 +32,7 @@ utils::Span<vm::InternalCallEntry> SystemDiagnosticsStopwatch::get_internal_call
         {"System.Diagnostics.Stopwatch::GetTimestamp()", (vm::InternalCallFunction)&SystemDiagnosticsStopwatch::get_timestamp, get_timestamp_invoker},
     };
 
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

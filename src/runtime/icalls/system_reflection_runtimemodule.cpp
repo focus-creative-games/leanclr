@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_reflection_runtimemodule.h"
 
@@ -558,7 +559,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeModule::get_internal_c
         {"System.Reflection.RuntimeModule::ResolveSignature(System.IntPtr,System.Int32,System.Reflection.ResolveTokenError&)",
          (vm::InternalCallFunction)&SystemReflectionRuntimeModule::resolve_signature, resolve_signature_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

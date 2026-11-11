@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_runtimetype.h"
 #include "icall_base.h"
@@ -1194,8 +1195,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtimetype[] = {
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeType::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetype,
-                                              sizeof(s_internal_call_entries_system_runtimetype) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetype, std::size(s_internal_call_entries_system_runtimetype));
 }
 
 } // namespace icalls

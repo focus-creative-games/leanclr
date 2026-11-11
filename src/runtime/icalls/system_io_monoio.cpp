@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_io_monoio.h"
 
@@ -361,8 +362,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_io_monoio[] = {
 
 utils::Span<vm::InternalCallEntry> SystemIOMonoIO::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_io_monoio,
-                                              sizeof(s_internal_call_entries_system_io_monoio) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_io_monoio, std::size(s_internal_call_entries_system_io_monoio));
 }
 
 } // namespace icalls

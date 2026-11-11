@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_diagnostics_stackframe.h"
 
@@ -43,7 +44,7 @@ utils::Span<vm::InternalCallEntry> SystemDiagnosticsStackFrame::get_internal_cal
          "System.Int32&,System.Int32&)",
          (vm::InternalCallFunction)&SystemDiagnosticsStackFrame::get_frame_info, get_frame_info_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

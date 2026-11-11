@@ -1,3 +1,4 @@
+#include <iterator>
 #include "utils/little_endian.h"
 #include "il_opcodes.h"
 #include "utils/mem_op.h"
@@ -310,7 +311,7 @@ static const OpCodeInfo g_opcodes[] = {
 
 const OpCodeInfo* OpCodes::get_opcode_info(OpCodeEnum opcode)
 {
-    assert(static_cast<size_t>(opcode) < sizeof(g_opcodes) / sizeof(g_opcodes[0]));
+    assert(static_cast<size_t>(opcode) < std::size(g_opcodes));
     return &g_opcodes[static_cast<size_t>(opcode)];
 }
 

@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_threading_thread.h"
 
@@ -918,8 +919,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_threading_thread[] =
 
 utils::Span<vm::InternalCallEntry> SystemThreadingThread::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_thread,
-                                              sizeof(s_internal_call_entries_system_threading_thread) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_thread, std::size(s_internal_call_entries_system_threading_thread));
 }
 
 } // namespace icalls

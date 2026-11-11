@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "interop.h"
 
@@ -1120,7 +1121,7 @@ static vm::InternalCallEntry s_interop_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> Interop::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_interop_internal_call_entries, sizeof(s_interop_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_interop_internal_call_entries, std::size(s_interop_internal_call_entries));
 }
 } // namespace icalls
 } // namespace leanclr

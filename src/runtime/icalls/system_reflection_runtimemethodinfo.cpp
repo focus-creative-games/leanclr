@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_reflection_runtimemethodinfo.h"
 
@@ -475,7 +476,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimeme
 utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeMethodInfo::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimemethodinfo,
-                                              sizeof(s_internal_call_entries_system_reflection_runtimemethodinfo) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_reflection_runtimemethodinfo));
 }
 
 } // namespace icalls

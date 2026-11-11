@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_io_path.h"
 
@@ -28,8 +29,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_io_path[] = {
 
 utils::Span<vm::InternalCallEntry> SystemIOPath::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_io_path,
-                                              sizeof(s_internal_call_entries_system_io_path) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_io_path, std::size(s_internal_call_entries_system_io_path));
 }
 
 } // namespace icalls

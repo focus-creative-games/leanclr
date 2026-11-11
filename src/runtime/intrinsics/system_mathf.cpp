@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_mathf.h"
 
@@ -31,7 +32,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_mathf[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemMathF::get_intrinsic_entries() noexcept
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_mathf, sizeof(s_intrinsic_entries_system_mathf) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_mathf, std::size(s_intrinsic_entries_system_mathf));
 }
 
 } // namespace intrinsics

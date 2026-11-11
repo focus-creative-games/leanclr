@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_security_cryptography_rngcryptoserviceprovider.h"
 
@@ -84,7 +85,7 @@ utils::Span<vm::InternalCallEntry> SystemSecurityCryptographyRNGCryptoServicePro
         {"System.Security.Cryptography.RNGCryptoServiceProvider::RngClose(System.IntPtr)",
          (vm::InternalCallFunction)&SystemSecurityCryptographyRNGCryptoServiceProvider::rng_close, rng_close_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

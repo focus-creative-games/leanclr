@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_threading_timer.h"
 
@@ -30,7 +31,7 @@ utils::Span<vm::InternalCallEntry> SystemThreadingTimer::get_internal_call_entri
     static vm::InternalCallEntry s_entries[] = {
         {"System.Threading.Timer::GetTimeMonotonic()", (vm::InternalCallFunction)&SystemThreadingTimer::get_time_monotonic, get_time_monotonic_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_consoleriver.h"
 
@@ -159,8 +160,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_consoleriver[] = {
 
 utils::Span<vm::InternalCallEntry> SystemConsoleDriver::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_consoleriver,
-                                              sizeof(s_internal_call_entries_system_consoleriver) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_consoleriver, std::size(s_internal_call_entries_system_consoleriver));
 }
 } // namespace icalls
 } // namespace leanclr

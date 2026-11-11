@@ -1,3 +1,4 @@
+#include <iterator>
 #include "utils/hashset.h"
 #include <unordered_set>
 
@@ -377,7 +378,7 @@ RtResultVoid ArrayClass::setup_interfaces(RtClass* klass)
     Vector<const RtClass*> element_classes;
     RET_ERR_ON_FAIL(collect_array_interface_generic_variant_element_classes(klass->element_class, element_classes));
 
-    size_t interface_count = element_classes.size() * (sizeof(to_inflate) / sizeof(to_inflate[0]));
+    size_t interface_count = element_classes.size() * (std::size(to_inflate));
     const RtClass** interfaces = klass->image->get_mem_pool().calloc_any<const RtClass*>(interface_count);
     int32_t current_interface_index = 0;
     for (const RtClass* element_class : element_classes)

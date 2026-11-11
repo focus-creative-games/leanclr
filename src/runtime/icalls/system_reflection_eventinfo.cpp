@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_reflection_eventinfo.h"
 
@@ -49,7 +50,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionEventInfo::get_internal_call_
         {"System.Reflection.EventInfo::internal_from_handle_type", (vm::InternalCallFunction)&SystemReflectionEventInfo::internal_from_handle_type,
          internal_from_handle_type_invoker_eventinfo},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

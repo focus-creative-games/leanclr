@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "mono_runtimemarshal.h"
 
@@ -39,7 +40,7 @@ utils::Span<vm::InternalCallEntry> MonoRuntimeMarshal::get_internal_call_entries
         {"Mono.RuntimeMarshal::FreeAssemblyName(Mono.MonoAssemblyName&,System.Boolean)", (vm::InternalCallFunction)&MonoRuntimeMarshal::free_assembly_name,
          free_assembly_name_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

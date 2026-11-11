@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "mono_runtimeclasshandle.h"
 
@@ -29,7 +30,7 @@ utils::Span<vm::InternalCallEntry> MonoRuntimeClassHandle::get_internal_call_ent
     static vm::InternalCallEntry s_entries[] = {
         {"Mono.RuntimeClassHandle::GetTypeFromClass", (vm::InternalCallFunction)&MonoRuntimeClassHandle::get_type_from_class, get_type_from_class_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

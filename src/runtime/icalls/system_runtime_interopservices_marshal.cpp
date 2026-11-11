@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_runtime_interopservices_marshal.h"
 #include "icall_base.h"
@@ -919,8 +920,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtime_interopservi
 utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesMarshal::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_interopservices_marshal,
-                                              sizeof(s_internal_call_entries_system_runtime_interopservices_marshal) /
-                                                  sizeof(s_internal_call_entries_system_runtime_interopservices_marshal[0]));
+                                              std::size(s_internal_call_entries_system_runtime_interopservices_marshal));
 }
 
 } // namespace icalls

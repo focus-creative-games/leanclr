@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_mathf.h"
 
@@ -389,8 +390,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_mathf[] = {
 
 utils::Span<vm::InternalCallEntry> SystemMathF::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_mathf,
-                                              sizeof(s_internal_call_entries_system_mathf) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_mathf, std::size(s_internal_call_entries_system_mathf));
 }
 
 } // namespace icalls

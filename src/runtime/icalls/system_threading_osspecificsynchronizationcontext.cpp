@@ -1,3 +1,4 @@
+#include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_threading_osspecificsynchronizationcontext.h"
 
@@ -29,7 +30,7 @@ utils::Span<vm::InternalCallEntry> SystemThreadingOSSpecificSynchronizationConte
         {"System.Threading.OSSpecificSynchronizationContext::GetOSContext()",
          (vm::InternalCallFunction)&SystemThreadingOSSpecificSynchronizationContext::get_os_context, get_os_context_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls
