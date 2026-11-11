@@ -42,6 +42,7 @@ def main():
     ap.add_argument('--msbuild', type=Path)
     ap.add_argument('--lightweight-returns', action='store_true')
     ap.add_argument('--interface-call-cache', action='store_true')
+    ap.add_argument('--interface-cache-entries', type=int, choices=[1, 2], default=1)
     ap.add_argument('--output', type=Path, default=ROOT / 'out/global-generics')
     opts = ap.parse_args()
     if opts.target != 'native' and not opts.emsdk:
@@ -52,6 +53,12 @@ def main():
     output.mkdir(parents=True, exist_ok=True)
     stage.mkdir(parents=True, exist_ok=True)
     run(['dotnet', 'build', ROOT / 'src/leanaot/LeanAOT/LeanAOT.csproj', '-c', 'Release'], output / 'tool.log')
+    for invalid in ['0', '3', '-1']:
+        result = subprocess.run(['dotnet', str(ROOT / 'out/dotnet/LeanAOT/Release/net8.0/LeanAOT.dll'),
+                                 '--leanaot-interface-cache-entries', invalid], cwd=ROOT, text=True,
+                                stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
+        (output / f'cache-entries-invalid-{invalid}.log').write_text(result.stdout, encoding='utf-8')
+        assert result.returncode != 0 and '--leanaot-interface-cache-entries must be 1 or 2.' in result.stdout, invalid
     run([opts.msbuild or msbuild(), ROOT / 'src/tests/managed/AotTests/AotTests.csproj', '/t:Build', '/p:Configuration=Release',
          '/p:LangVersion=latest', f'/p:LEANCLR_OUT_ROOT={root / "managed-build"}', '/v:minimal', '/nologo'], output / 'managed.log')
     for assembly in ['AotTests', 'Common', 'GenericAotArguments']:
@@ -62,7 +69,8 @@ def main():
     for variant in ['default', 'disabled']:
         generated = output / variant
         command = ['dotnet', ROOT / 'out/dotnet/LeanAOT/Release/net8.0/LeanAOT.dll', '-d', stage, '-d', bcl,
-                   '-a', 'AotTests', '-o', generated, '--leanaot-aot-rule-file', ROOT / 'src/tests/generic-registry/aot.xml']
+                   '-a', 'AotTests', '-o', generated, '--leanaot-aot-rule-file', ROOT / 'src/tests/generic-registry/aot.xml',
+                   '--leanaot-interface-cache-entries', str(opts.interface_cache_entries)]
         if variant == 'disabled':
             command += ['--leanaot-max-generic-instances', '0']
         if opts.lightweight_returns:
@@ -72,14 +80,19 @@ def main():
         run(command, output / f'{variant}-generate.log')
         report = json.loads((generated / 'generic-aot-report.json').read_text())
         assert report['interface_call_cache'] == opts.interface_call_cache
+        assert report['interface_call_cache_entries'] == (opts.interface_cache_entries if opts.interface_call_cache else 0)
+        budget = 2 if opts.interface_cache_entries == 2 else 4
         methods = {}
         for cpp in generated.glob('*method*part*.cpp'):
             for section in cpp.read_text().split('// Method: ')[1:]:
                 name = section.splitlines()[0]
-                count = section.count('leanclr::codegen::InterfaceCallCache ')
-                assert count <= 4, name
+                single = section.count('leanclr::codegen::InterfaceCallCache ')
+                double = section.count('leanclr::codegen::InterfaceCallCache2 ')
+                count = single + double
+                assert count <= budget and single * 3 + double * 6 <= 12, name
+                assert not (single if opts.interface_cache_entries == 2 else double), name
                 methods[name] = count
-        for name, expected in [('StraightLine', 0), ('Sum', 1), ('Budget', 4)]:
+        for name, expected in [('StraightLine', 0), ('Sum', 1), ('Budget', budget)]:
             matches = [count for method, count in methods.items() if re.search(r'TC_InterfaceDispatch::' + name + r'\(', method)]
             assert matches == [expected if opts.interface_call_cache else 0], (name, matches)
         if not opts.interface_call_cache:

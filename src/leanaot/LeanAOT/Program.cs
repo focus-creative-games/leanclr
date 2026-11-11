@@ -115,8 +115,11 @@ internal class Program
         [Option("leanaot-lightweight-returns", HelpText = "Opt-in scalar ABI for AOT void and aligned managed reference returns; runtime APIs keep Result.")]
         public bool LightweightAotReturns { get; set; }
 
-        [Option("leanaot-interface-call-cache", HelpText = "Opt-in stack-local target cache for up to four interface callsites in loops per AOT method.")]
+        [Option("leanaot-interface-call-cache", HelpText = "Opt-in bounded stack-local target caches for interface callsites in loops.")]
         public bool InterfaceCallCache { get; set; }
+
+        [Option("leanaot-interface-cache-entries", Default = 1, HelpText = "Receiver capacity per cached interface callsite: 1 (up to four sites) or 2 (up to two sites); requires --leanaot-interface-call-cache to enable.")]
+        public int InterfaceCallCacheEntries { get; set; }
 
         /// <summary>
         /// LeanAOT-only: PGO-generated exact include lists (repeat for multiple files).
@@ -260,6 +263,12 @@ internal class Program
         aotAssemblyNames = new List<string>();
         outputCodeDir = null;
         errorMessage = null;
+
+        if (options.InterfaceCallCacheEntries != 1 && options.InterfaceCallCacheEntries != 2)
+        {
+            errorMessage = "--leanaot-interface-cache-entries must be 1 or 2.";
+            return false;
+        }
 
         var rawAssemblies = options.Assemblies?.ToList() ?? new List<string>();
         if (rawAssemblies.Count == 0 && !string.IsNullOrWhiteSpace(options.Directory))
@@ -536,6 +545,7 @@ internal class Program
         config.EmitNullChecks = options.EmitNullChecks;
         config.LightweightAotReturns = options.LightweightAotReturns;
         config.InterfaceCallCache = options.InterfaceCallCache;
+        config.InterfaceCallCacheEntries = options.InterfaceCallCacheEntries;
         config.EnableArrayBoundsCheck = options.EnableArrayBoundsCheck;
         config.EmitMethodMap = options.EmitMethodMap;
         config.EmitSourceMapping = options.EmitSourceMapping;
@@ -717,6 +727,7 @@ internal class Program
                 max_depth = manifestArgs.MaxGenericDepth,
                 return_protocol = globalServices.Config.LightweightAotReturns ? "lightweight-void-reference" : "result",
                 interface_call_cache = globalServices.Config.InterfaceCallCache,
+                interface_call_cache_entries = globalServices.Config.InterfaceCallCache ? globalServices.Config.InterfaceCallCacheEntries : 0,
                 generic_registry = "global-sorted-fnv1a64",
                 instances = manifest.GenericMethodPlans.Select(p => new { method = p.Method.FullName, key = p.Key, depth = p.Depth }),
                 fallbacks = manifest.GenericFallbacks,

@@ -56,7 +56,9 @@ Both modes exercise the standalone AOT result tests and interface bridges into
 targets using each return ABI, including null success and OOM propagation.
 See [the return protocol report](../../../docs/performance/aot-return-protocol.md).
 
-The formal runner also includes eleven interface dispatch tests. Add
+The formal runner also includes fourteen interface dispatch tests. Add
 `--interface-call-cache` to exercise the opt-in stack-local loop cache; omitting
-it verifies the original resolver path. See
+it verifies the original resolver path. Add `--interface-cache-entries 2` to
+select two receivers per site under the same total per-method storage budget.
+See [the two-entry report](../../../docs/performance/aot-interface-dispatch-two.md) and
 [the interface dispatch report](../../../docs/performance/aot-interface-dispatch.md).

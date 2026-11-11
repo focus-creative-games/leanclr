@@ -112,7 +112,7 @@ def build(opts, output, managed_input=None):
     if opts.lightweight_returns:
         generator += ['--leanaot-lightweight-returns']
     if opts.interface_call_cache:
-        generator += ['--leanaot-interface-call-cache']
+        generator += ['--leanaot-interface-call-cache', '--leanaot-interface-cache-entries', str(opts.interface_cache_entries)]
     commands.append([str(x) for x in generator])
     invoke(generator, output / 'generate.log')
     for target in ['native'] + (['wasm'] if opts.emsdk else []):
@@ -142,6 +142,7 @@ def main():
     ap.add_argument('--max-generic-instances', type=int, default=2048)
     ap.add_argument('--lightweight-returns', action='store_true')
     ap.add_argument('--interface-call-cache', action='store_true')
+    ap.add_argument('--interface-cache-entries', type=int, choices=[1, 2], default=1)
     ap.add_argument('--samples', type=int, default=7)
     ap.add_argument('--iterations', type=int, default=5000000)
     ap.add_argument('--output', type=Path, default=ROOT / 'out/performance/aot')

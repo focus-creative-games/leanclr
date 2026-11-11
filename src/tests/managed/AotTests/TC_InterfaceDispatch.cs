@@ -27,6 +27,12 @@ namespace AotTests
             [AotMethod(false)] public object Reference() { return this; }
         }
         public interface IGeneric { T Echo<T>(T value); }
+        public sealed class Fourth : IValue
+        {
+            public int Read(int divisor) { return 40 / divisor; }
+            public void Add(int value) { }
+            public object Reference() { return this; }
+        }
         public sealed class Generic : IGeneric { public T Echo<T>(T value) { return value; } }
         public interface IOut<out T> { T Get(); }
         public sealed class Output : IOut<string> { public string Get() { return "ok"; } }
@@ -54,6 +60,25 @@ namespace AotTests
             First a = new First { Value = 7 }, b = new First { Value = 11 };
             Assert.True(Sum(new IValue[] { a, b, new Second() }, 30) == 380);
             Assert.True(a.Calls == 10 && b.Calls == 10);
+        }
+        [UnitTest] public void ThreeReceiverClasses()
+        {
+            First value = new First { Value = 7 };
+            Assert.True(Sum(new IValue[] { value, new Second(), new Interpreted() }, 30) == 570 && value.Calls == 10);
+        }
+        [MethodImpl(MethodImplOptions.NoInlining)]
+        public static int PhaseLoop(IValue[] before, IValue[] after)
+        {
+            int result = 0;
+            for (int i = 0; i < 40; ++i)
+                result += (i < 20 ? before : after)[i & 1].Read(1);
+            return result;
+        }
+        [UnitTest] public void ReceiverPhaseChange()
+        {
+            First value = new First { Value = 7 };
+            Assert.True(PhaseLoop(new IValue[] { value, new Second() }, new IValue[] { new Interpreted(), new Fourth() }) == 970);
+            Assert.True(value.Calls == 10);
         }
         [UnitTest] public void InterpreterTargets()
         {
@@ -116,6 +141,15 @@ namespace AotTests
             try { for (int i = 0; i < 3; ++i) result += values[i].Read(1); }
             catch (NullReferenceException) { result += 100; }
             Assert.True(result == 114 && first.Calls == 2);
+        }
+        [UnitTest] public void SecondaryTargetThrows()
+        {
+            First first = new First { Value = 12 };
+            IValue[] values = { first, new Second() };
+            int result = 0;
+            try { for (int i = 0; i < 4; ++i) result += values[i & 1].Read(i < 2 ? 2 : 3 - i); }
+            catch (DivideByZeroException) { result += 100; }
+            Assert.True(result == 128 && first.Calls == 2);
         }
         [MethodImpl(MethodImplOptions.NoInlining)]
         public static int Reenter(IValue value, int depth)

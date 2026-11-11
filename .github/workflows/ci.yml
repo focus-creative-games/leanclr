@@ -53,15 +53,17 @@ jobs:
         run: python scripts/test/aot-features.py --target native --config Debug ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
       - name: Verify 32-bit native context and snapshot ABI
         run: python scripts/test/aot-features.py --target native --arch Win32 ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
-      - name: Verify formal AotTests generic registry and cached interface calls
-        run: python scripts/test/global-generics.py --interface-call-cache --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
-      - name: Verify generic registry Debug and 32-bit layouts
+      - name: Verify formal AotTests with two-entry interface caches
+        run: python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+      - name: Verify two-entry cache Debug and 32-bit layouts
         run: |
-          python scripts/test/global-generics.py --interface-call-cache --target native --config Debug ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+          python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target native --config Debug ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python scripts/test/global-generics.py --interface-call-cache --target native --arch Win32 ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+          python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target native --arch Win32 ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+      - name: Verify single-entry interface cache control
+        run: python scripts/test/global-generics.py --interface-call-cache --output out/interface-dispatch/cached --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
       - name: Verify cache-disabled native and Wasm control
-        run: python scripts/test/global-generics.py --output out/interface-dispatch/baseline --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
+        run: python scripts/test/global-generics.py --interface-cache-entries 2 --output out/interface-dispatch/baseline --target all --emsdk .emsdk ${{ matrix.protocol == 'lightweight' && '--lightweight-returns' || '' }}
       - uses: actions/upload-artifact@v4
         if: failure()
         with:
@@ -70,6 +72,7 @@ jobs:
             out/aot-features*/*.log
             out/global-generics/*/*.log
             out/interface-dispatch/baseline/*/*.log
+            out/interface-dispatch/cached/*/*.log
 
   native:
     name: ${{ matrix.name }}

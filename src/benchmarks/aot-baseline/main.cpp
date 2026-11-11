@@ -85,7 +85,10 @@ int main(int argc, char** argv)
                              "ReferenceReturns",
                              "InterfacesAlternating",
                              "InterfacesGeneric",
-                             "InterfacesStraightLine"};
+                             "InterfacesStraightLine",
+                             "InterfacesThreeTypes",
+                             "InterfacesPhaseChange",
+                             "InterfacesManySites"};
     const char* workloads[] = {"arithmetic",
                                "calls",
                                "properties",
@@ -98,10 +101,21 @@ int main(int argc, char** argv)
                                "reference-returns",
                                "interfaces-alternating",
                                "interfaces-generic",
-                               "interfaces-straight-line"};
-    const bool interface_mode = argc > 3 && std::strcmp(argv[3], "interfaces") == 0;
+                               "interfaces-straight-line",
+                               "interfaces-three-types",
+                               "interfaces-phase-change",
+                               "interfaces-many-sites"};
+    const bool interface2_mode = argc > 3 && std::strcmp(argv[3], "interfaces2") == 0;
+    const bool interface_mode = interface2_mode || (argc > 3 && std::strcmp(argv[3], "interfaces") == 0);
     if (interface_mode)
     {
+        for (const char* name : {"Transform", "OtherTransform", "ThirdTransform", "FourthTransform"})
+        {
+            auto target_type = vm::Class::find_nested_class_by_name(klass, name, false);
+            require(target_type.is_ok() && target_type.unwrap() && vm::Class::initialize_all(target_type.unwrap()).is_ok(), "Interface benchmark target type");
+            const auto* target = vm::Method::find_matched_method_in_class_by_name(target_type.unwrap(), "Apply");
+            require(target && target->invoker_type == metadata::RtInvokerType::Aot, "Interface benchmark target must be AOT");
+        }
         auto generic_type = vm::Class::find_nested_class_by_name(klass, "GenericTransform", false);
         require(generic_type.is_ok() && generic_type.unwrap(), "Generic interface benchmark class");
         require(vm::Class::initialize_all(generic_type.unwrap()).is_ok(), "Generic interface benchmark initialization");
@@ -114,9 +128,9 @@ int main(int argc, char** argv)
                 "Generic interface benchmark implementation must be AOT");
     }
     const unsigned workload_count = argc > 3 && std::strcmp(argv[3], "returns") == 0 ? 10 : 8;
-    for (unsigned index = 0; index < (interface_mode ? 4 : workload_count); ++index)
+    for (unsigned index = 0; index < (interface_mode ? (interface2_mode ? 7 : 4) : workload_count); ++index)
     {
-        const unsigned interface_indices[] = {4, 10, 11, 12};
+        const unsigned interface_indices[] = {4, 10, 11, 12, 13, 14, 15};
         const unsigned k = interface_mode ? interface_indices[index] : index;
         const auto* method = vm::Method::find_matched_method_in_class_by_name(klass, methods[k]);
         require(method != nullptr, "Benchmark method missing");

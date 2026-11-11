@@ -119,10 +119,67 @@ static void interface_cache_checks()
     resolve(&first, &declaration, &first_impl);
 }
 
+static void two_entry_cache_checks()
+{
+    using namespace metadata;
+    static_assert(sizeof(codegen::InterfaceCallCache2) == 6 * sizeof(void*), "two entries preserve the per-method storage budget");
+    static_assert(std::is_trivial<codegen::InterfaceCallCache2>::value, "two-entry cache has trivial lifetime");
+    RtTypeSig signature = {};
+    signature.ele_type = RtElementType::Class;
+    RtClass contract = {}, other_contract = {}, first = {}, second = {}, third = {}, fourth = {};
+    contract.flags = other_contract.flags = static_cast<uint32_t>(RtTypeAttribute::Interface);
+    contract.by_val = other_contract.by_val = &signature;
+    RtMethodInfo declaration = {}, alternate = {}, implementations[4] = {};
+    declaration.parent = &contract;
+    alternate.parent = &other_contract;
+    declaration.flags = alternate.flags = static_cast<uint16_t>(RtMethodAttribute::Virtual);
+    RtInterfaceOffset offsets[] = {{&contract, 0}, {&other_contract, 1}};
+    RtVirtualInvokeData tables[4][2] = {};
+    RtClass* classes[] = {&first, &second, &third, &fourth};
+    for (unsigned i = 0; i < 4; ++i)
+    {
+        tables[i][0] = {&declaration, &implementations[i]};
+        tables[i][1] = {&alternate, &implementations[3 - i]};
+        classes[i]->vtable = tables[i];
+        classes[i]->interface_vtable_offsets = offsets;
+        classes[i]->interface_vtable_offset_count = i == 0 ? 2 : 1;
+    }
+    vm::RtObject receiver = {};
+    codegen::InterfaceCallCache2 cache = {};
+    const auto resolve = [&](unsigned index, const RtMethodInfo* method, const RtMethodInfo* expected)
+    {
+        receiver.klass = classes[index];
+        auto result = codegen::get_interface_method_impl_cached(&receiver, method, cache);
+        check(result.is_ok() && result.unwrap() == expected, "two-entry target identity");
+    };
+    resolve(0, &declaration, &implementations[0]);
+    resolve(1, &declaration, &implementations[1]);
+    resolve(0, &declaration, &implementations[0]);
+    resolve(1, &declaration, &implementations[1]);
+    check(cache.next_victim == 0 && cache.receiver_classes[0] == &first && cache.receiver_classes[1] == &second, "hits must not rotate replacement");
+    receiver.klass = &second;
+    auto missing = codegen::get_interface_method_impl_cached(&receiver, &alternate, cache);
+    check(missing.is_err() && missing.unwrap_err() == RtErr::MethodAccess, "failed declaration resolution");
+    check(cache.declaration == &declaration && cache.next_victim == 0 && cache.receiver_classes[0] == &first && cache.receiver_classes[1] == &second &&
+              cache.implementations[0] == &implementations[0] && cache.implementations[1] == &implementations[1],
+          "failure must preserve both entries and replacement cursor");
+    resolve(2, &declaration, &implementations[2]);
+    check(cache.next_victim == 1 && cache.receiver_classes[0] == &third && cache.receiver_classes[1] == &second, "first round-robin eviction");
+    resolve(3, &declaration, &implementations[3]);
+    resolve(2, &declaration, &implementations[2]);
+    resolve(3, &declaration, &implementations[3]);
+    check(cache.next_victim == 0 && cache.receiver_classes[0] == &third && cache.receiver_classes[1] == &fourth, "new two-class phase replaces old phase");
+    resolve(0, &alternate, &implementations[3]);
+    check(cache.declaration == &alternate && cache.receiver_classes[0] == &first && !cache.receiver_classes[1] && !cache.implementations[1] &&
+              cache.next_victim == 1,
+          "successful declaration change must invalidate both old entries");
+    resolve(0, &declaration, &implementations[0]);
+}
+
 static void interface_cases(bool generic_aot)
 {
     auto* tests = type("AotTests", "AotTests.TC_InterfaceDispatch");
-    for (const char* name : {"Sum", "Reenter", "StraightLine", "Budget"})
+    for (const char* name : {"Sum", "Reenter", "StraightLine", "Budget", "PhaseLoop"})
     {
         const auto* helper = vm::Method::find_matched_method_in_class_by_name(tests, name);
         check(helper && helper->invoker_type == metadata::RtInvokerType::Aot, "interface loop helper must be AOT");
@@ -152,8 +209,9 @@ static void interface_cases(bool generic_aot)
     }
     auto object = LEANCLR_NEWOBJ(tests, gc::GcAllocSite::make_internal(__FILE__, __LINE__, "formal interface dispatch tests"));
     check(object.is_ok(), "allocate interface test instance");
-    const char* cases[] = {"Monomorphic",   "Polymorphic",      "InterpreterTargets", "VoidAndReferences", "GenericContexts", "Variance",
-                           "BoxedReceiver", "WarmTargetThrows", "WarmTargetThenNull", "RecursiveFrames",   "CacheBudget"};
+    const char* cases[] = {"Monomorphic",     "Polymorphic", "ThreeReceiverClasses", "ReceiverPhaseChange", "InterpreterTargets", "VoidAndReferences",
+                           "GenericContexts", "Variance",    "BoxedReceiver",        "WarmTargetThrows",    "WarmTargetThenNull", "SecondaryTargetThrows",
+                           "RecursiveFrames", "CacheBudget"};
     for (const char* name : cases)
     {
         const auto* method = vm::Method::find_matched_method_in_class_by_name(tests, name);
@@ -172,11 +230,12 @@ static void interface_cases(bool generic_aot)
             std::exit(1);
         }
         std::printf("Passed: AotTests.TC_InterfaceDispatch.%s\n", name);
-        if (std::strcmp(name, "WarmTargetThrows") == 0 || std::strcmp(name, "WarmTargetThenNull") == 0)
+        if (std::strcmp(name, "WarmTargetThrows") == 0 || std::strcmp(name, "WarmTargetThenNull") == 0 || std::strcmp(name, "SecondaryTargetThrows") == 0)
             check(method->interp_data != nullptr, "exception after cached dispatch must hand off to interpreter");
     }
     interface_cache_checks();
-    std::puts("Formal managed AOT interface tests passed: 11");
+    two_entry_cache_checks();
+    std::puts("Formal managed AOT interface tests passed: 14");
 }
 
 static void backend(const metadata::RtMethodInfo* method, bool expected, const char* message)

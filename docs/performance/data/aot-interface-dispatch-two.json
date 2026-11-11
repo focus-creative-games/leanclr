@@ -1,0 +1,3805 @@
+{
+  "schema": 1,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "",
+  "samples": [
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.59984,
+      "engine": "wasm-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.494581000006292
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 3.90274,
+      "engine": "wasm-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.494581000006292
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.64806,
+      "engine": "wasm-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.494581000006292
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.67848,
+      "engine": "wasm-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.494581000006292
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 8.61712,
+      "engine": "wasm-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.494581000006292
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 4.2906,
+      "engine": "wasm-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.494581000006292
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 32.5298,
+      "engine": "wasm-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.494581000006292
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.19602,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.7102829999930691
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.30146,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.7102829999930691
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 22.10786,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.7102829999930691
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 10.46538,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.7102829999930691
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 10.84962,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.7102829999930691
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 8.53338,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.7102829999930691
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 38.87194,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.7102829999930691
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.16438,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.4730196000018623
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.39998,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.4730196000018623
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 17.2603,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.4730196000018623
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.5827,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.4730196000018623
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 5.45176,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.4730196000018623
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 5.24284,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.4730196000018623
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 33.09212,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.4730196000018623
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.42754,
+      "engine": "native-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.33728659999906085
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 3.40176,
+      "engine": "native-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.33728659999906085
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.0811,
+      "engine": "native-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.33728659999906085
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.41546,
+      "engine": "native-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.33728659999906085
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 8.60638,
+      "engine": "native-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.33728659999906085
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 3.35564,
+      "engine": "native-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.33728659999906085
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 25.72724,
+      "engine": "native-cached2",
+      "sample": 0,
+      "process_wall_seconds": 0.33728659999906085
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.89824,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.32587150001199916
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.74606,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.32587150001199916
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.66062,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.32587150001199916
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.9835,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.32587150001199916
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.56466,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.32587150001199916
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 5.6401,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.32587150001199916
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 18.57214,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.32587150001199916
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.53458,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.4671888999873772
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.76042,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.4671888999873772
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.61048,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.4671888999873772
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.86968,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.4671888999873772
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.87142,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.4671888999873772
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 8.08558,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.4671888999873772
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 21.54498,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.4671888999873772
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.10512,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.6714549000025727
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.11424,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.6714549000025727
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 25.38012,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.6714549000025727
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.78216,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.6714549000025727
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.20928,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.6714549000025727
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 7.69178,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.6714549000025727
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 34.49676,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.6714549000025727
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.84652,
+      "engine": "wasm-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.47372559999348596
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 4.10624,
+      "engine": "wasm-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.47372559999348596
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.69568,
+      "engine": "wasm-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.47372559999348596
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.79796,
+      "engine": "wasm-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.47372559999348596
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 8.25656,
+      "engine": "wasm-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.47372559999348596
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 3.89012,
+      "engine": "wasm-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.47372559999348596
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 28.9874,
+      "engine": "wasm-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.47372559999348596
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.55348,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.46470419998513535
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.62122,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.46470419998513535
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.57464,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.46470419998513535
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.8812,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.46470419998513535
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.8878,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.46470419998513535
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 8.23056,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.46470419998513535
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 21.1912,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.46470419998513535
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.16422,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.47619630000554025
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.21054,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.47619630000554025
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 19.11714,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.47619630000554025
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.59704,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.47619630000554025
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 5.48998,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.47619630000554025
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 5.01758,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.47619630000554025
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 32.00414,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.47619630000554025
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.53206,
+      "engine": "native-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.34183520000078715
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 3.31138,
+      "engine": "native-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.34183520000078715
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.0712,
+      "engine": "native-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.34183520000078715
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.79092,
+      "engine": "native-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.34183520000078715
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 10.08172,
+      "engine": "native-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.34183520000078715
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 3.57966,
+      "engine": "native-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.34183520000078715
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 24.39446,
+      "engine": "native-cached2",
+      "sample": 1,
+      "process_wall_seconds": 0.34183520000078715
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.77384,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.32946149999042973
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.65976,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.32946149999042973
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.80348,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.32946149999042973
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.9394,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.32946149999042973
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.21906,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.32946149999042973
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 5.76716,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.32946149999042973
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 18.71688,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.32946149999042973
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.95204,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.3134683000098448
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.30238,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.3134683000098448
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.4422,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.3134683000098448
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.52358,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.3134683000098448
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 5.96416,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.3134683000098448
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 5.75108,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.3134683000098448
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 18.59384,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.3134683000098448
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.65654,
+      "engine": "wasm-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.4656799000222236
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 3.80526,
+      "engine": "wasm-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.4656799000222236
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.55156,
+      "engine": "wasm-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.4656799000222236
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.66278,
+      "engine": "wasm-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.4656799000222236
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 8.37082,
+      "engine": "wasm-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.4656799000222236
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 4.39474,
+      "engine": "wasm-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.4656799000222236
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 28.97848,
+      "engine": "wasm-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.4656799000222236
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.1404,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.684816300024977
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.1415,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.684816300024977
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 23.22108,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.684816300024977
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.74822,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.684816300024977
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.60514,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.684816300024977
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 9.43594,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.684816300024977
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 34.69984,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.684816300024977
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.35792,
+      "engine": "native-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.32995159999700263
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 3.33072,
+      "engine": "native-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.32995159999700263
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.95196,
+      "engine": "native-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.32995159999700263
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.3534,
+      "engine": "native-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.32995159999700263
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.08436,
+      "engine": "native-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.32995159999700263
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 3.44964,
+      "engine": "native-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.32995159999700263
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 24.9472,
+      "engine": "native-cached2",
+      "sample": 2,
+      "process_wall_seconds": 0.32995159999700263
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.50152,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.4620456999982707
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.6812,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.4620456999982707
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.55492,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.4620456999982707
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.07202,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.4620456999982707
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.98046,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.4620456999982707
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 7.97516,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.4620456999982707
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 20.38136,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.4620456999982707
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.27284,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4715095999999903
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.70104,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4715095999999903
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 17.0158,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4715095999999903
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.40624,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4715095999999903
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 5.39958,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4715095999999903
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 4.80928,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4715095999999903
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 32.51798,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4715095999999903
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.74686,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.4779844000004232
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 8.1094,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.4779844000004232
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.62424,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.4779844000004232
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.6841,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.4779844000004232
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.85654,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.4779844000004232
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 7.9012,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.4779844000004232
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 21.35058,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.4779844000004232
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.1541,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.6748343999788631
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.00352,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.6748343999788631
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 22.06758,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.6748343999788631
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.69354,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.6748343999788631
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.457,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.6748343999788631
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 7.69656,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.6748343999788631
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 37.75948,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.6748343999788631
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.36598,
+      "engine": "native-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.3315981999912765
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 3.32952,
+      "engine": "native-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.3315981999912765
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.14666,
+      "engine": "native-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.3315981999912765
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.01886,
+      "engine": "native-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.3315981999912765
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.74952,
+      "engine": "native-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.3315981999912765
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 3.41712,
+      "engine": "native-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.3315981999912765
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 26.91896,
+      "engine": "native-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.3315981999912765
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.09744,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.4693991999956779
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.3591,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.4693991999956779
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 16.25796,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.4693991999956779
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.72102,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.4693991999956779
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.3073,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.4693991999956779
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 5.27996,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.4693991999956779
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 33.18496,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.4693991999956779
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 4.4941,
+      "engine": "wasm-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.5399386999779381
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.57624,
+      "engine": "wasm-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.5399386999779381
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 4.44908,
+      "engine": "wasm-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.5399386999779381
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.15722,
+      "engine": "wasm-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.5399386999779381
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 8.95216,
+      "engine": "wasm-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.5399386999779381
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 5.46914,
+      "engine": "wasm-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.5399386999779381
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 31.56464,
+      "engine": "wasm-cached2",
+      "sample": 3,
+      "process_wall_seconds": 0.5399386999779381
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.75726,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.33222889999160543
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.86076,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.33222889999160543
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.85786,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.33222889999160543
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.89628,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.33222889999160543
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.61266,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.33222889999160543
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 6.08782,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.33222889999160543
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 19.43062,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.33222889999160543
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.85804,
+      "engine": "wasm-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.4971148000040557
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 4.04036,
+      "engine": "wasm-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.4971148000040557
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.563,
+      "engine": "wasm-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.4971148000040557
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.79768,
+      "engine": "wasm-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.4971148000040557
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 8.16804,
+      "engine": "wasm-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.4971148000040557
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 4.22028,
+      "engine": "wasm-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.4971148000040557
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 31.89938,
+      "engine": "wasm-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.4971148000040557
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.65242,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.4709109000104945
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 8.13716,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.4709109000104945
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.75326,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.4709109000104945
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.916,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.4709109000104945
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.8901,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.4709109000104945
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 7.76872,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.4709109000104945
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 21.05258,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.4709109000104945
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.99832,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.3183941999741364
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.82168,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.3183941999741364
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.71212,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.3183941999741364
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.60994,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.3183941999741364
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 5.98626,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.3183941999741364
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 6.0153,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.3183941999741364
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 18.4791,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.3183941999741364
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.07062,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.4598802999826148
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.39268,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.4598802999826148
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 16.62154,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.4598802999826148
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.87522,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.4598802999826148
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 5.54098,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.4598802999826148
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 5.05846,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.4598802999826148
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 31.55236,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.4598802999826148
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.23216,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.672636400006013
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.2313,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.672636400006013
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 21.79176,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.672636400006013
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 10.10324,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.672636400006013
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.80792,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.672636400006013
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 7.36596,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.672636400006013
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 35.724,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.672636400006013
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.44458,
+      "engine": "native-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.31920300002093427
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 3.42536,
+      "engine": "native-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.31920300002093427
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.24152,
+      "engine": "native-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.31920300002093427
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.59068,
+      "engine": "native-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.31920300002093427
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.62312,
+      "engine": "native-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.31920300002093427
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 3.5251,
+      "engine": "native-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.31920300002093427
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 24.9573,
+      "engine": "native-cached2",
+      "sample": 4,
+      "process_wall_seconds": 0.31920300002093427
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.69556,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.5377971999987494
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 9.15212,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.5377971999987494
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.79776,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.5377971999987494
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 11.8974,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.5377971999987494
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 11.4661,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.5377971999987494
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 8.38308,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.5377971999987494
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 23.32404,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.5377971999987494
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.70448,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.34066769998753443
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.32104,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.34066769998753443
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.8184,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.34066769998753443
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.54156,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.34066769998753443
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.35424,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.34066769998753443
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 5.8373,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.34066769998753443
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 20.61946,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.34066769998753443
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.38208,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.7329463000060059
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.33462,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.7329463000060059
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 23.50584,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.7329463000060059
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.58488,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.7329463000060059
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.46316,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.7329463000060059
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 7.7973,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.7329463000060059
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 45.01626,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.7329463000060059
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.50834,
+      "engine": "native-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.333647799998289
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 3.58548,
+      "engine": "native-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.333647799998289
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.26554,
+      "engine": "native-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.333647799998289
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.04136,
+      "engine": "native-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.333647799998289
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.55126,
+      "engine": "native-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.333647799998289
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 3.57944,
+      "engine": "native-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.333647799998289
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 25.48352,
+      "engine": "native-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.333647799998289
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.86776,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.6637212999921758
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 9.2412,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.6637212999921758
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 16.97894,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.6637212999921758
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 11.18266,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.6637212999921758
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 10.0336,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.6637212999921758
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 9.87272,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.6637212999921758
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 43.88918,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.6637212999921758
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.27026,
+      "engine": "wasm-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.5842708999989554
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 4.59086,
+      "engine": "wasm-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.5842708999989554
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 4.31578,
+      "engine": "wasm-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.5842708999989554
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 10.9811,
+      "engine": "wasm-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.5842708999989554
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 8.62832,
+      "engine": "wasm-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.5842708999989554
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 4.47258,
+      "engine": "wasm-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.5842708999989554
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 30.17334,
+      "engine": "wasm-cached2",
+      "sample": 5,
+      "process_wall_seconds": 0.5842708999989554
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.64688,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.47892700001830235
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 8.19288,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.47892700001830235
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.8039,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.47892700001830235
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.80112,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.47892700001830235
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 7.98708,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.47892700001830235
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 7.73068,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.47892700001830235
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 21.45886,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.47892700001830235
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.7479,
+      "engine": "native-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.31992529999115504
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 3.51116,
+      "engine": "native-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.31992529999115504
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.24962,
+      "engine": "native-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.31992529999115504
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.3733,
+      "engine": "native-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.31992529999115504
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.66142,
+      "engine": "native-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.31992529999115504
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 3.35424,
+      "engine": "native-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.31992529999115504
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 23.66738,
+      "engine": "native-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.31992529999115504
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.5087,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.6732778000005055
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.2829,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.6732778000005055
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 22.32582,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.6732778000005055
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.73748,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.6732778000005055
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 8.02008,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.6732778000005055
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 7.58116,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.6732778000005055
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 34.73216,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.6732778000005055
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.74582,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3273934000171721
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.5562,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3273934000171721
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.07264,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3273934000171721
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.5593,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3273934000171721
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 6.14454,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3273934000171721
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 6.14382,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3273934000171721
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 19.52532,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3273934000171721
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.8304,
+      "engine": "wasm-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.4715851999935694
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 4.16184,
+      "engine": "wasm-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.4715851999935694
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.85042,
+      "engine": "wasm-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.4715851999935694
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.03272,
+      "engine": "wasm-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.4715851999935694
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 8.42414,
+      "engine": "wasm-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.4715851999935694
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 4.29872,
+      "engine": "wasm-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.4715851999935694
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 28.40142,
+      "engine": "wasm-cached2",
+      "sample": 6,
+      "process_wall_seconds": 0.4715851999935694
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.35474,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.4750058999925386
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.59854,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.4750058999925386
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 17.61514,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.4750058999925386
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.89616,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.4750058999925386
+    },
+    {
+      "workload": "interfaces-three-types",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "485957237",
+      "ns_per_op": 5.291,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.4750058999925386
+    },
+    {
+      "workload": "interfaces-phase-change",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "430160595",
+      "ns_per_op": 4.9357,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.4750058999925386
+    },
+    {
+      "workload": "interfaces-many-sites",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2039817299",
+      "ns_per_op": 31.62954,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.4750058999925386
+    }
+  ],
+  "summary": [
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces",
+      "median_ns": 5.16438,
+      "min_ns": 5.07062,
+      "max_ns": 9.86776
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces",
+      "median_ns": 7.19602,
+      "min_ns": 7.10512,
+      "max_ns": 7.5087
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces",
+      "median_ns": 2.77384,
+      "min_ns": 2.70448,
+      "max_ns": 2.99832
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces",
+      "median_ns": 3.64688,
+      "min_ns": 3.50152,
+      "max_ns": 3.74686
+    },
+    {
+      "engine": "native-cached2",
+      "workload": "interfaces",
+      "median_ns": 2.44458,
+      "min_ns": 2.35792,
+      "max_ns": 2.7479
+    },
+    {
+      "engine": "wasm-cached2",
+      "workload": "interfaces",
+      "median_ns": 3.84652,
+      "min_ns": 3.59984,
+      "max_ns": 5.27026
+    },
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces-alternating",
+      "median_ns": 5.39998,
+      "min_ns": 5.21054,
+      "max_ns": 9.2412
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces-alternating",
+      "median_ns": 7.2313,
+      "min_ns": 7.00352,
+      "max_ns": 7.33462
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces-alternating",
+      "median_ns": 6.65976,
+      "min_ns": 6.30238,
+      "max_ns": 6.86076
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces-alternating",
+      "median_ns": 8.1094,
+      "min_ns": 7.62122,
+      "max_ns": 9.15212
+    },
+    {
+      "engine": "native-cached2",
+      "workload": "interfaces-alternating",
+      "median_ns": 3.40176,
+      "min_ns": 3.31138,
+      "max_ns": 3.58548
+    },
+    {
+      "engine": "wasm-cached2",
+      "workload": "interfaces-alternating",
+      "median_ns": 4.10624,
+      "min_ns": 3.80526,
+      "max_ns": 5.57624
+    },
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces-generic",
+      "median_ns": 17.0158,
+      "min_ns": 16.25796,
+      "max_ns": 19.11714
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces-generic",
+      "median_ns": 22.32582,
+      "min_ns": 21.79176,
+      "max_ns": 25.38012
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces-generic",
+      "median_ns": 2.80348,
+      "min_ns": 2.4422,
+      "max_ns": 3.07264
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces-generic",
+      "median_ns": 3.62424,
+      "min_ns": 3.55492,
+      "max_ns": 3.8039
+    },
+    {
+      "engine": "native-cached2",
+      "workload": "interfaces-generic",
+      "median_ns": 3.14666,
+      "min_ns": 2.95196,
+      "max_ns": 3.26554
+    },
+    {
+      "engine": "wasm-cached2",
+      "workload": "interfaces-generic",
+      "median_ns": 3.69568,
+      "min_ns": 3.55156,
+      "max_ns": 4.44908
+    },
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces-many-sites",
+      "median_ns": 32.51798,
+      "min_ns": 31.55236,
+      "max_ns": 43.88918
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces-many-sites",
+      "median_ns": 35.724,
+      "min_ns": 34.49676,
+      "max_ns": 45.01626
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces-many-sites",
+      "median_ns": 18.71688,
+      "min_ns": 18.4791,
+      "max_ns": 20.61946
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces-many-sites",
+      "median_ns": 21.35058,
+      "min_ns": 20.38136,
+      "max_ns": 23.32404
+    },
+    {
+      "engine": "native-cached2",
+      "workload": "interfaces-many-sites",
+      "median_ns": 24.9573,
+      "min_ns": 23.66738,
+      "max_ns": 26.91896
+    },
+    {
+      "engine": "wasm-cached2",
+      "workload": "interfaces-many-sites",
+      "median_ns": 30.17334,
+      "min_ns": 28.40142,
+      "max_ns": 32.5298
+    },
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces-phase-change",
+      "median_ns": 5.05846,
+      "min_ns": 4.80928,
+      "max_ns": 9.87272
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces-phase-change",
+      "median_ns": 7.69656,
+      "min_ns": 7.36596,
+      "max_ns": 9.43594
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces-phase-change",
+      "median_ns": 5.8373,
+      "min_ns": 5.6401,
+      "max_ns": 6.14382
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces-phase-change",
+      "median_ns": 7.97516,
+      "min_ns": 7.73068,
+      "max_ns": 8.38308
+    },
+    {
+      "engine": "native-cached2",
+      "workload": "interfaces-phase-change",
+      "median_ns": 3.44964,
+      "min_ns": 3.35424,
+      "max_ns": 3.57966
+    },
+    {
+      "engine": "wasm-cached2",
+      "workload": "interfaces-phase-change",
+      "median_ns": 4.29872,
+      "min_ns": 3.89012,
+      "max_ns": 5.46914
+    },
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces-straight-line",
+      "median_ns": 6.89616,
+      "min_ns": 6.5827,
+      "max_ns": 11.18266
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces-straight-line",
+      "median_ns": 8.78216,
+      "min_ns": 8.69354,
+      "max_ns": 10.46538
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces-straight-line",
+      "median_ns": 8.60994,
+      "min_ns": 8.52358,
+      "max_ns": 8.9835
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces-straight-line",
+      "median_ns": 8.8812,
+      "min_ns": 8.6841,
+      "max_ns": 11.8974
+    },
+    {
+      "engine": "native-cached2",
+      "workload": "interfaces-straight-line",
+      "median_ns": 8.01886,
+      "min_ns": 7.41546,
+      "max_ns": 9.3534
+    },
+    {
+      "engine": "wasm-cached2",
+      "workload": "interfaces-straight-line",
+      "median_ns": 8.79796,
+      "min_ns": 8.66278,
+      "max_ns": 10.9811
+    },
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces-three-types",
+      "median_ns": 5.48998,
+      "min_ns": 5.291,
+      "max_ns": 10.0336
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces-three-types",
+      "median_ns": 7.60514,
+      "min_ns": 7.20928,
+      "max_ns": 10.84962
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces-three-types",
+      "median_ns": 6.21906,
+      "min_ns": 5.96416,
+      "max_ns": 6.61266
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces-three-types",
+      "median_ns": 7.8901,
+      "min_ns": 7.85654,
+      "max_ns": 11.4661
+    },
+    {
+      "engine": "native-cached2",
+      "workload": "interfaces-three-types",
+      "median_ns": 6.74952,
+      "min_ns": 6.55126,
+      "max_ns": 10.08172
+    },
+    {
+      "engine": "wasm-cached2",
+      "workload": "interfaces-three-types",
+      "median_ns": 8.42414,
+      "min_ns": 8.16804,
+      "max_ns": 8.95216
+    }
+  ],
+  "iterations": 5000000,
+  "lightweight_returns": false,
+  "two_entry": true,
+  "generated_policy": {
+    "baseline": {
+      "single_sites": 0,
+      "double_sites": 0,
+      "max_words_per_method": 0
+    },
+    "cached": {
+      "single_sites": 9,
+      "double_sites": 0,
+      "max_words_per_method": 12
+    },
+    "cached2": {
+      "single_sites": 0,
+      "double_sites": 7,
+      "max_words_per_method": 12
+    }
+  },
+  "parent_commit": "2dde5b92b36ac27aebf8b97b30ac34f72df85914",
+  "artifacts": {
+    "native-baseline": {
+      "path": "out/performance/interface-dispatch/baseline/native/Release/aot-baseline.exe",
+      "sha256": "e093fa20283f0068f0b758d4bc74751c87f4893c04731ad740de95aba5636098",
+      "bytes": 885248,
+      "gzip_bytes": 337259
+    },
+    "wasm-baseline": {
+      "path": "out/performance/interface-dispatch/baseline/wasm/aot-baseline.wasm",
+      "sha256": "704b52620ed94a232c26e8484166807958c439e4a23555e7fae755d65eeda2f9",
+      "bytes": 836429,
+      "gzip_bytes": 267383,
+      "code_section_bytes": 670687
+    },
+    "native-cached": {
+      "path": "out/performance/interface-dispatch/cached/native/Release/aot-baseline.exe",
+      "sha256": "57cfabe9b42b0e8e7f730f999cb67a6874dc23fd4e8c0a8266f89de0a87b3107",
+      "bytes": 886272,
+      "gzip_bytes": 337948
+    },
+    "wasm-cached": {
+      "path": "out/performance/interface-dispatch/cached/wasm/aot-baseline.wasm",
+      "sha256": "84265f76deb45a2cee6f9f2dc3fd543c3178cd6821b6189f7717139c106aafe3",
+      "bytes": 837012,
+      "gzip_bytes": 267614,
+      "code_section_bytes": 671270
+    },
+    "native-cached2": {
+      "path": "out/performance/interface-dispatch/cached2/native/Release/aot-baseline.exe",
+      "sha256": "a04d5efde71f3146ca7a56d45cc797bd5347a77812d0b5891767dab711c5136c",
+      "bytes": 886784,
+      "gzip_bytes": 338112
+    },
+    "wasm-cached2": {
+      "path": "out/performance/interface-dispatch/cached2/wasm/aot-baseline.wasm",
+      "sha256": "974412809746aefda4c93e6e186792ecb84841ebecb71477bc834427c74a28a1",
+      "bytes": 837675,
+      "gzip_bytes": 267795,
+      "code_section_bytes": 671933
+    }
+  },
+  "managed_inputs": {
+    "baseline": "9e1fa5f705214c0e7b0e465d1b8ceb26c30ed995712ad05a13b6d46261855581",
+    "cached": "9e1fa5f705214c0e7b0e465d1b8ceb26c30ed995712ad05a13b6d46261855581",
+    "cached2": "9e1fa5f705214c0e7b0e465d1b8ceb26c30ed995712ad05a13b6d46261855581"
+  },
+  "build_manifests": {
+    "baseline": {
+      "commands": [
+        [
+          "C:\\WINDOWS\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe",
+          "/nologo",
+          "/noconfig",
+          "/optimize+",
+          "/nostdlib+",
+          "/target:exe",
+          "/out:D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\managed\\AotBaseline.dll",
+          "/r:D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5\\mscorlib.dll",
+          "/r:D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5\\System.dll",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\Benchmarks.cs"
+        ],
+        [
+          "dotnet",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\managed",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5",
+          "-a",
+          "AotBaseline",
+          "-o",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\generated",
+          "--leanaot-aot-rule-file",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\aot.xml",
+          "--leanaot-max-generic-instances",
+          "2048"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\native",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\generated",
+          "-A",
+          "x64"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\native",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\wasm",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\generated",
+          "-G",
+          "Ninja",
+          "-DLEANCLR_HOST=PORTABLE",
+          "-DCMAKE_TOOLCHAIN_FILE=D:\\workspace\\wasmclr\\emsdk\\upstream\\emscripten\\cmake\\Modules\\Platform\\Emscripten.cmake"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\wasm",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ]
+      ],
+      "standalone_thread_hook": null
+    },
+    "cached": {
+      "commands": [
+        [
+          "dotnet",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\managed",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5",
+          "-a",
+          "AotBaseline",
+          "-o",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\generated",
+          "--leanaot-aot-rule-file",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\aot.xml",
+          "--leanaot-max-generic-instances",
+          "2048",
+          "--leanaot-interface-call-cache",
+          "--leanaot-interface-cache-entries",
+          "1"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\native",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\generated",
+          "-A",
+          "x64"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\native",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\wasm",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\generated",
+          "-G",
+          "Ninja",
+          "-DLEANCLR_HOST=PORTABLE",
+          "-DCMAKE_TOOLCHAIN_FILE=D:\\workspace\\wasmclr\\emsdk\\upstream\\emscripten\\cmake\\Modules\\Platform\\Emscripten.cmake"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\wasm",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ]
+      ],
+      "standalone_thread_hook": null
+    },
+    "cached2": {
+      "commands": [
+        [
+          "dotnet",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached2\\managed",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5",
+          "-a",
+          "AotBaseline",
+          "-o",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached2\\generated",
+          "--leanaot-aot-rule-file",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\aot.xml",
+          "--leanaot-max-generic-instances",
+          "2048",
+          "--leanaot-interface-call-cache",
+          "--leanaot-interface-cache-entries",
+          "2"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached2\\native",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached2\\generated",
+          "-A",
+          "x64"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached2\\native",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached2\\wasm",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached2\\generated",
+          "-G",
+          "Ninja",
+          "-DLEANCLR_HOST=PORTABLE",
+          "-DCMAKE_TOOLCHAIN_FILE=D:\\workspace\\wasmclr\\emsdk\\upstream\\emscripten\\cmake\\Modules\\Platform\\Emscripten.cmake"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached2\\wasm",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ]
+      ],
+      "standalone_thread_hook": null
+    }
+  },
+  "toolchains": {
+    "native-baseline": {
+      "CMAKE_CXX_COMPILER": "d:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx86/x64/cl.exe",
+      "CMAKE_CXX_COMPILER_ID": "MSVC",
+      "CMAKE_CXX_COMPILER_VERSION": "19.44.35229.0"
+    },
+    "wasm-baseline": {
+      "CMAKE_CXX_COMPILER": "D:/workspace/wasmclr/emsdk/upstream/emscripten/em++.bat",
+      "CMAKE_CXX_COMPILER_ID": "Clang",
+      "CMAKE_CXX_COMPILER_VERSION": "22.0.0"
+    },
+    "native-cached": {
+      "CMAKE_CXX_COMPILER": "d:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx86/x64/cl.exe",
+      "CMAKE_CXX_COMPILER_ID": "MSVC",
+      "CMAKE_CXX_COMPILER_VERSION": "19.44.35229.0"
+    },
+    "wasm-cached": {
+      "CMAKE_CXX_COMPILER": "D:/workspace/wasmclr/emsdk/upstream/emscripten/em++.bat",
+      "CMAKE_CXX_COMPILER_ID": "Clang",
+      "CMAKE_CXX_COMPILER_VERSION": "22.0.0"
+    },
+    "native-cached2": {
+      "CMAKE_CXX_COMPILER": "d:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx86/x64/cl.exe",
+      "CMAKE_CXX_COMPILER_ID": "MSVC",
+      "CMAKE_CXX_COMPILER_VERSION": "19.44.35229.0"
+    },
+    "wasm-cached2": {
+      "CMAKE_CXX_COMPILER": "D:/workspace/wasmclr/emsdk/upstream/emscripten/em++.bat",
+      "CMAKE_CXX_COMPILER_ID": "Clang",
+      "CMAKE_CXX_COMPILER_VERSION": "22.0.0"
+    }
+  },
+  "node_version": "v22.12.0",
+  "source_hashes": {
+    "scripts/benchmarks/compare_interface_dispatch.py": "77032d8a97f51cfe32439cacfa9d1ab267eee4031fa2acc96b184a699b8958a3",
+    "scripts/benchmarks/run_aot.py": "280766bf4f8f3aed8cd18e13a7cca1b11e42c42c448d4918a571e340fcf44cbe",
+    "scripts/test/global-generics.py": "6a2158c33456e7a1e84b12c6a3804004eee9e857610c1ab152958d5c3bbd8e33",
+    "src/benchmarks/aot-baseline/Benchmarks.cs": "b125e0dc30c008819c5a525f8354be8f6e305fec47c7dea2cbb0ee73ec01cdb6",
+    "src/benchmarks/aot-baseline/main.cpp": "a497e9c077af876b147591d649d355522879b105e6aab9a8bfde4f437d662730",
+    "src/leanaot/LeanAOT.ToCpp/GlobalConfig.cs": "2960597bb3d9ea61387490daf42064a934006e7c0c46bb3d11c67139f3539e02",
+    "src/leanaot/LeanAOT.ToCpp/MethodWriterBase.InterfaceCache.cs": "6745c21f8c799fdcfce0e2031b94df773d05bce20d68b9e4d673cdd234ca0c6c",
+    "src/leanaot/LeanAOT.ToCpp/ReturnProtocol.cs": "1c7467c81225d5f350d1e628fbc8268eaeee2139acc4fd3d136f7c9b91982ce5",
+    "src/leanaot/LeanAOT/Program.cs": "7fb81b5d2ef5978e2537d1a9410d5ddb137173886112b0d1fcfea23a50b3d268",
+    "src/runtime/codegen/interface_dispatch.h": "524432cd5f1fc0211da2c03a9ac0b726ffeea7c000ccf9e0f1cef751050cd2c1",
+    "src/runtime/vm/method.cpp": "a28050cc2514ca473ed6c97d6821970b3569749e6ef4589c598e5a0b2b18a1d3",
+    "src/tests/generic-aot/README.md": "7f31054787f2371bff07ecaeddc65ccb5b1e63628646ddce4ceeb21efcefbd64",
+    "src/tests/generic-registry/main.cpp": "2918fff5652efdb18b4ccde98c87ba1608f44db0c7bb98e17275f1f43e491673",
+    "src/tests/managed/AotTests/TC_InterfaceDispatch.cs": "84be58720f01d00444a0a8c01c9df4a4f4ff533dd38051911875b7613077b535"
+  },
+  "generated_hashes": {
+    "out/performance/interface-dispatch/baseline/generated/AotBaseline.method_body_part1.cpp": "1f88e3c02bf95c75564c5766053f1b81cba24e0096cf5a342ecc4088ff7e84c9",
+    "out/performance/interface-dispatch/baseline/generated/AotBaseline.module_registration.cpp": "69aeafe67bbafac68ba2e33288f45cc40349641fe1c31c8af7681eab3d947b8c",
+    "out/performance/interface-dispatch/baseline/generated/generic_methods_part0.cpp": "b7451d58fb7afc249a2ae0b782c13b2dc12c424bec7741c81455723b73cf044c",
+    "out/performance/interface-dispatch/baseline/generated/generic_registration.cpp": "73c44372397bef488da2724c3ad2c65b809e43adea2fb2fd8e626c1a480994b2",
+    "out/performance/interface-dispatch/baseline/generated/method_direct_call_bridges_part0.cpp": "25e59966ece89327487392b239001137c32b0840966b94c1f53070211b3a69fb",
+    "out/performance/interface-dispatch/baseline/generated/method_invokers_part0.cpp": "701d31bd1830c78b9d9149e7244e6802c8772b336f7ba7b0dbbcdf24ee4963b0",
+    "out/performance/interface-dispatch/baseline/generated/modules_registration.cpp": "1e85e97c5ed8d9d6217d5623ce261d894829d410e4c74038922150861d5abf76",
+    "out/performance/interface-dispatch/cached/generated/AotBaseline.method_body_part1.cpp": "1b6395b52713e0b43e01bfe84035947da9646accf0b767828724d21c88d68453",
+    "out/performance/interface-dispatch/cached/generated/AotBaseline.module_registration.cpp": "69aeafe67bbafac68ba2e33288f45cc40349641fe1c31c8af7681eab3d947b8c",
+    "out/performance/interface-dispatch/cached/generated/generic_methods_part0.cpp": "b7451d58fb7afc249a2ae0b782c13b2dc12c424bec7741c81455723b73cf044c",
+    "out/performance/interface-dispatch/cached/generated/generic_registration.cpp": "73c44372397bef488da2724c3ad2c65b809e43adea2fb2fd8e626c1a480994b2",
+    "out/performance/interface-dispatch/cached/generated/method_direct_call_bridges_part0.cpp": "25e59966ece89327487392b239001137c32b0840966b94c1f53070211b3a69fb",
+    "out/performance/interface-dispatch/cached/generated/method_invokers_part0.cpp": "701d31bd1830c78b9d9149e7244e6802c8772b336f7ba7b0dbbcdf24ee4963b0",
+    "out/performance/interface-dispatch/cached/generated/modules_registration.cpp": "1e85e97c5ed8d9d6217d5623ce261d894829d410e4c74038922150861d5abf76",
+    "out/performance/interface-dispatch/cached2/generated/AotBaseline.method_body_part1.cpp": "4052c0d87ee190a30fe21c9c19d05495f7b0e3c3c65b64bd399cc025fa48f3b6",
+    "out/performance/interface-dispatch/cached2/generated/AotBaseline.module_registration.cpp": "69aeafe67bbafac68ba2e33288f45cc40349641fe1c31c8af7681eab3d947b8c",
+    "out/performance/interface-dispatch/cached2/generated/generic_methods_part0.cpp": "b7451d58fb7afc249a2ae0b782c13b2dc12c424bec7741c81455723b73cf044c",
+    "out/performance/interface-dispatch/cached2/generated/generic_registration.cpp": "73c44372397bef488da2724c3ad2c65b809e43adea2fb2fd8e626c1a480994b2",
+    "out/performance/interface-dispatch/cached2/generated/method_direct_call_bridges_part0.cpp": "25e59966ece89327487392b239001137c32b0840966b94c1f53070211b3a69fb",
+    "out/performance/interface-dispatch/cached2/generated/method_invokers_part0.cpp": "701d31bd1830c78b9d9149e7244e6802c8772b336f7ba7b0dbbcdf24ee4963b0",
+    "out/performance/interface-dispatch/cached2/generated/modules_registration.cpp": "1e85e97c5ed8d9d6217d5623ce261d894829d410e4c74038922150861d5abf76"
+  },
+  "notes": [
+    "Working-tree implementation based on parent_commit; only cache enable/capacity settings differ between configurations.",
+    "Same managed source and compiler options; metadata is warm, each AOT invocation starts with empty stack caches.",
+    "Monomorphic, alternating-class, generic-method and straight-line control; --two-entry adds three-class, phase-change and five-site workloads.",
+    "All four ordinary targets, the generic override and workload entries are verified AOT before timing.",
+    "Up to four three-word single-entry sites or two six-word double-entry sites per invocation; no static cache, heap map or new GC roots.",
+    "Seven interleaved process samples by default; frequency/background activity is not controlled.",
+    "No IL2CPP, browser, game-wide or cold-start performance claim; artifact sizes exclude external BCL/metadata/resources."
+  ],
+  "control_source_hashes": {
+    "baseline": {
+      "System.UInt32 Benchmarks::InterfaceOnce(Benchmarks/ITransform,System.UInt32)": "6f909993f668c31fe2d40c6e13431e4ae7c79681196dcf8123fb1ce059616077",
+      "System.UInt32 Benchmarks::InterfacesStraightLine(System.Int32,System.UInt32)": "3013f8c41fb84406dc785b7ef2ce4e15c9b9df72d2dd5cf8eeb1e9dbf99efdb5"
+    },
+    "cached": {
+      "System.UInt32 Benchmarks::InterfaceOnce(Benchmarks/ITransform,System.UInt32)": "6f909993f668c31fe2d40c6e13431e4ae7c79681196dcf8123fb1ce059616077",
+      "System.UInt32 Benchmarks::InterfacesStraightLine(System.Int32,System.UInt32)": "3013f8c41fb84406dc785b7ef2ce4e15c9b9df72d2dd5cf8eeb1e9dbf99efdb5"
+    },
+    "cached2": {
+      "System.UInt32 Benchmarks::InterfaceOnce(Benchmarks/ITransform,System.UInt32)": "6f909993f668c31fe2d40c6e13431e4ae7c79681196dcf8123fb1ce059616077",
+      "System.UInt32 Benchmarks::InterfacesStraightLine(System.Int32,System.UInt32)": "3013f8c41fb84406dc785b7ef2ce4e15c9b9df72d2dd5cf8eeb1e9dbf99efdb5"
+    }
+  },
+  "validation": {
+    "configurations": {
+      "two": 16,
+      "one": 8,
+      "off": 8
+    },
+    "formal_methods_per_configuration": 38,
+    "total_formal_method_executions": 1216,
+    "runtime_passed": 41,
+    "logs": [
+      {
+        "mode": "two",
+        "path": "out/global-generics/lightweight/default-native-Debug-x64/Testing/Temporary/LastTest.log",
+        "sha256": "50660fa079789abe9e3200411caca8344f020671989802a3bc4057e0bbfcf539"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/lightweight/default-native-Release-Win32/Testing/Temporary/LastTest.log",
+        "sha256": "52799289fc4c9e1389a73877f91f73021b587136b4a73baaa46cdddf07056d2d"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/lightweight/default-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "be6eb772470a285300b4dfb0ac2c12e7c8e9267c13d175bef2c6a23028c75c0c"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/lightweight/default-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "060dab9be87d584eba8ebe5d27b4f25c18b777370e4dadae3350d06a0148b5cd"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/lightweight/disabled-native-Debug-x64/Testing/Temporary/LastTest.log",
+        "sha256": "29f55e5098f1889b8f21013a54bb4bd97ec89c2d2392c084de31d2c3697754a0"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/lightweight/disabled-native-Release-Win32/Testing/Temporary/LastTest.log",
+        "sha256": "db622c19a431cad3da245fcb798ecc480e89c70a9b705dfd558add6d4ac65b91"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/lightweight/disabled-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "3bbeb58a2e376e52dfcf47e6b332c0c10ff99d58a1989598b6c04916530cae46"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/lightweight/disabled-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "68aef598370a87ae6537818e630cd6c082afd8a570150e9db2caa56ff9df8b0b"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/result/default-native-Debug-x64/Testing/Temporary/LastTest.log",
+        "sha256": "419c8d59861122dadc6b14e414c868900adbc07efa53442a2f8bd58bceb54e17"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/result/default-native-Release-Win32/Testing/Temporary/LastTest.log",
+        "sha256": "52334dc07385b63a28c0f121fdd01129572ae49e9652af3624b773b6a6795285"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/result/default-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "0cc392ce51299114ed40f149a550b3eeea0ccfb5279b100aae620718af71599c"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/result/default-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "30a59d27a7da64ec4f6c9f5d4a7f1ee2f75911d42e0ad0c746f8f9ed509937cc"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/result/disabled-native-Debug-x64/Testing/Temporary/LastTest.log",
+        "sha256": "b66968399f77df5b6db6934e5101ac8b9eae9382752725c495bc75a8a93b841f"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/result/disabled-native-Release-Win32/Testing/Temporary/LastTest.log",
+        "sha256": "726b6ba3dd970aacc9d8ac8646ee864f5669d6bfb1aa91ddcabbcbc4d43e4b00"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/result/disabled-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "31401a0b127045908de805ce73ded7641243289985b6c5cefdf86af44e1b2d53"
+      },
+      {
+        "mode": "two",
+        "path": "out/global-generics/result/disabled-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "befb548e9ee24b62fcddeac14112ee7c2335b71be24f10c914ee1652591b09f9"
+      },
+      {
+        "mode": "one",
+        "path": "out/interface-dispatch/cached/lightweight/default-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "aa15796432eaa6ec90036b06a571081c6b2c3759ae02ae5a3a74b0698838db8b"
+      },
+      {
+        "mode": "one",
+        "path": "out/interface-dispatch/cached/lightweight/default-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "ecbd9eaab50245d8a93226da1ce6153d0af76e0651aeea7dce6a1412a5694fc2"
+      },
+      {
+        "mode": "one",
+        "path": "out/interface-dispatch/cached/lightweight/disabled-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "a70885a73d5f3b5e36674b75cf4fb1251219b8535aa41d849780c284a6dced37"
+      },
+      {
+        "mode": "one",
+        "path": "out/interface-dispatch/cached/lightweight/disabled-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "6ccea80bd87ca860396fd13c2a4a2fe133dffd22eb1f667d0eadbbca41a8ca9c"
+      },
+      {
+        "mode": "one",
+        "path": "out/interface-dispatch/cached/result/default-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "fd5dfec258aaaa53cef3d62ef2f748cbe0243c6dd523437f7d4f59bc05d3c975"
+      },
+      {
+        "mode": "one",
+        "path": "out/interface-dispatch/cached/result/default-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "d02ab3236701dde93f2d2abd36cc0af07b62f9067f79995eccdd481c31e0d82d"
+      },
+      {
+        "mode": "one",
+        "path": "out/interface-dispatch/cached/result/disabled-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "424d178b9f987de9f04d2e44b9e263b3ea17be9b8efa591868781d890982bd91"
+      },
+      {
+        "mode": "one",
+        "path": "out/interface-dispatch/cached/result/disabled-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "ff0c14594fbcc72e08933d0d028fa0ec8e18b3c696751770e760d6111effe36c"
+      },
+      {
+        "mode": "off",
+        "path": "out/interface-dispatch/baseline/lightweight/default-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "73da84894f6d0acd25af0e64022b2b21ca7713f03797ae1d0f7407c90c957910"
+      },
+      {
+        "mode": "off",
+        "path": "out/interface-dispatch/baseline/lightweight/default-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "9362ffb0fd43d64c4f4767838174a2bd6e731e882922a62effb9ecbef5169a8d"
+      },
+      {
+        "mode": "off",
+        "path": "out/interface-dispatch/baseline/lightweight/disabled-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "be01eb719341d30d50a3ca06acbbf4705dfe8bd54e84ab7912aac7c546230baf"
+      },
+      {
+        "mode": "off",
+        "path": "out/interface-dispatch/baseline/lightweight/disabled-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "70b4428c66fff0b42b9463bf16926120787bc897a2767fda9c663c80eb459c63"
+      },
+      {
+        "mode": "off",
+        "path": "out/interface-dispatch/baseline/result/default-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "ca17c982d84ba96b40f4b02c3fd8b92ae34ce270e3d93def2f6d8e7e899d7126"
+      },
+      {
+        "mode": "off",
+        "path": "out/interface-dispatch/baseline/result/default-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "53f5e6dfebd7792603091ba48f5fdd51d5d502f7d322013190f4cdb921eb22e3"
+      },
+      {
+        "mode": "off",
+        "path": "out/interface-dispatch/baseline/result/disabled-native-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "5a73dfbfce1c13a187e33daa22536b1eed53128f3995c8edf3ed0766345992f0"
+      },
+      {
+        "mode": "off",
+        "path": "out/interface-dispatch/baseline/result/disabled-wasm-Release-x64/Testing/Temporary/LastTest.log",
+        "sha256": "f64b1c9706a49b4e5d9053e993cc9409050d6013f9a9da74058f81ffca592871"
+      }
+    ],
+    "runtime_log_sha256": "c6bcbc976c2cae4dfff9afb1f0888b855303e00f62e24fe0a5a8efab635d9d03"
+  },
+  "validated_layouts": {
+    "x64": {
+      "single_site_bytes": 24,
+      "double_site_bytes": 48,
+      "max_bytes_per_method": 96
+    },
+    "x86_wasm": {
+      "single_site_bytes": 12,
+      "double_site_bytes": 24,
+      "max_bytes_per_method": 48
+    }
+  }
+}

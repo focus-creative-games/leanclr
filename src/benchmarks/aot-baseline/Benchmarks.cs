@@ -16,6 +16,14 @@ public static class Benchmarks
         public uint Apply(uint x) { return unchecked(x * 22695477u + 1u); }
     }
     public interface IGenericTransform { uint Apply<T>(uint x); }
+    public sealed class ThirdTransform : ITransform
+    {
+        public uint Apply(uint x) { return unchecked(x * 1103515245u + 12345u); }
+    }
+    public sealed class FourthTransform : ITransform
+    {
+        public uint Apply(uint x) { return unchecked(x * 214013u + 2531011u); }
+    }
     public sealed class GenericTransform : IGenericTransform
     {
         public uint Apply<T>(uint x) { return unchecked(x * 1664525u + 1013904223u); }
@@ -24,6 +32,8 @@ public static class Benchmarks
     static readonly uint[] Data = CreateData();
     static readonly ITransform Transformer = new Transform();
     static readonly ITransform[] Transformers = { new Transform(), new OtherTransform() };
+    static readonly ITransform[] ThreeTransformers = { new Transform(), new OtherTransform(), new ThirdTransform() };
+    static readonly ITransform[] PhaseTransformers = { new Transform(), new OtherTransform(), new ThirdTransform(), new FourthTransform() };
     static readonly GenericTransform GenericTransformer = new GenericTransform();
     static readonly Box PropertyBox = new Box();
     [MethodImpl(MethodImplOptions.NoInlining)]
@@ -109,6 +119,31 @@ public static class Benchmarks
     {
         ITransform value = Transformer;
         for (int i = 0; i < n; ++i) seed = InterfaceOnce(value, seed);
+        return seed;
+    }
+    public static uint InterfacesThreeTypes(int n, uint seed)
+    {
+        ITransform[] values = ThreeTransformers;
+        for (int i = 0; i < n; ++i) seed = values[i % 3].Apply(seed);
+        return seed;
+    }
+    public static uint InterfacesPhaseChange(int n, uint seed)
+    {
+        ITransform[] values = PhaseTransformers;
+        for (int i = 0; i < n; ++i) seed = values[(i & 1) + (i < n / 2 ? 0 : 2)].Apply(seed);
+        return seed;
+    }
+    public static uint InterfacesManySites(int n, uint seed)
+    {
+        ITransform value = Transformer;
+        for (int i = 0; i < n; ++i)
+        {
+            seed = value.Apply(seed);
+            seed = value.Apply(seed);
+            seed = value.Apply(seed);
+            seed = value.Apply(seed);
+            seed = value.Apply(seed);
+        }
         return seed;
     }
     public static uint Structs(int n, uint seed)

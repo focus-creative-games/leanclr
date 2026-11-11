@@ -4,7 +4,8 @@ namespace LeanAOT.ToCpp
 {
     partial class MethodWriterBase
     {
-        // Bound extra frame storage to four three-pointer entries. A backward
+        // Bound nominal cache storage to twelve pointer-sized words per frame:
+        // four single-entry sites or two double-entry sites. A backward
         // branch interval is a conservative loop candidate, not a claim about
         // hotness. Never allocate caches for straight-line interface calls.
         private int _interfaceCacheCount;
@@ -31,11 +32,13 @@ namespace LeanAOT.ToCpp
         private string InterfaceResolution(Instruction inst, MethodDetail method, EvalVariable receiver, RuntimeResolvedVariable declaration)
         {
             string args = $"{GetEvalVariableName(receiver)}, {declaration.GetFullReferenceVariableName()}";
+            bool twoEntries = _globalConfig.InterfaceCallCacheEntries == 2;
+            int siteBudget = twoEntries ? 2 : 4;
             if (!_globalConfig.InterfaceCallCache || !method.MethodDef.DeclaringType.IsInterface ||
-                _interfaceCacheCount >= 4 || !IsInterfaceLoopCandidate(inst))
+                _interfaceCacheCount >= siteBudget || !IsInterfaceLoopCandidate(inst))
                 return $"{VmFunctionNames.GetVirtualMethodOnObj}({args})";
             string cache = $"__interface_cache_{_interfaceCacheCount++}";
-            _localsWriter.AddLine($"leanclr::codegen::InterfaceCallCache {cache} = {{}};");
+            _localsWriter.AddLine($"leanclr::codegen::InterfaceCallCache{(twoEntries ? "2" : "")} {cache} = {{}};");
             return $"leanclr::codegen::get_interface_method_impl_cached({args}, {cache})";
         }
     }
