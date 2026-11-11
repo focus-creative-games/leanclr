@@ -1,0 +1,144 @@
+name: Minimal net10 platforms
+on: [push, pull_request, workflow_dispatch]
+
+jobs:
+  windows:
+    runs-on: windows-2022
+    timeout-minutes: 75
+    env:
+      PYTHONUTF8: '1'
+      ASAN_OPTIONS: detect_leaks=0:halt_on_error=1:allocator_may_return_null=1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.204
+      - shell: pwsh
+        run: |
+          ./scripts/dotnet10/integration-baseline.ps1 -AllSmokeEntries
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          ./scripts/dotnet10/integration-baseline.ps1 -AllSmokeEntries -Configuration Debug
+      - name: AOT and engine ABI with ASan
+        shell: pwsh
+        run: |
+          $runtime = python -c "import sys; sys.path.insert(0,'scripts/dotnet10'); from integration import installed_runtime; print(installed_runtime())"
+          $vs = & "${env:ProgramFiles(x86)}/Microsoft Visual Studio/Installer/vswhere.exe" -latest -products '*' -property installationPath
+          $asan = Get-ChildItem "$vs/VC/Tools/MSVC/*/bin/Hostx64/x64/clang_rt.asan_dynamic-x86_64.dll" | Sort-Object FullName -Descending | Select-Object -First 1
+          if (!$asan) { throw 'MSVC ASan runtime not found' }
+          $env:PATH = "$($asan.DirectoryName);$env:PATH"
+          python scripts/dotnet10/aot-contracts.py --runtime "$runtime" --configuration RelWithDebInfo --asan
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/dotnet10/aot-contracts.py --runtime "$runtime" --variant optimized
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/test/aot-features.py --target native --profile coreclr-net10 --runtime-dir "$runtime"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/dotnet10/engine-contracts.py --configuration RelWithDebInfo --asan
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/dotnet10/engine-contracts.py --configuration Debug
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/dotnet10/engine-contracts.py --shared
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: net10-windows
+          path: |
+            out/net10-aot-current/*.log
+            out/net10-aot-current/results.json
+            out/net10-aot-current/optimized/*.log
+            out/net10-aot-current/optimized/results.json
+            out/net10-engine-*/*.log
+
+  native:
+    name: Net10 ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: Linux x64, os: ubuntu-24.04, sanitizers: ''}
+          - {name: Linux ARM64, os: ubuntu-24.04-arm, sanitizers: ''}
+          - {name: Linux ASan UBSan, os: ubuntu-24.04, sanitizers: 'address,undefined'}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 60
+    env:
+      CC: clang
+      CXX: clang++
+      PYTHONUTF8: '1'
+      ASAN_OPTIONS: detect_leaks=0:halt_on_error=1:allocator_may_return_null=1
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.204
+      - run: python3 scripts/dotnet10/integration.py --sanitizers '${{ matrix.sanitizers }}'
+      - name: Resolve target CoreLib
+        run: echo "NET10_RUNTIME=$(python3 -c "import sys; sys.path.insert(0,'scripts/dotnet10'); from integration import installed_runtime; print(installed_runtime())")" >> "$GITHUB_ENV"
+      - run: python3 scripts/dotnet10/aot-contracts.py --runtime "$NET10_RUNTIME" --sanitizers '${{ matrix.sanitizers }}'
+      - run: python3 scripts/test/aot-features.py --target native --profile coreclr-net10 --runtime-dir "$NET10_RUNTIME"
+      - run: python3 scripts/dotnet10/engine-contracts.py --sanitizers '${{ matrix.sanitizers }}'
+      - run: python3 scripts/dotnet10/engine-contracts.py --shared --sanitizers '${{ matrix.sanitizers }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: net10-${{ matrix.name }}
+          path: |
+            out/net10-portable-gate/**/*.log
+            out/net10-portable-gate/results.json
+            out/net10-aot-current/*.log
+            out/net10-aot-current/results.json
+            out/net10-engine-native-*/*.log
+
+  wasm:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 60
+    env:
+      PYTHONUTF8: '1'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.204
+      - uses: actions/checkout@v4
+        with:
+          repository: emscripten-core/emsdk
+          ref: '4.0.12'
+          path: .emsdk
+      - run: .emsdk/emsdk install 4.0.12 && .emsdk/emsdk activate 4.0.12
+      - name: Net10 Wasm and independent engine contracts
+        shell: bash
+        run: |
+          source .emsdk/emsdk_env.sh
+          python3 scripts/dotnet10/fetch-corelib.py
+          runtime=out/net10-runtime-win-x86/runtimes/win-x86/lib/net10.0
+          python3 scripts/dotnet10/aot-contracts.py --target wasm --runtime "$runtime" --emsdk .emsdk
+          python3 scripts/dotnet10/aot-contracts.py --target wasm --variant optimized --runtime "$runtime" --emsdk .emsdk
+          python3 scripts/test/aot-features.py --target wasm --profile coreclr-net10 --runtime-dir "$runtime" --emsdk .emsdk
+          foreign=$(python3 -c "import sys; sys.path.insert(0,'scripts/dotnet10'); from integration import installed_runtime; print(installed_runtime())")
+          python3 scripts/dotnet10/check-bitness-rejection.py --node --runner out/net10-aot-current/wasm/native/bin/aot-tester.js --foreign-runtime "$foreign"
+          python3 scripts/dotnet10/engine-contracts.py --target wasm --runtime "$runtime" --emsdk .emsdk
+          cmake -S src/tests/net10-contracts -B out/net10-resources-wasm -G Ninja -DCMAKE_BUILD_TYPE=Release -DLEANCLR_HOST=PORTABLE -DCMAKE_CROSSCOMPILING_EMULATOR=node -DCMAKE_TOOLCHAIN_FILE="$PWD/.emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake" -DLEANCLR_NET10_RUNTIME_DIR="$runtime"
+          cmake --build out/net10-resources-wasm --parallel 4
+          ctest --test-dir out/net10-resources-wasm --output-on-failure
+          python3 scripts/dotnet10/prepare-resource-baseline.py
+          cmake -S out/net10-linear-baseline/src/tests/net10-contracts -B out/net10-linear-baseline/wasm -G Ninja -DCMAKE_BUILD_TYPE=Release -DLEANCLR_HOST=PORTABLE -DCMAKE_CROSSCOMPILING_EMULATOR=node -DCMAKE_TOOLCHAIN_FILE="$PWD/.emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake"
+          cmake --build out/net10-linear-baseline/wasm --parallel 4 --target net10-resources
+          python3 scripts/dotnet10/resource-budget.py --runner out/net10-resources-wasm/net10-resources.js --baseline out/net10-linear-baseline/wasm/net10-resources.js --node --runtime "$runtime" --output out/net10-resource-wasm-comparison.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: net10-wasm
+          path: |
+            out/net10-aot-current/**/*.log
+            out/net10-aot-current/**/results.json
+            out/net10-engine-wasm-Release/*.log
+            out/net10-aot-features/*.log
+            out/net10-resource-wasm-comparison.json
+            out/net10-runtime-win-x86/provenance.json

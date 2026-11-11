@@ -122,6 +122,7 @@ static void print_error_and_exit(const std::string& err_message, RtErr err)
     vm::RtString* stack_trace_str = reinterpret_cast<vm::RtString*>(ret.unwrap());
     if (stack_trace_str)
         sb.append_utf16_str(&stack_trace_str->first_char, stack_trace_str->length);
+    sb.sure_null_terminator_but_not_append();
     std::cerr << sb.get_const_chars() << std::endl << std::endl;
 
     std::exit(-1);

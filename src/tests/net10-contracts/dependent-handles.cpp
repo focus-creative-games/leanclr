@@ -1,3 +1,4 @@
+#include "../aot-returns/test_assert.h"
 #include "vm/gchandle.h"
 #include "vm/reflection.h"
 #include <cstdlib>
@@ -31,6 +32,7 @@ static void mark(vm::RtObject* object, void* data)
 
 int main()
 {
+    configure_test_assertions();
     for (uintptr_t invalid : {uintptr_t{1}, uintptr_t{3}, ~uintptr_t{0}})
     {
         const auto* handle = reinterpret_cast<const void*>(invalid);

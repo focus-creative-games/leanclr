@@ -1,3 +1,4 @@
+#include "../aot-returns/test_assert.h"
 #include "metadata/native_handle_registry.h"
 #include "metadata/rt_metadata.h"
 #include <cstdlib>
@@ -11,6 +12,7 @@ static void check(bool value)
 
 int main()
 {
+    configure_test_assertions();
     metadata::RtClass first{}, second{};
     first.image = reinterpret_cast<metadata::RtModuleDef*>(uintptr_t{0x1000});
     second.image = reinterpret_cast<metadata::RtModuleDef*>(uintptr_t{0x2000});

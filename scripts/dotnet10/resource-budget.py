@@ -32,7 +32,9 @@ def main():
                 key: statistics.median(row[key] for row in rows) for key in rows[0] if key != 'checksum'}}
     sizes = {a.runner.name: a.runner.stat().st_size}
     if a.node: sizes[a.runner.with_suffix('.wasm').name] = a.runner.with_suffix('.wasm').stat().st_size
-    if a.baseline: sizes['baseline'] = a.baseline.stat().st_size
+    if a.baseline:
+        sizes['baseline'] = a.baseline.stat().st_size
+        if a.node: sizes['baseline_wasm'] = a.baseline.with_suffix('.wasm').stat().st_size
     a.output.parent.mkdir(parents=True, exist_ok=True)
     a.output.write_text(json.dumps({'binary_bytes': sizes, 'results': result}, indent=2) + '\n', encoding='utf-8')
     for count, rows in result.items():
