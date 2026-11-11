@@ -48,6 +48,10 @@ namespace LeanAOT.ToCpp
             IMethod method = info.method;
             _forwardDeclaration.AddMethodForwardDeclaration(method);
             MethodDetail methodDetail = GlobalServices.Inst.MetadataService.GetMethodDetail(method);
+            // Canonical body declarations erase reference parameters. Stack
+            // offsets still name the actual signature's exact pointer types.
+            foreach (var parameter in methodDetail.ParamsIncludeThis)
+                _forwardDeclaration.AddTypeForwardDefine(parameter.Type);
 
             _invokerImplWriter.AddLine();
             //_invokerImplWriter.AddLine($"// Invoker for {method.FullName}");

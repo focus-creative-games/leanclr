@@ -2172,7 +2172,8 @@ namespace LeanAOT.ToCpp
             }
             if (_manifestService.ShouldAOT(methodDetail.Method))
             {
-                var argsStr = CreateMethodFunctionArgsWithCast(methodDetail, args);
+                var bodyMethod = _metadataService.GetMethodDetail(GlobalServices.Inst.ReferenceSharing?.Canonicalize(methodDetail.Method) ?? methodDetail.Method);
+                var argsStr = CreateMethodFunctionArgsWithCast(bodyMethod, args);
                 if (methodDetail.IsGeneric) argsStr = methodDetail.WithMethodContext(argsStr, methodVarNameProvider());
                 if (!methodDetail.IsVoidReturn)
                 {

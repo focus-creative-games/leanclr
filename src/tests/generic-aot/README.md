@@ -76,3 +76,8 @@ and scripts/test/generic-eh.py for the archived protocol/platform matrix.
 Wide long/ulong/double/struct returns have a separate `--status-out-returns`
 runner switch (`--leanaot-status-out-returns` for generation). The default
 remains unchanged; see [the measured wide-return trial](../../../docs/performance/aot-wide-returns.md).
+
+`--share-reference-generics` opts the runners into bounded canonical reference
+bodies (`--leanaot-share-reference-generics` for generation). Real contexts and
+registered identities remain distinct. See [the sharing trial and measured
+scope](../../../docs/performance/aot-reference-sharing.md).

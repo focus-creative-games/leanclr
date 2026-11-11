@@ -77,7 +77,15 @@ namespace LeanAOT.ToCpp
 
         public string FullName => _method.FullName;
 
-        public string UniqueName => _uniqueName;
+        internal string UnsharedUniqueName => _uniqueName;
+        public string UniqueName
+        {
+            get
+            {
+                var body = GlobalServices.Inst?.ReferenceSharing?.Canonicalize(_method);
+                return body == null || ReferenceEquals(body, _method) ? _uniqueName : GlobalServices.Inst.MetadataService.GetMethodDetail(body).UnsharedUniqueName;
+            }
+        }
 
         public string VirtualMethodUniqueName => $"{_uniqueName}_virtual";
 

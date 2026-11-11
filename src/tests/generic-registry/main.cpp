@@ -329,6 +329,38 @@ static void mixed_wide_returns()
     *target = original;
 }
 
+static void reference_sharing_cases(bool expected)
+{
+    auto* tests = type("AotTests", "AotTests.TC_ReferenceSharing");
+    auto object = LEANCLR_NEWOBJ(tests, gc::GcAllocSite::make_internal(__FILE__, __LINE__, "reference sharing tests"));
+    check(object.is_ok(), "reference sharing allocation");
+    for (const char* name :
+         {"SelectAcrossAssemblies", "ClassAndMethodContexts", "SharedErrors", "ReflectionAndUnregistered", "TypeDependentSpecializations", "LoopAndNull"})
+    {
+        const auto* method = vm::Method::find_matched_method_in_class_by_name(tests, name);
+        check(method && method->invoker_type == metadata::RtInvokerType::Aot, "reference sharing wrapper backend");
+        auto result = vm::Runtime::invoke_with_run_cctor(method, object.unwrap(), nullptr);
+        check(result.is_ok(), name);
+        std::printf("Passed: AotTests.TC_ReferenceSharing.%s\n", name);
+    }
+    auto* functions = type("Common", "GenericAotLibrary.Functions");
+    const auto& corlib = vm::Class::get_corlib_types();
+    const auto* strings = inflate(functions, "Identity", corlib.cls_string->by_val);
+    const auto* objects = inflate(functions, "Identity", corlib.cls_object->by_val);
+    backend(strings, expected, "shared identity string backend");
+    backend(objects, expected, "shared identity object backend");
+    auto argument_class = vm::Class::get_class_from_typesig(strings->generic_method->generic_context.method_inst->generic_args[0]);
+    check(strings != objects && strings->generic_method != objects->generic_method && argument_class.is_ok() && argument_class.unwrap() == corlib.cls_string,
+          "sharing must preserve actual method identity/context");
+#if GENERIC_REGISTRY_SHARED_REFERENCES
+    check(expected && strings->method_ptr == objects->method_ptr, "registered references must share canonical code");
+#endif
+    auto unregistered = vm::Class::find_nested_class_by_name(tests, "Unregistered", false);
+    check(unregistered.is_ok() && unregistered.unwrap(), "unregistered reference type");
+    backend(inflate(functions, "Identity", unregistered.unwrap()->by_val), false, "canonical code must not register unseen instances");
+    std::puts("Formal managed reference sharing tests passed: 6");
+}
+
 static void generic_eh_cases(bool expected)
 {
     auto* functions = type("Common", "GenericAotLibrary.Eh");
@@ -574,4 +606,5 @@ int main(int argc, char** argv)
     }
     std::puts("Formal managed wide return tests passed: 7");
     mixed_wide_returns();
+    reference_sharing_cases(expected);
 }

@@ -61,13 +61,13 @@ jobs:
         run: python scripts/test/aot-features.py --target native --config Debug ${{ matrix.flags }}
       - name: Verify 32-bit native context and snapshot ABI
         run: python scripts/test/aot-features.py --target native --arch Win32 ${{ matrix.flags }}
-      - name: Verify formal AotTests with two-entry interface caches
-        run: python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target all --emsdk .emsdk ${{ matrix.flags }}
+      - name: Verify canonical reference bodies with two-entry interface caches
+        run: python scripts/test/global-generics.py --share-reference-generics --interface-call-cache --interface-cache-entries 2 --target all --emsdk .emsdk ${{ matrix.flags }}
       - name: Verify two-entry cache Debug and 32-bit layouts
         run: |
-          python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target native --config Debug ${{ matrix.flags }}
+          python scripts/test/global-generics.py --share-reference-generics --interface-call-cache --interface-cache-entries 2 --target native --config Debug ${{ matrix.flags }}
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          python scripts/test/global-generics.py --interface-call-cache --interface-cache-entries 2 --target native --arch Win32 ${{ matrix.flags }}
+          python scripts/test/global-generics.py --share-reference-generics --interface-call-cache --interface-cache-entries 2 --target native --arch Win32 ${{ matrix.flags }}
       - name: Verify single-entry interface cache control
         run: python scripts/test/global-generics.py --interface-call-cache --output out/interface-dispatch/cached --target all --emsdk .emsdk ${{ matrix.flags }}
       - name: Verify cache-disabled native and Wasm control

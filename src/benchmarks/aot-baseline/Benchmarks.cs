@@ -12,6 +12,16 @@ public static class Benchmarks
     public static uint WideLong(int n, uint seed) { long value = seed; for (int i = 0; i < n; ++i) value = WideLongStep(value); return unchecked((uint)value); }
     public static uint WideDouble(int n, uint seed) { double value = seed; for (int i = 0; i < n; ++i) value = WideDoubleStep(value); return (uint)value; }
     public static uint WideStruct(int n, uint seed) { Pair value = new Pair { X = seed, Y = 17 }; for (int i = 0; i < n; ++i) value = WidePairStep(value); return value.X ^ value.Y; }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static T SharingLoop<T>(T first, T fallback, int count, uint seed) where T : class
+    {
+        for (int i = 0; i < count; ++i) seed = unchecked(seed * 1664525u + 1013904223u);
+        return (seed & 0x40000000u) == 0 ? first : fallback;
+    }
+    public static uint SharingString(int n, uint seed) { string first = "first"; return object.ReferenceEquals(SharingLoop<string>(first, "second", n, seed), first) ? 17u : 19u; }
+    public static uint SharingObject(int n, uint seed) { object first = PropertyBox; return object.ReferenceEquals(SharingLoop<object>(first, Transformer, n, seed), first) ? 17u : 19u; }
+    public static uint SharingBox(int n, uint seed) { return object.ReferenceEquals(SharingLoop<Box>(PropertyBox, null, n, seed), PropertyBox) ? 17u : 19u; }
+    public static uint SharingArray(int n, uint seed) { return object.ReferenceEquals(SharingLoop<uint[]>(Data, null, n, seed), Data) ? 17u : 19u; }
     public interface ITransform { uint Apply(uint x); }
     public sealed class Transform : ITransform
     {

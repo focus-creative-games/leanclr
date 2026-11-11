@@ -115,6 +115,8 @@ def build(opts, output, managed_input=None):
         generator += ['--leanaot-packed-int32-returns']
     if getattr(opts, 'status_out_returns', False):
         generator += ['--leanaot-status-out-returns']
+    if getattr(opts, 'share_reference_generics', False):
+        generator += ['--leanaot-share-reference-generics']
     if opts.interface_call_cache:
         generator += ['--leanaot-interface-call-cache', '--leanaot-interface-cache-entries', str(opts.interface_cache_entries)]
     commands.append([str(x) for x in generator])
@@ -147,6 +149,7 @@ def main():
     ap.add_argument('--lightweight-returns', action='store_true')
     ap.add_argument('--packed-int32-returns', action='store_true')
     ap.add_argument('--status-out-returns', action='store_true')
+    ap.add_argument('--share-reference-generics', action='store_true')
     ap.add_argument('--interface-call-cache', action='store_true')
     ap.add_argument('--interface-cache-entries', type=int, choices=[1, 2], default=1)
     ap.add_argument('--samples', type=int, default=7)

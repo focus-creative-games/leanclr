@@ -25,6 +25,7 @@ def main():
     ap.add_argument('--lightweight-returns', action='store_true')
     ap.add_argument('--packed-int32-returns', action='store_true')
     ap.add_argument('--status-out-returns', action='store_true')
+    ap.add_argument('--share-reference-generics', action='store_true')
     ap.add_argument('--generic-only', action='store_true')
     opts = ap.parse_args()
     if opts.target != 'native' and not opts.emsdk:
@@ -63,6 +64,7 @@ def main():
             if family == 'eh': command += ['-a', 'FilterFixture']
             if variant == 'disabled': command += ['--leanaot-max-generic-instances', '0']
             if opts.lightweight_returns: command += ['--leanaot-lightweight-returns']
+            if opts.share_reference_generics: command += ['--leanaot-share-reference-generics']
             if opts.status_out_returns: command += ['--leanaot-status-out-returns']
             if opts.packed_int32_returns: command += ['--leanaot-packed-int32-returns']
             run(command, output / f'{family}-{variant}-generate.log')

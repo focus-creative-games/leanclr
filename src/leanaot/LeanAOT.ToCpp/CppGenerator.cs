@@ -184,6 +184,7 @@ namespace LeanAOT.ToCpp
         {
             ModuleMethodBodyCodeFilePart body = null;
             int part = 0;
+            var emittedBodies = new HashSet<string>(StringComparer.Ordinal);
             foreach (var instance in _config.manifest.GenericMethodPlans.OrderBy(p => p.Key, StringComparer.Ordinal))
             {
                 if (body == null || body.ExceedsMaxSize())
@@ -191,8 +192,10 @@ namespace LeanAOT.ToCpp
                     body?.Save();
                     body = new ModuleMethodBodyCodeFilePart($"{_config.outputCodeDir}/generic_methods_part{part++}.cpp", null);
                 }
-                var detail = GlobalServices.Inst.MetadataService.GetMethodDetail(instance.Method);
                 GlobalServices.Inst.InvokerService.GetInvoker(instance.Method);
+                var method = GlobalServices.Inst.ReferenceSharing.Canonicalize(instance.Method);
+                if (!emittedBodies.Add(Manifest.GenericInstanceKey(method))) continue;
+                var detail = GlobalServices.Inst.MetadataService.GetMethodDetail(method);
                 new MethodWriter(detail, body).WriteCode();
                 if (detail.ShouldGenerateVirtualMethod) new VirtualMethodWriter(detail, body).WriteCode();
             }

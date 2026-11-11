@@ -43,6 +43,7 @@ def main():
     ap.add_argument('--lightweight-returns', action='store_true')
     ap.add_argument('--packed-int32-returns', action='store_true')
     ap.add_argument('--status-out-returns', action='store_true')
+    ap.add_argument('--share-reference-generics', action='store_true')
     ap.add_argument('--interface-call-cache', action='store_true')
     ap.add_argument('--interface-cache-entries', type=int, choices=[1, 2], default=1)
     ap.add_argument('--output', type=Path, default=ROOT / 'out/global-generics')
@@ -77,6 +78,7 @@ def main():
             command += ['--leanaot-max-generic-instances', '0']
         if opts.lightweight_returns:
             command += ['--leanaot-lightweight-returns']
+        if opts.share_reference_generics: command += ['--leanaot-share-reference-generics']
         if opts.status_out_returns: command += ['--leanaot-status-out-returns']
         if opts.packed_int32_returns:
             command += ['--leanaot-packed-int32-returns']
@@ -85,6 +87,14 @@ def main():
         run(command, output / f'{variant}-generate.log')
         report = json.loads((generated / 'generic-aot-report.json').read_text())
         assert report['packed_int32_returns'] == opts.packed_int32_returns
+        assert report['reference_generic_sharing'] == opts.share_reference_generics
+        if opts.share_reference_generics and variant == 'default':
+            assert report['generic_body_count'] < len(report['instances'])
+            assert report['shared_reference_bindings']
+            instances = {item['key'] for item in report['instances']}
+            assert all(item['instance'] in instances for item in report['shared_reference_bindings'])
+        else:
+            assert not report['shared_reference_bindings']
         assert report['interface_call_cache'] == opts.interface_call_cache
         assert report['interface_call_cache_entries'] == (opts.interface_cache_entries if opts.interface_call_cache else 0)
         budget = 2 if opts.interface_cache_entries == 2 else 4
@@ -132,7 +142,8 @@ def main():
             command = ['cmake', '-S', ROOT / 'src/tests/generic-registry', '-B', build,
                        f'-DCMAKE_BUILD_TYPE={opts.config}', '-DCMAKE_TRY_COMPILE_CONFIGURATION=Release',
                        f'-DGENERIC_REGISTRY_CPP={generated}', f'-DGENERIC_REGISTRY_DLLS:STRING={stage.relative_to(ROOT).as_posix()}',
-                       f'-DGENERIC_REGISTRY_DISABLED={"ON" if variant == "disabled" else "OFF"}']
+                       f'-DGENERIC_REGISTRY_DISABLED={"ON" if variant == "disabled" else "OFF"}',
+                       f'-DGENERIC_REGISTRY_SHARED_REFERENCES={"ON" if opts.share_reference_generics and variant == "default" else "OFF"}']
             if target == 'native':
                 command += ['-A', opts.arch]
             else:

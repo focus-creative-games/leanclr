@@ -122,6 +122,9 @@ internal class Program
         [Option("leanaot-status-out-returns", HelpText = "Opt-in status plus explicit output pointer for AOT long/ulong/double/struct returns.")]
         public bool StatusOutAotReturns { get; set; }
 
+        [Option("leanaot-share-reference-generics", HelpText = "Share metadata-independent generic reference bodies; keep actual runtime contexts and specialized fallback.")]
+        public bool ShareReferenceGenerics { get; set; }
+
         [Option("leanaot-interface-call-cache", HelpText = "Opt-in bounded stack-local target caches for interface callsites in loops.")]
         public bool InterfaceCallCache { get; set; }
 
@@ -553,6 +556,7 @@ internal class Program
         config.LightweightAotReturns = options.LightweightAotReturns;
         config.PackedInt32AotReturns = options.PackedInt32AotReturns;
         config.StatusOutAotReturns = options.StatusOutAotReturns;
+        config.ShareReferenceGenerics = options.ShareReferenceGenerics;
         config.InterfaceCallCache = options.InterfaceCallCache;
         config.InterfaceCallCacheEntries = options.InterfaceCallCacheEntries;
         config.EnableArrayBoundsCheck = options.EnableArrayBoundsCheck;
@@ -741,6 +745,9 @@ internal class Program
                 interface_call_cache = globalServices.Config.InterfaceCallCache,
                 interface_call_cache_entries = globalServices.Config.InterfaceCallCache ? globalServices.Config.InterfaceCallCacheEntries : 0,
                 generic_registry = "global-sorted-fnv1a64",
+                reference_generic_sharing = globalServices.Config.ShareReferenceGenerics,
+                shared_reference_bindings = globalServices.ReferenceSharing.Bindings.Select(p => new { instance = p.Instance, body = p.Body }),
+                generic_body_count = manifest.GenericMethodPlans.Select(p => Manifest.GenericInstanceKey(globalServices.ReferenceSharing.Canonicalize(p.Method))).Distinct().Count(),
                 instances = manifest.GenericMethodPlans.Select(p => new { method = p.Method.FullName, key = p.Key, depth = p.Depth }),
                 fallbacks = manifest.GenericFallbacks,
                 method_fallbacks = manifest.MethodFallbacks,

@@ -6,6 +6,7 @@
         public static GlobalServices Inst { get; set; }
 
         public GlobalConfig Config { get; set; }
+        public ReferenceGenericSharing ReferenceSharing { get; set; }
 
         public TypeNameService TypeNameService { get; set; }
 

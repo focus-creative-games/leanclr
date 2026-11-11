@@ -95,7 +95,11 @@ int main(int argc, char** argv)
                              "GenericEhString",
                              "WideLong",
                              "WideDouble",
-                             "WideStruct"};
+                             "WideStruct",
+                             "SharingString",
+                             "SharingObject",
+                             "SharingBox",
+                             "SharingArray"};
     const char* workloads[] = {"arithmetic",
                                "calls",
                                "properties",
@@ -118,7 +122,12 @@ int main(int argc, char** argv)
                                "generic-eh-string",
                                "wide-long",
                                "wide-double",
-                               "wide-struct"};
+                               "wide-struct",
+                               "sharing-string",
+                               "sharing-object",
+                               "sharing-box",
+                               "sharing-array"};
+    const bool sharing_mode = argc > 3 && std::strcmp(argv[3], "reference-sharing") == 0;
     const bool wide_mode = argc > 3 && std::strcmp(argv[3], "wide-returns") == 0;
     const bool generic_eh_mode = argc > 3 && std::strcmp(argv[3], "generic-eh") == 0;
     const bool integer_mode = argc > 3 && std::strcmp(argv[3], "integer-returns") == 0;
@@ -145,7 +154,8 @@ int main(int argc, char** argv)
                 "Generic interface benchmark implementation must be AOT");
     }
     const unsigned workload_count = argc > 3 && std::strcmp(argv[3], "returns") == 0 ? 10 : 8;
-    for (unsigned index = 0; index < (wide_mode         ? 3
+    for (unsigned index = 0; index < (sharing_mode      ? 4
+                                      : wide_mode       ? 3
                                       : generic_eh_mode ? 2
                                       : integer_mode    ? 12
                                       : interface_mode  ? (interface2_mode ? 7 : 4)
@@ -153,7 +163,8 @@ int main(int argc, char** argv)
          ++index)
     {
         const unsigned interface_indices[] = {4, 10, 11, 12, 13, 14, 15};
-        const unsigned k = wide_mode         ? 20 + index
+        const unsigned k = sharing_mode      ? 23 + index
+                           : wide_mode       ? 20 + index
                            : generic_eh_mode ? 18 + index
                            : integer_mode    ? (index < 10 ? index : index + 6)
                            : interface_mode  ? interface_indices[index]

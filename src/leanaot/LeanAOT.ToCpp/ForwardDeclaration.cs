@@ -454,6 +454,8 @@ namespace LeanAOT.ToCpp
 
         public void AddMethodForwardDeclaration(IMethod method)
         {
+            bool selected = _manifestService.ShouldAOT(method);
+            method = GlobalServices.Inst.ReferenceSharing?.Canonicalize(method) ?? method;
             if (!_addedMethods.Add(method))
                 return;
             MethodDetail methodDetail = _metadataService.GetMethodDetail(method);
@@ -472,7 +474,7 @@ namespace LeanAOT.ToCpp
                 AddTypeForwardDefine(methodDetail.DeclaringType);
             }
 
-            if (!_manifestService.ShouldAOT(method))
+            if (!selected)
             {
                 return;
             }
