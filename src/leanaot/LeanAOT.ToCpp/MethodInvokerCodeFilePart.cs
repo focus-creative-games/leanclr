@@ -72,7 +72,8 @@ namespace LeanAOT.ToCpp
             }
             else
             {
-                _invokerImplWriter.AddLine($"return {VmFunctionNames.SetRetOrReturnError}((({castFnPtrType})method_ptr)({args}), ret);");
+                string call = methodDetail.UsesStatusOut ? ReturnProtocol.InvokeStatusOut(methodDetail.RetType, $"(({castFnPtrType})method_ptr)", args) : $"(({castFnPtrType})method_ptr)({args})";
+                _invokerImplWriter.AddLine($"return {VmFunctionNames.SetRetOrReturnError}({call}, ret);");
             }
             _invokerImplWriter.DecreaseIndent();
             _invokerImplWriter.AddLine("}");

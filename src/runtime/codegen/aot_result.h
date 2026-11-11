@@ -178,5 +178,19 @@ static_assert(std::is_trivially_copyable<AotInt32Result<uint32_t>>::value, "AOT 
 static_assert(sizeof(AotInt32Result<uint32_t>) == sizeof(uint64_t), "AOT uint32 result must be one 64-bit word");
 static_assert(std::is_trivially_copyable<AotVoidResult>::value, "AOT void ABI must stay trivial");
 static_assert(sizeof(AotVoidResult) == sizeof(core::RtErr), "AOT void result must contain only its error code");
+
+// Physical ABI: scalar status and an explicit, caller-owned output pointer.
+// The output is read only on success. No heap allocation or shared error slot.
+template <typename T, typename Function, typename... Args>
+inline core::Result<T> invoke_aot_status_out(Function function, Args... args) noexcept
+{
+    static_assert(std::is_trivially_copyable<T>::value, "AOT outputs must be trivially copyable");
+    T value;
+    core::RtErr status = function(args..., &value);
+    if (status != core::RtErr::None)
+        return status;
+    return value;
+}
+
 } // namespace codegen
 } // namespace leanclr

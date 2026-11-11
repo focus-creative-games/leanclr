@@ -6,6 +6,12 @@ using System.Runtime.CompilerServices;
 public static class Benchmarks
 {
     public struct Pair { public uint X, Y; }
+    [MethodImpl(MethodImplOptions.NoInlining)] public static long WideLongStep(long value) { return unchecked(value * 1664525L + 1013904223L); }
+    [MethodImpl(MethodImplOptions.NoInlining)] public static double WideDoubleStep(double value) { return value * 0.5 + 1.0; }
+    [MethodImpl(MethodImplOptions.NoInlining)] public static Pair WidePairStep(Pair value) { value.X = unchecked(value.X * 1664525u + value.Y); value.Y = unchecked(value.Y + 7); return value; }
+    public static uint WideLong(int n, uint seed) { long value = seed; for (int i = 0; i < n; ++i) value = WideLongStep(value); return unchecked((uint)value); }
+    public static uint WideDouble(int n, uint seed) { double value = seed; for (int i = 0; i < n; ++i) value = WideDoubleStep(value); return (uint)value; }
+    public static uint WideStruct(int n, uint seed) { Pair value = new Pair { X = seed, Y = 17 }; for (int i = 0; i < n; ++i) value = WidePairStep(value); return value.X ^ value.Y; }
     public interface ITransform { uint Apply(uint x); }
     public sealed class Transform : ITransform
     {

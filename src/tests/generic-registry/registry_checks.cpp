@@ -167,7 +167,7 @@ void verify_generic_registry(const RtMethodInfo* primitive, const RtMethodInfo* 
     require(unordered.is_err() && unordered.unwrap_err() == RtErr::BadImageFormat, "reject unordered index");
     require(AotModule::find_aot_generic_method_impl(primitive) == prototype, "failed registration must preserve registry");
     collision[0] = *prototype;
-    collision[0].return_protocol = 4;
+    collision[0].return_protocol = 8;
     data.generic_method_entry_count = 1;
     auto protocol = AotModule::register_aot_modules(&data);
     require(protocol.is_err() && protocol.unwrap_err() == RtErr::BadImageFormat, "reject unknown generic return ABI");

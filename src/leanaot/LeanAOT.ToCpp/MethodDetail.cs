@@ -215,6 +215,10 @@ namespace LeanAOT.ToCpp
             return NameUtil.StandardizeName(result.ToString());
         }
 
+        public bool UsesStatusOut => ReturnProtocol.UsesStatusOut(_retType);
+        private string OutputParameter => MethodGenerationUtil.GetAbiRelaxedTypeName(_retType) + "* __aot_ret";
+        private string WithOutput(string args) => UsesStatusOut ? (args.Length == 0 ? OutputParameter : args + ", " + OutputParameter) : args;
+
         public string CreateMethodParameters()
         {
             var typeNameService = GlobalServices.Inst.TypeNameService;
@@ -223,13 +227,13 @@ namespace LeanAOT.ToCpp
             //{
             //    paramList = paramList.Append($"{ConstStrings.MethodInfoPtrTypeName} {ConstStrings.MethodInfoParameterName}");
             //}
-            return WithMethodContext(string.Join(", ", paramList), "const leanclr::metadata::RtMethodInfo* __aot_method");
+            return WithOutput(WithMethodContext(string.Join(", ", paramList), "const leanclr::metadata::RtMethodInfo* __aot_method"));
         }
 
         public string GenerateMethodDeclaring(string overrideMethodName = null)
         {
             string attributes = _methodDef != null && (_methodDef.ImplAttributes & MethodImplAttributes.NoInlining) != 0 ? "LEANCLR_CODEGEN_NOINLINE " : "";
-            return $"{attributes}{MethodGenerationUtil.GetResultTypeName(_retType)} {overrideMethodName ?? _uniqueName}({CreateMethodParameters()}){ConstStrings.CppFunctionNoexcept}";
+            return $"{attributes}{(UsesStatusOut ? "leanclr::RtErr" : MethodGenerationUtil.GetResultTypeName(_retType))} {overrideMethodName ?? _uniqueName}({CreateMethodParameters()}){ConstStrings.CppFunctionNoexcept}";
         }
 
         public string GenerateVirtualMethodDeclaring()
@@ -247,10 +251,11 @@ namespace LeanAOT.ToCpp
             return $"typedef {CreateRelaxMethodFunctionTypeDefine(cppTypedefName)}";
         }
 
-        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null, bool? lightweight = null, bool? packedInt32 = null)
+        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null, bool? lightweight = null, bool? packedInt32 = null, bool? statusOut = null)
         {
             var sb = new StringBuilder();
-            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType, lightweight, packedInt32));
+            bool output = ReturnProtocol.UsesStatusOut(_retType, statusOut ?? (!lightweight.HasValue && GlobalServices.Inst.Config.StatusOutAotReturns));
+            sb.Append(output ? "leanclr::RtErr" : MethodGenerationUtil.GetResultTypeName(_retType, lightweight, packedInt32));
             sb.Append(" (*)(");
             bool first = true;
             foreach (var param in _paramsIncludeThis)
@@ -261,7 +266,8 @@ namespace LeanAOT.ToCpp
                     sb.Append(", ");
                 sb.Append(MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed));
             }
-            if (genericContext ?? IsGeneric) sb.Append((first ? "" : ", ") + "const leanclr::metadata::RtMethodInfo*");
+            if (genericContext ?? IsGeneric) { sb.Append((first ? "" : ", ") + "const leanclr::metadata::RtMethodInfo*"); first = false; }
+            if (output) sb.Append((first ? "" : ", ") + MethodGenerationUtil.GetAbiRelaxedTypeName(_retType) + "*");
             sb.Append(')');
             sb.Append(ConstStrings.CppFunctionNoexcept);
             return sb.ToString();

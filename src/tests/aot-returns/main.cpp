@@ -88,8 +88,42 @@ static void integer_boundaries(T value)
     check(back.is_ok() && back.unwrap() == value, "integer packed boundary");
 }
 
+struct WidePacket
+{
+    int64_t integer;
+    double floating;
+    Object* reference;
+};
+
+extern "C" RtErr aot_wide_probe(WidePacket value, uint8_t error, WidePacket* output) noexcept
+{
+    if (error)
+        return static_cast<RtErr>(error);
+    *output = value;
+    return RtErr::None;
+}
+
+static void wide_boundaries()
+{
+    Object marker = {};
+    WidePacket input = {INT64_MIN, -0.125, &marker};
+    auto success = leanclr::codegen::invoke_aot_status_out<WidePacket>(aot_wide_probe, input, uint8_t(0));
+    check(success.is_ok() && success.unwrap().integer == INT64_MIN && success.unwrap().floating == -0.125 && success.unwrap().reference == &marker,
+          "wide status-out payload");
+    for (unsigned code = 1; code <= 255; ++code)
+    {
+        WidePacket output = {17, 0.25, nullptr};
+        auto status = aot_wide_probe(input, static_cast<uint8_t>(code), &output);
+        check(status == static_cast<RtErr>(code) && output.integer == 17 && output.floating == 0.25 && output.reference == nullptr,
+              "wide failure must leave output untouched");
+        auto result = leanclr::codegen::invoke_aot_status_out<WidePacket>(aot_wide_probe, input, static_cast<uint8_t>(code));
+        check(result.is_err() && result.unwrap_err() == status, "wide adapter error propagation");
+    }
+}
+
 int main()
 {
+    wide_boundaries();
     configure_test_assertions();
     for (unsigned code = 1; code <= 255; ++code)
     {

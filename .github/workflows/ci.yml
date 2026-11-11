@@ -29,6 +29,10 @@ jobs:
           - {protocol: lightweight, flags: '--lightweight-returns'}
           - {protocol: packed, flags: '--packed-int32-returns'}
           - {protocol: packed-lightweight, flags: '--packed-int32-returns --lightweight-returns'}
+          - {protocol: status-out, flags: '--status-out-returns'}
+          - {protocol: status-out-lightweight, flags: '--status-out-returns --lightweight-returns'}
+          - {protocol: status-out-packed, flags: '--status-out-returns --packed-int32-returns'}
+          - {protocol: all-returns, flags: '--status-out-returns --packed-int32-returns --lightweight-returns'}
     runs-on: windows-2022
     timeout-minutes: 90
     steps:

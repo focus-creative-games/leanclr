@@ -363,7 +363,7 @@ namespace LeanAOT.ToCpp
             _tailWriter.AddLine($"{GetHanleReturnValueLabelName()}:");
             if (!_method.IsVoidReturn)
             {
-                _tailWriter.AddLine($"{VmFunctionNames.RET_VALUE}({GetRetVariableName()});");
+                _tailWriter.AddLine(_method.UsesStatusOut ? $"*__aot_ret = {GetRetVariableName()}; return leanclr::RtErr::None;" : $"{VmFunctionNames.RET_VALUE}({GetRetVariableName()});");
             }
             else
             {
@@ -2176,7 +2176,7 @@ namespace LeanAOT.ToCpp
                 if (methodDetail.IsGeneric) argsStr = methodDetail.WithMethodContext(argsStr, methodVarNameProvider());
                 if (!methodDetail.IsVoidReturn)
                 {
-                    EmitAssignOrThrow(inst, retVar, $"{methodDetail.UniqueName}({argsStr})");
+                    EmitAssignOrThrow(inst, retVar, methodDetail.UsesStatusOut ? ReturnProtocol.InvokeStatusOut(methodDetail.RetType, methodDetail.UniqueName, argsStr) : $"{methodDetail.UniqueName}({argsStr})");
                 }
                 else
                 {

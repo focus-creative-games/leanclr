@@ -457,6 +457,11 @@ inline bool uses_lightweight_aot_returns(const metadata::RtMethodInfo* method) n
     return (method->aot_return_protocol & 1) != 0;
 }
 
+inline bool uses_status_out_aot_returns(const metadata::RtMethodInfo* method) noexcept
+{
+    return (method->aot_return_protocol & 4) != 0;
+}
+
 inline bool uses_packed_int32_aot_returns(const metadata::RtMethodInfo* method) noexcept
 {
     return (method->aot_return_protocol & 2) != 0;

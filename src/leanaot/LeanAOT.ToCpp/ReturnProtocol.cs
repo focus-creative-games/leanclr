@@ -8,7 +8,18 @@ namespace LeanAOT.ToCpp
     static class ReturnProtocol
     {
         public static int Flags => (GlobalServices.Inst.Config.LightweightAotReturns ? 1 : 0) |
-            (GlobalServices.Inst.Config.PackedInt32AotReturns ? 2 : 0);
+            (GlobalServices.Inst.Config.PackedInt32AotReturns ? 2 : 0) | (GlobalServices.Inst.Config.StatusOutAotReturns ? 4 : 0);
+
+        public static bool CanStatusOut(TypeSig type)
+        {
+            type = type.RemovePinnedAndModifiers();
+            return type.ElementType == ElementType.I8 || type.ElementType == ElementType.U8 || type.ElementType == ElementType.R8 ||
+                (MetaUtil.IsValueType(type) && (type.ElementType == ElementType.ValueType || type.ElementType == ElementType.GenericInst) && !type.ToTypeDefOrRef().ResolveTypeDef().IsEnum);
+        }
+
+        public static bool UsesStatusOut(TypeSig type, bool? enabled = null) => (enabled ?? GlobalServices.Inst.Config.StatusOutAotReturns) && CanStatusOut(type);
+        public static string InvokeStatusOut(TypeSig type, string function, string args) =>
+            $"leanclr::codegen::invoke_aot_status_out<{MethodGenerationUtil.GetAbiRelaxedTypeName(type)}>({function}{(args.Length == 0 ? "" : ", " + args)})";
 
         public static bool IsInt32(TypeSig type)
         {

@@ -72,3 +72,7 @@ Closed generic EH methods now use the same conservative normal-path/handoff
 policy after signature and local inflation. The formal suite adds thirteen
 generic EH cases; see [the generic EH report](../../../docs/performance/aot-generic-eh.md)
 and scripts/test/generic-eh.py for the archived protocol/platform matrix.
+
+Wide long/ulong/double/struct returns have a separate `--status-out-returns`
+runner switch (`--leanaot-status-out-returns` for generation). The default
+remains unchanged; see [the measured wide-return trial](../../../docs/performance/aot-wide-returns.md).

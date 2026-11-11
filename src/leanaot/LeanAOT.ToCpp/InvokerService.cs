@@ -36,7 +36,7 @@ namespace LeanAOT.ToCpp
         private string GetInvokerName(IMethod method)
         {
             MethodDetail methodDetail = _metadataService.GetMethodDetail(method);
-            string hash = HashUtil.CreateMd5Hash(MethodGenerationUtil.CreateRelaxedMethodFunctionTypeDeclaring(methodDetail));
+            string hash = HashUtil.CreateMd5Hash(MethodGenerationUtil.CreateRelaxedMethodFunctionTypeDeclaring(methodDetail) + (methodDetail.UsesStatusOut ? "|status-out" : ""));
             return $"leanclr_generated_invoke_method_{hash}";
         }
 

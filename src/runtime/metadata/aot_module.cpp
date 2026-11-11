@@ -23,12 +23,12 @@ RtResultVoid AotModule::register_aot_modules(const RtAotModulesData* initData)
     // Validate before changing registry state. The index itself is static data;
     // registration never loads argument assemblies or allocates a generic map.
     for (uint32_t i = 0; i < initData->module_count; ++i)
-        if (!initData->modules[i] || !initData->modules[i]->module_name || initData->modules[i]->return_protocol > 3)
+        if (!initData->modules[i] || !initData->modules[i]->module_name || initData->modules[i]->return_protocol > 7)
             return RtErr::BadImageFormat;
     for (uint32_t i = 0; i < initData->generic_method_entry_count; ++i)
     {
         const auto& entry = initData->generic_method_entries[i];
-        if (!entry.definition_module || !*entry.definition_module || entry.return_protocol > 3 ||
+        if (!entry.definition_module || !*entry.definition_module || entry.return_protocol > 7 ||
             (!entry.class_argument_count && !entry.method_argument_count) || (entry.class_argument_count && !entry.class_arguments) ||
             (entry.method_argument_count && !entry.method_arguments) || (entry.implementation.token >> 24) != 6 ||
             !RtToken::decode_rid(entry.implementation.token) || !entry.implementation.method_ptr || !entry.implementation.virtual_method_ptr ||

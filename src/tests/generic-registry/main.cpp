@@ -276,6 +276,59 @@ static void integer_cases()
     std::puts("Formal managed integer return tests passed: 7");
 }
 
+static RtResult<int64_t> legacy_wide_target(vm::RtObject*, int64_t value) noexcept
+{
+    if (value == 13)
+        return RtErr::OutOfMemory;
+    return value;
+}
+
+static RtErr status_out_wide_target(vm::RtObject*, int64_t value, int64_t* output) noexcept
+{
+    if (value == 13)
+        return RtErr::OutOfMemory;
+    *output = value;
+    return RtErr::None;
+}
+
+static void mixed_wide_returns()
+{
+    auto* tests = type("AotTests", "AotTests.TC_WideReturns");
+    auto nested = vm::Class::find_nested_class_by_name(tests, "Target", false);
+    check(nested.is_ok() && nested.unwrap() && vm::Class::initialize_all(nested.unwrap()).is_ok(), "wide target class");
+    auto receiver = LEANCLR_NEWOBJ(nested.unwrap(), gc::GcAllocSite::make_internal(__FILE__, __LINE__, "mixed wide returns"));
+    check(receiver.is_ok(), "wide target allocation");
+    auto* target = const_cast<metadata::RtMethodInfo*>(vm::Method::find_matched_method_in_class_by_name(nested.unwrap(), "Integer"));
+    const auto* caller = vm::Method::find_matched_method_in_class_by_name(tests, "ReadInteger");
+    check(target && caller && caller->invoker_type == metadata::RtInvokerType::Aot, "wide interface callsite");
+    auto original = *target;
+    vm::RtObject* object = receiver.unwrap();
+    int64_t input = INT64_MIN;
+    const void* args[] = {object, &input};
+    for (uint8_t flags = 0; flags < 8; ++flags)
+    {
+        target->aot_return_protocol = flags;
+        target->method_ptr = target->virtual_method_ptr = (flags & 4) ? reinterpret_cast<metadata::RtManagedMethodPointer>(status_out_wide_target)
+                                                                      : reinterpret_cast<metadata::RtManagedMethodPointer>(legacy_wide_target);
+        input = INT64_MIN;
+        auto value = vm::Runtime::invoke_with_run_cctor(caller, nullptr, args);
+        if (value.is_err() && vm::Exception::get_current_exception())
+        {
+            utils::Utf8StringBuilder message;
+            vm::Exception::format_exception(vm::Exception::get_current_exception(), message);
+            std::fprintf(stderr, "%.*s\n", static_cast<int>(message.length()), message.get_const_chars());
+        }
+        if (value.is_err() || !value.unwrap() || *reinterpret_cast<int64_t*>(value.unwrap() + 1) != input)
+            std::fprintf(stderr, "Mixed wide flag %u: error %u, payload %lld\n", unsigned(flags), value.is_err() ? unsigned(value.unwrap_err()) : 0,
+                         value.is_ok() && value.unwrap() ? static_cast<long long>(*reinterpret_cast<int64_t*>(value.unwrap() + 1)) : 0LL);
+        check(value.is_ok() && value.unwrap() && *reinterpret_cast<int64_t*>(value.unwrap() + 1) == input, "mixed wide value");
+        input = 13;
+        auto error = vm::Runtime::invoke_with_run_cctor(caller, nullptr, args);
+        check(error.is_err() && error.unwrap_err() == RtErr::ManagedException, "mixed wide OOM");
+    }
+    *target = original;
+}
+
 static void generic_eh_cases(bool expected)
 {
     auto* functions = type("Common", "GenericAotLibrary.Eh");
@@ -501,4 +554,24 @@ int main(int argc, char** argv)
     interface_cases(expected);
     integer_cases();
     generic_eh_cases(expected);
+    auto* wide = type("AotTests", "AotTests.TC_WideReturns");
+    auto wide_object = LEANCLR_NEWOBJ(wide, gc::GcAllocSite::make_internal(__FILE__, __LINE__, "wide return tests"));
+    check(wide_object.is_ok(), "wide return test object");
+    for (const char* name :
+         {"IntegerBoundaries", "FloatingBits", "StructWithReference", "InterfaceAndEnum", "ErrorPropagation", "ReflectionAndDelegates", "GenericEhBoundary"})
+    {
+        const auto* method = vm::Method::find_matched_method_in_class_by_name(wide, name);
+        check(method && method->invoker_type == metadata::RtInvokerType::Aot, name);
+        auto result = vm::Runtime::invoke_with_run_cctor(method, wide_object.unwrap(), nullptr);
+        if (result.is_err())
+        {
+            utils::Utf8StringBuilder message;
+            vm::Exception::format_exception(vm::Exception::get_current_exception(), message);
+            std::fprintf(stderr, "%.*s\n", static_cast<int>(message.length()), message.get_const_chars());
+        }
+        check(result.is_ok(), name);
+        std::printf("Passed: AotTests.TC_WideReturns.%s\n", name);
+    }
+    std::puts("Formal managed wide return tests passed: 7");
+    mixed_wide_returns();
 }

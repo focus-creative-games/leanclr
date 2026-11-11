@@ -42,6 +42,7 @@ def main():
     ap.add_argument('--msbuild', type=Path)
     ap.add_argument('--lightweight-returns', action='store_true')
     ap.add_argument('--packed-int32-returns', action='store_true')
+    ap.add_argument('--status-out-returns', action='store_true')
     ap.add_argument('--interface-call-cache', action='store_true')
     ap.add_argument('--interface-cache-entries', type=int, choices=[1, 2], default=1)
     ap.add_argument('--output', type=Path, default=ROOT / 'out/global-generics')
@@ -76,6 +77,7 @@ def main():
             command += ['--leanaot-max-generic-instances', '0']
         if opts.lightweight_returns:
             command += ['--leanaot-lightweight-returns']
+        if opts.status_out_returns: command += ['--leanaot-status-out-returns']
         if opts.packed_int32_returns:
             command += ['--leanaot-packed-int32-returns']
         if opts.interface_call_cache:
@@ -103,7 +105,8 @@ def main():
             expected = f'leanclr::codegen::AotInt32Result<{value}>' if opts.packed_int32_returns else f'leanclr::RtResult<{value}>'
             assert expected in integer_signatures[method], method
         for method, value in [('EnumLeaf', 'int32_t'), ('UnsignedEnumLeaf', 'uint32_t'), ('ByRef', 'void*'), ('Wide', 'int64_t'), ('Floating', 'float64_t')]:
-            assert f'leanclr::RtResult<{value}>' in integer_signatures[method], method
+            expected = 'leanclr::RtErr' if opts.status_out_returns and method in ['Wide', 'Floating'] else f'leanclr::RtResult<{value}>'
+            assert expected in integer_signatures[method], method
         for name, expected in [('StraightLine', 0), ('Sum', 1), ('Budget', budget)]:
             matches = [count for method, count in methods.items() if re.search(r'TC_InterfaceDispatch::' + name + r'\(', method)]
             assert matches == [expected if opts.interface_call_cache else 0], (name, matches)

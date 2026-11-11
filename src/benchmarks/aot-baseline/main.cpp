@@ -92,7 +92,10 @@ int main(int argc, char** argv)
                              "UInt32Returns",
                              "Int32Returns",
                              "GenericEhInt",
-                             "GenericEhString"};
+                             "GenericEhString",
+                             "WideLong",
+                             "WideDouble",
+                             "WideStruct"};
     const char* workloads[] = {"arithmetic",
                                "calls",
                                "properties",
@@ -112,7 +115,11 @@ int main(int argc, char** argv)
                                "uint32-returns",
                                "int32-returns",
                                "generic-eh-int",
-                               "generic-eh-string"};
+                               "generic-eh-string",
+                               "wide-long",
+                               "wide-double",
+                               "wide-struct"};
+    const bool wide_mode = argc > 3 && std::strcmp(argv[3], "wide-returns") == 0;
     const bool generic_eh_mode = argc > 3 && std::strcmp(argv[3], "generic-eh") == 0;
     const bool integer_mode = argc > 3 && std::strcmp(argv[3], "integer-returns") == 0;
     const bool interface2_mode = argc > 3 && std::strcmp(argv[3], "interfaces2") == 0;
@@ -138,10 +145,19 @@ int main(int argc, char** argv)
                 "Generic interface benchmark implementation must be AOT");
     }
     const unsigned workload_count = argc > 3 && std::strcmp(argv[3], "returns") == 0 ? 10 : 8;
-    for (unsigned index = 0; index < (generic_eh_mode ? 2 : integer_mode ? 12 : interface_mode ? (interface2_mode ? 7 : 4) : workload_count); ++index)
+    for (unsigned index = 0; index < (wide_mode         ? 3
+                                      : generic_eh_mode ? 2
+                                      : integer_mode    ? 12
+                                      : interface_mode  ? (interface2_mode ? 7 : 4)
+                                                        : workload_count);
+         ++index)
     {
         const unsigned interface_indices[] = {4, 10, 11, 12, 13, 14, 15};
-        const unsigned k = generic_eh_mode ? 18 + index : integer_mode ? (index < 10 ? index : index + 6) : interface_mode ? interface_indices[index] : index;
+        const unsigned k = wide_mode         ? 20 + index
+                           : generic_eh_mode ? 18 + index
+                           : integer_mode    ? (index < 10 ? index : index + 6)
+                           : interface_mode  ? interface_indices[index]
+                                             : index;
         const auto* method = vm::Method::find_matched_method_in_class_by_name(klass, methods[k]);
         require(method != nullptr, "Benchmark method missing");
         const bool is_aot = method->invoker_type == metadata::RtInvokerType::Aot;

@@ -50,7 +50,17 @@ namespace LeanAOT.ToCpp
             }
             AddParameterAndReturnTypeForwardDeclarations();
             WriteMethodHeader();
-            WriteMethodBody();
+            if (_method.UsesStatusOut && !(this is VirtualMethodWriter))
+            {
+                _bodyWriter.AddLine($"auto __result = [&]() noexcept -> {MethodGenerationUtil.GetResultTypeName(_method.RetType, false)}");
+                _bodyWriter.BeginBlock();
+                WriteMethodBody();
+                _bodyWriter.EndBlock();
+                _bodyWriter.AddLine("();");
+                _bodyWriter.AddLine("if (__result.is_err()) return __result.unwrap_err();");
+                _bodyWriter.AddLine("*__aot_ret = __result.unwrap(); return leanclr::RtErr::None;");
+            }
+            else WriteMethodBody();
             WriteMethodEnd();
             _writer.MarkAsArchived();
         }
