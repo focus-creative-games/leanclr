@@ -13,7 +13,7 @@ RtResultVoid SystemArgIterator::setup(intptr_t sig, intptr_t first_arg) noexcept
 {
     (void)sig;
     (void)first_arg;
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    return RtErr::NotSupported;
 }
 
 static RtResultVoid setup_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
@@ -30,7 +30,7 @@ static RtResultVoid setup_invoker(metadata::RtManagedMethodPointer methodPtr, co
 RtResultVoid SystemArgIterator::int_get_next_arg(void* value) noexcept
 {
     (void)value;
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    return RtErr::NotSupported;
 }
 
 static RtResultVoid int_get_next_arg_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
@@ -47,7 +47,7 @@ RtResultVoid SystemArgIterator::int_get_next_arg_with_type(void* value, intptr_t
 {
     (void)value;
     (void)rth_handle;
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    return RtErr::NotSupported;
 }
 
 static RtResultVoid int_get_next_arg_with_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,
@@ -63,7 +63,7 @@ static RtResultVoid int_get_next_arg_with_type_invoker(metadata::RtManagedMethod
 /// @icall: System.ArgIterator::IntGetNextArgType()
 RtResult<intptr_t> SystemArgIterator::int_get_next_arg_type() noexcept
 {
-    RETURN_NOT_IMPLEMENTED_ERROR();
+    return RtErr::NotSupported;
 }
 
 static RtResultVoid int_get_next_arg_type_invoker(metadata::RtManagedMethodPointer methodPtr, const metadata::RtMethodInfo* method,

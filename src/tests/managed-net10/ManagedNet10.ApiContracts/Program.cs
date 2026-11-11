@@ -52,6 +52,12 @@ internal static class Program
     {
         try { _ = VarargsTarget(__arglist()); throw new Exception("varargs incorrectly succeeded"); }
         catch (NotSupportedException) { }
+        RuntimeArgumentHandle handle = default;
+        try { _ = new ArgIterator(handle); throw new Exception("default ArgIterator incorrectly succeeded"); }
+        catch (ArgumentException) { }
+        unsafe { *(nint*)&handle = 1; }
+        try { _ = new ArgIterator(handle); throw new Exception("invalid ArgIterator cookie accepted"); }
+        catch (NotSupportedException) { }
     }
     public static void TestStructReturn()
     {

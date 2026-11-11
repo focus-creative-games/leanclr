@@ -9,7 +9,11 @@ or every generic instantiation. Unsupported wins over validated rules.
 Positive and negative runtime contracts live in `ManagedNet10.ApiContracts`:
 array interfaces and bounds, multidimensional cloning and nonzero lower bounds,
 Span/collections/string operations, reflection, overlapping struct returns, and
-explicit rejection of worker threads without executing their callbacks.
+explicit rejection of worker threads without executing their callbacks, and rejected
+varargs/ArgIterator initialization (including default and forged native cookies).
+Default RuntimeArgumentHandle is rejected by CoreLib with ArgumentException; a
+nonzero cookie reaches the unsupported native initializer and receives
+NotSupportedException without being dereferenced.
 
 ## Historical matrix
 

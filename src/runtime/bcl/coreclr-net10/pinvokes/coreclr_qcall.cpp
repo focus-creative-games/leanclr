@@ -109,22 +109,6 @@ struct RtCpInfo
     uint8_t lead_byte[12];
 };
 
-struct RtArgIteratorSigPointer
-{
-    intptr_t ptr;
-    uint32_t len;
-    uint32_t padding;
-};
-
-struct RtArgIterator
-{
-    intptr_t arg_cookie;
-    RtArgIteratorSigPointer sig_ptr;
-    intptr_t arg_ptr;
-    int32_t remaining_args;
-    int32_t padding;
-};
-
 class RtObjectSlotRootGuard
 {
   public:
@@ -4019,20 +4003,12 @@ RtResultVoid runtime_helpers_compile_method_invoker(metadata::RtManagedMethodPoi
     return intrinsics::SystemRuntimeCompilerServicesRuntimeHelpers::prepare_method(interp::EvalStackOp::get_param<const void*>(params, 0));
 }
 
-RtResultVoid arg_iterator_init_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+RtResultVoid arg_iterator_init_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
                                        interp::RtStackObject*) noexcept
 {
-    auto arg_iterator = interp::EvalStackOp::get_param<RtArgIterator*>(params, 0);
-    auto cookie = interp::EvalStackOp::get_param<intptr_t>(params, 1);
-    if (arg_iterator == nullptr)
-    {
-        RET_ERR(RtErr::NullReference);
-    }
-
-    std::memset(arg_iterator, 0, sizeof(RtArgIterator));
-    arg_iterator->arg_cookie = cookie;
-    arg_iterator->remaining_args = cookie != 0 ? *reinterpret_cast<int32_t*>(cookie) : 0;
-    RET_VOID_OK();
+    // No frame-cookie or native ArgIterator layout is supported by minimal net10.
+    // Reject before reading a cookie or touching the caller's managed struct.
+    return RtErr::NotSupported;
 }
 
 RtResultVoid runtime_helpers_allocate_uninitialized_clone_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
