@@ -1,4 +1,7 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_environment.h"
+#include "bcl/mono/host_result.h"
 #include "icall_base.h"
 
 #include "vm/runtime.h"
@@ -7,7 +10,7 @@
 #include "vm/class.h"
 #include "vm/environment.h"
 
-#include "platform/rt_time.h"
+#include "host/services.h"
 
 namespace leanclr
 {
@@ -86,7 +89,8 @@ static RtResultVoid get_new_line_invoker(metadata::RtManagedMethodPointer, const
 
 RtResult<int32_t> SystemEnvironment::get_platform() noexcept
 {
-    RET_OK(static_cast<int32_t>(vm::Environment::get_platform()));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::Platform, value, vm::Environment::get_platform());
+    return static_cast<int32_t>(value);
 }
 
 /// @icall: System.Environment::get_Platform
@@ -114,7 +118,7 @@ static RtResultVoid get_os_version_string_invoker(metadata::RtManagedMethodPoint
 
 RtResult<int32_t> SystemEnvironment::get_tick_count() noexcept
 {
-    RET_OK(os::Time::get_tick_count());
+    RET_OK(static_cast<int32_t>(static_cast<uint32_t>(host::Services::monotonic_nanoseconds() / 1000000)));
 }
 
 /// @icall: System.Environment::get_TickCount
@@ -142,8 +146,7 @@ static RtResultVoid get_user_name_invoker(metadata::RtManagedMethodPointer, cons
 
 RtResultVoid SystemEnvironment::exit(int32_t code) noexcept
 {
-    vm::Environment::exit(code);
-    RET_VOID_OK();
+    return vm::Environment::exit(code);
 }
 
 /// @icall: System.Environment::Exit
@@ -305,20 +308,25 @@ static RtResultVoid fail_fast_invoker(metadata::RtManagedMethodPointer, const me
 
 RtResult<bool> SystemEnvironment::get_is_64bit_operating_system() noexcept
 {
-    RET_OK(sizeof(void*) == 8);
+    int64_t value;
+    int32_t error = host::Services::query_integer(host::IntegerQuery::Is64BitOperatingSystem, &value);
+    if (error)
+        return bcl::host_error(error);
+    return value != 0;
 }
 
 /// @icall: System.Environment::GetIs64BitOperatingSystem()
 static RtResultVoid get_is_64bit_operating_system_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                           const interp::RtStackObject* /*params*/, interp::RtStackObject* ret) noexcept
 {
-    EvalStackOp::set_return(ret, static_cast<int32_t>(sizeof(void*) == 8));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, value, SystemEnvironment::get_is_64bit_operating_system());
+    EvalStackOp::set_return(ret, static_cast<int32_t>(value));
     RET_VOID_OK();
 }
 
 RtResult<int32_t> SystemEnvironment::get_processor_count() noexcept
 {
-    RET_OK(vm::Environment::get_processor_count());
+    return vm::Environment::get_processor_count();
 }
 
 /// @icall: System.Environment::get_ProcessorCount
@@ -332,7 +340,7 @@ static RtResultVoid get_processor_count_invoker(metadata::RtManagedMethodPointer
 
 RtResult<int32_t> SystemEnvironment::get_page_size() noexcept
 {
-    RET_OK(vm::Environment::get_page_size());
+    return vm::Environment::get_page_size();
 }
 
 /// @icall: System.Environment::GetPageSize
@@ -378,8 +386,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_environment[] = {
 
 utils::Span<vm::InternalCallEntry> SystemEnvironment::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_environment,
-                                              sizeof(s_internal_call_entries_system_environment) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_environment, std::size(s_internal_call_entries_system_environment));
 }
 
 } // namespace icalls

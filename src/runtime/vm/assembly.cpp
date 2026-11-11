@@ -1,4 +1,5 @@
 #include "assembly.h"
+#include "host/services.h"
 
 #include <cstring>
 
@@ -55,10 +56,10 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
         RET_ERR(RtErr::FileNotFound);
     }
     FileData dllFileData = {};
-    auto result = file_loader(name, "dll", dllFileData);
-    if (!file_loader(name, "dll", dllFileData))
+    auto result = host::Services::load_assembly(name, "dll", dllFileData);
+    if (!result)
     {
-        std::printf("Failed to load assembly from file loader for %s\n", name);
+        host::Services::logf(host::LogLevel::Error, "Failed to load assembly from file loader for %s\n", name);
         RET_ERR(RtErr::FileNotFound);
     }
     AssemblyData dllData{dllFileData.data, dllFileData.length, dllFileData.shared};
@@ -66,7 +67,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
     AssemblyData* pdb_data_ptr = nullptr;
     AssemblyData pdb_data;
     FileData pdb_file_data = {};
-    if (file_loader(name, "pdb", pdb_file_data))
+    if (host::Services::load_assembly(name, "pdb", pdb_file_data))
     {
         pdb_data = AssemblyData{pdb_file_data.data, pdb_file_data.length, pdb_file_data.shared};
         pdb_data_ptr = &pdb_data;
@@ -88,8 +89,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(RtAppDomain* app_domain, 
 
 RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll_data, const AssemblyData* symbol_data_ptr)
 {
-    utils::ScopeGuard cleanup_guard;
-    cleanup_guard.register_cleanup(
+    auto dll_cleanup = utils::make_scope_exit(
         [dll_data]()
         {
             if (!dll_data.shared)
@@ -97,7 +97,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
                 alloc::GeneralAllocation::free(const_cast<uint8_t*>(dll_data.data));
             }
         });
-    cleanup_guard.register_cleanup(
+    auto symbol_cleanup = utils::make_scope_exit(
         [symbol_data_ptr]()
         {
             if (symbol_data_ptr && !symbol_data_ptr->shared)
@@ -106,8 +106,10 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
             }
         });
     alloc::MemPool* pool = alloc::GeneralAllocation::new_any<alloc::MemPool>();
-    cleanup_guard.register_cleanup([pool]() { alloc::GeneralAllocation::delete_any(pool); });
+    auto pool_cleanup = utils::make_scope_exit([pool]() { alloc::GeneralAllocation::delete_any(pool); });
 
+    if (!pool)
+        RET_ERR(RtErr::OutOfMemory);
     metadata::PeImageReader reader(dll_data.data, dll_data.length);
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::CliImage*, image, reader.ReadCliImage(*pool));
@@ -125,6 +127,8 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
     if (symbol_data_ptr)
     {
         pdbImage = alloc::GeneralAllocation::new_any<metadata::PdbImage>(*pool, symbol_data_ptr->data, symbol_data_ptr->length);
+        if (!pdbImage)
+            RET_ERR(RtErr::OutOfMemory);
         auto ret_load = pdbImage->load();
         if (ret_load.is_err())
         {
@@ -138,23 +142,25 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
         pdbImage = nullptr;
     }
 
+    auto pdb_cleanup = utils::make_scope_exit([pdbImage]() { alloc::GeneralAllocation::delete_any(pdbImage); });
+
     metadata::RtAssembly* ass = alloc::GeneralAllocation::malloc_any_zeroed<metadata::RtAssembly>();
+    if (!ass)
+        RET_ERR(RtErr::OutOfMemory);
+    auto assembly_cleanup = utils::make_scope_exit([ass]() { alloc::GeneralAllocation::free(ass); });
     metadata::RtModuleDef* mod = alloc::GeneralAllocation::new_any<metadata::RtModuleDef>(ass, *image, pdbImage, *pool);
+    if (!mod)
+        RET_ERR(RtErr::OutOfMemory);
     ass->mod = mod;
-    cleanup_guard.register_cleanup(
-        [ass, mod]()
-        {
-            alloc::GeneralAllocation::free(ass);
-            alloc::GeneralAllocation::delete_any(mod);
-        });
+    auto module_cleanup = utils::make_scope_exit([mod]() { alloc::GeneralAllocation::delete_any(mod); });
     RET_ERR_ON_FAIL(mod->load());
 
     metadata::RtModuleDef::register_module_def(mod);
-    cleanup_guard.register_cleanup(
+    auto registration_cleanup = utils::make_scope_exit(
         [mod]()
         {
             metadata::RtModuleDef::unregister_module_def(mod);
-            std::printf("Failed to load reference assemblies of module %s\n", mod->get_name_no_ext());
+            host::Services::logf(host::LogLevel::Error, "Failed to load reference assemblies of module %s\n", mod->get_name_no_ext());
         });
     utils::Vector<metadata::RtAssembly*> ref_assemblies;
     RET_ERR_ON_FAIL(mod->get_reference_assemblies(ref_assemblies));
@@ -174,7 +180,13 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
     }
 
     // don't free mem pool if succ
-    cleanup_guard.set_not_cleanup();
+    dll_cleanup.dismiss();
+    symbol_cleanup.dismiss();
+    pool_cleanup.dismiss();
+    pdb_cleanup.dismiss();
+    assembly_cleanup.dismiss();
+    module_cleanup.dismiss();
+    registration_cleanup.dismiss();
     RET_OK(ass);
 }
 
@@ -186,11 +198,18 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(RtAppDomain* app_domain
     }
     size_t dll_data_len = static_cast<size_t>(Array::get_array_length(dll_data));
     byte* dup_dll_data = (byte*)utils::MemOp::dup_mem(Array::get_array_data_start_as<uint8_t>(dll_data), dll_data_len);
+    if (!dup_dll_data)
+        RET_ERR(RtErr::OutOfMemory);
     AssemblyData dll_data_wrap{dup_dll_data, dll_data_len, false};
     if (symbol_data)
     {
         size_t symbol_data_len = static_cast<size_t>(Array::get_array_length(symbol_data));
         byte* dup_symbol_data = (byte*)utils::MemOp::dup_mem(Array::get_array_data_start_as<uint8_t>(symbol_data), symbol_data_len);
+        if (!dup_symbol_data)
+        {
+            alloc::GeneralAllocation::free(dup_dll_data);
+            RET_ERR(RtErr::OutOfMemory);
+        }
         AssemblyData symbolData{dup_symbol_data, symbol_data_len, false};
         return load_from_data(dll_data_wrap, &symbolData);
     }

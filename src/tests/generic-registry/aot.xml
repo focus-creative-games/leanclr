@@ -1,0 +1,15 @@
+<aot>
+  <assembly fullname="*" aot="0" />
+  <assembly fullname="AotTests">
+    <type fullname="AotTests.TC_GenericAot*" aot="1" />
+    <type fullname="AotTests.TC_InterfaceDispatch*" aot="1" />
+    <type fullname="AotTests.TC_Int32Returns*" aot="1" />
+    <type fullname="AotTests.TC_GenericEh*" aot="1" />
+    <type fullname="AotTests.TC_WideReturns*" aot="1" />
+    <type fullname="AotTests.TC_ReferenceSharing*" aot="1" />
+    <type fullname="AotTests.TC_PgoCaches*" aot="1" />
+  </assembly>
+  <assembly fullname="Common">
+    <type fullname="GenericAotLibrary.*" aot="1" />
+  </assembly>
+</aot>

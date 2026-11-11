@@ -1,1681 +1,1189 @@
 <llopcodes>
-    <opcode name="Illegal" hlopcode="Illegal" prefix="4"/>
-    <opcode name="Nop" hlopcode="Nop" prefix="4"/>
-    <opcode name="ProfileAddCost" hlopcode="ProfileAddCost" prefix="4">
-        <param name="cost" type="u32" arg="i4" arg_kind="const"/>
+    <opcode name="Illegal" />
+    <opcode name="Nop" />
+    <opcode name="ProfileAddCost">
+        <param name="cost" type="u32" arg="i4" arg_kind="const" />
     </opcode>
-    <opcode name="InitLocals1_S" hlopcode="InitLocals" prefix="0">
-        <param name="offset" arg="locals_offset" arg_kind="stack_const"/>
+    <opcode name="InitLocals">
+        <param name="offset" arg="locals_offset" arg_kind="stack_const" />
+        <param name="size" type="u16" arg="size" arg_kind="const" />
     </opcode>
-    <opcode name="InitLocals2_S" hlopcode="InitLocals" prefix="0">
-        <param name="offset" arg="locals_offset" arg_kind="stack_const"/>
+    <opcode name="Arglist" />
+    <tplopcode name="LdLoc">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdLocI1" base="LdLoc" variant="i1" />
+    <opcode name="LdLocU1" base="LdLoc" variant="u1" />
+    <opcode name="LdLocI2" base="LdLoc" variant="i2" />
+    <opcode name="LdLocU2" base="LdLoc" variant="u2" />
+    <opcode name="LdLocI4" base="LdLoc" variant="i4" />
+    <opcode name="LdLocI8" base="LdLoc" variant="i8" />
+    <opcode name="LdLocAny" base="LdLoc" variant="any" size_param="1" />
+    <tplopcode name="LdLoca">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdLoca" base="LdLoca" />
+    <tplopcode name="StLoc">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StLocI1" base="StLoc" variant="i1" />
+    <opcode name="StLocI2" base="StLoc" variant="i2" />
+    <opcode name="StLocI4" base="StLoc" variant="i4" />
+    <opcode name="StLocI8" base="StLoc" variant="i8" />
+    <opcode name="StLocAny" base="StLoc" variant="any" size_param="1" />
+    <tplopcode name="LdNull">
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdNull" base="LdNull" />
+    <tplopcode name="LdcI4I2">
+        <param name="value" type="i16" arg="i2" arg_kind="const" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdcI4I2" base="LdcI4I2" />
+    <tplopcode name="LdcI4I4">
+        <param name="value" type="i32" arg="i4" arg_kind="const" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdcI4I4" base="LdcI4I4" />
+    <tplopcode name="LdcI8I2">
+        <param name="value" type="i16" arg="i2" arg_kind="const" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdcI8I2" base="LdcI8I2" />
+    <tplopcode name="LdcI8I4">
+        <param name="value" type="i32" arg="i4" arg_kind="const" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdcI8I4" base="LdcI8I4" />
+    <tplopcode name="LdcI8I8">
+        <param name="value_low" type="i32" arg="i8_low" arg_kind="const" />
+        <param name="value_high" type="i32" arg="i8_high" arg_kind="const" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdcI8I8" base="LdcI8I8" />
+    <tplopcode name="LdStr">
+        <param name="str_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdStr" base="LdStr" />
+    <tplopcode name="Br">
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="Br" base="Br" />
+    <tplopcode name="BrTrue">
+        <param name="condition" arg="src" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BrTrueI4" base="BrTrue" />
+    <opcode name="BrTrueI8" base="BrTrue" />
+    <tplopcode name="BrFalse">
+        <param name="condition" arg="src" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BrFalseI4" base="BrFalse" />
+    <opcode name="BrFalseI8" base="BrFalse" />
+    <tplopcode name="Beq">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BeqI4" base="Beq" variant="i4" />
+    <opcode name="BeqI8" base="Beq" variant="i8" />
+    <opcode name="BeqR4" base="Beq" variant="r4" />
+    <opcode name="BeqR8" base="Beq" variant="r8" />
+    <tplopcode name="Bge">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BgeI4" base="Bge" variant="i4" />
+    <opcode name="BgeI8" base="Bge" variant="i8" />
+    <opcode name="BgeR4" base="Bge" variant="r4" />
+    <opcode name="BgeR8" base="Bge" variant="r8" />
+    <tplopcode name="Bgt">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BgtI4" base="Bgt" variant="i4" />
+    <opcode name="BgtI8" base="Bgt" variant="i8" />
+    <opcode name="BgtR4" base="Bgt" variant="r4" />
+    <opcode name="BgtR8" base="Bgt" variant="r8" />
+    <tplopcode name="Ble">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BleI4" base="Ble" variant="i4" />
+    <opcode name="BleI8" base="Ble" variant="i8" />
+    <opcode name="BleR4" base="Ble" variant="r4" />
+    <opcode name="BleR8" base="Ble" variant="r8" />
+    <tplopcode name="Blt">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BltI4" base="Blt" variant="i4" />
+    <opcode name="BltI8" base="Blt" variant="i8" />
+    <opcode name="BltR4" base="Blt" variant="r4" />
+    <opcode name="BltR8" base="Blt" variant="r8" />
+    <tplopcode name="BneUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BneUnI4" base="BneUn" variant="i4" />
+    <opcode name="BneUnI8" base="BneUn" variant="i8" />
+    <opcode name="BneUnR4" base="BneUn" variant="r4" />
+    <opcode name="BneUnR8" base="BneUn" variant="r8" />
+    <tplopcode name="BgeUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BgeUnI4" base="BgeUn" variant="i4" />
+    <opcode name="BgeUnI8" base="BgeUn" variant="i8" />
+    <opcode name="BgeUnR4" base="BgeUn" variant="r4" />
+    <opcode name="BgeUnR8" base="BgeUn" variant="r8" />
+    <tplopcode name="BgtUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BgtUnI4" base="BgtUn" variant="i4" />
+    <opcode name="BgtUnI8" base="BgtUn" variant="i8" />
+    <opcode name="BgtUnR4" base="BgtUn" variant="r4" />
+    <opcode name="BgtUnR8" base="BgtUn" variant="r8" />
+    <tplopcode name="BleUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BleUnI4" base="BleUn" variant="i4" />
+    <opcode name="BleUnI8" base="BleUn" variant="i8" />
+    <opcode name="BleUnR4" base="BleUn" variant="r4" />
+    <opcode name="BleUnR8" base="BleUn" variant="r8" />
+    <tplopcode name="BltUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="BltUnI4" base="BltUn" variant="i4" />
+    <opcode name="BltUnI8" base="BltUn" variant="i8" />
+    <opcode name="BltUnR4" base="BltUn" variant="r4" />
+    <opcode name="BltUnR8" base="BltUn" variant="r8" />
+    <opcode name="Switch">
+        <param name="index" arg="arg1" arg_kind="stack" />
+        <param name="num_targets" type="u32" arg="num_targets" arg_kind="const" />
     </opcode>
-    <opcode name="InitLocals3_S" hlopcode="InitLocals" prefix="0">
-        <param name="offset" arg="locals_offset" arg_kind="stack_const"/>
+    <tplopcode name="LdIndI1">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdIndI1" base="LdIndI1" />
+    <tplopcode name="LdIndU1">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdIndU1" base="LdIndU1" />
+    <tplopcode name="LdIndI2">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdIndI2" base="LdIndI2" />
+    <opcode name="LdIndI2Unaligned" base="LdIndI2" />
+    <tplopcode name="LdIndU2">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdIndU2" base="LdIndU2" />
+    <opcode name="LdIndU2Unaligned" base="LdIndU2" />
+    <tplopcode name="LdIndI4">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdIndI4" base="LdIndI4" />
+    <opcode name="LdIndI4Unaligned" base="LdIndI4" />
+    <tplopcode name="LdIndI8">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdIndI8" base="LdIndI8" />
+    <opcode name="LdIndI8Unaligned" base="LdIndI8" />
+    <tplopcode name="StIndI1">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StIndI1" base="StIndI1" />
+    <tplopcode name="StIndI2">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StIndI2" base="StIndI2" />
+    <opcode name="StIndI2Unaligned" base="StIndI2" />
+    <tplopcode name="StIndI4">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StIndI4" base="StIndI4" />
+    <opcode name="StIndI4Unaligned" base="StIndI4" />
+    <tplopcode name="StIndI8">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StIndI8" base="StIndI8" />
+    <opcode name="StIndI8Unaligned" base="StIndI8" />
+    <opcode name="StIndI8I4" base="StIndI8" />
+    <opcode name="StIndI8I4Unaligned" base="StIndI8" />
+    <opcode name="StIndI8U4" base="StIndI8" />
+    <opcode name="StIndI8U4Unaligned" base="StIndI8" />
+    <tplopcode name="Add">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="AddI4" base="Add" variant="i4" />
+    <opcode name="AddI8" base="Add" variant="i8" />
+    <opcode name="AddR4" base="Add" variant="r4" />
+    <opcode name="AddR8" base="Add" variant="r8" />
+    <tplopcode name="Sub">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="SubI4" base="Sub" variant="i4" />
+    <opcode name="SubI8" base="Sub" variant="i8" />
+    <opcode name="SubR4" base="Sub" variant="r4" />
+    <opcode name="SubR8" base="Sub" variant="r8" />
+    <tplopcode name="Mul">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="MulI4" base="Mul" variant="i4" />
+    <opcode name="MulI8" base="Mul" variant="i8" />
+    <opcode name="MulR4" base="Mul" variant="r4" />
+    <opcode name="MulR8" base="Mul" variant="r8" />
+    <tplopcode name="Div">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="DivI4" base="Div" variant="i4" />
+    <opcode name="DivI8" base="Div" variant="i8" />
+    <opcode name="DivR4" base="Div" variant="r4" />
+    <opcode name="DivR8" base="Div" variant="r8" />
+    <tplopcode name="DivUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="DivUnI4" base="DivUn" variant="i4" />
+    <opcode name="DivUnI8" base="DivUn" variant="i8" />
+    <tplopcode name="Rem">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="RemI4" base="Rem" variant="i4" />
+    <opcode name="RemI8" base="Rem" variant="i8" />
+    <opcode name="RemR4" base="Rem" variant="r4" />
+    <opcode name="RemR8" base="Rem" variant="r8" />
+    <tplopcode name="RemUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="RemUnI4" base="RemUn" variant="i4" />
+    <opcode name="RemUnI8" base="RemUn" variant="i8" />
+    <tplopcode name="And">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="AndI4" base="And" variant="i4" />
+    <opcode name="AndI8" base="And" variant="i8" />
+    <tplopcode name="Or">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="OrI4" base="Or" variant="i4" />
+    <opcode name="OrI8" base="Or" variant="i8" />
+    <tplopcode name="Xor">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="XorI4" base="Xor" variant="i4" />
+    <opcode name="XorI8" base="Xor" variant="i8" />
+    <tplopcode name="Shl">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ShlI4" base="Shl" variant="i4" />
+    <opcode name="ShlI8" base="Shl" variant="i8" />
+    <tplopcode name="Shr">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ShrI4" base="Shr" variant="i4" />
+    <opcode name="ShrI8" base="Shr" variant="i8" />
+    <tplopcode name="ShrUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ShrUnI4" base="ShrUn" variant="i4" />
+    <opcode name="ShrUnI8" base="ShrUn" variant="i8" />
+    <tplopcode name="Neg">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="NegI4" base="Neg" variant="i4" />
+    <opcode name="NegI8" base="Neg" variant="i8" />
+    <opcode name="NegR4" base="Neg" variant="r4" />
+    <opcode name="NegR8" base="Neg" variant="r8" />
+    <tplopcode name="Not">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="NotI4" base="Not" variant="i4" />
+    <opcode name="NotI8" base="Not" variant="i8" />
+    <tplopcode name="AddOvf">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="AddOvfI4" base="AddOvf" variant="i4" />
+    <opcode name="AddOvfI8" base="AddOvf" variant="i8" />
+    <tplopcode name="AddOvfUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="AddOvfUnI4" base="AddOvfUn" variant="i4" />
+    <opcode name="AddOvfUnI8" base="AddOvfUn" variant="i8" />
+    <tplopcode name="MulOvf">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="MulOvfI4" base="MulOvf" variant="i4" />
+    <opcode name="MulOvfI8" base="MulOvf" variant="i8" />
+    <tplopcode name="MulOvfUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="MulOvfUnI4" base="MulOvfUn" variant="i4" />
+    <opcode name="MulOvfUnI8" base="MulOvfUn" variant="i8" />
+    <tplopcode name="SubOvf">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="SubOvfI4" base="SubOvf" variant="i4" />
+    <opcode name="SubOvfI8" base="SubOvf" variant="i8" />
+    <tplopcode name="SubOvfUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="SubOvfUnI4" base="SubOvfUn" variant="i4" />
+    <opcode name="SubOvfUnI8" base="SubOvfUn" variant="i8" />
+    <tplopcode name="ConvI1">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvI1I4" base="ConvI1" />
+    <opcode name="ConvI1I8" base="ConvI1" />
+    <opcode name="ConvI1R4" base="ConvI1" />
+    <opcode name="ConvI1R8" base="ConvI1" />
+    <tplopcode name="ConvU1">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvU1I4" base="ConvU1" />
+    <opcode name="ConvU1I8" base="ConvU1" />
+    <opcode name="ConvU1R4" base="ConvU1" />
+    <opcode name="ConvU1R8" base="ConvU1" />
+    <tplopcode name="ConvI2">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvI2I4" base="ConvI2" />
+    <opcode name="ConvI2I8" base="ConvI2" />
+    <opcode name="ConvI2R4" base="ConvI2" />
+    <opcode name="ConvI2R8" base="ConvI2" />
+    <tplopcode name="ConvU2">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvU2I4" base="ConvU2" />
+    <opcode name="ConvU2I8" base="ConvU2" />
+    <opcode name="ConvU2R4" base="ConvU2" />
+    <opcode name="ConvU2R8" base="ConvU2" />
+    <tplopcode name="ConvI4">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvI4I8" base="ConvI4" />
+    <opcode name="ConvI4R4" base="ConvI4" />
+    <opcode name="ConvI4R8" base="ConvI4" />
+    <tplopcode name="ConvU4">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvU4I8" base="ConvU4" />
+    <opcode name="ConvU4R4" base="ConvU4" />
+    <opcode name="ConvU4R8" base="ConvU4" />
+    <tplopcode name="ConvI8">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvI8I4" base="ConvI8" />
+    <opcode name="ConvI8U4" base="ConvU8" />
+    <opcode name="ConvI8R4" base="ConvI8" />
+    <opcode name="ConvI8R8" base="ConvI8" />
+    <tplopcode name="ConvU8">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvU8I4" base="ConvU8" />
+     same to ConvI8U4
+
+    <opcode name="ConvU8R4" base="ConvU8" />
+    <opcode name="ConvU8R8" base="ConvU8" />
+    <tplopcode name="ConvR4">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvR4I4" base="ConvR4" />
+    <opcode name="ConvR4I8" base="ConvR4" />
+    <opcode name="ConvR4R8" base="ConvR4" />
+    <tplopcode name="ConvR8">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvR8I4" base="ConvR8" />
+    <opcode name="ConvR8I8" base="ConvR8" />
+    <opcode name="ConvR8R4" base="ConvR8" />
+    <tplopcode name="ConvOvfI1">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfI1I4" base="ConvOvfI1" />
+    <opcode name="ConvOvfI1I8" base="ConvOvfI1" />
+    <opcode name="ConvOvfI1R4" base="ConvOvfI1" />
+    <opcode name="ConvOvfI1R8" base="ConvOvfI1" />
+    <tplopcode name="ConvOvfU1">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfU1I4" base="ConvOvfU1" />
+    <opcode name="ConvOvfU1I8" base="ConvOvfU1" />
+    <opcode name="ConvOvfU1R4" base="ConvOvfU1" />
+    <opcode name="ConvOvfU1R8" base="ConvOvfU1" />
+    <tplopcode name="ConvOvfI2">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfI2I4" base="ConvOvfI2" />
+    <opcode name="ConvOvfI2I8" base="ConvOvfI2" />
+    <opcode name="ConvOvfI2R4" base="ConvOvfI2" />
+    <opcode name="ConvOvfI2R8" base="ConvOvfI2" />
+    <tplopcode name="ConvOvfU2">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfU2I4" base="ConvOvfU2" />
+    <opcode name="ConvOvfU2I8" base="ConvOvfU2" />
+    <opcode name="ConvOvfU2R4" base="ConvOvfU2" />
+    <opcode name="ConvOvfU2R8" base="ConvOvfU2" />
+    <tplopcode name="ConvOvfI4">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfI4I8" base="ConvOvfI4" />
+    <opcode name="ConvOvfI4R4" base="ConvOvfI4" />
+    <opcode name="ConvOvfI4R8" base="ConvOvfI4" />
+    <tplopcode name="ConvOvfU4">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfU4I4" base="ConvOvfU4" />
+    <opcode name="ConvOvfU4I8" base="ConvOvfU4" />
+    <opcode name="ConvOvfU4R4" base="ConvOvfU4" />
+    <opcode name="ConvOvfU4R8" base="ConvOvfU4" />
+    <tplopcode name="ConvOvfI8">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfI8R4" base="ConvOvfI8" />
+    <opcode name="ConvOvfI8R8" base="ConvOvfI8" />
+    <tplopcode name="ConvOvfU8">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfU8I4" base="ConvOvfU8" />
+    <opcode name="ConvOvfU8I8" base="ConvOvfU8" />
+    <opcode name="ConvOvfU8R4" base="ConvOvfU8" />
+    <opcode name="ConvOvfU8R8" base="ConvOvfU8" />
+    <tplopcode name="ConvOvfI1Un">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfI1UnI4" base="ConvOvfI1Un" />
+    <opcode name="ConvOvfI1UnI8" base="ConvOvfI1Un" />
+    <opcode name="ConvOvfI1UnR4" base="ConvOvfI1Un" />
+    <opcode name="ConvOvfI1UnR8" base="ConvOvfI1Un" />
+    <tplopcode name="ConvOvfU1Un">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfU1UnI4" base="ConvOvfU1Un" />
+    <opcode name="ConvOvfU1UnI8" base="ConvOvfU1Un" />
+    <opcode name="ConvOvfU1UnR4" base="ConvOvfU1Un" />
+    <opcode name="ConvOvfU1UnR8" base="ConvOvfU1Un" />
+    <tplopcode name="ConvOvfI2Un">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfI2UnI4" base="ConvOvfI2Un" />
+    <opcode name="ConvOvfI2UnI8" base="ConvOvfI2Un" />
+    <opcode name="ConvOvfI2UnR4" base="ConvOvfI2Un" />
+    <opcode name="ConvOvfI2UnR8" base="ConvOvfI2Un" />
+    <tplopcode name="ConvOvfU2Un">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfU2UnI4" base="ConvOvfU2Un" />
+    <opcode name="ConvOvfU2UnI8" base="ConvOvfU2Un" />
+    <opcode name="ConvOvfU2UnR4" base="ConvOvfU2Un" />
+    <opcode name="ConvOvfU2UnR8" base="ConvOvfU2Un" />
+    <tplopcode name="ConvOvfI4Un">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfI4UnI4" base="ConvOvfI4Un" />
+    <opcode name="ConvOvfI4UnI8" base="ConvOvfI4Un" />
+    <opcode name="ConvOvfI4UnR4" base="ConvOvfI4Un" />
+    <opcode name="ConvOvfI4UnR8" base="ConvOvfI4Un" />
+    <tplopcode name="ConvOvfU4Un">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfU4UnI8" base="ConvOvfU4Un" />
+    <opcode name="ConvOvfU4UnR4" base="ConvOvfU4Un" />
+    <opcode name="ConvOvfU4UnR8" base="ConvOvfU4Un" />
+    <tplopcode name="ConvOvfI8Un">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfI8UnI8" base="ConvOvfI8Un" />
+    <opcode name="ConvOvfI8UnR4" base="ConvOvfI8Un" />
+    <opcode name="ConvOvfI8UnR8" base="ConvOvfI8Un" />
+    <tplopcode name="ConvOvfU8Un">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="ConvOvfU8UnR4" base="ConvOvfU8Un" />
+    <opcode name="ConvOvfU8UnR8" base="ConvOvfU8Un" />
+    <tplopcode name="Ceq">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CeqI4" base="Ceq" variant="i4" />
+    <opcode name="CeqI8" base="Ceq" variant="i8" />
+    <opcode name="CeqR4" base="Ceq" variant="r4" />
+    <opcode name="CeqR8" base="Ceq" variant="r8" />
+    <tplopcode name="Cgt">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CgtI4" base="Cgt" variant="i4" />
+    <opcode name="CgtI8" base="Cgt" variant="i8" />
+    <opcode name="CgtR4" base="Cgt" variant="r4" />
+    <opcode name="CgtR8" base="Cgt" variant="r8" />
+    <tplopcode name="CgtUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CgtUnI4" base="CgtUn" variant="i4" />
+    <opcode name="CgtUnI8" base="CgtUn" variant="i8" />
+    <opcode name="CgtUnR4" base="CgtUn" variant="r4" />
+    <opcode name="CgtUnR8" base="CgtUn" variant="r8" />
+    <tplopcode name="Clt">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CltI4" base="Clt" variant="i4" />
+    <opcode name="CltI8" base="Clt" variant="i8" />
+    <opcode name="CltR4" base="Clt" variant="r4" />
+    <opcode name="CltR8" base="Clt" variant="r8" />
+    <tplopcode name="CltUn">
+        <param name="arg1" arg="arg1" arg_kind="stack" />
+        <param name="arg2" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CltUnI4" base="CltUn" variant="i4" />
+    <opcode name="CltUnI8" base="CltUn" variant="i8" />
+    <opcode name="CltUnR4" base="CltUn" variant="r4" />
+    <opcode name="CltUnR8" base="CltUn" variant="r8" />
+    <tplopcode name="InitObjI1">
+        <param name="addr" arg="src" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="InitObjI1" base="InitObjI1" />
+    <tplopcode name="InitObjI2">
+        <param name="addr" arg="src" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="InitObjI2" base="InitObjI2" />
+    <opcode name="InitObjI2Unaligned" base="InitObjI2" />
+    <tplopcode name="InitObjI4">
+        <param name="addr" arg="src" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="InitObjI4" base="InitObjI4" />
+    <opcode name="InitObjI4Unaligned" base="InitObjI4" />
+    <tplopcode name="InitObjI8">
+        <param name="addr" arg="src" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="InitObjI8" base="InitObjI8" />
+    <opcode name="InitObjI8Unaligned" base="InitObjI8" />
+    <tplopcode name="InitObjAny">
+        <param name="addr" arg="src" arg_kind="stack" />
+        <param name="size" arg="size" arg_kind="const" />
+    </tplopcode>
+    <opcode name="InitObjAny" base="InitObjAny" />
+    <tplopcode name="CpObjI1">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CpObjI1" base="CpObjI1" />
+    <tplopcode name="CpObjI2">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CpObjI2" base="CpObjI2" />
+    <tplopcode name="CpObjI4">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CpObjI4" base="CpObjI4" />
+    <tplopcode name="CpObjI8">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CpObjI8" base="CpObjI8" />
+    <tplopcode name="CpObjAny">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CpObjAny" base="CpObjAny" size_param="1" />
+    <tplopcode name="LdObjAny">
+        <param name="addr" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdObjAny" base="LdObjAny" size_param="1" />
+    <tplopcode name="StObjAny">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="addr" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StObjAny" base="StObjAny" size_param="1" />
+    <tplopcode name="CastClass">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="CastClass" base="CastClass" />
+    <tplopcode name="IsInst">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="IsInst" base="IsInst" />
+    <tplopcode name="Box">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="Box" base="Box" />
+    <tplopcode name="Unbox">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="Unbox" base="Unbox" />
+    <tplopcode name="UnboxAny">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="UnboxAny" base="UnboxAny" />
+    <tplopcode name="NewArr">
+        <param name="length" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="arr_klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="NewArr" base="NewArr" />
+    <tplopcode name="LdLen">
+        <param name="arr" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdLen" base="LdLen" />
+    <tplopcode name="Ldelema">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="Ldelema" base="Ldelema" />
+    <opcode name="LdelemaReadOnly">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
     </opcode>
-    <opcode name="InitLocals4_S" hlopcode="InitLocals" prefix="0">
-        <param name="offset" arg="locals_offset" arg_kind="stack_const"/>
+    <tplopcode name="LdelemI1">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemI1" base="LdelemI1" />
+    <tplopcode name="LdelemU1">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemU1" base="LdelemU1" />
+    <tplopcode name="LdelemI2">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemI2" base="LdelemI2" />
+    <tplopcode name="LdelemU2">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemU2" base="LdelemU2" />
+    <tplopcode name="LdelemI4">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemI4" base="LdelemI4" />
+    <tplopcode name="LdelemI8">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemI8" base="LdelemI8" />
+    <tplopcode name="LdelemI">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemI" base="LdelemI" />
+    <tplopcode name="LdelemR4">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemR4" base="LdelemR4" />
+    <tplopcode name="LdelemR8">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemR8" base="LdelemR8" />
+    <tplopcode name="LdelemRef">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdelemRef" base="LdelemRef" />
+    <tplopcode name="LdelemAnyRef">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="LdelemAnyRef" base="LdelemAnyRef" />
+    <tplopcode name="LdelemAnyVal">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="ele_size" arg="element_size" arg_kind="const" />
+    </tplopcode>
+    <opcode name="LdelemAnyVal" base="LdelemAnyVal" />
+    <tplopcode name="StelemI1">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StelemI1" base="StelemI1" />
+    <tplopcode name="StelemI2">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StelemI2" base="StelemI2" />
+    <tplopcode name="StelemI4">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StelemI4" base="StelemI4" />
+    <tplopcode name="StelemI8">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StelemI8" base="StelemI8" />
+    <tplopcode name="StelemI">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StelemI" base="StelemI" />
+    <tplopcode name="StelemR4">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StelemR4" base="StelemR4" />
+    <tplopcode name="StelemR8">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StelemR8" base="StelemR8" />
+    <tplopcode name="StelemRef">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StelemRef" base="StelemRef" />
+    <tplopcode name="StelemAnyRef">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="StelemAnyRef" base="StelemAnyRef" />
+    <tplopcode name="StelemAnyVal">
+        <param name="arr" arg="arg1" arg_kind="stack" />
+        <param name="index" arg="arg2" arg_kind="stack" />
+        <param name="value" arg="arg3" arg_kind="stack" />
+        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="ele_size" arg="element_size" arg_kind="const" />
+    </tplopcode>
+    <opcode name="StelemAnyVal" base="StelemAnyVal" />
+    <opcode name="MkRefAny">
+        <param name="addr" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
     </opcode>
-    <opcode name="InitLocals" hlopcode="InitLocals" prefix="1">
-        <param name="offset" arg="locals_offset" arg_kind="stack_const"/>
-        <param name="size" type="u16" arg="size" arg_kind="const"/>
+    <opcode name="RefAnyVal">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
     </opcode>
-    <opcode name="InitLocals_S" hlopcode="InitLocals" prefix="0">
-        <param name="offset" arg="locals_offset" arg_kind="stack_const"/>
-        <param name="size" type="u8" arg="size" arg_kind="const"/>
+    <opcode name="RefAnyType">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
     </opcode>
-
-    <opcode name="Arglist" hlopcode="Arglist" prefix="4"/>
-    <tplopcode name="LdLoc" hlopcode="LdLoc">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdLocI1" base="LdLoc" variant="i1"  prefix="1"/>
-    <opcode name="LdLocU1" base="LdLoc" variant="u1"  prefix="1"/>
-    <opcode name="LdLocI2" base="LdLoc" variant="i2"  prefix="1"/>
-    <opcode name="LdLocU2" base="LdLoc" variant="u2"  prefix="1"/>
-    <opcode name="LdLocI4" base="LdLoc" variant="i4"  prefix="1"/>
-    <opcode name="LdLocI8" base="LdLoc" variant="i8"  prefix="1"/>
-    <opcode name="LdLocAny" base="LdLoc" variant="any" size_param="1" prefix="1"/>
-    <opcode name="LdLocI1_S" base="LdLoc" variant="i1"  prefix="0"/>
-    <opcode name="LdLocU1_S" base="LdLoc" variant="u1"  prefix="0"/>
-    <opcode name="LdLocI2_S" base="LdLoc" variant="i2"  prefix="0"/>
-    <opcode name="LdLocU2_S" base="LdLoc" variant="u2"  prefix="0"/>
-    <opcode name="LdLocI4_S" base="LdLoc" variant="i4"  prefix="0"/>
-    <opcode name="LdLocI8_S" base="LdLoc" variant="i8"  prefix="0"/>
-    <opcode name="LdLocAny_S" base="LdLoc" variant="any" size_param="1" prefix="0"/>
-
-    <!--opcode name="LdLocR4_S" base="LdLoc" variant="r4"/>
-    <opcode name="LdLocR8_S" base="LdLoc" variant="r8"/>
-    <opcode name="LdLocRef_S" base="LdLoc" variant="ref"/-->
-    <tplopcode name="LdLoca" hlopcode="LdLoca">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdLoca" base="LdLoca" prefix="1"/>
-    <opcode name="LdLoca_S" base="LdLoca" prefix="0"/>
-    <tplopcode name="StLoc" hlopcode="StLoc">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StLocI1" base="StLoc" variant="i1" prefix="1"/>
-    <opcode name="StLocI2" base="StLoc" variant="i2" prefix="1"/>
-    <opcode name="StLocI4" base="StLoc" variant="i4" prefix="1"/>
-    <opcode name="StLocI8" base="StLoc" variant="i8" prefix="1"/>
-    <opcode name="StLocAny" base="StLoc" variant="any" size_param="1" prefix="1"/>
-    <opcode name="StLocI1_S" base="StLoc" variant="i1" prefix="0"/>
-    <opcode name="StLocI2_S" base="StLoc" variant="i2" prefix="0"/>
-    <opcode name="StLocI4_S" base="StLoc" variant="i4" prefix="0"/>
-    <opcode name="StLocI8_S" base="StLoc" variant="i8" prefix="0"/>
-    <opcode name="StLocAny_S" base="StLoc" variant="any" size_param="1" prefix="0"/>
-    <tplopcode name="LdNull" hlopcode="LdNull">
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdNull" base="LdNull" prefix="1"/>
-    <opcode name="LdNull_S" base="LdNull" prefix="0"/>
-    <tplopcode name="LdcI4I2" hlopcode="LdcI4">
-        <param name="value" type="i16" arg="i2" arg_kind="const"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdcI4I2" base="LdcI4I2" prefix="1"/>
-    <opcode name="LdcI4I2_S" base="LdcI4I2" prefix="0"/>
-    <tplopcode name="LdcI4I4" hlopcode="LdcI4">
-        <param name="value" type="i32" arg="i4" arg_kind="const"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdcI4I4" base="LdcI4I4" prefix="1"/>
-    <opcode name="LdcI4I4_S" base="LdcI4I4" prefix="0"/>
-    <tplopcode name="LdcI8I2" hlopcode="LdcI8">
-        <param name="value" type="i16" arg="i2" arg_kind="const"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdcI8I2" base="LdcI8I2" prefix="1"/>
-    <opcode name="LdcI8I2_S" base="LdcI8I2" prefix="0"/>
-    <tplopcode name="LdcI8I4" hlopcode="LdcI8">
-        <param name="value" type="i32" arg="i4" arg_kind="const"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdcI8I4" base="LdcI8I4" prefix="1"/>
-    <opcode name="LdcI8I4_S" base="LdcI8I4" prefix="0"/>
-    <tplopcode name="LdcI8I8" hlopcode="LdcI8">
-        <param name="value_low" type="i32" arg="i8_low" arg_kind="const"/>
-        <param name="value_high" type="i32" arg="i8_high" arg_kind="const"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdcI8I8" base="LdcI8I8" prefix="1"/>
-    <opcode name="LdcI8I8_S" base="LdcI8I8" prefix="0"/>
-    <!--opcode name="LdcR4" hlopcode="LdcR4"/>
-    <opcode name="LdcR8" hlopcode="LdcR8"/-->
-    <tplopcode name="LdStr" hlopcode="LdStr">
-        <param name="str_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdStr" base="LdStr" prefix="1"/>
-    <opcode name="LdStr_S" base="LdStr" prefix="0"/>
-
-    <!--opcode name="AddI_S" base="Add" variant="ref"/-->
-
-    <tplopcode name="Br" hlopcode="Br">
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="Br" base="Br" prefix="1"/>
-    <opcode name="Br_S" base="Br" prefix="0"/>
-    <tplopcode name="BrTrue" hlopcode="BrTrue">
-        <param name="condition" arg="src" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BrTrueI4" base="BrTrue" prefix="1"/>
-    <opcode name="BrTrueI4_S" base="BrTrue" prefix="0"/>
-    <opcode name="BrTrueI8" base="BrTrue" prefix="1"/>
-    <opcode name="BrTrueI8_S" base="BrTrue" prefix="0"/>
-    <tplopcode name="BrFalse" hlopcode="BrFalse">
-        <param name="condition" arg="src" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BrFalseI4" base="BrFalse" prefix="1"/>
-    <opcode name="BrFalseI4_S" base="BrFalse" prefix="0"/>
-    <opcode name="BrFalseI8" base="BrFalse" prefix="1"/>
-    <opcode name="BrFalseI8_S" base="BrFalse" prefix="0"/>
-    <tplopcode name="Beq" hlopcode="Beq">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BeqI4" base="Beq" variant="i4" prefix="1"/>
-    <opcode name="BeqI8" base="Beq" variant="i8" prefix="1"/>
-    <opcode name="BeqR4" base="Beq" variant="r4" prefix="1"/>
-    <opcode name="BeqR8" base="Beq" variant="r8" prefix="1"/>
-    <opcode name="BeqI4_S" base="Beq" variant="i4" prefix="0"/>
-    <opcode name="BeqI8_S" base="Beq" variant="i8" prefix="0"/>
-    <!-- <opcode name="BeqR4_S" base="Beq" variant="r4" prefix="0"/>
-    <opcode name="BeqR8_S" base="Beq" variant="r8" prefix="0"/> -->
-    <tplopcode name="Bge" hlopcode="Bge">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BgeI4" base="Bge" variant="i4" prefix="1"/>
-    <opcode name="BgeI8" base="Bge" variant="i8" prefix="1"/>
-    <opcode name="BgeR4" base="Bge" variant="r4" prefix="1"/>
-    <opcode name="BgeR8" base="Bge" variant="r8" prefix="1"/>
-    <opcode name="BgeI4_S" base="Bge" variant="i4" prefix="0"/>
-    <opcode name="BgeI8_S" base="Bge" variant="i8" prefix="0"/>
-    <!-- <opcode name="BgeR4_S" base="Bge" variant="r4" prefix="0"/>
-    <opcode name="BgeR8_S" base="Bge" variant="r8" prefix="0"/> -->
-    <tplopcode name="Bgt" hlopcode="Bgt">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BgtI4" base="Bgt" variant="i4" prefix="1"/>
-    <opcode name="BgtI8" base="Bgt" variant="i8" prefix="1"/>
-    <opcode name="BgtR4" base="Bgt" variant="r4" prefix="1"/>
-    <opcode name="BgtR8" base="Bgt" variant="r8" prefix="1"/>
-    <opcode name="BgtI4_S" base="Bgt" variant="i4" prefix="0"/>
-    <opcode name="BgtI8_S" base="Bgt" variant="i8" prefix="0"/>
-    <!-- <opcode name="BgtR4_S" base="Bgt" variant="r4" prefix="0"/>
-    <opcode name="BgtR8_S" base="Bgt" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="Ble" hlopcode="Ble">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BleI4" base="Ble" variant="i4" prefix="1"/>
-    <opcode name="BleI8" base="Ble" variant="i8" prefix="1"/>
-    <opcode name="BleR4" base="Ble" variant="r4" prefix="1"/>
-    <opcode name="BleR8" base="Ble" variant="r8" prefix="1"/>
-    <opcode name="BleI4_S" base="Ble" variant="i4" prefix="0"/>
-    <opcode name="BleI8_S" base="Ble" variant="i8" prefix="0"/>
-    <!-- <opcode name="BleR4_S" base="Ble" variant="r4" prefix="0"/>
-    <opcode name="BleR8_S" base="Ble" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="Blt" hlopcode="Blt">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BltI4" base="Blt" variant="i4" prefix="1"/>
-    <opcode name="BltI8" base="Blt" variant="i8" prefix="1"/>
-    <opcode name="BltR4" base="Blt" variant="r4" prefix="1"/>
-    <opcode name="BltR8" base="Blt" variant="r8" prefix="1"/>
-    <opcode name="BltI4_S" base="Blt" variant="i4" prefix="0"/>
-    <opcode name="BltI8_S" base="Blt" variant="i8" prefix="0"/>
-    <!-- <opcode name="BltR4_S" base="Blt" variant="r4" prefix="0"/>
-    <opcode name="BltR8_S" base="Blt" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="BneUn" hlopcode="BneUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BneUnI4" base="BneUn" variant="i4" prefix="1"/>
-    <opcode name="BneUnI8" base="BneUn" variant="i8" prefix="1"/>
-    <opcode name="BneUnR4" base="BneUn" variant="r4" prefix="1"/>
-    <opcode name="BneUnR8" base="BneUn" variant="r8" prefix="1"/>
-    <opcode name="BneUnI4_S" base="BneUn" variant="i4" prefix="0"/>
-    <opcode name="BneUnI8_S" base="BneUn" variant="i8" prefix="0"/>
-    <!-- <opcode name="BneUnR4_S" base="BneUn" variant="r4" prefix="0"/>
-    <opcode name="BneUnR8_S" base="BneUn" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="BgeUn" hlopcode="BgeUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BgeUnI4" base="BgeUn" variant="i4" prefix="1"/>
-    <opcode name="BgeUnI8" base="BgeUn" variant="i8" prefix="1"/>
-    <opcode name="BgeUnR4" base="BgeUn" variant="r4" prefix="1"/>
-    <opcode name="BgeUnR8" base="BgeUn" variant="r8" prefix="1"/>
-    <opcode name="BgeUnI4_S" base="BgeUn" variant="i4" prefix="0"/>
-    <opcode name="BgeUnI8_S" base="BgeUn" variant="i8" prefix="0"/>
-    <!-- <opcode name="BgeUnR4_S" base="BgeUn" variant="r4" prefix="0"/>
-    <opcode name="BgeUnR8_S" base="BgeUn" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="BgtUn" hlopcode="BgtUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BgtUnI4" base="BgtUn" variant="i4" prefix="1"/>
-    <opcode name="BgtUnI8" base="BgtUn" variant="i8" prefix="1"/>
-    <opcode name="BgtUnR4" base="BgtUn" variant="r4" prefix="1"/>
-    <opcode name="BgtUnR8" base="BgtUn" variant="r8" prefix="1"/>
-    <opcode name="BgtUnI4_S" base="BgtUn" variant="i4" prefix="0"/>
-    <opcode name="BgtUnI8_S" base="BgtUn" variant="i8" prefix="0"/>
-    <!-- <opcode name="BgtUnR4_S" base="BgtUn" variant="r4" prefix="0"/>
-    <opcode name="BgtUnR8_S" base="BgtUn" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="BleUn" hlopcode="BleUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BleUnI4" base="BleUn" variant="i4" prefix="1"/>
-    <opcode name="BleUnI8" base="BleUn" variant="i8" prefix="1"/>
-    <opcode name="BleUnR4" base="BleUn" variant="r4" prefix="1"/>
-    <opcode name="BleUnR8" base="BleUn" variant="r8" prefix="1"/>
-    <opcode name="BleUnI4_S" base="BleUn" variant="i4" prefix="0"/>
-    <opcode name="BleUnI8_S" base="BleUn" variant="i8" prefix="0"/>
-    <!-- <opcode name="BleUnR4_S" base="BleUn" variant="r4" prefix="0"/>
-    <opcode name="BleUnR8_S" base="BleUn" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="BltUn" hlopcode="BltUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="BltUnI4" base="BltUn" variant="i4" prefix="1"/>
-    <opcode name="BltUnI8" base="BltUn" variant="i8" prefix="1"/>
-    <opcode name="BltUnR4" base="BltUn" variant="r4" prefix="1"/>
-    <opcode name="BltUnR8" base="BltUn" variant="r8" prefix="1"/>
-    <opcode name="BltUnI4_S" base="BltUn" variant="i4" prefix="0"/>
-    <opcode name="BltUnI8_S" base="BltUn" variant="i8" prefix="0"/>
-    <!-- <opcode name="BltUnR4_S" base="BltUn" variant="r4" prefix="0"/>
-    <opcode name="BltUnR8_S" base="BltUn" variant="r8" prefix="0"/> -->
-    <opcode name="Switch" hlopcode="Switch" prefix="1">
-        <param name="index" arg="arg1" arg_kind="stack"/>
-        <param name="num_targets" type="u32" arg="num_targets" arg_kind="const"/>
+    <opcode name="LdToken">
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="token_idx" arg="resolved_data_index" arg_kind="resolved_data" />
     </opcode>
-    <!--opcode name="Switch_S" hlopcode="Switch" prefix="1">
-        <param name="index" arg="arg1" arg_kind="stack"/>
-        <param name="num_targets" type="u8" arg="num_targets" arg_kind="const"/>
-    </opcode-->
-    <tplopcode name="LdIndI1" hlopcode="LdIndI1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdIndI1" base="LdIndI1" prefix="2"/>
-    <opcode name="LdIndI1_S" base="LdIndI1" prefix="1"/>
-    <tplopcode name="LdIndU1" hlopcode="LdIndU1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdIndU1" base="LdIndU1" prefix="2"/>
-    <opcode name="LdIndU1_S" base="LdIndU1" prefix="1"/>
-    <tplopcode name="LdIndI2" hlopcode="LdIndI2">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdIndI2" base="LdIndI2" prefix="2"/>
-    <opcode name="LdIndI2_S" base="LdIndI2" prefix="1"/>
-    <opcode name="LdIndI2Unaligned" base="LdIndI2" prefix="3"/>
-    <tplopcode name="LdIndU2" hlopcode="LdIndU2">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdIndU2" base="LdIndU2" prefix="2"/>
-    <opcode name="LdIndU2_S" base="LdIndU2" prefix="1"/>
-    <opcode name="LdIndU2Unaligned" base="LdIndU2" prefix="3"/>
-    <tplopcode name="LdIndI4" hlopcode="LdIndI4">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdIndI4" base="LdIndI4" prefix="2"/>
-    <opcode name="LdIndI4_S" base="LdIndI4" prefix="1"/>
-    <opcode name="LdIndI4Unaligned" base="LdIndI4" prefix="3"/>
-    <tplopcode name="LdIndI8" hlopcode="LdIndI8">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdIndI8" base="LdIndI8" prefix="2"/>
-    <opcode name="LdIndI8_S" base="LdIndI8" prefix="1"/>
-    <opcode name="LdIndI8Unaligned" base="LdIndI8" prefix="3"/>
-
-    <tplopcode name="StIndI1" hlopcode="StIndI1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StIndI1" base="StIndI1" prefix="2"/>
-    <opcode name="StIndI1_S" base="StIndI1" prefix="1"/>
-    <tplopcode name="StIndI2" hlopcode="StIndI2">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StIndI2" base="StIndI2" prefix="2"/>
-    <opcode name="StIndI2_S" base="StIndI2" prefix="1"/>
-    <opcode name="StIndI2Unaligned" base="StIndI2" prefix="3"/>
-    <tplopcode name="StIndI4" hlopcode="StIndI4">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StIndI4" base="StIndI4" prefix="2"/>
-    <opcode name="StIndI4_S" base="StIndI4" prefix="1"/>
-    <opcode name="StIndI4Unaligned" base="StIndI4" prefix="3"/>
-    <tplopcode name="StIndI8" hlopcode="StIndI8">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StIndI8" base="StIndI8" prefix="2"/>
-    <opcode name="StIndI8_S" base="StIndI8" prefix="1"/>
-    <opcode name="StIndI8Unaligned" base="StIndI8" prefix="3"/>
-
-    <!-- load i4 from src address then expand it to i8, use for intrinsic of IntPtr::.ctor(i4) -->
-    <opcode name="StIndI8I4" base="StIndI8" prefix="2"/>
-    <opcode name="StIndI8I4_S" base="StIndI8" prefix="1"/>
-    <opcode name="StIndI8I4Unaligned" base="StIndI8" prefix="3"/>
-    <opcode name="StIndI8U4" base="StIndI8" prefix="2"/>
-    <opcode name="StIndI8U4_S" base="StIndI8" prefix="1"/>
-    <opcode name="StIndI8U4Unaligned" base="StIndI8" prefix="3"/>
-
-
-
-    <tplopcode name="Add" hlopcode="Add">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="AddI4" base="Add" variant="i4" prefix="1"/>
-    <opcode name="AddI8" base="Add" variant="i8" prefix="1"/>
-    <opcode name="AddR4" base="Add" variant="r4" prefix="1"/>
-    <opcode name="AddR8" base="Add" variant="r8" prefix="1"/>
-    <!--opcode name="AddI" base="Add" variant="ref"/-->
-    <opcode name="AddI4_S" base="Add" variant="i4" prefix="0"/>
-    <opcode name="AddI8_S" base="Add" variant="i8" prefix="0"/>
-    <opcode name="AddR4_S" base="Add" variant="r4" prefix="0"/>
-    <opcode name="AddR8_S" base="Add" variant="r8" prefix="0"/>
-
-    <tplopcode name="Sub" hlopcode="Sub">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="SubI4" base="Sub" variant="i4" prefix="1"/>
-    <opcode name="SubI8" base="Sub" variant="i8" prefix="1"/>
-    <opcode name="SubR4" base="Sub" variant="r4" prefix="1"/>
-    <opcode name="SubR8" base="Sub" variant="r8" prefix="1"/>
-    <opcode name="SubI4_S" base="Sub" variant="i4" prefix="0"/>
-    <opcode name="SubI8_S" base="Sub" variant="i8" prefix="0"/>
-    <opcode name="SubR4_S" base="Sub" variant="r4" prefix="0"/>
-    <opcode name="SubR8_S" base="Sub" variant="r8" prefix="0"/>
-
-    <tplopcode name="Mul" hlopcode="Mul">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="MulI4" base="Mul" variant="i4" prefix="1"/>
-    <opcode name="MulI8" base="Mul" variant="i8" prefix="1"/>
-    <opcode name="MulR4" base="Mul" variant="r4" prefix="1"/>
-    <opcode name="MulR8" base="Mul" variant="r8" prefix="1"/>
-    <opcode name="MulI4_S" base="Mul" variant="i4" prefix="0"/>
-    <opcode name="MulI8_S" base="Mul" variant="i8" prefix="0"/>
-    <opcode name="MulR4_S" base="Mul" variant="r4" prefix="0"/>
-    <opcode name="MulR8_S" base="Mul" variant="r8" prefix="0"/>
-
-    <tplopcode name="Div" hlopcode="Div">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="DivI4" base="Div" variant="i4" prefix="1"/>
-    <opcode name="DivI8" base="Div" variant="i8" prefix="1"/>
-    <opcode name="DivR4" base="Div" variant="r4" prefix="1"/>
-    <opcode name="DivR8" base="Div" variant="r8" prefix="1"/>
-    <opcode name="DivI4_S" base="Div" variant="i4" prefix="0"/>
-    <opcode name="DivI8_S" base="Div" variant="i8" prefix="0"/>
-    <opcode name="DivR4_S" base="Div" variant="r4" prefix="0"/>
-    <opcode name="DivR8_S" base="Div" variant="r8" prefix="0"/>
-
-    <tplopcode name="DivUn" hlopcode="DivUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="DivUnI4" base="DivUn" variant="i4" prefix="1"/>
-    <opcode name="DivUnI8" base="DivUn" variant="i8" prefix="1"/>
-    <opcode name="DivUnI4_S" base="DivUn" variant="i4" prefix="0"/>
-    <opcode name="DivUnI8_S" base="DivUn" variant="i8" prefix="0"/>
-
-    <tplopcode name="Rem" hlopcode="Rem">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="RemI4" base="Rem" variant="i4" prefix="1"/>
-    <opcode name="RemI8" base="Rem" variant="i8" prefix="1"/>
-    <opcode name="RemR4" base="Rem" variant="r4" prefix="1"/>
-    <opcode name="RemR8" base="Rem" variant="r8" prefix="1"/>
-    <opcode name="RemI4_S" base="Rem" variant="i4" prefix="0"/>
-    <opcode name="RemI8_S" base="Rem" variant="i8" prefix="0"/>
-    <opcode name="RemR4_S" base="Rem" variant="r4" prefix="0"/>
-    <opcode name="RemR8_S" base="Rem" variant="r8" prefix="0"/>
-
-    <tplopcode name="RemUn" hlopcode="RemUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="RemUnI4" base="RemUn" variant="i4" prefix="1"/>
-    <opcode name="RemUnI8" base="RemUn" variant="i8" prefix="1"/>
-    <opcode name="RemUnI4_S" base="RemUn" variant="i4" prefix="0"/>
-    <opcode name="RemUnI8_S" base="RemUn" variant="i8" prefix="0"/>
-
-    <tplopcode name="And" hlopcode="And">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="AndI4" base="And" variant="i4" prefix="1"/>
-    <opcode name="AndI8" base="And" variant="i8" prefix="1"/>
-    <opcode name="AndI4_S" base="And" variant="i4" prefix="0"/>
-    <opcode name="AndI8_S" base="And" variant="i8" prefix="0"/>
-
-    <tplopcode name="Or" hlopcode="Or">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="OrI4" base="Or" variant="i4" prefix="1"/>
-    <opcode name="OrI8" base="Or" variant="i8" prefix="1"/>
-    <opcode name="OrI4_S" base="Or" variant="i4" prefix="0"/>
-    <opcode name="OrI8_S" base="Or" variant="i8" prefix="0"/>
-
-    <tplopcode name="Xor" hlopcode="Xor">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="XorI4" base="Xor" variant="i4" prefix="1"/>
-    <opcode name="XorI8" base="Xor" variant="i8" prefix="1"/>
-    <opcode name="XorI4_S" base="Xor" variant="i4" prefix="0"/>
-    <opcode name="XorI8_S" base="Xor" variant="i8" prefix="0"/>
-
-    <tplopcode name="Shl" hlopcode="Shl">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ShlI4" base="Shl" variant="i4" prefix="1"/>
-    <opcode name="ShlI8" base="Shl" variant="i8" prefix="1"/>
-    <opcode name="ShlI4_S" base="Shl" variant="i4" prefix="0"/>
-    <!-- <opcode name="ShlI8_S" base="Shl" variant="i8" prefix="0"/> -->
-
-    <tplopcode name="Shr" hlopcode="Shr">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ShrI4" base="Shr" variant="i4" prefix="1"/>
-    <opcode name="ShrI8" base="Shr" variant="i8" prefix="1"/>
-    <opcode name="ShrI4_S" base="Shr" variant="i4" prefix="0"/>
-    <!-- <opcode name="ShrI8_S" base="Shr" variant="i8" prefix="0"/> -->
-
-    <tplopcode name="ShrUn" hlopcode="ShrUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ShrUnI4" base="ShrUn" variant="i4" prefix="1"/>
-    <opcode name="ShrUnI8" base="ShrUn" variant="i8" prefix="1"/>
-    <opcode name="ShrUnI4_S" base="ShrUn" variant="i4" prefix="0"/>
-    <!-- <opcode name="ShrUnI8_S" base="ShrUn" variant="i8" prefix="0"/> -->
-
-    <tplopcode name="Neg" hlopcode="Neg">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="NegI4" base="Neg" variant="i4" prefix="1"/>
-    <opcode name="NegI8" base="Neg" variant="i8" prefix="1"/>
-    <opcode name="NegR4" base="Neg" variant="r4" prefix="1"/>
-    <opcode name="NegR8" base="Neg" variant="r8" prefix="1"/>
-    <opcode name="NegI4_S" base="Neg" variant="i4" prefix="0"/>
-    <opcode name="NegI8_S" base="Neg" variant="i8" prefix="0"/>
-    <opcode name="NegR4_S" base="Neg" variant="r4" prefix="0"/>
-    <opcode name="NegR8_S" base="Neg" variant="r8" prefix="0"/>
-
-    <tplopcode name="Not" hlopcode="Not">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="NotI4" base="Not" variant="i4" prefix="1"/>
-    <opcode name="NotI8" base="Not" variant="i8" prefix="1"/>
-    <opcode name="NotI4_S" base="Not" variant="i4" prefix="0"/>
-    <opcode name="NotI8_S" base="Not" variant="i8" prefix="0"/>
-
-    <tplopcode name="AddOvf" hlopcode="AddOvf">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="AddOvfI4" base="AddOvf" variant="i4" prefix="3"/>
-    <opcode name="AddOvfI8" base="AddOvf" variant="i8" prefix="3"/>
-
-    <tplopcode name="AddOvfUn" hlopcode="AddOvfUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="AddOvfUnI4" base="AddOvfUn" variant="i4" prefix="3"/>
-    <opcode name="AddOvfUnI8" base="AddOvfUn" variant="i8" prefix="3"/>
-
-    <tplopcode name="MulOvf" hlopcode="MulOvf">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="MulOvfI4" base="MulOvf" variant="i4" prefix="3"/>
-    <opcode name="MulOvfI8" base="MulOvf" variant="i8" prefix="3"/>
-
-    <tplopcode name="MulOvfUn" hlopcode="MulOvfUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="MulOvfUnI4" base="MulOvfUn" variant="i4" prefix="3"/>
-    <opcode name="MulOvfUnI8" base="MulOvfUn" variant="i8" prefix="3"/>
-
-    <tplopcode name="SubOvf" hlopcode="SubOvf">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="SubOvfI4" base="SubOvf" variant="i4" prefix="3"/>
-    <opcode name="SubOvfI8" base="SubOvf" variant="i8" prefix="3"/>
-
-    <tplopcode name="SubOvfUn" hlopcode="SubOvfUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="SubOvfUnI4" base="SubOvfUn" variant="i4" prefix="3"/>
-    <opcode name="SubOvfUnI8" base="SubOvfUn" variant="i8" prefix="3"/>
-
-    <tplopcode name="ConvI1" hlopcode="ConvI1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvI1I4" base="ConvI1" prefix="2"/>
-    <opcode name="ConvI1I8" base="ConvI1" prefix="2"/>
-    <opcode name="ConvI1R4" base="ConvI1" prefix="2"/>
-    <opcode name="ConvI1R8" base="ConvI1" prefix="2"/>
-    <opcode name="ConvI1I4_S" base="ConvI1" prefix="0"/>
-    <opcode name="ConvI1I8_S" base="ConvI1" prefix="0"/>
-    <opcode name="ConvI1R4_S" base="ConvI1" prefix="0"/>
-    <opcode name="ConvI1R8_S" base="ConvI1" prefix="0"/>
-
-
-    <tplopcode name="ConvU1" hlopcode="ConvU1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvU1I4" base="ConvU1" prefix="2"/>
-    <opcode name="ConvU1I8" base="ConvU1" prefix="2"/>
-    <opcode name="ConvU1R4" base="ConvU1" prefix="2"/>
-    <opcode name="ConvU1R8" base="ConvU1" prefix="2"/>
-    <opcode name="ConvU1I4_S" base="ConvU1" prefix="0"/>
-    <opcode name="ConvU1I8_S" base="ConvU1" prefix="0"/>
-    <opcode name="ConvU1R4_S" base="ConvU1" prefix="0"/>
-    <opcode name="ConvU1R8_S" base="ConvU1" prefix="0"/>
-
-    <tplopcode name="ConvI2" hlopcode="ConvI2">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvI2I4" base="ConvI2" prefix="2"/>
-    <opcode name="ConvI2I8" base="ConvI2" prefix="2"/>
-    <opcode name="ConvI2R4" base="ConvI2" prefix="2"/>
-    <opcode name="ConvI2R8" base="ConvI2" prefix="2"/>
-    <opcode name="ConvI2I4_S" base="ConvI2" prefix="0"/>
-    <opcode name="ConvI2I8_S" base="ConvI2" prefix="0"/>
-    <opcode name="ConvI2R4_S" base="ConvI2" prefix="0"/>
-    <opcode name="ConvI2R8_S" base="ConvI2" prefix="0"/>
-
-    <tplopcode name="ConvU2" hlopcode="ConvU2">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvU2I4" base="ConvU2" prefix="2"/>
-    <opcode name="ConvU2I8" base="ConvU2" prefix="2"/>
-    <opcode name="ConvU2R4" base="ConvU2" prefix="2"/>
-    <opcode name="ConvU2R8" base="ConvU2" prefix="2"/>
-    <opcode name="ConvU2I4_S" base="ConvU2" prefix="0"/>
-    <opcode name="ConvU2I8_S" base="ConvU2" prefix="0"/>
-    <opcode name="ConvU2R4_S" base="ConvU2" prefix="0"/>
-    <opcode name="ConvU2R8_S" base="ConvU2" prefix="0"/>
-
-    <tplopcode name="ConvI4" hlopcode="ConvI4">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <!-- <opcode name="ConvI4I4" base="ConvI4" prefix="1"/> -->
-    <opcode name="ConvI4I8" base="ConvI4" prefix="2"/>
-    <opcode name="ConvI4R4" base="ConvI4" prefix="2"/>
-    <opcode name="ConvI4R8" base="ConvI4" prefix="2"/>
-    <!-- <opcode name="ConvI4I4_S" base="ConvI4" prefix="0"/> -->
-    <opcode name="ConvI4I8_S" base="ConvI4" prefix="0"/>
-    <opcode name="ConvI4R4_S" base="ConvI4" prefix="0"/>
-    <opcode name="ConvI4R8_S" base="ConvI4" prefix="0"/>
-
-    <tplopcode name="ConvU4" hlopcode="ConvU4">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <!-- <opcode name="ConvU4I4" base="ConvU4" prefix="1"/> -->
-    <opcode name="ConvU4I8" base="ConvU4" prefix="2"/>
-    <opcode name="ConvU4R4" base="ConvU4" prefix="2"/>
-    <opcode name="ConvU4R8" base="ConvU4" prefix="2"/>
-    <!-- <opcode name="ConvU4I4_S" base="ConvU4" prefix="0"/> -->
-    <opcode name="ConvU4I8_S" base="ConvU4" prefix="0"/>
-    <opcode name="ConvU4R4_S" base="ConvU4" prefix="0"/>
-    <opcode name="ConvU4R8_S" base="ConvU4" prefix="0"/>
-
-    <tplopcode name="ConvI8" hlopcode="ConvI8">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvI8I4" base="ConvI8" prefix="2"/>
-    <opcode name="ConvI8U4" base="ConvU8" prefix="2"/>
-    <!-- <opcode name="ConvI8I8" base="ConvI8" prefix="2"/> -->
-    <opcode name="ConvI8R4" base="ConvI8" prefix="2"/>
-    <opcode name="ConvI8R8" base="ConvI8" prefix="2"/>
-    <opcode name="ConvI8I4_S" base="ConvI8" prefix="0"/>
-    <!-- <opcode name="ConvI8I8_S" base="ConvI8" prefix="0"/> -->
-    <opcode name="ConvI8R4_S" base="ConvI8" prefix="0"/>
-    <opcode name="ConvI8R8_S" base="ConvI8" prefix="0"/>
-
-    <tplopcode name="ConvU8" hlopcode="ConvU8">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvU8I4" base="ConvU8" prefix="2"/>
-    <!-- <opcode name="ConvU8U4" base="ConvU8" prefix="2"/> --> same to ConvI8U4
-    <!-- <opcode name="ConvU8I8" base="ConvU8" prefix="2"/> -->
-    <opcode name="ConvU8R4" base="ConvU8" prefix="2"/>
-    <opcode name="ConvU8R8" base="ConvU8" prefix="2"/>
-    <!-- <opcode name="ConvU8I4_S" base="ConvU8" prefix="0"/> -->
-    <!-- <opcode name="ConvU8I8_S" base="ConvU8" prefix="0"/> -->
-    <!-- <opcode name="ConvU8R4_S" base="ConvU8" prefix="0"/> -->
-    <!-- <opcode name="ConvU8R8_S" base="ConvU8" prefix="0"/> -->
-
-    <tplopcode name="ConvR4" hlopcode="ConvR4">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvR4I4" base="ConvR4" prefix="2"/>
-    <opcode name="ConvR4I8" base="ConvR4" prefix="2"/>
-    <!-- <opcode name="ConvR4R4" base="ConvR4" prefix="1"/> -->
-    <opcode name="ConvR4R8" base="ConvR4" prefix="2"/>
-    <opcode name="ConvR4I4_S" base="ConvR4" prefix="0"/>
-    <opcode name="ConvR4I8_S" base="ConvR4" prefix="0"/>
-    <!-- <opcode name="ConvR4R4_S" base="ConvR4" prefix="0"/> -->
-    <opcode name="ConvR4R8_S" base="ConvR4" prefix="0"/>
-
-    <tplopcode name="ConvR8" hlopcode="ConvR8">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvR8I4" base="ConvR8" prefix="2"/>
-    <opcode name="ConvR8I8" base="ConvR8" prefix="2"/>
-    <opcode name="ConvR8R4" base="ConvR8" prefix="2"/>
-    <!-- <opcode name="ConvR8R8" base="ConvR8" prefix="2"/> -->
-    <opcode name="ConvR8I4_S" base="ConvR8" prefix="0"/>
-    <opcode name="ConvR8I8_S" base="ConvR8" prefix="0"/>
-    <opcode name="ConvR8R4_S" base="ConvR8" prefix="0"/>
-    <!-- <opcode name="ConvR8R8_S" base="ConvR8" prefix="0"/> -->
-
-    <tplopcode name="ConvOvfI1" hlopcode="ConvOvfI1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfI1I4" base="ConvOvfI1" prefix="3"/>
-    <opcode name="ConvOvfI1I8" base="ConvOvfI1" prefix="3"/>
-    <opcode name="ConvOvfI1R4" base="ConvOvfI1" prefix="3"/>
-    <opcode name="ConvOvfI1R8" base="ConvOvfI1" prefix="3"/>
-
-    <tplopcode name="ConvOvfU1" hlopcode="ConvOvfU1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfU1I4" base="ConvOvfU1" prefix="3"/>
-    <opcode name="ConvOvfU1I8" base="ConvOvfU1" prefix="3"/>
-    <opcode name="ConvOvfU1R4" base="ConvOvfU1" prefix="3"/>
-    <opcode name="ConvOvfU1R8" base="ConvOvfU1" prefix="3"/>
-
-    <tplopcode name="ConvOvfI2" hlopcode="ConvOvfI2">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfI2I4" base="ConvOvfI2" prefix="3"/>
-    <opcode name="ConvOvfI2I8" base="ConvOvfI2" prefix="3"/>
-    <opcode name="ConvOvfI2R4" base="ConvOvfI2" prefix="3"/>
-    <opcode name="ConvOvfI2R8" base="ConvOvfI2" prefix="3"/>
-
-    <tplopcode name="ConvOvfU2" hlopcode="ConvOvfU2">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfU2I4" base="ConvOvfU2" prefix="3"/>
-    <opcode name="ConvOvfU2I8" base="ConvOvfU2" prefix="3"/>
-    <opcode name="ConvOvfU2R4" base="ConvOvfU2" prefix="3"/>
-    <opcode name="ConvOvfU2R8" base="ConvOvfU2" prefix="3"/>
-
-    <tplopcode name="ConvOvfI4" hlopcode="ConvOvfI4">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <!-- <opcode name="ConvOvfI4I4" base="ConvOvfI4" prefix="3"/> -->
-    <opcode name="ConvOvfI4I8" base="ConvOvfI4" prefix="3"/>
-    <opcode name="ConvOvfI4R4" base="ConvOvfI4" prefix="3"/>
-    <opcode name="ConvOvfI4R8" base="ConvOvfI4" prefix="3"/>
-
-    <tplopcode name="ConvOvfU4" hlopcode="ConvOvfU4">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfU4I4" base="ConvOvfU4" prefix="3"/>
-    <opcode name="ConvOvfU4I8" base="ConvOvfU4" prefix="3"/>
-    <opcode name="ConvOvfU4R4" base="ConvOvfU4" prefix="3"/>
-    <opcode name="ConvOvfU4R8" base="ConvOvfU4" prefix="3"/>
-
-    <tplopcode name="ConvOvfI8" hlopcode="ConvOvfI8">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <!-- <opcode name="ConvOvfI8I4" base="ConvOvfI8" prefix="3"/>
-    <opcode name="ConvOvfI8I8" base="ConvOvfI8" prefix="3"/> -->
-    <opcode name="ConvOvfI8R4" base="ConvOvfI8" prefix="3"/>
-    <opcode name="ConvOvfI8R8" base="ConvOvfI8" prefix="3"/>
-
-    <tplopcode name="ConvOvfU8" hlopcode="ConvOvfU8">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfU8I4" base="ConvOvfU8" prefix="3"/>
-    <opcode name="ConvOvfU8I8" base="ConvOvfU8" prefix="3"/>
-    <opcode name="ConvOvfU8R4" base="ConvOvfU8" prefix="3"/>
-    <opcode name="ConvOvfU8R8" base="ConvOvfU8" prefix="3"/>
-
-    <tplopcode name="ConvOvfI1Un" hlopcode="ConvOvfI1Un">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfI1UnI4" base="ConvOvfI1Un" prefix="3"/>
-    <opcode name="ConvOvfI1UnI8" base="ConvOvfI1Un" prefix="3"/>
-    <opcode name="ConvOvfI1UnR4" base="ConvOvfI1Un" prefix="3"/>
-    <opcode name="ConvOvfI1UnR8" base="ConvOvfI1Un" prefix="3"/>
-
-    <tplopcode name="ConvOvfU1Un" hlopcode="ConvOvfU1Un">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfU1UnI4" base="ConvOvfU1Un" prefix="3"/>
-    <opcode name="ConvOvfU1UnI8" base="ConvOvfU1Un" prefix="3"/>
-    <opcode name="ConvOvfU1UnR4" base="ConvOvfU1Un" prefix="3"/>
-    <opcode name="ConvOvfU1UnR8" base="ConvOvfU1Un" prefix="3"/>
-
-    <tplopcode name="ConvOvfI2Un" hlopcode="ConvOvfI2Un">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfI2UnI4" base="ConvOvfI2Un" prefix="3"/>
-    <opcode name="ConvOvfI2UnI8" base="ConvOvfI2Un" prefix="3"/>
-    <opcode name="ConvOvfI2UnR4" base="ConvOvfI2Un" prefix="3"/>
-    <opcode name="ConvOvfI2UnR8" base="ConvOvfI2Un" prefix="3"/>
-
-    <tplopcode name="ConvOvfU2Un" hlopcode="ConvOvfU2Un">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfU2UnI4" base="ConvOvfU2Un" prefix="3"/>
-    <opcode name="ConvOvfU2UnI8" base="ConvOvfU2Un" prefix="3"/>
-    <opcode name="ConvOvfU2UnR4" base="ConvOvfU2Un" prefix="3"/>
-    <opcode name="ConvOvfU2UnR8" base="ConvOvfU2Un" prefix="3"/>
-
-    <tplopcode name="ConvOvfI4Un" hlopcode="ConvOvfI4Un">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="ConvOvfI4UnI4" base="ConvOvfI4Un" prefix="3"/>
-    <opcode name="ConvOvfI4UnI8" base="ConvOvfI4Un" prefix="3"/>
-    <opcode name="ConvOvfI4UnR4" base="ConvOvfI4Un" prefix="3"/>
-    <opcode name="ConvOvfI4UnR8" base="ConvOvfI4Un" prefix="3"/>
-
-    <tplopcode name="ConvOvfU4Un" hlopcode="ConvOvfU4Un">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <!-- <opcode name="ConvOvfU4UnI4" base="ConvOvfU4Un" prefix="3"/> -->
-    <opcode name="ConvOvfU4UnI8" base="ConvOvfU4Un" prefix="3"/>
-    <opcode name="ConvOvfU4UnR4" base="ConvOvfU4Un" prefix="3"/>
-    <opcode name="ConvOvfU4UnR8" base="ConvOvfU4Un" prefix="3"/>
-
-    <tplopcode name="ConvOvfI8Un" hlopcode="ConvOvfI8Un">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <!-- <opcode name="ConvOvfI8UnI4" base="ConvOvfI8Un" prefix="3"/> -->
-    <opcode name="ConvOvfI8UnI8" base="ConvOvfI8Un" prefix="3"/>
-    <opcode name="ConvOvfI8UnR4" base="ConvOvfI8Un" prefix="3"/>
-    <opcode name="ConvOvfI8UnR8" base="ConvOvfI8Un" prefix="3"/>
-
-    <tplopcode name="ConvOvfU8Un" hlopcode="ConvOvfU8Un">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <!-- <opcode name="ConvOvfU8UnI4" base="ConvOvfU8Un" prefix="3"/> -->
-    <!-- <opcode name="ConvOvfU8UnI8" base="ConvOvfU8Un" prefix="3"/> -->
-    <opcode name="ConvOvfU8UnR4" base="ConvOvfU8Un" prefix="3"/>
-    <opcode name="ConvOvfU8UnR8" base="ConvOvfU8Un" prefix="3"/>
-
-    <tplopcode name="Ceq" hlopcode="Ceq">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CeqI4" base="Ceq" variant="i4" prefix="1"/>
-    <opcode name="CeqI8" base="Ceq" variant="i8" prefix="1"/>
-    <opcode name="CeqR4" base="Ceq" variant="r4" prefix="1"/>
-    <opcode name="CeqR8" base="Ceq" variant="r8" prefix="1"/>
-    <opcode name="CeqI4_S" base="Ceq" variant="i4" prefix="0"/>
-    <opcode name="CeqI8_S" base="Ceq" variant="i8" prefix="0"/>
-    <opcode name="CeqR4_S" base="Ceq" variant="r4" prefix="0"/>
-    <opcode name="CeqR8_S" base="Ceq" variant="r8" prefix="0"/>
-
-    <tplopcode name="Cgt" hlopcode="Cgt">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CgtI4" base="Cgt" variant="i4" prefix="1"/>
-    <opcode name="CgtI8" base="Cgt" variant="i8" prefix="1"/>
-    <opcode name="CgtR4" base="Cgt" variant="r4" prefix="1"/>
-    <opcode name="CgtR8" base="Cgt" variant="r8" prefix="1"/>
-    <opcode name="CgtI4_S" base="Cgt" variant="i4" prefix="0"/>
-    <opcode name="CgtI8_S" base="Cgt" variant="i8" prefix="0"/>
-    <!-- <opcode name="CgtR4_S" base="Cgt" variant="r4" prefix="0"/>
-    <opcode name="CgtR8_S" base="Cgt" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="CgtUn" hlopcode="CgtUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CgtUnI4" base="CgtUn" variant="i4" prefix="1"/>
-    <opcode name="CgtUnI8" base="CgtUn" variant="i8" prefix="1"/>
-    <opcode name="CgtUnR4" base="CgtUn" variant="r4" prefix="1"/>
-    <opcode name="CgtUnR8" base="CgtUn" variant="r8" prefix="1"/>
-    <opcode name="CgtUnI4_S" base="CgtUn" variant="i4" prefix="0"/>
-    <opcode name="CgtUnI8_S" base="CgtUn" variant="i8" prefix="0"/>
-    <!-- <opcode name="CgtUnR4_S" base="CgtUn" variant="r4" prefix="0"/>
-    <opcode name="CgtUnR8_S" base="CgtUn" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="Clt" hlopcode="Clt">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CltI4" base="Clt" variant="i4" prefix="1"/>
-    <opcode name="CltI8" base="Clt" variant="i8" prefix="1"/>
-    <opcode name="CltR4" base="Clt" variant="r4" prefix="1"/>
-    <opcode name="CltR8" base="Clt" variant="r8" prefix="1"/>
-    <opcode name="CltI4_S" base="Clt" variant="i4" prefix="0"/>
-    <opcode name="CltI8_S" base="Clt" variant="i8" prefix="0"/>
-    <!-- <opcode name="CltR4_S" base="Clt" variant="r4" prefix="0"/>
-    <opcode name="CltR8_S" base="Clt" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="CltUn" hlopcode="CltUn">
-        <param name="arg1" arg="arg1" arg_kind="stack"/>
-        <param name="arg2" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CltUnI4" base="CltUn" variant="i4" prefix="1"/>
-    <opcode name="CltUnI8" base="CltUn" variant="i8" prefix="1"/>
-    <opcode name="CltUnR4" base="CltUn" variant="r4" prefix="1"/>
-    <opcode name="CltUnR8" base="CltUn" variant="r8" prefix="1"/>
-    <opcode name="CltUnI4_S" base="CltUn" variant="i4" prefix="0"/>
-    <opcode name="CltUnI8_S" base="CltUn" variant="i8" prefix="0"/>
-    <!-- <opcode name="CltUnR4_S" base="CltUn" variant="r4" prefix="0"/>
-    <opcode name="CltUnR8_S" base="CltUn" variant="r8" prefix="0"/> -->
-
-    <tplopcode name="InitObjI1" hlopcode="InitObjI1">
-        <param name="addr" arg="src" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="InitObjI1" base="InitObjI1" prefix="1"/>
-    <opcode name="InitObjI1_S" base="InitObjI1" prefix="0"/>
-
-    <tplopcode name="InitObjI2" hlopcode="InitObjI2">
-        <param name="addr" arg="src" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="InitObjI2" base="InitObjI2" prefix="1"/>
-    <opcode name="InitObjI2_S" base="InitObjI2" prefix="0"/>
-    <opcode name="InitObjI2Unaligned" base="InitObjI2" prefix="3"/>
-
-    <tplopcode name="InitObjI4" hlopcode="InitObjI4">
-        <param name="addr" arg="src" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="InitObjI4" base="InitObjI4" prefix="1"/>
-    <opcode name="InitObjI4_S" base="InitObjI4" prefix="0"/>
-    <opcode name="InitObjI4Unaligned" base="InitObjI4" prefix="3"/>
-
-    <tplopcode name="InitObjI8" hlopcode="InitObjI8">
-        <param name="addr" arg="src" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="InitObjI8" base="InitObjI8" prefix="1"/>
-    <opcode name="InitObjI8_S" base="InitObjI8" prefix="0"/>
-    <opcode name="InitObjI8Unaligned" base="InitObjI8" prefix="3"/>
-
-    <tplopcode name="InitObjAny" hlopcode="InitObjAny">
-        <param name="addr" arg="src" arg_kind="stack"/>
-        <param name="size" arg="size" arg_kind="const"/>
-    </tplopcode>
-    <opcode name="InitObjAny" base="InitObjAny" prefix="1"/>
-    <opcode name="InitObjAny_S" base="InitObjAny" prefix="0"/>
-
-    <tplopcode name="CpObjI1" hlopcode="CpObjI1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CpObjI1" base="CpObjI1" prefix="1"/>
-    <opcode name="CpObjI1_S" base="CpObjI1" prefix="0"/>
-
-    <tplopcode name="CpObjI2" hlopcode="CpObjI2">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CpObjI2" base="CpObjI2" prefix="1"/>
-    <opcode name="CpObjI2_S" base="CpObjI2" prefix="0"/>
-
-    <tplopcode name="CpObjI4" hlopcode="CpObjI4">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CpObjI4" base="CpObjI4" prefix="1"/>
-    <opcode name="CpObjI4_S" base="CpObjI4" prefix="0"/>
-
-    <tplopcode name="CpObjI8" hlopcode="CpObjI8">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CpObjI8" base="CpObjI8" prefix="1"/>
-    <opcode name="CpObjI8_S" base="CpObjI8" prefix="0"/>
-
-    <tplopcode name="CpObjAny" hlopcode="CpObjAny">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CpObjAny" base="CpObjAny" size_param="1" prefix="1"/>
-    <opcode name="CpObjAny_S" base="CpObjAny" size_param="1" prefix="0"/>
-
-    <tplopcode name="LdObjAny" hlopcode="LdObjAny">
-        <param name="addr" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdObjAny" base="LdObjAny" size_param="1" prefix="1"/>
-    <opcode name="LdObjAny_S" base="LdObjAny" size_param="1" prefix="0"/>
-
-    <tplopcode name="StObjAny" hlopcode="StObjAny">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="addr" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StObjAny" base="StObjAny" size_param="1" prefix="1"/>
-    <opcode name="StObjAny_S" base="StObjAny" size_param="1" prefix="0"/>
-
-    <tplopcode name="CastClass" hlopcode="CastClass">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <!-- <param name="dst" arg="dst" arg_kind="stack"/> -->
-        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="CastClass" base="CastClass" prefix="1"/>
-    <opcode name="CastClass_S" base="CastClass" prefix="0"/>
-
-    <tplopcode name="IsInst" hlopcode="IsInst">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="IsInst" base="IsInst" prefix="1"/>
-    <opcode name="IsInst_S" base="IsInst" prefix="0"/>
-
-    <tplopcode name="Box" hlopcode="Box">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="Box" base="Box" prefix="1"/>
-    <opcode name="Box_S" base="Box" prefix="0"/>
-
-    <tplopcode name="Unbox" hlopcode="Unbox">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="Unbox" base="Unbox" prefix="1"/>
-    <opcode name="Unbox_S" base="Unbox" prefix="0"/>
-    <tplopcode name="UnboxAny" hlopcode="UnboxAny">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="UnboxAny" base="UnboxAny" prefix="1"/>
-    <opcode name="UnboxAny_S" base="UnboxAny" prefix="0"/>
-
-    <tplopcode name="NewArr" hlopcode="NewArr">
-        <param name="length" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="arr_klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="NewArr" base="NewArr" prefix="1"/>
-    <opcode name="NewArr_S" base="NewArr" prefix="0"/>
-
-    <tplopcode name="LdLen" hlopcode="LdLen">
-        <param name="arr" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdLen" base="LdLen" prefix="1"/>
-    <opcode name="LdLen_S" base="LdLen" prefix="0"/>
-
-    <tplopcode name="Ldelema" hlopcode="Ldelema">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="Ldelema" base="Ldelema" prefix="1"/>
-    <opcode name="Ldelema_S" base="Ldelema" prefix="0"/>
-    <opcode name="LdelemaReadOnly" hlopcode="Ldelema" prefix="2">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
+    <tplopcode name="Ckfinite">
+        <param name="src" arg="src" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="CkfiniteR4" base="Ckfinite" variant="r4" />
+    <opcode name="CkfiniteR8" base="Ckfinite" variant="r8" />
+    <opcode name="LocAlloc">
+        <param name="size" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
     </opcode>
-    <tplopcode name="LdelemI1" hlopcode="LdelemI1">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemI1" base="LdelemI1" prefix="1"/>
-    <opcode name="LdelemI1_S" base="LdelemI1" prefix="0"/>
-
-    <tplopcode name="LdelemU1" hlopcode="LdelemU1">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemU1" base="LdelemU1" prefix="1"/>
-    <opcode name="LdelemU1_S" base="LdelemU1" prefix="0"/>
-
-    <tplopcode name="LdelemI2" hlopcode="LdelemI2">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemI2" base="LdelemI2" prefix="1"/>
-    <opcode name="LdelemI2_S" base="LdelemI2" prefix="0"/>
-
-    <tplopcode name="LdelemU2" hlopcode="LdelemU2">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemU2" base="LdelemU2" prefix="1"/>
-    <opcode name="LdelemU2_S" base="LdelemU2" prefix="0"/>
-
-    <tplopcode name="LdelemI4" hlopcode="LdelemI4">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemI4" base="LdelemI4" prefix="1"/>
-    <opcode name="LdelemI4_S" base="LdelemI4" prefix="0"/>
-
-    <tplopcode name="LdelemI8" hlopcode="LdelemI8">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemI8" base="LdelemI8" prefix="1"/>
-    <opcode name="LdelemI8_S" base="LdelemI8" prefix="0"/>
-
-    <tplopcode name="LdelemI" hlopcode="LdelemI">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemI" base="LdelemI" prefix="1"/>
-    <opcode name="LdelemI_S" base="LdelemI" prefix="0"/>
-
-    <tplopcode name="LdelemR4" hlopcode="LdelemR4">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemR4" base="LdelemR4" prefix="1"/>
-    <opcode name="LdelemR4_S" base="LdelemR4" prefix="0"/>
-
-    <tplopcode name="LdelemR8" hlopcode="LdelemR8">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemR8" base="LdelemR8" prefix="1"/>
-    <opcode name="LdelemR8_S" base="LdelemR8" prefix="0"/>
-
-    <tplopcode name="LdelemRef" hlopcode="LdelemRef">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdelemRef" base="LdelemRef" prefix="1"/>
-    <opcode name="LdelemRef_S" base="LdelemRef" prefix="0"/>
-
-    <tplopcode name="LdelemAnyRef" hlopcode="LdelemAny">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="LdelemAnyRef" base="LdelemAnyRef" prefix="1"/>
-    <opcode name="LdelemAnyRef_S" base="LdelemAnyRef" prefix="0"/>
-
-    <tplopcode name="LdelemAnyVal" hlopcode="LdelemAny">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="ele_size" arg="element_size" arg_kind="const"/>
-    </tplopcode>
-    <opcode name="LdelemAnyVal" base="LdelemAnyVal" prefix="1"/>
-    <opcode name="LdelemAnyVal_S" base="LdelemAnyVal" prefix="0"/>
-
-    <tplopcode name="StelemI1" hlopcode="StelemI1">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StelemI1" base="StelemI1" prefix="1"/>
-    <opcode name="StelemI1_S" base="StelemI1" prefix="0"/>
-
-    <tplopcode name="StelemI2" hlopcode="StelemI2">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StelemI2" base="StelemI2" prefix="1"/>
-    <opcode name="StelemI2_S" base="StelemI2" prefix="0"/>
-
-    <tplopcode name="StelemI4" hlopcode="StelemI4">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StelemI4" base="StelemI4" prefix="1"/>
-    <opcode name="StelemI4_S" base="StelemI4" prefix="0"/>
-
-    <tplopcode name="StelemI8" hlopcode="StelemI8">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StelemI8" base="StelemI8" prefix="1"/>
-    <opcode name="StelemI8_S" base="StelemI8" prefix="0"/>
-
-    <tplopcode name="StelemI" hlopcode="StelemI">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StelemI" base="StelemI" prefix="1"/>
-    <opcode name="StelemI_S" base="StelemI" prefix="0"/>
-
-    <tplopcode name="StelemR4" hlopcode="StelemR4">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StelemR4" base="StelemR4" prefix="1"/>
-    <opcode name="StelemR4_S" base="StelemR4" prefix="0"/>
-
-    <tplopcode name="StelemR8" hlopcode="StelemR8">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StelemR8" base="StelemR8" prefix="1"/>
-    <opcode name="StelemR8_S" base="StelemR8" prefix="0"/>
-
-    <tplopcode name="StelemRef" hlopcode="StelemRef">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StelemRef" base="StelemRef" prefix="1"/>
-    <opcode name="StelemRef_S" base="StelemRef" prefix="0"/>
-
-    <tplopcode name="StelemAnyRef" hlopcode="StelemAny">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="StelemAnyRef" base="StelemAnyRef" prefix="1"/>
-    <opcode name="StelemAnyRef_S" base="StelemAnyRef" prefix="0"/>
-
-    <tplopcode name="StelemAnyVal" hlopcode="StelemAny">
-        <param name="arr" arg="arg1" arg_kind="stack"/>
-        <param name="index" arg="arg2" arg_kind="stack"/>
-        <param name="value" arg="arg3" arg_kind="stack"/>
-        <param name="ele_klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="ele_size" arg="element_size" arg_kind="const"/>
-    </tplopcode>
-    <opcode name="StelemAnyVal" base="StelemAnyVal" prefix="1"/>
-    <opcode name="StelemAnyVal_S" base="StelemAnyVal" prefix="0"/>
-
-    <opcode name="MkRefAny" hlopcode="MkRefAny" prefix="1">
-        <param name="addr" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
+    <opcode name="InitBlk">
+        <param name="addr" arg="arg1" arg_kind="stack" />
+        <param name="value" arg="arg2" arg_kind="stack" />
+        <param name="size" arg="arg3" arg_kind="stack" />
     </opcode>
-    <opcode name="RefAnyVal" hlopcode="RefAnyVal" prefix="1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
+    <opcode name="CpBlk">
+        <param name="dst" arg="arg1" arg_kind="stack" />
+        <param name="src" arg="arg2" arg_kind="stack" />
+        <param name="size" arg="arg3" arg_kind="stack" />
     </opcode>
-    <opcode name="RefAnyType" hlopcode="RefAnyType" prefix="1">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
+    <tplopcode name="Ldftn">
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="Ldftn" base="Ldftn" />
+    <tplopcode name="Ldvirtftn">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="Ldvirtftn" base="Ldvirtftn" />
+    <tplopcode name="Ldfld">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="offset" arg="field_offset" arg_kind="field_offset" />
+    </tplopcode>
+    <opcode name="LdfldI1" base="Ldfld" />
+    <opcode name="LdfldI1_L" base="Ldfld" />
+    <opcode name="LdfldU1" base="Ldfld" />
+    <opcode name="LdfldU1_L" base="Ldfld" />
+    <opcode name="LdfldI2" base="Ldfld" />
+    <opcode name="LdfldI2_L" base="Ldfld" />
+    <opcode name="LdfldI2Unaligned" base="Ldfld" />
+    <opcode name="LdfldU2" base="Ldfld" />
+    <opcode name="LdfldU2_L" base="Ldfld" />
+    <opcode name="LdfldU2Unaligned" base="Ldfld" />
+    <opcode name="LdfldI4" base="Ldfld" />
+    <opcode name="LdfldI4_L" base="Ldfld" />
+    <opcode name="LdfldI4Unaligned" base="Ldfld" />
+    <opcode name="LdfldI8" base="Ldfld" />
+    <opcode name="LdfldI8_L" base="Ldfld" />
+    <opcode name="LdfldI8Unaligned" base="Ldfld" />
+    <tplopcode name="LdfldAny">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="offset" arg="field_offset" arg_kind="field_offset" />
+        <param name="size" arg="field_size" arg_kind="field_offset" />
+    </tplopcode>
+    <opcode name="LdfldAny" base="LdfldAny" />
+    <opcode name="LdfldAny_L" base="LdfldAny" />
+    <tplopcode name="Ldvfld">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="offset" arg="field_offset" arg_kind="field_offset" />
+    </tplopcode>
+    <opcode name="LdvfldI1" base="Ldvfld" />
+    <opcode name="LdvfldI1_L" base="Ldvfld" />
+    <opcode name="LdvfldU1" base="Ldvfld" />
+    <opcode name="LdvfldU1_L" base="Ldvfld" />
+    <opcode name="LdvfldI2" base="Ldvfld" />
+    <opcode name="LdvfldI2_L" base="Ldvfld" />
+    <opcode name="LdvfldI2Unaligned" base="Ldvfld" />
+    <opcode name="LdvfldU2" base="Ldvfld" />
+    <opcode name="LdvfldU2_L" base="Ldvfld" />
+    <opcode name="LdvfldU2Unaligned" base="Ldvfld" />
+    <opcode name="LdvfldI4" base="Ldvfld" />
+    <opcode name="LdvfldI4_L" base="Ldvfld" />
+    <opcode name="LdvfldI4Unaligned" base="Ldvfld" />
+    <opcode name="LdvfldI8" base="Ldvfld" />
+    <opcode name="LdvfldI8_L" base="Ldvfld" />
+    <opcode name="LdvfldI8Unaligned" base="Ldvfld" />
+    <tplopcode name="LdvfldAny">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="offset" arg="field_offset" arg_kind="field_offset" />
+        <param name="size" arg="field_size" arg_kind="field_offset" />
+    </tplopcode>
+    <opcode name="LdvfldAny" base="LdvfldAny" />
+    <opcode name="LdvfldAny_L" base="LdvfldAny" />
+    <tplopcode name="Ldflda">
+        <param name="obj" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="offset" arg="field_offset" arg_kind="field_offset" />
+    </tplopcode>
+    <opcode name="Ldflda" base="Ldflda" />
+    <opcode name="Ldflda_L" base="Ldflda" />
+    <tplopcode name="Stfld">
+        <param name="obj" arg="arg1" arg_kind="stack" />
+        <param name="value" arg="arg2" arg_kind="stack" />
+        <param name="offset" arg="field_offset" arg_kind="field_offset" />
+    </tplopcode>
+    <opcode name="StfldI1" base="Stfld" />
+    <opcode name="StfldI1_L" base="Stfld" />
+    <opcode name="StfldI2" base="Stfld" />
+    <opcode name="StfldI2_L" base="Stfld" />
+    <opcode name="StfldI2Unaligned" base="Stfld" />
+    <opcode name="StfldI4" base="Stfld" />
+    <opcode name="StfldI4_L" base="Stfld" />
+    <opcode name="StfldI4Unaligned" base="Stfld" />
+    <opcode name="StfldI8" base="Stfld" />
+    <opcode name="StfldI8_L" base="Stfld" />
+    <opcode name="StfldI8Unaligned" base="Stfld" />
+    <tplopcode name="StfldAny">
+        <param name="obj" arg="arg1" arg_kind="stack" />
+        <param name="value" arg="arg2" arg_kind="stack" />
+        <param name="offset" arg="field_offset" arg_kind="field_offset" />
+        <param name="size" arg="field_size" arg_kind="field_offset" />
+    </tplopcode>
+    <opcode name="StfldAny" base="StfldAny" />
+    <opcode name="StfldAny_L" base="StfldAny" />
+    <tplopcode name="Ldsfld">
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="LdsfldI1" base="Ldsfld" />
+    <opcode name="LdsfldU1" base="Ldsfld" />
+    <opcode name="LdsfldI2" base="Ldsfld" />
+    <opcode name="LdsfldU2" base="Ldsfld" />
+    <opcode name="LdsfldI4" base="Ldsfld" />
+    <opcode name="LdsfldI8" base="Ldsfld" />
+    <tplopcode name="LdsfldAny">
+        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="size" arg="field_size" arg_kind="field_offset" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdsfldAny" base="LdsfldAny" />
+    <tplopcode name="Ldsflda">
+        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="Ldsflda" base="Ldsflda" />
+    <tplopcode name="LdsfldRvaData">
+        <param name="data" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="LdsfldRvaData" base="LdsfldRvaData" />
+    <tplopcode name="Stsfld">
+        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="value" arg="arg1" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StsfldI1" base="Stsfld" />
+    <opcode name="StsfldI2" base="Stsfld" />
+    <opcode name="StsfldI4" base="Stsfld" />
+    <opcode name="StsfldI8" base="Stsfld" />
+    <tplopcode name="StsfldAny">
+        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="size" arg="field_size" arg_kind="field_offset" />
+        <param name="value" arg="arg1" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="StsfldAny" base="StsfldAny" />
+    <tplopcode name="RetVoid" />
+    <opcode name="RetVoid" base="RetVoid" />
+    <tplopcode name="Ret">
+        <param name="src" arg="src" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="RetI4" base="Ret" variant="i4" />
+    <opcode name="RetI8" base="Ret" variant="i8" />
+    <opcode name="RetAny" base="Ret" variant="any" size_param="1" />
+    <tplopcode name="RetNop" />
+    <opcode name="RetNop" base="RetNop" />
+    <tplopcode name="CallInterp">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="CallInterp" base="CallInterp" />
+    <tplopcode name="CallVirtInterp">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="CallVirtInterp" base="CallVirtInterp" />
+    <tplopcode name="CallInternalCall">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="CallInternalCall" base="CallInternalCall" />
+    <tplopcode name="CallPInvoke">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <tplopcode name="CallIntrinsic">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="CallIntrinsic" base="CallIntrinsic" />
+    <opcode name="CallPInvoke" base="CallPInvoke" />
+    <tplopcode name="CallAot">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="CallAot" base="CallAot" />
+    <tplopcode name="CallRuntimeImplemented">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="CallRuntimeImplemented" base="CallRuntimeImplemented" />
+    <tplopcode name="CalliInterp">
+        <param name="method_sig_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="method_idx" arg="arg3" arg_kind="stack" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="CalliInterp" base="CalliInterp" />
+    <tplopcode name="BoxRefInplace">
+        <param name="src" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
+        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+    </tplopcode>
+    <opcode name="BoxRefInplace" base="BoxRefInplace" />
+    <tplopcode name="NewObjInterp">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+        <param name="total_params_stack_object_size" arg="total_params_stack_object_size" arg_kind="const" />
+    </tplopcode>
+    <opcode name="NewObjInterp" base="NewObjInterp" />
+    <opcode name="NewValueTypeInterp" base="NewObjInterp" />
+    <tplopcode name="NewObjInternalCall">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="invoker_idx" arg="invoker_idx" arg_kind="invoker_idx" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="NewObjInternalCall" base="NewObjInternalCall" />
+    <tplopcode name="NewObjIntrinsic">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="invoker_idx" arg="invoker_idx" arg_kind="invoker_idx" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="NewObjIntrinsic" base="NewObjIntrinsic" />
+    <tplopcode name="NewObjAot">
+        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+        <param name="total_params_stack_object_size" arg="total_params_stack_object_size" arg_kind="const" />
+    </tplopcode>
+    <opcode name="NewObjAot" base="NewObjAot" />
+    <opcode name="NewValueTypeAot" base="NewObjAot" />
+    <tplopcode name="Throw">
+        <param name="ex" arg="src" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="Throw" base="Throw" />
+    <tplopcode name="Rethrow">
+
+
+    </tplopcode>
+    <opcode name="Rethrow" base="Rethrow" />
+    <tplopcode name="LeaveTryWithFinally">
+        <param name="first_finally_clause_index" arg="first_finally_clause_index" arg_kind="exception_clause_index" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+        <param name="finally_clauses_count" type="u8" arg="finally_clauses_count" arg_kind="const" />
+    </tplopcode>
+    <opcode name="LeaveTryWithFinally" base="LeaveTryWithFinally" />
+    <tplopcode name="LeaveCatchWithFinally">
+        <param name="first_finally_clause_index" arg="first_finally_clause_index" arg_kind="exception_clause_index" />
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+        <param name="finally_clauses_count" type="u8" arg="finally_clauses_count" arg_kind="const" />
+    </tplopcode>
+    <opcode name="LeaveCatchWithFinally" base="LeaveCatchWithFinally" />
+    <tplopcode name="LeaveCatchWithoutFinally">
+        <param name="target_offset" arg="branch_target_offset" arg_kind="target" />
+    </tplopcode>
+    <opcode name="LeaveCatchWithoutFinally" base="LeaveCatchWithoutFinally" />
+    <tplopcode name="EndFilter">
+        <param name="cond" arg="src" arg_kind="stack" />
+    </tplopcode>
+    <opcode name="EndFilter" base="EndFilter" />
+    <tplopcode name="EndFinally" />
+    <opcode name="EndFinally" base="EndFinally" />
+    <tplopcode name="EndFault" />
+    <opcode name="EndFault" base="EndFault" />
+    <opcode name="GetEnumLongHashCode">
+        <param name="value_ptr" arg="src" arg_kind="stack" />
+        <param name="dst" arg="dst" arg_kind="stack" />
     </opcode>
-    <opcode name="LdToken" hlopcode="LdToken" prefix="1">
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="token_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </opcode>
-    <tplopcode name="Ckfinite" hlopcode="Ckfinite">
-        <param name="src" arg="src" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="CkfiniteR4" base="Ckfinite" variant="r4" prefix="1"/>
-    <opcode name="CkfiniteR8" base="Ckfinite" variant="r8" prefix="1"/>
-    <opcode name="LocAlloc" hlopcode="LocAlloc" prefix="1">
-        <param name="size" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </opcode>
-    <opcode name="InitBlk" hlopcode="InitBlk" prefix="2">
-        <param name="addr" arg="arg1" arg_kind="stack"/>
-        <param name="value" arg="arg2" arg_kind="stack"/>
-        <param name="size" arg="arg3" arg_kind="stack"/>
-    </opcode>
-    <opcode name="CpBlk" hlopcode="CpBlk" prefix="2">
-        <param name="dst" arg="arg1" arg_kind="stack"/>
-        <param name="src" arg="arg2" arg_kind="stack"/>
-        <param name="size" arg="arg3" arg_kind="stack"/>
-    </opcode>
-
-    <tplopcode name="Ldftn" hlopcode="Ldftn">
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="Ldftn" base="Ldftn" prefix="1"/>
-    <opcode name="Ldftn_S" base="Ldftn" prefix="0"/>
-
-    <tplopcode name="Ldvirtftn" hlopcode="Ldvirtftn">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="Ldvirtftn" base="Ldvirtftn" prefix="1"/>
-    <opcode name="Ldvirtftn_S" base="Ldvirtftn" prefix="0"/>
-
-    <tplopcode name="Ldfld" hlopcode="Ldfld">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="offset" arg="field_offset" arg_kind="field_offset"/>
-    </tplopcode>
-    <opcode name="LdfldI1" base="Ldfld" prefix="1"/>
-    <opcode name="LdfldI1_S" base="Ldfld" prefix="0"/>
-    <opcode name="LdfldI1_L" base="Ldfld" prefix="3"/>
-    <opcode name="LdfldU1" base="Ldfld" prefix="1"/>
-    <opcode name="LdfldU1_S" base="Ldfld" prefix="0"/>
-    <opcode name="LdfldU1_L" base="Ldfld" prefix="3"/>
-    <opcode name="LdfldI2" base="Ldfld" prefix="1"/>
-    <opcode name="LdfldI2_S" base="Ldfld" prefix="0"/>
-    <opcode name="LdfldI2_L" base="Ldfld" prefix="3"/>
-    <opcode name="LdfldI2Unaligned" base="Ldfld" prefix="3"/>
-    <opcode name="LdfldU2" base="Ldfld" prefix="1"/>
-    <opcode name="LdfldU2_S" base="Ldfld" prefix="0"/>
-    <opcode name="LdfldU2_L" base="Ldfld" prefix="3"/>
-    <opcode name="LdfldU2Unaligned" base="Ldfld" prefix="3"/>
-    <opcode name="LdfldI4" base="Ldfld" prefix="1"/>
-    <opcode name="LdfldI4_S" base="Ldfld" prefix="0"/>
-    <opcode name="LdfldI4_L" base="Ldfld" prefix="3"/>
-    <opcode name="LdfldI4Unaligned" base="Ldfld" prefix="3"/>
-    <opcode name="LdfldI8" base="Ldfld" prefix="1"/>
-    <opcode name="LdfldI8_S" base="Ldfld" prefix="0"/>
-    <opcode name="LdfldI8_L" base="Ldfld" prefix="3"/>
-    <opcode name="LdfldI8Unaligned" base="Ldfld" prefix="3"/>
-
-
-    <tplopcode name="LdfldAny" hlopcode="Ldfld">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="offset" arg="field_offset" arg_kind="field_offset"/>
-        <param name="size" arg="field_size" arg_kind="field_offset"/>
-    </tplopcode>
-    <opcode name="LdfldAny" base="LdfldAny" prefix="1"/>
-    <opcode name="LdfldAny_S" base="LdfldAny" prefix="0"/>
-    <opcode name="LdfldAny_L" base="LdfldAny" prefix="3"/>
-
-    <tplopcode name="Ldvfld" hlopcode="Ldvfld">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="offset" arg="field_offset" arg_kind="field_offset"/>
-    </tplopcode>
-    <opcode name="LdvfldI1" base="Ldvfld" prefix="1"/>
-    <opcode name="LdvfldI1_S" base="Ldvfld" prefix="0"/>
-    <opcode name="LdvfldI1_L" base="Ldvfld" prefix="3"/>
-    <opcode name="LdvfldU1" base="Ldvfld" prefix="1"/>
-    <opcode name="LdvfldU1_S" base="Ldvfld" prefix="0"/>
-    <opcode name="LdvfldU1_L" base="Ldvfld" prefix="3"/>
-    <opcode name="LdvfldI2" base="Ldvfld" prefix="1"/>
-    <opcode name="LdvfldI2_S" base="Ldvfld" prefix="0"/>
-    <opcode name="LdvfldI2_L" base="Ldvfld" prefix="3"/>
-    <opcode name="LdvfldI2Unaligned" base="Ldvfld" prefix="3"/>
-    <opcode name="LdvfldU2" base="Ldvfld" prefix="1"/>
-    <opcode name="LdvfldU2_S" base="Ldvfld" prefix="0"/>
-    <opcode name="LdvfldU2_L" base="Ldvfld" prefix="3"/>
-    <opcode name="LdvfldU2Unaligned" base="Ldvfld" prefix="3"/>
-    <opcode name="LdvfldI4" base="Ldvfld" prefix="1"/>
-    <opcode name="LdvfldI4_S" base="Ldvfld" prefix="0"/>
-    <opcode name="LdvfldI4_L" base="Ldvfld" prefix="3"/>
-    <opcode name="LdvfldI4Unaligned" base="Ldvfld" prefix="3"/>
-    <opcode name="LdvfldI8" base="Ldvfld" prefix="1"/>
-    <opcode name="LdvfldI8_S" base="Ldvfld" prefix="0"/>
-    <opcode name="LdvfldI8_L" base="Ldvfld" prefix="3"/>
-    <opcode name="LdvfldI8Unaligned" base="Ldvfld" prefix="3"/>
-
-
-    <tplopcode name="LdvfldAny" hlopcode="Ldvfld">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="offset" arg="field_offset" arg_kind="field_offset"/>
-        <param name="size" arg="field_size" arg_kind="field_offset"/>
-    </tplopcode>
-    <opcode name="LdvfldAny" base="LdvfldAny" prefix="1"/>
-    <opcode name="LdvfldAny_S" base="LdvfldAny" prefix="0"/>
-    <opcode name="LdvfldAny_L" base="LdvfldAny" prefix="3"/>
-
-    <tplopcode name="Ldflda" hlopcode="Ldflda">
-        <param name="obj" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="offset" arg="field_offset" arg_kind="field_offset"/>
-    </tplopcode>
-    <opcode name="Ldflda" base="Ldflda" prefix="1"/>
-    <opcode name="Ldflda_S" base="Ldflda" prefix="0"/>
-    <opcode name="Ldflda_L" base="Ldflda" prefix="3"/>
-
-    <tplopcode name="Stfld" hlopcode="Stfld">
-        <param name="obj" arg="arg1" arg_kind="stack"/>
-        <param name="value" arg="arg2" arg_kind="stack"/>
-        <param name="offset" arg="field_offset" arg_kind="field_offset"/>
-    </tplopcode>
-    <opcode name="StfldI1" base="Stfld" prefix="1"/>
-    <opcode name="StfldI1_S" base="Stfld" prefix="0"/>
-    <opcode name="StfldI1_L" base="Stfld" prefix="3"/>
-    <opcode name="StfldI2" base="Stfld" prefix="1"/>
-    <opcode name="StfldI2_S" base="Stfld" prefix="0"/>
-    <opcode name="StfldI2_L" base="Stfld" prefix="3"/>
-    <opcode name="StfldI2Unaligned" base="Stfld" prefix="3"/>
-    <opcode name="StfldI4" base="Stfld" prefix="1"/>
-    <opcode name="StfldI4_S" base="Stfld" prefix="0"/>
-    <opcode name="StfldI4_L" base="Stfld" prefix="3"/>
-    <opcode name="StfldI4Unaligned" base="Stfld" prefix="3"/>
-    <opcode name="StfldI8" base="Stfld" prefix="1"/>
-    <opcode name="StfldI8_S" base="Stfld" prefix="0"/>
-    <opcode name="StfldI8_L" base="Stfld" prefix="3"/>
-    <opcode name="StfldI8Unaligned" base="Stfld" prefix="3"/>
-
-    <tplopcode name="StfldAny" hlopcode="Stfld">
-        <param name="obj" arg="arg1" arg_kind="stack"/>
-        <param name="value" arg="arg2" arg_kind="stack"/>
-        <param name="offset" arg="field_offset" arg_kind="field_offset"/>
-        <param name="size" arg="field_size" arg_kind="field_offset"/>
-    </tplopcode>
-    <opcode name="StfldAny" base="StfldAny" prefix="1"/>
-    <opcode name="StfldAny_S" base="StfldAny" prefix="0"/>
-    <opcode name="StfldAny_L" base="StfldAny" prefix="3"/>
-
-    <tplopcode name="Ldsfld" hlopcode="Ldsfld">
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="LdsfldI1" base="Ldsfld" prefix="1"/>
-    <opcode name="LdsfldI1_S" base="Ldsfld" prefix="0"/>
-    <opcode name="LdsfldU1" base="Ldsfld" prefix="1"/>
-    <opcode name="LdsfldU1_S" base="Ldsfld" prefix="0"/>
-    <opcode name="LdsfldI2" base="Ldsfld" prefix="1"/>
-    <opcode name="LdsfldI2_S" base="Ldsfld" prefix="0"/>
-    <opcode name="LdsfldU2" base="Ldsfld" prefix="1"/>
-    <opcode name="LdsfldU2_S" base="Ldsfld" prefix="0"/>
-    <opcode name="LdsfldI4" base="Ldsfld" prefix="1"/>
-    <opcode name="LdsfldI4_S" base="Ldsfld" prefix="0"/>
-    <opcode name="LdsfldI8" base="Ldsfld" prefix="1"/>
-    <opcode name="LdsfldI8_S" base="Ldsfld" prefix="0"/>
-
-    <tplopcode name="LdsfldAny" hlopcode="Ldfld">
-        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="size" arg="field_size" arg_kind="field_offset"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdsfldAny" base="LdsfldAny" prefix="1"/>
-    <opcode name="LdsfldAny_S" base="LdsfldAny" prefix="0"/>
-
-    <tplopcode name="Ldsflda" hlopcode="Ldsflda">
-        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="Ldsflda" base="Ldsflda" prefix="1"/>
-    <opcode name="Ldsflda_S" base="Ldsflda" prefix="0"/>
-
-    <tplopcode name="LdsfldRvaData" hlopcode="Ldsflda">
-        <param name="data" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="LdsfldRvaData" base="LdsfldRvaData" prefix="1"/>
-    <opcode name="LdsfldRvaData_S" base="LdsfldRvaData" prefix="0"/>
-
-    <tplopcode name="Stsfld" hlopcode="Stsfld">
-        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="value" arg="arg1" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StsfldI1" base="Stsfld" prefix="1"/>
-    <opcode name="StsfldI1_S" base="Stsfld" prefix="0"/>
-    <opcode name="StsfldI2" base="Stsfld" prefix="1"/>
-    <opcode name="StsfldI2_S" base="Stsfld" prefix="0"/>
-    <opcode name="StsfldI4" base="Stsfld" prefix="1"/>
-    <opcode name="StsfldI4_S" base="Stsfld" prefix="0"/>
-    <opcode name="StsfldI8" base="Stsfld" prefix="1"/>
-    <opcode name="StsfldI8_S" base="Stsfld" prefix="0"/>
-
-    <tplopcode name="StsfldAny" hlopcode="Stsfld">
-        <param name="field_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="size" arg="field_size" arg_kind="field_offset"/>
-        <param name="value" arg="arg1" arg_kind="stack"/>
-    </tplopcode>
-    <opcode name="StsfldAny" base="StsfldAny" prefix="1"/>
-    <opcode name="StsfldAny_S" base="StsfldAny" prefix="0"/>
-
-
-    <tplopcode name="RetVoid" hlopcode="Ret"/>
-    <opcode name="RetVoid" base="RetVoid" prefix="1"/>
-    <opcode name="RetVoid_S" base="RetVoid" prefix="0"/>
-
-    <tplopcode name="Ret" hlopcode="Ret">
-        <param name="src" arg="src" arg_kind="stack"/>
-    </tplopcode>
-    <!-- <opcode name="RetI1" base="Ret" variant="i1" prefix="1"/> -->
-    <!-- <opcode name="RetI2" base="Ret" variant="i2" prefix="1"/> -->
-    <opcode name="RetI4" base="Ret" variant="i4" prefix="1"/>
-    <opcode name="RetI8" base="Ret" variant="i8" prefix="1"/>
-    <opcode name="RetAny" base="Ret" variant="any" size_param="1" prefix="1"/>
-    <!-- <opcode name="RetI1_S" base="Ret" variant="i1" prefix="0"/> -->
-    <!-- <opcode name="RetI2_S" base="Ret" variant="i2" prefix="0"/> -->
-    <opcode name="RetI4_S" base="Ret" variant="i4" prefix="0"/>
-    <opcode name="RetI8_S" base="Ret" variant="i8" prefix="0"/>
-    <opcode name="RetAny_S" base="Ret" variant="any" size_param="1" prefix="0"/>
-    <tplopcode name="RetNop" hlopcode="Ret"/>
-    <opcode name="RetNop_S" base="RetNop" prefix="0"/>
-
-    <tplopcode name="CallInterp" hlopcode="Call">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-    </tplopcode>
-    <opcode name="CallInterp" base="CallInterp" prefix="1"/>
-    <opcode name="CallInterp_S" base="CallInterp" prefix="0"/>
-
-    <tplopcode name="CallVirtInterp" hlopcode="CallVirt">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-    </tplopcode>
-    <opcode name="CallVirtInterp" base="CallVirtInterp" prefix="1"/>
-    <opcode name="CallVirtInterp_S" base="CallVirtInterp" prefix="0"/>
-
-    <tplopcode name="CallInternalCall" hlopcode="Call">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-    </tplopcode>
-    <opcode name="CallInternalCall" base="CallInternalCall" prefix="1"/>
-    <opcode name="CallInternalCall_S" base="CallInternalCall" prefix="0"/>
-    <tplopcode name="CallPInvoke" hlopcode="Call">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-    </tplopcode>
-    <tplopcode name="CallIntrinsic" hlopcode="Call">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-    </tplopcode>
-    <opcode name="CallIntrinsic" base="CallIntrinsic" prefix="1"/>
-    <opcode name="CallIntrinsic_S" base="CallIntrinsic" prefix="0"/>
-    <opcode name="CallPInvoke" base="CallPInvoke" prefix="1"/>
-    <opcode name="CallPInvoke_S" base="CallPInvoke" prefix="0"/>
-    <tplopcode name="CallAot" hlopcode="CallAot">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-    </tplopcode>
-    <opcode name="CallAot" base="CallAot" prefix="1"/>
-    <opcode name="CallAot_S" base="CallAot" prefix="0"/>
-    <tplopcode name="CallRuntimeImplemented" hlopcode="Call">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-    </tplopcode>
-    <opcode name="CallRuntimeImplemented" base="CallRuntimeImplemented" prefix="1"/>
-    <opcode name="CallRuntimeImplemented_S" base="CallRuntimeImplemented" prefix="0"/>
-
-    <tplopcode name="CalliInterp" hlopcode="Calli">
-        <param name="method_sig_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="method_idx" arg="arg3" arg_kind="stack"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-    </tplopcode>
-    <opcode name="CalliInterp" base="CalliInterp" prefix="1"/>
-    <opcode name="CalliInterp_S" base="CalliInterp" prefix="0"/>
-    <tplopcode name="BoxRefInplace" hlopcode="BoxRefInplace">
-        <param name="src" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-        <param name="klass_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-    </tplopcode>
-    <opcode name="BoxRefInplace" base="BoxRefInplace" prefix="1"/>
-    <opcode name="BoxRefInplace_S" base="BoxRefInplace" prefix="0"/>
-
-    <tplopcode name="NewObjInterp" hlopcode="Call">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-        <param name="total_params_stack_object_size" arg="total_params_stack_object_size" arg_kind="const"/>
-    </tplopcode>
-    <opcode name="NewObjInterp" base="NewObjInterp" prefix="1"/>
-    <opcode name="NewObjInterp_S" base="NewObjInterp" prefix="0"/>
-    <opcode name="NewValueTypeInterp" base="NewObjInterp" prefix="1"/>
-    <opcode name="NewValueTypeInterp_S" base="NewObjInterp" prefix="0"/>
-
-    <tplopcode name="NewObjInternalCall" hlopcode="Call">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="invoker_idx" arg="invoker_idx" arg_kind="invoker_idx"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-    </tplopcode>
-    <opcode name="NewObjInternalCall" base="NewObjInternalCall" prefix="1"/>
-    <opcode name="NewObjInternalCall_S" base="NewObjInternalCall" prefix="0"/>
-
-    <tplopcode name="NewObjIntrinsic" hlopcode="NewObjIntrinsic">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="invoker_idx" arg="invoker_idx" arg_kind="invoker_idx"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-        <!-- <param name="total_params_stack_object_size" arg="total_params_stack_object_size" arg_kind="const"/> -->
-    </tplopcode>
-    <opcode name="NewObjIntrinsic" base="NewObjIntrinsic" prefix="1"/>
-    <opcode name="NewObjIntrinsic_S" base="NewObjIntrinsic" prefix="0"/>
-    <tplopcode name="NewObjAot" hlopcode="NewObjAot">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <!-- <param name="invoker_idx" arg="aot_invoker_idx" arg_kind="aot_invoker_idx"/> -->
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-        <param name="total_params_stack_object_size" arg="total_params_stack_object_size" arg_kind="const"/>
-    </tplopcode>
-    <opcode name="NewObjAot" base="NewObjAot" prefix="1"/>
-    <opcode name="NewObjAot_S" base="NewObjAot" prefix="0"/>
-    <opcode name="NewValueTypeAot" base="NewObjAot" prefix="1"/>
-    <opcode name="NewValueTypeAot_S" base="NewObjAot" prefix="0"/>
-
-    <!-- <tplopcode name="CallDelegateInvoke" hlopcode="Call">
-        <param name="method_idx" arg="resolved_data_index" arg_kind="resolved_data"/>
-        <param name="frame_base" arg="frame_base" arg_kind="stack_const"/>
-        <param name="total_params_stack_object_size" arg="total_params_stack_object_size" arg_kind="const"/>
-    </tplopcode>
-    <opcode name="CallDelegateInvoke" base="CallDelegateInvoke" prefix="1"/>
-    <opcode name="CallDelegateInvoke_S" base="CallDelegateInvoke" prefix="0"/> -->
-
-    <tplopcode name="Throw" hlopcode="Throw">
-        <!-- <param name="first_exception_clause_index" arg="arg1" arg_kind="exception_clause_index"/> -->
-        <param name="ex" arg="src" arg_kind="stack"/>
-        <!-- <param name="init_ex_for_filter_or_handler" arg="arg2" arg_kind="stack"/> -->
-    </tplopcode>
-    <opcode name="Throw" base="Throw" prefix="1"/>
-    <opcode name="Throw_S" base="Throw" prefix="0"/>
-
-    <tplopcode name="Rethrow" hlopcode="Rethrow">
-        <!-- <param name="first_exception_clause_index" arg="arg1" arg_kind="exception_clause_index"/> -->
-        <!-- <param name="init_ex_for_filter_or_handler" arg="arg2" arg_kind="stack"/> -->
-    </tplopcode>
-    <opcode name="Rethrow" base="Rethrow" prefix="1"/>
-    <opcode name="Rethrow_S" base="Rethrow" prefix="0"/>
-
-    <tplopcode name="LeaveTryWithFinally" hlopcode="Leave">
-        <param name="first_finally_clause_index" arg="first_finally_clause_index" arg_kind="exception_clause_index"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-        <param name="finally_clauses_count" type="u8" arg="finally_clauses_count" arg_kind="const"/>
-    </tplopcode>
-    <opcode name="LeaveTryWithFinally" base="LeaveTryWithFinally" prefix="1"/>
-    <opcode name="LeaveTryWithFinally_S" base="LeaveTryWithFinally" prefix="0"/>
-
-    <!-- LeaveTryWithoutFinally is replaced with Branch -->
-
-    <tplopcode name="LeaveCatchWithFinally" hlopcode="Leave">
-        <param name="first_finally_clause_index" arg="first_finally_clause_index" arg_kind="exception_clause_index"/>
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-        <param name="finally_clauses_count" type="u8" arg="finally_clauses_count" arg_kind="const"/>
-    </tplopcode>
-    <opcode name="LeaveCatchWithFinally" base="LeaveCatchWithFinally" prefix="1"/>
-    <opcode name="LeaveCatchWithFinally_S" base="LeaveCatchWithFinally" prefix="0"/>
-    <tplopcode name="LeaveCatchWithoutFinally" hlopcode="Leave">
-        <param name="target_offset" arg="branch_target_offset" arg_kind="target"/>
-    </tplopcode>
-    <opcode name="LeaveCatchWithoutFinally" base="LeaveCatchWithoutFinally" prefix="1"/>
-    <opcode name="LeaveCatchWithoutFinally_S" base="LeaveCatchWithoutFinally" prefix="0"/>
-
-    <tplopcode name="EndFilter" hlopcode="EndFilter">
-        <param name="cond" arg="src" arg_kind="stack"/>
-        <!-- <param name="ex_obj" arg="dst" arg_kind="stack"/> -->
-    </tplopcode>
-    <opcode name="EndFilter" base="EndFilter" prefix="1"/>
-    <opcode name="EndFilter_S" base="EndFilter" prefix="0"/>
-
-    <tplopcode name="EndFinally" hlopcode="EndFinallyOrFault"/>
-    <opcode name="EndFinally" base="EndFinally" prefix="1"/>
-    <opcode name="EndFinally_S" base="EndFinally" prefix="0"/>
-
-    <tplopcode name="EndFault" hlopcode="EndFinallyOrFault"/>
-    <opcode name="EndFault" base="EndFault" prefix="1"/>
-    <opcode name="EndFault_S" base="EndFault" prefix="0"/>
-
-    <!-- <opcode name="UnwindExceptionHandler" hlopcode="__Intrinsic" prefix="1">
-    </opcode> -->
-
-    <opcode name="GetEnumLongHashCode" hlopcode="GetEnumLongHashCode" prefix="2">
-        <param name="value_ptr" arg="src" arg_kind="stack"/>
-        <param name="dst" arg="dst" arg_kind="stack"/>
-    </opcode>
-
 </llopcodes>

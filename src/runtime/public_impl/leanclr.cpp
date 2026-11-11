@@ -138,14 +138,22 @@ extern "C"
         }                                                                                                                                   \
     }
 
-    void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass**& class_buf, size_t& class_buf_capacity, LeanclrException** out_exception)
+    void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass*** out_class_buf, size_t* out_class_buf_capacity, LeanclrException** out_exception)
     {
+        if (!out_class_buf || !out_class_buf_capacity)
+        {
+            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            return;
+        }
+        auto& class_buf = *out_class_buf;
+        auto& class_buf_capacity = *out_class_buf_capacity;
         metadata::RtModuleDef* rt_mod = reinterpret_cast<metadata::RtModuleDef*>(mod);
-        size_t copy_count = std::min(class_buf_capacity, (size_t)rt_mod->get_class_count());
+        const size_t capacity = class_buf_capacity;
         utils::Vector<metadata::RtClass*> classes;
         auto ret = rt_mod->get_types(export_only, classes);
         class_buf_capacity = 0;
         SET_EXCEPTION_ON_ERR(ret, out_exception);
+        const size_t copy_count = std::min(capacity, classes.size());
         for (size_t i = 0; i < copy_count; i++)
         {
             class_buf[i] = reinterpret_cast<LeanclrClass*>(classes[i]);
@@ -191,8 +199,15 @@ extern "C"
         return const_cast<LeanclrClass*>(reinterpret_cast<const LeanclrClass*>(((const metadata::RtClass*)klass)->parent));
     }
 
-    void leanclr_get_class_interfaces(LeanclrClass* klass, const LeanclrClass**& interfaces, size_t& count, LeanclrException** out_exception)
+    void leanclr_get_class_interfaces(LeanclrClass* klass, const LeanclrClass*** out_interfaces, size_t* out_count, LeanclrException** out_exception)
     {
+        if (!out_interfaces || !out_count)
+        {
+            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            return;
+        }
+        auto& interfaces = *out_interfaces;
+        auto& count = *out_count;
         auto rt_klass = reinterpret_cast<metadata::RtClass*>(klass);
         auto ret = vm::Class::initialize_interfaces(rt_klass);
         SET_EXCEPTION_ON_ERR(ret, out_exception);
@@ -205,8 +220,15 @@ extern "C"
         return const_cast<LeanclrClass*>(reinterpret_cast<const LeanclrClass*>(((const metadata::RtClass*)klass)->declaring_class));
     }
 
-    void leanclr_get_class_nested_classes(LeanclrClass* klass, const LeanclrClass**& nested_classes, size_t& count, LeanclrException** out_exception)
+    void leanclr_get_class_nested_classes(LeanclrClass* klass, const LeanclrClass*** out_nested_classes, size_t* out_count, LeanclrException** out_exception)
     {
+        if (!out_nested_classes || !out_count)
+        {
+            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            return;
+        }
+        auto& nested_classes = *out_nested_classes;
+        auto& count = *out_count;
         auto rt_klass = reinterpret_cast<metadata::RtClass*>(klass);
         auto ret = vm::Class::initialize_nested_classes(rt_klass);
         SET_EXCEPTION_ON_ERR(ret, out_exception);
@@ -214,8 +236,15 @@ extern "C"
         nested_classes = (const LeanclrClass**)(rt_klass->nested_classes);
     }
 
-    void leanclr_get_class_methods(LeanclrClass* klass, const LeanclrMethodInfo**& methods, size_t& count, LeanclrException** out_exception)
+    void leanclr_get_class_methods(LeanclrClass* klass, const LeanclrMethodInfo*** out_methods, size_t* out_count, LeanclrException** out_exception)
     {
+        if (!out_methods || !out_count)
+        {
+            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            return;
+        }
+        auto& methods = *out_methods;
+        auto& count = *out_count;
         auto rt_klass = reinterpret_cast<metadata::RtClass*>(klass);
         auto ret = vm::Class::initialize_methods(rt_klass);
         SET_EXCEPTION_ON_ERR(ret, out_exception);
@@ -231,8 +260,15 @@ extern "C"
         return reinterpret_cast<const LeanclrMethodInfo*>(vm::Method::find_matched_method_in_class_by_name(rt_klass, method_name));
     }
 
-    void leanclr_get_class_field(LeanclrClass* klass, const LeanclrFieldInfo*& fields, size_t& count, LeanclrException** out_exception)
+    void leanclr_get_class_field(LeanclrClass* klass, const LeanclrFieldInfo** out_fields, size_t* out_count, LeanclrException** out_exception)
     {
+        if (!out_fields || !out_count)
+        {
+            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            return;
+        }
+        auto& fields = *out_fields;
+        auto& count = *out_count;
         auto rt_klass = reinterpret_cast<metadata::RtClass*>(klass);
         auto ret = vm::Class::initialize_fields(rt_klass);
         SET_EXCEPTION_ON_ERR(ret, out_exception);
@@ -248,8 +284,15 @@ extern "C"
         return reinterpret_cast<const LeanclrFieldInfo*>(vm::Class::get_field_for_name(rt_klass, field_name, false));
     }
 
-    void leanclr_get_class_properties(LeanclrClass* klass, const LeanclrPropertyInfo*& properties, size_t& count, LeanclrException** out_exception)
+    void leanclr_get_class_properties(LeanclrClass* klass, const LeanclrPropertyInfo** out_properties, size_t* out_count, LeanclrException** out_exception)
     {
+        if (!out_properties || !out_count)
+        {
+            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            return;
+        }
+        auto& properties = *out_properties;
+        auto& count = *out_count;
         auto rt_klass = reinterpret_cast<metadata::RtClass*>(klass);
         auto ret = vm::Class::initialize_properties(rt_klass);
         SET_EXCEPTION_ON_ERR(ret, out_exception);
@@ -265,8 +308,15 @@ extern "C"
         return reinterpret_cast<const LeanclrPropertyInfo*>(vm::Class::get_property_for_name(rt_klass, property_name, false));
     }
 
-    void leanclr_get_class_events(LeanclrClass* klass, const LeanclrEventInfo*& events, size_t& count, LeanclrException** out_exception)
+    void leanclr_get_class_events(LeanclrClass* klass, const LeanclrEventInfo** out_events, size_t* out_count, LeanclrException** out_exception)
     {
+        if (!out_events || !out_count)
+        {
+            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            return;
+        }
+        auto& events = *out_events;
+        auto& count = *out_count;
         auto rt_klass = reinterpret_cast<metadata::RtClass*>(klass);
         auto ret = vm::Class::initialize_events(rt_klass);
         SET_EXCEPTION_ON_ERR(ret, out_exception);

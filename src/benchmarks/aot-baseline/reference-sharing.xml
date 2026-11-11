@@ -1,0 +1,8 @@
+<aot>
+  <assembly fullname="*" aot="0" />
+  <assembly fullname="AotBaseline">
+    <type fullname="Benchmarks" aot="0">
+      <method name="Sharing*" aot="1" />
+    </type>
+  </assembly>
+</aot>

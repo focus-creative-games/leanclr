@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_numerics_vector.h"
 #include "interp/interp_defs.h"
 #include "platform/hardware.h"
@@ -32,8 +34,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_numerics_vector[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemNumericsVector::get_intrinsic_entries() noexcept
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_numerics_vector,
-                                           sizeof(s_intrinsic_entries_system_numerics_vector) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_numerics_vector, std::size(s_intrinsic_entries_system_numerics_vector));
 }
 
 } // namespace intrinsics

@@ -1,7 +1,7 @@
 @echo off
 setlocal enabledelayedexpansion
 rem Build leanclr runtime library.
-rem Usage: build.bat [Debug|Release] [x64|x86] [clean] [shared] [sln]
+rem Usage: build.bat [Debug|Release] [x64|x86] [clean] [shared] [sln] [native|minimal|custom]
 
 call "%~dp0..\lib\repo-root.bat"
 call "%REPO_ROOT%\scripts\lib\out-dir-init.bat"
@@ -14,6 +14,8 @@ set VS_VERSION=17 2022
 set CLEAN=0
 set BUILD_SHARED=0
 set GENERATE_SLN=0
+set HOST=NATIVE
+set MODULE=runtime
 
 :parse_args
 if "%~1"=="" goto end_parse
@@ -25,14 +27,19 @@ if /i "%~1"=="-clean" set CLEAN=1
 if /i "%~1"=="x86" set ARCH=x86
 if /i "%~1"=="x64" set ARCH=x64
 if /i "%~1"=="shared" set BUILD_SHARED=1
+if /i "%~1"=="native" set HOST=NATIVE
+if /i "%~1"=="minimal" set HOST=PORTABLE
+if /i "%~1"=="custom" set HOST=CUSTOM
 shift
 goto parse_args
 :end_parse
 
+if not "%HOST%"=="NATIVE" set "MODULE=runtime/%HOST%"
+set "COMPOSITION_ARGS=-DLEANCLR_BCL_ADAPTER=MONO -DLEANCLR_HOST=%HOST% -DLEANCLR_FORCE_PORTABLE=OFF -DCMAKE_TRY_COMPILE_CONFIGURATION=%BUILD_TYPE%"
 if %GENERATE_SLN%==1 (
-    call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "runtime" "vs-sln" "%ARCH%"
+    call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "%MODULE%" "vs-sln" "%ARCH%"
 ) else (
-    call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "runtime" "%BUILD_TYPE%" "%ARCH%"
+    call "%REPO_ROOT%\scripts\lib\cmake-dir.bat" "%MODULE%" "%BUILD_TYPE%" "%ARCH%"
 )
 
 echo ================================
@@ -67,9 +74,9 @@ if %GENERATE_SLN%==1 (
     echo [1/2] CMake configure...
 )
 if %BUILD_SHARED%==1 (
-    cmake -S "%RUNTIME_SRC%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio %VS_VERSION%" -A %CMAKE_GENERATOR_ARCH% -DBUILD_SHARED_LEANCLR=ON
+    cmake -S "%RUNTIME_SRC%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio %VS_VERSION%" -A %CMAKE_GENERATOR_ARCH% -DBUILD_SHARED_LEANCLR=ON %COMPOSITION_ARGS%
 ) else (
-    cmake -S "%RUNTIME_SRC%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio %VS_VERSION%" -A %CMAKE_GENERATOR_ARCH%
+    cmake -S "%RUNTIME_SRC%" -B "%CMAKE_BUILD_DIR%" -G "Visual Studio %VS_VERSION%" -A %CMAKE_GENERATOR_ARCH% -DBUILD_SHARED_LEANCLR=OFF %COMPOSITION_ARGS%
 )
 if errorlevel 1 (
     echo ERROR: CMake generation failed.

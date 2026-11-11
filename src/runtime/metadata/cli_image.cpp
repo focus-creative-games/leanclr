@@ -1,3 +1,4 @@
+#include <iterator>
 #include <algorithm>
 #include <cstring>
 
@@ -6,6 +7,7 @@
 #include "utils/binary_reader.h"
 #include "alloc/mem_pool.h"
 #include "utils/rt_vector.h"
+
 namespace leanclr
 {
 namespace metadata
@@ -54,64 +56,40 @@ static const TableType HAS_CUSTOM_DEBUG_INFORMATION[] = {
     TableType::MethodSpec,
 };
 
-// Metadata structures
-struct MetadataRootPartial
-{
-    uint32_t signature;
-    uint16_t major_version;
-    uint16_t minor_version;
-    uint32_t reserved;
-    uint32_t length;
-    uint8_t version_first_byte;
-};
-
-struct StreamHeader
-{
-    uint32_t offset;
-    uint32_t size;
-    uint8_t name[1]; // Variable length
-};
-
 RtResult<const char*> CliImage::read_assembly_name_no_ext() const
 {
     const auto opt_row = read_assembly(1);
     if (!opt_row)
     {
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
     }
 
     auto& row = opt_row.value();
-    int32_t index = static_cast<int32_t>(row.name);
-    if (index < string_heap.size)
+    uint32_t index = row.name;
+    if (index < string_heap.size && std::memchr(string_heap.data + index, 0, string_heap.size - index) != nullptr)
     {
         RET_OK(reinterpret_cast<const char*>(string_heap.data + index));
     }
-    RET_ASSERT_ERR(RtErr::BadImageFormat);
+    RET_ERR(RtErr::BadImageFormat);
 }
 
 RtResultVoid CliImage::load_streams()
 {
-    if (metadata_offset >= image_length)
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    if (!utils::CheckedSize::contains(image_length, metadata_offset, metadata_length))
+        RET_ERR(RtErr::BadImageFormat);
 
     BinaryReader reader(image_data + metadata_offset, metadata_length);
 
-    // Read metadata root header
-    const MetadataRootPartial* meta_root = nullptr;
-    if (!reader.try_peek_any_ptr(meta_root))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
-
-    if (meta_root->signature != 0x424A5342) // "BSJB"
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
-
-    // Skip version string (aligned to 4-byte boundary)
-    if (!reader.try_advance(meta_root->length + 16 + 2))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+    uint32_t signature, version_length;
+    if (!reader.try_read_u32(signature) || signature != 0x424A5342 || !reader.try_advance(8) || !reader.try_read_u32(version_length))
+        RET_ERR(RtErr::BadImageFormat);
+    if (!reader.try_advance(version_length) || !reader.try_advance(2))
+        RET_ERR(RtErr::BadImageFormat);
 
     // Read stream header count
     uint16_t stream_header_count;
     if (!reader.try_read_u16(stream_header_count))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     // Process each stream header
     for (uint16_t i = 0; i < stream_header_count; ++i)
@@ -120,26 +98,22 @@ RtResultVoid CliImage::load_streams()
         uint32_t stream_offset;
         uint32_t stream_size;
         if (!reader.try_read_u32(stream_offset) || !reader.try_read_u32(stream_size))
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+            RET_ERR(RtErr::BadImageFormat);
 
         // Peek at the stream name (null-terminated string)
         const char* heap_name = nullptr;
-        if (!reader.try_peek_any_ptr(heap_name))
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
-
-        // Calculate name length (including null terminator)
-        size_t name_len = std::strlen(heap_name);
-        if (name_len > MAX_STREAM_NAME_LENGTH)
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        size_t name_len;
+        if (!reader.try_peek_cstring(MAX_STREAM_NAME_LENGTH, heap_name, name_len))
+            RET_ERR(RtErr::BadImageFormat);
 
         // Align position to 4-byte boundary after name
         size_t aligned_name_len = (name_len / 4 + 1) * 4;
         if (!reader.try_advance(aligned_name_len))
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+            RET_ERR(RtErr::BadImageFormat);
 
         // Validate stream data is within bounds
-        if (stream_offset + stream_size > metadata_length)
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        if (!utils::CheckedSize::contains(metadata_length, stream_offset, stream_size))
+            RET_ERR(RtErr::BadImageFormat);
 
         // Find matching heap and set its data
         CliHeap* cur_heap = nullptr;
@@ -170,31 +144,31 @@ RtResultVoid CliImage::load_streams()
 RtResultVoid CliImage::load_tables(alloc::MemPool& pool)
 {
     if (!tables_heap.data || tables_heap.size < TABLE_HEAP_HEADER_SIZE)
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     BinaryReader reader(tables_heap.data, tables_heap.size);
 
     // Skip reserved field (4 bytes)
     uint32_t reserved;
     if (!reader.try_read_u32(reserved))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     // Read version info
     uint8_t major_version;
     uint8_t minor_version;
     if (!reader.try_read_byte(major_version) || !reader.try_read_byte(minor_version))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     if (major_version != 2 || minor_version != 0)
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     // Read heap sizes flags
     uint8_t heap_sizes;
     if (!reader.try_read_byte(heap_sizes))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     if ((heap_sizes & ~0x7) != 0)
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     string_heap_size_4_byte = (heap_sizes & 0x1) != 0;
     guid_heap_size_4_byte = (heap_sizes & 0x2) != 0;
@@ -203,31 +177,31 @@ RtResultVoid CliImage::load_tables(alloc::MemPool& pool)
     // Skip reserved byte
     uint8_t reserved2;
     if (!reader.try_read_byte(reserved2))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     // Read valid table bits
     uint64_t valid_table_bits;
     if (!reader.try_read_u64(valid_table_bits))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     if ((valid_table_bits & ~((1ULL << MAX_TABLE_COUNT) - 1)) != 0)
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     uint32_t valid_table_count = utils::MemOp::get_not_zero_bit_count(valid_table_bits);
     if (valid_table_count == 0)
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     // Read sorted table bits (not used currently)
     uint64_t sorted_table_bits;
     if (!reader.try_read_u64(sorted_table_bits))
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
 
     // Read row counts for all valid tables
     utils::Vector<uint32_t> row_counts(valid_table_count);
     for (uint32_t i = 0; i < valid_table_count; ++i)
     {
         if (!reader.try_read_u32(row_counts[i]))
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+            RET_ERR(RtErr::BadImageFormat);
     }
 
     // Initialize valid tables and row counts
@@ -256,11 +230,12 @@ RtResultVoid CliImage::load_tables(alloc::MemPool& pool)
 
         const uint8_t* table_data = nullptr;
         if (!reader.try_peek_any_ptr(table_data))
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+            RET_ERR(RtErr::BadImageFormat);
 
         cur.data = table_data;
-        if (!reader.try_advance(cur.row_count * cur.total_field_size))
-            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        if (cur.total_field_size == 0 || cur.row_count > reader.remaining() / cur.total_field_size ||
+            !reader.try_advance(static_cast<size_t>(cur.row_count) * cur.total_field_size))
+            RET_ERR(RtErr::BadImageFormat);
     }
 
     RET_VOID_OK();
@@ -581,7 +556,7 @@ void CliImage::init_table_field_metas(alloc::MemPool& pool)
         auto fields = pool.calloc_any<CliTableFieldMeta>(FIELD_COUNT);
         if (fields)
         {
-            fields[0].size = compute_table_index_bytes(HAS_CUSTOM_ATTRIBUTE_ASSOCIATE_TABLES, sizeof(HAS_CUSTOM_ATTRIBUTE_ASSOCIATE_TABLES) / sizeof(TableType),
+            fields[0].size = compute_table_index_bytes(HAS_CUSTOM_ATTRIBUTE_ASSOCIATE_TABLES, std::size(HAS_CUSTOM_ATTRIBUTE_ASSOCIATE_TABLES),
                                                        TagBits::HAS_CUSTOM_ATTRIBUTE);
             fields[1].size = compute_table_index_byte2(TableType::Method, TableType::MemberRef, TagBits::CUSTOM_ATTRIBUTE_TYPE);
             fields[2].size = compute_blob_index_byte();
@@ -1114,8 +1089,8 @@ void CliImage::init_table_field_metas(alloc::MemPool& pool)
         auto fields = pool.calloc_any<CliTableFieldMeta>(FIELD_COUNT);
         if (fields)
         {
-            fields[0].size = compute_table_index_bytes(HAS_CUSTOM_DEBUG_INFORMATION, sizeof(HAS_CUSTOM_DEBUG_INFORMATION) / sizeof(TableType),
-                                                       TagBits::HAS_CUSTOM_DEBUG_INFORMATION);
+            fields[0].size =
+                compute_table_index_bytes(HAS_CUSTOM_DEBUG_INFORMATION, std::size(HAS_CUSTOM_DEBUG_INFORMATION), TagBits::HAS_CUSTOM_DEBUG_INFORMATION);
             fields[1].size = compute_guid_index_byte();
             fields[2].size = compute_blob_index_byte();
             tables[static_cast<size_t>(TableType::CustomDebugInformation)].row_field_count = FIELD_COUNT;
@@ -1131,7 +1106,11 @@ std::optional<uint32_t> CliImage::rva_to_image_offset(uint32_t rva) const
         const CliSection& sec = sections[i];
         if (rva >= sec.virtual_address_begin && rva < sec.virtual_address_end)
         {
-            return rva - sec.virtual_address_begin + sec.raw_data_begin;
+            const uint32_t delta = rva - sec.virtual_address_begin;
+            if (delta >= sec.raw_data_size || sec.raw_data_begin > image_length || delta >= image_length - sec.raw_data_begin ||
+                delta > UINT32_MAX - sec.raw_data_begin)
+                return std::nullopt;
+            return delta + sec.raw_data_begin;
         }
     }
     return std::nullopt;
@@ -1142,18 +1121,18 @@ RtResult<utils::BinaryReader> CliImage::get_decoded_blob_reader(uint32_t index) 
     auto& heap = blob_heap;
     if (index >= heap.size)
     {
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
     }
     auto data = heap.data + index;
     uint32_t blob_size = 0;
     size_t size_length = 0;
     if (!utils::BinaryReader::try_decode_compressed_uint32(data, heap.size - index, blob_size, size_length))
     {
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
     }
-    if (index + size_length + blob_size > heap.size)
+    if (size_length > heap.size - index || blob_size > heap.size - index - size_length)
     {
-        RET_ASSERT_ERR(RtErr::BadImageFormat);
+        RET_ERR(RtErr::BadImageFormat);
     }
     RET_OK(utils::BinaryReader(data + size_length, blob_size));
 }
@@ -1164,7 +1143,7 @@ std::optional<RowModule> CliImage::read_module(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowModule row{};
     row.generation = read_column_u16(row_data, table.row_fields[0]);
     row.name = read_column_u32(row_data, table.row_fields[1]);
@@ -1180,7 +1159,7 @@ std::optional<RowTypeRef> CliImage::read_type_ref(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowTypeRef row{};
     row.resolution_scope = read_column_u32(row_data, table.row_fields[0]);
     row.type_name = read_column_u32(row_data, table.row_fields[1]);
@@ -1194,7 +1173,7 @@ std::optional<RowTypeDef> CliImage::read_type_def(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowTypeDef row{};
     row.flags = read_column_u32(row_data, table.row_fields[0]);
     row.type_name = read_column_u32(row_data, table.row_fields[1]);
@@ -1211,7 +1190,7 @@ std::optional<RowField> CliImage::read_field(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowField row{};
     row.flags = read_column_u16(row_data, table.row_fields[0]);
     row.name = read_column_u32(row_data, table.row_fields[1]);
@@ -1225,7 +1204,7 @@ std::optional<RowMethod> CliImage::read_method(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowMethod row{};
     row.rva = read_column_u32(row_data, table.row_fields[0]);
     row.impl_flags = read_column_u16(row_data, table.row_fields[1]);
@@ -1242,7 +1221,7 @@ std::optional<RowParam> CliImage::read_param(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowParam row{};
     row.flags = read_column_u16(row_data, table.row_fields[0]);
     row.sequence = read_column_u16(row_data, table.row_fields[1]);
@@ -1256,7 +1235,7 @@ std::optional<RowInterfaceImpl> CliImage::read_interface_impl(uint32_t row_index
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowInterfaceImpl row{};
     row.class_idx = read_column_u32(row_data, table.row_fields[0]);
     row.interface_idx = read_column_u32(row_data, table.row_fields[1]);
@@ -1269,7 +1248,7 @@ std::optional<RowMemberRef> CliImage::read_member_ref(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowMemberRef row{};
     row.class_idx = read_column_u32(row_data, table.row_fields[0]);
     row.name = read_column_u32(row_data, table.row_fields[1]);
@@ -1283,7 +1262,7 @@ std::optional<RowConstant> CliImage::read_constant(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowConstant row{};
     row.type_ = read_column_u8(row_data, table.row_fields[0]);
     row.padding = read_column_u8(row_data, table.row_fields[1]);
@@ -1298,7 +1277,7 @@ std::optional<RowCustomAttribute> CliImage::read_custom_attribute(uint32_t row_i
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowCustomAttribute row{};
     row.parent = read_column_u32(row_data, table.row_fields[0]);
     row.type_ = read_column_u32(row_data, table.row_fields[1]);
@@ -1312,7 +1291,7 @@ std::optional<RowFieldMarshal> CliImage::read_field_marshal(uint32_t row_index) 
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowFieldMarshal row{};
     row.parent = read_column_u32(row_data, table.row_fields[0]);
     row.native_type = read_column_u32(row_data, table.row_fields[1]);
@@ -1325,7 +1304,7 @@ std::optional<RowDeclSecurity> CliImage::read_decl_security(uint32_t row_index) 
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowDeclSecurity row{};
     row.action = read_column_u16(row_data, table.row_fields[0]);
     row.parent = read_column_u32(row_data, table.row_fields[1]);
@@ -1339,7 +1318,7 @@ std::optional<RowClassLayout> CliImage::read_class_layout(uint32_t row_index) co
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowClassLayout row{};
     row.packing_size = read_column_u16(row_data, table.row_fields[0]);
     row.class_size = read_column_u32(row_data, table.row_fields[1]);
@@ -1353,7 +1332,7 @@ std::optional<RowFieldLayout> CliImage::read_field_layout(uint32_t row_index) co
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowFieldLayout row{};
     row.offset = read_column_u32(row_data, table.row_fields[0]);
     row.field = read_column_u32(row_data, table.row_fields[1]);
@@ -1366,7 +1345,7 @@ std::optional<RowStandaloneSig> CliImage::read_stand_alone_sig(uint32_t row_inde
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowStandaloneSig row{};
     row.signature = read_column_u32(row_data, table.row_fields[0]);
     return row;
@@ -1378,7 +1357,7 @@ std::optional<RowEventMap> CliImage::read_event_map(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowEventMap row{};
     row.parent = read_column_u32(row_data, table.row_fields[0]);
     row.event_list = read_column_u32(row_data, table.row_fields[1]);
@@ -1391,7 +1370,7 @@ std::optional<RowEvent> CliImage::read_event(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowEvent row{};
     row.event_flags = read_column_u16(row_data, table.row_fields[0]);
     row.name = read_column_u32(row_data, table.row_fields[1]);
@@ -1405,7 +1384,7 @@ std::optional<RowPropertyMap> CliImage::read_property_map(uint32_t row_index) co
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowPropertyMap row{};
     row.parent = read_column_u32(row_data, table.row_fields[0]);
     row.property_list = read_column_u32(row_data, table.row_fields[1]);
@@ -1418,7 +1397,7 @@ std::optional<RowProperty> CliImage::read_property(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowProperty row{};
     row.flags = read_column_u16(row_data, table.row_fields[0]);
     row.name = read_column_u32(row_data, table.row_fields[1]);
@@ -1432,7 +1411,7 @@ std::optional<RowMethodSemantics> CliImage::read_method_semantics(uint32_t row_i
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowMethodSemantics row{};
     row.semantics = read_column_u16(row_data, table.row_fields[0]);
     row.method = read_column_u32(row_data, table.row_fields[1]);
@@ -1446,7 +1425,7 @@ std::optional<RowMethodImpl> CliImage::read_method_impl(uint32_t row_index) cons
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowMethodImpl row{};
     row.class_idx = read_column_u32(row_data, table.row_fields[0]);
     row.method_body = read_column_u32(row_data, table.row_fields[1]);
@@ -1460,7 +1439,7 @@ std::optional<RowModuleRef> CliImage::read_module_ref(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowModuleRef row{};
     row.name = read_column_u32(row_data, table.row_fields[0]);
     return row;
@@ -1472,7 +1451,7 @@ std::optional<RowTypeSpec> CliImage::read_type_spec(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowTypeSpec row{};
     row.signature = read_column_u32(row_data, table.row_fields[0]);
     return row;
@@ -1484,7 +1463,7 @@ std::optional<RowImplMap> CliImage::read_impl_map(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowImplMap row{};
     row.mapping_flags = read_column_u16(row_data, table.row_fields[0]);
     row.member_forwarded = read_column_u32(row_data, table.row_fields[1]);
@@ -1499,7 +1478,7 @@ std::optional<RowFieldRva> CliImage::read_field_rva(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowFieldRva row{};
     row.rva = read_column_u32(row_data, table.row_fields[0]);
     row.field = read_column_u32(row_data, table.row_fields[1]);
@@ -1512,7 +1491,7 @@ std::optional<RowAssembly> CliImage::read_assembly(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowAssembly row{};
     row.hash_alg_id = read_column_u32(row_data, table.row_fields[0]);
     row.major_version = read_column_u16(row_data, table.row_fields[1]);
@@ -1532,7 +1511,7 @@ std::optional<RowAssemblyRef> CliImage::read_assembly_ref(uint32_t row_index) co
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowAssemblyRef row{};
     row.major_version = read_column_u16(row_data, table.row_fields[0]);
     row.minor_version = read_column_u16(row_data, table.row_fields[1]);
@@ -1552,7 +1531,7 @@ std::optional<RowFile> CliImage::read_file(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowFile row{};
     row.flags = read_column_u32(row_data, table.row_fields[0]);
     row.name = read_column_u32(row_data, table.row_fields[1]);
@@ -1566,7 +1545,7 @@ std::optional<RowExportedType> CliImage::read_exported_type(uint32_t row_index) 
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowExportedType row{};
     row.flags = read_column_u32(row_data, table.row_fields[0]);
     row.type_def_id = read_column_u32(row_data, table.row_fields[1]);
@@ -1582,7 +1561,7 @@ std::optional<RowManifestResource> CliImage::read_manifest_resource(uint32_t row
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowManifestResource row{};
     row.offset = read_column_u32(row_data, table.row_fields[0]);
     row.flags = read_column_u32(row_data, table.row_fields[1]);
@@ -1597,7 +1576,7 @@ std::optional<RowNestedClass> CliImage::read_nested_class(uint32_t row_index) co
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowNestedClass row{};
     row.nested_class = read_column_u32(row_data, table.row_fields[0]);
     row.enclosing_class = read_column_u32(row_data, table.row_fields[1]);
@@ -1610,7 +1589,7 @@ std::optional<RowGenericParam> CliImage::read_generic_param(uint32_t row_index) 
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowGenericParam row{};
     row.number = read_column_u16(row_data, table.row_fields[0]);
     row.flags = read_column_u16(row_data, table.row_fields[1]);
@@ -1625,7 +1604,7 @@ std::optional<RowMethodSpec> CliImage::read_method_spec(uint32_t row_index) cons
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowMethodSpec row{};
     row.method = read_column_u32(row_data, table.row_fields[0]);
     row.instantiation = read_column_u32(row_data, table.row_fields[1]);
@@ -1638,7 +1617,7 @@ std::optional<RowGenericParamConstraint> CliImage::read_generic_param_constraint
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowGenericParamConstraint row{};
     row.owner = read_column_u32(row_data, table.row_fields[0]);
     row.constraint = read_column_u32(row_data, table.row_fields[1]);
@@ -1651,7 +1630,7 @@ std::optional<RowDocument> CliImage::read_document(uint32_t row_index) const
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowDocument row{};
     row.name = read_column_u32(row_data, table.row_fields[0]);
     row.hash_algorithm = read_column_u32(row_data, table.row_fields[1]);
@@ -1666,7 +1645,7 @@ std::optional<RowMethodDebugInformation> CliImage::read_method_debug_information
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowMethodDebugInformation row{};
     row.document = read_column_u32(row_data, table.row_fields[0]);
     row.sequence_points = read_column_u32(row_data, table.row_fields[1]);
@@ -1679,7 +1658,7 @@ std::optional<RowLocalScope> CliImage::read_local_scope(uint32_t row_index) cons
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowLocalScope row{};
     row.method = read_column_u32(row_data, table.row_fields[0]);
     row.import_scope = read_column_u32(row_data, table.row_fields[1]);
@@ -1696,7 +1675,7 @@ std::optional<RowLocalVariable> CliImage::read_local_variable(uint32_t row_index
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowLocalVariable row{};
     row.attributes = read_column_u16(row_data, table.row_fields[0]);
     row.index = read_column_u16(row_data, table.row_fields[1]);
@@ -1710,7 +1689,7 @@ std::optional<RowLocalConstant> CliImage::read_local_constant(uint32_t row_index
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowLocalConstant row{};
     row.name = read_column_u32(row_data, table.row_fields[0]);
     row.signature = read_column_u32(row_data, table.row_fields[1]);
@@ -1723,7 +1702,7 @@ std::optional<RowImportScope> CliImage::read_import_scope(uint32_t row_index) co
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowImportScope row{};
     row.parent = read_column_u32(row_data, table.row_fields[0]);
     row.imports = read_column_u32(row_data, table.row_fields[1]);
@@ -1736,7 +1715,7 @@ std::optional<RowStateMachineMethod> CliImage::read_state_machine_method(uint32_
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowStateMachineMethod row{};
     row.move_next_method = read_column_u32(row_data, table.row_fields[0]);
     row.kickoff_method = read_column_u32(row_data, table.row_fields[1]);
@@ -1749,7 +1728,7 @@ std::optional<RowCustomDebugInformation> CliImage::read_custom_debug_information
     if (row_index == 0 || row_index > table.row_count)
         return std::nullopt;
 
-    const uint8_t* row_data = table.data + (row_index - 1) * table.total_field_size;
+    const uint8_t* row_data = table.data + static_cast<size_t>(row_index - 1) * table.total_field_size;
     RowCustomDebugInformation row{};
     row.parent = read_column_u32(row_data, table.row_fields[0]);
     row.kind = read_column_u32(row_data, table.row_fields[1]);

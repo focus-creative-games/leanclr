@@ -6,48 +6,6 @@ namespace leanclr
 {
 namespace interp
 {
-// Extra value union for instruction data
-
-namespace hl
-{
-struct BasicBlock;
-}
-
-namespace ll
-{
-struct BasicBlock;
-}
-
-struct Variable;
-
-union InstArgData
-{
-    const Variable* var;
-    const Variable** vars;
-    size_t value;
-};
-
-union IRExtraValue
-{
-    size_t value;
-    int32_t i4;
-    int64_t i8;
-    size_t u;
-    float r4;
-    double r8;
-    const void* ptr;
-    const Variable* var;
-    const hl::BasicBlock* hl_bb;
-    const hl::BasicBlock** hl_bbs;
-    const ll::BasicBlock* ll_bb;
-    const ll::BasicBlock** ll_bbs;
-    metadata::RtClass* klass;
-    const metadata::RtMethodInfo* method;
-    const metadata::RtFieldInfo* field;
-    const metadata::RtMethodSig* method_sig;
-    const vm::RtString* user_string;
-};
-
 // Variable information structure
 struct Variable
 {

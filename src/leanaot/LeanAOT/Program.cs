@@ -4,6 +4,7 @@ using LeanAOT.GenerationPlan;
 using LeanAOT.ToCpp;
 using NLog;
 using CommandLine;
+using dnlib.DotNet;
 using CommandLine.Text;
 
 namespace LeanAOT;
@@ -105,6 +106,32 @@ internal class Program
         /// </summary>
         [Option("leanaot-aot-rule-file", Required = false, HelpText = "LeanAOT-only: path to an aot.xml rule file (repeat for multiple files).")]
         public IEnumerable<string> AotMethodRuleFiles { get; set; }
+
+        [Option("leanaot-max-generic-instances", Default = 2048, HelpText = "Maximum closed generic AOT instances (0 disables discovery).")]
+        public int MaxGenericInstances { get; set; }
+
+        [Option("leanaot-max-generic-depth", Default = 32, HelpText = "Maximum closed generic call expansion depth.")]
+        public int MaxGenericDepth { get; set; }
+
+        [Option("leanaot-lightweight-returns", HelpText = "Opt-in scalar ABI for AOT void and aligned managed reference returns; runtime APIs keep Result.")]
+        public bool LightweightAotReturns { get; set; }
+
+        [Option("leanaot-packed-int32-returns", HelpText = "Opt-in 64-bit scalar result ABI for AOT int/uint returns; independent of lightweight void/reference returns.")]
+        public bool PackedInt32AotReturns { get; set; }
+
+        [Option("leanaot-status-out-returns", HelpText = "Opt-in status plus explicit output pointer for AOT long/ulong/double/struct returns.")]
+        public bool StatusOutAotReturns { get; set; }
+
+        [Option("leanaot-share-reference-generics", HelpText = "Share metadata-independent generic reference bodies; keep actual runtime contexts and specialized fallback.")]
+        public bool ShareReferenceGenerics { get; set; }
+
+        [Option("leanaot-interface-call-cache", HelpText = "Opt-in bounded stack-local target caches for interface callsites in loops.")]
+        public bool InterfaceCallCache { get; set; }
+
+        [Option("leanaot-interface-cache-entries", Default = 1, HelpText = "Receiver capacity per cached interface callsite: 1 (up to four sites) or 2 (up to two sites); requires --leanaot-interface-call-cache to enable.")]
+        public int InterfaceCallCacheEntries { get; set; }
+        [Option("leanaot-profiled-interface-caches", HelpText = "Use fingerprint-validated PGO receiver hints for bounded per-site interface cache capacities.")]
+        public bool ProfiledInterfaceCaches { get; set; }
 
         /// <summary>
         /// LeanAOT-only: PGO-generated exact include lists (repeat for multiple files).
@@ -248,6 +275,12 @@ internal class Program
         aotAssemblyNames = new List<string>();
         outputCodeDir = null;
         errorMessage = null;
+
+        if (options.InterfaceCallCacheEntries != 1 && options.InterfaceCallCacheEntries != 2)
+        {
+            errorMessage = "--leanaot-interface-cache-entries must be 1 or 2.";
+            return false;
+        }
 
         var rawAssemblies = options.Assemblies?.ToList() ?? new List<string>();
         if (rawAssemblies.Count == 0 && !string.IsNullOrWhiteSpace(options.Directory))
@@ -522,6 +555,13 @@ internal class Program
         config.ConvertToCpp = options.ConvertToCpp;
         config.EnableAnalytics = options.EnableAnalytics;
         config.EmitNullChecks = options.EmitNullChecks;
+        config.LightweightAotReturns = options.LightweightAotReturns;
+        config.PackedInt32AotReturns = options.PackedInt32AotReturns;
+        config.StatusOutAotReturns = options.StatusOutAotReturns;
+        config.ShareReferenceGenerics = options.ShareReferenceGenerics;
+        config.InterfaceCallCache = options.InterfaceCallCache;
+        config.InterfaceCallCacheEntries = options.InterfaceCallCacheEntries;
+        config.ProfiledInterfaceCaches = options.ProfiledInterfaceCaches;
         config.EnableArrayBoundsCheck = options.EnableArrayBoundsCheck;
         config.EmitMethodMap = options.EmitMethodMap;
         config.EmitSourceMapping = options.EmitSourceMapping;
@@ -657,8 +697,11 @@ internal class Program
             aotAssemblyNames = aotAssemblyNames,
             AotRulesEvaluator = aotRules,
             PgoIncludeIndex = pgoIncludeIndex,
+            MaxGenericInstances = il2CppOptions.MaxGenericInstances,
+            MaxGenericDepth = il2CppOptions.MaxGenericDepth,
         };
         var manifest = new Manifest(manifestArgs);
+
 
         var metaService = new MetadataService();
         var globalServices = new GlobalServices()
@@ -673,6 +716,9 @@ internal class Program
             RuntimeApiCatalog = runtimeApiCatalog,
         };
         ApplyIl2CppOptionsToGlobalConfig(globalServices.Config, il2CppOptions);
+        globalServices.Config.PgoIncludeIndex = pgoIncludeIndex;
+        if (il2CppOptions.ProfiledInterfaceCaches && (!il2CppOptions.InterfaceCallCache || pgoRulePaths.Count == 0))
+            throw new ArgumentException("--leanaot-profiled-interface-caches requires --leanaot-interface-call-cache and a PGO rule file.");
         GlobalServices.Inst = globalServices;
 
         EnsureEmptyProfilerOutputFile(globalServices.Config);
@@ -691,6 +737,33 @@ internal class Program
         Directory.CreateDirectory(confBuilder.outputCodeDir);
         var conf = confBuilder.Build();
         generator.Generate(conf);
+        System.IO.Directory.CreateDirectory(outputCodeDir);
+        System.IO.File.WriteAllText(System.IO.Path.Combine(outputCodeDir, "generic-aot-report.json"),
+            System.Text.Json.JsonSerializer.Serialize(new
+            {
+                schema = 1,
+                max_instances = manifestArgs.MaxGenericInstances,
+                max_depth = manifestArgs.MaxGenericDepth,
+                return_protocol = globalServices.Config.LightweightAotReturns ? "lightweight-void-reference" : "result",
+                packed_int32_returns = globalServices.Config.PackedInt32AotReturns,
+                status_out_returns = globalServices.Config.StatusOutAotReturns,
+                return_protocol_flags = (globalServices.Config.LightweightAotReturns ? 1 : 0) | (globalServices.Config.PackedInt32AotReturns ? 2 : 0) | (globalServices.Config.StatusOutAotReturns ? 4 : 0),
+                interface_call_cache = globalServices.Config.InterfaceCallCache,
+                interface_call_cache_entries = globalServices.Config.InterfaceCallCache ? globalServices.Config.InterfaceCallCacheEntries : 0,
+                profiled_interface_caches = globalServices.Config.ProfiledInterfaceCaches,
+                interface_cache_decisions = globalServices.Config.InterfaceCacheDecisions,
+                generic_registry = "global-sorted-fnv1a64",
+                reference_generic_sharing = globalServices.Config.ShareReferenceGenerics,
+                shared_reference_bindings = globalServices.ReferenceSharing.Bindings.Select(p => new { instance = p.Instance, body = p.Body }),
+                generic_body_count = manifest.GenericMethodPlans.Select(p => Manifest.GenericInstanceKey(globalServices.ReferenceSharing.Canonicalize(p.Method))).Distinct().Count(),
+                instances = manifest.GenericMethodPlans.Select(p => new { method = p.Method.FullName, key = p.Key, depth = p.Depth }),
+                fallbacks = manifest.GenericFallbacks,
+                method_fallbacks = manifest.MethodFallbacks,
+                normal_path_methods = manifest.AssemblyPlans.Values.SelectMany(p => p.MethodPlans)
+                    .Where(p => p.MethodDef.HasBody && p.MethodDef.Body.HasExceptionHandlers).Select(p => p.MethodDef.FullName),
+                generic_normal_path_methods = manifest.GenericMethodPlans.Where(p => p.Method.ResolveMethodDef().Body.HasExceptionHandlers)
+                    .Select(p => new { method = p.Method.FullName, key = p.Key }),
+            }, new System.Text.Json.JsonSerializerOptions { WriteIndented = true }));
 
         Il2CppCompatibilityOutputs.EmitIfRequested(globalServices.Config, manifest, dllSearchPaths, aotAssemblyNames, metaService);
     }

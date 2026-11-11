@@ -39,5 +39,6 @@
     "build_config.h": "cpp"
   },
 
-  "cmake.sourceDirectory": "${workspaceFolder}/src/runtime"
+  "cmake.sourceDirectory": "${workspaceFolder}/src/runtime",
+  "dotnet.preferCSharpExtension": true
 }

@@ -5,6 +5,7 @@
 #include "interp/interp_defs.h"
 #include "gc/garbage_collector.h"
 #include "class.h"
+#include "array_layout.h"
 
 namespace leanclr
 {
@@ -13,8 +14,11 @@ namespace vm
 class Array
 {
   public:
+    static RtResult<ArrayLayout> get_array_layout(const metadata::RtClass* klass, int32_t length);
+
     // Array creation methods
     static size_t get_array_allocation_size(const metadata::RtClass* klass, int32_t length);
+    static size_t get_array_bounds_offset(const metadata::RtClass* klass, int32_t length);
 
     static RtResult<RtArray*> __new_empty_szarray_by_ele_klass(const metadata::RtClass* ele_class LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
     {

@@ -1,7 +1,9 @@
 #pragma once
 
 #include "mem_op.h"
+#include "little_endian.h"
 
+#include <algorithm>
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
@@ -39,7 +41,7 @@ class BinaryReader
 
     bool try_set_position(size_t new_index)
     {
-        if (new_index < _length)
+        if (new_index <= _length)
         {
             _index = new_index;
             return true;
@@ -60,27 +62,56 @@ class BinaryReader
 
     bool try_offset(ptrdiff_t offset)
     {
-        if (offset < 0 && static_cast<size_t>(-offset) > _index)
+        if (offset < 0)
         {
-            return false;
+            const size_t distance = static_cast<size_t>(-(offset + 1)) + 1;
+            if (distance > _index)
+                return false;
+            _index -= distance;
+            return true;
         }
-        if (offset > 0 && static_cast<size_t>(offset) > _length - _index)
-        {
-            return false;
-        }
-
-        _index = static_cast<size_t>(static_cast<ptrdiff_t>(_index) + offset);
-        return true;
+        return try_advance(static_cast<size_t>(offset));
     }
 
     bool try_align_up_position(size_t alignment)
     {
-        size_t aligned_index = MemOp::align_up(_index, alignment);
+        size_t aligned_index;
+        if (!CheckedSize::align_up(_index, alignment, aligned_index))
+            return false;
         if (aligned_index > _length)
         {
             return false;
         }
         _index = aligned_index;
+        return true;
+    }
+
+    size_t remaining() const
+    {
+        return _length - _index;
+    }
+
+    // A child is bounded by its declared payload, even if the parent has more
+    // bytes. Failed slicing never advances the parent or changes the child.
+    bool try_read_slice(size_t count, BinaryReader& child)
+    {
+        if (!is_remaining(count))
+            return false;
+        child = BinaryReader(get_current_ptr(), count);
+        _index += count;
+        return true;
+    }
+
+    bool try_peek_cstring(size_t max_length, const char*& out_value, size_t& out_length) const
+    {
+        const size_t limit = std::min(remaining(), max_length == SIZE_MAX ? max_length : max_length + 1);
+        if (limit == 0)
+            return false;
+        const void* end = std::memchr(get_current_ptr(), 0, limit);
+        if (!end)
+            return false;
+        out_value = reinterpret_cast<const char*>(get_current_ptr());
+        out_length = static_cast<const uint8_t*>(end) - get_current_ptr();
         return true;
     }
 
@@ -91,25 +122,25 @@ class BinaryReader
 
     bool is_remaining(size_t count) const
     {
-        return _index + count <= _length;
+        return count <= _length - _index;
     }
 
     bool is_aligned(size_t alignment) const
     {
-        return _index % alignment == 0;
+        return alignment != 0 && _index % alignment == 0;
     }
 
     const uint8_t* get_current_ptr() const
     {
-        return _data + _index;
+        return _index == 0 ? _data : _data + _index;
     }
 
     template <typename T>
     bool try_peek_any_ptr(const T*& out_ptr) const
     {
-        if (_index + sizeof(T) <= _length)
+        if (sizeof(T) <= _length - _index && reinterpret_cast<uintptr_t>(get_current_ptr()) % alignof(T) == 0)
         {
-            out_ptr = reinterpret_cast<const T*>(_data + _index);
+            out_ptr = reinterpret_cast<const T*>(get_current_ptr());
             return true;
         }
         else
@@ -121,9 +152,9 @@ class BinaryReader
     template <typename T>
     bool try_peek_any_ptr_range(size_t count, const T*& out_ptr) const
     {
-        if (_index + sizeof(T) * count <= _length)
+        if (count <= (_length - _index) / sizeof(T) && reinterpret_cast<uintptr_t>(get_current_ptr()) % alignof(T) == 0)
         {
-            out_ptr = reinterpret_cast<const T*>(_data + _index);
+            out_ptr = reinterpret_cast<const T*>(get_current_ptr());
             return true;
         }
         else
@@ -145,12 +176,13 @@ class BinaryReader
         }
     }
 
+    // Raw native representation only; use the scalar readers for file formats.
     template <typename T>
     bool try_read_any(T& out_value)
     {
-        if (_index + sizeof(T) <= _length)
+        if (sizeof(T) <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const T*>(_data + _index));
+            std::memcpy(&out_value, get_current_ptr(), sizeof(T));
             _index += sizeof(T);
             return true;
         }
@@ -176,9 +208,9 @@ class BinaryReader
 
     bool try_read_u16(uint16_t& out_value)
     {
-        if (_index + 2 <= _length)
+        if (2 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const uint16_t*>(_data + _index));
+            out_value = LittleEndian::read_u16(get_current_ptr());
             _index += 2;
             return true;
         }
@@ -190,9 +222,9 @@ class BinaryReader
 
     bool try_read_u32(uint32_t& out_value)
     {
-        if (_index + 4 <= _length)
+        if (4 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const uint32_t*>(_data + _index));
+            out_value = LittleEndian::read_u32(get_current_ptr());
             _index += 4;
             return true;
         }
@@ -204,9 +236,9 @@ class BinaryReader
 
     bool try_read_u64(uint64_t& out_value)
     {
-        if (_index + 8 <= _length)
+        if (8 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const uint64_t*>(_data + _index));
+            out_value = LittleEndian::read_u64(get_current_ptr());
             _index += 8;
             return true;
         }
@@ -218,9 +250,9 @@ class BinaryReader
 
     bool try_read_f32(float& out_value)
     {
-        if (_index + 4 <= _length)
+        if (4 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const float*>(_data + _index));
+            out_value = LittleEndian::read_f32(get_current_ptr());
             _index += 4;
             return true;
         }
@@ -232,9 +264,9 @@ class BinaryReader
 
     bool try_read_f64(double& out_value)
     {
-        if (_index + 8 <= _length)
+        if (8 <= _length - _index)
         {
-            MemOp::copy_obj_nonoverlapping(&out_value, reinterpret_cast<const double*>(_data + _index));
+            out_value = LittleEndian::read_f64(get_current_ptr());
             _index += 8;
             return true;
         }
@@ -246,7 +278,7 @@ class BinaryReader
 
     bool try_read_bytes(void* out_buffer, size_t count)
     {
-        if (_index + count <= _length)
+        if (count <= _length - _index)
         {
             MemOp::copy_obj_array_nonoverlapping(reinterpret_cast<uint8_t*>(out_buffer), _data + _index, count);
             _index += count;
@@ -303,34 +335,16 @@ class BinaryReader
 
     bool try_read_compressed_int32(int32_t& out_value)
     {
-        uint32_t unsignedValue;
-        if (!try_read_compressed_uint32(unsignedValue))
-        {
+        const size_t begin = _index;
+        uint32_t bits;
+        if (!try_read_compressed_uint32(bits))
             return false;
-        }
-        uint32_t value = unsignedValue >> 1;
-        if (!(unsignedValue & 0x1))
-        {
-            out_value = static_cast<int32_t>(value);
-            return true;
-        }
-        if (value < 0x40)
-        {
-            out_value = static_cast<int32_t>(value - 0x40);
-            return true;
-        }
-        if (value < 0x2000)
-        {
-            out_value = static_cast<int32_t>(value - 0x2000);
-            return true;
-        }
-        if (value < 0x10000000)
-        {
-            out_value = static_cast<int32_t>(value - 0x10000000);
-            return true;
-        }
-        assert(value < 0x20000000);
-        out_value = static_cast<int32_t>(value - 0x20000000);
+        const size_t width = _index - begin;
+        const int32_t value = static_cast<int32_t>(bits >> 1);
+        // The sign bit was rotated into bit zero. Its original position is
+        // determined by the encoding width, not by the decoded magnitude.
+        const int32_t sign_range = width == 1 ? 0x40 : (width == 2 ? 0x2000 : 0x10000000);
+        out_value = (bits & 1) != 0 ? value - sign_range : value;
         return true;
     }
 };

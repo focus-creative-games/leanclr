@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_globalization_culturedata.h"
 #include "icall_base.h"
 
@@ -42,7 +44,7 @@ static const DateTimeCultureFillData* find_datetime_culture_data(int32_t datetim
 {
     switch (datetime_index)
     {
-    case 9:  // en (mono culture-info-tables)
+    case 9: // en (mono culture-info-tables)
     case 105:
     case 119: // en-US
         return &s_datetime_en;
@@ -257,8 +259,8 @@ static RtResultVoid fill_number_data_invoker(metadata::RtManagedMethodPointer me
 }
 
 static vm::InternalCallEntry s_internal_call_entries_system_globalization_culturedata[] = {
-    {"System.Globalization.CultureData::fill_culture_data(System.Int32)",
-     (vm::InternalCallFunction)&SystemGlobalizationCultureData::fill_culture_data, fill_culture_data_invoker},
+    {"System.Globalization.CultureData::fill_culture_data(System.Int32)", (vm::InternalCallFunction)&SystemGlobalizationCultureData::fill_culture_data,
+     fill_culture_data_invoker},
     {"System.Globalization.CultureData::fill_number_data(System.Int32,System.Globalization.CultureData/NumberFormatEntryManaged&)",
      (vm::InternalCallFunction)&SystemGlobalizationCultureData::fill_number_data, fill_number_data_invoker},
 };
@@ -266,7 +268,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultur
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureData::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_culturedata,
-                                              sizeof(s_internal_call_entries_system_globalization_culturedata) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_globalization_culturedata));
 }
 
 } // namespace icalls

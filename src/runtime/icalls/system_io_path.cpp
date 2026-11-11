@@ -1,6 +1,8 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_io_path.h"
 
-#include "platform/rt_path.h"
+#include "bcl/mono/platform/rt_path.h"
 
 namespace leanclr
 {
@@ -10,7 +12,7 @@ namespace icalls
 /// @icall: System.IO.Path::get_temp_path
 RtResult<vm::RtString*> SystemIOPath::get_temp_path() noexcept
 {
-    RET_OK(os::Path::get_temp_path());
+    return os::Path::get_temp_path();
 }
 
 static RtResultVoid get_temp_path_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* /*params*/,
@@ -27,8 +29,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_io_path[] = {
 
 utils::Span<vm::InternalCallEntry> SystemIOPath::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_io_path,
-                                              sizeof(s_internal_call_entries_system_io_path) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_io_path, std::size(s_internal_call_entries_system_io_path));
 }
 
 } // namespace icalls

@@ -1,5 +1,17 @@
 #pragma once
 
+// Non-CMake integrations must obey the same minimum as the exported CMake
+// usage requirement. MSVC may retain the historical __cplusplus value.
+#if defined(__cplusplus)
+#if defined(_MSVC_LANG)
+#if _MSVC_LANG < 201703L
+#error "LeanCLR requires C++17 or newer"
+#endif
+#elif __cplusplus < 201703L
+#error "LeanCLR requires C++17 or newer"
+#endif
+#endif
+
 #include <stdint.h>
 #include <stddef.h>
 
@@ -16,8 +28,13 @@ typedef double float64_t;
 //   * __EMSCRIPTEN__ is checked before __linux__ for the same reason on some
 //     toolchains.
 // POSIX platforms additionally define LEANCLR_PLATFORM_POSIX.
+//
+// LEANCLR_FORCE_PORTABLE (CMake option) forces the unknown/portable code path for
+// testing: no Win32 or POSIX OS headers, only standard library I/O.
 // ---------------------------------------------------------------------------
-#if defined(_WIN32)
+#if defined(LEANCLR_FORCE_PORTABLE)
+#define LEANCLR_PLATFORM_UNKNOWN 1
+#elif defined(_WIN32)
 #define LEANCLR_PLATFORM_WIN 1
 #elif defined(__APPLE__)
 #include <TargetConditionals.h>
@@ -43,6 +60,12 @@ typedef double float64_t;
 #define LEANCLR_PLATFORM_UNKNOWN 1
 #endif
 
+#if defined(LEANCLR_PLATFORM_UNKNOWN)
+#define LEANCLR_PLATFORM_PORTABLE 1
+#else
+#define LEANCLR_PLATFORM_PORTABLE 0
+#endif
+
 // Native aligned heap: Windows CRT (_aligned_*), or POSIX posix_memalign where
 // we can query usable size for aligned_realloc (Apple / glibc / bionic). Other
 // targets use a portable header-based aligned allocator in general_allocation.cpp.
@@ -60,7 +83,16 @@ typedef double float64_t;
 #define LEANCLR_DEBUG 0
 #endif
 
-#define LEANCLR_SUPPORT_UNALIGNED_ACCESS 1
+// Runtime object storage currently requires a little-endian host (including
+// FieldRVA data and UTF-16 storage). Reject unsupported targets explicitly.
+#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ != __ORDER_LITTLE_ENDIAN__
+#error "LeanCLR currently requires a little-endian host"
+#endif
+
+// Use portable memory copies even when hardware accepts unaligned accesses.
+#ifndef LEANCLR_SUPPORT_UNALIGNED_ACCESS
+#define LEANCLR_SUPPORT_UNALIGNED_ACCESS 0
+#endif
 
 #if UINTPTR_MAX == 0xFFFFFFFF
 #define LEANCLR_ARCH_32BIT 1

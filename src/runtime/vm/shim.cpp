@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "shim.h"
 #include "method.h"
 #include "rt_array.h"
@@ -48,7 +49,7 @@ RtResultVoid fn_not_implemented_internal_call_invoker(metadata::RtManagedMethodP
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("Internal call invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
+    host::Services::logf(host::LogLevel::Error, "Internal call invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
@@ -60,7 +61,7 @@ RtResultVoid fn_not_implemented_intrinsic_invoker(metadata::RtManagedMethodPoint
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("Intrinsic invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
+    host::Services::logf(host::LogLevel::Error, "Intrinsic invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
@@ -72,7 +73,7 @@ RtResultVoid fn_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer,
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
+    host::Services::logf(host::LogLevel::Error, "P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
@@ -84,7 +85,7 @@ RtResultVoid fn_not_implemented_pinvoke_invoker(metadata::RtManagedMethodPointer
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
+    host::Services::logf(host::LogLevel::Error, "P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     RETURN_NOT_IMPLEMENTED_ERROR();
 }
@@ -96,7 +97,7 @@ RtResultVoid fn_not_implemented_runtime_impl_invoker(metadata::RtManagedMethodPo
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("Runtime impl invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
+    host::Services::logf(host::LogLevel::Error, "Runtime impl invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     // Placeholder implementation
     RETURN_NOT_IMPLEMENTED_ERROR();
@@ -109,7 +110,7 @@ RtResultVoid fn_not_implemented_invoker(metadata::RtManagedMethodPointer method_
 #if LEANCLR_DEBUG
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
-    printf("Not implemented invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
+    host::Services::logf(host::LogLevel::Error, "Not implemented invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     // Placeholder implementation
     RETURN_NOT_IMPLEMENTED_ERROR();
@@ -202,7 +203,7 @@ static metadata::RtInvokeMethodPointer try_setup_array_or_szarray_invoke(const m
 }
 
 // Get invoker for a method
-RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* method)
+static RtResult<InvokeTypeAndMethod> get_invoker(const metadata::RtMethodInfo* method, const metadata::RtAotMethodDefData* aot_data)
 {
     const metadata::RtClass* klass = method->parent;
 
@@ -238,7 +239,6 @@ RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* me
             RET_OK(InvokeTypeAndMethod(RtInvokerType::Intrinsic, intrinsic_entry->invoker));
         }
 
-        const metadata::RtAotMethodDefData* aot_data = metadata::AotModule::find_aot_method_impl(method);
         if (aot_data != nullptr)
         {
             RET_OK(InvokeTypeAndMethod(RtInvokerType::Aot, aot_data->invoke_method_ptr));
@@ -316,22 +316,30 @@ RtResult<InvokeTypeAndMethod> Shim::get_invoker(const metadata::RtMethodInfo* me
 }
 
 // Get method pointer (for native/unmanaged methods)
-MethodAndVirtualMethod Shim::get_method_pointer(const metadata::RtMethodInfo* method)
+static MethodAndVirtualMethod get_method_pointer(const metadata::RtMethodInfo* method, const metadata::RtAotMethodDefData* aot_data)
 {
-    const metadata::RtAotModuleData* aotModuleData = method->parent->image->get_aot_module_data();
-    if (aotModuleData != nullptr)
+    if (aot_data != nullptr)
     {
-        const metadata::RtAotMethodDefData* aot_data = metadata::AotModule::find_aot_method_impl(method);
-        if (aot_data != nullptr)
-        {
-            return MethodAndVirtualMethod(aot_data->method_ptr, aot_data->virtual_method_ptr);
-        }
+        return MethodAndVirtualMethod(aot_data->method_ptr, aot_data->virtual_method_ptr);
     }
     metadata::RtManagedMethodPointer method_pointer = reinterpret_cast<metadata::RtManagedMethodPointer>(fn_not_implemented_method_pointer);
     metadata::RtManagedMethodPointer virtual_method_pointer = reinterpret_cast<metadata::RtManagedMethodPointer>(
         Method::is_static(method) || !Class::is_value_type(method->parent) ? fn_not_implemented_method_pointer : fn_not_implemented_virtual_method_pointer);
 
     return MethodAndVirtualMethod(method_pointer, virtual_method_pointer);
+}
+
+RtResultVoid Shim::setup_method(metadata::RtMethodInfo* method)
+{
+    const auto binding = metadata::AotModule::find_aot_method_binding(method);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InvokeTypeAndMethod, invoke, get_invoker(method, binding.implementation));
+    const auto pointers = get_method_pointer(method, binding.implementation);
+    method->invoke_method_ptr = invoke.invoker;
+    method->invoker_type = invoke.invoker_type;
+    method->method_ptr = pointers.method_ptr;
+    method->virtual_method_ptr = pointers.virtual_method_ptr;
+    method->aot_return_protocol = binding.return_protocol;
+    RET_VOID_OK();
 }
 
 } // namespace vm

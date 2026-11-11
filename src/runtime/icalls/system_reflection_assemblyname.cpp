@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_assemblyname.h"
 
 #include "vm/reflection.h"
@@ -9,7 +11,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<bool> SystemReflectionAssemblyName::parse_assembly_name(intptr_t name_cstr, metadata::RtMonoAssemblyName* aname, bool* is_version_defined,
+RtResult<bool> SystemReflectionAssemblyName::parse_assembly_name(intptr_t name_cstr, metadata::AssemblyNameInfo* aname, bool* is_version_defined,
                                                                  bool* is_token_defined) noexcept
 {
     const char* name_str = reinterpret_cast<const char*>(name_cstr);
@@ -27,7 +29,7 @@ static RtResultVoid parse_assembly_name_invoker(metadata::RtManagedMethodPointer
     (void)methodPtr;
     (void)method;
     auto blob = EvalStackOp::get_param<intptr_t>(params, 0);
-    auto aname = EvalStackOp::get_param<metadata::RtMonoAssemblyName*>(params, 1);
+    auto aname = EvalStackOp::get_param<metadata::AssemblyNameInfo*>(params, 1);
     auto is_ver_ptr = EvalStackOp::get_param<bool*>(params, 2);
     auto is_tok_ptr = EvalStackOp::get_param<bool*>(params, 3);
 
@@ -60,7 +62,7 @@ static RtResultVoid get_public_token_invoker(metadata::RtManagedMethodPointer me
     RET_VOID_OK();
 }
 
-RtResult<metadata::RtMonoAssemblyName*> SystemReflectionAssemblyName::get_native_name(metadata::RtAssembly* ass) noexcept
+RtResult<metadata::AssemblyNameInfo*> SystemReflectionAssemblyName::get_native_name(metadata::RtAssembly* ass) noexcept
 {
     return vm::Reflection::get_assembly_name_object(ass);
 }
@@ -73,7 +75,7 @@ static RtResultVoid get_native_name_invoker(metadata::RtManagedMethodPointer met
     (void)method;
     auto h = EvalStackOp::get_param<metadata::RtAssembly*>(params, 0);
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtMonoAssemblyName*, result, SystemReflectionAssemblyName::get_native_name(h));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::AssemblyNameInfo*, result, SystemReflectionAssemblyName::get_native_name(h));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }
@@ -88,7 +90,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionAssemblyName::get_internal_ca
         {"System.Reflection.AssemblyName::GetNativeName(System.IntPtr)", (vm::InternalCallFunction)&SystemReflectionAssemblyName::get_native_name,
          get_native_name_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

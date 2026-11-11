@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_globalization_calendardata.h"
 #include "icall_base.h"
 
@@ -53,8 +55,8 @@ static const char* s_en_abbrev_era_names[] = {"AD"};
 static const char* s_en_day_names[] = {"Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"};
 static const char* s_en_abbrev_day_names[] = {"Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"};
 static const char* s_en_super_short_day_names[] = {"Su", "Mo", "Tu", "We", "Th", "Fr", "Sa"};
-static const char* s_en_month_names[] = {"January", "February", "March", "April", "May", "June", "July", "August", "September",
-                                         "October", "November", "December", ""};
+static const char* s_en_month_names[] = {"January", "February",  "March",   "April",    "May",      "June", "July",
+                                         "August",  "September", "October", "November", "December", ""};
 static const char* s_en_abbrev_month_names[] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec", ""};
 
 static const char* s_zh_short_dates[] = {"yyyy/M/d", "yyyy-MM-dd"};
@@ -66,14 +68,35 @@ static const char* s_zh_day_names[] = {"\xe6\x98\x9f\xe6\x9c\x9f\xe6\x97\xa5", "
                                        "\xe6\x98\x9f\xe6\x9c\x9f\xe4\xb8\x89", "\xe6\x98\x9f\xe6\x9c\x9f\xe5\x9b\x9b", "\xe6\x98\x9f\xe6\x9c\x9f\xe4\xba\x94",
                                        "\xe6\x98\x9f\xe6\x9c\x9f\xe5\x85\xad"};
 static const char* s_zh_abbrev_day_names[] = {"\xe5\x91\xa8\xe6\x97\xa5", "\xe5\x91\xa8\xe4\xb8\x80", "\xe5\x91\xa8\xe4\xba\x8c", "\xe5\x91\xa8\xe4\xb8\x89",
-                                             "\xe5\x91\xa8\xe5\x9b\x9b", "\xe5\x91\xa8\xe4\xba\x94", "\xe5\x91\xa8\xe5\x85\xad"};
-static const char* s_zh_super_short_day_names[] = {"\xe6\x97\xa5", "\xe4\xb8\x80", "\xe4\xba\x8c", "\xe4\xb8\x89", "\xe5\x9b\x9b", "\xe4\xba\x94", "\xe5\x85\xad"};
-static const char* s_zh_month_names[] = {"\xe4\xb8\x80\xe6\x9c\x88", "\xe4\xba\x8c\xe6\x9c\x88", "\xe4\xb8\x89\xe6\x9c\x88", "\xe5\x9b\x9b\xe6\x9c\x88",
-                                        "\xe4\xba\x94\xe6\x9c\x88", "\xe5\x85\xad\xe6\x9c\x88", "\xe4\xb8\x83\xe6\x9c\x88", "\xe5\x85\xab\xe6\x9c\x88",
-                                        "\xe4\xb9\x9d\xe6\x9c\x88", "\xe5\x8d\x81\xe6\x9c\x88", "\xe5\x8d\x81\xe4\xb8\x80\xe6\x9c\x88", "\xe5\x8d\x81\xe4\xba\x8c\xe6\x9c\x88", ""};
-static const char* s_zh_abbrev_month_names[] = {"\xe4\xb8\x80\xe6\x9c\x88", "\xe4\xba\x8c\xe6\x9c\x88", "\xe4\xb8\x89\xe6\x9c\x88", "\xe5\x9b\x9b\xe6\x9c\x88",
-                                                "\xe4\xba\x94\xe6\x9c\x88", "\xe5\x85\xad\xe6\x9c\x88", "\xe4\xb8\x83\xe6\x9c\x88", "\xe5\x85\xab\xe6\x9c\x88",
-                                                "\xe4\xb9\x9d\xe6\x9c\x88", "\xe5\x8d\x81\xe6\x9c\x88", "\xe5\x8d\x81\xe4\xb8\x80\xe6\x9c\x88", "\xe5\x8d\x81\xe4\xba\x8c\xe6\x9c\x88", ""};
+                                              "\xe5\x91\xa8\xe5\x9b\x9b", "\xe5\x91\xa8\xe4\xba\x94", "\xe5\x91\xa8\xe5\x85\xad"};
+static const char* s_zh_super_short_day_names[] = {"\xe6\x97\xa5", "\xe4\xb8\x80", "\xe4\xba\x8c", "\xe4\xb8\x89",
+                                                   "\xe5\x9b\x9b", "\xe4\xba\x94", "\xe5\x85\xad"};
+static const char* s_zh_month_names[] = {"\xe4\xb8\x80\xe6\x9c\x88",
+                                         "\xe4\xba\x8c\xe6\x9c\x88",
+                                         "\xe4\xb8\x89\xe6\x9c\x88",
+                                         "\xe5\x9b\x9b\xe6\x9c\x88",
+                                         "\xe4\xba\x94\xe6\x9c\x88",
+                                         "\xe5\x85\xad\xe6\x9c\x88",
+                                         "\xe4\xb8\x83\xe6\x9c\x88",
+                                         "\xe5\x85\xab\xe6\x9c\x88",
+                                         "\xe4\xb9\x9d\xe6\x9c\x88",
+                                         "\xe5\x8d\x81\xe6\x9c\x88",
+                                         "\xe5\x8d\x81\xe4\xb8\x80\xe6\x9c\x88",
+                                         "\xe5\x8d\x81\xe4\xba\x8c\xe6\x9c\x88",
+                                         ""};
+static const char* s_zh_abbrev_month_names[] = {"\xe4\xb8\x80\xe6\x9c\x88",
+                                                "\xe4\xba\x8c\xe6\x9c\x88",
+                                                "\xe4\xb8\x89\xe6\x9c\x88",
+                                                "\xe5\x9b\x9b\xe6\x9c\x88",
+                                                "\xe4\xba\x94\xe6\x9c\x88",
+                                                "\xe5\x85\xad\xe6\x9c\x88",
+                                                "\xe4\xb8\x83\xe6\x9c\x88",
+                                                "\xe5\x85\xab\xe6\x9c\x88",
+                                                "\xe4\xb9\x9d\xe6\x9c\x88",
+                                                "\xe5\x8d\x81\xe6\x9c\x88",
+                                                "\xe5\x8d\x81\xe4\xb8\x80\xe6\x9c\x88",
+                                                "\xe5\x8d\x81\xe4\xba\x8c\xe6\x9c\x88",
+                                                ""};
 
 static const CalendarCultureFillData s_calendar_en = {
     "Gregorian Calendar",
@@ -160,8 +183,7 @@ static bool is_known_locale(const char* locale_name)
     {
         return false;
     }
-    return is_zh_locale(locale_name) || utils::StringUtil::equals_ignorecase(locale_name, "en") ||
-           utils::StringUtil::equals_ignorecase(locale_name, "en-us");
+    return is_zh_locale(locale_name) || utils::StringUtil::equals_ignorecase(locale_name, "en") || utils::StringUtil::equals_ignorecase(locale_name, "en-us");
 }
 
 static const CalendarCultureFillData* find_calendar_culture_data(const char* locale_name)
@@ -217,7 +239,7 @@ RtResult<bool> SystemGlobalizationCalendarData::fill_calendar_data(vm::RtCalenda
     {
         RET_ERR(RtErr::NullReference);
     }
-    assert (locale_name != nullptr);
+    assert(locale_name != nullptr);
 
     if (!is_gregorian_calendar_id(calendar_id))
     {
@@ -255,7 +277,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_calend
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCalendarData::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_calendardata,
-                                              sizeof(s_internal_call_entries_system_globalization_calendardata) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_globalization_calendardata));
 }
 
 } // namespace icalls

@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_runtimeparameterinfo.h"
 
 #include "vm/class.h"
@@ -47,9 +49,10 @@ RtResult<vm::RtArray*> SystemReflectionRuntimeParameterInfo::get_type_modifiers(
     utils::Vector<metadata::RtClass*> modifiers;
     RET_ERR_ON_FAIL(vm::Method::get_parameter_modifiers(method, index, optional, modifiers));
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
-        vm::RtArray*, modifier_type_arr,
-        LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_systemtype, static_cast<int32_t>(modifiers.size()), "icalls::SystemReflectionRuntimeParameterInfo::get_type_modifiers"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, modifier_type_arr,
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_systemtype,
+                                                                                        static_cast<int32_t>(modifiers.size()),
+                                                                                        "icalls::SystemReflectionRuntimeParameterInfo::get_type_modifiers"));
 
     for (size_t i = 0; i < modifiers.size(); ++i)
     {
@@ -97,7 +100,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeParameterInfo::get_int
         {"System.Reflection.RuntimeParameterInfo::GetTypeModifiers(System.Type,System.Reflection.MemberInfo,System.Int32,System.Boolean)",
          (vm::InternalCallFunction)&SystemReflectionRuntimeParameterInfo::get_type_modifiers, runtimeparameterinfo_get_type_modifiers_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

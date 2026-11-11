@@ -113,5 +113,76 @@ namespace CorlibTests.InternalCall
             Buffer.BlockCopy(src, 1, dest, 0, 2);
             Assert.Equal(unchecked((int)0x0000BBCC), dest[0]);
         }
+
+        // T contains a reference, so Buffer.Memmove<T> calls Memmove_wbarrier.
+        // len is the element count; the icall must scale it by the element size.
+        private struct NodeLike
+        {
+            public object o;
+            public int a;
+            public short b;
+            public int c;
+            public int d;
+            public byte e;
+            public byte f;
+        }
+
+        [UnitTest]
+        [CoversIcall("System.Runtime.RuntimeImports::Memmove_wbarrier(System.Byte*,System.Byte*,System.UInt32,System.IntPtr)")]
+        public void SpanCopyTo_ReferenceType()
+        {
+            const int n = 200;
+            object key = new object();
+            object[] src = new object[n];
+            for (int i = 0; i < n; i++)
+            {
+                src[i] = key;
+            }
+
+            object[] dst = new object[n];
+            new ReadOnlySpan<object>(src).CopyTo(dst);
+
+            int ok = 0;
+            for (int i = 0; i < n; i++)
+            {
+                if (object.ReferenceEquals(dst[i], key))
+                {
+                    ok++;
+                }
+            }
+            Assert.Equal(n, ok);
+        }
+
+        [UnitTest]
+        [CoversIcall("System.Runtime.RuntimeImports::Memmove_wbarrier(System.Byte*,System.Byte*,System.UInt32,System.IntPtr)")]
+        public void SpanCopyTo_StructWithReference()
+        {
+            const int n = 200;
+            object key = new object();
+            NodeLike[] src = new NodeLike[n];
+            for (int i = 0; i < n; i++)
+            {
+                src[i] = new NodeLike { o = key, a = i, b = (short)i, c = i + 1, d = i + 2, e = (byte)i, f = (byte)(i + 3) };
+            }
+
+            NodeLike[] dst = new NodeLike[n];
+            new ReadOnlySpan<NodeLike>(src).CopyTo(dst);
+
+            int okRef = 0;
+            int okFields = 0;
+            for (int i = 0; i < n; i++)
+            {
+                if (object.ReferenceEquals(dst[i].o, key))
+                {
+                    okRef++;
+                }
+                if (dst[i].a == i && dst[i].b == (short)i && dst[i].c == i + 1 && dst[i].d == i + 2 && dst[i].e == (byte)i && dst[i].f == (byte)(i + 3))
+                {
+                    okFields++;
+                }
+            }
+            Assert.Equal(n, okRef);
+            Assert.Equal(n, okFields);
+        }
     }
 }

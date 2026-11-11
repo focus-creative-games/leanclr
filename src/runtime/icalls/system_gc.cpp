@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_gc.h"
 
 #include "icall_base.h"
@@ -235,7 +237,7 @@ utils::Span<vm::InternalCallEntry> SystemGC::get_internal_call_entries() noexcep
         {"System.GC::_ReRegisterForFinalize(System.Object)", (vm::InternalCallFunction)&SystemGC::reregister_for_finalize, reregister_for_finalize_invoker},
         {"System.GC::GetTotalMemory(System.Boolean)", (vm::InternalCallFunction)&SystemGC::get_total_memory, get_total_memory_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

@@ -40,19 +40,20 @@ class GeneralAllocator
 
     pointer allocate(size_type n)
     {
-        if (n == 0)
+        size_t bytes;
+        if (n == 0 || !utils::CheckedSize::multiply(n, sizeof(T), bytes))
         {
             return nullptr;
         }
 
-        void* ptr = GeneralAllocation::malloc(n * sizeof(T));
+        void* ptr = alignof(T) > alignof(std::max_align_t) ? GeneralAllocation::aligned_malloc(bytes, alignof(T)) : GeneralAllocation::malloc(bytes);
         return static_cast<pointer>(ptr);
     }
 
     void deallocate(pointer p, size_type n) noexcept
     {
         (void)n; // unused
-        GeneralAllocation::free(p);
+        GeneralAllocation::free_any(p);
     }
 
     template <typename U, typename... Args>

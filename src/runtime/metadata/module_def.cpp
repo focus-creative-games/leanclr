@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "module_def.h"
 
 #include "const_strs.h"
@@ -409,7 +410,8 @@ RtResult<RtAssembly*> RtModuleDef::get_reference_assembly(uint32_t rid)
             auto ret_ref_assembly = vm::Assembly::load_by_name(ref_name);
             if (ret_ref_assembly.is_err())
             {
-                printf("Failed to load reference assembly %s, error: %d\n", ref_name, static_cast<int>(ret_ref_assembly.unwrap_err()));
+                host::Services::logf(host::LogLevel::Error, "Failed to load reference assembly %s, error: %d\n", ref_name,
+                                     static_cast<int>(ret_ref_assembly.unwrap_err()));
                 RET_ERR(ret_ref_assembly.unwrap_err());
             }
             RtAssembly* ref_assembly = ret_ref_assembly.unwrap();
@@ -2258,7 +2260,7 @@ RtResultVoid RtModuleDef::get_types(bool exported_only, utils::Vector<RtClass*>&
     RET_VOID_OK();
 }
 
-void RtModuleDef::fill_assembly_name(RtMonoAssemblyName& out) const
+void RtModuleDef::fill_assembly_name(AssemblyNameInfo& out) const
 {
     out.name = utils::StringUtil::strdup(_assemblyName.name);
     out.culture = utils::StringUtil::strdup(_assemblyName.culture);

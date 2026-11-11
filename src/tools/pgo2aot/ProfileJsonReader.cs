@@ -36,6 +36,7 @@ namespace Pgo2Aot
 
                 foreach (ProfileEntry entry in entries)
                 {
+                    ReceiverPolicy.Validate(entry);
                     if (string.IsNullOrWhiteSpace(entry.Assembly))
                     {
                         throw new InvalidDataException($"Profile entry missing assembly in {fullPath}");
@@ -55,6 +56,10 @@ namespace Pgo2Aot
                             Signature = entry.Signature,
                             Calls = Math.Max(existing.Calls, entry.Calls),
                             Cost = Math.Max(existing.Cost, entry.Cost),
+                            IlBytes = Math.Max(existing.IlBytes, entry.IlBytes),
+                            IlHash = string.Equals(existing.IlHash, entry.IlHash, StringComparison.OrdinalIgnoreCase) ? entry.IlHash : string.Empty,
+                            InterfaceSites = ReceiverPolicy.Merge(existing, entry),
+                            ReceiverProfileDropped = Math.Max(existing.ReceiverProfileDropped, entry.ReceiverProfileDropped),
                         };
                     }
                     else
@@ -118,12 +123,38 @@ namespace Pgo2Aot
         }
 
         [Serializable]
+        private sealed class ReceiverJsonDto
+        {
+            public string assembly, type;
+            public long calls;
+        }
+        [Serializable]
+        private sealed class InterfaceSiteJsonDto
+        {
+            public uint ilOffset;
+            public long calls, otherCalls;
+            public long cacheObservations, oneEntryHits, twoEntryHits;
+            public ReceiverJsonDto[] types;
+            public InterfaceSite Convert() => new InterfaceSite
+            {
+                IlOffset = ilOffset, Calls = calls > 0 ? (ulong)calls : 0, OtherCalls = otherCalls > 0 ? (ulong)otherCalls : 0,
+                CacheObservations = cacheObservations > 0 ? (ulong)cacheObservations : 0,
+                OneEntryHits = oneEntryHits > 0 ? (ulong)oneEntryHits : 0, TwoEntryHits = twoEntryHits > 0 ? (ulong)twoEntryHits : 0,
+                Types = (types ?? Array.Empty<ReceiverJsonDto>()).Select(t => new ReceiverType
+                { Assembly = t.assembly, Type = t.type, Calls = t.calls > 0 ? (ulong)t.calls : 0 }).ToArray()
+            };
+        }
+        [Serializable]
         private sealed class ProfileEntryJsonDto
         {
             public string assembly;
             public string signature;
             public long calls;
             public long cost;
+            public uint ilBytes;
+            public string ilHash;
+            public long receiverProfileDropped;
+            public InterfaceSiteJsonDto[] interfaceSites;
 
             public ProfileEntry ToProfileEntry()
             {
@@ -133,6 +164,10 @@ namespace Pgo2Aot
                     Signature = signature ?? string.Empty,
                     Calls = calls > 0 ? (ulong)calls : 0,
                     Cost = cost > 0 ? (ulong)cost : 0,
+                    IlBytes = ilBytes,
+                    IlHash = ilHash ?? string.Empty,
+                    ReceiverProfileDropped = receiverProfileDropped > 0 ? (ulong)receiverProfileDropped : 0,
+                    InterfaceSites = (interfaceSites ?? Array.Empty<InterfaceSiteJsonDto>()).Select(s => s.Convert()).ToArray(),
                 };
             }
         }

@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "mono_safestringmarshal.h"
 #include "icall_base.h"
 #include "vm/rt_string.h"
@@ -60,7 +62,7 @@ static InternalCallEntry s_internal_call_entries_mono_safestringmarshal[] = {
 
 utils::Span<InternalCallEntry> MonoSafeStringMarshal::get_internal_call_entries() noexcept
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries_mono_safestringmarshal) / sizeof(s_internal_call_entries_mono_safestringmarshal[0]);
+    constexpr size_t entry_count = std::size(s_internal_call_entries_mono_safestringmarshal);
     return utils::Span<InternalCallEntry>(s_internal_call_entries_mono_safestringmarshal, entry_count);
 }
 

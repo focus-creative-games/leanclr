@@ -1,4 +1,7 @@
 #include "runtime.h"
+#include "utils/scope_guard.h"
+#include "host/services.h"
+#include "bcl/adapter.h"
 
 #include "intrinsics.h"
 #include "internal_calls.h"
@@ -23,9 +26,12 @@
 #include "metadata/module_def.h"
 #include "metadata/aot_module.h"
 #include "alloc/general_allocation.h"
+#include "alloc/scoped_buffer.h"
 #include "alloc/metadata_allocation.h"
 #include "interp/machine_state.h"
 #include "utils/rt_vector.h"
+#include "utils/hashmap.h"
+#include "gc/gc_roots.h"
 
 namespace leanclr
 {
@@ -38,32 +44,12 @@ struct ScopeBufferGuard
     static constexpr size_t kTempArgsBufferSize = 16;
     static constexpr size_t kTempRetBufferSize = 4;
 
-    interp::RtStackObject* args;
-    interp::RtStackObject* ret;
-    size_t args_size;
-    size_t ret_size;
-    interp::RtStackObject args_temp_buffer[kTempArgsBufferSize];
-    interp::RtStackObject ret_temp_buffer[kTempRetBufferSize];
+    alloc::ScopedBuffer<interp::RtStackObject, kTempArgsBufferSize> args;
+    alloc::ScopedBuffer<interp::RtStackObject, kTempRetBufferSize> ret;
     utils::Vector<void*> temp_byref_valuetype_args_buffer;
-
-    ScopeBufferGuard() : args(nullptr), ret(nullptr), args_size(0), ret_size(0)
-    {
-    }
 
     ~ScopeBufferGuard()
     {
-        // Free args buffer if allocated
-        if (args_size > kTempArgsBufferSize && args != nullptr)
-        {
-            alloc::GeneralAllocation::free(args);
-        }
-
-        // Free ret buffer if allocated
-        if (ret_size > kTempRetBufferSize && ret != nullptr)
-        {
-            alloc::GeneralAllocation::free(ret);
-        }
-
         // Free temporary byref value type buffers
         for (size_t i = 0; i < temp_byref_valuetype_args_buffer.size(); ++i)
         {
@@ -74,7 +60,13 @@ struct ScopeBufferGuard
     void* alloc_zeroed_temp_value_type_buffer(size_t size)
     {
         void* buffer = alloc::GeneralAllocation::malloc_zeroed(size);
-        temp_byref_valuetype_args_buffer.push_back(buffer);
+        if (!buffer)
+            return nullptr;
+        if (!temp_byref_valuetype_args_buffer.try_push_back(buffer))
+        {
+            alloc::GeneralAllocation::free(buffer);
+            return nullptr;
+        }
         return buffer;
     }
 
@@ -82,6 +74,7 @@ struct ScopeBufferGuard
     {
         interp::RtStackObject* args_buffer;
         interp::RtStackObject* ret_buffer;
+
         ArgsAndRetBuffers(interp::RtStackObject* args_buf, interp::RtStackObject* ret_buf) : args_buffer(args_buf), ret_buffer(ret_buf)
         {
         }
@@ -89,38 +82,9 @@ struct ScopeBufferGuard
 
     RtResult<ArgsAndRetBuffers> prepare_args_and_ret_buffer(const metadata::RtMethodInfo* method)
     {
-        size_t total_args_size = method->total_arg_stack_object_size;
-        size_t ret_size_val = method->ret_stack_object_size;
-
-        interp::RtStackObject* args_buffer;
-        if (total_args_size <= kTempArgsBufferSize)
-        {
-            args_buffer = args_temp_buffer;
-            std::memset(args_buffer, 0, total_args_size * sizeof(interp::RtStackObject));
-        }
-        else
-        {
-            args_buffer = new interp::RtStackObject[total_args_size];
-            std::memset(args_buffer, 0, total_args_size * sizeof(interp::RtStackObject));
-        }
-        args_size = total_args_size;
-        args = args_buffer;
-
-        interp::RtStackObject* ret_buffer;
-        if (ret_size_val <= kTempRetBufferSize)
-        {
-            ret_buffer = ret_temp_buffer;
-            std::memset(ret_buffer, 0, ret_size_val * sizeof(interp::RtStackObject));
-        }
-        else
-        {
-            ret_buffer = new interp::RtStackObject[ret_size_val];
-            std::memset(ret_buffer, 0, ret_size_val * sizeof(interp::RtStackObject));
-        }
-        ret_size = ret_size_val;
-        ret = ret_buffer;
-
-        RET_OK(ArgsAndRetBuffers(args_buffer, ret_buffer));
+        if (!args.try_allocate_zeroed(method->total_arg_stack_object_size) || !ret.try_allocate_zeroed(method->ret_stack_object_size))
+            RET_ERR(RtErr::OutOfMemory);
+        RET_OK(ArgsAndRetBuffers(args.data(), ret.data()));
     }
 
     RtResult<ArgsAndRetBuffers> convert_params_to_temp_buffer(const metadata::RtMethodInfo* method, RtObject* obj, const void* const* params)
@@ -273,6 +237,8 @@ struct ScopeBufferGuard
                 if (Class::is_value_type(param_klass))
                 {
                     void* buffer = alloc_zeroed_temp_value_type_buffer(param_klass->instance_size_without_header);
+                    if (!buffer)
+                        RET_ERR(RtErr::OutOfMemory);
                     RET_ERR_ON_FAIL(Object::unbox_any(param, param_klass, buffer, false));
                     dst.ptr = buffer;
                 }
@@ -355,8 +321,27 @@ static RtResult<RtObject*> invoke_without_run_cctor(const metadata::RtMethodInfo
 
 // Public Runtime functions implementation
 
+namespace
+{
+Runtime::State runtime_state = Runtime::State::Uninitialized;
+}
+
+Runtime::State Runtime::get_state()
+{
+    return runtime_state;
+}
+
 RtResultVoid Runtime::initialize()
 {
+    if (runtime_state != State::Uninitialized)
+        return RtErr::InvalidOperation;
+    runtime_state = State::Initializing;
+    auto failed = utils::make_scope_exit([]() { runtime_state = State::Failed; });
+    host::Services::freeze();
+    const auto memory = alloc::GeneralAllocation::get_memory_callbacks();
+    if (!memory.malloc || !memory.calloc || !memory.free || !memory.realloc || !memory.aligned_malloc || !memory.aligned_free || !memory.aligned_realloc ||
+        !host::Services::has_required_services())
+        return RtErr::NotSupported;
     // Initialize subsystems
     alloc::MetadataAllocation::init();
     Intrinsics::initialize();
@@ -366,7 +351,7 @@ RtResultVoid Runtime::initialize()
     auto aot_modules_data = Settings::get_aot_modules_data();
     if (aot_modules_data != nullptr)
     {
-        metadata::AotModule::register_aot_modules(aot_modules_data);
+        RET_ERR_ON_FAIL(metadata::AotModule::register_aot_modules(aot_modules_data));
     }
 
     auto internal_func_initializer = Settings::get_internal_functions_initializer();
@@ -382,7 +367,7 @@ RtResultVoid Runtime::initialize()
     RET_ERR_ON_FAIL(Assembly::load_corlib());
     RET_ERR_ON_FAIL(Class::initialize());
     RET_ERR_ON_FAIL(ArrayClass::initialize());
-    RET_ERR_ON_FAIL(Class::verify_integrity_of_corlib_classes());
+    RET_ERR_ON_FAIL(bcl::Adapter::validate_managed_layouts());
     RET_ERR_ON_FAIL(String::initialize());
     RET_ERR_ON_FAIL(Exception::initialize());
     RET_ERR_ON_FAIL(Delegate::initialize());
@@ -402,37 +387,111 @@ RtResultVoid Runtime::initialize()
         corlib_aot_module_data->deferred_initializer(corlib_mod);
     }
 
+    runtime_state = State::Running;
+    failed.dismiss();
     RET_VOID_OK();
 }
 
 void Runtime::shutdown()
 {
-    // todo: implement shutdown logic
+    // Shutdown is terminal quiescence. Process-lifetime metadata/heap storage
+    // remains owned by this runtime; unloading/reinitialization is unsupported.
+    // A reentrant shutdown during startup must not invalidate the init stack.
+    if (runtime_state == State::Initializing || runtime_state == State::Stopped)
+        return;
+    Environment::shutdown();
+    runtime_state = State::Stopped;
+}
+
+struct InitializerFailure
+{
+    RtErr error;
+    RtException* exception;
+};
+
+static utils::HashMap<const metadata::RtClass*, InitializerFailure>& get_s_initializer_failures()
+{
+    static utils::HashMap<const metadata::RtClass*, InitializerFailure> value;
+    return value;
+}
+
+void register_runtime_gc_roots()
+{
+    gc::GcRoots::register_visit_object_roots(
+        [](gc::GcVisitObjectRoot visit, void* context)
+        {
+            for (auto& entry : get_s_initializer_failures())
+                if (entry.second.exception)
+                    visit(reinterpret_cast<RtObject*>(entry.second.exception), context);
+        });
+}
+
+static RtResultVoid fail_initializer(metadata::RtClass* klass, RtErr error)
+{
+    RtException* original = Exception::raise_error_as_exception(error, nullptr, nullptr);
+    RtException* exception = original;
+    if (original != nullptr)
+    {
+        auto wrapped = LEANCLR_NEWOBJ_INTERNAL(Class::get_corlib_types().cls_type_initialization_exception, "Runtime::type_initializer_failure");
+        if (wrapped.is_ok())
+        {
+            exception = reinterpret_cast<RtException*>(wrapped.unwrap());
+            Exception::set_inner_exception(exception, original);
+        }
+        Exception::set_current_exception(exception);
+        error = RtErr::ManagedException;
+    }
+    get_s_initializer_failures()[klass] = {error, exception};
+    klass->cctor_status = metadata::RtCCtorStatus::Failed;
+    RET_ERR(error);
+}
+
+static RtResultVoid run_initializer(const metadata::RtClass* type, bool run_module)
+{
+    auto* klass = const_cast<metadata::RtClass*>(type);
+    if (klass->cctor_status == metadata::RtCCtorStatus::Failed)
+    {
+        const auto& failure = get_s_initializer_failures().at(klass);
+        if (failure.exception)
+            Exception::set_current_exception(failure.exception);
+        RET_ERR(failure.error);
+    }
+    // Recursive access on the single runtime thread observes partial initialization.
+    if (klass->cctor_status != metadata::RtCCtorStatus::NotInited)
+        RET_VOID_OK();
+    RET_ERR_ON_FAIL(Class::initialize_all(klass));
+    Class::set_cctor_initing(klass);
+    if (run_module)
+    {
+        auto module = Runtime::run_module_static_constructor(klass->image);
+        if (module.is_err())
+            return fail_initializer(klass, module.unwrap_err());
+    }
+    const auto* cctor = Class::get_static_constructor(klass);
+    if (cctor)
+    {
+        auto invoked = invoke_without_run_cctor(cctor, nullptr, nullptr);
+        if (invoked.is_err())
+            return fail_initializer(klass, invoked.unwrap_err());
+    }
+    Class::set_cctor_finished(klass);
+    RET_VOID_OK();
 }
 
 RtResultVoid Runtime::run_class_static_constructor(const metadata::RtClass* klass)
 {
-    assert(klass);
-
-    if (Class::is_cctor_not_finished(klass))
-    {
-        RET_ERR_ON_FAIL(run_module_static_constructor(klass->image));
-        RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
-        Class::set_cctor_finished(const_cast<metadata::RtClass*>(klass));
-
-        const metadata::RtMethodInfo* cctor = Class::get_static_constructor(klass);
-        if (cctor)
-        {
-            RET_ERR_ON_FAIL(invoke_without_run_cctor(cctor, nullptr, nullptr));
-        }
-    }
-
-    RET_VOID_OK();
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
+    return run_initializer(klass, true);
 }
 
 RtResultVoid Runtime::run_class_static_constructor_hierarchy(const metadata::RtClass* klass)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(klass);
+    if (klass->cctor_status == metadata::RtCCtorStatus::Initing)
+        RET_VOID_OK();
     if (Class::is_cctor_not_finished(klass))
     {
         RET_ERR_ON_FAIL(run_class_static_constructor(klass));
@@ -442,7 +501,7 @@ RtResultVoid Runtime::run_class_static_constructor_hierarchy(const metadata::RtC
     {
         RET_ERR_ON_FAIL(run_class_static_constructor_hierarchy(parent_klass));
     }
-    if (!Class::is_cctor_not_finished_hierarchy(klass))
+    if (klass->cctor_status == metadata::RtCCtorStatus::InitSelf)
     {
         Class::set_cctor_finished_hierarchy(const_cast<metadata::RtClass*>(klass));
     }
@@ -466,22 +525,19 @@ RtResult<const metadata::RtMethodInfo*> Runtime::get_module_constructor(metadata
 
 RtResultVoid Runtime::run_module_static_constructor(metadata::RtModuleDef* module)
 {
-    if (!module->is_module_cctor_finished())
-    {
-        module->set_module_cctor_finished();
-
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, cctor, get_module_constructor(module));
-
-        if (cctor != nullptr)
-        {
-            RET_ERR_ON_FAIL(invoke_without_run_cctor(cctor, nullptr, nullptr));
-        }
-    }
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, global, module->get_global_type_def());
+    if (global != nullptr)
+        RET_ERR_ON_FAIL(run_initializer(global, false));
+    module->set_module_cctor_finished();
     RET_VOID_OK();
 }
 
 RtResult<RtObject*> Runtime::invoke_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, const void* const* params)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))
@@ -495,6 +551,8 @@ RtResult<RtObject*> Runtime::invoke_with_run_cctor(const metadata::RtMethodInfo*
 RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params,
                                                                        int32_t paramCount)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     const metadata::RtMethodInfo* actual_method = method;
@@ -504,7 +562,8 @@ RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const met
     if (return_instance)
     {
         assert(!Class::is_nullable_type(method->parent));
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, new_obj, LEANCLR_NEWOBJ_INTERNAL(method->parent, "Runtime::invoke_object_arguments_without_run_cctor"));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, new_obj,
+                                                LEANCLR_NEWOBJ_INTERNAL(method->parent, "Runtime::invoke_object_arguments_without_run_cctor"));
         actual_obj = new_obj;
     }
 
@@ -541,6 +600,8 @@ RtResult<RtObject*> Runtime::invoke_object_arguments_without_run_cctor(const met
 
 RtResult<RtObject*> Runtime::invoke_object_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtObject** params, int32_t paramCount)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))
@@ -553,6 +614,8 @@ RtResult<RtObject*> Runtime::invoke_object_arguments_with_run_cctor(const metada
 
 RtResult<RtObject*> Runtime::invoke_array_arguments_without_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     RtObject** params_data_start;
     int32_t paramCount;
     if (params)
@@ -570,6 +633,8 @@ RtResult<RtObject*> Runtime::invoke_array_arguments_without_run_cctor(const meta
 
 RtResult<RtObject*> Runtime::invoke_array_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params)
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))
     {
         RET_ERR_ON_FAIL(run_class_static_constructor(method->parent));
@@ -581,6 +646,8 @@ RtResult<RtObject*> Runtime::invoke_array_arguments_with_run_cctor(const metadat
 RtResultVoid Runtime::invoke_stackobject_arguments_without_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                                      interp::RtStackObject* ret) noexcept
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
@@ -590,6 +657,8 @@ RtResultVoid Runtime::invoke_stackobject_arguments_without_run_cctor(const metad
 RtResultVoid Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                                              interp::RtStackObject* ret) noexcept
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(method->invoke_method_ptr);
@@ -599,6 +668,8 @@ RtResultVoid Runtime::virtual_invoke_stackobject_arguments_without_run_cctor(con
 RtResultVoid Runtime::invoke_stackobject_arguments_with_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                                   interp::RtStackObject* ret) noexcept
 {
+    if (runtime_state != State::Running && runtime_state != State::Initializing)
+        return RtErr::InvalidOperation;
     assert(method);
 
     if (Method::is_static(method) && Class::is_cctor_not_finished(method->parent))

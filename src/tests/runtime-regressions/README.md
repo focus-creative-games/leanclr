@@ -1,0 +1,43 @@
+# Runtime regression tests
+
+These tests cover the B01–B13 review fixes: empty and cloned multidimensional arrays, bounded metadata, exported types, failed initializers, invocation allocation ownership, weak handles, allocation failure, loader callbacks, GC accounting, compressed integers, public ABI consumers, and integer execution semantics.
+
+Prepare the BCL and managed DLLs using the repository test build scripts, then run from the repository root:
+
+```powershell
+cmake -S src/tests/runtime-regressions -B out/regressions -A x64 -DCMAKE_TRY_COMPILE_CONFIGURATION=Release
+cmake --build out/regressions --config Release
+ctest --test-dir out/regressions -C Release --output-on-failure
+```
+
+Set `LEANCLR_TEST_DLL_DIR` to an alternative DLL staging directory. Fixture tests require `csc` or `mcs`; the module initializer test requires `ilasm`. CMake discovers the Windows Framework tools by default. `runtime-managed-tests` is the existing managed test runner linked against the same runtime; copy the staged DLL directory beside it as `dlls` before running it.
+
+For shared-library ABI verification, configure a separate build with `-DBUILD_SHARED_LEANCLR=ON -DLEANCLR_REGRESSION_PUBLIC_API_ONLY=ON`. This builds C and C++ consumers of the exported API. CMake propagates `LEANCLR_STATIC` for static consumers; non-CMake static consumers must define it themselves. The C++ reference overloads remain available, while the exported functions use C pointer parameters.
+
+To run the same fixture tests through generated AOT code, first build LeanAOT, generate the fixture sources, and reconfigure with their absolute path:
+
+```powershell
+dotnet build src/leanaot/LeanAOT/LeanAOT.csproj -c Release
+dotnet out/dotnet/LeanAOT/Release/net8.0/LeanAOT.dll -d out/regressions -d src/libraries/mono-4.5 -a RegressionFixtures -o out/regression-aot --leanaot-aot-rule-file src/tests/runtime-regressions/aot-rules.xml
+cmake -S src/tests/runtime-regressions -B out/regressions -DLEANCLR_REGRESSION_AOT_DIR=D:/absolute/path/to/out/regression-aot
+cmake --build out/regressions --config Release
+ctest --test-dir out/regressions -C Release --output-on-failure
+```
+
+The integer execution test checks that its methods actually use AOT invokers when AOT is enabled. Clear `LEANCLR_REGRESSION_AOT_DIR` to restore interpreter execution. Regenerate AOT sources whenever `RegressionFixtures.cs` changes.
+
+The standalone `integer-math.cpp` also supports compiler sanitizer checks without runtime initialization, for example Clang `-O2 -fsanitize=undefined -fsanitize-trap=undefined`. The tests check wraparound and shifts for 32-bit, 64-bit, and native integers, including the signed minimum and randomized arithmetic.
+
+Allocation failure tests inject failure into host allocation callbacks after metadata is warmed. Fallible object, array, handle, string icall and invocation paths return `OutOfMemory`; raw string allocation helpers return `nullptr`. `Vector::try_reserve` and `try_push_back` preserve the container on failure. Existing infallible metadata/container operations have no recoverable return channel and terminate through `panic`/`abort` on allocation failure.
+
+GC used/heap byte counters describe occupied allocation blocks, including size-class rounding and multidimensional bounds, rather than retained free arena capacity. The lifetime allocation counter reports aligned object allocation bytes and is not reset by collection. Core still requires the host to control GC timing outside managed execution.
+
+`type-system` checks open type and method parameter constraints, transitive bounds, reference-only variance, and open array covariance. `TypeSystemFixture.Run()` is also executable on .NET for differential testing (zero means all checks passed). `invalid-layouts` rejects unaligned references, reference/scalar overlap, nested reference overlap and overflowing offsets before creating GC bitmaps; failed field initialization must fail again on retry. `nested-reference-layout` verifies that a nested explicit reference union remains visible to the collector.
+
+`portable-memory` exercises byte offsets 0–7 for little-endian integer/float decoding and native scalar/pointer access, checks typed-view alignment, and tests overlapping copies in both directions. It can run independently under Clang `-O2 -fsanitize=undefined -fsanitize-trap=undefined`. `binary-il` exercises negative switch-table offsets and validates 64-bit integer/double constants against independent native expectations, including a low word whose sign bit is set. `unaligned-image` parses the PE header, CLI streams and assembly table of the same BCL image at byte offsets 0–7. `packed-memory` executes Pack=1 field loads/stores, indirect access, array copies, boxing and reflection; `PackedMemoryFixture.Run()` can also run on .NET (zero means success).
+
+Serialized PE/CLI/IL values use explicit little-endian readers. Runtime memory helpers preserve native representation through byte copies, without typed unaligned dereferences. Only little-endian runtime hosts are supported; known big-endian compiler targets fail at compile time. Passing these tests on x64 does not establish validation on strict-alignment ARM hardware.
+
+`foundation` checks shared size arithmetic, bounded subreaders, physical array layouts, inline/heap scratch transitions, rollback guards, allocator failure preservation and callback configuration locking. Allocation failure tests install their allocator before any runtime allocation and change only its failure-injection state. See [memory ownership and failure policy](../../runtime/alloc/README.md) for callback coverage and the distinction between recoverable and fatal allocation paths.
+
+The runtime now compiles core, native host providers and the selected Mono BCL adapter separately. `layer-boundaries` checks forbidden dependencies; `core-boundary` checks opaque managed types and pointer-result ABI exchange. `host-services` and `default-host-services` exercise injected/native clocks, entropy, file streams and diagnostics. `managed-host-services` runs managed clocks, Guid and FileStream against an injected host stream, including entropy failure. Host services must be configured before startup and freeze at first use. See [runtime layering](../../runtime/bcl/README.md) for ownership, units and the supported stream-service scope. The shared-library C++ consumer also verifies that the host API is exported.

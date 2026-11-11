@@ -97,12 +97,41 @@ static RtTypeSig g_varByRefs[RT_MAX_GENERIC_PARAM_COUNT];
 static RtTypeSig g_mvarByVals[RT_MAX_GENERIC_PARAM_COUNT];
 static RtTypeSig g_mvarByRefs[RT_MAX_GENERIC_PARAM_COUNT];
 
-static utils::HashSet<const RtGenericInst*, GenericInstHash, GenericInstCompare> g_genericInstCache;
-static utils::HashSet<const RtGenericClass*, GenericClassHash, GenericClassCompare> g_genericClassCache;
-static utils::HashMap<const RtTypeSig*, RtTypeSigByValRef, TypeSigIgnoreAttrsHasher, TypeSigIgnoreAttrsEqual> g_ptrTypesigCache;
-static utils::HashMap<const RtTypeSig*, RtTypeSigByValRef, TypeSigIgnoreAttrsHasher, TypeSigIgnoreAttrsEqual> g_szarrayTypesigCache;
-static utils::HashMap<ArrayTypeSigKey, RtTypeSigByValRef, ArrayTypeSigKeyHash, ArrayTypeSigKeyCompare> g_arrayTypesigCache;
-static utils::HashSet<const RtGenericMethod*, GenericMethodHash, GenericMethodCompare> g_genericMethodCache;
+static utils::HashSet<const RtGenericInst*, GenericInstHash, GenericInstCompare>& get_g_genericInstCache()
+{
+    static utils::HashSet<const RtGenericInst*, GenericInstHash, GenericInstCompare> value;
+    return value;
+}
+
+static utils::HashSet<const RtGenericClass*, GenericClassHash, GenericClassCompare>& get_g_genericClassCache()
+{
+    static utils::HashSet<const RtGenericClass*, GenericClassHash, GenericClassCompare> value;
+    return value;
+}
+
+static utils::HashMap<const RtTypeSig*, RtTypeSigByValRef, TypeSigIgnoreAttrsHasher, TypeSigIgnoreAttrsEqual>& get_g_ptrTypesigCache()
+{
+    static utils::HashMap<const RtTypeSig*, RtTypeSigByValRef, TypeSigIgnoreAttrsHasher, TypeSigIgnoreAttrsEqual> value;
+    return value;
+}
+
+static utils::HashMap<const RtTypeSig*, RtTypeSigByValRef, TypeSigIgnoreAttrsHasher, TypeSigIgnoreAttrsEqual>& get_g_szarrayTypesigCache()
+{
+    static utils::HashMap<const RtTypeSig*, RtTypeSigByValRef, TypeSigIgnoreAttrsHasher, TypeSigIgnoreAttrsEqual> value;
+    return value;
+}
+
+static utils::HashMap<ArrayTypeSigKey, RtTypeSigByValRef, ArrayTypeSigKeyHash, ArrayTypeSigKeyCompare>& get_g_arrayTypesigCache()
+{
+    static utils::HashMap<ArrayTypeSigKey, RtTypeSigByValRef, ArrayTypeSigKeyHash, ArrayTypeSigKeyCompare> value;
+    return value;
+}
+
+static utils::HashSet<const RtGenericMethod*, GenericMethodHash, GenericMethodCompare>& get_g_genericMethodCache()
+{
+    static utils::HashSet<const RtGenericMethod*, GenericMethodHash, GenericMethodCompare> value;
+    return value;
+}
 
 static const char* make_generic_name(bool is_method, uint16_t index)
 {
@@ -379,8 +408,8 @@ RtResult<const RtGenericInst*> MetadataCache::get_pooled_generic_inst(const RtTy
 
     RtGenericInst key{genericArgs, genericArgCount};
 
-    auto it = g_genericInstCache.find(&key);
-    if (it != g_genericInstCache.end())
+    auto it = get_g_genericInstCache().find(&key);
+    if (it != get_g_genericInstCache().end())
         RET_OK(*it);
 
     // Allocate new generic instance
@@ -394,7 +423,7 @@ RtResult<const RtGenericInst*> MetadataCache::get_pooled_generic_inst(const RtTy
     new_gi->generic_args = new_args;
     new_gi->generic_arg_count = genericArgCount;
 
-    g_genericInstCache.insert(new_gi);
+    get_g_genericInstCache().insert(new_gi);
 
     RET_OK(new_gi);
 }
@@ -403,8 +432,8 @@ const RtGenericClass* MetadataCache::get_pooled_generic_class(uint32_t baseTypeD
 {
     RtGenericClass key{baseTypeDefGid, classInst};
 
-    auto it = g_genericClassCache.find(&key);
-    if (it != g_genericClassCache.end())
+    auto it = get_g_genericClassCache().find(&key);
+    if (it != get_g_genericClassCache().end())
         return *it;
 
     // Allocate new generic class
@@ -421,7 +450,7 @@ const RtGenericClass* MetadataCache::get_pooled_generic_class(uint32_t baseTypeD
     new_gc->by_ref_type_sig.data.generic_class = new_gc;
     new_gc->by_ref_type_sig.by_ref = 1;
 
-    g_genericClassCache.insert(new_gc);
+    get_g_genericClassCache().insert(new_gc);
 
     return new_gc;
 }
@@ -429,22 +458,22 @@ const RtGenericClass* MetadataCache::get_pooled_generic_class(uint32_t baseTypeD
 const RtGenericMethod* MetadataCache::get_pooled_generic_method(uint32_t methodDefGid, const RtGenericInst* classInst, const RtGenericInst* methodInst)
 {
     RtGenericMethod key{methodDefGid, {classInst, methodInst}};
-    auto it = g_genericMethodCache.find(&key);
-    if (it != g_genericMethodCache.end())
+    auto it = get_g_genericMethodCache().find(&key);
+    if (it != get_g_genericMethodCache().end())
         return *it;
 
     RtGenericMethod* gm = alloc::MetadataAllocation::malloc_any_zeroed<RtGenericMethod>();
     gm->base_method_gid = methodDefGid;
     gm->generic_context = RtGenericContext{classInst, methodInst};
-    g_genericMethodCache.insert(gm);
+    get_g_genericMethodCache().insert(gm);
     return gm;
 }
 
 RtResult<RtTypeSigByValRef> MetadataCache::get_pooled_ptr_typesigs_by_element_typesig(const RtTypeSig* eleType)
 {
     auto key = eleType;
-    auto it = g_ptrTypesigCache.find(key);
-    if (it != g_ptrTypesigCache.end())
+    auto it = get_g_ptrTypesigCache().find(key);
+    if (it != get_g_ptrTypesigCache().end())
     {
         RtTypeSigByValRef ret{it->second.by_val, it->second.by_ref};
         RET_OK(ret);
@@ -462,7 +491,7 @@ RtResult<RtTypeSigByValRef> MetadataCache::get_pooled_ptr_typesigs_by_element_ty
     byRef->by_ref = 1;
 
     RtTypeSigByValRef ret{byVal, byRef};
-    g_ptrTypesigCache.insert({key, ret});
+    get_g_ptrTypesigCache().insert({key, ret});
     RET_OK(ret);
 }
 
@@ -478,8 +507,8 @@ RtResult<const RtTypeSig*> MetadataCache::get_pooled_ptr_typesig_by_element_type
 RtResult<RtTypeSigByValRef> MetadataCache::get_pooled_szarray_typesigs_by_element_typesig(const RtTypeSig* eleType)
 {
     const RtTypeSig* key = eleType;
-    auto it = g_szarrayTypesigCache.find(key);
-    if (it != g_szarrayTypesigCache.end())
+    auto it = get_g_szarrayTypesigCache().find(key);
+    if (it != get_g_szarrayTypesigCache().end())
     {
         RET_OK(it->second);
     }
@@ -496,7 +525,7 @@ RtResult<RtTypeSigByValRef> MetadataCache::get_pooled_szarray_typesigs_by_elemen
     byRef->by_ref = 1;
 
     RtTypeSigByValRef ret{byVal, byRef};
-    g_szarrayTypesigCache.insert({key, ret});
+    get_g_szarrayTypesigCache().insert({key, ret});
     RET_OK(ret);
 }
 
@@ -512,8 +541,8 @@ RtResult<const RtTypeSig*> MetadataCache::get_pooled_szarray_typesig_by_element_
 static RtResult<RtTypeSigByValRef> get_pooled_array_type_info(const RtTypeSig* eleTypeSig, uint8_t rank)
 {
     auto key = ArrayTypeSigKey{eleTypeSig, rank};
-    auto it = g_arrayTypesigCache.find(key);
-    if (it != g_arrayTypesigCache.end())
+    auto it = get_g_arrayTypesigCache().find(key);
+    if (it != get_g_arrayTypesigCache().end())
         return it->second;
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, canonEle, MetadataCache::get_pooled_typesig(eleTypeSig->to_canonized_without_byref()));
@@ -530,7 +559,7 @@ static RtResult<RtTypeSigByValRef> get_pooled_array_type_info(const RtTypeSig* e
     byRef->by_ref = 1;
 
     auto value = RtTypeSigByValRef{byVal, byRef};
-    g_arrayTypesigCache.insert({key, value});
+    get_g_arrayTypesigCache().insert({key, value});
     return value;
 }
 
@@ -559,7 +588,7 @@ RtResult<const RtTypeSig*> MetadataCache::get_pooled_array_typesig_by_element_ty
 
 void MetadataCache::walk_generic_classes(ClassWalkCallback callback, void* userData)
 {
-    for (auto& entry : g_genericClassCache)
+    for (auto& entry : get_g_genericClassCache())
     {
         callback(const_cast<RtClass*>(entry->cache_klass), userData);
     }

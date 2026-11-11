@@ -7,13 +7,12 @@ namespace LeanAOT.ToCpp
 
     static class MethodGenerationUtil
     {
-        public static string GetResultTypeName(TypeSig typeSig)
+        public static string GetResultTypeName(TypeSig typeSig, bool? lightweight = null, bool? packedInt32 = null)
         {
-            if (MetaUtil.IsVoidType(typeSig))
-            {
-                return "leanclr::RtResultVoid";
-            }
-            return $"leanclr::RtResult<{GlobalServices.Inst.TypeNameService.GetCppTypeNameAsFieldOrArgOrLoc(typeSig, TypeNameRelaxLevel.AbiRelaxed)}>";
+            // An explicit protocol override denotes a runtime/foreign ABI;
+            // packed integers must also be explicitly selected in that case.
+            return ReturnProtocol.ResultType(typeSig, lightweight ?? GlobalServices.Inst.Config.LightweightAotReturns,
+                packedInt32 ?? (!lightweight.HasValue && GlobalServices.Inst.Config.PackedInt32AotReturns));
         }
 
         public static string GetParameterName(Parameter param)
@@ -58,7 +57,7 @@ namespace LeanAOT.ToCpp
 
         public static string CreateRelaxedMethodFunctionTypeDeclaring(MethodDetail methodDetail)
         {
-            return $"{GetResultTypeName(methodDetail.RetType)} (*)({CreateMethodRelaxedArgs(methodDetail, true)}){ConstStrings.CppFunctionNoexcept}";
+            return $"{GetResultTypeName(methodDetail.RetType)} (*)({methodDetail.WithMethodContext(CreateMethodRelaxedArgs(methodDetail, true), "const leanclr::metadata::RtMethodInfo*")}){ConstStrings.CppFunctionNoexcept}";
         }
     }
 }

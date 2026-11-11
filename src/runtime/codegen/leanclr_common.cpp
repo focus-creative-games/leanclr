@@ -10,10 +10,6 @@
 #include "vm/pinvoke.h"
 #include "vm/rt_exception.h"
 
-#if LEANCLR_PLATFORM_WIN
-#include <windows.h>
-#endif
-
 namespace leanclr
 {
 namespace codegen
@@ -408,7 +404,8 @@ RtResult<vm::RtArray*> marshal_native_array_to_managed_array(const metadata::RtT
     {
         RET_ERR(RtErr::NotSupported);
     }
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, "codegen::marshal_native_array_to_managed_array"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr,
+                                            LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, length, "codegen::marshal_native_array_to_managed_array"));
     const size_t ele_size = vm::Array::get_array_element_size(arr);
     std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_element_data, static_cast<size_t>(length) * ele_size);
     RET_OK(arr);
@@ -438,7 +435,9 @@ RtResult<vm::RtArray*> marshal_native_array_to_managed_array(void* native_array,
     }
     assert(array_param_typesig->ele_type == metadata::RtElementType::SZArray);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, arr_klass, vm::Class::get_class_from_typesig(array_param_typesig));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, static_cast<int32_t>(native_element_count), "codegen::marshal_native_array_to_managed_array"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        vm::RtArray*, arr,
+        LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, static_cast<int32_t>(native_element_count), "codegen::marshal_native_array_to_managed_array"));
     const size_t ele_size = vm::Array::get_array_element_size(arr);
     std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_array, native_element_count * ele_size);
     RET_OK(arr);
@@ -469,7 +468,9 @@ RtResult<vm::RtArray*> marshal_native_val_array_to_managed_array(void* native_ar
     assert(array_typesig != nullptr);
     assert(array_typesig->ele_type == metadata::RtElementType::SZArray);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, arr_klass, vm::Class::get_class_from_typesig(array_typesig));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr, LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, static_cast<int32_t>(native_element_count), "codegen::marshal_native_val_array_to_managed_array"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, arr,
+                                            LEANCLR_CODEGEN_NEW_SZARRAY_FROM_ARRAY_KLASS(arr_klass, static_cast<int32_t>(native_element_count),
+                                                                                         "codegen::marshal_native_val_array_to_managed_array"));
     const size_t ele_size = vm::Array::get_array_element_size(arr);
     std::memcpy(vm::Array::get_array_data_start_as_ptr_void(arr), native_array, native_element_count * ele_size);
     RET_OK(arr);

@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_security_securitymanager.h"
 
 namespace leanclr
@@ -24,7 +26,7 @@ utils::Span<vm::InternalCallEntry> SystemSecuritySecurityManager::get_internal_c
         {"System.Security.SecurityManager::get_SecurityEnabled", (vm::InternalCallFunction)&SystemSecuritySecurityManager::get_security_enabled,
          get_security_enabled_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

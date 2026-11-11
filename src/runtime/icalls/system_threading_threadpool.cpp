@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_threadpool.h"
 
 namespace leanclr
@@ -96,8 +98,8 @@ RtResultVoid SystemThreadingThreadPool::get_available_threads_native(int32_t* wo
 }
 
 /// @icall: System.Threading.ThreadPool::GetAvailableThreadsNative(System.Int32&,System.Int32&)
-static RtResultVoid get_available_threads_native_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
-                                                         const interp::RtStackObject* params, interp::RtStackObject* /*ret*/) noexcept
+static RtResultVoid get_available_threads_native_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                         interp::RtStackObject* /*ret*/) noexcept
 {
     int32_t* w = EvalStackOp::get_param<int32_t*>(params, 0);
     int32_t* c = EvalStackOp::get_param<int32_t*>(params, 1);
@@ -120,7 +122,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_threading_threadpool
 utils::Span<vm::InternalCallEntry> SystemThreadingThreadPool::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_threading_threadpool,
-                                              sizeof(s_internal_call_entries_system_threading_threadpool) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_threading_threadpool));
 }
 
 } // namespace icalls

@@ -11,6 +11,16 @@ namespace vm
 class Runtime
 {
   public:
+    enum class State
+    {
+        Uninitialized,
+        Initializing,
+        Running,
+        Failed,
+        Stopped
+    };
+    static State get_state();
+    // One initialization attempt per process. Failed/Stopped are terminal.
     static RtResultVoid initialize();
     static void shutdown();
 

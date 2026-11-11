@@ -23,7 +23,8 @@ namespace LeanAOT.ToCpp
             _filePath = filePath;
             _totalWriter = new CodeWriter(filePath);
             _forwardDeclaration = new ForwardDeclaration(_totalWriter.CreateThunkCollection("forward_declarations"));
-            _forwardDeclaration.AddCommonIncludes(mod);
+            if (mod == null) _forwardDeclaration.AddInclude(ConstStrings.CodegenCommonHeaderFileName);
+            else _forwardDeclaration.AddCommonIncludes(mod);
         }
 
         public bool ExceedsMaxSize()

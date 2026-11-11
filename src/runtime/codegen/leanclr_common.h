@@ -1,8 +1,11 @@
 #pragma once
+#include "aot_result.h"
+#include "interface_dispatch.h"
 
 #include <cstdlib>
 #include <cstring>
 #include <limits>
+#include "utils/integer_math.h"
 #include "vm/rt_managed_types.h"
 #include "vm/rt_exception.h"
 #include "vm/method.h"
@@ -22,6 +25,7 @@
 #include "vmutils/stringbuilder.h"
 #include "metadata/module_def.h"
 #include "interp/interp_defs.h"
+#include "interp/interpreter.h"
 #include "interp/execution_helper.h"
 #include "profile/profile.h"
 #include "utils/string_builder.h"
@@ -35,18 +39,27 @@
 #define LEANCLR_CODEGEN_ASSUME_NOT_NULL(ptr) LEANCLR_ASSUME_NOT_NULL(ptr)
 
 #if LEANCLR_PGO_PROFILE
-#define LEANCLR_CODEGEN_PROFILE_INC_CALL_COUNT(methodInfo) \
-    do                                                     \
-    {                                                      \
+#define LEANCLR_CODEGEN_PROFILE_BEGIN_INVOCATION() leanclr::profile::Profile::next_invocation_id()
+#define LEANCLR_CODEGEN_PROFILE_INTERFACE_RECEIVER(receiver, caller, offset)                                                \
+    do                                                                                                                      \
+    {                                                                                                                       \
+        if (receiver)                                                                                                       \
+            leanclr::profile::Profile::observe_interface_receiver(caller, offset, (receiver)->klass, __profile_invocation); \
+    } while (0)
+#define LEANCLR_CODEGEN_PROFILE_INC_CALL_COUNT(methodInfo)    \
+    do                                                        \
+    {                                                         \
         leanclr::codegen::profile_inc_call_count(methodInfo); \
     } while (0)
 
-#define LEANCLR_CODEGEN_PROFILE_ADD_COST(methodInfo, cost) \
-    do                                                      \
-    {                                                       \
+#define LEANCLR_CODEGEN_PROFILE_ADD_COST(methodInfo, cost)                           \
+    do                                                                               \
+    {                                                                                \
         leanclr::codegen::profile_add_cost(methodInfo, static_cast<uint32_t>(cost)); \
     } while (0)
 #else
+#define LEANCLR_CODEGEN_PROFILE_BEGIN_INVOCATION() uint64_t(0)
+#define LEANCLR_CODEGEN_PROFILE_INTERFACE_RECEIVER(receiver, caller, offset) ((void)0)
 #define LEANCLR_CODEGEN_PROFILE_INC_CALL_COUNT(methodInfo) ((void)0)
 #define LEANCLR_CODEGEN_PROFILE_ADD_COST(methodInfo, cost) ((void)0)
 #endif
@@ -413,8 +426,8 @@ constexpr size_t get_stack_object_size_for_type()
     return (sizeof(T) + sizeof(interp::RtStackObject) - 1) / sizeof(interp::RtStackObject);
 }
 
-template <typename T>
-RtResultVoid set_ret_or_return_error(const RtResult<T>& result, interp::RtStackObject* ret) noexcept
+template <typename TResult>
+RtResultVoid set_ret_or_return_error(const TResult& result, interp::RtStackObject* ret) noexcept
 {
     if (result.is_ok())
     {
@@ -446,6 +459,21 @@ inline RtResultVoid run_class_static_constructor(const metadata::RtClass* klass)
 inline bool is_aot_method(const metadata::RtMethodInfo* method) noexcept
 {
     return method->invoker_type == metadata::RtInvokerType::Aot;
+}
+
+inline bool uses_lightweight_aot_returns(const metadata::RtMethodInfo* method) noexcept
+{
+    return (method->aot_return_protocol & 1) != 0;
+}
+
+inline bool uses_status_out_aot_returns(const metadata::RtMethodInfo* method) noexcept
+{
+    return (method->aot_return_protocol & 4) != 0;
+}
+
+inline bool uses_packed_int32_aot_returns(const metadata::RtMethodInfo* method) noexcept
+{
+    return (method->aot_return_protocol & 2) != 0;
 }
 
 inline RtResultVoid invoke_with_run_class_static_constructor(const metadata::RtMethodInfo* method, interp::RtStackObject* arg_buff,

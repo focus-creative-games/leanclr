@@ -12,6 +12,8 @@ class Interop
   public:
     static utils::Span<vm::InternalCallEntry> get_internal_call_entries() noexcept;
 
+    static RtResult<uint32_t> bcrypt_gen_random(intptr_t algo_handle, uint8_t* buffer, int32_t length, int32_t flags) noexcept;
+
 #if LEANCLR_PLATFORM_POSIX
     static RtResult<int32_t> double_to_string(double value, const char* format, char* buffer, int32_t buffer_size) noexcept;
     static RtResult<int32_t> sys_lchflags_can_set_hidden_flag() noexcept;
@@ -47,7 +49,6 @@ class Interop
 #endif
 
 #if LEANCLR_PLATFORM_WIN
-    static RtResult<uint32_t> bcrypt_gen_random(intptr_t algo_handle, uint8_t* buffer, int32_t length, int32_t flags) noexcept;
 
     static RtResult<bool> kernel32_set_thread_error_mode(uint32_t mode, uint32_t& old_mode) noexcept;
     static RtResult<bool> kernel32_get_file_attributes_ex_private(vm::RtString* name, uint32_t file_info_level, void* file_info) noexcept;
@@ -64,10 +65,10 @@ class Interop
     static RtResult<bool> kernel32_close_handle(intptr_t handle) noexcept;
     static RtResult<int32_t> kernel32_copy_file2(vm::RtString* existing, vm::RtString* new_file, void* extended_parameters) noexcept;
     static RtResult<bool> kernel32_copy_file_ex_private(vm::RtString* src, vm::RtString* dst, intptr_t progress_routine, intptr_t progress_data,
-                                                       int32_t* cancel, int32_t flags) noexcept;
+                                                        int32_t* cancel, int32_t flags) noexcept;
     static RtResult<bool> kernel32_create_directory_private(vm::RtString* path, void* security_attributes) noexcept;
     static RtResult<intptr_t> kernel32_create_file_private(vm::RtString* name, int32_t desired_access, int32_t share_mode, void* security_attributes,
-                                                             int32_t creation_disposition, int32_t flags_and_attributes, intptr_t template_file) noexcept;
+                                                           int32_t creation_disposition, int32_t flags_and_attributes, intptr_t template_file) noexcept;
     static RtResult<bool> kernel32_delete_file_private(vm::RtString* path) noexcept;
     static RtResult<bool> kernel32_find_next_file(vm::RtObject* find_handle, void* find_file_data) noexcept;
     // static RtResult<int32_t> kernel32_format_message(int32_t flags, intptr_t source, uint32_t message_id, int32_t language_id, Utf16Char* buffer,
@@ -77,8 +78,8 @@ class Interop
     static RtResult<int32_t> kernel32_get_logical_drives() noexcept;
     static RtResult<bool> kernel32_move_file_ex_private(vm::RtString* src, vm::RtString* dst, uint32_t flags) noexcept;
     static RtResult<bool> kernel32_remove_directory_private(vm::RtString* path) noexcept;
-    static RtResult<bool> kernel32_replace_file_private(vm::RtString* replaced_file_name, vm::RtString* replacement_file_name,
-                                                        vm::RtString* backup_file_name, int32_t replace_flags, intptr_t exclude, intptr_t reserved) noexcept;
+    static RtResult<bool> kernel32_replace_file_private(vm::RtString* replaced_file_name, vm::RtString* replacement_file_name, vm::RtString* backup_file_name,
+                                                        int32_t replace_flags, intptr_t exclude, intptr_t reserved) noexcept;
     static RtResult<bool> kernel32_set_file_attributes_private(vm::RtString* name, int32_t attributes) noexcept;
     static RtResult<bool> kernel32_set_file_information_by_handle(vm::RtObject* h_file, int32_t file_information_class, void* file_information,
                                                                   uint32_t buffer_size) noexcept;

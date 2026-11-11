@@ -1,0 +1,5 @@
+<aot>
+  <assembly fullname="*" aot="0" />
+  <assembly fullname="GenericFixtures" aot="1" />
+  <assembly fullname="GenericLibrary" aot="1" />
+</aot>

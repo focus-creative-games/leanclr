@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_runtimefieldhandle.h"
 
 #include <cstring>
@@ -14,8 +16,8 @@ namespace leanclr
 namespace icalls
 {
 
-RtResult<vm::RtObject*> SystemRuntimeFieldHandle::get_value_direct(vm::RtReflectionField* field, vm::RtReflectionRuntimeType* field_type, vm::RtTypedReference* typed_ref,
-                                                                  vm::RtReflectionRuntimeType* context_type) noexcept
+RtResult<vm::RtObject*> SystemRuntimeFieldHandle::get_value_direct(vm::RtReflectionField* field, vm::RtReflectionRuntimeType* field_type,
+                                                                   vm::RtTypedReference* typed_ref, vm::RtReflectionRuntimeType* context_type) noexcept
 {
     assert(field != nullptr);
     assert(typed_ref != nullptr);
@@ -23,15 +25,15 @@ RtResult<vm::RtObject*> SystemRuntimeFieldHandle::get_value_direct(vm::RtReflect
 
     const metadata::RtFieldInfo* field_info = field->field;
     const metadata::RtClass* parent_klass = field_info->parent;
-    //if (!vm::Class::is_value_type(parent_klass))
+    // if (!vm::Class::is_value_type(parent_klass))
     //{
-    //    RET_ERR(RtErr::NotSupported);
-    //}
-    // may be used in unsafe context which type is not the same as the field's parent type, so we don't check it
-    // if (parent_klass != typed_ref->klass)
-    // {
-    //     RET_ERR(RtErr::Argument);
+    //     RET_ERR(RtErr::NotSupported);
     // }
+    //  may be used in unsafe context which type is not the same as the field's parent type, so we don't check it
+    //  if (parent_klass != typed_ref->klass)
+    //  {
+    //      RET_ERR(RtErr::Argument);
+    //  }
     if (vm::Class::is_reference_type(parent_klass))
     {
         return vm::Field::get_value_object(field_info, *(vm::RtObject**)typed_ref->value);
@@ -48,15 +50,15 @@ RtResultVoid SystemRuntimeFieldHandle::set_value_direct(vm::RtReflectionField* f
 
     const metadata::RtFieldInfo* field_info = field->field;
     const metadata::RtClass* parent_klass = field_info->parent;
-    //if (!vm::Class::is_value_type(parent_klass))
+    // if (!vm::Class::is_value_type(parent_klass))
     //{
-    //    RET_ERR(RtErr::NotSupported);
-    //}
-    // may be used in unsafe context which type is not the same as the field's parent type, so we don't check it
-    // if (parent_klass != typed_ref->klass)
-    // {
-    //     RET_ERR(RtErr::Argument);
+    //     RET_ERR(RtErr::NotSupported);
     // }
+    //  may be used in unsafe context which type is not the same as the field's parent type, so we don't check it
+    //  if (parent_klass != typed_ref->klass)
+    //  {
+    //      RET_ERR(RtErr::Argument);
+    //  }
     if (vm::Class::is_reference_type(parent_klass))
     {
         return vm::Field::set_value_object(field_info, *(vm::RtObject**)typed_ref->value, value);
@@ -79,8 +81,7 @@ static RtResultVoid get_value_direct_invoker(metadata::RtManagedMethodPointer, c
     auto field_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 1);
     auto typed_ref = EvalStackOp::get_param<vm::RtTypedReference*>(params, 2);
     auto context_type = EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 3);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result,
-                                            SystemRuntimeFieldHandle::get_value_direct(field, field_type, typed_ref, context_type));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, SystemRuntimeFieldHandle::get_value_direct(field, field_type, typed_ref, context_type));
     EvalStackOp::set_return(ret, result);
     RET_VOID_OK();
 }
@@ -120,8 +121,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtimefieldhandle[]
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeFieldHandle::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimefieldhandle,
-                                              sizeof(s_internal_call_entries_system_runtimefieldhandle) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimefieldhandle, std::size(s_internal_call_entries_system_runtimefieldhandle));
 }
 
 } // namespace icalls

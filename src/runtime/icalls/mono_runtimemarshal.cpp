@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "mono_runtimemarshal.h"
 
 #include "icall_base.h"
@@ -8,7 +10,7 @@ namespace leanclr
 namespace icalls
 {
 
-RtResultVoid MonoRuntimeMarshal::free_assembly_name(metadata::RtMonoAssemblyName* aname, bool free_struct) noexcept
+RtResultVoid MonoRuntimeMarshal::free_assembly_name(metadata::RtAssemblyName* aname, bool free_struct) noexcept
 {
     alloc::GeneralAllocation::free(const_cast<char*>(aname->name));
     alloc::GeneralAllocation::free(const_cast<char*>(aname->culture));
@@ -25,7 +27,7 @@ static RtResultVoid free_assembly_name_invoker(metadata::RtManagedMethodPointer 
                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     (void)ret;
-    auto aname = EvalStackOp::get_param<metadata::RtMonoAssemblyName*>(params, 0);
+    auto aname = EvalStackOp::get_param<metadata::RtAssemblyName*>(params, 0);
     auto free_struct_int = EvalStackOp::get_param<int32_t>(params, 1);
     bool free_struct = (free_struct_int != 0);
     RET_ERR_ON_FAIL(MonoRuntimeMarshal::free_assembly_name(aname, free_struct));
@@ -38,7 +40,7 @@ utils::Span<vm::InternalCallEntry> MonoRuntimeMarshal::get_internal_call_entries
         {"Mono.RuntimeMarshal::FreeAssemblyName(Mono.MonoAssemblyName&,System.Boolean)", (vm::InternalCallFunction)&MonoRuntimeMarshal::free_assembly_name,
          free_assembly_name_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

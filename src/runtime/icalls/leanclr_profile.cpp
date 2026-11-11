@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "leanclr_profile.h"
 
 #include "profile/profile.h"
@@ -156,8 +158,7 @@ static vm::InternalCallEntry s_internal_call_entries_leanclr_profile[] = {
 
 utils::Span<vm::InternalCallEntry> LeanCLRProfile::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_leanclr_profile,
-                                              sizeof(s_internal_call_entries_leanclr_profile) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_leanclr_profile, std::size(s_internal_call_entries_leanclr_profile));
 }
 
 } // namespace icalls

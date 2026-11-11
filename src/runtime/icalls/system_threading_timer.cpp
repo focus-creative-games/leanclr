@@ -1,6 +1,8 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_timer.h"
 
-#include "platform/rt_time.h"
+#include "host/services.h"
 
 namespace leanclr
 {
@@ -9,7 +11,7 @@ namespace icalls
 
 RtResult<int64_t> SystemThreadingTimer::get_time_monotonic() noexcept
 {
-    RET_OK(os::Time::get_ticks_100nanos());
+    RET_OK(host::Services::monotonic_nanoseconds() / 100);
 }
 
 /// @icall: System.Threading.Timer::GetTimeMonotonic()
@@ -29,7 +31,7 @@ utils::Span<vm::InternalCallEntry> SystemThreadingTimer::get_internal_call_entri
     static vm::InternalCallEntry s_entries[] = {
         {"System.Threading.Timer::GetTimeMonotonic()", (vm::InternalCallFunction)&SystemThreadingTimer::get_time_monotonic, get_time_monotonic_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

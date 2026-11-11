@@ -45,7 +45,10 @@ namespace LeanAOT.ToCpp
 
         private string GetDirectCallBridgeName(MethodDetail methodDetail)
         {
-            string hash = HashUtil.CreateMd5Hash(MethodGenerationUtil.CreateRelaxedMethodFunctionTypeDeclaring(methodDetail));
+            // An enum can share the relaxed int32 signature but never uses the
+            // packed primitive ABI. Preserve that distinction in legacy callers.
+            string hash = HashUtil.CreateMd5Hash(MethodGenerationUtil.CreateRelaxedMethodFunctionTypeDeclaring(methodDetail) +
+                (ReturnProtocol.IsInt32(methodDetail.RetType) ? "|packed32-capable" : "") + (ReturnProtocol.CanStatusOut(methodDetail.RetType) ? "|status-out-capable" : ""));
             return $"leanclr_generated_direct_call_bridge_{hash}";
         }
 

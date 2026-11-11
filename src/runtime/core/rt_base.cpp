@@ -1,26 +1,22 @@
+#include "host/services.h"
 #include "rt_base.h"
+#include <cstdlib>
 
 namespace leanclr
 {
 RtErr fatal_on_not_implemented_error()
 {
-    assert(false);
-    // crash the program
-    int* p = (int*)-1;
-    *p = 0;
-    return RtErr::NotImplemented;
+    panic("Not implemented runtime operation");
 }
 
-void panic(const char* errMsg)
+[[noreturn]] void panic(const char* errMsg)
 {
-    printf("Panic: %s\n", errMsg);
-    int* p = (int*)-1;
-    *p = 0;
-    // crash the program
+    host::Services::log(host::LogLevel::Fatal, errMsg);
+    std::abort();
 }
 
 void print_not_implemented_error(const char* errMsg)
 {
-    printf("Not implemented error: %s\n", errMsg);
+    host::Services::log(host::LogLevel::Error, errMsg);
 }
 } // namespace leanclr

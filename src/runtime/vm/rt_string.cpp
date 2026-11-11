@@ -7,9 +7,12 @@
 #include "3rd/utf8/utf8.h"
 #include <vector>
 #include <string>
+#include <string_view>
+#include <functional>
 #include <cstring>
 #include "utils/hashset.h"
 #include "utils/hash_util.h"
+#include "utils/integer_math.h"
 
 namespace leanclr
 {
@@ -45,7 +48,11 @@ struct RtStringEqual
 };
 } // namespace
 
-static utils::HashSet<RtString*, RtStringHash, RtStringEqual> g_internTable;
+static utils::HashSet<RtString*, RtStringHash, RtStringEqual>& get_g_internTable()
+{
+    static utils::HashSet<RtString*, RtStringHash, RtStringEqual> value;
+    return value;
+}
 
 // Removed key builder; Hash/Eq operate directly on RtString contents
 
@@ -58,6 +65,8 @@ static RtResultVoid init_static_empty_string(metadata::RtClass* stringClass)
         RET_ASSERT_ERR(RtErr::ExecutionEngine);
     }
     g_empty_string = String::fast_allocate_string(0);
+    if (!g_empty_string)
+        RET_ERR(RtErr::OutOfMemory);
     RET_ERR_ON_FAIL(Field::set_static_value(emptyField, &g_empty_string));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, empty_str, Field::get_value_object(emptyField, nullptr));
     assert(empty_str == g_empty_string);
@@ -71,11 +80,11 @@ static RtResultVoid init_redirected_ctor_method(metadata::RtClass* stringClass)
         const metadata::RtMethodInfo* method = stringClass->methods[i];
         const char* redirected_ctor_method_name = "Ctor";
         if (std::strcmp(method->name, redirected_ctor_method_name) == 0 && method->parameter_count == 4)
-            {
-                g_redirectedCtorMethod = method;
-                RET_VOID_OK();
-            }
+        {
+            g_redirectedCtorMethod = method;
+            RET_VOID_OK();
         }
+    }
     assert(false && "String directcted ctor method not found");
     RET_ASSERT_ERR(RtErr::ExecutionEngine);
 }
@@ -91,7 +100,7 @@ RtResultVoid String::initialize()
 
 static void visit_intern_string_roots(gc::GcVisitObjectRoot visit, void* userdata)
 {
-    for (utils::HashSet<RtString*>::const_iterator it = g_internTable.begin(); it != g_internTable.end(); ++it)
+    for (utils::HashSet<RtString*>::const_iterator it = get_g_internTable().begin(); it != get_g_internTable().end(); ++it)
     {
         RtString* str = *it;
         if (str != nullptr)
@@ -120,17 +129,27 @@ const metadata::RtMethodInfo* String::get_redirected_ctor_method()
 
 RtString* String::create_string_from_utf16chars(const Utf16Char* str, int32_t length)
 {
+    if (length < 0 || (length != 0 && str == nullptr))
+        return nullptr;
     RtString* newString = fast_allocate_string(length);
+    if (!newString)
+        return nullptr;
 
-    std::memcpy(&newString->first_char, str, static_cast<size_t>(length) * sizeof(Utf16Char));
+    if (length != 0)
+        std::memcpy(&newString->first_char, str, static_cast<size_t>(length) * sizeof(Utf16Char));
     return newString;
 }
 
 RtString* String::create_string_from_utf8chars(const char* str, int32_t length)
 {
+    if (length < 0 || (length != 0 && str == nullptr))
+        return nullptr;
     // First, convert UTF-8 to UTF-16 and count characters
     utils::Vector<Utf16Char> utf16_buffer;
-    utf16_buffer.reserve(static_cast<size_t>(length)); // Reserve space (UTF-16 could be shorter or longer)
+    if (length == 0)
+        return fast_allocate_string(0);
+    if (!utf16_buffer.try_reserve(static_cast<size_t>(length)))
+        return nullptr;
 
     const char* start = str;
     const char* end = str + static_cast<size_t>(length);
@@ -146,23 +165,25 @@ RtString* String::create_string_from_utf8chars(const char* str, int32_t length)
 
 int32_t String::get_hash_code(RtString* str)
 {
-    int32_t hash = 5381;
+    uint32_t hash = 5381;
     const Utf16Char* char_data_ptr = &str->first_char;
     const int32_t* int32_data_ptr = reinterpret_cast<const int32_t*>(char_data_ptr);
     assert((size_t)int32_data_ptr % 4 == 0);
     for (int32_t i = 0, n = str->length / 2; i < n; ++i)
     {
-        hash = ((hash << 5) + hash) + int32_data_ptr[i];
+        hash = ((hash << 5) + hash) + static_cast<uint32_t>(int32_data_ptr[i]);
     }
     if (str->length % 2 != 0)
     {
         hash = ((hash << 5) + hash) + static_cast<int32_t>(char_data_ptr[str->length - 1]);
     }
-    return hash;
+    return utils::IntegerMath::from_unsigned<int32_t>(hash);
 }
 
 int32_t String::get_string_allocation_size(int32_t length)
 {
+    if (length < 0 || static_cast<size_t>(length) > (INT32_MAX - (sizeof(RtString) - OVER_SIZE_OF_STRING + sizeof(Utf16Char))) / sizeof(Utf16Char))
+        return 0;
     const size_t bytes = sizeof(RtString) - OVER_SIZE_OF_STRING + sizeof(Utf16Char) /* extra one character*/ + static_cast<size_t>(length) * sizeof(Utf16Char);
     return static_cast<int32_t>(bytes);
 }
@@ -173,12 +194,16 @@ RtString* String::fast_allocate_string(int32_t length)
     // TODO: can we optimize it out? we have redirected String::GetHashCode and String::GetLegacyNonRandomizedHashCode to
     // the intrinsic implementation which does not require zero-termination.
     size_t allocation_size = static_cast<size_t>(get_string_allocation_size(length));
+    if (allocation_size == 0)
+        return nullptr;
 #if LEANCLR_GC_DEBUG
     RtString* newString = (RtString*)gc::GarbageCollector::allocate_object(
         g_stringClass, allocation_size, ::leanclr::gc::GcAllocSite::make_internal(__FILE__, __LINE__, "String::fast_allocate_string"));
 #else
     RtString* newString = (RtString*)gc::GarbageCollector::allocate_object(g_stringClass, allocation_size);
 #endif
+    if (!newString)
+        return nullptr;
     newString->length = static_cast<int32_t>(length);
     return newString;
 }
@@ -187,10 +212,10 @@ RtString* String::intern_string(RtString* s)
 {
     if (s == nullptr)
         return s;
-    auto it = g_internTable.find(s);
-    if (it != g_internTable.end())
+    auto it = get_g_internTable().find(s);
+    if (it != get_g_internTable().end())
         return *it;
-    g_internTable.emplace(s);
+    get_g_internTable().emplace(s);
     return s;
 }
 
@@ -198,7 +223,7 @@ bool String::is_interned_string(RtString* s)
 {
     if (s == nullptr)
         return false;
-    return g_internTable.find(s) != g_internTable.end();
+    return get_g_internTable().find(s) != get_g_internTable().end();
 }
 
 } // namespace vm

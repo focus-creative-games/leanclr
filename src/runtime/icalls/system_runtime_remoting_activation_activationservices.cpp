@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_runtime_remoting_activation_activationservices.h"
 
 #include "vm/class.h"
@@ -38,8 +40,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtime_remoting_act
 utils::Span<vm::InternalCallEntry> SystemRuntimeRemotingActivationActivationServices::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtime_remoting_activation_activationservices,
-                                              sizeof(s_internal_call_entries_system_runtime_remoting_activation_activationservices) /
-                                                  sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_runtime_remoting_activation_activationservices));
 }
 
 } // namespace icalls

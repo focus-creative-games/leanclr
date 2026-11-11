@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_methodbase.h"
 #include "icall_base.h"
 #include "vm/reflection.h"
@@ -43,8 +45,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_methodbas
 
 utils::Span<vm::InternalCallEntry> SystemReflectionMethodBase::get_internal_call_entries() noexcept
 {
-    constexpr size_t entry_count =
-        sizeof(s_internal_call_entries_system_reflection_methodbase) / sizeof(s_internal_call_entries_system_reflection_methodbase[0]);
+    constexpr size_t entry_count = std::size(s_internal_call_entries_system_reflection_methodbase);
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_methodbase, entry_count);
 }
 

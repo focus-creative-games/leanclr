@@ -29,7 +29,7 @@ class SystemReflectionAssembly
     static RtResult<vm::RtReflectionAssembly*> get_entry_assembly() noexcept;
 
     // Get assembly name from path (not implemented)
-    static RtResultVoid internal_get_assembly_name(vm::RtString* path, metadata::RtMonoAssemblyName* aname, vm::RtString** codebase_out) noexcept;
+    static RtResultVoid internal_get_assembly_name(vm::RtString* path, metadata::AssemblyNameInfo* aname, vm::RtString** codebase_out) noexcept;
 
     // Load assembly from path
     static RtResult<vm::RtReflectionAssembly*> load_from(vm::RtString* path, bool ref_only, int32_t* mark) noexcept;

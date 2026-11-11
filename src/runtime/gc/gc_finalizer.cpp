@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "gc/gc_finalizer.h"
 
 #include "gc/obj_scanner.h"
@@ -19,7 +20,12 @@ enum class FinalizerRegState : uint8_t
     Finalized,
 };
 
-static utils::HashMap<vm::RtObject*, FinalizerRegState> s_registry;
+static utils::HashMap<vm::RtObject*, FinalizerRegState>& get_s_registry()
+{
+    static utils::HashMap<vm::RtObject*, FinalizerRegState> value;
+    return value;
+}
+
 static utils::Vector<vm::RtObject*> s_freachable;
 
 struct PromoteScanContext
@@ -35,20 +41,20 @@ struct PromoteScanContext
 
 void GcFinalizer::on_object_allocated(vm::RtObject* obj)
 {
-    assert (obj != nullptr);
+    assert(obj != nullptr);
     if (!vm::Class::has_finalizer(obj->klass))
     {
         return;
     }
-    s_registry[obj] = FinalizerRegState::Active;
+    get_s_registry()[obj] = FinalizerRegState::Active;
 }
 
 void GcFinalizer::promote_unreachable(GCAliveObjectBitmap& alive_bitmap)
 {
-    assert (s_freachable.empty());
+    assert(s_freachable.empty());
     PromoteScanContext ctx{&alive_bitmap};
     ObjScanner scanner(PromoteScanContext::visit, &ctx);
-    for (auto& entry : s_registry)
+    for (auto& entry : get_s_registry())
     {
         vm::RtObject* obj = entry.first;
         if (entry.second != FinalizerRegState::Active)
@@ -78,21 +84,21 @@ void GcFinalizer::run_pending_finalizers()
 
     for (vm::RtObject* obj : pending)
     {
-        auto it = s_registry.find(obj);
-        if (it == s_registry.end() || it->second != FinalizerRegState::Active)
+        auto it = get_s_registry().find(obj);
+        if (it == get_s_registry().end() || it->second != FinalizerRegState::Active)
         {
             continue;
         }
 
         it->second = FinalizerRegState::Finalized;
 
-        assert (vm::Class::has_finalizer(obj->klass));
+        assert(vm::Class::has_finalizer(obj->klass));
 
         const metadata::RtMethodInfo* finalizer = vm::Class::get_finalizer(obj->klass);
         auto ret = vm::Runtime::invoke_object_arguments_with_run_cctor(finalizer, obj, nullptr, 0);
         if (ret.is_err())
         {
-            printf("Failed to invoke finalizer, klass: %s.%s\n", obj->klass->namespaze, obj->klass->name);
+            host::Services::logf(host::LogLevel::Error, "Failed to invoke finalizer, klass: %s.%s\n", obj->klass->namespaze, obj->klass->name);
         }
     }
 }
@@ -112,8 +118,8 @@ void GcFinalizer::suppress_finalize(vm::RtObject* obj)
     {
         return;
     }
-    auto it = s_registry.find(obj);
-    if (it != s_registry.end() && it->second == FinalizerRegState::Active)
+    auto it = get_s_registry().find(obj);
+    if (it != get_s_registry().end() && it->second == FinalizerRegState::Active)
     {
         it->second = FinalizerRegState::Suppressed;
     }
@@ -129,7 +135,7 @@ void GcFinalizer::reregister_for_finalize(vm::RtObject* obj)
     {
         return;
     }
-    s_registry[obj] = FinalizerRegState::Active;
+    get_s_registry()[obj] = FinalizerRegState::Active;
 }
 
 void GcFinalizer::on_object_freed(vm::RtObject* obj)
@@ -138,7 +144,7 @@ void GcFinalizer::on_object_freed(vm::RtObject* obj)
     {
         return;
     }
-    s_registry.erase(obj);
+    get_s_registry().erase(obj);
 }
 
 } // namespace gc

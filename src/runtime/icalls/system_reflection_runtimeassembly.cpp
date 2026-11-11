@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_runtimeassembly.h"
 #include "icall_base.h"
 
@@ -206,7 +208,8 @@ static RtResultVoid get_manifest_resource_info_internal_invoker(metadata::RtMana
 RtResult<vm::RtArray*> SystemReflectionRuntimeAssembly::get_manifest_resource_names(vm::RtReflectionAssembly* ref_ass) noexcept
 {
     (void)ref_ass;
-    return LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_string, "icalls::SystemReflectionRuntimeAssembly::get_manifest_resource_names");
+    return LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_string,
+                                                           "icalls::SystemReflectionRuntimeAssembly::get_manifest_resource_names");
 }
 
 /// @icall: System.Reflection.RuntimeAssembly::GetManifestResourceNames
@@ -238,7 +241,8 @@ static RtResultVoid get_manifest_module_internal_invoker(metadata::RtManagedMeth
 RtResult<vm::RtArray*> SystemReflectionRuntimeAssembly::get_modules_internal(vm::RtReflectionAssembly* ref_ass) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, module_arr,
-                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_reflection_module, 1, "icalls::SystemReflectionRuntimeAssembly::get_modules_internal"));
+                                            LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_reflection_module, 1,
+                                                                                        "icalls::SystemReflectionRuntimeAssembly::get_modules_internal"));
     metadata::RtAssembly* ass = ref_ass->assembly;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionModule*, ref_module, vm::Reflection::get_module_reflection_object(ass->mod));
     vm::Array::set_array_data_at<vm::RtReflectionModule*>(module_arr, 0, ref_module);
@@ -308,7 +312,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_reflection_runtimeas
 utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeAssembly::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_reflection_runtimeassembly,
-                                              sizeof(s_internal_call_entries_system_reflection_runtimeassembly) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_reflection_runtimeassembly));
 }
 
 } // namespace icalls

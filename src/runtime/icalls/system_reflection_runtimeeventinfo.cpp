@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_reflection_runtimeeventinfo.h"
 
 #include "vm/class.h"
@@ -54,7 +56,8 @@ RtResultVoid SystemReflectionRuntimeEventInfo::get_event_info(vm::RtReflectionEv
     }
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, other_methods,
-                                            LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_reflection_method, "icalls::SystemReflectionRuntimeEventInfo::get_event_info"));
+                                            LEANCLR_NEW_EMPTY_SZARRAY_BY_ELE_KLASS_INTERNAL(vm::Class::get_corlib_types().cls_reflection_method,
+                                                                                            "icalls::SystemReflectionRuntimeEventInfo::get_event_info"));
     ref_event_info->other_methods = other_methods;
 
     RET_VOID_OK();
@@ -100,7 +103,7 @@ utils::Span<vm::InternalCallEntry> SystemReflectionRuntimeEventInfo::get_interna
         {"System.Reflection.RuntimeEventInfo::get_metadata_token(System.Reflection.RuntimeEventInfo)",
          (vm::InternalCallFunction)&SystemReflectionRuntimeEventInfo::get_metadata_token, get_metadata_token_invoker_system_reflection_runtimeeventinfo},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

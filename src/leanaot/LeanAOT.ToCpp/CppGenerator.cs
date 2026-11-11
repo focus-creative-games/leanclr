@@ -174,9 +174,35 @@ namespace LeanAOT.ToCpp
 
         public override void GenerateGlobalInitializationCpp()
         {
+            GenerateGlobalGenericMethods();
             GenerateAllModuleRegistrationCpp();
             GenerateAllMethodInvokerCpp();
             GenerateAllDirectCallBridgeCpp();
+        }
+
+        private void GenerateGlobalGenericMethods()
+        {
+            ModuleMethodBodyCodeFilePart body = null;
+            int part = 0;
+            var emittedBodies = new HashSet<string>(StringComparer.Ordinal);
+            foreach (var instance in _config.manifest.GenericMethodPlans.OrderBy(p => p.Key, StringComparer.Ordinal))
+            {
+                if (body == null || body.ExceedsMaxSize())
+                {
+                    body?.Save();
+                    body = new ModuleMethodBodyCodeFilePart($"{_config.outputCodeDir}/generic_methods_part{part++}.cpp", null);
+                }
+                GlobalServices.Inst.InvokerService.GetInvoker(instance.Method);
+                var method = GlobalServices.Inst.ReferenceSharing.Canonicalize(instance.Method);
+                if (!emittedBodies.Add(Manifest.GenericInstanceKey(method))) continue;
+                var detail = GlobalServices.Inst.MetadataService.GetMethodDetail(method);
+                new MethodWriter(detail, body).WriteCode();
+                if (detail.ShouldGenerateVirtualMethod) new VirtualMethodWriter(detail, body).WriteCode();
+            }
+            body?.Save();
+            var registration = new GenericRegistrationCppCodeFile($"{_config.outputCodeDir}/generic_registration.cpp", _config.manifest.GenericMethodPlans);
+            registration.Generate();
+            registration.Save();
         }
 
         private void GenerateAllModuleRegistrationCpp()

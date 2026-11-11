@@ -1,3 +1,5 @@
+#include <iterator>
+#include "utils/little_endian.h"
 #include "il_opcodes.h"
 #include "utils/mem_op.h"
 
@@ -309,7 +311,7 @@ static const OpCodeInfo g_opcodes[] = {
 
 const OpCodeInfo* OpCodes::get_opcode_info(OpCodeEnum opcode)
 {
-    assert(static_cast<size_t>(opcode) < sizeof(g_opcodes) / sizeof(g_opcodes[0]));
+    assert(static_cast<size_t>(opcode) < std::size(g_opcodes));
     return &g_opcodes[static_cast<size_t>(opcode)];
 }
 
@@ -347,18 +349,34 @@ bool OpCodes::try_decode_opcode_info(const uint8_t* codes_cur, const uint8_t* co
     return false;
 }
 
-size_t OpCodes::get_opcode_size(const uint8_t* codes_cur, const OpCodeInfo* opcode_info)
+bool OpCodes::try_get_opcode_size(const uint8_t* codes_cur, const uint8_t* codes_end, const OpCodeInfo* opcode_info, size_t& out_size)
 {
-    if (opcode_info->inline_type != ArgType::Switch)
+    if (!codes_cur || codes_cur >= codes_end || !opcode_info)
+        return false;
+    const size_t remaining = static_cast<size_t>(codes_end - codes_cur);
+    const size_t prefix_size = *codes_cur == static_cast<uint8_t>(OpCodeValue::Prefix1) ? 2 : 1;
+    if (remaining < prefix_size)
+        return false;
+    size_t size;
+    if (opcode_info->inline_type == ArgType::Switch)
     {
-        size_t inline_param = static_cast<size_t>(opcode_info->inline_param);
-        size_t prefix_size = (*codes_cur < static_cast<uint8_t>(OpCodeValue::Prefix1)) ? 1 : 2;
-        return inline_param + prefix_size;
+        if (remaining - prefix_size < sizeof(uint32_t))
+            return false;
+        const size_t header_size = prefix_size + sizeof(uint32_t);
+        const uint32_t count = utils::LittleEndian::read_u32(codes_cur + prefix_size);
+        // Bound the count before multiplication, including on 32-bit hosts.
+        if (count > (remaining - header_size) / sizeof(int32_t))
+            return false;
+        size = header_size + static_cast<size_t>(count) * sizeof(int32_t);
     }
-
-    uint32_t count = 0;
-    std::memcpy(&count, codes_cur + 1, sizeof(uint32_t));
-    return 1 + sizeof(uint32_t) + (sizeof(uint32_t) * utils::MemOp::read_u32_may_unaligned(codes_cur + 1));
+    else
+    {
+        if (opcode_info->inline_param < 0 || static_cast<size_t>(opcode_info->inline_param) > remaining - prefix_size)
+            return false;
+        size = prefix_size + static_cast<size_t>(opcode_info->inline_param);
+    }
+    out_size = size;
+    return true;
 }
 
 } // namespace il

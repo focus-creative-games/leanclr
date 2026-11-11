@@ -17,7 +17,7 @@ namespace LeanAOT.ToCpp
             string thisParamVarName = thisParam.Name;
             string thisParamTypeName = MethodGenerationUtil.GetExactTypeName(thisParam.Type);
             _bodyWriter.AddLine($"{thisParamVarName} = ({thisParamTypeName})(({ConstStrings.ObjectPtrTypeName}){thisParamVarName} + 1);");
-            _bodyWriter.AddLine($"return {_method.UniqueName}({string.Join(", ", _method.ParamsIncludeThis.Select(p => p.Name))});");
+            _bodyWriter.AddLine($"return {_method.UniqueName}({_method.WithMethodContext(string.Join(", ", _method.ParamsIncludeThis.Select(p => p.Name)), "__aot_method")}{(_method.UsesStatusOut ? ", __aot_ret" : "")});");
         }
     }
 }

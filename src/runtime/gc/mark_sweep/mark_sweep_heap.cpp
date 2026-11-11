@@ -1,3 +1,4 @@
+#include <iterator>
 #include "gc/mark_sweep/mark_sweep_heap.h"
 
 #if LEANCLR_GC_MARK_SWEEP
@@ -34,12 +35,17 @@ static constexpr SizeClassPoolInfo s_size_class_pool_infos[] = {
     {256, 8, 16 * 1024}, {512, 16, 32 * 1024}, {1024, 32, 64 * 1024}, {2048, 64, 128 * 1024}, {4096, 128, 256 * 1024}, {8192, 256, 512 * 1024},
 };
 
-constexpr size_t kSizeClassPoolInfoCount = sizeof(s_size_class_pool_infos) / sizeof(s_size_class_pool_infos[0]);
+constexpr size_t kSizeClassPoolInfoCount = std::size(s_size_class_pool_infos);
 constexpr size_t kSizeClassPoolCount = kSizeClassPoolInfoCount * 16 + 16 /* pool0 has extra 16 size classes for small objects */;
 static SizeClassPool* s_size_class_pools[kSizeClassPoolCount] = {};
 constexpr size_t kMaxSmallObejctSize = s_size_class_pool_infos[kSizeClassPoolInfoCount - 1].max_size;
 static SizeClassPool* s_map_div8_size_to_pool[kMaxSmallObejctSize / 8] = {};
-static utils::HashSet<void*> s_big_object_arenas;
+
+static utils::HashSet<void*>& get_s_big_object_arenas()
+{
+    static utils::HashSet<void*> value;
+    return value;
+}
 
 // constexpr size_t kMinSmallHeapBlockSize = 8;
 // constexpr size_t kMaxSmallHeapBlockSize = 256;
@@ -89,7 +95,7 @@ static void sweep_small_objects(const GCAliveObjectBitmap& alive_object_bitmap, 
 
 static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, int64_t& freed_bytes)
 {
-    for (auto it = s_big_object_arenas.begin(); it != s_big_object_arenas.end();)
+    for (auto it = get_s_big_object_arenas().begin(); it != get_s_big_object_arenas().end();)
     {
         vm::RtObject* obj = reinterpret_cast<vm::RtObject*>(*it);
         if (alive_object_bitmap.is_marked(obj))
@@ -105,7 +111,7 @@ static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, in
         alloc::GeneralAllocation::free(*it);
 #endif
         freed_bytes += static_cast<int64_t>(aligned_size);
-        it = s_big_object_arenas.erase(it);
+        it = get_s_big_object_arenas().erase(it);
     }
 }
 
@@ -122,7 +128,8 @@ static void initialize_size_class_pools()
         for (size_t j = 1; j <= (max_size - last_pool_max_size) / size_increment; j++)
         {
             size_t current_block_size = last_pool_max_size + size_increment * j;
-            auto new_pool = new SizeClassPool(arena_size, current_block_size, GC_ALIGN);
+            auto new_pool =
+                alloc::GeneralAllocation::require_allocation(alloc::GeneralAllocation::new_any<SizeClassPool>(arena_size, current_block_size, GC_ALIGN));
             for (; last_map_index < current_block_size / 8; last_map_index++)
             {
                 s_map_div8_size_to_pool[last_map_index] = new_pool;
@@ -166,16 +173,19 @@ void MarkSweepHeap::collect()
 
     GCAliveObjectBitmap alive_object_bitmap;
     GcRoots::foreach_root(alive_object_bitmap);
+    // Short weak handles cannot observe promotion solely for finalization.
+    vm::GCHandle::sweep_weak_handles(is_object_alive, &alive_object_bitmap, false);
     GcFinalizer::promote_unreachable(alive_object_bitmap);
 
     int64_t freed_bytes = 0;
     sweep_small_objects(alive_object_bitmap, freed_bytes);
     sweep_big_objects(alive_object_bitmap, freed_bytes);
-    vm::GCHandle::sweep_weak_handles(is_object_alive, &alive_object_bitmap);
+    vm::GCHandle::sweep_weak_handles(is_object_alive, &alive_object_bitmap, true);
 
     int64_t old_heap_bytes = s_heap_bytes;
     s_used_bytes -= freed_bytes;
     s_heap_bytes -= freed_bytes;
+    GcPressure::set_used_size(s_used_bytes);
     s_collection_count++;
     // printf("MarkSweepHeap::collect end, old_heap_bytes: %lld, new_heap_bytes: %lld, freed_bytes: %lld\n", old_heap_bytes, s_heap_bytes, freed_bytes);
 }
@@ -221,12 +231,16 @@ void MarkSweepHeap::set_gc_mode(GCMode mode)
 
 vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite* site)
 {
-    assert(size >= sizeof(vm::RtObject));
+    if (size < sizeof(vm::RtObject) || size > SIZE_MAX - (GC_ALIGN - 1))
+        return nullptr;
     size_t aligned_size = utils::MemOp::align_up(size, GC_ALIGN);
+    size_t charged_size = aligned_size;
     vm::RtObject* obj;
     if (is_small_object(aligned_size))
     {
-        obj = (vm::RtObject*)get_size_class_pool(aligned_size)->allocate_block();
+        auto* pool = get_size_class_pool(aligned_size);
+        charged_size = pool->block_size();
+        obj = (vm::RtObject*)pool->allocate_block();
         if (obj == nullptr)
         {
             return nullptr;
@@ -237,7 +251,7 @@ vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, 
         obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(aligned_size);
         if (obj != nullptr)
         {
-            s_big_object_arenas.insert(obj);
+            get_s_big_object_arenas().insert(obj);
         }
         else
         {
@@ -249,8 +263,9 @@ vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, 
 #if LEANCLR_GC_DEBUG
     obj->__sync_block = site != nullptr ? const_cast<GcAllocSite*>(site->intern_site()) : nullptr;
 #endif
-    s_used_bytes += aligned_size;
-    s_heap_bytes += aligned_size;
+    s_used_bytes += charged_size;
+    s_heap_bytes += charged_size;
+    GcPressure::set_used_size(s_used_bytes);
     GcPressure::on_alloc(aligned_size);
     return obj;
 }

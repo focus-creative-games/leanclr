@@ -1,7 +1,7 @@
 -xc++
 -I.
 -I../../runtime
--std=c++14
+-std=c++17
 -fms-compatibility
 -fno-exceptions
 -DWIN32

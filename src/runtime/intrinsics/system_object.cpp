@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_object.h"
 #include "interp/interp_defs.h"
 #include "vm/object.h"
@@ -46,13 +48,12 @@ static vm::NewobjIntrinsicEntry s_newobj_intrinsic_entries_system_object[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemObject::get_intrinsic_entries() noexcept
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_object, sizeof(s_intrinsic_entries_system_object) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_object, std::size(s_intrinsic_entries_system_object));
 }
 
 utils::Span<vm::NewobjIntrinsicEntry> SystemObject::get_newobj_intrinsic_entries() noexcept
 {
-    return utils::Span<vm::NewobjIntrinsicEntry>(s_newobj_intrinsic_entries_system_object,
-                                                 sizeof(s_newobj_intrinsic_entries_system_object) / sizeof(vm::NewobjIntrinsicEntry));
+    return utils::Span<vm::NewobjIntrinsicEntry>(s_newobj_intrinsic_entries_system_object, std::size(s_newobj_intrinsic_entries_system_object));
 }
 
 } // namespace intrinsics

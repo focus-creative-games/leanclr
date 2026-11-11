@@ -1,3 +1,4 @@
+#include "utils/little_endian.h"
 #include "basic_block_splitter.h"
 
 namespace leanclr
@@ -16,11 +17,15 @@ BasicBlockSplitter::BasicBlockSplitter(const metadata::RtMethodBody* method_body
 
 RtResultVoid BasicBlockSplitter::split()
 {
+    if (!_method_body || (!_method_body->code && _method_body->code_size != 0))
+        RET_ERR(RtErr::BadImageFormat);
+    if (!_valid_il_offsets)
+        RET_ERR(RtErr::OutOfMemory);
     RET_ERR_ON_FAIL(split_codes());
-    split_exception_clauses();
+    RET_ERR_ON_FAIL(split_exception_clauses());
     if (!validate_offsets())
     {
-        RET_ASSERT_ERR(RtErr::ExecutionEngine);
+        RET_ERR(RtErr::BadImageFormat);
     }
     RET_VOID_OK();
 }
@@ -40,9 +45,10 @@ void BasicBlockSplitter::mark_valid_il_offset(uint32_t offset)
 
 bool BasicBlockSplitter::is_valid_il_offset(uint32_t offset) const
 {
+    if (offset > _method_body->code_size)
+        return false;
     const uint32_t index = offset >> 5;
     const uint32_t bit = 1u << (offset & 31);
-    assert(index < _valid_il_offsets_count);
     return (_valid_il_offsets[index] & bit) != 0;
 }
 
@@ -52,7 +58,7 @@ RtResultVoid BasicBlockSplitter::split_codes()
     const auto& body = *_method_body;
     const uint8_t* codes = body.code;
     const uint32_t code_size = body.code_size;
-    const uint8_t* codes_end = codes + code_size;
+    const uint8_t* codes_end = code_size == 0 ? codes : codes + code_size;
 
     uint32_t offset = 0;
     while (offset < code_size)
@@ -63,13 +69,16 @@ RtResultVoid BasicBlockSplitter::split_codes()
         const il::OpCodeInfo* opcode_info = nullptr;
         if (!il::OpCodes::try_decode_opcode_info(pc, codes_end, opcode_info))
         {
-            RET_ASSERT_ERR(RtErr::ExecutionEngine);
+            RET_ERR(RtErr::BadImageFormat);
         }
-        const uint32_t opcode_size = static_cast<uint32_t>(il::OpCodes::get_opcode_size(pc, opcode_info));
+        size_t size;
+        if (!il::OpCodes::try_get_opcode_size(pc, codes_end, opcode_info, size))
+            RET_ERR(RtErr::BadImageFormat);
+        const uint32_t opcode_size = static_cast<uint32_t>(size);
         const uint32_t next_offset = offset + opcode_size;
         if (next_offset > code_size)
         {
-            RET_ASSERT_ERR(RtErr::ExecutionEngine);
+            RET_ERR(RtErr::BadImageFormat);
         }
 
         switch (opcode_info->inline_type)
@@ -82,41 +91,27 @@ RtResultVoid BasicBlockSplitter::split_codes()
             break;
         case il::ArgType::BranchTarget:
         {
-            uint32_t target_offset = 0;
-            if (opcode_info->inline_param == 1)
-            {
-                target_offset = static_cast<uint32_t>(static_cast<int8_t>(*(pc + 1)));
-            }
-            else
-            {
-                uint32_t val = 0;
-                std::memcpy(&val, pc + 1, sizeof(uint32_t));
-                target_offset = static_cast<uint32_t>(val);
-            }
-            if (target_offset != 0 || opcode_info->code2 == static_cast<uint8_t>(il::OpCodeValue::LeaveS) ||
-                opcode_info->code2 == static_cast<uint8_t>(il::OpCodeValue::Leave))
-            {
-                _split_offsets.insert(next_offset);
-                _split_offsets.insert(next_offset + target_offset);
-            }
+            const int32_t delta = opcode_info->inline_param == 1 ? static_cast<int8_t>(pc[1]) : utils::LittleEndian::read_i32(pc + 1);
+            const int64_t target = static_cast<int64_t>(next_offset) + delta;
+            if (target < 0 || target >= code_size)
+                RET_ERR(RtErr::BadImageFormat);
+            _split_offsets.insert(next_offset);
+            _split_offsets.insert(static_cast<uint32_t>(target));
             break;
         }
         case il::ArgType::Switch:
         {
-            int32_t case_count = 0;
-            std::memcpy(&case_count, pc + 1, sizeof(int32_t));
-            const int32_t* case_start = reinterpret_cast<const int32_t*>(pc + 5);
+            const uint32_t case_count = utils::LittleEndian::read_u32(pc + 1);
+            const uint8_t* case_start = pc + 5;
             bool split_any = false;
-            for (int32_t i = 0; i < case_count; ++i)
+            for (uint32_t i = 0; i < case_count; ++i)
             {
-                uint32_t case_offset_val = 0;
-                std::memcpy(&case_offset_val, case_start + i, sizeof(uint32_t));
-                const uint32_t case_offset = case_offset_val;
-                if (case_offset != 0)
-                {
-                    _split_offsets.insert(next_offset + case_offset);
-                    split_any = true;
-                }
+                const int32_t delta = utils::LittleEndian::read_i32(case_start + static_cast<size_t>(i) * 4);
+                const int64_t target = static_cast<int64_t>(next_offset) + delta;
+                if (target < 0 || target >= code_size)
+                    RET_ERR(RtErr::BadImageFormat);
+                _split_offsets.insert(static_cast<uint32_t>(target));
+                split_any = true;
             }
             if (split_any)
             {
@@ -131,23 +126,28 @@ RtResultVoid BasicBlockSplitter::split_codes()
 
     if (offset != code_size)
     {
-        RET_ASSERT_ERR(RtErr::ExecutionEngine);
+        RET_ERR(RtErr::BadImageFormat);
     }
 
     mark_valid_il_offset(code_size);
     RET_VOID_OK();
 }
 
-void BasicBlockSplitter::split_exception_clauses()
+RtResultVoid BasicBlockSplitter::split_exception_clauses()
 {
     assert(_method_body != nullptr);
     for (const auto& clause : _method_body->exception_clauses)
     {
+        const uint32_t size = _method_body->code_size;
+        if (clause.try_offset > size || clause.try_length > size - clause.try_offset || clause.handler_offset > size ||
+            clause.handler_length > size - clause.handler_offset)
+            RET_ERR(RtErr::BadImageFormat);
         _split_offsets.insert(static_cast<size_t>(clause.try_offset));
         _split_offsets.insert(static_cast<size_t>(clause.try_offset + clause.try_length));
         _split_offsets.insert(static_cast<size_t>(clause.handler_offset));
         _split_offsets.insert(static_cast<size_t>(clause.handler_offset + clause.handler_length));
     }
+    RET_VOID_OK();
 }
 
 bool BasicBlockSplitter::validate_offsets() const

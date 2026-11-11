@@ -1,0 +1,265 @@
+using System;
+using System.Diagnostics;
+using System.Runtime.CompilerServices;
+
+// The same source is used by LeanAOT and IL2CPP. No engine APIs are required.
+public static class Benchmarks
+{
+    public struct Pair { public uint X, Y; }
+    [MethodImpl(MethodImplOptions.NoInlining)] public static long WideLongStep(long value) { return unchecked(value * 1664525L + 1013904223L); }
+    [MethodImpl(MethodImplOptions.NoInlining)] public static double WideDoubleStep(double value) { return value * 0.5 + 1.0; }
+    [MethodImpl(MethodImplOptions.NoInlining)] public static Pair WidePairStep(Pair value) { value.X = unchecked(value.X * 1664525u + value.Y); value.Y = unchecked(value.Y + 7); return value; }
+    public static uint WideLong(int n, uint seed) { long value = seed; for (int i = 0; i < n; ++i) value = WideLongStep(value); return unchecked((uint)value); }
+    public static uint WideDouble(int n, uint seed) { double value = seed; for (int i = 0; i < n; ++i) value = WideDoubleStep(value); return (uint)value; }
+    public static uint WideStruct(int n, uint seed) { Pair value = new Pair { X = seed, Y = 17 }; for (int i = 0; i < n; ++i) value = WidePairStep(value); return value.X ^ value.Y; }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static T SharingLoop<T>(T first, T fallback, int count, uint seed) where T : class
+    {
+        for (int i = 0; i < count; ++i) seed = unchecked(seed * 1664525u + 1013904223u);
+        return (seed & 0x40000000u) == 0 ? first : fallback;
+    }
+    public static uint SharingString(int n, uint seed) { string first = "first"; return object.ReferenceEquals(SharingLoop<string>(first, "second", n, seed), first) ? 17u : 19u; }
+    public static uint SharingObject(int n, uint seed) { object first = PropertyBox; return object.ReferenceEquals(SharingLoop<object>(first, Transformer, n, seed), first) ? 17u : 19u; }
+    public static uint SharingBox(int n, uint seed) { return object.ReferenceEquals(SharingLoop<Box>(PropertyBox, null, n, seed), PropertyBox) ? 17u : 19u; }
+    public static uint SharingArray(int n, uint seed) { return object.ReferenceEquals(SharingLoop<uint[]>(Data, null, n, seed), Data) ? 17u : 19u; }
+    public interface ITransform { uint Apply(uint x); }
+    public sealed class Transform : ITransform
+    {
+        public uint Apply(uint x) { return unchecked(x * 1664525u + 1013904223u); }
+    }
+    public sealed class OtherTransform : ITransform
+    {
+        public uint Apply(uint x) { return unchecked(x * 22695477u + 1u); }
+    }
+    public interface IGenericTransform { uint Apply<T>(uint x); }
+    public sealed class ThirdTransform : ITransform
+    {
+        public uint Apply(uint x) { return unchecked(x * 1103515245u + 12345u); }
+    }
+    public sealed class FourthTransform : ITransform
+    {
+        public uint Apply(uint x) { return unchecked(x * 214013u + 2531011u); }
+    }
+    public sealed class GenericTransform : IGenericTransform
+    {
+        public uint Apply<T>(uint x) { return unchecked(x * 1664525u + 1013904223u); }
+    }
+    public sealed class Box { public uint Value { get; set; } }
+    static readonly uint[] Data = CreateData();
+    static readonly ITransform Transformer = new Transform();
+    static readonly ITransform[] Transformers = { new Transform(), new OtherTransform() };
+    static readonly ITransform[] ThreeTransformers = { new Transform(), new OtherTransform(), new ThirdTransform() };
+    static readonly ITransform[] PhaseTransformers = { new Transform(), new OtherTransform(), new ThirdTransform(), new FourthTransform() };
+    static readonly GenericTransform GenericTransformer = new GenericTransform();
+    static readonly Box PropertyBox = new Box();
+    public static uint GenericEhFinals;
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint GenericEhLoop<T>(int n, uint seed, int divisor)
+    {
+        uint tag = typeof(T) == typeof(int) ? 3u : 7u;
+        try
+        {
+            for (int i = 0; i < n; ++i) seed = unchecked(seed * 1664525u + (uint)(12345 / divisor) + tag);
+            return seed;
+        }
+        catch (DivideByZeroException) { return seed ^ 0xBADF00Du; }
+        finally { ++GenericEhFinals; }
+    }
+    public static uint GenericEhInt(int n, uint seed)
+    {
+        uint before = GenericEhFinals;
+        uint result = GenericEhLoop<int>(n, seed, 7);
+        if (GenericEhFinals != before + 1) throw new Exception("generic finally count");
+        return result;
+    }
+    public static uint GenericEhString(int n, uint seed)
+    {
+        uint before = GenericEhFinals;
+        uint result = GenericEhLoop<string>(n, seed, 7);
+        if (GenericEhFinals != before + 1) throw new Exception("generic finally count");
+        return result;
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint UInt32ReturnLeaf(uint x, int divisor) { return unchecked(x * 1664525u + (uint)(12345 / divisor)); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint UInt32ReturnMiddle(uint x, int divisor) { uint y = UInt32ReturnLeaf(x, divisor); return unchecked((y ^ 0xFEDCBA98u) + 17u); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint UInt32ReturnTop(uint x, int divisor) { uint y = UInt32ReturnMiddle(x, divisor); return unchecked(y * 17u + 19u); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int Int32ReturnLeaf(int x, int divisor) { return unchecked(x * 1664525 + 12345 / divisor); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int Int32ReturnMiddle(int x, int divisor) { int y = Int32ReturnLeaf(x, divisor); return unchecked((y ^ -19088744) + 17); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static int Int32ReturnTop(int x, int divisor) { int y = Int32ReturnMiddle(x, divisor); return unchecked(y * 17 + 19); }
+    public static uint UInt32Returns(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i) seed = UInt32ReturnTop(seed, 7);
+        return seed;
+    }
+    public static uint Int32Returns(int n, uint seed)
+    {
+        int value = unchecked((int)seed);
+        for (int i = 0; i < n; ++i) value = Int32ReturnTop(value, 7);
+        return unchecked((uint)value);
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void VoidReturnLeaf(Box box, int divisor) { box.Value = unchecked(box.Value * 1664525u + (uint)(12345 / divisor)); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static void VoidReturnMiddle(Box box, int divisor) { VoidReturnLeaf(box, divisor); box.Value ^= 19u; }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static Box ReferenceReturnLeaf(Box box, int value) { return value == 0 ? null : box; }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static Box ReferenceReturnMiddle(Box box, int value) { Box result = ReferenceReturnLeaf(box, value); if (result != null) result.Value = unchecked(result.Value * 1664525u + 1013904223u); return result; }
+    public static uint VoidReturns(int n, uint seed)
+    {
+        Box box = new Box { Value = seed };
+        for (int i = 0; i < n; ++i) VoidReturnMiddle(box, 7);
+        return box.Value;
+    }
+    public static uint ReferenceReturns(int n, uint seed)
+    {
+        Box box = new Box { Value = seed };
+        for (int i = 0; i < n; ++i) box = ReferenceReturnMiddle(box, 1);
+        return box.Value;
+    }
+    static uint[] CreateData()
+    {
+        uint[] data = new uint[1024];
+        for (uint i = 0; i < data.Length; ++i) data[i] = i * 17u;
+        return data;
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint Step(uint x) { return unchecked(x * 1664525u + 1013904223u); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint Chain1(uint x) { return Step(x); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint Chain2(uint x) { return Chain1(x); }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static Pair PairStep(Pair p) { p.X = Step(p.X); p.Y ^= p.X; return p; }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static T Identity<T>(T x) { return x; }
+    public static uint Arithmetic(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i) seed = unchecked(seed * 1664525u + 1013904223u);
+        return seed;
+    }
+    public static uint Calls(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i) seed = Chain2(seed);
+        return seed;
+    }
+    public static uint Properties(int n, uint seed)
+    {
+        Box box = PropertyBox;
+        for (int i = 0; i < n; ++i) { box.Value = seed; seed = unchecked(box.Value * 1664525u + 1013904223u); }
+        return seed;
+    }
+    public static uint ArrayLoop(int n, uint seed)
+    {
+        uint[] data = Data;
+        for (int i = 0; i < n; ++i) seed = unchecked(seed * 1664525u + data[i & 1023]);
+        return seed;
+    }
+    public static uint Interfaces(int n, uint seed)
+    {
+        ITransform t = Transformer;
+        for (int i = 0; i < n; ++i) seed = t.Apply(seed);
+        return seed;
+    }
+    public static uint InterfacesAlternating(int n, uint seed)
+    {
+        ITransform[] values = Transformers;
+        for (int i = 0; i < n; ++i) seed = values[i & 1].Apply(seed);
+        return seed;
+    }
+    public static uint InterfacesGeneric(int n, uint seed)
+    {
+        seed = GenericTransformer.Apply<int>(seed); // Concrete override anchor.
+        IGenericTransform value = GenericTransformer;
+        for (int i = 0; i < n; ++i) seed = value.Apply<int>(seed);
+        return seed;
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint InterfaceOnce(ITransform value, uint seed) { return value.Apply(seed); }
+    public static uint InterfacesStraightLine(int n, uint seed)
+    {
+        ITransform value = Transformer;
+        for (int i = 0; i < n; ++i) seed = InterfaceOnce(value, seed);
+        return seed;
+    }
+    public static uint InterfacesThreeTypes(int n, uint seed)
+    {
+        ITransform[] values = ThreeTransformers;
+        for (int i = 0; i < n; ++i) seed = values[i % 3].Apply(seed);
+        return seed;
+    }
+    public static uint InterfacesPhaseChange(int n, uint seed)
+    {
+        ITransform[] values = PhaseTransformers;
+        for (int i = 0; i < n; ++i) seed = values[(i & 1) + (i < n / 2 ? 0 : 2)].Apply(seed);
+        return seed;
+    }
+    public static uint InterfacesManySites(int n, uint seed)
+    {
+        ITransform value = Transformer;
+        for (int i = 0; i < n; ++i)
+        {
+            seed = value.Apply(seed);
+            seed = value.Apply(seed);
+            seed = value.Apply(seed);
+            seed = value.Apply(seed);
+            seed = value.Apply(seed);
+        }
+        return seed;
+    }
+    public static uint Structs(int n, uint seed)
+    {
+        Pair p = new Pair { X = seed, Y = 17 };
+        for (int i = 0; i < n; ++i) p = PairStep(p);
+        return p.X ^ p.Y;
+    }
+    public static uint Generics(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i) seed = Step(Identity<uint>(seed));
+        return seed;
+    }
+    public static uint Exceptions(int n, uint seed)
+    {
+        for (int i = 0; i < n; ++i)
+        {
+            try { if ((i & 1023) == 0) throw new ArgumentException(); seed = Step(seed); }
+            catch (ArgumentException) { seed ^= 13; }
+            finally { seed = unchecked(seed + 7); }
+        }
+        return seed;
+    }
+    public static uint Dispatch(int kind, int n, uint seed)
+    {
+        switch (kind)
+        {
+            case 0: return Arithmetic(n, seed);
+            case 1: return Calls(n, seed);
+            case 2: return Properties(n, seed);
+            case 3: return ArrayLoop(n, seed);
+            case 4: return Interfaces(n, seed);
+            case 5: return Structs(n, seed);
+            case 6: return Generics(n, seed);
+            default: return Exceptions(n, seed);
+        }
+    }
+    public static int Main(string[] args)
+    {
+        int n = args.Length > 0 ? int.Parse(args[0]) : 2000000;
+        string[] names = { "arithmetic", "calls", "properties", "array", "interfaces", "structs", "generics", "exceptions" };
+        for (int kind = 0; kind < names.Length; ++kind)
+        {
+            Dispatch(kind, n / 8 + 1, 19);
+            long start = Stopwatch.GetTimestamp();
+            uint checksum = Dispatch(kind, n, 19);
+            long end = Stopwatch.GetTimestamp();
+            double ns = (end - start) * (1000000000.0 / Stopwatch.Frequency) / n;
+            Console.WriteLine("{\"workload\":\"" + names[kind] + "\",\"iterations\":" + n + ",\"checksum\":\"" + checksum + "\",\"ns_per_op\":" + ns.ToString("F6", System.Globalization.CultureInfo.InvariantCulture) + "}");
+        }
+        return 0;
+    }
+}

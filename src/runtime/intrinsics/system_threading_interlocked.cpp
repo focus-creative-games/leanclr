@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_interlocked.h"
 
 #include "core/rt_err.h"
@@ -132,8 +134,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_threading_interlocked[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemThreadingInterlocked::get_intrinsic_entries() noexcept
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_threading_interlocked,
-                                           sizeof(s_intrinsic_entries_system_threading_interlocked) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_threading_interlocked, std::size(s_intrinsic_entries_system_threading_interlocked));
 }
 
 } // namespace intrinsics

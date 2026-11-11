@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_globalization_cultureinfo.h"
 #include "icall_base.h"
 
@@ -53,8 +55,7 @@ static const CultureTextInfoData s_text_info_zh_cn = {936, 500, 10008, 936, fals
 // Indices and LCIDs aligned with mono/metadata/culture-info-tables.h (culture_entries).
 static const KnownCulture s_known_cultures[] = {
     {"en", "en", 0x0009, 0x007F, 9, 9, 257, "English", "English", "en", "eng", "ENU", "", &s_text_info_en},
-    {"en-us", "en-US", 0x0409, 0x0009, 105, 105, 257, "English (United States)", "English (United States)", "en", "eng", "ENU", "US",
-     &s_text_info_en_us},
+    {"en-us", "en-US", 0x0409, 0x0009, 105, 105, 257, "English (United States)", "English (United States)", "en", "eng", "ENU", "US", &s_text_info_en_us},
     {"zh", "zh", 0x7804, 0x007F, 268, 268, 257, "Chinese", "Chinese", "zh", "zho", "CHS", "", &s_text_info_zh},
     {"zh-cn", "zh-CN", 0x0804, 0x0004, 187, 187, 257, "Chinese (Simplified)", "Chinese (Simplified)", "zh", "zho", "CHS", "CN", &s_text_info_zh_cn},
 };
@@ -244,8 +245,7 @@ RtResultVoid SystemGlobalizationCultureInfo::set_user_preferred_culture_info_in_
     RET_VOID_OK();
 }
 
-RtResultVoid SystemGlobalizationCultureInfo::initialize_user_preferred_culture_info_in_app_x(
-    vm::RtMulticastDelegate* /*onCultureInfoChangedInAppX*/) noexcept
+RtResultVoid SystemGlobalizationCultureInfo::initialize_user_preferred_culture_info_in_app_x(vm::RtMulticastDelegate* /*onCultureInfoChangedInAppX*/) noexcept
 {
     WARN_NOT_IMPLEMENTED_ERROR_THEN_RETURN_VOID("System.Globalization.CultureInfo::initialize_user_preferred_culture_info_in_app_x");
 }
@@ -298,7 +298,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_globalization_cultur
 utils::Span<vm::InternalCallEntry> SystemGlobalizationCultureInfo::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_globalization_cultureinfo,
-                                              sizeof(s_internal_call_entries_system_globalization_cultureinfo) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_globalization_cultureinfo));
 }
 
 } // namespace icalls

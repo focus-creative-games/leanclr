@@ -132,6 +132,10 @@ RtResult<SizeAndAlignment> Layout::compute_layout(utils::Vector<const RtFieldInf
 // Compute layout for fields with explicit layout
 RtResult<SizeAndAlignment> Layout::compute_explicit_layout(RtModuleDef* mod, utils::Vector<const RtFieldInfo*>& fields, uint8_t packing)
 {
+    struct FieldRange { uint32_t offset; uint32_t size; };
+    struct ReferenceSlot { uint32_t offset; size_t field; };
+    utils::Vector<FieldRange> ranges;
+    utils::Vector<ReferenceSlot> references;
     uint32_t max_size = 0;
     uint8_t max_alignment = 1;
 
@@ -149,11 +153,48 @@ RtResult<SizeAndAlignment> Layout::compute_explicit_layout(RtModuleDef* mod, uti
         }
 
         uint32_t offset = field_offset_opt.value();
+        if (offset > UINT32_MAX - field_info.size) RET_ERR(RtErr::TypeLoad);
+        const size_t field_index = ranges.size();
+        ranges.push_back({offset, field_info.size});
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, field_class, vm::Class::get_class_from_typesig(field->type_sig));
+        if (!field->type_sig->by_ref && vm::Class::is_reference_type(field_class))
+        {
+            references.push_back({offset, field_index});
+        }
+        else if (!field->type_sig->by_ref && vm::Class::is_value_type(field_class) && vm::Class::get_has_references(field_class))
+        {
+            const size_t bits = size_t(field_class->gc_bitmap_word_count) * vm::Class::kBitsPerWord;
+            for (size_t bit = vm::RT_OBJECT_HEADER_SIZE / PTR_SIZE; bit < bits; ++bit)
+            {
+                if ((field_class->gc_bitmap[bit / vm::Class::kBitsPerWord] & (size_t(1) << (bit % vm::Class::kBitsPerWord))) == 0) continue;
+                const size_t relative = bit * PTR_SIZE - vm::RT_OBJECT_HEADER_SIZE;
+                if (relative > field_info.size || PTR_SIZE > field_info.size - relative) RET_ERR(RtErr::TypeLoad);
+                references.push_back({offset + static_cast<uint32_t>(relative), field_index});
+            }
+        }
         const_cast<RtFieldInfo*>(field)->offset = offset;
 
         max_size = std::max(max_size, offset + field_info.size);
         max_alignment = std::max(max_alignment, effective_alignment);
     }
+    // GC references may alias complete reference slots, never scalar data or
+    // partial slots. Validate before constructing a pointer-based GC bitmap.
+    for (const auto& reference : references)
+    {
+        if (reference.offset % PTR_SIZE != 0) RET_ERR(RtErr::TypeLoad);
+        for (size_t i = 0; i < ranges.size(); ++i)
+        {
+            if (i == reference.field) continue;
+            const auto& range = ranges[i];
+            if (uint64_t(reference.offset) + PTR_SIZE <= range.offset ||
+                uint64_t(range.offset) + range.size <= reference.offset) continue;
+            bool same_slot = false;
+            for (const auto& other : references)
+                if (other.field == i && other.offset == reference.offset) { same_slot = true; break; }
+            if (!same_slot) RET_ERR(RtErr::TypeLoad);
+        }
+    }
+    if (max_size > UINT32_MAX - vm::RT_OBJECT_HEADER_SIZE - (max_alignment - 1)) RET_ERR(RtErr::TypeLoad);
     max_size = static_cast<uint32_t>(MemOp::align_up(max_size, max_alignment));
 
     SizeAndAlignment result = {max_size, max_alignment};

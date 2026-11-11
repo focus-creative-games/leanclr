@@ -14,6 +14,16 @@ namespace LeanAOT.ToCpp
         public bool EnableAnalytics { get; set; }
 
         public bool EmitNullChecks { get; set; }
+        public bool LightweightAotReturns { get; set; }
+        public bool PackedInt32AotReturns { get; set; }
+        public bool StatusOutAotReturns { get; set; }
+        public bool ShareReferenceGenerics { get; set; }
+
+        public bool InterfaceCallCache { get; set; }
+        public int InterfaceCallCacheEntries { get; set; } = 1;
+        public bool ProfiledInterfaceCaches { get; set; }
+        public LeanAOT.GenerationPlan.PgoMethodIncludeIndex PgoIncludeIndex { get; set; }
+        public List<object> InterfaceCacheDecisions { get; } = new List<object>();
 
         public bool EnableArrayBoundsCheck { get; set; }
 

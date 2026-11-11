@@ -1,74 +1,50 @@
 #pragma once
-
-#include <functional>
+#include <type_traits>
 #include <utility>
-#include <vector>
 
 namespace leanclr
 {
 namespace utils
 {
-
-// Runs registered cleanup callbacks in reverse registration order when the scope ends.
-// Set not_cleanup to skip all callbacks on destruction (e.g. success path or after move).
-class ScopeGuard
+// One statically typed cleanup per guard: installing rollback must not itself
+// allocate or fail while handling an allocation error.
+template <typename F>
+class ScopeExit
 {
+    F cleanup_;
+    bool active_ = true;
+
   public:
-
-    ScopeGuard() = default;
-
-    ~ScopeGuard()
+    explicit ScopeExit(F cleanup) : cleanup_(std::move(cleanup))
     {
-        run_cleanups_if_needed();
     }
 
-    ScopeGuard(const ScopeGuard&) = delete;
-    ScopeGuard& operator=(const ScopeGuard&) = delete;
-    ScopeGuard(ScopeGuard&& other) = delete;
+    ScopeExit(const ScopeExit&) = delete;
+    ScopeExit& operator=(const ScopeExit&) = delete;
 
-    ScopeGuard& operator=(ScopeGuard&& other) noexcept
+    ScopeExit(ScopeExit&& other) noexcept(std::is_nothrow_move_constructible<F>::value) : cleanup_(std::move(other.cleanup_)), active_(other.active_)
     {
-        if (this != &other)
-        {
-            run_cleanups_if_needed();
-            not_cleanup = other.not_cleanup;
-            cleanups_ = std::move(other.cleanups_);
-            other.not_cleanup = true;
-            other.cleanups_.clear();
-        }
-        return *this;
+        other.active_ = false;
     }
 
-    void register_cleanup(std::function<void()> cleanup_func)
+    ScopeExit& operator=(ScopeExit&&) = delete;
+
+    ~ScopeExit() noexcept
     {
-        cleanups_.push_back(std::move(cleanup_func));
+        if (active_)
+            cleanup_();
     }
 
-    void set_not_cleanup()
+    void dismiss() noexcept
     {
-        not_cleanup = true;
-    }
-
-  private:
-      bool not_cleanup = false;
-    std::vector<std::function<void()>> cleanups_;
-
-    void run_cleanups_if_needed()
-    {
-        if (not_cleanup)
-        {
-            return;
-        }
-        for (auto it = cleanups_.rbegin(); it != cleanups_.rend(); ++it)
-        {
-            if (*it)
-            {
-                (*it)();
-            }
-        }
-        cleanups_.clear();
+        active_ = false;
     }
 };
 
+template <typename F>
+ScopeExit<typename std::decay<F>::type> make_scope_exit(F&& cleanup)
+{
+    return ScopeExit<typename std::decay<F>::type>(std::forward<F>(cleanup));
+}
 } // namespace utils
 } // namespace leanclr

@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_exception.h"
 
 #include "icall_base.h"
@@ -28,7 +30,7 @@ utils::Span<vm::InternalCallEntry> SystemException::get_internal_call_entries() 
         {"System.Exception::ReportUnhandledException(System.Exception)", (vm::InternalCallFunction)&SystemException::report_unhandled_exception,
          report_unhandled_exception_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

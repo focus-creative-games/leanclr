@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_interlocked.h"
 #include "interp/eval_stack_op.h"
 #include <cstdint>
@@ -479,8 +481,7 @@ static InternalCallEntry s_internal_call_entries_system_threading_interlocked[] 
 
 utils::Span<InternalCallEntry> SystemThreadingInterlocked::get_internal_call_entries() noexcept
 {
-    constexpr size_t entry_count =
-        sizeof(s_internal_call_entries_system_threading_interlocked) / sizeof(s_internal_call_entries_system_threading_interlocked[0]);
+    constexpr size_t entry_count = std::size(s_internal_call_entries_system_threading_interlocked);
     return utils::Span<InternalCallEntry>(s_internal_call_entries_system_threading_interlocked, entry_count);
 }
 

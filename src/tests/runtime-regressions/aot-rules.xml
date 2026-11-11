@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<aot>
+  <assembly fullname="*" aot="0" />
+  <assembly fullname="RegressionFixtures" aot="1" />
+</aot>

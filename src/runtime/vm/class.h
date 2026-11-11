@@ -295,12 +295,12 @@ class Class
 
     static bool is_cctor_not_finished(const metadata::RtClass* klass)
     {
-        return klass->cctor_status == metadata::RtCCtorStatus::NotInited;
+        return klass->cctor_status == metadata::RtCCtorStatus::NotInited || klass->cctor_status == metadata::RtCCtorStatus::Failed;
     }
 
     static bool is_cctor_not_finished_hierarchy(const metadata::RtClass* klass)
     {
-        return klass->cctor_status < metadata::RtCCtorStatus::InitHierarchy;
+        return klass->cctor_status != metadata::RtCCtorStatus::InitHierarchy;
     }
 
     static void set_cctor_initing(metadata::RtClass* klass)

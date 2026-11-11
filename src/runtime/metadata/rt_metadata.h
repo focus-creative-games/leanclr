@@ -101,9 +101,11 @@ struct RtTypeSig
 {
     RtElementType ele_type;
     uint8_t field_or_param_attrs;
+
     union
     {
         uint8_t flags;
+
         struct
         {
             uint8_t by_ref : 1;
@@ -111,6 +113,7 @@ struct RtTypeSig
             uint8_t num_mods : 6;
         };
     };
+
     RtTypeSigVariantData data;
 
     bool is_void() const
@@ -510,8 +513,8 @@ using RtInvokeMethodPointer = RtResultVoid (*)(RtManagedMethodPointer, const RtM
 using RtNativeMethodPointer = void (*)();
 
 #define CAST_AS_NOEXCEP_MANAGED_METHOD_POINTER(p) ((void (*)() noexcept)(p))
-#define CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(p)                                                                        \
-    ((::leanclr::RtResultVoid(*)(::leanclr::metadata::RtManagedMethodPointer, const ::leanclr::metadata::RtMethodInfo*, \
+#define CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(p)                                                                         \
+    ((::leanclr::RtResultVoid (*)(::leanclr::metadata::RtManagedMethodPointer, const ::leanclr::metadata::RtMethodInfo*, \
                                   const ::leanclr::interp::RtStackObject*, ::leanclr::interp::RtStackObject*) noexcept)(p))
 
 // Interface offset structure
@@ -573,6 +576,7 @@ struct RtMethodInfo
     uint16_t total_arg_stack_object_size;
     uint16_t ret_stack_object_size;
     RtInvokerType invoker_type;
+    uint8_t aot_return_protocol; // Flags: bit 0 void/reference, bit 1 packed int32, bit 2 wide/struct status-out. Fits existing padding; bound once.
 #if LEANCLR_PGO_PROFILE
     uint32_t profile_slot;
 #endif
@@ -629,7 +633,7 @@ struct RtAssemblyName
     uint8_t public_key_token[8];
 };
 
-struct RtMonoAssemblyName
+struct AssemblyNameInfo
 {
     const char* name;
     const char* culture;
@@ -645,6 +649,9 @@ struct RtMonoAssemblyName
     uint16_t version_revision;
     uint16_t arch;
 };
+
+// Legacy adapter source compatibility; this is native CLI identity data.
+using RtMonoAssemblyName = AssemblyNameInfo;
 
 // Constants
 constexpr uint8_t RT_CODE_TYPE_MASK = 0x0003;
@@ -682,6 +689,7 @@ enum class RtCCtorStatus : uint8_t
     Initing,
     InitSelf,
     InitHierarchy,
+    Failed,
 };
 
 // Class structure
@@ -921,6 +929,29 @@ struct RtAotMethodMonoPInvokeCallbackData
     RtNativeMethodPointer native_method_ptr;
 };
 
+// Closed AOT instance identities. No managed/BCL layouts or module IDs are
+// embedded: module IDs are assigned at load time. Nested arguments are immutable.
+struct RtAotTypeIdentity
+{
+    RtElementType element_type;
+    const char* module_name;
+    EncodedTokenId type_token;
+    const RtAotTypeIdentity* arguments;
+    uint32_t argument_count;
+};
+
+struct RtAotGenericMethodData
+{
+    uint64_t key_hash;
+    const char* definition_module;
+    RtAotMethodDefData implementation;
+    const RtAotTypeIdentity* class_arguments;
+    const RtAotTypeIdentity* method_arguments;
+    uint8_t class_argument_count;
+    uint8_t method_argument_count;
+    uint8_t return_protocol;
+};
+
 struct RtAotModuleData
 {
     const char* module_name;
@@ -930,12 +961,16 @@ struct RtAotModuleData
     uint32_t method_def_entry_count;
     const RtAotMethodMonoPInvokeCallbackData* mono_pinvoke_callback_entries;
     uint32_t mono_pinvoke_callback_entry_count;
+    // 0: ordinary Result; 1: opt-in scalar void / aligned managed reference ABI.
+    uint32_t return_protocol;
 };
 
 struct RtAotModulesData
 {
     const RtAotModuleData** modules;
     uint32_t module_count;
+    const RtAotGenericMethodData* generic_method_entries;
+    uint32_t generic_method_entry_count;
 };
 
 typedef void (*ClassWalkCallback)(RtClass* klass, void* userData);

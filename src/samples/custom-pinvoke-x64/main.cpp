@@ -15,6 +15,7 @@
 #include "vm/settings.h"
 #include "vm/type.h"
 #include "vm/rt_exception.h"
+#include "vm/rt_string.h"
 #include "vm/property.h"
 #include "vm/field.h"
 #include "vm/pinvoke.h"
@@ -30,7 +31,7 @@ using namespace leanclr;
 // Global library search directories
 static std::vector<std::string> g_lib_dirs;
 
-static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, const char* extension)
+static bool assembly_file_loader(const char* assembly_name, const char* extension, vm::FileData& file_data)
 {
     for (const auto& dir : g_lib_dirs)
     {
@@ -47,7 +48,7 @@ static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, co
         auto* dll_data = static_cast<uint8_t*>(alloc::GeneralAllocation::malloc(file_size));
         if (!dll_data)
         {
-            return RtErr::OutOfMemory;
+            return false;
         }
 
         if (!dll_file.read(reinterpret_cast<char*>(dll_data), file_size))
@@ -57,10 +58,11 @@ static RtResult<vm::FileData> assembly_file_loader(const char* assembly_name, co
         }
         dll_file.close();
 
-        return vm::FileData{dll_data, static_cast<size_t>(file_size)};
+        file_data = vm::FileData{dll_data, static_cast<size_t>(file_size), false};
+        return true;
     }
 
-    return RtErr::FileNotFound;
+    return false;
 }
 
 static void print_usage(const char* program_name)
@@ -201,9 +203,14 @@ static int run(const std::string& dll_name, const std::vector<std::string>& dll_
             return -1;
         }
 
-        const metadata::RtPropertyInfo* prop = vm::Class::get_property_for_name(ex->klass, "StackTrace", true);
-        assert(prop);
-        auto ret = vm::Runtime::invoke_with_run_cctor(prop->get_method, ex, nullptr);
+        auto* exception_object = reinterpret_cast<vm::RtObject*>(ex);
+        const metadata::RtPropertyInfo* prop = vm::Class::get_property_for_name(exception_object->klass, "StackTrace", true);
+        if (!prop || !prop->get_method)
+        {
+            std::cerr << "Failed to find exception stack trace getter" << std::endl;
+            return -1;
+        }
+        auto ret = vm::Runtime::invoke_with_run_cctor(prop->get_method, exception_object, nullptr);
         if (ret.is_err())
         {
             std::cerr << "Failed to get exception stack trace" << std::endl;
@@ -215,27 +222,18 @@ static int run(const std::string& dll_name, const std::vector<std::string>& dll_
 
         utils::Utf8StringBuilder sb;
 
-        metadata::MetadataName::append_klass_full_name_without_generic_params(sb, ex->klass, metadata::TypeNameFormat::FullName).is_ok();
-        sb.append_cstr(": ");
-        sb.sure_null_terminator_but_not_append();
-        std::cerr << sb.get_const_chars();
-
-        sb.clear();
-        vm::RtString* message = ex->message;
-        if (message)
-        {
-            sb.append_utf16_str(&message->first_char, message->length);
-        }
-        else
-        {
-            sb.sure_null_terminator_but_not_append();
-        }
-        std::cerr << sb.get_const_chars() << std::endl << std::endl;
+        vm::Exception::format_exception(ex, sb);
+        std::cerr.write(sb.get_const_chars(), static_cast<std::streamsize>(sb.length()));
+        std::cerr << std::endl << std::endl;
 
         sb.clear();
         vm::RtString* stack_trace_str = reinterpret_cast<vm::RtString*>(ret.unwrap());
-        sb.append_utf16_str(&stack_trace_str->first_char, stack_trace_str->length);
-        std::cerr << sb.get_const_chars() << std::endl << std::endl;
+        if (stack_trace_str)
+        {
+            sb.append_utf16_str(vm::String::get_chars_ptr(stack_trace_str), static_cast<size_t>(vm::String::get_length(stack_trace_str)));
+        }
+        std::cerr.write(sb.get_const_chars(), static_cast<std::streamsize>(sb.length()));
+        std::cerr << std::endl << std::endl;
 
         return -1;
     }

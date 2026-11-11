@@ -130,7 +130,7 @@ namespace LeanAOT.GenerationPlan
         {
             if (method.IsRuntime || method.IsAbstract || method.HasGenericParameters || method.DeclaringType.HasGenericParameters)
                 return false;
-            if (method.HasBody && method.Body.HasExceptionHandlers)
+            if (AotExceptionPolicy.FallbackReason(method) != null)
                 return false;
             if (!method.HasBody && method.IsConstructor && method.DeclaringType.FullName == "System.String")
                 return false;

@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_runtimetypehandle.h"
 
 #include "icall_base.h"
@@ -202,7 +204,8 @@ RtResult<bool> SystemRuntimeTypeHandle::type_is_assignable_from(vm::RtReflection
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, to_klass, vm::Class::get_class_from_typesig(to_type_sig));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, from_klass, vm::Class::get_class_from_typesig(from_type_sig));
-    RET_ERR_ON_FAIL(vm::Class::initialize_all(from_klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_super_types(from_klass));
+    RET_ERR_ON_FAIL(vm::Class::initialize_super_types(to_klass));
     RET_OK(vm::Class::is_assignable_from(from_klass, to_klass));
 }
 
@@ -545,8 +548,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_runtimetypehandle[] 
 
 utils::Span<vm::InternalCallEntry> SystemRuntimeTypeHandle::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetypehandle,
-                                              sizeof(s_internal_call_entries_system_runtimetypehandle) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_runtimetypehandle, std::size(s_internal_call_entries_system_runtimetypehandle));
 }
 
 } // namespace icalls

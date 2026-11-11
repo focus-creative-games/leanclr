@@ -19,7 +19,7 @@ LeanCLR is designed to fill this gap: maintain high ECMA-335 compatibility while
 
 ## Key Features
 
-- **Strong cross-platform support** — AOT + Interpreter hybrid execution model with no JIT, implemented in standard C++11 and free of platform-specific dependencies.
+- **Strong cross-platform support** — AOT + Interpreter hybrid execution model with no JIT, implemented in standard C++17. The runtime requires a little-endian host; each target still needs build and runtime validation.
 - **Easy integration** — Integration complexity is close to Lua; easy to embed into apps, games, embedded devices, IVI/automotive platforms, and more.
 - **High ECMA-335 compatibility** — Near-complete support for ECMA-335 and major CoreCLR extensions, including generics, exceptions, reflection, and delegates.
 - **Compact and efficient** — Small binary size, low memory usage, and high runtime efficiency; single-thread core build is under **600 KB** on x64/WebAssembly and can be reduced to around **300 KB** after trimming.
@@ -35,9 +35,9 @@ Full documentation site: **https://doc.leanclr.com**
 - [Testing](https://doc.leanclr.com/docs/development/testing)
 - [Contributing](https://doc.leanclr.com/docs/development/contributing)
 
-## Supported Platforms (Standard)
+## Native host platform targets
 
-Standard edition currently supports:
+The native host targets the following platforms; API coverage and validation vary:
 
 | Platform | Notes |
 |------|------|
@@ -57,7 +57,7 @@ LeanCLR already supports Unity and is actively integrating Godot and CoreCLR BCL
 |------|------|------|
 | **Unity / Unity China, WebGL and Mini-Game platforms** | ✅ Complete | [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity): replace IL2CPP with LeanCLR when shipping games (not limited to WebGL/mini-game platforms) |
 | **Godot (all platforms)** | 🚧 In development | [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) is being integrated with the Godot engine |
-| **CoreCLR .NET 10 BCL** | 🚧 In development | The Standard `coreclr` branch is adding .NET 10 BCL support |
+| **CoreCLR .NET 10 BCL** | 🚧 In development | The `coreclr` branch is adding .NET 10 BCL support |
 | **Unreal Engine (all platforms)** | 📋 Planned | ETA TBD |
 
 ## Project Status
@@ -76,43 +76,49 @@ LeanCLR already supports Unity and is actively integrating Godot and CoreCLR BCL
 | **P/Invoke** | ✅ Complete | Supports manual registration and LeanAOT-generated P/Invoke wrappers |
 | **Garbage Collection** | ✅ Complete | Precise Mark-Sweep full GC |
 | **AOT Compiler** | ✅ Complete | IL → C++ transpilation supported |
-| **Multi-threading** | 📋 Planned | Threads and synchronization primitives (Standard edition) |
+| **Multi-threading** | 📋 Planned | Threads, synchronization and GC coordination; all current compositions are single-threaded |
 
 ### Stability
 
-The current Standard edition is highly stable:
+Historical compatibility results before consolidation (not validation of every current composition):
 
 - **unity branch**: fully compatible with Unity 2019.4.x – 6000.3.x LTS IL2CPP BCL, passing all (thousands of) test cases
-- **mono branch**: 99.95% compatible with Mono 4.8 BCL, with only one failing test case
+- **mono branch**: historically 99.95% compatible with Mono 4.8 BCL, with one failing test; now aligned with refactored core and requiring validation per composition
 - **coreclr branch**: .NET 10 BCL support is in progress
 
-## Editions
+## Architecture and build compositions
 
-LeanCLR provides **Standard** and **Core** editions: **Core is trimmed from Standard**. Both are implemented (single-threaded); full multi-threading for Standard remains on the roadmap. See [Core & Standard](https://doc.leanclr.com/docs/intro/editions).
+Core and Mono now share **one runtime implementation**, based on the refactored
+core baseline. The `core` and `mono` branch names remain during migration;
+build configuration selects deployment capabilities.
 
-### Core Edition
+| Composition | BCL | Host | Threading |
+| --- | --- | --- | --- |
+| **mono-minimal** (formerly Core) | Mono | C/C++ library services without Windows/POSIX SDK dependencies | Single |
+| **mono-native** (formerly Mono) | Mono | Existing native platform services; API coverage varies | Single |
+| **mono-custom** | Mono | Application-supplied allocation, clocks, I/O and other services | Single |
 
-The Core edition is implemented and runs on every platform with a C++11 toolchain. Core is designed as an embeddable pure scripting engine: you can run C# purely via the interpreter, or combine it with [LeanAOT](https://doc.leanclr.com/docs/aot/overview) to transpile hot IL to C++ for strong runtime performance.
+All compositions share the type system, interpreter, LeanAOT and GC. Minimal
+retains standard-library I/O; choose Custom to take ownership of host services.
+Runtime hosts require little-endian storage and a C++17 toolchain; new targets
+still require validation. Native does not imply multithreading or complete OS API coverage.
 
-### Standard Branches
+```powershell
+scripts\runtime\build.bat Release x64 minimal
+scripts\runtime\build.bat Release x64 native
+```
 
-Standard is split by BCL source:
+On Linux/macOS use `./scripts/runtime/build.sh Release minimal` or `native`.
+Native remains the default. The existing `leanclr` CMake target and public API
+remain unchanged.
 
-| Branch | BCL Source | Notes |
-|------|------------|------|
-| **mono** | Mono BCL | General cross-platform integration; Mono 4.8 BCL compatible |
-| **unity** | Unity IL2CPP BCL | For Unity / Unity China integration |
-| **coreclr** | CoreCLR BCL | .NET 10 BCL support in progress |
+CoreCLR BCL and Unity/Godot/UE integrations are intended to become compatibility
+and host adapters. Their current development status is unchanged; this migration
+only consolidates core and mono.
 
-### Standard vs Core
-
-| Feature | Standard | Core |
-| - | - | - |
-| ECMA-335 | Standard implementation, high compatibility | Standard ECMA-335 specification |
-| Thread model | Single-threaded (multi-threading planned) | Single-threaded |
-| Cross-platform | Windows, Linux, macOS, Android, iOS, HarmonyOS, WebAssembly, etc. | All platforms; pure C++11 with no platform-specific dependencies |
-| BCL | mono / unity / coreclr branches; platform icalls partially implemented | mono-4.5 BCL; only a subset of platform-related calls implemented |
-| GC | Precise Mark-Sweep full GC | Precise Mark-Sweep full GC |
+See [architecture and branch migration](docs/architecture.md),
+[runtime layering](src/runtime/bcl/README.md), and
+[memory ownership and failure policy](src/runtime/alloc/README.md).
 
 ## Demo
 

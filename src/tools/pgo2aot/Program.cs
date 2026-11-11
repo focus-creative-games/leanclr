@@ -7,9 +7,11 @@ namespace Pgo2Aot
 {
     internal sealed class Program
     {
-        private static int Main(string[] args) =>
-            Parser.Default.ParseArguments<ConvertOptions>(args)
-                .MapResult(RunConvert, _ => 1);
+        private static int Main(string[] args)
+        {
+            using (var parser = new Parser(settings => settings.AllowMultiInstance = true))
+                return parser.ParseArguments<ConvertOptions>(args).MapResult(RunConvert, _ => 1);
+        }
 
         private static int RunConvert(ConvertOptions options)
         {
@@ -17,7 +19,8 @@ namespace Pgo2Aot
             {
                 IReadOnlyList<ProfileEntry> sourceEntries = ProfileJsonReader.LoadAndMerge(options.Input);
                 IReadOnlyList<ProfileEntry> selectedEntries = SelectEntries(sourceEntries, options);
-                AotXmlWriter.Write(Path.GetFullPath(options.Output), selectedEntries);
+                selectedEntries = ReceiverPolicy.Budget(selectedEntries, options.MaxMethods, options.MaxIlBytes);
+                AotXmlWriter.Write(Path.GetFullPath(options.Output), selectedEntries, options.MinSiteCalls);
 
                 Console.WriteLine(
                     $"Selected {selectedEntries.Count} method(s) from {sourceEntries.Count} profile record(s) -> {options.Output}");
@@ -85,6 +88,12 @@ namespace Pgo2Aot
 
         [Option('o', "output", Required = true, HelpText = "Output pgo-aot.xml path.")]
         public string Output { get; set; } = string.Empty;
+        [Option("max-methods", HelpText = "Cap selected PGO roots after ranking; does not cap explicit roots or generic closure.")]
+        public int? MaxMethods { get; set; }
+        [Option("max-il-bytes", HelpText = "Cap summed IL bytes of selected PGO roots; unknown IL sizes are skipped.")]
+        public ulong? MaxIlBytes { get; set; }
+        [Option("min-site-calls", Default = (ulong)64, HelpText = "Minimum receiver observations for an interface-cache hint.")]
+        public ulong MinSiteCalls { get; set; }
 
         [Option("strategy", Required = true, HelpText = "Selection strategy: threshold | top | pareto.")]
         public string Strategy { get; set; } = string.Empty;

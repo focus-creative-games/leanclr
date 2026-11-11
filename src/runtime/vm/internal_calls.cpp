@@ -5,7 +5,7 @@
 #include "utils/string_builder.h"
 #include "utils/string_util.h"
 #include "metadata/metadata_name.h"
-#include "icalls/internal_call_stubs.h"
+#include "bcl/adapter.h"
 
 namespace leanclr
 {
@@ -13,22 +13,42 @@ namespace vm
 {
 
 // Static maps for internal call functions
-static utils::HashMap<const char*, ManagedMethodPointer, utils::CStrHasher, utils::CStrCompare> g_liteInternalCallMap;
-static utils::HashMap<const char*, InternalCallRegistry, utils::CStrHasher, utils::CStrCompare> g_internalCallMap;
-static utils::HashMap<const char*, InternalCallInvoker, utils::CStrHasher, utils::CStrCompare> g_newobjInternalCallMap;
+static utils::HashMap<const char*, ManagedMethodPointer, utils::CStrHasher, utils::CStrCompare>& get_g_liteInternalCallMap()
+{
+    static utils::HashMap<const char*, ManagedMethodPointer, utils::CStrHasher, utils::CStrCompare> value;
+    return value;
+}
+
+static utils::HashMap<const char*, InternalCallRegistry, utils::CStrHasher, utils::CStrCompare>& get_g_internalCallMap()
+{
+    static utils::HashMap<const char*, InternalCallRegistry, utils::CStrHasher, utils::CStrCompare> value;
+    return value;
+}
+
+static utils::HashMap<const char*, InternalCallInvoker, utils::CStrHasher, utils::CStrCompare>& get_g_newobjInternalCallMap()
+{
+    static utils::HashMap<const char*, InternalCallInvoker, utils::CStrHasher, utils::CStrCompare> value;
+    return value;
+}
+
 static utils::Vector<InternalCallInvoker> g_internalCallInvokerIdList;
-static utils::HashMap<InternalCallInvoker, uint16_t> g_internalCallInvokerIdMap;
+
+static utils::HashMap<InternalCallInvoker, uint16_t>& get_g_internalCallInvokerIdMap()
+{
+    static utils::HashMap<InternalCallInvoker, uint16_t> value;
+    return value;
+}
 
 void InternalCalls::register_lite_internal_call(const char* name, ManagedMethodPointer func)
 {
-    assert(g_liteInternalCallMap.find(name) == g_liteInternalCallMap.end() && "Lite internal call already registered");
-    g_liteInternalCallMap[name] = func;
+    assert(get_g_liteInternalCallMap().find(name) == get_g_liteInternalCallMap().end() && "Lite internal call already registered");
+    get_g_liteInternalCallMap()[name] = func;
 }
 
 ManagedMethodPointer InternalCalls::get_lite_internal_call(const char* name)
 {
-    auto it = g_liteInternalCallMap.find(name);
-    if (it != g_liteInternalCallMap.end())
+    auto it = get_g_liteInternalCallMap().find(name);
+    if (it != get_g_liteInternalCallMap().end())
         return it->second;
 
     // Fallback: trim parameter list and retry with "Type::Method" key.
@@ -39,8 +59,8 @@ ManagedMethodPointer InternalCalls::get_lite_internal_call(const char* name)
         short_name.append_cstr(name, static_cast<size_t>(params_start - name));
         short_name.sure_null_terminator_but_not_append();
 
-        it = g_liteInternalCallMap.find(short_name.get_const_chars());
-        if (it != g_liteInternalCallMap.end())
+        it = get_g_liteInternalCallMap().find(short_name.get_const_chars());
+        if (it != get_g_liteInternalCallMap().end())
             return it->second;
     }
 
@@ -50,15 +70,15 @@ ManagedMethodPointer InternalCalls::get_lite_internal_call(const char* name)
 // Register an internal call function by name
 void InternalCalls::register_internal_call(const char* name, InternalCallFunction func, InternalCallInvoker invoker)
 {
-    assert(g_internalCallMap.find(name) == g_internalCallMap.end() && "Internal call already registered");
-    g_internalCallMap[name] = InternalCallRegistry{func, invoker};
+    assert(get_g_internalCallMap().find(name) == get_g_internalCallMap().end() && "Internal call already registered");
+    get_g_internalCallMap()[name] = InternalCallRegistry{func, invoker};
 }
 
 // Get internal call by name
 const InternalCallRegistry* InternalCalls::get_internal_call(const char* name)
 {
-    auto it = g_internalCallMap.find(name);
-    if (it != g_internalCallMap.end())
+    auto it = get_g_internalCallMap().find(name);
+    if (it != get_g_internalCallMap().end())
         return &it->second;
     return nullptr;
 }
@@ -70,8 +90,8 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
     utils::Utf8StringBuilder sb;
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
-        auto it = g_internalCallMap.find(sb.get_const_chars());
-        if (it != g_internalCallMap.end())
+        auto it = get_g_internalCallMap().find(sb.get_const_chars());
+        if (it != get_g_internalCallMap().end())
             RET_OK(&it->second);
     }
 
@@ -79,8 +99,8 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
     {
         sb.clear();
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
-        auto it = g_internalCallMap.find(sb.get_const_chars());
-        if (it != g_internalCallMap.end())
+        auto it = get_g_internalCallMap().find(sb.get_const_chars());
+        if (it != get_g_internalCallMap().end())
             RET_OK(&it->second);
     }
 
@@ -90,15 +110,15 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
 // Register newobj internal call
 void InternalCalls::register_newobj_internal_call(const char* name, InternalCallInvoker invoker)
 {
-    assert(g_newobjInternalCallMap.find(name) == g_newobjInternalCallMap.end() && "Newobj internal call already registered");
-    g_newobjInternalCallMap[name] = invoker;
+    assert(get_g_newobjInternalCallMap().find(name) == get_g_newobjInternalCallMap().end() && "Newobj internal call already registered");
+    get_g_newobjInternalCallMap()[name] = invoker;
 }
 
 // Get newobj internal call by name
 InternalCallInvoker InternalCalls::get_newobj_internal_call(const char* name)
 {
-    auto it = g_newobjInternalCallMap.find(name);
-    if (it != g_newobjInternalCallMap.end())
+    auto it = get_g_newobjInternalCallMap().find(name);
+    if (it != get_g_newobjInternalCallMap().end())
         return it->second;
     return nullptr;
 }
@@ -111,8 +131,8 @@ RtResult<InternalCallInvoker> InternalCalls::get_newobj_internal_call_by_method(
     {
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
         const char* fullName = sb.get_const_chars();
-        auto it = g_newobjInternalCallMap.find(fullName);
-        if (it != g_newobjInternalCallMap.end())
+        auto it = get_g_newobjInternalCallMap().find(fullName);
+        if (it != get_g_newobjInternalCallMap().end())
             RET_OK(it->second);
     }
 
@@ -121,8 +141,8 @@ RtResult<InternalCallInvoker> InternalCalls::get_newobj_internal_call_by_method(
         sb.clear();
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
         const char* nameOnly = sb.get_const_chars();
-        auto it = g_newobjInternalCallMap.find(nameOnly);
-        if (it != g_newobjInternalCallMap.end())
+        auto it = get_g_newobjInternalCallMap().find(nameOnly);
+        if (it != get_g_newobjInternalCallMap().end())
             RET_OK(it->second);
     }
 
@@ -132,8 +152,8 @@ RtResult<InternalCallInvoker> InternalCalls::get_newobj_internal_call_by_method(
 // Get ID for an internal call invoker (with registration if needed)
 uint16_t InternalCalls::register_internal_call_invoker_id(InternalCallInvoker invoker)
 {
-    auto it = g_internalCallInvokerIdMap.find(invoker);
-    if (it != g_internalCallInvokerIdMap.end())
+    auto it = get_g_internalCallInvokerIdMap().find(invoker);
+    if (it != get_g_internalCallInvokerIdMap().end())
         return it->second;
 
     uint16_t id = static_cast<uint16_t>(g_internalCallInvokerIdList.size());
@@ -145,7 +165,7 @@ uint16_t InternalCalls::register_internal_call_invoker_id(InternalCallInvoker in
     }
 
     g_internalCallInvokerIdList.push_back(invoker);
-    g_internalCallInvokerIdMap[invoker] = id;
+    get_g_internalCallInvokerIdMap()[invoker] = id;
     return id;
 }
 
@@ -159,15 +179,7 @@ InternalCallInvoker InternalCalls::get_internal_call_invoker_by_id_unchecked(uin
 // Initialize internal calls system
 void InternalCalls::initialize()
 {
-    utils::Vector<vm::InternalCallEntry> entries;
-    icalls::InternalCallStubs::get_internal_call_entries(entries);
-    for (auto& entry : entries)
-        register_internal_call(entry.name, entry.func, entry.invoker);
-
-    utils::Vector<vm::NewobjInternalCallEntry> newobjEntries;
-    icalls::InternalCallStubs::get_newobj_internal_call_entries(newobjEntries);
-    for (auto& entry : newobjEntries)
-        register_newobj_internal_call(entry.name, entry.invoker);
+    bcl::Adapter::register_internal_calls();
 }
 
 } // namespace vm

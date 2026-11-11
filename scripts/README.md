@@ -31,6 +31,20 @@ Clean all outputs: `scripts\dev\clean-out.bat` (Windows) or `./scripts/dev/clean
 
 Legacy paths under `src/tests/` forward to `scripts/test/` for compatibility.
 
+Runtime builds accept `native` (default), `minimal`, or `custom`, for example
+`scripts\runtime\build.bat Release x64 minimal` or
+`./scripts/runtime/build.sh Release minimal`. All use the same Mono BCL adapter;
+the argument selects the host provider, not another runtime implementation.
+Non-native builds use `out/cmake/runtime/PORTABLE/` or `CUSTOM/` so their caches
+and artifacts do not overlap native builds. `src/runtime/CMakePresets.json`
+also supplies `mono-minimal`, `mono-native`, and `mono-custom` presets.
+See [architecture and migration](../docs/architecture.md) for capabilities and limits.
+
+Isolated performance experiments and reproducible P0/P1 measurements are under
+[`src/benchmarks`](../src/benchmarks/README.md), driven by
+`scripts/benchmarks/run_protocols.py` and `run_aot.py`. The measured report is
+[`docs/performance/p0-p1.md`](../docs/performance/p0-p1.md).
+
 ## Layout
 
 ```

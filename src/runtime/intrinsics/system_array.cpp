@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_array.h"
 
 #include "interp/eval_stack_op.h"
@@ -97,7 +99,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_array[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemArray::get_intrinsic_entries() noexcept
 {
-    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_array, sizeof(s_intrinsic_entries_system_array) / sizeof(vm::IntrinsicEntry));
+    return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_array, std::size(s_intrinsic_entries_system_array));
 }
 
 } // namespace intrinsics

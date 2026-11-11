@@ -1,0 +1,359 @@
+{
+  "schema": 1,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "unity": "D:\\UnityHubs\\2022.3.62f3",
+  "summary": [
+    {
+      "engine": "native-leanaot",
+      "workload": "arithmetic",
+      "execution": "aot",
+      "median_ns": 0.79176,
+      "min_ns": 0.78752,
+      "max_ns": 1.19162
+    },
+    {
+      "engine": "native-leanaot",
+      "workload": "calls",
+      "execution": "aot",
+      "median_ns": 0.98842,
+      "min_ns": 0.98696,
+      "max_ns": 1.4366
+    },
+    {
+      "engine": "native-leanaot",
+      "workload": "properties",
+      "execution": "aot",
+      "median_ns": 0.78766,
+      "min_ns": 0.78702,
+      "max_ns": 1.1417
+    },
+    {
+      "engine": "native-leanaot",
+      "workload": "array",
+      "execution": "aot",
+      "median_ns": 0.78816,
+      "min_ns": 0.78714,
+      "max_ns": 0.84672
+    },
+    {
+      "engine": "native-leanaot",
+      "workload": "interfaces",
+      "execution": "aot",
+      "median_ns": 4.35662,
+      "min_ns": 4.25024,
+      "max_ns": 4.51362
+    },
+    {
+      "engine": "native-leanaot",
+      "workload": "structs",
+      "execution": "aot",
+      "median_ns": 5.18018,
+      "min_ns": 5.11974,
+      "max_ns": 5.99416
+    },
+    {
+      "engine": "native-leanaot",
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "median_ns": 16.18368,
+      "min_ns": 15.74664,
+      "max_ns": 18.34582
+    },
+    {
+      "engine": "native-leanaot",
+      "workload": "exceptions",
+      "execution": "interpreter",
+      "median_ns": 33.84392,
+      "min_ns": 32.0477,
+      "max_ns": 35.39088
+    },
+    {
+      "engine": "native-cpp",
+      "workload": "arithmetic",
+      "execution": "cpp-reference",
+      "median_ns": 0.82204,
+      "min_ns": 0.78798,
+      "max_ns": 1.2552
+    },
+    {
+      "engine": "native-cpp",
+      "workload": "calls",
+      "execution": "cpp-reference",
+      "median_ns": 0.8187,
+      "min_ns": 0.78776,
+      "max_ns": 1.06894
+    },
+    {
+      "engine": "native-cpp",
+      "workload": "properties",
+      "execution": "cpp-reference",
+      "median_ns": 0.80854,
+      "min_ns": 0.78704,
+      "max_ns": 1.10168
+    },
+    {
+      "engine": "native-cpp",
+      "workload": "array",
+      "execution": "cpp-reference",
+      "median_ns": 0.8036,
+      "min_ns": 0.78722,
+      "max_ns": 0.9355
+    },
+    {
+      "engine": "native-cpp",
+      "workload": "interfaces",
+      "execution": "cpp-reference",
+      "median_ns": 1.6391,
+      "min_ns": 1.57394,
+      "max_ns": 2.1396
+    },
+    {
+      "engine": "native-cpp",
+      "workload": "structs",
+      "execution": "cpp-reference",
+      "median_ns": 1.41328,
+      "min_ns": 1.3768,
+      "max_ns": 1.9287
+    },
+    {
+      "engine": "native-cpp",
+      "workload": "generics",
+      "execution": "cpp-reference",
+      "median_ns": 0.7876,
+      "min_ns": 0.78692,
+      "max_ns": 0.79094
+    },
+    {
+      "engine": "native-il2cpp",
+      "workload": "arithmetic",
+      "execution": "il2cpp",
+      "median_ns": 0.79592,
+      "min_ns": 0.78786,
+      "max_ns": 0.82928
+    },
+    {
+      "engine": "native-il2cpp",
+      "workload": "calls",
+      "execution": "il2cpp",
+      "median_ns": 4.58712,
+      "min_ns": 4.56164,
+      "max_ns": 4.70458
+    },
+    {
+      "engine": "native-il2cpp",
+      "workload": "properties",
+      "execution": "il2cpp",
+      "median_ns": 0.79066,
+      "min_ns": 0.78672,
+      "max_ns": 0.84294
+    },
+    {
+      "engine": "native-il2cpp",
+      "workload": "array",
+      "execution": "il2cpp",
+      "median_ns": 0.78798,
+      "min_ns": 0.78656,
+      "max_ns": 0.81526
+    },
+    {
+      "engine": "native-il2cpp",
+      "workload": "interfaces",
+      "execution": "il2cpp",
+      "median_ns": 4.22744,
+      "min_ns": 4.03388,
+      "max_ns": 4.63058
+    },
+    {
+      "engine": "native-il2cpp",
+      "workload": "structs",
+      "execution": "il2cpp",
+      "median_ns": 5.74264,
+      "min_ns": 5.71592,
+      "max_ns": 7.65922
+    },
+    {
+      "engine": "native-il2cpp",
+      "workload": "generics",
+      "execution": "il2cpp",
+      "median_ns": 3.02948,
+      "min_ns": 2.95906,
+      "max_ns": 4.09402
+    },
+    {
+      "engine": "native-il2cpp",
+      "workload": "exceptions",
+      "execution": "il2cpp",
+      "median_ns": 4.55954,
+      "min_ns": 4.4139,
+      "max_ns": 5.62096
+    },
+    {
+      "engine": "wasm-leanaot",
+      "workload": "arithmetic",
+      "execution": "aot",
+      "median_ns": 0.122,
+      "min_ns": 0.10616,
+      "max_ns": 0.17366
+    },
+    {
+      "engine": "wasm-leanaot",
+      "workload": "calls",
+      "execution": "aot",
+      "median_ns": 0.81188,
+      "min_ns": 0.80906,
+      "max_ns": 0.8237
+    },
+    {
+      "engine": "wasm-leanaot",
+      "workload": "properties",
+      "execution": "aot",
+      "median_ns": 0.10042,
+      "min_ns": 0.09998,
+      "max_ns": 0.10552
+    },
+    {
+      "engine": "wasm-leanaot",
+      "workload": "array",
+      "execution": "aot",
+      "median_ns": 0.79302,
+      "min_ns": 0.79048,
+      "max_ns": 0.8499
+    },
+    {
+      "engine": "wasm-leanaot",
+      "workload": "interfaces",
+      "execution": "aot",
+      "median_ns": 7.13132,
+      "min_ns": 6.95898,
+      "max_ns": 7.34262
+    },
+    {
+      "engine": "wasm-leanaot",
+      "workload": "structs",
+      "execution": "aot",
+      "median_ns": 0.79592,
+      "min_ns": 0.79108,
+      "max_ns": 0.88264
+    },
+    {
+      "engine": "wasm-leanaot",
+      "workload": "generics",
+      "execution": "aot+interpreter",
+      "median_ns": 19.7963,
+      "min_ns": 19.62578,
+      "max_ns": 20.59062
+    },
+    {
+      "engine": "wasm-leanaot",
+      "workload": "exceptions",
+      "execution": "interpreter",
+      "median_ns": 31.6772,
+      "min_ns": 30.58218,
+      "max_ns": 33.14222
+    },
+    {
+      "engine": "wasm-cpp",
+      "workload": "arithmetic",
+      "execution": "cpp-reference",
+      "median_ns": 0.83294,
+      "min_ns": 0.79464,
+      "max_ns": 0.89154
+    },
+    {
+      "engine": "wasm-cpp",
+      "workload": "calls",
+      "execution": "cpp-reference",
+      "median_ns": 1.07132,
+      "min_ns": 1.04412,
+      "max_ns": 1.08504
+    },
+    {
+      "engine": "wasm-cpp",
+      "workload": "properties",
+      "execution": "cpp-reference",
+      "median_ns": 0.79554,
+      "min_ns": 0.78838,
+      "max_ns": 0.80706
+    },
+    {
+      "engine": "wasm-cpp",
+      "workload": "array",
+      "execution": "cpp-reference",
+      "median_ns": 0.86912,
+      "min_ns": 0.85266,
+      "max_ns": 0.91158
+    },
+    {
+      "engine": "wasm-cpp",
+      "workload": "interfaces",
+      "execution": "cpp-reference",
+      "median_ns": 1.96874,
+      "min_ns": 1.88022,
+      "max_ns": 2.09462
+    },
+    {
+      "engine": "wasm-cpp",
+      "workload": "structs",
+      "execution": "cpp-reference",
+      "median_ns": 11.9382,
+      "min_ns": 11.30242,
+      "max_ns": 13.00628
+    },
+    {
+      "engine": "wasm-cpp",
+      "workload": "generics",
+      "execution": "cpp-reference",
+      "median_ns": 1.05948,
+      "min_ns": 0.99436,
+      "max_ns": 1.22266
+    }
+  ],
+  "artifacts": {
+    "native-leanaot": {
+      "bytes": 871424,
+      "gzip_bytes": 330602
+    },
+    "native-cpp": {
+      "bytes": 13312,
+      "gzip_bytes": 5955
+    },
+    "native-il2cpp": {
+      "bytes": 7073792,
+      "gzip_bytes": 2842690
+    },
+    "wasm-leanaot": {
+      "bytes": 824509,
+      "gzip_bytes": 264157,
+      "code_section_bytes": 660520
+    },
+    "wasm-cpp": {
+      "bytes": 15212,
+      "gzip_bytes": 7758,
+      "code_section_bytes": 13658
+    }
+  },
+  "source_sha256": "94d22c777ca02d5c500593f20c6429a5b302b2b20d7f15b7e9ee0bb5167d21eb",
+  "notes": [
+    "IL2CPP uses Unity BCL after UnityLinker; LeanAOT uses repository Mono BCL.",
+    "LeanAOT generic benchmark has an interpreter helper; exception benchmark runs in interpreter.",
+    "IL2CPP honors NoInlining; current LeanAOT output does not emit a corresponding attribute.",
+    "C++ is a computational reference, not a managed semantic equivalent.",
+    "Process wall time includes workload, warmup, verification and output; it is NOT startup time.",
+    "Native executables and Wasm bytes exclude external BCL/metadata/resources; do not compare as complete deployment sizes.",
+    "IL2CPP/WebGL end-to-end timing is not measured by this runner."
+  ],
+  "source_hashes": {
+    "src\\benchmarks\\aot-baseline\\aot.xml": "90663fa3d5d44d578f6956b4092aff3625e5355f303645569358169121f138f6",
+    "src\\benchmarks\\aot-baseline\\Benchmarks.cs": "94d22c777ca02d5c500593f20c6429a5b302b2b20d7f15b7e9ee0bb5167d21eb",
+    "src\\benchmarks\\aot-baseline\\CMakeLists.txt": "7041dd675dfc085e6b0ca28cd60fd3fa5807a3ee8d79da2066421dfdfb0ba7a4",
+    "src\\benchmarks\\aot-baseline\\il2cpp-thread-hook.cpp": "8aeda1858025ca1c4f3c75a414484379d8321511fb4e3005352b6927fded38ba",
+    "src\\benchmarks\\aot-baseline\\main.cpp": "f790f9f18f0c3c25fd8956ad9ccfc0a80a420f40ec7070cc638043e4b45d86d4",
+    "src\\benchmarks\\aot-baseline\\nodefs.js": "54a5e8940388ec5b3567ac81efea1251b19e1e097674fb27ab84b3ddc16d1919",
+    "src\\benchmarks\\aot-baseline\\reference.cpp": "a04410383f1bcfecb5a7c54aeb6076d5dec16af0d7434ab493427a45a850f577"
+  },
+  "cpu": "",
+  "result_header_sha256": "33a95f48e0f2c08dec77edcefa29f8d5e92665cbeb2d517a4d55b938bdc108a1",
+  "recorded_samples": 266,
+  "raw_samples": "out/performance/aot/results.json",
+  "compiler": []
+}

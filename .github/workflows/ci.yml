@@ -1,37 +1,199 @@
-name: CI Test
+name: Shared runtime and Mono compositions
 
 on:
-  # push:
-  #   branches: [ "main", "master" ]
-  # pull_request:
-  #   branches: [ "main", "master" ]
+  push:
+    branches: [core, mono, main, master]
+  pull_request:
+    branches: [core, mono, main, master]
   workflow_dispatch:
 
+permissions:
+  contents: read
+
+concurrency:
+  group: runtime-ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  NATIVE_TARGETS: public-c public-cpp host-capabilities default-host-services host-services core-boundary foundation portable-memory integer-math bit-scan il-bounds string-allocation command-line aligned-allocation lifecycle container-allocation il-fuzz-smoke
+  NATIVE_TESTS: '^(public-c|public-cpp|public-cpp20|host-capabilities|environment-exit|default-host-services|host-services|core-boundary|layer-boundaries|foundation|portable-memory|integer-math|bit-scan|il-bounds|string-allocation|command-line|aligned-allocation|lifecycle-failure|lifecycle-before-start|container-allocation|il-fuzz-smoke)$'
+
 jobs:
-  build-and-test:
-    if: false
-    runs-on: ubuntu-latest
+  aot-features:
+    name: AOT features (${{ matrix.protocol }})
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {protocol: result, flags: ''}
+          - {protocol: lightweight, flags: '--lightweight-returns'}
+          - {protocol: packed, flags: '--packed-int32-returns'}
+          - {protocol: packed-lightweight, flags: '--packed-int32-returns --lightweight-returns'}
+          - {protocol: status-out, flags: '--status-out-returns'}
+          - {protocol: status-out-lightweight, flags: '--status-out-returns --lightweight-returns'}
+          - {protocol: status-out-packed, flags: '--status-out-returns --packed-int32-returns'}
+          - {protocol: all-returns, flags: '--status-out-returns --packed-int32-returns --lightweight-returns'}
+    runs-on: windows-2022
+    timeout-minutes: 120
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Install dependencies
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/checkout@v4
+        with:
+          repository: emscripten-core/emsdk
+          ref: '4.0.12'
+          path: .emsdk
+      - name: Install pinned Wasm toolchain
+        shell: pwsh
         run: |
-          sudo apt-get update
-          sudo apt-get install -y cmake g++
-
-      - name: Make scripts executable
+          .emsdk/emsdk.bat install 4.0.12
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          .emsdk/emsdk.bat activate 4.0.12
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+      - name: Verify native and Wasm AOT/fallback paths
+        run: python scripts/test/aot-features.py --target all --emsdk .emsdk ${{ matrix.flags }}
+      - name: Verify debug Result and frame invariants
+        run: python scripts/test/aot-features.py --target native --config Debug ${{ matrix.flags }}
+      - name: Verify 32-bit native context and snapshot ABI
+        run: python scripts/test/aot-features.py --target native --arch Win32 ${{ matrix.flags }}
+      - name: Verify canonical reference bodies with two-entry interface caches
+        run: python scripts/test/global-generics.py --share-reference-generics --interface-call-cache --interface-cache-entries 2 --target all --emsdk .emsdk ${{ matrix.flags }}
+      - name: Verify two-entry cache Debug and 32-bit layouts
         run: |
-          chmod +x scripts/ci.sh
-          chmod +x scripts/test/build-all.sh
-          chmod +x scripts/test/run.sh
-          chmod +x scripts/test/basic-tester/build.sh
-
-      - name: Build and run tests
-        run: ./scripts/ci.sh Release
-
-      - name: Notify Feishu on failure
+          python scripts/test/global-generics.py --share-reference-generics --interface-call-cache --interface-cache-entries 2 --target native --config Debug ${{ matrix.flags }}
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          python scripts/test/global-generics.py --share-reference-generics --interface-call-cache --interface-cache-entries 2 --target native --arch Win32 ${{ matrix.flags }}
+      - name: Verify single-entry interface cache control
+        run: python scripts/test/global-generics.py --interface-call-cache --output out/interface-dispatch/cached --target all --emsdk .emsdk ${{ matrix.flags }}
+      - name: Verify cache-disabled native and Wasm control
+        run: python scripts/test/global-generics.py --interface-cache-entries 2 --output out/interface-dispatch/baseline --target all --emsdk .emsdk ${{ matrix.flags }}
+      - name: Verify scalar integer ABI in Wasm Release and Debug
+        run: python scripts/benchmarks/compare_int32_returns.py --abi-only --emsdk .emsdk
+      - name: Verify receiver feedback, stale profiles and budgets
+        if: matrix.protocol == 'result'
+        run: python scripts/test/pgo-caches.py --emsdk .emsdk
+      - name: Verify bounded receiver profiler
+        if: matrix.protocol == 'result'
+        run: |
+          cmake -S src/tests/runtime-regressions -B out/ci-profile -A x64 -DLEANCLR_ENABLE_PROFILE=ON
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build out/ci-profile --config Release --target profile-receivers --parallel 4
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          ctest --test-dir out/ci-profile -C Release -R '^profile-receivers$' --output-on-failure
+      - uses: actions/upload-artifact@v4
         if: failure()
+        with:
+          name: aot-feature-failures-${{ matrix.protocol }}
+          path: |
+            out/aot-features*/*.log
+            out/global-generics/*/*.log
+            out/interface-dispatch/baseline/*/*.log
+            out/interface-dispatch/cached/*/*.log
+            out/pgo-cache-validation/*.log
+            out/pgo-cache-*/*/*.log
+
+  native:
+    name: ${{ matrix.name }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - {name: Windows x64 native, os: windows-2022, arch: x64, host: NATIVE}
+          - {name: Windows x86 native, os: windows-2022, arch: Win32, host: NATIVE}
+          - {name: Linux x64 native, os: ubuntu-24.04, arch: native, host: NATIVE}
+          - {name: Linux ARM64 native, os: ubuntu-24.04-arm, arch: native, host: NATIVE}
+          - {name: Windows x64 minimal, os: windows-2022, arch: x64, host: PORTABLE}
+          - {name: Linux x64 minimal, os: ubuntu-24.04, arch: native, host: PORTABLE}
+          - {name: Windows x64 C++20, os: windows-2022, arch: x64, host: NATIVE, standard: '20'}
+          - {name: Linux x64 C++20, os: ubuntu-24.04, arch: native, host: NATIVE, standard: '20'}
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 20
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure
         run: |
-          MSG="{\"msg_type\":\"text\",\"content\":{\"text\":\"[CI] Automated test failed.\\nRepo: ${{ github.repository }}\\nCommit: ${{ github.sha }}\\nWorkflow: ${{ github.workflow }}\\nJob: ${{ github.job }}\\nPlease check and fix it.\"}}"
-          curl -X POST -H "Content-Type: application/json" -d "$MSG" "${{ secrets.FEISHU_ROBOT_NOTIFY_URL }}"
+          args=()
+          if [[ '${{ matrix.arch }}' != native ]]; then args+=(-A '${{ matrix.arch }}'); fi
+          cmake -S src/tests/runtime-regressions -B out/ci -DCMAKE_BUILD_TYPE=Release -DLEANCLR_BCL_ADAPTER=MONO -DLEANCLR_HOST=${{ matrix.host }} -DCMAKE_CXX_STANDARD=${{ matrix.standard || '17' }} -DLEANCLR_TEST_CPP20_CONSUMER=ON "${args[@]}"
+      - name: Build runtime and standalone regressions
+        run: cmake --build out/ci --config Release --parallel 2 --target $NATIVE_TARGETS public-cpp20
+      - name: Test on target architecture
+        run: ctest --test-dir out/ci -C Release --output-on-failure -R "$NATIVE_TESTS"
+      - name: Verify experimental return protocols (not performance thresholds)
+        if: matrix.host == 'NATIVE' && matrix.arch != 'Win32'
+        run: |
+          args=()
+          if [[ '${{ matrix.arch }}' != native ]]; then args+=(-A '${{ matrix.arch }}'); fi
+          cmake -S src/benchmarks/result-abi -B out/protocols -DCMAKE_BUILD_TYPE=Release "${args[@]}"
+          cmake --build out/protocols --config Release --parallel 2
+          ctest --test-dir out/protocols -C Release --output-on-failure
+
+  custom:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - run: cmake -S src/tests/runtime-regressions -B out/custom -DCMAKE_BUILD_TYPE=Release -DLEANCLR_HOST=CUSTOM -DLEANCLR_REGRESSION_PUBLIC_API_ONLY=ON
+      - run: cmake --build out/custom --parallel 2
+      - run: ctest --test-dir out/custom --output-on-failure
+
+  wasm32:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: emscripten-core/emsdk
+          ref: '4.0.12'
+          path: .emsdk
+      - name: Install pinned toolchain
+        run: |
+          .emsdk/emsdk install 4.0.12
+          .emsdk/emsdk activate 4.0.12
+      - name: Build and run wasm in Node
+        shell: bash
+        run: |
+          source .emsdk/emsdk_env.sh
+          emcmake cmake -S src/tests/runtime-regressions -B out/wasm -DCMAKE_BUILD_TYPE=Release -DLEANCLR_HOST=PORTABLE
+          cmake --build out/wasm --parallel 2 --target $NATIVE_TARGETS
+          ctest --test-dir out/wasm --output-on-failure -R "$NATIVE_TESTS"
+          emcmake cmake -S src/benchmarks/result-abi -B out/protocols-wasm -DCMAKE_BUILD_TYPE=Release -DCMAKE_CROSSCOMPILING_EMULATOR=node
+          cmake --build out/protocols-wasm --parallel 2
+          ctest --test-dir out/protocols-wasm --output-on-failure
+
+  sanitize-and-fuzz:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    env:
+      CC: clang
+      CXX: clang++
+      ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
+      UBSAN_OPTIONS: halt_on_error=1:print_stacktrace=1
+    steps:
+      - uses: actions/checkout@v4
+      - name: Configure instrumented runtime
+        run: cmake -S src/tests/runtime-regressions -B out/sanitize -DCMAKE_BUILD_TYPE=RelWithDebInfo -DLEANCLR_SANITIZERS=address,undefined -DLEANCLR_BUILD_IL_FUZZER=ON
+      - run: cmake --build out/sanitize --parallel 2 --target ${NATIVE_TARGETS/il-fuzz-smoke/} il-fuzz
+      - run: ctest --test-dir out/sanitize --output-on-failure -R "$NATIVE_TESTS"
+      - name: Fuzz malformed IL and exception ranges
+        run: |
+          mkdir -p out/fuzz-corpus out/fuzz-artifacts
+          cp src/tests/runtime-regressions/fuzz-corpus/* out/fuzz-corpus/
+          out/sanitize/il-fuzz out/fuzz-corpus -max_total_time=120 -max_len=4096 -timeout=5 -rss_limit_mb=2048 -artifact_prefix=out/fuzz-artifacts/
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: sanitizer-and-fuzz-failures
+          path: |
+            out/fuzz-artifacts/
+            out/sanitize/Testing/Temporary/LastTest.log
+          if-no-files-found: ignore

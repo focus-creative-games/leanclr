@@ -1,13 +1,13 @@
 #pragma once
 
 #include <unordered_set>
-#include "alloc/general_allocator.h"
+#include "alloc/stl_allocator.h"
 
 namespace leanclr
 {
 namespace utils
 {
-template <typename K, class _Hasher = std::hash<K>, class _Keyeq = std::equal_to<K>, class _Allocator = std::allocator<K>>
+template <typename K, class _Hasher = std::hash<K>, class _Keyeq = std::equal_to<K>, class _Allocator = alloc::StlAllocator<K>>
 using HashSet = std::unordered_set<K, _Hasher, _Keyeq, _Allocator>;
 } // namespace utils
 } // namespace leanclr

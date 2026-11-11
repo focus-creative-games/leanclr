@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "interop.h"
 
 #include "vm/class.h"
@@ -6,9 +8,9 @@
 #include "vm/field.h"
 #include "vm/rt_array.h"
 #include "metadata/module_def.h"
-#include "platform/bcrypt.h"
-#include "platform/kernel32.h"
-#include "platform/rt_sys.h"
+#include "host/services.h"
+#include "bcl/mono/platform/kernel32.h"
+#include "bcl/mono/platform/rt_sys.h"
 #include "vmutils/stringbuilder.h"
 #include "vmutils/safehandle.h"
 
@@ -16,6 +18,28 @@ namespace leanclr
 {
 namespace icalls
 {
+
+RtResult<uint32_t> Interop::bcrypt_gen_random(intptr_t algo_handle, uint8_t* buffer, int32_t length, int32_t flags) noexcept
+{
+    (void)algo_handle;
+    (void)flags;
+    if (length < 0 || (!buffer && length != 0))
+        RET_OK(uint32_t(0xC000000D));
+    RET_OK(host::Services::random_bytes(buffer, static_cast<size_t>(length), host::RandomKind::Cryptographic) ? uint32_t(0) : uint32_t(0xC0000001));
+}
+
+/// @icall: Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)
+RtResultVoid bcrypt_gen_random_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                       interp::RtStackObject* ret) noexcept
+{
+    intptr_t algo_handle = interp::EvalStackOp::get_param<intptr_t>(params, 0);
+    uint8_t* buffer = interp::EvalStackOp::get_param<uint8_t*>(params, 1);
+    int32_t length = interp::EvalStackOp::get_param<int32_t>(params, 2);
+    int32_t flags = interp::EvalStackOp::get_param<int32_t>(params, 3);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, result, Interop::bcrypt_gen_random(algo_handle, buffer, length, flags));
+    EvalStackOp::set_return(ret, result);
+    RET_VOID_OK();
+}
 
 #if LEANCLR_PLATFORM_POSIX
 RtResult<int32_t> Interop::double_to_string(double value, const char* format, char* buffer, int32_t buffer_size) noexcept
@@ -98,7 +122,10 @@ RtResult<uint32_t> Interop::sys_get_e_uid() noexcept
 
 RtResultVoid Interop::sys_get_non_cryptographically_secure_random_bytes(uint8_t* buffer, int32_t length) noexcept
 {
-    platform::RtSys::get_non_cryptographically_secure_random_bytes(buffer, length);
+    if (length < 0)
+        RET_ERR(RtErr::ArgumentOutOfRange);
+    if (!host::Services::random_bytes(buffer, static_cast<size_t>(length), host::RandomKind::NonCryptographic))
+        RET_ERR(RtErr::ExecutionEngine);
     RET_VOID_OK();
 }
 
@@ -499,25 +526,6 @@ RtResultVoid sys_utimes_invoker(metadata::RtManagedMethodPointer, const metadata
 #endif
 
 #if LEANCLR_PLATFORM_WIN
-RtResult<uint32_t> Interop::bcrypt_gen_random(intptr_t algo_handle, uint8_t* buffer, int32_t length, int32_t flags) noexcept
-{
-    platform::Bcrypt::gen_random(algo_handle, buffer, length, flags);
-    RET_OK(0);
-}
-
-/// @icall: Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)
-RtResultVoid bcrypt_gen_random_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                       interp::RtStackObject* ret) noexcept
-{
-    intptr_t algo_handle = interp::EvalStackOp::get_param<intptr_t>(params, 0);
-    uint8_t* buffer = interp::EvalStackOp::get_param<uint8_t*>(params, 1);
-    int32_t length = interp::EvalStackOp::get_param<int32_t>(params, 2);
-    int32_t flags = interp::EvalStackOp::get_param<int32_t>(params, 3);
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(uint32_t, result, Interop::bcrypt_gen_random(algo_handle, buffer, length, flags));
-    EvalStackOp::set_return(ret, result);
-    RET_VOID_OK();
-}
-
 RtResult<bool> Interop::kernel32_set_thread_error_mode(uint32_t mode, uint32_t& old_mode) noexcept
 {
     return platform::Kernel32::set_thread_error_mode(mode, old_mode);
@@ -674,7 +682,8 @@ RtResultVoid kernel32_load_library_ex_invoker(metadata::RtManagedMethodPointer, 
 // }
 
 // /// @icall:
-// /// Interop/Kernel32::GetFileMUIPath(System.UInt32,System.String,System.Text.StringBuilder,System.Int32&,System.Text.StringBuilder,System.Int32&,System.Int64&)
+// ///
+// Interop/Kernel32::GetFileMUIPath(System.UInt32,System.String,System.Text.StringBuilder,System.Int32&,System.Text.StringBuilder,System.Int32&,System.Int64&)
 // RtResultVoid kernel32_get_file_mui_path_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
 //                                                 interp::RtStackObject* ret) noexcept
 // {
@@ -1013,6 +1022,9 @@ RtResultVoid kernel32_set_file_information_by_handle_invoker(metadata::RtManaged
 #endif
 
 static vm::InternalCallEntry s_interop_internal_call_entries[] = {
+    {"Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)", (vm::InternalCallFunction)&Interop::bcrypt_gen_random,
+     bcrypt_gen_random_invoker},
+
 #if LEANCLR_PLATFORM_POSIX
     {"Interop/Sys::DoubleToString(System.Double,System.Byte*,System.Byte*,System.Int32)", (vm::InternalCallFunction)&Interop::double_to_string,
      double_to_string_invoker},
@@ -1055,8 +1067,6 @@ static vm::InternalCallEntry s_interop_internal_call_entries[] = {
     {"Interop/Sys::UTimes(System.String,Interop/Sys/TimeValPair&)", (vm::InternalCallFunction)&Interop::sys_utimes, sys_utimes_invoker},
 #endif
 #if LEANCLR_PLATFORM_WIN
-    {"Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)", (vm::InternalCallFunction)&Interop::bcrypt_gen_random,
-     bcrypt_gen_random_invoker},
     {"Interop/Kernel32::SetThreadErrorMode(System.UInt32,System.UInt32&)", (vm::InternalCallFunction)&Interop::kernel32_set_thread_error_mode,
      kernel32_set_thread_error_mode_invoker},
     {"Interop/Kernel32::GetFileAttributesExPrivate(System.String,Interop/Kernel32/GET_FILEEX_INFO_LEVELS,Interop/Kernel32/WIN32_FILE_ATTRIBUTE_DATA&)",
@@ -1111,7 +1121,7 @@ static vm::InternalCallEntry s_interop_internal_call_entries[] = {
 
 utils::Span<vm::InternalCallEntry> Interop::get_internal_call_entries() noexcept
 {
-    return utils::Span<vm::InternalCallEntry>(s_interop_internal_call_entries, sizeof(s_interop_internal_call_entries) / sizeof(vm::InternalCallEntry));
+    return utils::Span<vm::InternalCallEntry>(s_interop_internal_call_entries, std::size(s_interop_internal_call_entries));
 }
 } // namespace icalls
 } // namespace leanclr

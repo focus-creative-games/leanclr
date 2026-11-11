@@ -1,3 +1,4 @@
+#include "bcl/mono/managed_layouts.h"
 #include "build_config.h"
 #include "metadata/rt_metadata.h"
 
@@ -27,15 +28,11 @@ using NativeReadOrWrite = int32_t (*)(intptr_t buffer, int32_t length, intptr_t 
 
 class DeflateStream
 {
-public:
+  public:
     static constexpr int32_t kArgumentError = -10;
     static constexpr int32_t kIoError = -11;
 
-    static DeflateStream* Create(
-        CompressMode mode,
-        bool gzip,
-        NativeReadOrWrite callback,
-        void* user_data)
+    static DeflateStream* Create(CompressMode mode, bool gzip, NativeReadOrWrite callback, void* user_data)
     {
         if (callback == nullptr)
         {
@@ -49,9 +46,8 @@ public:
 
         const bool compress = mode == CompressMode::Compress;
         const int window_bits = gzip ? 31 : -15;
-        const int init_status = compress
-            ? deflateInit2(zs, Z_DEFAULT_COMPRESSION, Z_DEFLATED, window_bits, 8, Z_DEFAULT_STRATEGY)
-            : inflateInit2(zs, window_bits);
+        const int init_status =
+            compress ? deflateInit2(zs, Z_DEFAULT_COMPRESSION, Z_DEFLATED, window_bits, 8, Z_DEFAULT_STRATEGY) : inflateInit2(zs, window_bits);
 
         if (init_status != Z_OK)
         {
@@ -263,7 +259,7 @@ public:
     DeflateStream(const DeflateStream&) = delete;
     DeflateStream& operator=(const DeflateStream&) = delete;
 
-private:
+  private:
     static constexpr int32_t kIoBufferSize = 4096;
 
     DeflateStream() = default;
@@ -351,55 +347,51 @@ private:
 
 extern "C"
 {
-intptr_t LEANCLR_PINVOKE_CALL_CDECL CreateZStream(
-    leanclr::pinvokes::CompressMode compress_mode,
-    bool gzip,
-    leanclr::pinvokes::NativeReadOrWrite freader,
-    void* data)
-{
-    leanclr::pinvokes::DeflateStream* stream =
-        leanclr::pinvokes::DeflateStream::Create(compress_mode, gzip, freader, data);
-    return reinterpret_cast<intptr_t>(stream);
-}
-
-int32_t LEANCLR_PINVOKE_CALL_CDECL Flush(intptr_t zstream)
-{
-    auto* stream = reinterpret_cast<leanclr::pinvokes::DeflateStream*>(zstream);
-    return stream->Flush();
-}
-
-int32_t LEANCLR_PINVOKE_CALL_CDECL CloseZStream(intptr_t zstream)
-{
-    auto* stream = reinterpret_cast<leanclr::pinvokes::DeflateStream*>(zstream);
-    if (stream == nullptr)
+    intptr_t LEANCLR_PINVOKE_CALL_CDECL CreateZStream(leanclr::pinvokes::CompressMode compress_mode, bool gzip, leanclr::pinvokes::NativeReadOrWrite freader,
+                                                      void* data)
     {
-        return leanclr::pinvokes::DeflateStream::kArgumentError;
+        leanclr::pinvokes::DeflateStream* stream = leanclr::pinvokes::DeflateStream::Create(compress_mode, gzip, freader, data);
+        return reinterpret_cast<intptr_t>(stream);
     }
 
-    const int32_t status = stream->Close();
-    delete stream;
-    return status;
-}
-
-int32_t LEANCLR_PINVOKE_CALL_CDECL ReadZStream(intptr_t zstream, void* buffer, int32_t count)
-{
-    auto* stream = reinterpret_cast<leanclr::pinvokes::DeflateStream*>(zstream);
-    if (stream == nullptr)
+    int32_t LEANCLR_PINVOKE_CALL_CDECL Flush(intptr_t zstream)
     {
-        return leanclr::pinvokes::DeflateStream::kArgumentError;
+        auto* stream = reinterpret_cast<leanclr::pinvokes::DeflateStream*>(zstream);
+        return stream->Flush();
     }
 
-    return stream->Read(buffer, count);
-}
-
-int32_t LEANCLR_PINVOKE_CALL_CDECL WriteZStream(intptr_t zstream, const void* buffer, int32_t count)
-{
-    auto* stream = reinterpret_cast<leanclr::pinvokes::DeflateStream*>(zstream);
-    if (stream == nullptr)
+    int32_t LEANCLR_PINVOKE_CALL_CDECL CloseZStream(intptr_t zstream)
     {
-        return leanclr::pinvokes::DeflateStream::kArgumentError;
+        auto* stream = reinterpret_cast<leanclr::pinvokes::DeflateStream*>(zstream);
+        if (stream == nullptr)
+        {
+            return leanclr::pinvokes::DeflateStream::kArgumentError;
+        }
+
+        const int32_t status = stream->Close();
+        delete stream;
+        return status;
     }
 
-    return stream->Write(buffer, count);
-}
+    int32_t LEANCLR_PINVOKE_CALL_CDECL ReadZStream(intptr_t zstream, void* buffer, int32_t count)
+    {
+        auto* stream = reinterpret_cast<leanclr::pinvokes::DeflateStream*>(zstream);
+        if (stream == nullptr)
+        {
+            return leanclr::pinvokes::DeflateStream::kArgumentError;
+        }
+
+        return stream->Read(buffer, count);
+    }
+
+    int32_t LEANCLR_PINVOKE_CALL_CDECL WriteZStream(intptr_t zstream, const void* buffer, int32_t count)
+    {
+        auto* stream = reinterpret_cast<leanclr::pinvokes::DeflateStream*>(zstream);
+        if (stream == nullptr)
+        {
+            return leanclr::pinvokes::DeflateStream::kArgumentError;
+        }
+
+        return stream->Write(buffer, count);
+    }
 }

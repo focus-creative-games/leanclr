@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_text_normalization.h"
 
 #include "normalization_tables.h"
@@ -7,9 +9,8 @@ namespace leanclr
 namespace icalls
 {
 
-RtResultVoid SystemTextNormalization::load_normalization_resource(intptr_t* props, intptr_t* mapped_chars, intptr_t* char_map_index,
-                                                                  intptr_t* helper_index, intptr_t* map_idx_to_composite,
-                                                                  intptr_t* combining_class) noexcept
+RtResultVoid SystemTextNormalization::load_normalization_resource(intptr_t* props, intptr_t* mapped_chars, intptr_t* char_map_index, intptr_t* helper_index,
+                                                                  intptr_t* map_idx_to_composite, intptr_t* combining_class) noexcept
 {
     *props = reinterpret_cast<intptr_t>(normalization_tables::props);
     *mapped_chars = reinterpret_cast<intptr_t>(normalization_tables::mapped_chars);
@@ -29,8 +30,8 @@ static RtResultVoid load_normalization_resource_invoker(metadata::RtManagedMetho
     intptr_t* helper_index = EvalStackOp::get_param<intptr_t*>(params, 3);
     intptr_t* map_idx_to_composite = EvalStackOp::get_param<intptr_t*>(params, 4);
     intptr_t* combining_class = EvalStackOp::get_param<intptr_t*>(params, 5);
-    RET_ERR_ON_FAIL(SystemTextNormalization::load_normalization_resource(props, mapped_chars, char_map_index, helper_index, map_idx_to_composite,
-                                                                         combining_class));
+    RET_ERR_ON_FAIL(
+        SystemTextNormalization::load_normalization_resource(props, mapped_chars, char_map_index, helper_index, map_idx_to_composite, combining_class));
     RET_VOID_OK();
 }
 
@@ -41,7 +42,7 @@ utils::Span<vm::InternalCallEntry> SystemTextNormalization::get_internal_call_en
          "System.IntPtr&)",
          (vm::InternalCallFunction)&SystemTextNormalization::load_normalization_resource, load_normalization_resource_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

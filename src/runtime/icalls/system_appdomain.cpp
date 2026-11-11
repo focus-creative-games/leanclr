@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_appdomain.h"
 #include "icall_base.h"
 
@@ -100,7 +102,8 @@ RtResult<vm::RtArray*> SystemAppDomain::get_assemblies(vm::RtAppDomain* this_dom
     utils::Vector<metadata::RtModuleDef*> mods;
     vm::AppDomain::get_modules(this_domain, mods);
     metadata::RtClass* cls_assembly = vm::Class::get_corlib_types().cls_reflection_assembly;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, ass_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_assembly, static_cast<int32_t>(mods.size()), "SystemAppDomain::get_assemblies"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        vm::RtArray*, ass_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(cls_assembly, static_cast<int32_t>(mods.size()), "SystemAppDomain::get_assemblies"));
     for (size_t i = 0; i < mods.size(); ++i)
     {
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionAssembly*, reflection_assembly,
@@ -448,7 +451,7 @@ utils::Span<vm::InternalCallEntry> SystemAppDomain::get_internal_call_entries() 
         {"System.AppDomain::DoUnhandledException(System.Exception)", (vm::InternalCallFunction)&SystemAppDomain::do_unhandled_exception,
          do_unhandled_exception_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

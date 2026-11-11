@@ -77,7 +77,15 @@ namespace LeanAOT.ToCpp
 
         public string FullName => _method.FullName;
 
-        public string UniqueName => _uniqueName;
+        internal string UnsharedUniqueName => _uniqueName;
+        public string UniqueName
+        {
+            get
+            {
+                var body = GlobalServices.Inst?.ReferenceSharing?.Canonicalize(_method);
+                return body == null || ReferenceEquals(body, _method) ? _uniqueName : GlobalServices.Inst.MetadataService.GetMethodDetail(body).UnsharedUniqueName;
+            }
+        }
 
         public string VirtualMethodUniqueName => $"{_uniqueName}_virtual";
 
@@ -89,7 +97,7 @@ namespace LeanAOT.ToCpp
 
         public bool IsGeneric => _isGeneric;
 
-        public ModuleDef Module => _isGeneric ? null : _methodDef.Module;
+        public ModuleDef Module => _methodDef.Module;
 
         public ModuleDef ModuleOfMethodDef => _methodDef.Module;
 
@@ -134,12 +142,17 @@ namespace LeanAOT.ToCpp
             {
                 return type;
             }
-            return MetaUtil.Inflate(type.ToTypeSig(), _gac).ToTypeDefOrRef();
+            var result = MetaUtil.Inflate(type.ToTypeSig(), _gac).ToTypeDefOrRef();
+            _originalTokens[result] = type.MDToken.Raw;
+            return result;
         }
 
         public IMethod InflateMethod(IMethod method)
         {
-            return !_isGeneric ? method : MetaUtil.InflateMethod(method, _gac);
+            if (!_isGeneric) return method;
+            var result = MetaUtil.InflateMethod(method, _gac);
+            _originalTokens[result] = method.MDToken.Raw;
+            return result;
         }
 
         public MethodSig InflateMethodSig(MethodSig methodSig)
@@ -149,8 +162,14 @@ namespace LeanAOT.ToCpp
 
         public IField InflateField(IField field)
         {
-            return !_isGeneric ? field : MetaUtil.InflateField(field, _gac);
+            if (!_isGeneric) return field;
+            var result = MetaUtil.InflateField(field, _gac);
+            _originalTokens[result] = field.MDToken.Raw;
+            return result;
         }
+        private readonly Dictionary<object, uint> _originalTokens = new Dictionary<object, uint>();
+        public uint GetMetadataToken(IMDTokenProvider value) => _originalTokens.TryGetValue(value, out uint token) ? token : value.MDToken.Raw;
+        public string WithMethodContext(string args, string context) => IsGeneric ? (args.Length == 0 ? context : args + ", " + context) : args;
 
         private string CreateFullQualifiedMethodName()
         {
@@ -204,6 +223,10 @@ namespace LeanAOT.ToCpp
             return NameUtil.StandardizeName(result.ToString());
         }
 
+        public bool UsesStatusOut => ReturnProtocol.UsesStatusOut(_retType);
+        private string OutputParameter => MethodGenerationUtil.GetAbiRelaxedTypeName(_retType) + "* __aot_ret";
+        private string WithOutput(string args) => UsesStatusOut ? (args.Length == 0 ? OutputParameter : args + ", " + OutputParameter) : args;
+
         public string CreateMethodParameters()
         {
             var typeNameService = GlobalServices.Inst.TypeNameService;
@@ -212,12 +235,13 @@ namespace LeanAOT.ToCpp
             //{
             //    paramList = paramList.Append($"{ConstStrings.MethodInfoPtrTypeName} {ConstStrings.MethodInfoParameterName}");
             //}
-            return string.Join(", ", paramList);
+            return WithOutput(WithMethodContext(string.Join(", ", paramList), "const leanclr::metadata::RtMethodInfo* __aot_method"));
         }
 
         public string GenerateMethodDeclaring(string overrideMethodName = null)
         {
-            return $"{MethodGenerationUtil.GetResultTypeName(_retType)} {overrideMethodName ?? _uniqueName}({CreateMethodParameters()}){ConstStrings.CppFunctionNoexcept}";
+            string attributes = _methodDef != null && (_methodDef.ImplAttributes & MethodImplAttributes.NoInlining) != 0 ? "LEANCLR_CODEGEN_NOINLINE " : "";
+            return $"{attributes}{(UsesStatusOut ? "leanclr::RtErr" : MethodGenerationUtil.GetResultTypeName(_retType))} {overrideMethodName ?? _uniqueName}({CreateMethodParameters()}){ConstStrings.CppFunctionNoexcept}";
         }
 
         public string GenerateVirtualMethodDeclaring()
@@ -235,10 +259,11 @@ namespace LeanAOT.ToCpp
             return $"typedef {CreateRelaxMethodFunctionTypeDefine(cppTypedefName)}";
         }
 
-        public string CreateRelaxMethodFunctionPointerTypeForCast()
+        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null, bool? lightweight = null, bool? packedInt32 = null, bool? statusOut = null)
         {
             var sb = new StringBuilder();
-            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType));
+            bool output = ReturnProtocol.UsesStatusOut(_retType, statusOut ?? (!lightweight.HasValue && GlobalServices.Inst.Config.StatusOutAotReturns));
+            sb.Append(output ? "leanclr::RtErr" : MethodGenerationUtil.GetResultTypeName(_retType, lightweight, packedInt32));
             sb.Append(" (*)(");
             bool first = true;
             foreach (var param in _paramsIncludeThis)
@@ -249,14 +274,16 @@ namespace LeanAOT.ToCpp
                     sb.Append(", ");
                 sb.Append(MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed));
             }
+            if (genericContext ?? IsGeneric) { sb.Append((first ? "" : ", ") + "const leanclr::metadata::RtMethodInfo*"); first = false; }
+            if (output) sb.Append((first ? "" : ", ") + MethodGenerationUtil.GetAbiRelaxedTypeName(_retType) + "*");
             sb.Append(')');
             sb.Append(ConstStrings.CppFunctionNoexcept);
             return sb.ToString();
         }
 
-        public string CreateMethodFunctionTypeDefineWithoutName()
+        public string CreateMethodFunctionTypeDefineWithoutName(bool? lightweight = null)
         {
-            return CreateMethodFunctionTypeDefine("");
+            return CreateMethodFunctionTypeDefine("", lightweight);
         }
 
         public string CreateNativeMethodFunctionTypeDefine(string cppTypedefName, bool noexcept)
@@ -283,10 +310,10 @@ namespace LeanAOT.ToCpp
             return sb.ToString();
         }
 
-        private string CreateMethodFunctionTypeDefine(string cppTypedefName)
+        private string CreateMethodFunctionTypeDefine(string cppTypedefName, bool? lightweight = null)
         {
             StringBuilder sb = new StringBuilder();
-            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType));
+            sb.Append(MethodGenerationUtil.GetResultTypeName(_retType, lightweight));
             sb.Append($" (*{cppTypedefName})(");
             bool first = true;
             foreach (var param in _paramsIncludeThis)
@@ -299,6 +326,7 @@ namespace LeanAOT.ToCpp
                 }
                 sb.Append(MethodGenerationUtil.GetExactTypeName(param.Type));
             }
+            if (IsGeneric) sb.Append((first ? "" : ", ") + "const leanclr::metadata::RtMethodInfo*");
             sb.Append(')');
             sb.Append(ConstStrings.CppFunctionNoexcept);
             return sb.ToString();
@@ -320,6 +348,7 @@ namespace LeanAOT.ToCpp
                 }
                 sb.Append(MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed));
             }
+            if (IsGeneric) sb.Append((first ? "" : ", ") + "const leanclr::metadata::RtMethodInfo*");
             sb.Append(')');
             sb.Append(ConstStrings.CppFunctionNoexcept);
             return sb.ToString();

@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_nativeeventcalls.h"
 
 #include "platform/rt_event.h"
@@ -107,7 +109,7 @@ utils::Span<vm::InternalCallEntry> SystemThreadingNativeEventCalls::get_internal
         {"System.Threading.NativeEventCalls::CloseEvent_internal(System.IntPtr)",
          (vm::InternalCallFunction)&SystemThreadingNativeEventCalls::close_event_internal, close_event_internal_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

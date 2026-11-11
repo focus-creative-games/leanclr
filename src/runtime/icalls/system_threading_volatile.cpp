@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_volatile.h"
 
 namespace leanclr
@@ -126,7 +128,7 @@ utils::Span<vm::InternalCallEntry> SystemThreadingVolatile::get_internal_call_en
         {"System.Threading.Volatile::Write(System.Double&,System.Double)", (vm::InternalCallFunction)&SystemThreadingVolatile::write_f64,
          write_f64_icall_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

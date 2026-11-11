@@ -20,7 +20,11 @@ using namespace leanclr::alloc;
 using namespace leanclr::utils;
 
 // Static map to cache inflated methods
-static HashMap<const RtGenericMethod*, const RtMethodInfo*> g_method_map;
+static HashMap<const RtGenericMethod*, const RtMethodInfo*>& get_g_method_map()
+{
+    static HashMap<const RtGenericMethod*, const RtMethodInfo*> value;
+    return value;
+}
 
 RtResult<const RtMethodInfo*> GenericMethod::get_method(const RtMethodInfo* methodDef, const RtGenericInst* classInst, const RtGenericInst* methodInst)
 {
@@ -90,8 +94,8 @@ RtResult<const RtMethodInfo*> GenericMethod::get_method_from_pooled_generic_meth
     const RtGenericInst* class_inst = genericMethod->generic_context.class_inst;
     const RtGenericInst* method_inst = genericMethod->generic_context.method_inst;
     assert(class_inst || method_inst);
-    auto it = g_method_map.find(genericMethod);
-    if (it != g_method_map.end())
+    auto it = get_g_method_map().find(genericMethod);
+    if (it != get_g_method_map().end())
     {
         RET_OK(it->second);
     }
@@ -167,13 +171,8 @@ RtResult<const RtMethodInfo*> GenericMethod::get_method_from_pooled_generic_meth
     // Build method argument descriptors
     RET_ERR_ON_FAIL(Method::build_method_arg_descs(new_method));
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InvokeTypeAndMethod, invoker_type_and_method, Shim::get_invoker(new_method));
-    new_method->invoke_method_ptr = invoker_type_and_method.invoker;
-    new_method->invoker_type = invoker_type_and_method.invoker_type;
-    MethodAndVirtualMethod method_and_virtual_method = Shim::get_method_pointer(new_method);
-    new_method->method_ptr = method_and_virtual_method.method_ptr;
-    new_method->virtual_method_ptr = method_and_virtual_method.virtual_method_ptr;
-    g_method_map.insert({genericMethod, new_method});
+    RET_ERR_ON_FAIL(Shim::setup_method(new_method));
+    get_g_method_map().insert({genericMethod, new_method});
     RET_OK(new_method);
 }
 

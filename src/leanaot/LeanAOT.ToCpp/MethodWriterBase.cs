@@ -112,6 +112,17 @@ namespace LeanAOT.ToCpp
             }
         }
 
+        // A MethodDef token resolves an open definition, not the active closed method.
+        private bool _currentMethodReferenced;
+        private string CurrentMethodReference
+        {
+            get
+            {
+                _currentMethodReferenced = true;
+                return _method.IsGeneric ? "__aot_method" : CurMethodVar.GetFullReferenceVariableName();
+            }
+        }
+
         private readonly Dictionary<ITypeDefOrRef, RuntimeResolvedVariable> _klassStaticConstructorVariables = new Dictionary<ITypeDefOrRef, RuntimeResolvedVariable>(TypeEqualityComparer.Instance);
 
         public MethodWriterBase(MethodDetail method, IMethodBodyCodeFilePart methodBodyCodeFile)
@@ -277,6 +288,15 @@ namespace LeanAOT.ToCpp
 
         void WriteDeferredCode()
         {
+            if (_globalConfig.EnableProfileInstrumentation)
+                _headWriter.AddLine("const uint64_t __profile_invocation = LEANCLR_CODEGEN_PROFILE_BEGIN_INVOCATION();");
+            if (ExceptionHandoff)
+            {
+                _ = CurrentMethodReference;
+                _headWriter.AddLine("uint32_t ___eh_ip = 0;");
+                _headWriter.AddLine("bool ___eh_explicit_throw = false;");
+                _headWriter.AddLine("int32_t ___eh_leave = 0;");
+            }
             if (!_runtimeResolvedMetadatas.IsEmpty())
             {
                 var subVariables = _runtimeResolvedMetadatas.ResolvedVariables.SelectMany(v => v.GetSubVariables()).ToList();
@@ -311,7 +331,10 @@ namespace LeanAOT.ToCpp
                 _headWriter.SetIndent(1);
                 _headWriter.AddLine($"if (!{_runtimeResolvedMetadatas.GetResolveMetadatasInitedVariableName()})");
                 _headWriter.BeginBlock();
-                _headWriter.AddLine($"{VmFunctionNames.ResolveMetadataTokens}({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
+                if (_method.IsGeneric)
+                    _headWriter.AddLine($"leanclr::codegen::resolve_generic_metadata_tokens(__aot_method->parent->image, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, __aot_method, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
+                else
+                    _headWriter.AddLine($"{VmFunctionNames.ResolveMetadataTokens}({ModuleGenerationUtil.GetModuleGlobalVariableName(_method.Module)}, {_runtimeResolvedMetadatas.GetResolveMetadatasTokensVariableName()}, {_runtimeResolvedMetadatas.ResolvedVariables.Count}, (void**)&{_runtimeResolvedMetadatas.GetResolveMetadatasVariableName()});");
 
                 foreach (SubRuntimeResolvedVariable subVariable in subVariables)
                 {
@@ -332,7 +355,7 @@ namespace LeanAOT.ToCpp
             {
                 _headWriter.AddLine($"{MethodGenerationUtil.GetAbiRelaxedTypeName(_method.RetType)} {GetRetVariableName()} = {{}};");
             }
-            if (__curMethodVar != null)
+            if (_currentMethodReferenced || __curMethodVar != null)
             {
                 _headWriter.AddLine($"{ConstStrings.RtErrTypeName} {GetRetErrorVariableName()} = {{}};");
             }
@@ -342,18 +365,20 @@ namespace LeanAOT.ToCpp
             _tailWriter.AddLine($"{GetHanleReturnValueLabelName()}:");
             if (!_method.IsVoidReturn)
             {
-                _tailWriter.AddLine($"{VmFunctionNames.RET_VALUE}({GetRetVariableName()});");
+                _tailWriter.AddLine(_method.UsesStatusOut ? $"*__aot_ret = {GetRetVariableName()}; return leanclr::RtErr::None;" : $"{VmFunctionNames.RET_VALUE}({GetRetVariableName()});");
             }
             else
             {
                 _tailWriter.AddLine($"{VmFunctionNames.RET_VOID}();");
             }
 
-            if (__curMethodVar != null)
+            if (_currentMethodReferenced || __curMethodVar != null)
             {
+                if (ExceptionHandoff) WriteFinallyDispatchers();
                 _tailWriter.AddLine($"{GetHandleReturnErrorLabelName()}:");
                 _tailWriter.AddLine($"assert({GetRetErrorVariableName()} != {ConstStrings.RtErrTypeName}::None);");
-                _tailWriter.AddLine($"LEANCLR_CODEGEN_THROW_RUNTIME_ERROR({GetRetErrorVariableName()}, {CurMethodVar.GetFullReferenceVariableName()}, 0);");
+                if (ExceptionHandoff) WriteExceptionSnapshot();
+                else _tailWriter.AddLine($"LEANCLR_CODEGEN_THROW_RUNTIME_ERROR({GetRetErrorVariableName()}, {CurrentMethodReference}, 0);");
             }
             _tailWriter.DecreaseIndent();
         }
@@ -395,7 +420,7 @@ namespace LeanAOT.ToCpp
                 uint blockCost = ComputeBasicBlockProfileCost(bb);
                 if (blockCost > 0)
                 {
-                    _bodyWriter.AddLine($"{VmFunctionNames.PROFILE_ADD_COST}({CurMethodVar.GetFullReferenceVariableName()}, {blockCost}u);");
+                    _bodyWriter.AddLine($"{VmFunctionNames.PROFILE_ADD_COST}({CurrentMethodReference}, {blockCost}u);");
                 }
             }
         }
@@ -1149,6 +1174,12 @@ namespace LeanAOT.ToCpp
             var retType = CalcBasicBinOpRetType(op1.type, op2.type);
             var retVar = PushStack0(_curState.runStackDatas, NewEvalVariable(retType, null));
             string typeName = GetTypeName(retVar);
+            if (retType == EvalDataType.Int32 || retType == EvalDataType.Int64 || retType == EvalDataType.I)
+            {
+                string helper = opSymbol == "+" ? "add" : (opSymbol == "-" ? "sub" : "mul");
+                _bodyWriter.AddLine($"{typeName} {GetEvalVariableName(retVar)} = leanclr::utils::IntegerMath::{helper}<{typeName}>({GetEvalVariableExprWithCast(op1, typeName)}, {GetEvalVariableExprWithCast(op2, typeName)});");
+                return;
+            }
             if (op1.type == op2.type && !isUnsigned)
             {
                 _bodyWriter.AddLine($"{typeName} {GetEvalVariableName(retVar)} = {GetEvalVariableName(op1)} {opSymbol} {GetEvalVariableName(op2)};");
@@ -1164,7 +1195,10 @@ namespace LeanAOT.ToCpp
             var op = Pop();
             var retType = op.type;
             var retVar = PushStack0(_curState.runStackDatas, NewEvalVariable(retType, null));
-            _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = {opSymbol}{GetEvalVariableName(op)};");
+            if (retType == EvalDataType.Int32 || retType == EvalDataType.Int64 || retType == EvalDataType.I)
+                _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = leanclr::utils::IntegerMath::neg<{GetTypeName(retVar)}>({GetEvalVariableName(op)});");
+            else
+                _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = {opSymbol}{GetEvalVariableName(op)};");
         }
 
         private void EmitBinBitwiseOp(Instruction inst, string opSymbol, bool isUnsigned = false)
@@ -1196,16 +1230,9 @@ namespace LeanAOT.ToCpp
         {
             var shiftAmount = Pop();
             var value = Pop();
-            var retType = value.type;
-            var retVar = PushStack0(_curState.runStackDatas, NewEvalVariable(retType, null));
-            if (value.type == retType && !isUnsigned)
-            {
-                _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = {GetEvalVariableName(value)} {opSymbol} {GetEvalVariableName(shiftAmount)};");
-            }
-            else
-            {
-                _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = static_cast<{GetTypeName(retVar)}>({GetEvalVariableExpr(value, isUnsigned)} {opSymbol} {GetEvalVariableName(shiftAmount)});");
-            }
+            var retVar = PushStack0(_curState.runStackDatas, NewEvalVariable(value.type, null));
+            string helper = opSymbol == "<<" ? "shl" : (isUnsigned ? "shr_un" : "shr");
+            _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)} = leanclr::utils::IntegerMath::{helper}<{GetTypeName(retVar)}>({GetEvalVariableName(value)}, static_cast<uint32_t>({GetEvalVariableName(shiftAmount)}));");
         }
 
         private void AddArch64ConditionMacroBegin()
@@ -1986,22 +2013,22 @@ namespace LeanAOT.ToCpp
             _bodyWriter.AddLine($"if (!{hasRunKlassStaticConstructorVarName})");
             _bodyWriter.BeginBlock();
             _bodyWriter.AddLine($"{hasRunKlassStaticConstructorVarName} = true;");
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_THROW_ON_ERROR}({VmFunctionNames.RunClassStaticConstructor}({klassVar}), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_THROW_ON_ERROR}({VmFunctionNames.RunClassStaticConstructor}({klassVar}), {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
             _bodyWriter.EndBlock();
         }
 
         private void EmitThrowRuntimeError(Instruction inst, string errName)
         {
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_THROW_RUNTIME_ERROR}(leanclr::RtErr::{errName}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_THROW_RUNTIME_ERROR}(leanclr::RtErr::{errName}, {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
         }
 
         private void EmitCheckNotNull(Instruction inst, EvalVariable objVar)
         {
-            if (!_globalConfig.EmitNullChecks)
+            if (!_globalConfig.EmitNullChecks && !ExceptionHandoff)
             {
                 return;
             }
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_CHECK_NULL_REFERENCE}({GetEvalVariableName(objVar)}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_CHECK_NULL_REFERENCE}({GetEvalVariableName(objVar)}, {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
         }
 
         private string GetUnlikelyExpr(string expr)
@@ -2057,17 +2084,17 @@ namespace LeanAOT.ToCpp
 
         private void EmitThrowOnError(Instruction inst, string sourceExpr)
         {
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_THROW_ON_ERROR}({sourceExpr}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_THROW_ON_ERROR}({sourceExpr}, {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
         }
 
         private void EmitDeclaringAssignOrThrow(Instruction inst, EvalVariable targetVar, string sourceExpr)
         {
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}({GetTypeName(targetVar)}, {GetEvalVariableName(targetVar)}, {sourceExpr}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}({GetTypeName(targetVar)}, {GetEvalVariableName(targetVar)}, {sourceExpr}, {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
         }
 
         private void EmitAssignOrThrow(Instruction inst, EvalVariable targetVar, string sourceExpr)
         {
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_ASSIGN_OR_THROW}({GetEvalVariableName(targetVar)}, {sourceExpr}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_ASSIGN_OR_THROW}({GetEvalVariableName(targetVar)}, {sourceExpr}, {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
         }
 
 
@@ -2147,10 +2174,12 @@ namespace LeanAOT.ToCpp
             }
             if (_manifestService.ShouldAOT(methodDetail.Method))
             {
-                var argsStr = CreateMethodFunctionArgsWithCast(methodDetail, args);
+                var bodyMethod = _metadataService.GetMethodDetail(GlobalServices.Inst.ReferenceSharing?.Canonicalize(methodDetail.Method) ?? methodDetail.Method);
+                var argsStr = CreateMethodFunctionArgsWithCast(bodyMethod, args);
+                if (methodDetail.IsGeneric) argsStr = methodDetail.WithMethodContext(argsStr, methodVarNameProvider());
                 if (!methodDetail.IsVoidReturn)
                 {
-                    EmitAssignOrThrow(inst, retVar, $"{methodDetail.UniqueName}({argsStr})");
+                    EmitAssignOrThrow(inst, retVar, methodDetail.UsesStatusOut ? ReturnProtocol.InvokeStatusOut(methodDetail.RetType, methodDetail.UniqueName, argsStr) : $"{methodDetail.UniqueName}({argsStr})");
                 }
                 else
                 {
@@ -2383,7 +2412,8 @@ namespace LeanAOT.ToCpp
             }
 
             var finalMethodVar = CreateTempVariable(ConstStrings.MethodInfoPtrTypeName);
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}({finalMethodVar.TypeName}, {finalMethodVar.Name}, {VmFunctionNames.GetVirtualMethodOnObj}({GetEvalVariableName(thisVar)}, {methodVar.GetFullReferenceVariableName()}), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            string resolver = InterfaceResolution(inst, methodDetail, thisVar, methodVar);
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}({finalMethodVar.TypeName}, {finalMethodVar.Name}, {resolver}, {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
             EmitAssumeNotNull(finalMethodVar.Name);
             EmitCallByMethodPointerDirectly(inst, methodDetail, finalMethodVar.Name, args, retVar, true);
         }
@@ -2448,7 +2478,7 @@ namespace LeanAOT.ToCpp
             var methodVar = _runtimeResolvedMetadatas.GetMethodVariable(method, methodDetail);
             var retVar = PushStack(_corlibTypes.IntPtr);
             //var finalMethodVar = CreateTempVariable(ConstStrings.MethodInfoPtrTypeName);
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}({ConstStrings.MethodInfoPtrTypeName}, {GetEvalVariableName(retVar)}, {VmFunctionNames.GetVirtualMethodOnObj}({GetEvalVariableName(thisVar)}, {methodVar.GetFullReferenceVariableName()}), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}({ConstStrings.MethodInfoPtrTypeName}, {GetEvalVariableName(retVar)}, {VmFunctionNames.GetVirtualMethodOnObj}({GetEvalVariableName(thisVar)}, {methodVar.GetFullReferenceVariableName()}), {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
             EmitAssumeNotNull(retVar);
         }
 
@@ -2556,10 +2586,9 @@ namespace LeanAOT.ToCpp
         {
             if (!MetaUtil.IsValueType(targetType.ToTypeSig()))
             {
-                Pop();
-                PushStack(targetType);
-                // do nothing since it's already a reference type, just need to change the type on stack
-                // EmitCastClass(inst, targetType);
+                var source = Pop();
+                var target = PushStack(targetType);
+                _bodyWriter.AddLine($"{GetTypeName(target)} {GetEvalVariableName(target)} = ({GetTypeName(target)}){GetEvalVariableName(source)};");
                 return;
             }
             var srcObj = Pop();
@@ -2576,7 +2605,15 @@ namespace LeanAOT.ToCpp
         private void EmitThrow(Instruction inst)
         {
             var exObj = Pop();
-            _bodyWriter.AddLine($"{VmFunctionNames.THROW_EXCEPTION}({GetEvalVariableName(exObj)}, {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            if (ExceptionHandoff)
+            {
+                _bodyWriter.AddLine($"leanclr::vm::Exception::set_current_exception((leanclr::vm::RtException*){GetEvalVariableName(exObj)});");
+                _bodyWriter.AddLine($"___ret_err = {GetEvalVariableName(exObj)} ? leanclr::RtErr::ManagedException : leanclr::RtErr::NullReference;");
+                _bodyWriter.AddLine("___eh_explicit_throw = true;");
+                _bodyWriter.AddLine($"goto {GetHandleReturnErrorLabelName()};");
+                return;
+            }
+            _bodyWriter.AddLine($"{VmFunctionNames.THROW_EXCEPTION}({GetEvalVariableName(exObj)}, {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
         }
 
         private void EmitRethrow(Instruction inst)
@@ -2804,7 +2841,7 @@ namespace LeanAOT.ToCpp
 
         private void EmitCheckArrayIndexOutOfRange(Instruction inst, EvalVariable objVar, EvalVariable indexVar)
         {
-            if (!_globalConfig.EnableArrayBoundsCheck)
+            if (!_globalConfig.EnableArrayBoundsCheck && !ExceptionHandoff)
             {
                 return;
             }
@@ -3080,12 +3117,15 @@ namespace LeanAOT.ToCpp
 
         private void EmitLeave(Instruction inst, Instruction operand)
         {
-            throw new NotImplementedException("leave is not implemented");
+            EmitNormalLeave(inst, operand);
         }
 
         private void EmitEndfinally(Instruction inst)
         {
-            throw new NotImplementedException("endfinally is not implemented");
+            var handler = _method.MethodDef.Body.ExceptionHandlers.First(e => e.HandlerType == ExceptionHandlerType.Finally &&
+                inst.Offset >= e.HandlerStart.Offset && (e.HandlerEnd == null || inst.Offset < e.HandlerEnd.Offset));
+            if (!_finallyReturns.ContainsKey(handler.HandlerStart.Offset)) _finallyReturns[handler.HandlerStart.Offset] = new List<(int, string)>();
+            _bodyWriter.AddLine($"goto __finally_end_{handler.HandlerStart.Offset};");
         }
 
         private void EmitRefanyval(Instruction inst, ITypeDefOrRef inflatedType, uint inlineToken)
@@ -3197,7 +3237,7 @@ namespace LeanAOT.ToCpp
 
             if (_globalConfig.EnableProfileInstrumentation)
             {
-                _bodyWriter.AddLine($"{VmFunctionNames.PROFILE_INC_CALL_COUNT}({CurMethodVar.GetFullReferenceVariableName()});");
+                _bodyWriter.AddLine($"{VmFunctionNames.PROFILE_INC_CALL_COUNT}({CurrentMethodReference});");
             }
 
             MethodDef methodDef = _method.MethodDef;
@@ -3218,6 +3258,7 @@ namespace LeanAOT.ToCpp
             bool methodHasReturnValue = !_method.IsVoidReturn;
             foreach (BasicBlock block in basicBlockCollection.Blocks)
             {
+                if (InterpreterOnlyBlock(block.StartOffset)) continue;
                 _bodyWriter.AddLine($"// Basic Block begin. IL: 0X{block.StartOffset.ToString("X8")} - 0X{(block.nextBlock != null ? block.nextBlock.StartOffset.ToString("X8") : " End")}");
 
                 EvalStackState state = _blockEvalStackStates[block];
@@ -3314,6 +3355,7 @@ namespace LeanAOT.ToCpp
                     }
                     string instComment = Encoding.ASCII.GetString(Encoding.ASCII.GetBytes(inst.ToString()));
                     _bodyWriter.AddLine($"// {instComment}");
+                    if (ExceptionHandoff) _bodyWriter.AddLine($"___eh_ip = {inst.Offset};");
                     switch (inst.OpCode.Code)
                     {
                     case Code.Nop: break;

@@ -34,11 +34,6 @@ class MemPool
     size_t page_size_;
     size_t region_size_;
 
-    static size_t align_up(size_t value, size_t alignment)
-    {
-        return utils::MemOp::align_up(value, alignment);
-    }
-
     Region* create_region(size_t capacity);
     bool add_region(size_t capacity);
 

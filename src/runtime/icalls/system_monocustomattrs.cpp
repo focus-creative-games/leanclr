@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_monocustomattrs.h"
 #include "vm/class.h"
 #include "vm/customattribute.h"
@@ -82,7 +84,7 @@ static InternalCallEntry s_internal_call_entries_system_monocustomattrs[] = {
 
 utils::Span<InternalCallEntry> SystemMonoCustomAttrs::get_internal_call_entries() noexcept
 {
-    constexpr size_t entry_count = sizeof(s_internal_call_entries_system_monocustomattrs) / sizeof(s_internal_call_entries_system_monocustomattrs[0]);
+    constexpr size_t entry_count = std::size(s_internal_call_entries_system_monocustomattrs);
     return utils::Span<InternalCallEntry>(s_internal_call_entries_system_monocustomattrs, entry_count);
 }
 

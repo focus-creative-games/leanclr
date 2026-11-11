@@ -13,7 +13,7 @@ class MonoRuntimeMarshal
     static utils::Span<vm::InternalCallEntry> get_internal_call_entries() noexcept;
 
     // Free an assembly name structure
-    static RtResultVoid free_assembly_name(metadata::RtMonoAssemblyName* aname, bool free_struct) noexcept;
+    static RtResultVoid free_assembly_name(metadata::RtAssemblyName* aname, bool free_struct) noexcept;
 };
 
 } // namespace icalls

@@ -13,12 +13,33 @@ namespace vm
 
 // Constants
 
-// Helper: Calculate total byte size for array including elements
-size_t Array::get_array_allocation_size(const metadata::RtClass* klass, int32_t length)
+RtResult<ArrayLayout> Array::get_array_layout(const metadata::RtClass* klass, int32_t length)
 {
     assert(klass && klass->element_class);
-    size_t element_size = Class::get_stack_location_size(klass->element_class);
-    return sizeof(RtArray) - 8 + static_cast<size_t>(length) * element_size;
+    if (length < 0)
+        RET_ERR(RtErr::Overflow);
+    const size_t rank = klass->by_val->ele_type == metadata::RtElementType::Array ? klass->by_val->data.array_type->rank : 0;
+    ArrayLayout layout;
+    if (!ArrayLayout::try_compute(Class::get_stack_location_size(klass->element_class), static_cast<size_t>(length), rank, layout))
+        RET_ERR(RtErr::OutOfMemory);
+    RET_OK(layout);
+}
+
+size_t Array::get_array_allocation_size(const metadata::RtClass* klass, int32_t length)
+{
+    // Existing arrays have already passed the fallible creation boundary.
+    auto layout = get_array_layout(klass, length);
+    if (layout.is_err())
+        leanclr::panic("Invalid existing array layout");
+    return layout.unwrap().allocation_size;
+}
+
+size_t Array::get_array_bounds_offset(const metadata::RtClass* klass, int32_t length)
+{
+    auto layout = get_array_layout(klass, length);
+    if (layout.is_err())
+        leanclr::panic("Invalid existing array layout");
+    return layout.unwrap().bounds_offset;
 }
 
 // Array creation methods
@@ -29,7 +50,8 @@ RtResult<RtArray*> Array::__new_szarray_from_array_klass(const metadata::RtClass
 
     RET_ERR_ON_FAIL(Class::initialize_all(const_cast<metadata::RtClass*>(klass)));
 
-    size_t arr_length = get_array_allocation_size(klass, length);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ArrayLayout, layout, get_array_layout(klass, length));
+    const size_t arr_length = layout.allocation_size;
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length LEANCLR_GC_CALL_SITE_PARAM));
 
     if (!arr_obj)
@@ -52,7 +74,8 @@ RtResult<RtArray*> Array::__new_szarray_from_ele_klass(const metadata::RtClass* 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, ArrayClass::get_szarray_class_from_element_class(ele_class));
     RET_ERR_ON_FAIL(Class::initialize_all(klass));
 
-    size_t arr_length = get_array_allocation_size(klass, length);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ArrayLayout, layout, get_array_layout(klass, length));
+    const size_t arr_length = layout.allocation_size;
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(klass, arr_length LEANCLR_GC_CALL_SITE_PARAM));
 
     if (!arr_obj)
@@ -64,7 +87,8 @@ RtResult<RtArray*> Array::__new_szarray_from_ele_klass(const metadata::RtClass* 
     RET_OK(arr_obj);
 }
 
-RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass* arr_klass, const int32_t* lengths, const int32_t* lower_bounds LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
+RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass* arr_klass, const int32_t* lengths,
+                                                         const int32_t* lower_bounds LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
     assert(arr_klass && lengths);
 
@@ -76,10 +100,22 @@ RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass
     const metadata::RtArrayType* arr_type = arr_klass->by_val->data.array_type;
     uint8_t rank = arr_type->rank;
 
-    // Calculate total length by multiplying all dimensions
-    int32_t total_length = 1;
+    // Validate every dimension before multiplying: an empty dimension makes
+    // the entire array empty, but must not hide a later negative length.
+    bool empty = false;
     for (uint8_t i = 0; i < rank; ++i)
     {
+        if (lengths[i] < 0 || (lower_bounds != nullptr && static_cast<int64_t>(lower_bounds[i]) + lengths[i] - 1 > INT32_MAX))
+        {
+            RET_ERR(RtErr::Overflow);
+        }
+        empty = empty || lengths[i] == 0;
+    }
+    int32_t total_length = empty ? 0 : 1;
+    for (uint8_t i = 0; i < rank; ++i)
+    {
+        if (empty)
+            break;
         int32_t dimension_length = lengths[i];
         // Check for overflow
         if (static_cast<uint32_t>(dimension_length) > static_cast<uint32_t>(RT_MAX_ARRAY_INDEX) / static_cast<uint32_t>(total_length))
@@ -91,21 +127,22 @@ RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass
 
     // Calculate data size
     const metadata::RtClass* ele_klass = arr_klass->element_class;
-    int32_t ele_size = static_cast<int32_t>(Class::get_stack_location_size(ele_klass));
+    size_t ele_size = Class::get_stack_location_size(ele_klass);
 
-    if (ele_size > RT_MAX_ARRAY_INDEX / total_length)
+    if (total_length != 0 && ele_size > static_cast<size_t>(RT_MAX_ARRAY_INDEX / total_length))
     {
         RET_ERR(RtErr::Overflow);
     }
 
-    int32_t total_data_bytes = total_length * ele_size;
-
-    // Calculate layout: array header + data + bounds array
-    size_t arr_total_bytes_without_bounds = get_array_allocation_size(arr_klass, 0) + static_cast<size_t>(total_data_bytes);
-    size_t bounds_start_index = utils::MemOp::align_up(arr_total_bytes_without_bounds, 8);
-    size_t total_array_bytes = bounds_start_index + sizeof(ArrayBounds) * rank;
+    // Creation, cloning and GC use the same complete layout, including bounds.
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ArrayLayout, layout, get_array_layout(arr_klass, total_length));
+    const size_t bounds_start_index = layout.bounds_offset;
+    const size_t total_array_bytes = layout.allocation_size;
 
     RtArray* arr_obj = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(arr_klass, total_array_bytes LEANCLR_GC_CALL_SITE_PARAM));
+
+    if (!arr_obj)
+        RET_ERR(RtErr::OutOfMemory);
 
     // Set up bounds
     ArrayBounds* bounds = reinterpret_cast<ArrayBounds*>(reinterpret_cast<uint8_t*>(arr_obj) + bounds_start_index);
@@ -121,7 +158,8 @@ RtResult<RtArray*> Array::__new_mdarray_from_array_klass(const metadata::RtClass
     RET_OK(arr_obj);
 }
 
-RtResult<RtArray*> Array::__new_mdarray_from_ele_klass(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths, const int32_t* lower_bounds LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
+RtResult<RtArray*> Array::__new_mdarray_from_ele_klass(const metadata::RtClass* ele_klass, int32_t rank, const int32_t* lengths,
+                                                       const int32_t* lower_bounds LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
     assert(ele_klass && lengths);
     if (rank < 1 || rank > RT_MAX_ARRAY_RANK)
@@ -420,7 +458,9 @@ RtResultVoid Array::newmdarray_lengths_invoker(metadata::RtManagedMethodPointer 
         i32_lengths[i] = interp::EvalStackOp::get_param<int32_t>(params, i);
     }
 
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr, LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(const_cast<metadata::RtClass*>(method->parent), i32_lengths, nullptr, "Array::newmdarray_lengths_invoker"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr,
+                                            LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(const_cast<metadata::RtClass*>(method->parent), i32_lengths, nullptr,
+                                                                                          "Array::newmdarray_lengths_invoker"));
     interp::EvalStackOp::set_return(ret, arr);
     RET_VOID_OK();
 }
@@ -442,7 +482,8 @@ RtResultVoid Array::newmdarray_lengths_lower_bounds_invoker(metadata::RtManagedM
     }
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtArray*, arr,
-                                            LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(const_cast<metadata::RtClass*>(method->parent), i32_lengths, i32_lower_bounds, "Array::newmdarray_lengths_lower_bounds_invoker"));
+                                            LEANCLR_NEW_MDARRAY_FROM_ARRAY_KLASS_INTERNAL(const_cast<metadata::RtClass*>(method->parent), i32_lengths,
+                                                                                          i32_lower_bounds, "Array::newmdarray_lengths_lower_bounds_invoker"));
     interp::EvalStackOp::set_return(ret, arr);
 
     RET_VOID_OK();
@@ -500,7 +541,8 @@ RtResult<RtArray*> Array::__clone(RtArray* old_arr LEANCLR_GC_DECLARE_CALL_SITE_
 {
     assert(old_arr);
 
-    size_t total_bytes = get_array_allocation_size(old_arr->klass, old_arr->length);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(ArrayLayout, layout, get_array_layout(old_arr->klass, old_arr->length));
+    const size_t total_bytes = layout.allocation_size;
     RtArray* new_arr = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(old_arr->klass, total_bytes LEANCLR_GC_CALL_SITE_PARAM));
 
     if (!new_arr)
@@ -508,6 +550,10 @@ RtResult<RtArray*> Array::__clone(RtArray* old_arr LEANCLR_GC_DECLARE_CALL_SITE_
         RET_ERR(RtErr::OutOfMemory);
     }
     std::memcpy(new_arr, old_arr, total_bytes);
+    if (old_arr->bounds != nullptr)
+    {
+        new_arr->bounds = reinterpret_cast<ArrayBounds*>(reinterpret_cast<uint8_t*>(new_arr) + layout.bounds_offset);
+    }
 
     // new_arr->length = old_arr->length;
     // size_t ele_size = get_array_element_size(old_arr);

@@ -97,20 +97,24 @@ struct GcAllocSiteEqual
     }
 };
 
-static utils::HashSet<const GcAllocSite*, GcAllocSiteHash, GcAllocSiteEqual> s_sites;
+static utils::HashSet<const GcAllocSite*, GcAllocSiteHash, GcAllocSiteEqual>& get_s_sites()
+{
+    static utils::HashSet<const GcAllocSite*, GcAllocSiteHash, GcAllocSiteEqual> value;
+    return value;
+}
 #endif
 
 const GcAllocSite* GcAllocSite::intern_site() const
 {
 #if LEANCLR_GC_DEBUG
     assert(kind != GcAllocSiteKind::None);
-    auto it = s_sites.find(this);
-    if (it != s_sites.end())
+    auto it = get_s_sites().find(this);
+    if (it != get_s_sites().end())
     {
         return *it;
     }
-    const GcAllocSite* new_site = new GcAllocSite(*this);
-    s_sites.insert(new_site);
+    const GcAllocSite* new_site = alloc::GeneralAllocation::require_allocation(alloc::GeneralAllocation::new_any<GcAllocSite>(*this));
+    get_s_sites().insert(new_site);
     return new_site;
 #else
     (void)this;

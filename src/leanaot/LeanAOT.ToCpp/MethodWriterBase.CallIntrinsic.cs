@@ -261,7 +261,7 @@ namespace LeanAOT.ToCpp
             string funcFullName = $"{namespaceStr}::{entry.Func}";
             if (methodDetail.IsVoidReturn)
             {
-                EmitThrowOnError(inst, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName()}){funcFullName})({argsStr})");
+                EmitThrowOnError(inst, $"(({methodDetail.CreateMethodFunctionTypeDefineWithoutName(false)}){funcFullName})({argsStr})");
             }
             else
             {
@@ -341,7 +341,7 @@ namespace LeanAOT.ToCpp
             _bodyWriter.IncreaseIndent();
             DefineIndexVar(args.GetRange(1, args.Count - 1), rank);
             string globalIndexVarName = "__globalIndex";
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
             ITypeDefOrRef elementType = methodDetail.RetType.ToTypeDefOrRef();
             string elementTypeName = GetExactTypeName(elementType);
             string loadElementDataExpr = $"{VmFunctionNames.GetArrayElementDataAt}<{elementTypeName}>({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, {globalIndexVarName})";
@@ -368,7 +368,7 @@ namespace LeanAOT.ToCpp
             _bodyWriter.IncreaseIndent();
             DefineIndexVar(args.GetRange(1, args.Count - 2), rank);
             string globalIndexVarName = "__globalIndex";
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
             ITypeDefOrRef elementType = paramsIncludeThis.Last().Type.ToTypeDefOrRef();
             string elementTypeName = GetExactTypeName(elementType);
 
@@ -395,7 +395,7 @@ namespace LeanAOT.ToCpp
             _bodyWriter.IncreaseIndent();
             DefineIndexVar(args.GetRange(1, args.Count - 1), rank);
             string globalIndexVarName = "__globalIndex";
-            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {CurMethodVar.GetFullReferenceVariableName()}, {GetCurrentIpOffset(inst)});");
+            _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}(int32_t, {globalIndexVarName}, {VmFunctionNames.GetMdArrayGlobalIndex}({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, __indexs), {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
             ITypeDefOrRef elementType = methodDetail.RetType.Next.ToTypeDefOrRef();
             string elementTypeName = GetExactTypeName(elementType);
             string loadElementDataExpr = $"{VmFunctionNames.GetArrayElementAddress}<{elementTypeName}>({GetVariableMayCast(arrVar, ConstStrings.ArrayPtrTypeName)}, {globalIndexVarName})";

@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_threading_volatile.h"
 #include "interp/eval_stack_op.h"
 
@@ -541,7 +543,7 @@ static vm::IntrinsicEntry s_intrinsic_entries_system_threading_volatile[] = {
 
 utils::Span<vm::IntrinsicEntry> SystemThreadingVolatile::get_intrinsic_entries() noexcept
 {
-    constexpr size_t entry_count = sizeof(s_intrinsic_entries_system_threading_volatile) / sizeof(s_intrinsic_entries_system_threading_volatile[0]);
+    constexpr size_t entry_count = std::size(s_intrinsic_entries_system_threading_volatile);
     return utils::Span<vm::IntrinsicEntry>(s_intrinsic_entries_system_threading_volatile, entry_count);
 }
 

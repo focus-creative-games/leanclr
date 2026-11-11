@@ -1,0 +1,1522 @@
+{
+  "schema": 1,
+  "platform": "Windows-11-10.0.26300-SP0",
+  "cpu": "",
+  "samples": [
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.19874,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.23842680000234395
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.51154,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.23842680000234395
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 17.38968,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.23842680000234395
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.33318,
+      "engine": "native-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.23842680000234395
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.51602,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.20367529999930412
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.24142,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.20367529999930412
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.29254,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.20367529999930412
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.79026,
+      "engine": "native-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.20367529999930412
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.29652,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.37624710000818595
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.98722,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.37624710000818595
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 23.77658,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.37624710000818595
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.58032,
+      "engine": "wasm-baseline",
+      "sample": 0,
+      "process_wall_seconds": 0.37624710000818595
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.47496,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.24960949999513105
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.63948,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.24960949999513105
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.55132,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.24960949999513105
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.63388,
+      "engine": "wasm-cached",
+      "sample": 0,
+      "process_wall_seconds": 0.24960949999513105
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.10764,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.22024160000728443
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.49246,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.22024160000728443
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 15.51772,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.22024160000728443
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.3088,
+      "engine": "native-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.22024160000728443
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.4987,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.13559749998967163
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.50588,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.13559749998967163
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.26564,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.13559749998967163
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.02048,
+      "engine": "native-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.13559749998967163
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.55262,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.2529509000014514
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 8.08188,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.2529509000014514
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.71512,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.2529509000014514
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.96296,
+      "engine": "wasm-cached",
+      "sample": 1,
+      "process_wall_seconds": 0.2529509000014514
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.30686,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.390005299996119
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.0816,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.390005299996119
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 25.06102,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.390005299996119
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.89434,
+      "engine": "wasm-baseline",
+      "sample": 1,
+      "process_wall_seconds": 0.390005299996119
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.90972,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4035973999998532
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.4049,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4035973999998532
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 24.51008,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4035973999998532
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.67576,
+      "engine": "wasm-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.4035973999998532
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.51606,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.14200439999694936
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.25074,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.14200439999694936
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.45986,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.14200439999694936
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.77862,
+      "engine": "native-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.14200439999694936
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.54946,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.25813440000638366
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 8.8699,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.25813440000638366
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.84958,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.25813440000638366
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.75952,
+      "engine": "wasm-cached",
+      "sample": 2,
+      "process_wall_seconds": 0.25813440000638366
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.13138,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.23004759999457747
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.55752,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.23004759999457747
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 17.25984,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.23004759999457747
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.00616,
+      "engine": "native-baseline",
+      "sample": 2,
+      "process_wall_seconds": 0.23004759999457747
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.49764,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.24567559998831712
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.7397,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.24567559998831712
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.52326,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.24567559998831712
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.74636,
+      "engine": "wasm-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.24567559998831712
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.51336,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.133581799978856
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.2305,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.133581799978856
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.41702,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.133581799978856
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.81008,
+      "engine": "native-cached",
+      "sample": 3,
+      "process_wall_seconds": 0.133581799978856
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.94846,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.3893583999888506
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.24778,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.3893583999888506
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 24.23018,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.3893583999888506
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.87112,
+      "engine": "wasm-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.3893583999888506
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.13738,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.21570939998491667
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.86918,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.21570939998491667
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 14.79324,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.21570939998491667
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.70642,
+      "engine": "native-baseline",
+      "sample": 3,
+      "process_wall_seconds": 0.21570939998491667
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.42174,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.24409679998643696
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.56168,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.24409679998643696
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.56024,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.24409679998643696
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.81662,
+      "engine": "wasm-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.24409679998643696
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.26504,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.3759126999939326
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.03252,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.3759126999939326
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 23.9282,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.3759126999939326
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.91158,
+      "engine": "wasm-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.3759126999939326
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.1383,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.2317410999967251
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.86492,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.2317410999967251
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 17.20542,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.2317410999967251
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 7.44296,
+      "engine": "native-baseline",
+      "sample": 4,
+      "process_wall_seconds": 0.2317410999967251
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.63462,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.14833509997697547
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.8339,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.14833509997697547
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.59012,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.14833509997697547
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.58168,
+      "engine": "native-cached",
+      "sample": 4,
+      "process_wall_seconds": 0.14833509997697547
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 3.92538,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.27762870001606643
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 8.29474,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.27762870001606643
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.71426,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.27762870001606643
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.13754,
+      "engine": "wasm-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.27762870001606643
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.00858,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.4251538999960758
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.52688,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.4251538999960758
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 26.97968,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.4251538999960758
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 10.5936,
+      "engine": "wasm-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.4251538999960758
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.87248,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.25810760000604205
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 5.71854,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.25810760000604205
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 18.85096,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.25810760000604205
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.09526,
+      "engine": "native-baseline",
+      "sample": 5,
+      "process_wall_seconds": 0.25810760000604205
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.7255,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.14825540001038462
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.68864,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.14825540001038462
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 2.62404,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.14825540001038462
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 8.0039,
+      "engine": "native-cached",
+      "sample": 5,
+      "process_wall_seconds": 0.14825540001038462
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 5.24886,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3339951000234578
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 9.14396,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3339951000234578
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 5.08854,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3339951000234578
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 10.19868,
+      "engine": "wasm-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.3339951000234578
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 2.80952,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.16336959999171086
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 6.5039,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.16336959999171086
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 3.03282,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.16336959999171086
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.78944,
+      "engine": "native-cached",
+      "sample": 6,
+      "process_wall_seconds": 0.16336959999171086
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 6.56996,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.2915474000037648
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 7.23892,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.2915474000037648
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 21.33562,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.2915474000037648
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.29914,
+      "engine": "native-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.2915474000037648
+    },
+    {
+      "workload": "interfaces",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 10.63924,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.48108150000916794
+    },
+    {
+      "workload": "interfaces-alternating",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "2801827219",
+      "ns_per_op": 8.00848,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.48108150000916794
+    },
+    {
+      "workload": "interfaces-generic",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "1851253910",
+      "ns_per_op": 27.12968,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.48108150000916794
+    },
+    {
+      "workload": "interfaces-straight-line",
+      "execution": "aot",
+      "iterations": 5000000,
+      "checksum": "491554643",
+      "ns_per_op": 9.828,
+      "engine": "wasm-baseline",
+      "sample": 6,
+      "process_wall_seconds": 0.48108150000916794
+    }
+  ],
+  "summary": [
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces",
+      "median_ns": 5.1383,
+      "min_ns": 5.10764,
+      "max_ns": 6.56996
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces",
+      "median_ns": 7.90972,
+      "min_ns": 7.26504,
+      "max_ns": 10.63924
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces",
+      "median_ns": 2.51606,
+      "min_ns": 2.4987,
+      "max_ns": 2.80952
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces",
+      "median_ns": 3.54946,
+      "min_ns": 3.42174,
+      "max_ns": 5.24886
+    },
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces-alternating",
+      "median_ns": 5.71854,
+      "min_ns": 5.49246,
+      "max_ns": 7.23892
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces-alternating",
+      "median_ns": 7.24778,
+      "min_ns": 6.98722,
+      "max_ns": 8.00848
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces-alternating",
+      "median_ns": 6.5039,
+      "min_ns": 6.2305,
+      "max_ns": 6.8339
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces-alternating",
+      "median_ns": 8.08188,
+      "min_ns": 7.56168,
+      "max_ns": 9.14396
+    },
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces-generic",
+      "median_ns": 17.25984,
+      "min_ns": 14.79324,
+      "max_ns": 21.33562
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces-generic",
+      "median_ns": 24.51008,
+      "min_ns": 23.77658,
+      "max_ns": 27.12968
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces-generic",
+      "median_ns": 2.45986,
+      "min_ns": 2.26564,
+      "max_ns": 3.03282
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces-generic",
+      "median_ns": 3.71426,
+      "min_ns": 3.52326,
+      "max_ns": 5.08854
+    },
+    {
+      "engine": "native-baseline",
+      "workload": "interfaces-straight-line",
+      "median_ns": 7.70642,
+      "min_ns": 7.3088,
+      "max_ns": 9.29914
+    },
+    {
+      "engine": "wasm-baseline",
+      "workload": "interfaces-straight-line",
+      "median_ns": 8.89434,
+      "min_ns": 8.58032,
+      "max_ns": 10.5936
+    },
+    {
+      "engine": "native-cached",
+      "workload": "interfaces-straight-line",
+      "median_ns": 8.02048,
+      "min_ns": 7.79026,
+      "max_ns": 9.78944
+    },
+    {
+      "engine": "wasm-cached",
+      "workload": "interfaces-straight-line",
+      "median_ns": 8.81662,
+      "min_ns": 8.63388,
+      "max_ns": 10.19868
+    }
+  ],
+  "iterations": 5000000,
+  "lightweight_returns": false,
+  "parent_commit": "8f9c9b3863e2955c1a0ca3faa62d04676ef5cd12",
+  "artifacts": {
+    "native-baseline": {
+      "path": "out/performance/interface-dispatch/baseline/native/Release/aot-baseline.exe",
+      "sha256": "e4659d80ee8e289d59e245c7a199c47a4bbf29a2cb17f7899b93eedc37be615c",
+      "bytes": 882176,
+      "gzip_bytes": 335953
+    },
+    "wasm-baseline": {
+      "path": "out/performance/interface-dispatch/baseline/wasm/aot-baseline.wasm",
+      "sha256": "67329545412efb34bf80388353aa9952d51b7a42bc66932d9b1703ccec6636bc",
+      "bytes": 833546,
+      "gzip_bytes": 266709,
+      "code_section_bytes": 668258
+    },
+    "native-cached": {
+      "path": "out/performance/interface-dispatch/cached/native/Release/aot-baseline.exe",
+      "sha256": "88e1545fa7c7f95a029a8cd8b4eced37da06b5f68fa49ed1139af719bda0046d",
+      "bytes": 882176,
+      "gzip_bytes": 336149
+    },
+    "wasm-cached": {
+      "path": "out/performance/interface-dispatch/cached/wasm/aot-baseline.wasm",
+      "sha256": "068841dd8ffac84bc035952b2f8678b4a4fc8a1650b527dc5415d656ec1fb97a",
+      "bytes": 833736,
+      "gzip_bytes": 266834,
+      "code_section_bytes": 668451
+    }
+  },
+  "managed_inputs": {
+    "baseline": "a9cd437ef635a93d227284fe42f30324de421f45060d27ece14211de6994095d",
+    "cached": "a9cd437ef635a93d227284fe42f30324de421f45060d27ece14211de6994095d"
+  },
+  "build_manifests": {
+    "baseline": {
+      "commands": [
+        [
+          "C:\\WINDOWS\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe",
+          "/nologo",
+          "/noconfig",
+          "/optimize+",
+          "/nostdlib+",
+          "/target:exe",
+          "/out:D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\managed\\AotBaseline.dll",
+          "/r:D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5\\mscorlib.dll",
+          "/r:D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5\\System.dll",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\Benchmarks.cs"
+        ],
+        [
+          "dotnet",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\managed",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5",
+          "-a",
+          "AotBaseline",
+          "-o",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\generated",
+          "--leanaot-aot-rule-file",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\aot.xml",
+          "--leanaot-max-generic-instances",
+          "2048"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\native",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\generated",
+          "-A",
+          "x64"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\native",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\wasm",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\generated",
+          "-G",
+          "Ninja",
+          "-DLEANCLR_HOST=PORTABLE",
+          "-DCMAKE_TOOLCHAIN_FILE=D:\\workspace\\wasmclr\\emsdk\\upstream\\emscripten\\cmake\\Modules\\Platform\\Emscripten.cmake"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\baseline\\wasm",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ]
+      ],
+      "standalone_thread_hook": null
+    },
+    "cached": {
+      "commands": [
+        [
+          "dotnet",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\managed",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\libraries\\mono-4.5",
+          "-a",
+          "AotBaseline",
+          "-o",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\generated",
+          "--leanaot-aot-rule-file",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline\\aot.xml",
+          "--leanaot-max-generic-instances",
+          "2048",
+          "--leanaot-interface-call-cache"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\native",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\generated",
+          "-A",
+          "x64"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\native",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-core\\src\\benchmarks\\aot-baseline",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\wasm",
+          "-DCMAKE_BUILD_TYPE=Release",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\generated",
+          "-G",
+          "Ninja",
+          "-DLEANCLR_HOST=PORTABLE",
+          "-DCMAKE_TOOLCHAIN_FILE=D:\\workspace\\wasmclr\\emsdk\\upstream\\emscripten\\cmake\\Modules\\Platform\\Emscripten.cmake"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-core\\out\\performance\\interface-dispatch\\cached\\wasm",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ]
+      ],
+      "standalone_thread_hook": null
+    }
+  },
+  "toolchains": {
+    "native-baseline": {
+      "CMAKE_CXX_COMPILER": "d:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx86/x64/cl.exe",
+      "CMAKE_CXX_COMPILER_ID": "MSVC",
+      "CMAKE_CXX_COMPILER_VERSION": "19.44.35229.0"
+    },
+    "wasm-baseline": {
+      "CMAKE_CXX_COMPILER": "D:/workspace/wasmclr/emsdk/upstream/emscripten/em++.bat",
+      "CMAKE_CXX_COMPILER_ID": "Clang",
+      "CMAKE_CXX_COMPILER_VERSION": "22.0.0"
+    },
+    "native-cached": {
+      "CMAKE_CXX_COMPILER": "d:/Program Files/Microsoft Visual Studio/2022/Community/VC/Tools/MSVC/14.44.35207/bin/Hostx86/x64/cl.exe",
+      "CMAKE_CXX_COMPILER_ID": "MSVC",
+      "CMAKE_CXX_COMPILER_VERSION": "19.44.35229.0"
+    },
+    "wasm-cached": {
+      "CMAKE_CXX_COMPILER": "D:/workspace/wasmclr/emsdk/upstream/emscripten/em++.bat",
+      "CMAKE_CXX_COMPILER_ID": "Clang",
+      "CMAKE_CXX_COMPILER_VERSION": "22.0.0"
+    }
+  },
+  "node_version": "v22.12.0",
+  "source_hashes": {
+    "scripts/benchmarks/compare_interface_dispatch.py": "530b561b59dea08ec5a8d2ab94d781aa5c7b1048c3366bc09766f21962b0e513",
+    "scripts/benchmarks/run_aot.py": "87700a65cf11576d5b77a8f59d5dfe3d04b4932e0923471e24ec8632ce7be7f6",
+    "scripts/test/global-generics.py": "82638d63b40c4f811281c7c034d398e5c19ba9b12973e0a4f235a9c5e5ec5787",
+    "src/benchmarks/aot-baseline/Benchmarks.cs": "9a4da46aaa7493b0bb6a729bff8311031a618c76e8ade0de0ef3f8d56d3c0b69",
+    "src/benchmarks/aot-baseline/main.cpp": "60ce9b74dba773fdf1a194860a5dff441c43efc45b9b130d02c2526da9df4c30",
+    "src/leanaot/LeanAOT.ToCpp/GlobalConfig.cs": "f2bbcb2e62f1b9f901da8812357f50e018872c26fadfa34e92e5734b68c84e5d",
+    "src/leanaot/LeanAOT.ToCpp/MethodWriterBase.InterfaceCache.cs": "c104efe7e2fd44f150a8febf8e8f00b877c6ffb2b7f057af0de43e974113bccf",
+    "src/leanaot/LeanAOT.ToCpp/MethodWriterBase.cs": "1e8849182d7a0d801bd47c8a0453ed58ee760e219e787fe2f67c3e143d34ac5f",
+    "src/leanaot/LeanAOT.ToCpp/ReturnProtocol.cs": "1c7467c81225d5f350d1e628fbc8268eaeee2139acc4fd3d136f7c9b91982ce5",
+    "src/leanaot/LeanAOT/Program.cs": "62ea29a452db5c014d33bbeaf7717902dd91fb0fbb0b1ee474d3d2ad3e242b43",
+    "src/runtime/codegen/interface_dispatch.h": "c07b55c73847968bd68f739d90fe6c6933e9a22e873c6ca66ca60c6e1a867a3f",
+    "src/runtime/codegen/leanclr_common.h": "8bc51de79e55643b1e5a07117660ff3dbc307f28d8235333fcbaa65485273149",
+    "src/runtime/vm/method.cpp": "a28050cc2514ca473ed6c97d6821970b3569749e6ef4589c598e5a0b2b18a1d3",
+    "src/tests/generic-aot/README.md": "d22c37ef7e7149b4758fa0f407e9bf1b0eca583847fba9992b83abd9bc2ca23a",
+    "src/tests/generic-registry/aot.xml": "f975e7bdb559bbc170c30d2663e6e89f3d28f1a2a921535f2335e9791527a143",
+    "src/tests/generic-registry/main.cpp": "9e98f1ee729f7fb36d9f50d2d18c153496de5a7da682fc63fa4bf2858e7af824",
+    "src/tests/managed/AotTests/TC_InterfaceDispatch.cs": "2069b92d7ad84797b8381baa7ddf267d7e144743c28e867b8c30fc1d3f0e0b41"
+  },
+  "generated_hashes": {
+    "out/performance/interface-dispatch/baseline/generated/AotBaseline.method_body_part1.cpp": "3597d828451ae991f9f4923793dc5a1fa67167df2495ee26e8947cdca761b697",
+    "out/performance/interface-dispatch/baseline/generated/AotBaseline.module_registration.cpp": "3c92a15a72624085c2e0b6cde6f0a904e73ce9468c9023924bff4aba9eb65660",
+    "out/performance/interface-dispatch/baseline/generated/generic_methods_part0.cpp": "f1ca6b4cd1e2192d8efcb747256a0dc4e8552e9c1e79124d8fc6ce16eef761cd",
+    "out/performance/interface-dispatch/baseline/generated/generic_registration.cpp": "ac942b4217cb29842edf4b05534089014618853f04b8ccf7080d6af598f68a23",
+    "out/performance/interface-dispatch/baseline/generated/method_direct_call_bridges_part0.cpp": "25e59966ece89327487392b239001137c32b0840966b94c1f53070211b3a69fb",
+    "out/performance/interface-dispatch/baseline/generated/method_invokers_part0.cpp": "d2a67417c9445e7ea02683d91b37083e335625c1937b704398975c6e6a29a4d9",
+    "out/performance/interface-dispatch/baseline/generated/modules_registration.cpp": "1e85e97c5ed8d9d6217d5623ce261d894829d410e4c74038922150861d5abf76",
+    "out/performance/interface-dispatch/cached/generated/AotBaseline.method_body_part1.cpp": "0a36ad6ca35f014cc47cf7d35031ee662fa2f29e88f65d20eda7571f7ace7225",
+    "out/performance/interface-dispatch/cached/generated/AotBaseline.module_registration.cpp": "3c92a15a72624085c2e0b6cde6f0a904e73ce9468c9023924bff4aba9eb65660",
+    "out/performance/interface-dispatch/cached/generated/generic_methods_part0.cpp": "f1ca6b4cd1e2192d8efcb747256a0dc4e8552e9c1e79124d8fc6ce16eef761cd",
+    "out/performance/interface-dispatch/cached/generated/generic_registration.cpp": "ac942b4217cb29842edf4b05534089014618853f04b8ccf7080d6af598f68a23",
+    "out/performance/interface-dispatch/cached/generated/method_direct_call_bridges_part0.cpp": "25e59966ece89327487392b239001137c32b0840966b94c1f53070211b3a69fb",
+    "out/performance/interface-dispatch/cached/generated/method_invokers_part0.cpp": "d2a67417c9445e7ea02683d91b37083e335625c1937b704398975c6e6a29a4d9",
+    "out/performance/interface-dispatch/cached/generated/modules_registration.cpp": "1e85e97c5ed8d9d6217d5623ce261d894829d410e4c74038922150861d5abf76"
+  },
+  "notes": [
+    "Working-tree implementation based on parent_commit; only the cache flag differs between configurations.",
+    "Same managed source and compiler options; metadata is warm, each AOT invocation starts with empty stack caches.",
+    "Monomorphic, alternating-class, generic-method and straight-line control workloads; actual generic override is verified AOT.",
+    "Up to four three-pointer entries per generated method invocation; no static cache, heap map or new GC roots.",
+    "Seven interleaved process samples by default; frequency/background activity is not controlled.",
+    "No IL2CPP, browser, game-wide or cold-start performance claim; artifact sizes exclude external BCL/metadata/resources."
+  ],
+  "validation": {
+    "cached_configurations": 16,
+    "uncached_configurations": 8,
+    "formal_generic_methods": 24,
+    "formal_interface_methods": 11,
+    "total_formal_method_executions": 840,
+    "runtime_passed": 41,
+    "logs": {
+      "out/interface-dispatch/final-checks/baseline-lightweight-default-native-Release-x64-tests.log": "dd32f2a40f9119793b2a236f936ef14d69705413a7c4ecbe615634f81e124e7d",
+      "out/interface-dispatch/final-checks/baseline-lightweight-default-wasm-Release-x64-tests.log": "bdc01759ba4ad87c9c5b2269bb6e6790dbb343d21217366646ebb15318bd97da",
+      "out/interface-dispatch/final-checks/baseline-lightweight-disabled-native-Release-x64-tests.log": "2b51c9f87a776540af8c7c3880dbc825fbe6b294c96a9b110f7176f1fe7a708a",
+      "out/interface-dispatch/final-checks/baseline-lightweight-disabled-wasm-Release-x64-tests.log": "8b386bdf3b8f24c55b03a5101fa8e95bae1624e73286f0a8bac699542b753a78",
+      "out/interface-dispatch/final-checks/baseline-result-default-native-Release-x64-tests.log": "4dceb50f7ef469634ff556fc3b3321ec4723f2e5ad88ce00488b8b97e705392b",
+      "out/interface-dispatch/final-checks/baseline-result-default-wasm-Release-x64-tests.log": "9bd53242554476a2c60f40159abc0ead7e0cbb95931c4678e9c33695f9f5270d",
+      "out/interface-dispatch/final-checks/baseline-result-disabled-native-Release-x64-tests.log": "b7e2201ffcfee33470ba0b831ca9cf645544da04ea6a7611dbed6ae7b3739727",
+      "out/interface-dispatch/final-checks/baseline-result-disabled-wasm-Release-x64-tests.log": "4efdc985675a164a63cf47169a37397758dcdb47a98eed2e4ae51e51aa202563",
+      "out/interface-dispatch/final-checks/lightweight-default-native-Debug-x64-tests.log": "046081b7ea35f726ad93be70f1b0f8f1bda6fae20e87512a4b11b31de9e18d1a",
+      "out/interface-dispatch/final-checks/lightweight-default-native-Release-Win32-tests.log": "61e759515eea0087a16abdd3d0e1938b1e8cd49f109577bca85ed29cc488e5d3",
+      "out/interface-dispatch/final-checks/lightweight-default-native-Release-x64-tests.log": "83977351a2ea3029d28c7575fd7545f3c37347d304b9974440f8e2f88a32eeef",
+      "out/interface-dispatch/final-checks/lightweight-default-wasm-Release-x64-tests.log": "669549b71327ecb11369f9a230842e495ff0f824ec414fc04147ee64520aafb5",
+      "out/interface-dispatch/final-checks/lightweight-disabled-native-Debug-x64-tests.log": "1ee69a0a9b7501409996293c44c82a372cab1ad84b1d2573b1eda968e32c93bc",
+      "out/interface-dispatch/final-checks/lightweight-disabled-native-Release-Win32-tests.log": "12b84b85d2a8467caabcce51fb826aea047dc0bf4b348f011447c45c563e1e24",
+      "out/interface-dispatch/final-checks/lightweight-disabled-native-Release-x64-tests.log": "0e7060119736017aa04b3a60e935b700cc7dc99ce6f60e7dbc258772cb8f43b1",
+      "out/interface-dispatch/final-checks/lightweight-disabled-wasm-Release-x64-tests.log": "aab9d6b209269120fe27bfd1f55bd0f7d826f7d5b3add4158d39450734a71726",
+      "out/interface-dispatch/final-checks/result-default-native-Debug-x64-tests.log": "19b97e4fa4e521135034f0057bb38de853cfdc58997f201e790cab62f44eb0c2",
+      "out/interface-dispatch/final-checks/result-default-native-Release-Win32-tests.log": "31dca4c6e066f3e08923936fb123914a65045c0ed7a2a17c35d67032d4c7dfa1",
+      "out/interface-dispatch/final-checks/result-default-native-Release-x64-tests.log": "30bb1e9f996e2b6ccea9ef2713768d4cbbbccaf8cb0ef35093264d1ba3f6a503",
+      "out/interface-dispatch/final-checks/result-default-wasm-Release-x64-tests.log": "7d1910ca136dd0c9fbde763e1b12d5f2b05f559c46a68eac89d47af248c12977",
+      "out/interface-dispatch/final-checks/result-disabled-native-Debug-x64-tests.log": "2e81422fe45e1e1d5f3e5e8f5bbef09843d93f79b19fdef6b5217adc449faf11",
+      "out/interface-dispatch/final-checks/result-disabled-native-Release-Win32-tests.log": "bf2532c64913fe46c9a37b85aa7b0340fce0d5b4a514c732e2aea3bf65278f37",
+      "out/interface-dispatch/final-checks/result-disabled-native-Release-x64-tests.log": "81f3fc3cd0236fda5dc0cc20cdc5c540432ed5f623e680f2e20351e1b9a482a7",
+      "out/interface-dispatch/final-checks/result-disabled-wasm-Release-x64-tests.log": "dea0c7fb8ed55131b2fb7ed51781da0f693258659c3fe9a9f8f845db334115a2",
+      "out/interface-dispatch/runtime-tests.log": "b1cc4499864604dae5ef8c9b81d828ef0516b0556351b7ae55b1b28838f092ff"
+    }
+  }
+}

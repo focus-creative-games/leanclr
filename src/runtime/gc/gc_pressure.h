@@ -32,6 +32,7 @@ class GcPressure
 
     static int64_t get_effective_pressure();
     static int64_t get_bytes_allocated_since_last_gc();
+    static int64_t get_total_allocated_bytes();
     static void set_used_size(int64_t used);
     static bool should_collect(bool force);
 };

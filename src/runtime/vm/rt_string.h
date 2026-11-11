@@ -16,7 +16,10 @@ class String
     static RtString* create_string_from_utf8chars(const char* str, int32_t length);
     static RtString* create_string_from_utf8cstr(const char* str)
     {
-        return create_string_from_utf8chars(str, static_cast<int32_t>(std::strlen(str)));
+        if (!str) return nullptr;
+        const size_t length = std::strlen(str);
+        if (length > INT32_MAX) return nullptr;
+        return create_string_from_utf8chars(str, static_cast<int32_t>(length));
     }
     static const metadata::RtMethodInfo* get_redirected_ctor_method();
     static constexpr int32_t get_offset_to_string_data()
@@ -52,7 +55,8 @@ class String
 
     // Runtime helpers mirrored from Rust vm::string
     static int32_t get_string_allocation_size(int32_t length);
-    static RtString* fast_allocate_string(int32_t length); // Declaration retained
+    // Raw allocation helpers return nullptr on invalid size or allocation failure.
+    static RtString* fast_allocate_string(int32_t length);
     static RtString* intern_string(RtString* s);
     static bool is_interned_string(RtString* s);
 };

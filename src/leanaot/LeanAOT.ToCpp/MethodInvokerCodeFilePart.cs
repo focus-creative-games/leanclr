@@ -48,6 +48,10 @@ namespace LeanAOT.ToCpp
             IMethod method = info.method;
             _forwardDeclaration.AddMethodForwardDeclaration(method);
             MethodDetail methodDetail = GlobalServices.Inst.MetadataService.GetMethodDetail(method);
+            // Canonical body declarations erase reference parameters. Stack
+            // offsets still name the actual signature's exact pointer types.
+            foreach (var parameter in methodDetail.ParamsIncludeThis)
+                _forwardDeclaration.AddTypeForwardDefine(parameter.Type);
 
             _invokerImplWriter.AddLine();
             //_invokerImplWriter.AddLine($"// Invoker for {method.FullName}");
@@ -65,13 +69,15 @@ namespace LeanAOT.ToCpp
                 }
             }
             string args = string.Join(", ", methodDetail.ParamsIncludeThis.Select((param, index) => $"*({MethodGenerationUtil.GetCppTypeNameAsFieldOrArgOrLoc(param.Type, TypeNameRelaxLevel.AbiRelaxed)}*)(args + ARG{index}_OFFSET)"));
+            args = methodDetail.WithMethodContext(args, "method");
             if (methodDetail.IsVoidReturn)
             {
                 _invokerImplWriter.AddLine($"return (({castFnPtrType})method_ptr)({args});");
             }
             else
             {
-                _invokerImplWriter.AddLine($"return {VmFunctionNames.SetRetOrReturnError}((({castFnPtrType})method_ptr)({args}), ret);");
+                string call = methodDetail.UsesStatusOut ? ReturnProtocol.InvokeStatusOut(methodDetail.RetType, $"(({castFnPtrType})method_ptr)", args) : $"(({castFnPtrType})method_ptr)({args})";
+                _invokerImplWriter.AddLine($"return {VmFunctionNames.SetRetOrReturnError}({call}, ret);");
             }
             _invokerImplWriter.DecreaseIndent();
             _invokerImplWriter.AddLine("}");

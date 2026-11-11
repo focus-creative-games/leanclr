@@ -84,6 +84,7 @@ RtResult<bool> Type::is_reference_type(const metadata::RtTypeSig* typeSig)
         RET_OK(false);
     }
 }
+
 RtResult<size_t> Type::get_size_of_type(const metadata::RtTypeSig* typeSig)
 {
     if (typeSig->by_ref)
@@ -288,7 +289,8 @@ RtResult<const metadata::RtTypeSig*> Type::resolve_assembly_qualified_name(metad
 RtResult<RtString*> Type::get_full_name(const metadata::RtTypeSig* typeSig, bool full_name, bool assembly_qualified)
 {
     utils::Utf8StringBuilder sb;
-    metadata::TypeNameFormat format = full_name ? (assembly_qualified ? metadata::TypeNameFormat::AssemblyQualified : metadata::TypeNameFormat::FullName) : metadata::TypeNameFormat::Reflection;
+    metadata::TypeNameFormat format = full_name ? (assembly_qualified ? metadata::TypeNameFormat::AssemblyQualified : metadata::TypeNameFormat::FullName)
+                                                : metadata::TypeNameFormat::Reflection;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_type_full_name(sb, typeSig, format, false));
     RtString* name = String::create_string_from_utf8chars(sb.get_const_chars(), static_cast<int32_t>(sb.length()));
     RET_OK(name);
@@ -504,7 +506,7 @@ RtResultVoid FullyQualifiedAssemblyName::parse()
     RET_VOID_OK();
 }
 
-RtResultVoid FullyQualifiedAssemblyName::write_to(metadata::RtMonoAssemblyName* assembly_name_info) const
+RtResultVoid FullyQualifiedAssemblyName::write_to(metadata::AssemblyNameInfo* assembly_name_info) const
 {
     if (_name_length > 0)
     {
@@ -540,7 +542,7 @@ RtResultVoid FullyQualifiedAssemblyName::write_to(metadata::RtMonoAssemblyName* 
     RET_VOID_OK();
 }
 
-RtResultVoid FullyQualifiedAssemblyName::parse_into(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info,
+RtResultVoid FullyQualifiedAssemblyName::parse_into(const char* input, size_t input_len, metadata::AssemblyNameInfo* assembly_name_info,
                                                     bool* is_version_defined, bool* is_token_defined)
 {
     FullyQualifiedAssemblyName parser(input, input_len);
@@ -551,7 +553,7 @@ RtResultVoid FullyQualifiedAssemblyName::parse_into(const char* input, size_t in
     RET_VOID_OK();
 }
 
-RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, metadata::RtMonoAssemblyName* assembly_name_info, bool* is_version_defined,
+RtResultVoid Type::parse_assembly_name(const char* input, size_t input_len, metadata::AssemblyNameInfo* assembly_name_info, bool* is_version_defined,
                                        bool* is_token_defined)
 {
     return FullyQualifiedAssemblyName::parse_into(input, input_len, assembly_name_info, is_version_defined, is_token_defined);

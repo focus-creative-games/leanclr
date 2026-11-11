@@ -1,6 +1,8 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_windowsconsoledriver.h"
 
-#include "platform/kernel32.h"
+#include "bcl/mono/platform/kernel32.h"
 
 namespace leanclr
 {
@@ -124,7 +126,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_windowsconsoleriver[
 utils::Span<vm::InternalCallEntry> SystemWindowsConsoleDriver::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_windowsconsoleriver,
-                                              sizeof(s_internal_call_entries_system_windowsconsoleriver) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_windowsconsoleriver));
 }
 
 } // namespace icalls

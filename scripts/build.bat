@@ -57,7 +57,7 @@ if /i "%~1"=="aot-tester" (
 echo Usage:
 echo   scripts\build.bat test build [Config] [Arch]
 echo   scripts\build.bat test run [Config]
-echo   scripts\build.bat runtime [Config] [Arch] [clean] [shared] [sln]
+echo   scripts\build.bat runtime [Config] [Arch] [clean] [shared] [sln] [native^|minimal^|custom]
 echo   scripts\build.bat leanaot Debug^|Release
 echo   scripts\build.bat aot-tester [build] [Config] [Arch]
 echo   scripts\build.bat aot-tester gen-cpp

@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_diagnostics_debugger.h"
 
 #include "icall_base.h"
@@ -64,7 +66,7 @@ utils::Span<vm::InternalCallEntry> SystemDiagnosticsDebugger::get_internal_call_
         {"System.Diagnostics.Debugger::Log_icall(System.Int32,System.String&,System.String&)", (vm::InternalCallFunction)&SystemDiagnosticsDebugger::log_icall,
          log_icall_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

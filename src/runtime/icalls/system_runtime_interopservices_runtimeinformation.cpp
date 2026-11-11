@@ -1,6 +1,8 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_runtime_interopservices_runtimeinformation.h"
 
-#include "platform/architecture.h"
+#include "bcl/mono/platform/architecture.h"
 
 namespace leanclr
 {
@@ -49,7 +51,7 @@ utils::Span<vm::InternalCallEntry> SystemRuntimeInteropServicesRuntimeInformatio
         {"System.Runtime.InteropServices.RuntimeInformation::GetOSName", (vm::InternalCallFunction)&SystemRuntimeInteropServicesRuntimeInformation::get_os_name,
          get_os_name_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 
 } // namespace icalls

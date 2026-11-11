@@ -55,12 +55,47 @@ namespace LeanAOT.ToCpp
             var parametersIncludeThis = methodDetail.ParamsIncludeThis;
             string methodVarName = "__method";
             string callvirVarName = "__callvir";
-            var castFnPtrType = methodDetail.CreateRelaxMethodFunctionPointerTypeForCast();
 
             _directCallBridgeImplWriter.AddLine($"if ({VmFunctionNames.IsAotMethod}({methodVarName}))");
             _directCallBridgeImplWriter.BeginBlock();
             _directCallBridgeImplWriter.AddLine($"{ConstStrings.ManagedMethodPointerTypeName} __method_pointer = {callvirVarName} ? {methodVarName}->{ConstStrings.VirtualMethodPointerFieldName} : {methodVarName}->{ConstStrings.MethodPointerFieldName};");
-            _directCallBridgeImplWriter.AddLine($"return (({castFnPtrType})__method_pointer)({MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(methodDetail)});");
+            // Interface/base signatures do not determine the implementation's
+            // context ABI. A generic class can implement a non-generic interface
+            // and a non-generic class can implement a closed generic interface.
+            var plainArgs = MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(methodDetail);
+            var contextArgs = plainArgs.Length == 0 ? "__method" : plainArgs + ", __method";
+            void WriteAotCall(bool lightweight, bool packedInt32 = false, bool statusOut = false)
+            {
+                _directCallBridgeImplWriter.AddLine("if (__method->generic_method != nullptr)");
+                _directCallBridgeImplWriter.BeginBlock();
+                string contextCall = $"(({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(true, lightweight, packedInt32, statusOut)})__method_pointer)";
+                _directCallBridgeImplWriter.AddLine("return " + (statusOut ? ReturnProtocol.InvokeStatusOut(methodDetail.RetType, contextCall, contextArgs) : $"{contextCall}({contextArgs})") + ";");
+                _directCallBridgeImplWriter.EndBlock();
+                string plainCall = $"(({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(false, lightweight, packedInt32, statusOut)})__method_pointer)";
+                _directCallBridgeImplWriter.AddLine("return " + (statusOut ? ReturnProtocol.InvokeStatusOut(methodDetail.RetType, plainCall, plainArgs) : $"{plainCall}({plainArgs})") + ";");
+            }
+            if (ReturnProtocol.IsLightweight(methodDetail.RetType, true))
+            {
+                _directCallBridgeImplWriter.AddLine("if (leanclr::codegen::uses_lightweight_aot_returns(__method))");
+                _directCallBridgeImplWriter.BeginBlock();
+                WriteAotCall(true);
+                _directCallBridgeImplWriter.EndBlock();
+            }
+            if (ReturnProtocol.IsInt32(methodDetail.RetType))
+            {
+                _directCallBridgeImplWriter.AddLine("if (leanclr::codegen::uses_packed_int32_aot_returns(__method))");
+                _directCallBridgeImplWriter.BeginBlock();
+                WriteAotCall(false, true);
+                _directCallBridgeImplWriter.EndBlock();
+            }
+            if (ReturnProtocol.CanStatusOut(methodDetail.RetType))
+            {
+                _directCallBridgeImplWriter.AddLine("if (leanclr::codegen::uses_status_out_aot_returns(__method))");
+                _directCallBridgeImplWriter.BeginBlock();
+                WriteAotCall(false, false, true);
+                _directCallBridgeImplWriter.EndBlock();
+            }
+            WriteAotCall(false);
             _directCallBridgeImplWriter.EndBlock();
             _directCallBridgeImplWriter.AddLine($"else");
             _directCallBridgeImplWriter.BeginBlock();

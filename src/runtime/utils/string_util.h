@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstring>
+#include <functional>
 #include <string>
+#include <string_view>
 
 #include "core/rt_base.h"
 #include "hash_util.h"
@@ -19,6 +21,13 @@ namespace utils
 class StringUtil
 {
   public:
+    // Recoverable allocation APIs. Null input is a successful null result.
+    static RtResult<const char*> try_strdup(const char* str);
+    static RtResult<const Utf16Char*> try_strdup_utf16_with_null_terminator(const Utf16Char* str, size_t length);
+    static RtResult<const Utf16Char*> try_strdup_utf16_without_null_terminator(const Utf16Char* str, size_t length);
+    static RtResult<const char*> try_concat(const char* str1, const char* str2);
+
+    // Legacy infallible APIs follow the runtime fatal allocation policy.
     static const char* strdup(const char* str);
 
     static const Utf16Char* strdup_utf16_with_null_terminator(const Utf16Char* str, size_t length);
@@ -32,6 +41,8 @@ class StringUtil
         return std::strncmp(str1, str2, len) == 0 && str1[len] == '\0';
     }
 
+    // Deterministic byte comparison: fold ASCII A-Z only, stop at NUL.
+    // Non-ASCII bytes compare exactly; no locale or Unicode case folding.
     static bool equals_ignorecase(const char* s1, const char* s2);
 
     static bool equals_ignorecase_n(const char* s1, const char* s2, size_t len);
@@ -57,8 +68,7 @@ class StringUtil
     static int32_t get_utf16chars_length(const Utf16Char* chars)
     {
         // Utf16Char is uint16_t; libc++ only specializes char_traits for char16_t, not uint16_t.
-        return static_cast<int32_t>(
-            std::char_traits<char16_t>::length(reinterpret_cast<const char16_t*>(chars)));
+        return static_cast<int32_t>(std::char_traits<char16_t>::length(reinterpret_cast<const char16_t*>(chars)));
     }
 };
 

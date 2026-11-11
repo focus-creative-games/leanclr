@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_text_encodinghelper.h"
 
 #include "vm/rt_string.h"
@@ -34,7 +36,7 @@ static vm::InternalCallEntry s_internal_call_entries_system_text_encodinghelper[
 utils::Span<vm::InternalCallEntry> SystemTextEncodingHelper::get_internal_call_entries() noexcept
 {
     return utils::Span<vm::InternalCallEntry>(s_internal_call_entries_system_text_encodinghelper,
-                                              sizeof(s_internal_call_entries_system_text_encodinghelper) / sizeof(vm::InternalCallEntry));
+                                              std::size(s_internal_call_entries_system_text_encodinghelper));
 }
 
 } // namespace icalls

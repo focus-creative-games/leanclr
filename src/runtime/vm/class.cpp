@@ -1,6 +1,7 @@
 #include <functional>
 
 #include "class.h"
+#include "bcl/adapter.h"
 #include "const_strs.h"
 #include "rt_managed_types.h"
 #include "metadata/module_def.h"
@@ -11,6 +12,7 @@
 #include "alloc/metadata_allocation.h"
 #include "utils/hashmap.h"
 #include "utils/hashset.h"
+#include "utils/scope_guard.h"
 #include "gc/garbage_collector.h"
 #include "gc/gc_roots.h"
 #include "array_class.h"
@@ -37,120 +39,6 @@ RtResult<metadata::RtClass*> get_class_must_exist(metadata::RtModuleDef* corlib,
 
 CorLibTypes g_corlibTypes{};
 
-RtResultVoid Class::init_corlib_classes(metadata::RtModuleDef* corlib)
-{
-    CorLibTypes& t = g_corlibTypes;
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_object, get_class_must_exist(corlib, "System.Object"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_void, get_class_must_exist(corlib, "System.Void"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_string, get_class_must_exist(corlib, "System.String"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_valuetype, get_class_must_exist(corlib, "System.ValueType"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_boolean, get_class_must_exist(corlib, "System.Boolean"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_char, get_class_must_exist(corlib, "System.Char"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_sbyte, get_class_must_exist(corlib, "System.SByte"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_byte, get_class_must_exist(corlib, "System.Byte"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_int16, get_class_must_exist(corlib, "System.Int16"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_uint16, get_class_must_exist(corlib, "System.UInt16"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_int32, get_class_must_exist(corlib, "System.Int32"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_uint32, get_class_must_exist(corlib, "System.UInt32"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_int64, get_class_must_exist(corlib, "System.Int64"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_uint64, get_class_must_exist(corlib, "System.UInt64"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_intptr, get_class_must_exist(corlib, "System.IntPtr"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_uintptr, get_class_must_exist(corlib, "System.UIntPtr"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_single, get_class_must_exist(corlib, "System.Single"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_double, get_class_must_exist(corlib, "System.Double"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_typedreference, get_class_must_exist(corlib, "System.TypedReference"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_enum, get_class_must_exist(corlib, "System.Enum"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_nullable, get_class_must_exist(corlib, "System.Nullable`1"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_array, get_class_must_exist(corlib, "System.Array"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_delegate, get_class_must_exist(corlib, "System.Delegate"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_multicastdelegate, get_class_must_exist(corlib, "System.MulticastDelegate"));
-    // UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_delegatedata, get_class_must_exist(corlib, "System.DelegateData"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_systemtype, get_class_must_exist(corlib, "System.Type"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_runtimetype, get_class_must_exist(corlib, "System.RuntimeType"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_icollection, get_class_must_exist(corlib, "System.Collections.ICollection"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_ienumerable, get_class_must_exist(corlib, "System.Collections.IEnumerable"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_ilist, get_class_must_exist(corlib, "System.Collections.IList"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_ienumerator, get_class_must_exist(corlib, "System.Collections.IEnumerator"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_ilist_generic, get_class_must_exist(corlib, "System.Collections.Generic.IList`1"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_icollection_generic, get_class_must_exist(corlib, "System.Collections.Generic.ICollection`1"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_ienumerable_generic, get_class_must_exist(corlib, "System.Collections.Generic.IEnumerable`1"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_ireadonlylist_generic, get_class_must_exist(corlib, "System.Collections.Generic.IReadOnlyList`1"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_ireadonlycollection_generic, get_class_must_exist(corlib, "System.Collections.Generic.IReadOnlyCollection`1"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_ienumerator_generic, get_class_must_exist(corlib, "System.Collections.Generic.IEnumerator`1"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_exception, get_class_must_exist(corlib, "System.Exception"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_arithmetic_exception, get_class_must_exist(corlib, "System.ArithmeticException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_division_by_zero_exception, get_class_must_exist(corlib, "System.DivideByZeroException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_execution_engine_exception, get_class_must_exist(corlib, "System.ExecutionEngineException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_overflow_exception, get_class_must_exist(corlib, "System.OverflowException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_stack_overflow_exception, get_class_must_exist(corlib, "System.StackOverflowException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_argument_exception, get_class_must_exist(corlib, "System.ArgumentException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_argument_null_exception, get_class_must_exist(corlib, "System.ArgumentNullException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_argument_out_of_range_exception, get_class_must_exist(corlib, "System.ArgumentOutOfRangeException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_type_load_exception, get_class_must_exist(corlib, "System.TypeLoadException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_index_out_of_range_exception, get_class_must_exist(corlib, "System.IndexOutOfRangeException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_invalid_cast_exception, get_class_must_exist(corlib, "System.InvalidCastException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_missing_field_exception, get_class_must_exist(corlib, "System.MissingFieldException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_missing_method_exception, get_class_must_exist(corlib, "System.MissingMethodException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_null_reference_exception, get_class_must_exist(corlib, "System.NullReferenceException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_array_type_mismatch_exception, get_class_must_exist(corlib, "System.ArrayTypeMismatchException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_out_of_memory_exception, get_class_must_exist(corlib, "System.OutOfMemoryException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_bad_image_format_exception, get_class_must_exist(corlib, "System.BadImageFormatException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_entry_point_not_found_exception, get_class_must_exist(corlib, "System.EntryPointNotFoundException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_missing_member_exception, get_class_must_exist(corlib, "System.MissingMemberException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_not_supported_exception, get_class_must_exist(corlib, "System.NotSupportedException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_not_implemented_exception, get_class_must_exist(corlib, "System.NotImplementedException"));
-    // UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_type_unloaded_exception, get_class_must_exist(corlib, "System.TypeUnloadedException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_type_initialization_exception, get_class_must_exist(corlib, "System.TypeInitializationException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_target_exception, get_class_must_exist(corlib, "System.Reflection.TargetException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_target_invocation_exception, get_class_must_exist(corlib, "System.Reflection.TargetInvocationException"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_target_parameter_count_exception, get_class_must_exist(corlib, "System.Reflection.TargetParameterCountException"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_attribute, get_class_must_exist(corlib, "System.Attribute"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_customattributedata, get_class_must_exist(corlib, "System.Reflection.CustomAttributeData"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_customattribute_typed_argument, get_class_must_exist(corlib, "System.Reflection.CustomAttributeTypedArgument"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_customattribute_named_argument, get_class_must_exist(corlib, "System.Reflection.CustomAttributeNamedArgument"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_intrinsic, get_class_must_exist(corlib, "System.Runtime.CompilerServices.IntrinsicAttribute"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_assembly, get_class_must_exist(corlib, "System.Reflection.RuntimeAssembly"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_module, get_class_must_exist(corlib, "System.Reflection.RuntimeModule"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_field, get_class_must_exist(corlib, "System.Reflection.RuntimeFieldInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_method, get_class_must_exist(corlib, "System.Reflection.RuntimeMethodInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_constructor, get_class_must_exist(corlib, "System.Reflection.RuntimeConstructorInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_property, get_class_must_exist(corlib, "System.Reflection.RuntimePropertyInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_event, get_class_must_exist(corlib, "System.Reflection.RuntimeEventInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_parameter, get_class_must_exist(corlib, "System.Reflection.RuntimeParameterInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_memberinfo, get_class_must_exist(corlib, "System.Reflection.MemberInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_methodbody, get_class_must_exist(corlib, "System.Reflection.MethodBody"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_exceptionhandlingclause, get_class_must_exist(corlib, "System.Reflection.ExceptionHandlingClause"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_reflection_localvariableinfo, get_class_must_exist(corlib, "System.Reflection.LocalVariableInfo"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_appdomain, get_class_must_exist(corlib, "System.AppDomain"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_appdomain_setup, get_class_must_exist(corlib, "System.AppDomainSetup"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_appcontext, get_class_must_exist(corlib, "System.Runtime.Remoting.Contexts.Context"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_thread, get_class_must_exist(corlib, "System.Threading.Thread"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_internal_thread, get_class_must_exist(corlib, "System.Threading.InternalThread"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_marshal_as, get_class_must_exist(corlib, "System.Runtime.InteropServices.MarshalAsAttribute"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_byreflike, get_class_must_exist(corlib, "System.Runtime.CompilerServices.IsByRefLikeAttribute"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_culturedata, get_class_must_exist(corlib, "System.Globalization.CultureData"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_cultureinfo, get_class_must_exist(corlib, "System.Globalization.CultureInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_datetimeformatinfo, get_class_must_exist(corlib, "System.Globalization.DateTimeFormatInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_numberformatinfo, get_class_must_exist(corlib, "System.Globalization.NumberFormatInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_regioninfo, get_class_must_exist(corlib, "System.Globalization.RegionInfo"));
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_calendardata, get_class_must_exist(corlib, "System.Globalization.CalendarData"));
-
-    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_stackframe, get_class_must_exist(corlib, "System.Diagnostics.StackFrame"));
-
-    RET_VOID_OK();
-}
-
 RtResult<metadata::RtClass*> Class::get_class_by_type_def_gid(uint32_t gid)
 {
     metadata::RtModuleDef* def_mod = metadata::RtModuleDef::get_module_by_id(metadata::RtMetadata::decode_module_id_from_gid(gid));
@@ -175,150 +63,8 @@ RtResultVoid Class::setup_finalizer_vtable_index()
 
 RtResultVoid Class::initialize()
 {
-    RET_ERR_ON_FAIL(init_corlib_classes(metadata::RtModuleDef::get_corlib_module()));
+    RET_ERR_ON_FAIL(bcl::Adapter::initialize_corlib(metadata::RtModuleDef::get_corlib_module()));
     RET_ERR_ON_FAIL(setup_finalizer_vtable_index());
-    RET_VOID_OK();
-}
-
-RtResultVoid Class::verify_integrity_of_corlib_classes()
-{
-    const CorLibTypes& t = get_corlib_types();
-    metadata::RtClass* const corlib_type_arr[] = {
-        t.cls_void,
-        t.cls_boolean,
-        t.cls_char,
-        t.cls_byte,
-        t.cls_sbyte,
-        t.cls_int16,
-        t.cls_uint16,
-        t.cls_int32,
-        t.cls_uint32,
-        t.cls_int64,
-        t.cls_uint64,
-        t.cls_intptr,
-        t.cls_uintptr,
-        t.cls_single,
-        t.cls_double,
-        t.cls_object,
-        t.cls_valuetype,
-        t.cls_string,
-        t.cls_enum,
-        t.cls_array,
-        t.cls_delegate,
-        t.cls_multicastdelegate,
-        // t.cls_delegatedata,
-        t.cls_typedreference,
-        t.cls_systemtype,
-        t.cls_runtimetype,
-        t.cls_nullable,
-        t.cls_icollection,
-        t.cls_ienumerable,
-        t.cls_ilist,
-        t.cls_ienumerator,
-        t.cls_ilist_generic,
-        t.cls_icollection_generic,
-        t.cls_ienumerable_generic,
-        t.cls_ireadonlylist_generic,
-        t.cls_ireadonlycollection_generic,
-        t.cls_ienumerator_generic,
-        t.cls_exception,
-        t.cls_arithmetic_exception,
-        t.cls_division_by_zero_exception,
-        t.cls_execution_engine_exception,
-        t.cls_overflow_exception,
-        t.cls_stack_overflow_exception,
-        t.cls_argument_exception,
-        t.cls_argument_null_exception,
-        t.cls_argument_out_of_range_exception,
-        t.cls_type_load_exception,
-        t.cls_index_out_of_range_exception,
-        t.cls_invalid_cast_exception,
-        t.cls_missing_field_exception,
-        t.cls_missing_method_exception,
-        t.cls_null_reference_exception,
-        t.cls_array_type_mismatch_exception,
-        t.cls_out_of_memory_exception,
-        t.cls_bad_image_format_exception,
-        t.cls_entry_point_not_found_exception,
-        t.cls_missing_member_exception,
-        t.cls_not_supported_exception,
-        t.cls_not_implemented_exception,
-        // t.cls_type_unloaded_exception,
-        t.cls_type_initialization_exception,
-        t.cls_target_exception,
-        t.cls_target_invocation_exception,
-        t.cls_target_parameter_count_exception,
-        t.cls_attribute,
-        t.cls_customattributedata,
-        t.cls_customattribute_typed_argument,
-        t.cls_customattribute_named_argument,
-        t.cls_intrinsic,
-        t.cls_reflection_assembly,
-        t.cls_reflection_module,
-        t.cls_reflection_field,
-        t.cls_reflection_method,
-        t.cls_reflection_constructor,
-        t.cls_reflection_property,
-        t.cls_reflection_event,
-        t.cls_reflection_parameter,
-        t.cls_reflection_memberinfo,
-        t.cls_reflection_methodbody,
-        t.cls_reflection_exceptionhandlingclause,
-        t.cls_reflection_localvariableinfo,
-        t.cls_appdomain,
-        t.cls_appdomain_setup,
-        t.cls_appcontext,
-        t.cls_thread,
-        t.cls_internal_thread,
-        t.cls_marshal_as,
-        t.cls_byreflike,
-        t.cls_culturedata,
-        t.cls_cultureinfo,
-        t.cls_datetimeformatinfo,
-        t.cls_numberformatinfo,
-        t.cls_regioninfo,
-        t.cls_calendardata,
-        t.cls_stackframe,
-    };
-
-    for (metadata::RtClass* cls : corlib_type_arr)
-    {
-        RET_ERR_ON_FAIL(initialize_all(cls));
-    }
-
-    RET_ERR_ON_FALSE(sizeof(RtObject) == RT_OBJECT_HEADER_SIZE, RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(RT_TYPED_REFERENCE_SIZE == PTR_SIZE * 3, RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_without_object_header(t.cls_typedreference) == RT_TYPED_REFERENCE_SIZE, RtErr::BadImageFormat);
-
-    // RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_delegatedata) == sizeof(RtDelegateData), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_delegate) == sizeof(RtDelegate), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_multicastdelegate) == sizeof(RtMulticastDelegate), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_exception) == sizeof(RtException), RtErr::BadImageFormat);
-
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_assembly) == sizeof(RtReflectionAssembly), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_module) == sizeof(RtReflectionModule), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_field) == sizeof(RtReflectionField), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_method) == sizeof(RtReflectionMethod), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_constructor) == sizeof(RtReflectionConstructor), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_property) == sizeof(RtReflectionProperty), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_event) == sizeof(RtReflectionEventInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_parameter) == sizeof(RtReflectionParameter), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_methodbody) == sizeof(RtReflectionMethodBody), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_exceptionhandlingclause) == sizeof(RtReflectionExceptionHandlingClause),
-                     RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_localvariableinfo) == sizeof(RtReflectionLocalVariableInfo), RtErr::BadImageFormat);
-
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_appdomain) == sizeof(RtAppDomain), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_appcontext) == sizeof(RtAppContext), RtErr::BadImageFormat);
-
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_cultureinfo) == sizeof(RtCultureInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_culturedata) == sizeof(RtCultureData), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_datetimeformatinfo) == sizeof(RtDateTimeFormatInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_numberformatinfo) == sizeof(RtNumberFormatInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_regioninfo) == sizeof(RtRegionInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_calendardata) == sizeof(RtCalendarData), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_stackframe) == sizeof(RtStackFrame), RtErr::BadImageFormat);
-
     RET_VOID_OK();
 }
 
@@ -886,6 +632,8 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
     if (!try_set_initialized_part(klass, metadata::RtClassInitPart::Field))
         RET_VOID_OK();
 
+    auto rollback = utils::make_scope_exit([klass]() { klass->init_flags &= ~static_cast<uint32_t>(metadata::RtClassInitPart::Field); });
+
     // Initialize parent fields
     if (klass->parent)
     {
@@ -929,6 +677,7 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
         break;
     }
     }
+    rollback.dismiss();
     RET_VOID_OK();
 }
 
@@ -1430,12 +1179,7 @@ RtResultVoid Class::setup_methods_typedef(metadata::RtClass* klass)
             }
         }
 
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(InvokeTypeAndMethod, invoker_type_and_method, Shim::get_invoker(method));
-        method->invoke_method_ptr = invoker_type_and_method.invoker;
-        method->invoker_type = invoker_type_and_method.invoker_type;
-        MethodAndVirtualMethod method_and_virtual_method = Shim::get_method_pointer(method);
-        method->method_ptr = method_and_virtual_method.method_ptr;
-        method->virtual_method_ptr = method_and_virtual_method.virtual_method_ptr;
+        RET_ERR_ON_FAIL(Shim::setup_method(method));
         methods[i] = method;
     }
 
@@ -2145,7 +1889,12 @@ RtResult<metadata::RtClass*> Class::get_class_from_typesig(const metadata::RtTyp
     }
 }
 
-static utils::HashMap<const metadata::RtTypeSig*, metadata::RtClass*, metadata::TypeSigIgnoreAttrsHasher, metadata::TypeSigIgnoreAttrsEqual> g_ptrClassCache;
+static utils::HashMap<const metadata::RtTypeSig*, metadata::RtClass*, metadata::TypeSigIgnoreAttrsHasher, metadata::TypeSigIgnoreAttrsEqual>&
+get_g_ptrClassCache()
+{
+    static utils::HashMap<const metadata::RtTypeSig*, metadata::RtClass*, metadata::TypeSigIgnoreAttrsHasher, metadata::TypeSigIgnoreAttrsEqual> value;
+    return value;
+}
 
 static const char* make_ptr_name(const char* eleName)
 {
@@ -2154,8 +1903,8 @@ static const char* make_ptr_name(const char* eleName)
 
 RtResult<metadata::RtClass*> Class::get_ptr_class_by_element_typesig(const metadata::RtTypeSig* eleTypeSig)
 {
-    auto it = g_ptrClassCache.find(eleTypeSig);
-    if (it != g_ptrClassCache.end())
+    auto it = get_g_ptrClassCache().find(eleTypeSig);
+    if (it != get_g_ptrClassCache().end())
     {
         RET_OK(it->second);
     }
@@ -2178,16 +1927,20 @@ RtResult<metadata::RtClass*> Class::get_ptr_class_by_element_typesig(const metad
     ptrClass->by_val = ptrTypeSigs.by_val;
     ptrClass->by_ref = ptrTypeSigs.by_ref;
 
-    g_ptrClassCache.insert({eleTypeSig, ptrClass});
+    get_g_ptrClassCache().insert({eleTypeSig, ptrClass});
     RET_OK(ptrClass);
 }
 
-static utils::HashMap<const metadata::RtGenericParam*, metadata::RtClass*> g_genericParamClassCache;
+static utils::HashMap<const metadata::RtGenericParam*, metadata::RtClass*>& get_g_genericParamClassCache()
+{
+    static utils::HashMap<const metadata::RtGenericParam*, metadata::RtClass*> value;
+    return value;
+}
 
 RtResult<metadata::RtClass*> Class::get_generic_param_class_by_typesig(const metadata::RtGenericParam* genericParam)
 {
-    auto it = g_genericParamClassCache.find(genericParam);
-    if (it != g_genericParamClassCache.end())
+    auto it = get_g_genericParamClassCache().find(genericParam);
+    if (it != get_g_genericParamClassCache().end())
     {
         RET_OK(it->second);
     }
@@ -2214,16 +1967,20 @@ RtResult<metadata::RtClass*> Class::get_generic_param_class_by_typesig(const met
     genericParamClass->by_val = byValTypeSig;
     genericParamClass->by_ref = byRefTypeSig;
 
-    g_genericParamClassCache.insert({genericParam, genericParamClass});
+    get_g_genericParamClassCache().insert({genericParam, genericParamClass});
     RET_OK(genericParamClass);
 }
 
-static utils::HashMap<const metadata::RtMethodSig*, metadata::RtClass*, metadata::MethodSigHash, metadata::MethodSigCompare> g_fnPtrClassCache;
+static utils::HashMap<const metadata::RtMethodSig*, metadata::RtClass*, metadata::MethodSigHash, metadata::MethodSigCompare>& get_g_fnPtrClassCache()
+{
+    static utils::HashMap<const metadata::RtMethodSig*, metadata::RtClass*, metadata::MethodSigHash, metadata::MethodSigCompare> value;
+    return value;
+}
 
 RtResult<metadata::RtClass*> Class::get_fnptr_class_by_method_sig(const metadata::RtMethodSig* method_sig)
 {
-    auto it = g_fnPtrClassCache.find(method_sig);
-    if (it != g_fnPtrClassCache.end())
+    auto it = get_g_fnPtrClassCache().find(method_sig);
+    if (it != get_g_fnPtrClassCache().end())
     {
         RET_OK(it->second);
     }
@@ -2250,7 +2007,7 @@ RtResult<metadata::RtClass*> Class::get_fnptr_class_by_method_sig(const metadata
     new_klass->by_val = by_val;
     new_klass->by_ref = by_ref;
 
-    g_fnPtrClassCache.insert({method_sig, new_klass});
+    get_g_fnPtrClassCache().insert({method_sig, new_klass});
     RET_OK(new_klass);
 }
 
@@ -2276,6 +2033,48 @@ RtResult<metadata::RtClass*> Class::find_nested_class_by_name(const metadata::Rt
         }
     }
     RET_OK(nullptr);
+}
+
+static bool is_generic_parameter_class(const metadata::RtClass* klass)
+{
+    auto kind = klass->by_val->ele_type;
+    return kind == metadata::RtElementType::Var || kind == metadata::RtElementType::MVar;
+}
+
+static bool is_definitely_reference_type(const metadata::RtClass* klass, utils::Vector<const metadata::RtClass*>& active)
+{
+    if (!is_generic_parameter_class(klass))
+        return Class::is_reference_type(klass);
+    for (auto* seen : active)
+        if (seen == klass)
+            return false;
+    const auto* parameter = klass->by_val->data.generic_param;
+    if (parameter->flags & (uint16_t)metadata::RtGenericParamAttribute::ReferenceTypeConstraint)
+        return true;
+    if (parameter->flags & (uint16_t)metadata::RtGenericParamAttribute::NotNullableValueTypeConstraint)
+        return false;
+    active.push_back(klass);
+    bool result = false;
+    for (uint8_t i = 0; i < parameter->constraint_type_sig_count && !result; ++i)
+    {
+        auto constraint = Class::get_class_from_typesig(parameter->constraint_type_sigs[i]);
+        if (constraint.is_err())
+            continue;
+        const auto* type = constraint.unwrap();
+        if (is_generic_parameter_class(type))
+            result = is_definitely_reference_type(type, active);
+        else
+            result = Class::is_reference_type(type) && !Class::is_interface(type) && type != Class::get_corlib_types().cls_object &&
+                     type != Class::get_corlib_types().cls_valuetype && type != Class::get_corlib_types().cls_enum;
+    }
+    active.pop_back();
+    return result;
+}
+
+static bool is_definitely_reference_type(const metadata::RtClass* klass)
+{
+    utils::Vector<const metadata::RtClass*> active;
+    return is_definitely_reference_type(klass, active);
 }
 
 bool Class::is_assignable_from_class(const metadata::RtClass* from_class, const metadata::RtClass* to_class)
@@ -2319,7 +2118,8 @@ bool Class::is_assignable_from_class(const metadata::RtClass* from_class, const 
     case metadata::RtElementType::Var:
     case metadata::RtElementType::MVar:
     {
-        // FIXME: should consider generic parameter constraints
+        // Concrete types do not cast to an open parameter. Identity and
+        // parameter-to-parameter constraint implications are handled at entry.
         return false;
     }
     case metadata::RtElementType::SZArray:
@@ -2331,7 +2131,7 @@ bool Class::is_assignable_from_class(const metadata::RtClass* from_class, const 
         }
         metadata::RtClass* fromEleClass = get_array_element_class(from_class);
         metadata::RtClass* toEleClass = get_array_element_class(to_class);
-        if (is_value_type(fromEleClass))
+        if (!is_definitely_reference_type(fromEleClass) || !is_definitely_reference_type(toEleClass))
         {
             return fromEleClass == toEleClass;
         }
@@ -2350,7 +2150,7 @@ bool Class::is_assignable_from_class(const metadata::RtClass* from_class, const 
         }
         metadata::RtClass* fromEleClass = get_array_element_class(from_class);
         metadata::RtClass* toEleClass = get_array_element_class(to_class);
-        if (is_value_type(fromEleClass))
+        if (!is_definitely_reference_type(fromEleClass) || !is_definitely_reference_type(toEleClass))
         {
             return fromEleClass == toEleClass;
         }
@@ -2402,7 +2202,11 @@ struct ClassPairCompareHasher
     }
 };
 
-static utils::HashSet<ClassPair, ClassPairCompareHasher, ClassPairCompare> g_genericParameterCovariantCheckCache;
+static utils::HashSet<ClassPair, ClassPairCompareHasher, ClassPairCompare>& get_g_genericParameterCovariantCheckCache()
+{
+    static utils::HashSet<ClassPair, ClassPairCompareHasher, ClassPairCompare> value;
+    return value;
+}
 
 bool Class::is_assignable_from_generic_parameter_convariant0(const metadata::RtClass* from_class, const metadata::RtClass* to_class, bool implemented_in_array)
 {
@@ -2443,9 +2247,9 @@ bool Class::is_assignable_from_generic_parameter_convariant0(const metadata::RtC
         }
         const metadata::RtClass* from_arg_class = ret_from_arg_class.unwrap();
         const metadata::RtClass* to_arg_class = ret_to_arg_class.unwrap();
-        if (is_value_type(from_arg_class) || is_value_type(to_arg_class))
+        if (!is_definitely_reference_type(from_arg_class) || !is_definitely_reference_type(to_arg_class))
         {
-            if (implemented_in_array)
+            if (implemented_in_array && is_value_type(from_arg_class) && is_value_type(to_arg_class))
             {
                 return ArrayClass::get_array_variance_reduce_type(from_arg_class) == ArrayClass::get_array_variance_reduce_type(to_arg_class);
             }
@@ -2477,14 +2281,14 @@ bool Class::is_assignable_from_generic_parameter_convariant(const metadata::RtCl
 {
     bool implemented_in_array = is_array_or_szarray(implement_class) || implement_class->declaring_class == get_corlib_types().cls_array;
     auto cachePair = ClassPair{from_class, to_class, implemented_in_array, false};
-    auto it = g_genericParameterCovariantCheckCache.find(cachePair);
-    if (it != g_genericParameterCovariantCheckCache.end())
+    auto it = get_g_genericParameterCovariantCheckCache().find(cachePair);
+    if (it != get_g_genericParameterCovariantCheckCache().end())
     {
         return it->assignable;
     }
     bool assignable = is_assignable_from_generic_parameter_convariant0(from_class, to_class, implemented_in_array);
     cachePair.assignable = assignable;
-    g_genericParameterCovariantCheckCache.insert(cachePair);
+    get_g_genericParameterCovariantCheckCache().insert(cachePair);
     return assignable;
 }
 
@@ -2555,21 +2359,55 @@ bool Class::is_assignable_from_interface(const metadata::RtClass* from_class, co
     return false;
 }
 
+static utils::Vector<ClassPair> s_active_assignability_checks;
+
 bool Class::is_assignable_from(const metadata::RtClass* from_class, const metadata::RtClass* to_class)
 {
-    assert(has_initialized_part(from_class, metadata::RtClassInitPart::SuperTypes));
     if (from_class == to_class)
-    {
         return true;
-    }
-    else if (!is_interface(to_class))
+    // Open constraints may recursively mention each other. A repeated pair is
+    // not evidence of a conversion; do not recurse indefinitely on that edge.
+    for (auto& pair : s_active_assignability_checks)
+        if (pair.from_class == from_class && pair.to_class == to_class)
+            return false;
+    s_active_assignability_checks.push_back({from_class, to_class, false, false});
+
+    struct PopCheck
     {
+        ~PopCheck()
+        {
+            s_active_assignability_checks.pop_back();
+        }
+    } guard;
+
+    auto from_initialized = initialize_super_types(const_cast<metadata::RtClass*>(from_class));
+    auto to_initialized = initialize_super_types(const_cast<metadata::RtClass*>(to_class));
+    const bool from_ok = from_initialized.is_ok(), to_ok = to_initialized.is_ok();
+    if (!from_ok || !to_ok)
+        return false;
+    auto from_interfaces = initialize_interfaces(const_cast<metadata::RtClass*>(from_class));
+    auto to_interfaces = initialize_interfaces(const_cast<metadata::RtClass*>(to_class));
+    const bool from_ifaces_ok = from_interfaces.is_ok(), to_ifaces_ok = to_interfaces.is_ok();
+    if (!from_ifaces_ok || !to_ifaces_ok)
+        return false;
+    if (is_generic_parameter_class(from_class))
+    {
+        if (to_class == get_corlib_types().cls_object)
+            return true;
+        const auto* parameter = from_class->by_val->data.generic_param;
+        if (to_class == get_corlib_types().cls_valuetype && (parameter->flags & (uint16_t)metadata::RtGenericParamAttribute::NotNullableValueTypeConstraint))
+            return true;
+        for (uint8_t i = 0; i < parameter->constraint_type_sig_count; ++i)
+        {
+            auto constraint = get_class_from_typesig(parameter->constraint_type_sigs[i]);
+            if (constraint.is_ok() && is_assignable_from(constraint.unwrap(), to_class))
+                return true;
+        }
+        return false;
+    }
+    if (!is_interface(to_class))
         return is_assignable_from_class(from_class, to_class);
-    }
-    else
-    {
-        return is_assignable_from_interface(from_class, to_class);
-    }
+    return is_assignable_from_interface(from_class, to_class);
 }
 
 bool Class::is_subclass_of_initialized(const metadata::RtClass* from_class, const metadata::RtClass* to_class, bool checkInterfaces)
@@ -2609,7 +2447,7 @@ bool Class::is_subclass_of_initialized(const metadata::RtClass* from_class, cons
 
 void Class::walk_ptr_classes(metadata::ClassWalkCallback callback, void* userData)
 {
-    for (auto& entry : g_ptrClassCache)
+    for (auto& entry : get_g_ptrClassCache())
     {
         callback(entry.second, userData);
     }

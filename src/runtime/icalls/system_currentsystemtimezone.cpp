@@ -1,3 +1,5 @@
+#include <iterator>
+#include "bcl/mono/managed_layouts.h"
 #include "system_currentsystemtimezone.h"
 
 #include "icall_base.h"
@@ -10,13 +12,15 @@ namespace leanclr
 namespace icalls
 {
 
-#if LEANCLR_PLATFORM_POSIX
+#if LEANCLR_PLATFORM_POSIX || LEANCLR_PLATFORM_PORTABLE
 RtResult<bool> SystemCurrentSystemTimeZone::get_time_zone_data(int32_t year, vm::RtArray** data, vm::RtArray** names, bool* daylight) noexcept
 {
     (void)year;
     auto corlib_types = vm::Class::get_corlib_types();
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, date_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_int64, 4, "SystemCurrentSystemTimeZone::get_time_zone_data"));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, names_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_string, 2, "SystemCurrentSystemTimeZone::get_time_zone_data"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        vm::RtArray*, date_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_int64, 4, "SystemCurrentSystemTimeZone::get_time_zone_data"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        vm::RtArray*, names_arr, LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(corlib_types.cls_string, 2, "SystemCurrentSystemTimeZone::get_time_zone_data"));
 
     vm::RtString* utc = vm::String::create_string_from_utf8cstr("UTC");
     vm::Array::set_array_data_at<vm::RtString*>(names_arr, 0, utc);
@@ -53,7 +57,7 @@ utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_cal
         {"System.CurrentSystemTimeZone::GetTimeZoneData(System.Int32,System.Int64[]&,System.String[]&,System.Boolean&)",
          (vm::InternalCallFunction)&SystemCurrentSystemTimeZone::get_time_zone_data, get_time_zone_data_invoker},
     };
-    return utils::Span<vm::InternalCallEntry>(s_entries, sizeof(s_entries) / sizeof(s_entries[0]));
+    return utils::Span<vm::InternalCallEntry>(s_entries, std::size(s_entries));
 }
 #else
 utils::Span<vm::InternalCallEntry> SystemCurrentSystemTimeZone::get_internal_call_entries() noexcept
