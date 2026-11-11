@@ -7,6 +7,8 @@
 #include "3rd/utf8/utf8.h"
 #include <vector>
 #include <string>
+#include <string_view>
+#include <functional>
 #include <cstring>
 #include "utils/hashset.h"
 #include "utils/hash_util.h"

@@ -1,7 +1,9 @@
 #pragma once
 
 #include <cstring>
+#include <functional>
 #include <string>
+#include <string_view>
 
 #include "core/rt_base.h"
 #include "hash_util.h"

@@ -1,5 +1,6 @@
 #include "host/services.h"
 #include "rt_base.h"
+#include <cstdlib>
 
 namespace leanclr
 {

@@ -1,6 +1,8 @@
 #pragma once
 #include "rt_managed_types.h"
 #include "utils/string_builder.h"
+#include <string>
+#include <string_view>
 
 namespace leanclr
 {
