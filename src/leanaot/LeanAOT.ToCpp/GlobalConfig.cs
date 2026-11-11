@@ -15,6 +15,7 @@ namespace LeanAOT.ToCpp
 
         public bool EmitNullChecks { get; set; }
         public bool LightweightAotReturns { get; set; }
+        public bool InterfaceCallCache { get; set; }
 
         public bool EnableArrayBoundsCheck { get; set; }
 

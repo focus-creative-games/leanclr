@@ -87,7 +87,7 @@ def build_il2cpp(unity, output, stage, commands):
     return helper
 
 
-def build(opts, output):
+def build(opts, output, managed_input=None):
     commands = []
     stage = output / 'managed'
     stage.mkdir(parents=True, exist_ok=True)
@@ -97,8 +97,11 @@ def build(opts, output):
            '/r:' + native_path(ROOT / 'src/libraries/mono-4.5/mscorlib.dll'),
            '/r:' + native_path(ROOT / 'src/libraries/mono-4.5/System.dll'),
            native_path(ROOT / 'src/benchmarks/aot-baseline/Benchmarks.cs')]
-    commands.append([str(x) for x in csc])
-    invoke(csc, output / 'csc.log')
+    if managed_input:
+        shutil.copy2(managed_input, stage / 'AotBaseline.dll')
+    else:
+        commands.append([str(x) for x in csc])
+        invoke(csc, output / 'csc.log')
     for name in DEPS:
         shutil.copy2(ROOT / 'src/libraries/mono-4.5' / f'{name}.dll', stage)
     invoke(['dotnet', 'build', ROOT / 'src/leanaot/LeanAOT/LeanAOT.csproj', '-c', 'Release'], output / 'tool-build.log')
@@ -108,6 +111,8 @@ def build(opts, output):
                  '--leanaot-max-generic-instances', str(opts.max_generic_instances)]
     if opts.lightweight_returns:
         generator += ['--leanaot-lightweight-returns']
+    if opts.interface_call_cache:
+        generator += ['--leanaot-interface-call-cache']
     commands.append([str(x) for x in generator])
     invoke(generator, output / 'generate.log')
     for target in ['native'] + (['wasm'] if opts.emsdk else []):
@@ -136,6 +141,7 @@ def main():
     ap.add_argument('--build-only', action='store_true')
     ap.add_argument('--max-generic-instances', type=int, default=2048)
     ap.add_argument('--lightweight-returns', action='store_true')
+    ap.add_argument('--interface-call-cache', action='store_true')
     ap.add_argument('--samples', type=int, default=7)
     ap.add_argument('--iterations', type=int, default=5000000)
     ap.add_argument('--output', type=Path, default=ROOT / 'out/performance/aot')

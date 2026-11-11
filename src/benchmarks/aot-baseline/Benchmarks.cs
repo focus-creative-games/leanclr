@@ -11,9 +11,20 @@ public static class Benchmarks
     {
         public uint Apply(uint x) { return unchecked(x * 1664525u + 1013904223u); }
     }
+    public sealed class OtherTransform : ITransform
+    {
+        public uint Apply(uint x) { return unchecked(x * 22695477u + 1u); }
+    }
+    public interface IGenericTransform { uint Apply<T>(uint x); }
+    public sealed class GenericTransform : IGenericTransform
+    {
+        public uint Apply<T>(uint x) { return unchecked(x * 1664525u + 1013904223u); }
+    }
     public sealed class Box { public uint Value { get; set; } }
     static readonly uint[] Data = CreateData();
     static readonly ITransform Transformer = new Transform();
+    static readonly ITransform[] Transformers = { new Transform(), new OtherTransform() };
+    static readonly GenericTransform GenericTransformer = new GenericTransform();
     static readonly Box PropertyBox = new Box();
     [MethodImpl(MethodImplOptions.NoInlining)]
     public static void VoidReturnLeaf(Box box, int divisor) { box.Value = unchecked(box.Value * 1664525u + (uint)(12345 / divisor)); }
@@ -77,6 +88,27 @@ public static class Benchmarks
     {
         ITransform t = Transformer;
         for (int i = 0; i < n; ++i) seed = t.Apply(seed);
+        return seed;
+    }
+    public static uint InterfacesAlternating(int n, uint seed)
+    {
+        ITransform[] values = Transformers;
+        for (int i = 0; i < n; ++i) seed = values[i & 1].Apply(seed);
+        return seed;
+    }
+    public static uint InterfacesGeneric(int n, uint seed)
+    {
+        seed = GenericTransformer.Apply<int>(seed); // Concrete override anchor.
+        IGenericTransform value = GenericTransformer;
+        for (int i = 0; i < n; ++i) seed = value.Apply<int>(seed);
+        return seed;
+    }
+    [MethodImpl(MethodImplOptions.NoInlining)]
+    public static uint InterfaceOnce(ITransform value, uint seed) { return value.Apply(seed); }
+    public static uint InterfacesStraightLine(int n, uint seed)
+    {
+        ITransform value = Transformer;
+        for (int i = 0; i < n; ++i) seed = InterfaceOnce(value, seed);
         return seed;
     }
     public static uint Structs(int n, uint seed)

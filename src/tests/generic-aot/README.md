@@ -55,3 +55,8 @@ Use `scripts/test/aot-features.py --lightweight-returns ...` to verify that mode
 Both modes exercise the standalone AOT result tests and interface bridges into
 targets using each return ABI, including null success and OOM propagation.
 See [the return protocol report](../../../docs/performance/aot-return-protocol.md).
+
+The formal runner also includes eleven interface dispatch tests. Add
+`--interface-call-cache` to exercise the opt-in stack-local loop cache; omitting
+it verifies the original resolver path. See
+[the interface dispatch report](../../../docs/performance/aot-interface-dispatch.md).

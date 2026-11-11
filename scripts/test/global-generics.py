@@ -1,7 +1,8 @@
-"""Build the real managed/AotTests project and verify its global generic AOT cases."""
+"""Build real managed/AotTests and verify generic and interface AOT paths."""
 import argparse
 import json
 import os
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -40,10 +41,12 @@ def main():
     ap.add_argument('--emsdk', type=Path)
     ap.add_argument('--msbuild', type=Path)
     ap.add_argument('--lightweight-returns', action='store_true')
+    ap.add_argument('--interface-call-cache', action='store_true')
+    ap.add_argument('--output', type=Path, default=ROOT / 'out/global-generics')
     opts = ap.parse_args()
     if opts.target != 'native' and not opts.emsdk:
         ap.error('--emsdk is required for Wasm')
-    root = ROOT / 'out/global-generics'
+    root = opts.output.resolve()
     output = root / ('lightweight' if opts.lightweight_returns else 'result')
     stage = root / 'managed'
     output.mkdir(parents=True, exist_ok=True)
@@ -64,8 +67,23 @@ def main():
             command += ['--leanaot-max-generic-instances', '0']
         if opts.lightweight_returns:
             command += ['--leanaot-lightweight-returns']
+        if opts.interface_call_cache:
+            command += ['--leanaot-interface-call-cache']
         run(command, output / f'{variant}-generate.log')
         report = json.loads((generated / 'generic-aot-report.json').read_text())
+        assert report['interface_call_cache'] == opts.interface_call_cache
+        methods = {}
+        for cpp in generated.glob('*method*part*.cpp'):
+            for section in cpp.read_text().split('// Method: ')[1:]:
+                name = section.splitlines()[0]
+                count = section.count('leanclr::codegen::InterfaceCallCache ')
+                assert count <= 4, name
+                methods[name] = count
+        for name, expected in [('StraightLine', 0), ('Sum', 1), ('Budget', 4)]:
+            matches = [count for method, count in methods.items() if re.search(r'TC_InterfaceDispatch::' + name + r'\(', method)]
+            assert matches == [expected if opts.interface_call_cache else 0], (name, matches)
+        if not opts.interface_call_cache:
+            assert not any(methods.values()), 'cache flag must be opt-in'
         assert bool(report['instances']) == (variant == 'default')
         assert not list(generated.glob('Common.module_registration.*')), 'generic definition must not require module registration'
         if variant == 'default':

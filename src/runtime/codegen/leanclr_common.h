@@ -1,5 +1,6 @@
 #pragma once
 #include "aot_result.h"
+#include "interface_dispatch.h"
 
 #include <cstdlib>
 #include <cstring>

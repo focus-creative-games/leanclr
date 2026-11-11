@@ -115,6 +115,9 @@ internal class Program
         [Option("leanaot-lightweight-returns", HelpText = "Opt-in scalar ABI for AOT void and aligned managed reference returns; runtime APIs keep Result.")]
         public bool LightweightAotReturns { get; set; }
 
+        [Option("leanaot-interface-call-cache", HelpText = "Opt-in stack-local target cache for up to four interface callsites in loops per AOT method.")]
+        public bool InterfaceCallCache { get; set; }
+
         /// <summary>
         /// LeanAOT-only: PGO-generated exact include lists (repeat for multiple files).
         /// </summary>
@@ -532,6 +535,7 @@ internal class Program
         config.EnableAnalytics = options.EnableAnalytics;
         config.EmitNullChecks = options.EmitNullChecks;
         config.LightweightAotReturns = options.LightweightAotReturns;
+        config.InterfaceCallCache = options.InterfaceCallCache;
         config.EnableArrayBoundsCheck = options.EnableArrayBoundsCheck;
         config.EmitMethodMap = options.EmitMethodMap;
         config.EmitSourceMapping = options.EmitSourceMapping;
@@ -712,6 +716,7 @@ internal class Program
                 max_instances = manifestArgs.MaxGenericInstances,
                 max_depth = manifestArgs.MaxGenericDepth,
                 return_protocol = globalServices.Config.LightweightAotReturns ? "lightweight-void-reference" : "result",
+                interface_call_cache = globalServices.Config.InterfaceCallCache,
                 generic_registry = "global-sorted-fnv1a64",
                 instances = manifest.GenericMethodPlans.Select(p => new { method = p.Method.FullName, key = p.Key, depth = p.Depth }),
                 fallbacks = manifest.GenericFallbacks,

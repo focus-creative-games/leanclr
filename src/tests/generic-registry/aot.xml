@@ -2,6 +2,7 @@
   <assembly fullname="*" aot="0" />
   <assembly fullname="AotTests">
     <type fullname="AotTests.TC_GenericAot*" aot="1" />
+    <type fullname="AotTests.TC_InterfaceDispatch*" aot="1" />
   </assembly>
   <assembly fullname="Common">
     <type fullname="GenericAotLibrary.*" aot="1" />

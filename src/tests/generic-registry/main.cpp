@@ -1,5 +1,6 @@
 #include "../aot-returns/test_assert.h"
 #include "registry_checks.h"
+#include "codegen/interface_dispatch.h"
 #include "alloc/general_allocation.h"
 #include "metadata/aot_module.h"
 #include "metadata/metadata_cache.h"
@@ -73,6 +74,109 @@ static const metadata::RtMethodInfo* inflate(metadata::RtClass* klass, const cha
     auto method = vm::GenericMethod::get_method(definition, nullptr, instance.unwrap());
     check(method.is_ok(), "inflate method");
     return method.unwrap();
+}
+
+static void interface_cache_checks()
+{
+    using namespace metadata;
+    static_assert(sizeof(codegen::InterfaceCallCache) == 3 * sizeof(void*), "bounded stack cache layout");
+    static_assert(std::is_trivial<codegen::InterfaceCallCache>::value, "cache has no constructor/destructor or managed values");
+    RtTypeSig signature = {};
+    signature.ele_type = RtElementType::Class;
+    RtClass contract = {}, other_contract = {}, first = {}, second = {}, absent = {};
+    contract.flags = other_contract.flags = static_cast<uint32_t>(RtTypeAttribute::Interface);
+    contract.by_val = other_contract.by_val = &signature;
+    RtMethodInfo declaration = {}, alternate = {}, first_impl = {}, second_impl = {};
+    declaration.parent = &contract;
+    alternate.parent = &other_contract;
+    declaration.flags = alternate.flags = static_cast<uint16_t>(RtMethodAttribute::Virtual);
+    RtVirtualInvokeData first_vtable[] = {{&declaration, &first_impl}, {&alternate, &second_impl}};
+    RtVirtualInvokeData second_vtable[] = {{&declaration, &second_impl}};
+    RtInterfaceOffset offsets[] = {{&contract, 0}, {&other_contract, 1}};
+    first.vtable = first_vtable;
+    first.interface_vtable_offsets = offsets;
+    first.interface_vtable_offset_count = 2;
+    second.vtable = second_vtable;
+    second.interface_vtable_offsets = offsets;
+    second.interface_vtable_offset_count = 1;
+    vm::RtObject receiver = {};
+    codegen::InterfaceCallCache cache = {};
+    const auto resolve = [&](const RtClass* klass, const RtMethodInfo* method, const RtMethodInfo* expected)
+    {
+        receiver.klass = klass;
+        auto result = codegen::get_interface_method_impl_cached(&receiver, method, cache);
+        check(result.is_ok() && result.unwrap() == expected, "interface cache target identity");
+    };
+    resolve(&first, &declaration, &first_impl);
+    resolve(&first, &declaration, &first_impl);
+    resolve(&first, &alternate, &second_impl); // Same class, different declaration.
+    resolve(&second, &declaration, &second_impl);
+    receiver.klass = &absent;
+    auto missing = codegen::get_interface_method_impl_cached(&receiver, &declaration, cache);
+    check(missing.is_err() && missing.unwrap_err() == RtErr::MethodAccess, "resolution failure must propagate");
+    check(cache.receiver_class == &second && cache.declaration == &declaration && cache.implementation == &second_impl,
+          "failed resolution must not poison successful entry");
+    resolve(&first, &declaration, &first_impl);
+}
+
+static void interface_cases(bool generic_aot)
+{
+    auto* tests = type("AotTests", "AotTests.TC_InterfaceDispatch");
+    for (const char* name : {"Sum", "Reenter", "StraightLine", "Budget"})
+    {
+        const auto* helper = vm::Method::find_matched_method_in_class_by_name(tests, name);
+        check(helper && helper->invoker_type == metadata::RtInvokerType::Aot, "interface loop helper must be AOT");
+    }
+    for (const char* name : {"First", "Interpreted", "Generic"})
+    {
+        auto nested = vm::Class::find_nested_class_by_name(tests, name, false);
+        check(nested.is_ok() && nested.unwrap() && vm::Class::initialize_all(nested.unwrap()).is_ok(), "interface target type");
+        if (std::strcmp(name, "Generic") == 0)
+        {
+            for (const auto* argument : {vm::Class::get_corlib_types().cls_int32->by_val, vm::Class::get_corlib_types().cls_string->by_val})
+            {
+                check((inflate(tests, "GenericLoop", argument)->invoker_type == metadata::RtInvokerType::Aot) == generic_aot, "generic interface loop backend");
+                check((inflate(nested.unwrap(), "Echo", argument)->invoker_type == metadata::RtInvokerType::Aot) == generic_aot,
+                      "generic interface target backend");
+            }
+        }
+        else
+        {
+            const auto expected = std::strcmp(name, "First") == 0 ? metadata::RtInvokerType::Aot : metadata::RtInvokerType::Interpreter;
+            for (const char* member : {"Read", "Add", "Reference"})
+            {
+                const auto* implementation = vm::Method::find_matched_method_in_class_by_name(nested.unwrap(), member);
+                check(implementation && implementation->invoker_type == expected, "ordinary interface target backend");
+            }
+        }
+    }
+    auto object = LEANCLR_NEWOBJ(tests, gc::GcAllocSite::make_internal(__FILE__, __LINE__, "formal interface dispatch tests"));
+    check(object.is_ok(), "allocate interface test instance");
+    const char* cases[] = {"Monomorphic",   "Polymorphic",      "InterpreterTargets", "VoidAndReferences", "GenericContexts", "Variance",
+                           "BoxedReceiver", "WarmTargetThrows", "WarmTargetThenNull", "RecursiveFrames",   "CacheBudget"};
+    for (const char* name : cases)
+    {
+        const auto* method = vm::Method::find_matched_method_in_class_by_name(tests, name);
+        check(method && method->invoker_type == metadata::RtInvokerType::Aot, name);
+        auto result = vm::Runtime::invoke_with_run_cctor(method, object.unwrap(), nullptr);
+        if (result.is_err())
+        {
+            std::fprintf(stderr, "Interface case failed: %s, error %u\n", name, static_cast<unsigned>(result.unwrap_err()));
+            auto* exception = vm::Exception::get_current_exception();
+            if (exception)
+            {
+                utils::Utf8StringBuilder message;
+                vm::Exception::format_exception(exception, message);
+                std::fprintf(stderr, "%.*s\n", static_cast<int>(message.length()), message.get_const_chars());
+            }
+            std::exit(1);
+        }
+        std::printf("Passed: AotTests.TC_InterfaceDispatch.%s\n", name);
+        if (std::strcmp(name, "WarmTargetThrows") == 0 || std::strcmp(name, "WarmTargetThenNull") == 0)
+            check(method->interp_data != nullptr, "exception after cached dispatch must hand off to interpreter");
+    }
+    interface_cache_checks();
+    std::puts("Formal managed AOT interface tests passed: 11");
 }
 
 static void backend(const metadata::RtMethodInfo* method, bool expected, const char* message)
@@ -207,4 +311,5 @@ int main(int argc, char** argv)
     verify_generic_registry(identity, external, missing, argc > 2 && std::strcmp(argv[2], "benchmark") == 0,
                             argc > 3 ? static_cast<unsigned>(std::atoi(argv[3])) : 20000);
     std::puts("Formal managed AOT generic tests passed: 24");
+    interface_cases(expected);
 }

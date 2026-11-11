@@ -73,13 +73,51 @@ int main(int argc, char** argv)
     auto identity_method = vm::GenericMethod::get_method(identity_def, nullptr, identity_inst.unwrap());
     require(identity_method.is_ok(), "Generic benchmark method");
     const bool generic_is_aot = identity_method.unwrap()->invoker_type == metadata::RtInvokerType::Aot;
-    const char* methods[] = {"Arithmetic", "Calls",    "Properties", "ArrayLoop",   "Interfaces",
-                             "Structs",    "Generics", "Exceptions", "VoidReturns", "ReferenceReturns"};
-    const char* workloads[] = {"arithmetic", "calls",    "properties", "array",        "interfaces",
-                               "structs",    "generics", "exceptions", "void-returns", "reference-returns"};
-    const unsigned workload_count = argc > 3 && std::strcmp(argv[3], "returns") == 0 ? 10 : 8;
-    for (unsigned k = 0; k < workload_count; ++k)
+    const char* methods[] = {"Arithmetic",
+                             "Calls",
+                             "Properties",
+                             "ArrayLoop",
+                             "Interfaces",
+                             "Structs",
+                             "Generics",
+                             "Exceptions",
+                             "VoidReturns",
+                             "ReferenceReturns",
+                             "InterfacesAlternating",
+                             "InterfacesGeneric",
+                             "InterfacesStraightLine"};
+    const char* workloads[] = {"arithmetic",
+                               "calls",
+                               "properties",
+                               "array",
+                               "interfaces",
+                               "structs",
+                               "generics",
+                               "exceptions",
+                               "void-returns",
+                               "reference-returns",
+                               "interfaces-alternating",
+                               "interfaces-generic",
+                               "interfaces-straight-line"};
+    const bool interface_mode = argc > 3 && std::strcmp(argv[3], "interfaces") == 0;
+    if (interface_mode)
     {
+        auto generic_type = vm::Class::find_nested_class_by_name(klass, "GenericTransform", false);
+        require(generic_type.is_ok() && generic_type.unwrap(), "Generic interface benchmark class");
+        require(vm::Class::initialize_all(generic_type.unwrap()).is_ok(), "Generic interface benchmark initialization");
+        const auto* definition = vm::Method::find_matched_method_in_class_by_name(generic_type.unwrap(), "Apply");
+        const auto* argument = vm::Class::get_corlib_types().cls_int32->by_val;
+        auto inst = metadata::MetadataCache::get_pooled_generic_inst(&argument, 1);
+        require(definition && inst.is_ok(), "Generic interface benchmark instance");
+        auto implementation = vm::GenericMethod::get_method(definition, nullptr, inst.unwrap());
+        require(implementation.is_ok() && implementation.unwrap()->invoker_type == metadata::RtInvokerType::Aot,
+                "Generic interface benchmark implementation must be AOT");
+    }
+    const unsigned workload_count = argc > 3 && std::strcmp(argv[3], "returns") == 0 ? 10 : 8;
+    for (unsigned index = 0; index < (interface_mode ? 4 : workload_count); ++index)
+    {
+        const unsigned interface_indices[] = {4, 10, 11, 12};
+        const unsigned k = interface_mode ? interface_indices[index] : index;
         const auto* method = vm::Method::find_matched_method_in_class_by_name(klass, methods[k]);
         require(method != nullptr, "Benchmark method missing");
         const bool is_aot = method->invoker_type == metadata::RtInvokerType::Aot;
