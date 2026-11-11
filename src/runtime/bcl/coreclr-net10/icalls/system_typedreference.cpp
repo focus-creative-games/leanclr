@@ -42,7 +42,6 @@ RtResultVoid SystemTypedReference::internal_make_typed_reference(vm::RtTypedRefe
         field_type = field_info->type_sig;
     }
 
-    UNWRAP_OR_RET_ERR_ON_FAIL(result->klass, vm::Class::get_class_from_typesig(field_type));
     result->value = value;
     UNWRAP_OR_RET_ERR_ON_FAIL(result->type_handle, vm::Reflection::get_net10_method_table(field_type));
 
@@ -51,7 +50,10 @@ RtResultVoid SystemTypedReference::internal_make_typed_reference(vm::RtTypedRefe
 
 RtResult<vm::RtObject*> SystemTypedReference::internal_to_object(const vm::RtTypedReference* typed_ref) noexcept
 {
-    if (vm::Class::is_reference_type(typed_ref->klass))
+    if (!typed_ref || !typed_ref->value)
+        RET_ERR(RtErr::Argument);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtClass*, klass, vm::Reflection::get_class_from_net10_method_table(typed_ref->type_handle));
+    if (vm::Class::is_reference_type(klass))
     {
         // For reference types, the value is already a pointer to the object
         RET_OK(*reinterpret_cast<vm::RtObject* const*>(typed_ref->value));
@@ -59,7 +61,7 @@ RtResult<vm::RtObject*> SystemTypedReference::internal_to_object(const vm::RtTyp
     else
     {
         // For value types, we need to box the value
-        return LEANCLR_BOX_OBJECT_INTERNAL(typed_ref->klass, typed_ref->value, "icalls::SystemTypedReference::internal_to_object");
+        return LEANCLR_BOX_OBJECT_INTERNAL(klass, typed_ref->value, "icalls::SystemTypedReference::internal_to_object");
     }
 }
 

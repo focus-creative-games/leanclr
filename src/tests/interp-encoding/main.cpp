@@ -35,6 +35,14 @@ int main()
         leanclr::interp::EvalStackOp::set_return(&slot, uint16_t{65535});
         if (slot.i32 != 65535)
             return 104;
+        enum class ByteEnum : uint8_t
+        {
+            Value = 7
+        };
+        slot.i64 = -1;
+        leanclr::interp::EvalStackOp::set_return(&slot, ByteEnum::Value);
+        if (slot.i32 != 7)
+            return 105;
     }
 
     static_assert(sizeof(OpCodeEnum) == 2, "The instruction ID must be 16 bits");

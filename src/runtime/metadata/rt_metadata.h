@@ -271,6 +271,7 @@ enum class RtClassExtraAttribute : uint32_t
     // HasFinalizer = 0x80,
     MethodMask = 0x80 | 0x40,
     ReferenceType = 0x100,
+    InlineArray = 0x200,
 };
 
 enum class RtClassInitPart : uint32_t
@@ -367,6 +368,8 @@ enum class RtSigType : uint8_t
     Field = 0x6,
     LocalVar = 0x7,
     Property = 0x8,
+    Unmanaged = 0x9,
+    NativeVarArg = 0xB,
     MethodSpec = 0xA,
     GenericInst = 0x10,
     HasThis = 0x20,

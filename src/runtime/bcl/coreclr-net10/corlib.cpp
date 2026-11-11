@@ -3,6 +3,7 @@
 #include "bcl/adapter.h"
 #include "vm/class.h"
 #include "vm/field.h"
+#include "host/services.h"
 #include "vm/assembly.h"
 #include "metadata/module_def.h"
 
@@ -154,11 +155,35 @@ static size_t native_field_offset(F T::* member)
     return static_cast<size_t>(reinterpret_cast<const char*>(&(value.*member)) - reinterpret_cast<const char*>(&value));
 }
 
-static RtResultVoid verify_field_layout(metadata::RtClass* klass, const char* name, size_t expected)
+static RtResultVoid verify_field_layout(metadata::RtClass* klass, const char* name, size_t expected, const char* expected_type = nullptr, bool by_ref = false)
 {
     RET_ERR_ON_FAIL(Class::initialize_fields(klass));
     const auto* field = Class::get_field_for_name(klass, name, true);
-    RET_ERR_ON_FALSE(field != nullptr && Field::get_field_offset_includes_object_header_for_all_type(field) == expected, RtErr::BadImageFormat);
+    if (!field || Field::get_field_offset_includes_object_header_for_all_type(field) != expected)
+    {
+        host::Services::logf(host::LogLevel::Error, "CoreLib layout mismatch: %s.%s::%s", klass->namespaze, klass->name, name);
+        RET_ERR(RtErr::BadImageFormat);
+    }
+    if (expected_type)
+    {
+        auto type_sig = field->type_sig->to_canonized_without_byref();
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, actual, Class::get_class_from_typesig(&type_sig));
+        const size_t length = std::strlen(expected_type);
+        const bool array = length >= 2 && std::strcmp(expected_type + length - 2, "[]") == 0;
+        char element_name[128];
+        if (array)
+        {
+            if (length - 2 >= sizeof(element_name) || !Class::is_array_or_szarray(actual))
+                RET_ERR(RtErr::BadImageFormat);
+            std::memcpy(element_name, expected_type, length - 2);
+            element_name[length - 2] = 0;
+            expected_type = element_name;
+            actual = const_cast<metadata::RtClass*>(actual->element_class);
+        }
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, expected_class,
+                                                metadata::RtModuleDef::get_corlib_module()->get_class_by_name(expected_type, false, true));
+        RET_ERR_ON_FALSE(actual == expected_class && field->type_sig->by_ref == by_ref, RtErr::BadImageFormat);
+    }
     RET_VOID_OK();
 }
 
@@ -169,163 +194,125 @@ RtResultVoid Class::verify_integrity_of_corlib_classes()
     if (corlib != nullptr && std::strcmp(corlib->get_name_no_ext(), STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0)
     {
         RET_ERR_ON_FALSE(sizeof(RtObject) == RT_OBJECT_HEADER_SIZE, RtErr::BadImageFormat);
-        // Only these native exception slots are validated in the integration
-        // baseline. Reflection, delegate and other facade layouts need their
-        // own field-by-field gates before the full profile can be advertised.
-        RET_ERR_ON_FAIL(verify_field_layout(t.cls_exception, "_message", native_field_offset(&RtException::message)));
-        RET_ERR_ON_FAIL(verify_field_layout(t.cls_exception, "_innerException", native_field_offset(&RtException::inner_exception)));
-        RET_ERR_ON_FAIL(verify_field_layout(t.cls_exception, "_stackTrace", native_field_offset(&RtException::trace_ips)));
+        // Validate native views before any adapter writes managed fields.
+        // Reflection types with dynamic layouts use field metadata at access time.
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_typedreference, "_value", RT_OBJECT_HEADER_SIZE + native_field_offset(&RtTypedReference::value), "System.Byte", true));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_typedreference, "_type", RT_OBJECT_HEADER_SIZE + native_field_offset(&RtTypedReference::type_handle), "System.IntPtr"));
+        RET_ERR_ON_FALSE(get_instance_size_without_object_header(t.cls_typedreference) == sizeof(RtTypedReference), RtErr::BadImageFormat);
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_exception, "_message", native_field_offset(&RtException::message), "System.String"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_exception, "_innerException", native_field_offset(&RtException::inner_exception), "System.Exception"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_exception, "_stackTrace", native_field_offset(&RtException::trace_ips), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_runtimetype, "m_keepalive", native_field_offset(&RtReflectionType::keepalive), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_runtimetype, "m_cache", native_field_offset(&RtReflectionType::cache), "System.IntPtr"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_runtimetype, "m_handle", native_field_offset(&RtReflectionType::type_handle), "System.IntPtr"));
+        RET_ERR_ON_FAIL(initialize_fields(t.cls_runtimetype));
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_runtimetype) == sizeof(RtReflectionType), RtErr::BadImageFormat);
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_delegate, "_target", native_field_offset(&RtDelegate::target), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_delegate, "_methodBase", native_field_offset(&RtDelegate::method_base), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_delegate, "_methodPtr", native_field_offset(&RtDelegate::method_ptr), "System.IntPtr"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_delegate, "_methodPtrAux", native_field_offset(&RtDelegate::method_ptr_aux), "System.IntPtr"));
+        RET_ERR_ON_FAIL(initialize_fields(t.cls_delegate));
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_delegate) == sizeof(RtDelegate), RtErr::BadImageFormat);
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_multicastdelegate, "_invocationList", native_field_offset(&RtMulticastDelegate::invocation_list), "System.Object"));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_multicastdelegate, "_invocationCount", native_field_offset(&RtMulticastDelegate::invocation_count), "System.IntPtr"));
+        RET_ERR_ON_FAIL(initialize_fields(t.cls_multicastdelegate));
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_multicastdelegate) == sizeof(RtMulticastDelegate), RtErr::BadImageFormat);
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_handle", native_field_offset(&RtReflectionMethod::method), "System.IntPtr"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_name", native_field_offset(&RtReflectionMethod::name), "System.String"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_toString", native_field_offset(&RtReflectionMethod::to_string), "System.String"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_bindingFlags", native_field_offset(&RtReflectionMethod::binding_flags),
+                                            "System.Reflection.BindingFlags"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_methodAttributes", native_field_offset(&RtReflectionMethod::method_attributes),
+                                            "System.Reflection.MethodAttributes"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_signature", native_field_offset(&RtReflectionMethod::signature), "System.Signature"));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_reflection_method, "m_declaringType", native_field_offset(&RtReflectionMethod::declaring_type), "System.RuntimeType"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_keepalive", native_field_offset(&RtReflectionMethod::keepalive), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_invoker", native_field_offset(&RtReflectionMethod::invoker),
+                                            "System.Reflection.MethodBaseInvoker"));
+        RET_ERR_ON_FAIL(initialize_fields(t.cls_reflection_method));
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_method) == sizeof(RtReflectionMethod), RtErr::BadImageFormat);
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_constructor, "m_declaringType", native_field_offset(&RtReflectionConstructor::declaring_type),
+                                            "System.RuntimeType"));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_reflection_constructor, "m_toString", native_field_offset(&RtReflectionConstructor::to_string), "System.String"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_constructor, "_empty1", native_field_offset(&RtReflectionConstructor::empty1), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_constructor, "_empty2", native_field_offset(&RtReflectionConstructor::empty2), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_constructor, "_empty3", native_field_offset(&RtReflectionConstructor::empty3), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_constructor, "m_handle", native_field_offset(&RtReflectionConstructor::method), "System.IntPtr"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_constructor, "m_bindingFlags", native_field_offset(&RtReflectionConstructor::binding_flags),
+                                            "System.Reflection.BindingFlags"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_constructor, "m_methodAttributes",
+                                            native_field_offset(&RtReflectionConstructor::method_attributes), "System.Reflection.MethodAttributes"));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_reflection_constructor, "m_signature", native_field_offset(&RtReflectionConstructor::signature), "System.Signature"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_constructor, "m_invoker", native_field_offset(&RtReflectionConstructor::invoker),
+                                            "System.Reflection.MethodBaseInvoker"));
+        RET_ERR_ON_FAIL(initialize_fields(t.cls_reflection_constructor));
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_constructor) == sizeof(RtReflectionConstructor), RtErr::BadImageFormat);
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_thread, "_executionContext", native_field_offset(&RtThread::execution_context)));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_thread, "_synchronizationContext", native_field_offset(&RtThread::synchronization_context)));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_thread, "_name", native_field_offset(&RtThread::name), "System.String"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_thread, "_startHelper", native_field_offset(&RtThread::start_helper)));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_thread, "_DONT_USE_InternalThread", native_field_offset(&RtThread::native_thread), "System.IntPtr"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_thread, "_priority", native_field_offset(&RtThread::priority), "System.Int32"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_thread, "_managedThreadId", native_field_offset(&RtThread::managed_thread_id), "System.Int32"));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_thread, "_mayNeedResetForThreadPool", native_field_offset(&RtThread::may_need_reset_for_thread_pool), "System.Boolean"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_thread, "_isDead", native_field_offset(&RtThread::is_dead), "System.Boolean"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_thread, "_isThreadPool", native_field_offset(&RtThread::is_thread_pool), "System.Boolean"));
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_thread) == sizeof(RtThread), RtErr::BadImageFormat);
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_reflection_module, "m_runtimeType", native_field_offset(&RtReflectionModule::runtime_type), "System.RuntimeType"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_module, "m_runtimeAssembly", native_field_offset(&RtReflectionModule::assembly),
+                                            "System.Reflection.RuntimeAssembly"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_module, "m_pData", native_field_offset(&RtReflectionModule::native_handle), "System.IntPtr"));
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_module) == sizeof(RtReflectionModule), RtErr::BadImageFormat);
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_assembly, "_ModuleResolve", native_field_offset(&RtReflectionAssembly::module_resolve),
+                                            "System.Reflection.ModuleResolveEventHandler"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_assembly, "m_fullname", native_field_offset(&RtReflectionAssembly::full_name), "System.String"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_assembly, "m_syncRoot", native_field_offset(&RtReflectionAssembly::sync_root), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_assembly, "m_assembly", native_field_offset(&RtReflectionAssembly::assembly), "System.IntPtr"));
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_assembly) == sizeof(RtReflectionAssembly), RtErr::BadImageFormat);
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_parameter, "AttrsImpl", native_field_offset(&RtReflectionParameter::attrs),
+                                            "System.Reflection.ParameterAttributes"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_parameter, "ClassImpl", native_field_offset(&RtReflectionParameter::parent_type), "System.Type"));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_reflection_parameter, "DefaultValueImpl", native_field_offset(&RtReflectionParameter::default_value), "System.Object"));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_reflection_parameter, "MemberImpl", native_field_offset(&RtReflectionParameter::member), "System.Reflection.MemberInfo"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_parameter, "NameImpl", native_field_offset(&RtReflectionParameter::name), "System.String"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_parameter, "PositionImpl", native_field_offset(&RtReflectionParameter::index), "System.Int32"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_reflectedTypeCache", native_field_offset(&RtReflectionMethod::reflected_type_cache)));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_parameters", native_field_offset(&RtReflectionMethod::parameters),
+                                            "System.Reflection.ParameterInfo[]"));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_method, "m_returnParameter", native_field_offset(&RtReflectionMethod::return_parameter),
+                                            "System.Reflection.ParameterInfo"));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(t.cls_reflection_constructor, "m_reflectedTypeCache", native_field_offset(&RtReflectionConstructor::reflected_type_cache)));
+        RET_ERR_ON_FAIL(verify_field_layout(t.cls_reflection_constructor, "m_parameters", native_field_offset(&RtReflectionConstructor::parameters),
+                                            "System.Reflection.ParameterInfo[]"));
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, signature, get_class_must_exist(corlib, "System.Signature"));
+        RET_ERR_ON_FAIL(verify_field_layout(signature, "_arguments", native_field_offset(&RtSignature::arguments), "System.RuntimeType[]"));
+        RET_ERR_ON_FAIL(verify_field_layout(signature, "_declaringType", native_field_offset(&RtSignature::declaring_type), "System.RuntimeType"));
+        RET_ERR_ON_FAIL(
+            verify_field_layout(signature, "_returnTypeORfieldType", native_field_offset(&RtSignature::return_type_or_field_type), "System.RuntimeType"));
+        RET_ERR_ON_FAIL(verify_field_layout(signature, "_keepAlive", native_field_offset(&RtSignature::keep_alive), "System.Object"));
+        RET_ERR_ON_FAIL(verify_field_layout(signature, "_sig", native_field_offset(&RtSignature::sig)));
+        RET_ERR_ON_FAIL(verify_field_layout(signature, "_csig", native_field_offset(&RtSignature::csig), "System.Int32"));
+        RET_ERR_ON_FAIL(verify_field_layout(signature, "_managedCallingConventionAndArgIteratorFlags",
+                                            native_field_offset(&RtSignature::managed_calling_convention_and_arg_iterator_flags), "System.Int32"));
+        RET_ERR_ON_FAIL(verify_field_layout(signature, "_nSizeOfArgStack", native_field_offset(&RtSignature::size_of_arg_stack), "System.Int32"));
+        RET_ERR_ON_FAIL(verify_field_layout(signature, "_pMethod", native_field_offset(&RtSignature::method), "System.RuntimeMethodHandleInternal"));
+        RET_ERR_ON_FALSE(get_instance_size_with_object_header(signature) == sizeof(RtSignature), RtErr::BadImageFormat);
         RET_VOID_OK();
     }
 
-    metadata::RtClass* const corlib_type_arr[] = {
-        t.cls_void,
-        t.cls_boolean,
-        t.cls_char,
-        t.cls_byte,
-        t.cls_sbyte,
-        t.cls_int16,
-        t.cls_uint16,
-        t.cls_int32,
-        t.cls_uint32,
-        t.cls_int64,
-        t.cls_uint64,
-        t.cls_intptr,
-        t.cls_uintptr,
-        t.cls_single,
-        t.cls_double,
-        t.cls_object,
-        t.cls_valuetype,
-        t.cls_string,
-        t.cls_enum,
-        t.cls_array,
-        t.cls_delegate,
-        t.cls_multicastdelegate,
-        // t.cls_delegatedata,
-        t.cls_typedreference,
-        t.cls_systemtype,
-        t.cls_runtimetype,
-        t.cls_nullable,
-        t.cls_icollection,
-        t.cls_ienumerable,
-        t.cls_ilist,
-        t.cls_ienumerator,
-        t.cls_ilist_generic,
-        t.cls_icollection_generic,
-        t.cls_ienumerable_generic,
-        t.cls_ireadonlylist_generic,
-        t.cls_ireadonlycollection_generic,
-        t.cls_ienumerator_generic,
-        t.cls_exception,
-        t.cls_arithmetic_exception,
-        t.cls_division_by_zero_exception,
-        t.cls_execution_engine_exception,
-        t.cls_overflow_exception,
-        t.cls_stack_overflow_exception,
-        t.cls_argument_exception,
-        t.cls_argument_null_exception,
-        t.cls_argument_out_of_range_exception,
-        t.cls_type_load_exception,
-        t.cls_index_out_of_range_exception,
-        t.cls_invalid_cast_exception,
-        t.cls_missing_field_exception,
-        t.cls_missing_method_exception,
-        t.cls_null_reference_exception,
-        t.cls_array_type_mismatch_exception,
-        t.cls_out_of_memory_exception,
-        t.cls_bad_image_format_exception,
-        t.cls_entry_point_not_found_exception,
-        t.cls_missing_member_exception,
-        t.cls_not_supported_exception,
-        t.cls_not_implemented_exception,
-        // t.cls_type_unloaded_exception,
-        t.cls_type_initialization_exception,
-        t.cls_target_exception,
-        t.cls_target_invocation_exception,
-        t.cls_target_parameter_count_exception,
-        t.cls_attribute,
-        t.cls_customattributedata,
-        t.cls_customattribute_typed_argument,
-        t.cls_customattribute_named_argument,
-        t.cls_intrinsic,
-        t.cls_reflection_assembly,
-        t.cls_reflection_module,
-        t.cls_reflection_field,
-        t.cls_reflection_method,
-        t.cls_reflection_constructor,
-        t.cls_reflection_property,
-        t.cls_reflection_event,
-        t.cls_reflection_parameter,
-        t.cls_reflection_memberinfo,
-        t.cls_reflection_methodbody,
-        t.cls_reflection_exceptionhandlingclause,
-        t.cls_reflection_localvariableinfo,
-        t.cls_appdomain,
-        t.cls_appdomain_setup,
-        t.cls_appcontext,
-        t.cls_thread,
-        t.cls_internal_thread,
-        t.cls_marshal_as,
-        t.cls_byreflike,
-        t.cls_culturedata,
-        t.cls_cultureinfo,
-        t.cls_datetimeformatinfo,
-        t.cls_numberformatinfo,
-        t.cls_regioninfo,
-        t.cls_calendardata,
-        t.cls_stackframe,
-    };
-
-    for (metadata::RtClass* cls : corlib_type_arr)
-    {
-        if (cls == nullptr)
-        {
-            continue;
-        }
-        RET_ERR_ON_FAIL(initialize_all(cls));
-    }
-
-    RET_ERR_ON_FALSE(sizeof(RtObject) == RT_OBJECT_HEADER_SIZE, RtErr::BadImageFormat);
-
-    RET_ERR_ON_FALSE(RT_TYPED_REFERENCE_SIZE == PTR_SIZE * 3, RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_without_object_header(t.cls_typedreference) == RT_TYPED_REFERENCE_SIZE, RtErr::BadImageFormat);
-
-    // RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_delegatedata) == sizeof(RtDelegateData), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_delegate) == sizeof(RtDelegate), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_multicastdelegate) == sizeof(RtMulticastDelegate), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_exception) == sizeof(RtException), RtErr::BadImageFormat);
-
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_assembly) == sizeof(RtReflectionAssembly), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_module) == sizeof(RtReflectionModule), RtErr::BadImageFormat);
-    auto reflection_field_size = get_instance_size_with_object_header(t.cls_reflection_field);
-    if (reflection_field_size != sizeof(RtReflectionField) && reflection_field_size != sizeof(RtObject))
-    {
-        RET_ERR(RtErr::BadImageFormat);
-    }
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_method) == sizeof(RtReflectionMethod), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_constructor) == sizeof(RtReflectionConstructor), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_property) == sizeof(RtReflectionProperty), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_event) == sizeof(RtReflectionEventInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_parameter) == sizeof(RtReflectionParameter), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_methodbody) == sizeof(RtReflectionMethodBody), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_exceptionhandlingclause) == sizeof(RtReflectionExceptionHandlingClause),
-                     RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_reflection_localvariableinfo) == sizeof(RtReflectionLocalVariableInfo), RtErr::BadImageFormat);
-
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_appdomain) == sizeof(RtAppDomain), RtErr::BadImageFormat);
-    if (t.cls_appcontext != nullptr)
-    {
-        RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_appcontext) == sizeof(RtAppContext), RtErr::BadImageFormat);
-    }
-
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_cultureinfo) == sizeof(RtCultureInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_culturedata) == sizeof(RtCultureData), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_datetimeformatinfo) == sizeof(RtDateTimeFormatInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_numberformatinfo) == sizeof(RtNumberFormatInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_regioninfo) == sizeof(RtRegionInfo), RtErr::BadImageFormat);
-    RET_ERR_ON_FALSE(get_instance_size_with_object_header(t.cls_calendardata) == sizeof(RtCalendarData), RtErr::BadImageFormat);
-
-    RET_VOID_OK();
+    RET_ERR(RtErr::BadImageFormat);
 }
 } // namespace vm
 

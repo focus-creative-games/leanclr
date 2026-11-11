@@ -112,6 +112,8 @@ class RtModuleDef
     {
     }
 
+    ~RtModuleDef();
+
     static void register_module_def(RtModuleDef* moduleDef);
     static void unregister_module_def(RtModuleDef* moduleDef);
     static void get_registered_modules(utils::Vector<metadata::RtModuleDef*>& modules);
@@ -355,7 +357,8 @@ class RtModuleDef
         return read_property_sig(reader, gcc, gc);
     }
 
-    RtResult<RtMethodSig> read_method_sig(utils::BinaryReader& reader, const RtGenericContainerContext& gcc, const RtGenericContext* gc);
+    RtResult<RtMethodSig> read_method_sig(utils::BinaryReader& reader, const RtGenericContainerContext& gcc, const RtGenericContext* gc,
+                                          bool allow_unmanaged = false);
 
     RtResult<RtMethodSig> read_method_sig(uint32_t signature, const RtGenericContainerContext& gcc, const RtGenericContext* gc)
     {

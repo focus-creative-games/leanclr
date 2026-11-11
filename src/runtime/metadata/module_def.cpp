@@ -1,5 +1,6 @@
 #include "host/services.h"
 #include "module_def.h"
+#include "native_handle_registry.h"
 
 #include "const_strs.h"
 #include "utils/rt_vector.h"
@@ -18,6 +19,13 @@ namespace leanclr
 {
 namespace metadata
 {
+
+RtModuleDef::~RtModuleDef()
+{
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    NativeHandleRegistry::remove_module(this);
+#endif
+}
 
 constexpr EncodedTokenId RtToken::Invalid;
 
@@ -68,6 +76,9 @@ void RtModuleDef::register_module_def(RtModuleDef* moduleDef)
 
 void RtModuleDef::unregister_module_def(RtModuleDef* moduleDef)
 {
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    NativeHandleRegistry::remove_module(moduleDef);
+#endif
     if (moduleDef->is_corlib())
     {
         assert(g_corlibModule == moduleDef && "Corlib module mismatch on unregister");
@@ -1101,7 +1112,7 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
 
         case RtElementType::FnPtr:
         {
-            auto ret_result = read_method_sig(reader, gcc, gc);
+            auto ret_result = read_method_sig(reader, gcc, gc, true);
             RET_ERR_ON_FAIL(ret_result);
             result.data.method_sig = new (_pool.malloc_any_zeroed<RtMethodSig>()) RtMethodSig{std::move(ret_result.unwrap())};
             RET_VOID_OK();
@@ -1462,7 +1473,8 @@ RtResult<RtPropertySig> RtModuleDef::read_property_sig(utils::BinaryReader& read
     RET_OK(propSig);
 }
 
-RtResult<RtMethodSig> RtModuleDef::read_method_sig(utils::BinaryReader& reader, const RtGenericContainerContext& gcc, const RtGenericContext* gc)
+RtResult<RtMethodSig> RtModuleDef::read_method_sig(utils::BinaryReader& reader, const RtGenericContainerContext& gcc, const RtGenericContext* gc,
+                                                   bool allow_unmanaged)
 {
     uint8_t byteType;
     if (!reader.try_read_byte(byteType))
@@ -1470,7 +1482,7 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig(utils::BinaryReader& reader, 
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
     RtSigType sigType = RtMetadata::decode_sig_type(byteType);
-    if (sigType >= RtSigType::Field)
+    if (sigType > RtSigType::VarArg && (!allow_unmanaged || (sigType != RtSigType::Unmanaged && sigType != RtSigType::NativeVarArg)))
     {
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
@@ -1523,7 +1535,7 @@ RtResult<RtMethodSig> RtModuleDef::read_stadalone_method_sig(EncodedTokenId stan
     RowStandaloneSig& row = optStandaloneSigRow.value();
     auto result = get_decoded_blob_reader(row.signature);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL2(utils::BinaryReader, reader, result);
-    return read_method_sig(reader, gcc, gc);
+    return read_method_sig(reader, gcc, gc, true);
 }
 
 RtResult<const RtGenericInst*> RtModuleDef::read_method_spec_generic_inst(utils::BinaryReader& reader, const RtGenericContainerContext& gcc,
@@ -1902,7 +1914,13 @@ RtResult<const RtMethodInfo*> RtModuleDef::get_method_by_rid(uint32_t rid)
 #if LEANCLR_BCL_CORECLR_NET10
     // Resolving a metadata accessor must not recursively construct its owner's
     // dispatch tables while that type's properties are still being loaded.
-    RET_ERR_ON_FAIL(vm::Class::initialize_methods(klass));
+    auto method_setup = vm::Class::initialize_methods(klass);
+    if (method_setup.is_err())
+    {
+        host::Services::logf(host::LogLevel::Error, "Method metadata initialization failed: %s.%s row:%u error:%d", klass->namespaze, klass->name, rid,
+                             static_cast<int>(method_setup.unwrap_err()));
+        return method_setup.unwrap_err();
+    }
 #else
     RET_ERR_ON_FAIL(vm::Class::initialize_vtables(klass));
 #endif

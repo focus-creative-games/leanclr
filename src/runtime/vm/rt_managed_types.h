@@ -82,12 +82,13 @@ struct RtString : RtObject
 struct RtTypedReference
 {
 #if LEANCLR_BCL_CORECLR_NET10
+    const void* value;
     const void* type_handle;
 #else
     const metadata::RtTypeSig* type_handle;
-#endif
     const void* value;
     const metadata::RtClass* klass;
+#endif
 };
 
 template <typename T>

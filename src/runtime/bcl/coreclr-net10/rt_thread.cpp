@@ -40,24 +40,9 @@ bool Thread::is_vm_thread(RtThread* thread)
 void Thread::setup_internal_thread(RtThread* thread)
 {
     assert(thread != nullptr);
-
-    auto internal_thread_class = Class::get_corlib_types().cls_internal_thread;
-    if (internal_thread_class == nullptr)
-    {
-        thread->internal_thread = nullptr;
-        return;
-    }
-    auto init_result = Class::initialize_all(internal_thread_class);
-    assert(init_result.is_ok());
-    (void)init_result;
-
-    auto internal_thread_obj = static_cast<RtInternalThread*>(LEANCLR_NEWOBJ_INTERNAL(internal_thread_class, "Thread::setup_internal_thread").unwrap());
-
-    internal_thread_obj->state = RtThreadState::Running;
-    internal_thread_obj->handle = nullptr;
-    internal_thread_obj->thread_id = 1;
-    internal_thread_obj->managed_id = 1;
-    thread->internal_thread = internal_thread_obj;
+    // This profile has one attached host thread and no Mono InternalThread.
+    thread->managed_thread_id = 1;
+    thread->priority = static_cast<int32_t>(ThreadPriority::Normal);
 }
 
 RtThread* Thread::attach_current_thread(RtAppDomain* app_domain)
@@ -82,10 +67,6 @@ RtThread* Thread::attach_current_thread(RtAppDomain* app_domain)
 void Thread::detach(RtThread* thread)
 {
     assert(thread != nullptr && thread == g_current_thread);
-    if (thread->internal_thread != nullptr)
-    {
-        free_internal_thread(thread->internal_thread);
-    }
     g_current_thread = nullptr;
 }
 
@@ -97,26 +78,9 @@ RtThread** Thread::get_all_attached_threads(size_t* size)
     return &g_current_thread;
 }
 
-RtResultVoid Thread::construct_internal_thread(RtThread* thread)
+RtResultVoid Thread::construct_internal_thread(RtThread*)
 {
-    auto internal_thread_class = Class::get_corlib_types().cls_internal_thread;
-    if (internal_thread_class == nullptr)
-    {
-        RET_ERR(RtErr::NotSupported);
-    }
-
-    auto internal_thread_obj = static_cast<RtInternalThread*>(LEANCLR_NEWOBJ_INTERNAL(internal_thread_class, "Thread::construct_internal_thread").unwrap());
-
-    // Allocate native thread handle
-    auto native_handle = alloc::GeneralAllocation::malloc_any_zeroed<RtNativeThread>();
-
-    internal_thread_obj->handle = native_handle;
-    internal_thread_obj->thread_id = 1;
-    internal_thread_obj->managed_id = 1;
-    internal_thread_obj->state = RtThreadState::Unstarted;
-    thread->internal_thread = internal_thread_obj;
-
-    RET_VOID_OK();
+    RET_ERR(RtErr::NotSupported);
 }
 
 RtResultVoid Thread::free_internal_thread(vm::RtInternalThread* this_thread)
@@ -217,42 +181,10 @@ static int32_t get_next_thread_id()
     return ++g_thread_id_counter;
 }
 
-bool Thread::start_thread(RtThread* thread, vm::RtMulticastDelegate* start)
+bool Thread::start_thread(RtThread*, vm::RtMulticastDelegate*)
 {
-    RtInternalThread* internal_thread = thread->internal_thread;
-    if (internal_thread == nullptr)
-    {
-        return false;
-    }
-
-    if ((int32_t)get_state(internal_thread) & (int32_t)RtThreadState::Aborted)
-    {
-        return internal_thread->handle != nullptr;
-    }
-    // StartData* start_data = (StartData*)gc::GarbageCollector::allocate_fixed(sizeof(StartData));
-    // start_data->m_Thread = thread;
-    // start_data->m_Domain = AppDomain::get_default_appdomain();
-    // start_data->m_Delegate = start;
-    // start_data->m_StartArg = thread->thread_start_arg;
-    // start_data->m_Semaphore = nullptr;
-
-    RtNativeThread* native_thread = internal_thread->handle;
-    // TODO
-    // native_thread->set_stack_size(internal_thread->stack_size);
-    // native_thread->set_explicit_apartment_state(internal_thread->apartment_state);
-    // auto ret = native_thread->run(start_data);
-    // if (ret != 0)
-    // {
-    //     return false;
-    // }
-    // return true;
-    internal_thread->state = (RtThreadState)((int32_t)internal_thread->state & ~(int32_t)RtThreadState::Unstarted);
-
-    // TODO: Get thread id from native thread
-    // internal_thread->thread_id = native_thread->thread_id;
-    internal_thread->managed_id = get_next_thread_id();
-    internal_thread->handle = native_thread;
-    return true;
+    // Native worker threads are outside this single-thread profile.
+    return false;
 }
 
 void Thread::abort(RtThread* thread)

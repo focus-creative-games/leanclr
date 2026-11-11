@@ -26,6 +26,7 @@
 #include "vm/parameter.h"
 #include "alloc/general_allocation.h"
 #include "metadata/metadata_cache.h"
+#include "metadata/native_handle_registry.h"
 #include "metadata/metadata_compare.h"
 #include "metadata/metadata_hash.h"
 #include "metadata/module_def.h"
@@ -276,55 +277,24 @@ static bool is_runtime_field_handle_internal_class(const metadata::RtClass* klas
     return is_system_type_named(klass, "RuntimeFieldHandleInternal");
 }
 
-static bool is_method_metadata_pointer(const metadata::RtMethodInfo* method) noexcept
+static bool is_method_metadata_pointer(const metadata::RtMethodInfo* value) noexcept
 {
-    if (method == nullptr || method->parent == nullptr || method->parent->methods == nullptr)
-    {
-        return false;
-    }
-
-    for (uint16_t i = 0; i < method->parent->method_count; ++i)
-    {
-        if (method->parent->methods[i] == method)
-        {
-            return true;
-        }
-    }
-
-    return false;
+    return metadata::NativeHandleRegistry::contains(value, metadata::NativeHandleKind::Method);
 }
 
-static bool is_field_metadata_pointer(const metadata::RtFieldInfo* field) noexcept
+static bool is_field_metadata_pointer(const metadata::RtFieldInfo* value) noexcept
 {
-    if (field == nullptr || field->parent == nullptr || field->type_sig == nullptr)
-    {
-        return false;
-    }
-
-    metadata::RtToken token = metadata::RtToken::decode(field->token);
-    return token.table_type == metadata::TableType::Field && token.rid != 0;
+    return metadata::NativeHandleRegistry::contains(value, metadata::NativeHandleKind::Field);
 }
 
-static bool is_property_metadata_pointer(const metadata::RtPropertyInfo* property) noexcept
+static bool is_property_metadata_pointer(const metadata::RtPropertyInfo* value) noexcept
 {
-    if (property == nullptr || property->parent == nullptr || property->name == nullptr)
-    {
-        return false;
-    }
-
-    metadata::RtToken token = metadata::RtToken::decode(property->token);
-    return token.table_type == metadata::TableType::Property && token.rid != 0;
+    return metadata::NativeHandleRegistry::contains(value, metadata::NativeHandleKind::Property);
 }
 
-static bool is_event_metadata_pointer(const metadata::RtEventInfo* event_info) noexcept
+static bool is_event_metadata_pointer(const metadata::RtEventInfo* value) noexcept
 {
-    if (event_info == nullptr || event_info->parent == nullptr || event_info->name == nullptr)
-    {
-        return false;
-    }
-
-    metadata::RtToken token = metadata::RtToken::decode(event_info->token);
-    return token.table_type == metadata::TableType::Event && token.rid != 0;
+    return metadata::NativeHandleRegistry::contains(value, metadata::NativeHandleKind::Event);
 }
 
 static RtResultVoid set_runtime_object_field_value(RtObject* obj, const char* field_name, const void* value) noexcept
@@ -959,56 +929,9 @@ static RtResultVoid ensure_net10_method_table_facade_initialized(Net10MethodTabl
 
 RtResult<const metadata::RtTypeSig*> Reflection::get_type_sig_from_net10_type_handle(const void* type_handle)
 {
-    if (type_handle == nullptr)
-    {
-        RET_ERR(RtErr::ArgumentNull);
-    }
-
-    auto found = s_net10_method_table_by_handle.find(type_handle);
-    if (found != s_net10_method_table_by_handle.end())
-    {
-        RET_OK(found->second->type_sig);
-    }
-
-    auto type_sig = reinterpret_cast<const metadata::RtTypeSig*>(type_handle);
-    if (looks_like_leanclr_type_sig(type_sig))
-    {
-        RET_OK(type_sig);
-    }
-
-    auto klass = reinterpret_cast<const metadata::RtClass*>(type_handle);
-    if (klass != nullptr && klass->by_val != nullptr)
-    {
-        RET_OK(klass->by_val);
-    }
-
-    auto slot_value = *reinterpret_cast<void* const*>(type_handle);
-    if (slot_value != nullptr && slot_value != type_handle)
-    {
-        auto slot_type_sig = get_type_sig_from_net10_method_table(slot_value);
-        if (slot_type_sig.is_ok())
-        {
-            return slot_type_sig;
-        }
-
-        auto slot_as_type_sig = reinterpret_cast<const metadata::RtTypeSig*>(slot_value);
-        if (looks_like_leanclr_type_sig(slot_as_type_sig))
-        {
-            RET_OK(slot_as_type_sig);
-        }
-
-        auto slot_as_klass = reinterpret_cast<const metadata::RtClass*>(slot_value);
-        if (slot_as_klass != nullptr && slot_as_klass->by_val != nullptr)
-        {
-            RET_OK(slot_as_klass->by_val);
-        }
-    }
-
-    if (std::getenv("LEANCLR_REFLECTION_TRACE") != nullptr)
-    {
-        std::fprintf(stderr, "leanclr-reflection: bad net10 type handle handle=%p slot=%p\n", type_handle, slot_value);
-    }
-    RET_ERR(RtErr::BadImageFormat);
+    // A native type handle is a registered facade identity, never an address
+    // to probe as a type signature, class, or pointer slot.
+    return get_type_sig_from_net10_method_table(type_handle);
 }
 
 RtResult<const metadata::RtClass*> Reflection::get_class_from_net10_method_table(const void* method_table)
@@ -1029,14 +952,7 @@ RtResult<const metadata::RtClass*> Reflection::get_class_from_net10_method_table
         RET_OK(found->second->klass);
     }
 
-    auto type_sig = reinterpret_cast<const metadata::RtTypeSig*>(method_table);
-    if (looks_like_leanclr_type_sig(type_sig))
-    {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, Class::get_class_from_typesig(type_sig));
-        RET_OK(klass);
-    }
-
-    RET_OK(reinterpret_cast<const metadata::RtClass*>(method_table));
+    RET_ERR(RtErr::BadImageFormat);
 }
 
 RtResult<RtReflectionRuntimeType*> Reflection::get_runtime_type_from_handle_arg(const void* type_handle)
@@ -1058,22 +974,7 @@ RtResult<RtReflectionRuntimeType*> Reflection::get_runtime_type_from_handle_arg(
         RET_OK(reinterpret_cast<RtReflectionRuntimeType*>(ref_type));
     }
 
-    auto slot_value = *reinterpret_cast<void* const*>(type_handle);
-    if (auto runtime_type = try_get_runtime_type_object(slot_value))
-    {
-        RET_OK(runtime_type);
-    }
-
-    auto slot_net10_type_sig = get_type_sig_from_net10_method_table(slot_value);
-    if (slot_net10_type_sig.is_ok())
-    {
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, ref_type, get_type_reflection_object(slot_net10_type_sig.unwrap()));
-        RET_OK(reinterpret_cast<RtReflectionRuntimeType*>(ref_type));
-    }
-
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtClass*, klass, get_class_from_net10_method_table(type_handle));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionType*, ref_type, get_klass_reflection_object(klass));
-    RET_OK(reinterpret_cast<RtReflectionRuntimeType*>(ref_type));
+    RET_ERR(RtErr::BadImageFormat);
 }
 
 RtResult<const metadata::RtTypeSig*> Reflection::get_type_sig_from_runtime_type_handle_arg(const void* type_handle)
@@ -1131,7 +1032,8 @@ RtResult<const metadata::RtTypeSig*> Reflection::get_type_sig_from_reflection_ty
     auto normalized_type = reinterpret_cast<const RtReflectionType*>(normalized_obj);
     if (std::getenv("LEANCLR_REFLECTION_TRACE") != nullptr)
     {
-        auto klass_ret = Class::get_class_from_typesig(reinterpret_cast<const metadata::RtTypeSig*>(normalized_type->type_handle));
+        auto traced_type = get_type_sig_from_net10_type_handle(normalized_type->type_handle);
+        auto klass_ret = traced_type.is_ok() ? Class::get_class_from_typesig(traced_type.unwrap()) : RtResult<metadata::RtClass*>(traced_type.unwrap_err());
         const char* ns = "<class-error>";
         const char* name = "";
         if (klass_ret.is_ok())
@@ -1363,7 +1265,7 @@ RtResult<RtObject*> Reflection::normalize_coreclr_reflection_object(RtObject* ob
         RET_OK(obj);
     }
 
-    auto possible_header = reinterpret_cast<RtObject*>(reinterpret_cast<uint8_t*>(obj) - sizeof(RtObject));
+    auto possible_header = reinterpret_cast<RtObject*>(reinterpret_cast<uintptr_t>(obj) - sizeof(RtObject));
     if (gc::GarbageCollector::is_allocated_object(possible_header) && is_coreclr_reflection_object_class(possible_header->klass))
     {
         RET_OK(possible_header);
@@ -1523,12 +1425,12 @@ RtResult<const metadata::RtMethodInfo*> Reflection::get_method_info_from_reflect
     if (obj_klass == corlib_types.cls_reflection_constructor)
     {
         auto constructor_obj = reinterpret_cast<RtReflectionConstructor*>(normalized_obj);
-        if (constructor_obj->method != nullptr)
+        if (is_method_metadata_pointer(constructor_obj->method))
         {
             RET_OK(constructor_obj->method);
         }
     }
-    else if (method_obj->method != nullptr)
+    else if (is_method_metadata_pointer(method_obj->method))
     {
         RET_OK(method_obj->method);
     }
@@ -1565,30 +1467,7 @@ RtResult<const metadata::RtMethodInfo*> Reflection::get_method_info_from_handle_
         RET_OK(direct_method);
     }
 
-    uintptr_t slot_value = *reinterpret_cast<const uintptr_t*>(method_arg);
-    auto slot_method = reinterpret_cast<const metadata::RtMethodInfo*>(slot_value);
-    if (is_method_metadata_pointer(slot_method))
-    {
-        RET_OK(slot_method);
-    }
-
-    auto slot_obj = reinterpret_cast<RtObject*>(slot_value);
-    auto normalized_slot_obj_ret = normalize_coreclr_reflection_object(slot_obj);
-    if (normalized_slot_obj_ret.is_ok())
-    {
-        RtObject* obj = normalized_slot_obj_ret.unwrap();
-        const CorLibTypes& corlib_types = Class::get_corlib_types();
-        if (obj->klass == corlib_types.cls_reflection_method || obj->klass == corlib_types.cls_reflection_constructor)
-        {
-            return get_method_info_from_reflection_object(reinterpret_cast<RtReflectionMethod*>(obj));
-        }
-        if (is_runtime_method_info_stub_class(obj->klass))
-        {
-            return get_method_info_from_runtime_method_info_stub(obj);
-        }
-    }
-
-    RET_OK(direct_method);
+    RET_ERR(RtErr::BadImageFormat);
 }
 
 RtResult<const metadata::RtClass*> Reflection::get_reflection_method_klass(RtReflectionMethod* method_obj)
@@ -1681,7 +1560,16 @@ RtResult<RtArray*> Reflection::get_param_objects(const metadata::RtMethodInfo* m
             }
         }
         param_info_obj->index = static_cast<int32_t>(i);
-        // param_info_obj->attrs = static_cast<uint32_t>(param_type_sig->flags);
+        // RuntimeParameterInfo's metadata scope and token are required by its
+        // managed default-value and attribute accessors; ParameterInfo's base
+        // fields alone do not represent a complete net10 parameter object.
+        int32_t token = static_cast<int32_t>(param_token_opt.value_or(0));
+        bool no_metadata = !param_token_opt.has_value();
+        bool name_cached = true;
+        RET_ERR_ON_FAIL(set_runtime_object_field_value(param_obj_base, "m_tkParamDef", &token));
+        RET_ERR_ON_FAIL(set_runtime_object_field_value(param_obj_base, "m_scope", &ass));
+        RET_ERR_ON_FAIL(set_runtime_object_field_value(param_obj_base, "m_noMetadata", &no_metadata));
+        RET_ERR_ON_FAIL(set_runtime_object_field_value(param_obj_base, "m_nameIsCached", &name_cached));
         Array::set_array_data_at<RtReflectionParameter*>(param_info_array_obj, static_cast<int32_t>(i), param_info_obj);
     }
     s_method_params_map.emplace(key, param_info_array_obj);
@@ -1852,20 +1740,6 @@ RtResult<const metadata::RtFieldInfo*> Reflection::get_field_info_from_handle_ar
     if (is_field_metadata_pointer(direct_field))
     {
         RET_OK(direct_field);
-    }
-
-    uintptr_t slot_value = *reinterpret_cast<const uintptr_t*>(field_arg);
-    auto slot_field = reinterpret_cast<const metadata::RtFieldInfo*>(slot_value);
-    if (is_field_metadata_pointer(slot_field))
-    {
-        RET_OK(slot_field);
-    }
-
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtFieldInfo*, slot_object_field,
-                                            get_field_info_from_reflection_field_arg(reinterpret_cast<const void*>(slot_value)));
-    if (slot_object_field != nullptr)
-    {
-        RET_OK(slot_object_field);
     }
 
     RET_ERR(RtErr::BadImageFormat);
@@ -2084,7 +1958,7 @@ RtResult<const metadata::RtPropertyInfo*> Reflection::get_property_info_from_ref
         RET_OK(found->second.property);
     }
 
-    if (property_obj->property != nullptr)
+    if (is_property_metadata_pointer(property_obj->property))
     {
         RET_OK(property_obj->property);
     }
@@ -2125,24 +1999,6 @@ RtResult<const metadata::RtPropertyInfo*> Reflection::get_property_info_from_han
     if (is_property_metadata_pointer(direct_property))
     {
         RET_OK(direct_property);
-    }
-
-    uintptr_t slot_value = *reinterpret_cast<const uintptr_t*>(property_arg);
-    auto slot_property = reinterpret_cast<const metadata::RtPropertyInfo*>(slot_value);
-    if (is_property_metadata_pointer(slot_property))
-    {
-        RET_OK(slot_property);
-    }
-
-    auto slot_obj = reinterpret_cast<RtObject*>(slot_value);
-    auto normalized_slot_obj_ret = normalize_coreclr_reflection_object(slot_obj);
-    if (normalized_slot_obj_ret.is_ok())
-    {
-        RtObject* obj = normalized_slot_obj_ret.unwrap();
-        if (obj->klass == Class::get_corlib_types().cls_reflection_property)
-        {
-            return get_property_info_from_reflection_object(reinterpret_cast<RtReflectionProperty*>(obj));
-        }
     }
 
     RET_ERR(RtErr::BadImageFormat);
@@ -2305,24 +2161,6 @@ RtResult<metadata::RtEventInfo*> Reflection::get_event_info_from_handle_arg(cons
     if (is_event_metadata_pointer(direct_event))
     {
         RET_OK(direct_event);
-    }
-
-    uintptr_t slot_value = *reinterpret_cast<const uintptr_t*>(event_arg);
-    auto slot_event = reinterpret_cast<metadata::RtEventInfo*>(slot_value);
-    if (is_event_metadata_pointer(slot_event))
-    {
-        RET_OK(slot_event);
-    }
-
-    auto slot_obj = reinterpret_cast<RtObject*>(slot_value);
-    auto normalized_slot_obj_ret = normalize_coreclr_reflection_object(slot_obj);
-    if (normalized_slot_obj_ret.is_ok())
-    {
-        RtObject* obj = normalized_slot_obj_ret.unwrap();
-        if (obj->klass == Class::get_corlib_types().cls_reflection_event)
-        {
-            return get_event_info_from_reflection_object(reinterpret_cast<RtReflectionEventInfo*>(obj));
-        }
     }
 
     RET_ERR(RtErr::BadImageFormat);

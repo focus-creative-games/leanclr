@@ -1,4 +1,5 @@
 #include "vm/gchandle.h"
+#include "vm/reflection.h"
 #include <cstdlib>
 #include <vector>
 using namespace leanclr;
@@ -30,6 +31,17 @@ static void mark(vm::RtObject* object, void* data)
 
 int main()
 {
+    for (uintptr_t invalid : {uintptr_t{1}, uintptr_t{3}, ~uintptr_t{0}})
+    {
+        const auto* handle = reinterpret_cast<const void*>(invalid);
+        check(vm::Reflection::get_type_sig_from_net10_type_handle(handle).is_err());
+        check(vm::Reflection::get_class_from_net10_method_table(handle).is_err());
+        check(vm::Reflection::get_runtime_type_from_handle_arg(handle).is_err());
+        check(vm::Reflection::get_method_info_from_handle_arg(handle).is_err());
+        check(vm::Reflection::get_field_info_from_handle_arg(handle).is_err());
+        check(vm::Reflection::get_property_info_from_handle_arg(handle).is_err());
+        check(vm::Reflection::get_event_info_from_handle_arg(handle).is_err());
+    }
     // Stack objects model a graph; callbacks exercise the same ephemeron API
     // used by GcRoots, without depending on a particular CoreLib installation.
     vm::RtObject a{}, b{}, c{}, dead_key{}, dead_value{};

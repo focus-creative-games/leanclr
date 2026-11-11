@@ -9,3 +9,7 @@ enable_testing()
 add_executable(net10-handles dependent-handles.cpp)
 target_link_libraries(net10-handles PRIVATE leanclr)
 add_test(NAME net10-handles COMMAND net10-handles)
+
+add_executable(net10-native-handles native-handles.cpp)
+target_link_libraries(net10-native-handles PRIVATE leanclr)
+add_test(NAME net10-native-handles COMMAND net10-native-handles)

@@ -9,6 +9,7 @@ namespace intrinsics
 class SystemType
 {
   public:
+    static RtResult<bool> get_is_enum(vm::RtReflectionRuntimeType* runtime_type) noexcept;
     static utils::Span<vm::IntrinsicEntry> get_intrinsic_entries() noexcept;
 
     static RtResult<vm::RtReflectionRuntimeType*> get_type_from_handle(const void* type_handle) noexcept;

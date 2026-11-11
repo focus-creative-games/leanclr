@@ -215,4 +215,4 @@ jobs:
         run: dotnet build src/leanaot/LeanAOT/LeanAOT.csproj -c Release
       - name: Verify net10 interpreter and handle contracts
         shell: pwsh
-        run: ./scripts/dotnet10/integration-baseline.ps1
+        run: ./scripts/dotnet10/integration-baseline.ps1 -AllSmokeEntries

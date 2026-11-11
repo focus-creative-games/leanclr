@@ -601,14 +601,16 @@ struct RtInternalThread : public RtObject
 // Thread
 struct RtThread : public RtObject
 {
-    RtInternalThread* internal_thread;
-    RtObject* thread_start_arg;
-    RtException* pending_exception;
-    RtMulticastDelegate* delegate;
     RtObject* execution_context;
-    bool execution_context_belongs_to_current_scope;
-    RtObject* principal;
-    int32_t principal_version;
+    RtObject* synchronization_context;
+    RtString* name;
+    RtObject* start_helper;
+    intptr_t native_thread;
+    int32_t priority;
+    int32_t managed_thread_id;
+    bool may_need_reset_for_thread_pool;
+    bool is_dead;
+    bool is_thread_pool;
 };
 
 } // namespace vm

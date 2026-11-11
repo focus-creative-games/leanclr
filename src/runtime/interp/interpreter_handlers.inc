@@ -2204,20 +2204,28 @@ LEANCLR_CASE_END()
 
 LEANCLR_CASE_BEGIN(MkRefAny)
 {
-    const metadata::RtClass* klass = get_resolved_data<metadata::RtClass>(imi, ir->klass_idx);
     const void* src_addr = get_stack_value_at<const void*>(eval_stack_base, ir->addr);
     vm::RtTypedReference* dst = get_ptr_stack_value_at<vm::RtTypedReference>(eval_stack_base, ir->dst);
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    dst->type_handle = get_resolved_data<void>(imi, ir->klass_idx);
+#else
+    const metadata::RtClass* klass = get_resolved_data<metadata::RtClass>(imi, ir->klass_idx);
     dst->type_handle = klass->by_val;
-    dst->value = src_addr;
     dst->klass = klass;
+#endif
+    dst->value = src_addr;
 }
 LEANCLR_CASE_END()
 
 LEANCLR_CASE_BEGIN(RefAnyVal)
 {
     vm::RtTypedReference* src = get_ptr_stack_value_at<vm::RtTypedReference>(eval_stack_base, ir->src);
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    if (src->type_handle != get_resolved_data<void>(imi, ir->klass_idx))
+#else
     const metadata::RtClass* check_klass = get_resolved_data<metadata::RtClass>(imi, ir->klass_idx);
     if (src->klass != check_klass)
+#endif
     {
         RAISE_RUNTIME_ERROR(RtErr::InvalidCast);
     }

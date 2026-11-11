@@ -2,7 +2,8 @@ param(
     [string]$RuntimeDir,
     [string]$Configuration = "Release",
     [string]$BuildDir = "out/net10-baseline",
-    [string]$ContractsBuildDir
+    [string]$ContractsBuildDir,
+    [switch]$AllSmokeEntries
 )
 $ErrorActionPreference = "Stop"
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "../..")).Path
@@ -40,8 +41,12 @@ try {
         "TestNestedThrowCatchOnly", "TestThrowTargetInvocationCatchOnly", "TestSpan",
         "TestSpanStackalloc", "TestExceptionFilterControlFlow",
         "TestCommandLineArguments", "TestCommandLineCopies", "TestUnsupportedNativeEntry",
-        "TestRuntimeHelpers", "TestStaticInterfaceDispatch", "TestHardwareFallbackAndUtf8Count", "TestPrepareMethodDoesNotExecute"
+        "TestRuntimeHelpers", "TestStaticInterfaceDispatch", "TestHardwareFallbackAndUtf8Count", "TestPrepareMethodDoesNotExecute", "TestTypedReferenceRoundTrip"
     )
+    if ($AllSmokeEntries) {
+        $source = Get-Content src/tests/managed-net10/ManagedNet10.Smoke/Program.cs -Raw
+        $entries = @([regex]::Matches($source, 'private static void (Test\w+)\(\)') | ForEach-Object { $_.Groups[1].Value })
+    }
     foreach ($entry in $entries) {
         Write-Host "Running $entry"
         Invoke-Checked $runner -l $assemblyDir -l $RuntimeDir -e "ManagedNet10.Smoke.Program::$entry" ManagedNet10.Smoke

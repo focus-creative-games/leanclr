@@ -19,7 +19,12 @@ RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_runtime_type
 
 RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_runtime_type_from_handle(void* runtime_type_handle) noexcept
 {
-    return vm::Reflection::get_runtime_type_from_handle_arg(runtime_type_handle);
+    if (!runtime_type_handle)
+        RET_ERR(RtErr::NullReference);
+    // Instance methods on RuntimeTypeHandle receive a managed byref to its
+    // single value slot, whereas the static MethodTable overload takes a value.
+    const void* value = *static_cast<const void* const*>(runtime_type_handle);
+    return vm::Reflection::get_runtime_type_from_handle_arg(value);
 }
 
 RtResult<bool> SystemRuntimeTypeHandle::can_cast_to(vm::RtReflectionRuntimeType* source_type, vm::RtReflectionRuntimeType* target_type) noexcept

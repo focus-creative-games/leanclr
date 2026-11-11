@@ -34,6 +34,22 @@ RtResult<vm::RtReflectionRuntimeType*> SystemType::get_type_from_handle(const vo
     return vm::Reflection::get_runtime_type_from_handle_arg(type_handle);
 }
 
+RtResult<bool> SystemType::get_is_enum(vm::RtReflectionRuntimeType* runtime_type) noexcept
+{
+    if (!runtime_type)
+        RET_ERR(RtErr::NullReference);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Reflection::get_class_from_runtime_type_object(runtime_type));
+    RET_OK(vm::Class::is_enum_type(klass));
+}
+
+static RtResultVoid get_is_enum_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                        interp::RtStackObject* ret) noexcept
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemType::get_is_enum(interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 0)));
+    interp::EvalStackOp::set_return(ret, static_cast<int32_t>(result));
+    RET_VOID_OK();
+}
+
 RtResult<bool> SystemType::get_is_value_type(vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     if (runtime_type == nullptr)
@@ -176,6 +192,8 @@ static RtResultVoid is_assignable_to_invoker(metadata::RtManagedMethodPointer me
 }
 
 static vm::IntrinsicEntry s_intrinsic_entries_system_type[] = {
+    {"System.Type::get_IsEnum", reinterpret_cast<vm::IntrinsicFunction>(SystemType::get_is_enum), get_is_enum_invoker},
+    {"System.RuntimeType::get_IsEnum", reinterpret_cast<vm::IntrinsicFunction>(SystemType::get_is_enum), get_is_enum_invoker},
     {"System.Type::GetTypeFromHandle(System.RuntimeTypeHandle)", (vm::IntrinsicFunction)&SystemType::get_type_from_handle, get_type_from_handle_invoker},
     {"System.Type::get_IsValueType", (vm::IntrinsicFunction)&SystemType::get_is_value_type, get_is_value_type_invoker},
     {"System.RuntimeType::get_IsValueType", (vm::IntrinsicFunction)&SystemType::get_is_value_type, get_is_value_type_invoker},

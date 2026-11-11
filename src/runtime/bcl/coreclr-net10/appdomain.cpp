@@ -76,27 +76,7 @@ RtResult<RtAppDomain*> AppDomain::init_default_app_domain()
 
 RtResultVoid AppDomain::initialize_context()
 {
-    auto& corlib_types = Class::get_corlib_types();
-    auto appcontext_class = corlib_types.cls_appcontext;
-    if (appcontext_class == nullptr)
-    {
-        RET_VOID_OK();
-    }
-
-    auto context_res = LEANCLR_NEWOBJ_INTERNAL(appcontext_class, "AppDomain::initialize_context");
-    RET_ERR_ON_FAIL(context_res);
-    auto context = reinterpret_cast<RtAppContext*>(context_res.unwrap());
-
-    context->domain_id = g_default_mono_domain.domain_id;
-    context->context_id = 0;
-    g_default_mono_domain.context = context;
-
-    auto current_thread = Thread::get_current_thread();
-    if (current_thread->internal_thread != nullptr)
-    {
-        current_thread->internal_thread->current_appcontext = reinterpret_cast<RtObject*>(context);
-    }
-
+    // .NET 10 has no Mono remoting Context or InternalThread object.
     RET_VOID_OK();
 }
 

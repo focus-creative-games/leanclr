@@ -175,6 +175,14 @@ internal readonly struct ExplicitStaticProbe : IStaticProbe<ExplicitStaticProbe>
 {
     static int IStaticProbe<ExplicitStaticProbe>.Read(int value) => value + 3;
 }
+[InlineArray(1)]
+internal struct SingleInlineValue { private int element; }
+[InlineArray(4)]
+internal struct ReferenceInlineValues { private object? element; }
+internal readonly struct GenericStaticProbe<T> : IStaticProbe<GenericStaticProbe<T>>
+{
+    static int IStaticProbe<GenericStaticProbe<T>>.Read(int value) => value + 4;
+}
 internal static class Program
 {
     private const int ConstNumber = 1234;
@@ -859,6 +867,7 @@ internal static class Program
     {
         Require(StaticRead<ImplicitStaticProbe>(40) == 42, "implicit static interface dispatch");
         Require(StaticRead<ExplicitStaticProbe>(39) == 42, "explicit static interface dispatch");
+        Require(StaticRead<GenericStaticProbe<string>>(38) == 42, "closed generic class static interface dispatch");
         ArgumentOutOfRangeException.ThrowIfNegative(1);
         try { ArgumentOutOfRangeException.ThrowIfNegative(-1); }
         catch (ArgumentOutOfRangeException) { return; }
@@ -886,6 +895,39 @@ internal static class Program
         try { RuntimeHelpers.PrepareMethod(default); }
         catch (ArgumentException) { return; }
         throw new Exception("PrepareMethod accepted empty handle");
+    }
+
+    private static void TestRuntimeTypeHandleViews()
+    {
+        RuntimeTypeHandle handle = typeof(int).TypeHandle;
+        Require(Type.GetTypeFromHandle(handle) == typeof(int), "runtime type handle round trip");
+        Require(!typeof(int).IsEnum && typeof(DayOfWeek).IsEnum, "enum type predicate");
+        Require(typeof(List<>).ContainsGenericParameters && !typeof(List<int>).ContainsGenericParameters, "open and closed type predicates");
+    }
+
+    private static void TestInlineArrayValueAndReferenceLayouts()
+    {
+        SingleInlineValue single = default;
+        single[0] = 42;
+        Require(Unsafe.SizeOf<SingleInlineValue>() == sizeof(int) && single[0] == 42, "single-element inline array");
+        ReferenceInlineValues values = default;
+        values[0] = "first";
+        values[3] = "last";
+        ReferenceInlineValues copy = values;
+        Require(Unsafe.SizeOf<ReferenceInlineValues>() == 4 * IntPtr.Size, "reference inline-array size");
+        Require((string?)copy[0] == "first" && (string?)copy[3] == "last", "inline-array copy lost elements");
+    }
+
+    private static void TestTypedReferenceRoundTrip()
+    {
+        int value = 19;
+        TypedReference reference = __makeref(value);
+        Require(__reftype(reference) == typeof(int), "typed reference type handle");
+        __refvalue(reference, int) = 42;
+        Require(value == 42 && __refvalue(reference, int) == 42, "typed reference alias");
+        try { _ = __refvalue(reference, long); }
+        catch (InvalidCastException) { return; }
+        throw new Exception("typed reference accepted wrong type");
     }
 
     private static void TestRuntimeHelpers()

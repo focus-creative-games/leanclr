@@ -1,6 +1,7 @@
 #include <functional>
 
 #include "class.h"
+#include "metadata/native_handle_registry.h"
 #include "host/services.h"
 #include "bcl/adapter.h"
 #include "const_strs.h"
@@ -698,6 +699,11 @@ RtResultVoid Class::initialize_fields(metadata::RtClass* klass)
     }
     }
     rollback.dismiss();
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    for (uint16_t i = 0; i < klass->field_count; ++i)
+        if (!metadata::NativeHandleRegistry::insert(&klass->fields[i], metadata::NativeHandleKind::Field))
+            RET_ERR(RtErr::OutOfMemory);
+#endif
     RET_VOID_OK();
 }
 
@@ -761,6 +767,56 @@ void Class::collect_instance_fields(const metadata::RtClass* klass, utils::Vecto
         }
     }
 }
+
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+namespace
+{
+bool is_inline_array_attribute_class(const metadata::RtClass* klass)
+{
+    return klass != nullptr && klass->namespaze != nullptr && klass->name != nullptr && std::strcmp(klass->namespaze, "System.Runtime.CompilerServices") == 0 &&
+           std::strcmp(klass->name, "InlineArrayAttribute") == 0;
+}
+
+RtResult<std::optional<uint32_t>> get_inline_array_length(const metadata::RtClass* klass)
+{
+    if (klass == nullptr || klass->image == nullptr || klass->token == 0)
+    {
+        RET_OK(std::optional<uint32_t>{});
+    }
+
+    metadata::RtModuleDef* mod = klass->image;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(metadata::RtCustomAttributeRidRange, rid_range, mod->get_custom_attribute_rid_range(klass->token));
+    for (uint32_t i = 0; i < rid_range.count; ++i)
+    {
+        uint32_t ca_rid = rid_range.start_rid + i;
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtCustomAttributeRawData, raw_data, mod->get_custom_attribute_raw_data(ca_rid));
+        if (!is_inline_array_attribute_class(raw_data.ctor->parent))
+        {
+            continue;
+        }
+
+        if (raw_data.ctor->parameter_count != 1 || raw_data.dataBlobIndex == 0)
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(utils::BinaryReader, reader, mod->get_decoded_blob_reader(raw_data.dataBlobIndex));
+        uint16_t prolog = 0;
+        uint32_t length = 0;
+        if (!reader.try_read_u16(prolog) || prolog != 0x0001 || !reader.try_read_u32(length))
+        {
+            RET_ASSERT_ERR(RtErr::BadImageFormat);
+        }
+        uint16_t named_count = 0;
+        if (!length || length > INT32_MAX || !reader.try_read_u16(named_count) || named_count || reader.remaining())
+            RET_ERR(RtErr::BadImageFormat);
+        RET_OK(std::optional<uint32_t>{length});
+    }
+
+    RET_OK(std::optional<uint32_t>{});
+}
+} // namespace
+#endif
 
 RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
 {
@@ -849,6 +905,29 @@ RtResultVoid Class::setup_field_layout(metadata::RtClass* klass)
         UNWRAP_OR_RET_ERR_ON_FAIL(instanceSizeAndAlignment,
                                   metadata::Layout::compute_layout(instanceFields, first_field_index_of_current_class, static_cast<uint8_t>(packingSize)));
     }
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(std::optional<uint32_t>, inline_length, get_inline_array_length(klass));
+    if (inline_length)
+    {
+        if (is_ref_type || is_explicit_layout(klass) || instanceFields.size() != 1)
+            RET_ERR(RtErr::TypeLoad);
+        const auto* element = instanceFields[0];
+        if (element->type_sig->by_ref)
+        {
+            DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, by_ref_like, is_by_ref_like(klass));
+            if (!by_ref_like)
+                RET_ERR(RtErr::TypeLoad);
+        }
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::SizeAndAlignment, layout,
+                                                metadata::Layout::get_field_size_and_alignment(const_cast<metadata::RtTypeSig*>(element->type_sig)));
+        uint64_t total = uint64_t(layout.size) * *inline_length;
+        if (!layout.size || total > UINT32_MAX - RT_OBJECT_HEADER_SIZE || classSize > total)
+            RET_ERR(RtErr::TypeLoad);
+        instanceSizeAndAlignment = {static_cast<uint32_t>(total), layout.alignment};
+        const_cast<metadata::RtFieldInfo*>(element)->offset = 0;
+        klass->extra_flags |= static_cast<uint32_t>(metadata::RtClassExtraAttribute::InlineArray);
+    }
+#endif
     klass->instance_size_without_header = std::max(instanceSizeAndAlignment.size, classSize);
     if (!is_ref_type)
     {
@@ -990,6 +1069,21 @@ RtResultVoid Class::setup_instance_gc_bitmap_impl(metadata::RtClass* klass, size
                 continue;
             }
             RET_ERR_ON_FAIL(setup_gc_bitmap_for_field(cur_field, false, bitmap, max_bitmap_index));
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+            if ((cur_klass->extra_flags & static_cast<uint32_t>(metadata::RtClassExtraAttribute::InlineArray)) != 0)
+            {
+                DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::SizeAndAlignment, element,
+                                                        metadata::Layout::get_field_size_and_alignment(const_cast<metadata::RtTypeSig*>(cur_field->type_sig)));
+                if (!element.size)
+                    RET_ERR(RtErr::TypeLoad);
+                metadata::RtFieldInfo repeated = *cur_field;
+                for (uint32_t offset = element.size; offset < cur_klass->instance_size_without_header; offset += element.size)
+                {
+                    repeated.offset = offset;
+                    RET_ERR_ON_FAIL(setup_gc_bitmap_for_field(&repeated, false, bitmap, max_bitmap_index));
+                }
+            }
+#endif
         }
     }
     RET_VOID_OK();
@@ -1175,7 +1269,12 @@ RtResultVoid Class::setup_methods_typedef(metadata::RtClass* klass)
         metadata::RtGenericContainerContext gcc{klass->generic_container, genericContainer};
 
         auto retMethodSig = mod->read_method_sig(methodRow.signature, gcc, nullptr);
-        RET_ERR_ON_FAIL(retMethodSig);
+        if (retMethodSig.is_err())
+        {
+            host::Services::logf(host::LogLevel::Error, "Invalid method signature: %s.%s::%s token:0x%x", klass->namespaze, klass->name, method->name,
+                                 method->token);
+            return retMethodSig.unwrap_err();
+        }
         const metadata::RtMethodSig& methodSig = retMethodSig.unwrap();
         method->return_type = methodSig.return_type;
         size_t paramCount = methodSig.params.size();
@@ -1219,7 +1318,13 @@ RtResultVoid Class::build_methods_arg_descs(metadata::RtClass* klass)
             // Generic methods arg descs are built on demand
             continue;
         }
-        RET_ERR_ON_FAIL(Method::build_method_arg_descs(const_cast<metadata::RtMethodInfo*>(method)));
+        auto descriptors = Method::build_method_arg_descs(const_cast<metadata::RtMethodInfo*>(method));
+        if (descriptors.is_err())
+        {
+            host::Services::logf(host::LogLevel::Error, "Invalid method argument layout: %s.%s::%s token:0x%x", klass->namespaze, klass->name, method->name,
+                                 method->token);
+            return descriptors.unwrap_err();
+        }
     }
     RET_VOID_OK();
 }
@@ -1252,6 +1357,11 @@ RtResultVoid Class::initialize_properties(metadata::RtClass* klass)
     default:
         break;
     }
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    for (uint16_t i = 0; i < klass->property_count; ++i)
+        if (!metadata::NativeHandleRegistry::insert(&klass->properties[i], metadata::NativeHandleKind::Property))
+            RET_ERR(RtErr::OutOfMemory);
+#endif
     RET_VOID_OK();
 }
 
@@ -1359,6 +1469,11 @@ RtResultVoid Class::initialize_events(metadata::RtClass* klass)
     default:
         break;
     }
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    for (uint16_t i = 0; i < klass->event_count; ++i)
+        if (!metadata::NativeHandleRegistry::insert(&klass->events[i], metadata::NativeHandleKind::Event))
+            RET_ERR(RtErr::OutOfMemory);
+#endif
     RET_VOID_OK();
 }
 

@@ -354,12 +354,12 @@ static RtResultVoid get_page_size_invoker(metadata::RtManagedMethodPointer, cons
 RtResult<int32_t> SystemEnvironment::get_current_managed_thread_id() noexcept
 {
     vm::RtThread* thread = vm::Thread::get_current_thread();
-    if (thread == nullptr || thread->internal_thread == nullptr)
+    if (thread == nullptr)
     {
         RET_OK(1);
     }
 
-    RET_OK(thread->internal_thread->managed_id != 0 ? thread->internal_thread->managed_id : 1);
+    RET_OK(thread->managed_thread_id);
 }
 
 /// @icall: System.Environment::get_CurrentManagedThreadId

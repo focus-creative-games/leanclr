@@ -688,14 +688,24 @@ RtResultVoid Transformer::emit_StelemAny(InstructionOperands& output)
 RtResultVoid Transformer::emit_MkRefAny(InstructionOperands& output)
 {
     output.opcode = OpCodeEnum::MkRefAny;
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const void*, handle, vm::Reflection::get_net10_method_table(output.klass->by_val));
+    setup_inst_resolved_data(output, handle);
+#else
     setup_inst_klass(output);
+#endif
     return append_instruction(output);
 }
 
 RtResultVoid Transformer::emit_RefAnyVal(InstructionOperands& output)
 {
     output.opcode = OpCodeEnum::RefAnyVal;
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const void*, handle, vm::Reflection::get_net10_method_table(output.klass->by_val));
+    setup_inst_resolved_data(output, handle);
+#else
     setup_inst_klass(output);
+#endif
     return append_instruction(output);
 }
 

@@ -3,6 +3,7 @@
 #include "core/stl_compat.h"
 
 #include "method.h"
+#include "metadata/native_handle_registry.h"
 
 #include "class.h"
 #include "runtime.h"
@@ -229,6 +230,8 @@ RtResult<const RtMethodInfo*> Method::resolve_static_interface_method(RtClass* k
     RET_ERR_ON_FAIL(Class::initialize_methods(klass));
     const RtClass* definition = klass;
     RtGenericContext context{};
+    if (declaration->generic_method)
+        context.method_inst = declaration->generic_method->generic_context.method_inst;
     if (Class::is_generic_inst(klass))
     {
         const auto* generic = klass->by_val->data.generic_class;
@@ -248,11 +251,15 @@ RtResult<const RtMethodInfo*> Method::resolve_static_interface_method(RtClass* k
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
                 const RtMethodInfo*, declared,
                 definition->image->get_method_by_token(RtMetadata::decode_method_def_or_ref_coded_index(row->method_declaration), gcc, &context));
+            if (context.method_inst && declared->generic_container)
+                UNWRAP_OR_RET_ERR_ON_FAIL(declared, inflate(declared, &context));
             if (declared->parent != declaration->parent || !MetadataCompare::is_method_signature_equal(declared, declaration, true, true))
                 continue;
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
                 const RtMethodInfo*, body,
                 definition->image->get_method_by_token(RtMetadata::decode_method_def_or_ref_coded_index(row->method_body), gcc, &context));
+            if (context.class_inst || context.method_inst)
+                UNWRAP_OR_RET_ERR_ON_FAIL(body, inflate(body, &context));
             if (!is_static(body) || is_abstract(body))
                 RET_ERR(RtErr::BadImageFormat);
             RET_OK(body);
@@ -262,6 +269,12 @@ RtResult<const RtMethodInfo*> Method::resolve_static_interface_method(RtClass* k
     for (uint16_t i = 0; i < klass->method_count; ++i)
     {
         const auto* candidate = klass->methods[i];
+        if (context.method_inst && candidate->generic_container)
+        {
+            if (candidate->generic_container->generic_param_count != context.method_inst->generic_arg_count)
+                continue;
+            UNWRAP_OR_RET_ERR_ON_FAIL(candidate, inflate(candidate, &context));
+        }
         if (is_static(candidate) && is_public(candidate) && !is_abstract(candidate) &&
             MetadataCompare::is_method_signature_equal(candidate, declaration, true, true))
         {
@@ -441,6 +454,10 @@ RtResult<bool> Method::is_intrinsic(const RtMethodInfo* method)
 
 RtResultVoid Method::build_method_arg_descs(RtMethodInfo* method)
 {
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    if (!NativeHandleRegistry::insert(method, NativeHandleKind::Method))
+        RET_ERR(RtErr::OutOfMemory);
+#endif
     assert(method->arg_descs == nullptr && "Method arg descs already built");
     if (Method::contains_not_instantiated_generic_param(method))
     {

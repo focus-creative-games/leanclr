@@ -1,5 +1,6 @@
 #include "utils/little_endian.h"
 #include "transformer.h"
+#include "host/services.h"
 #include "il_opcodes.h"
 #include "metadata/module_def.h"
 #include "metadata/generic_metadata.h"
@@ -176,7 +177,13 @@ RtResult<metadata::RtRuntimeHandle> Transformer::get_cached_runtime_handle(uint3
     {
         RET_OK(it->second);
     }
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(metadata::RtRuntimeHandle, handle, get_raw_runtime_handle_from_token(token));
+    auto raw = get_raw_runtime_handle_from_token(token);
+    if (raw.is_err())
+    {
+        host::Services::logf(host::LogLevel::Error, "Metadata token resolution failed: token:0x%x error:%d", token, static_cast<int>(raw.unwrap_err()));
+        return raw.unwrap_err();
+    }
+    auto handle = raw.unwrap();
     _runtime_handle_cache[token] = handle;
     RET_OK(handle);
 }
@@ -1413,6 +1420,10 @@ RtResultVoid Transformer::add_callvirt(const metadata::RtMethodInfo* method)
 
 RtResultVoid Transformer::add_calli(const metadata::RtMethodSig& method_sig)
 {
+    // Parsing an unmanaged function-pointer type is supported independently of
+    // invoking its native ABI. The managed calli protocol cannot execute it.
+    if (metadata::RtMetadata::decode_sig_type(method_sig.flags) != metadata::RtSigType::Default)
+        RET_ERR(RtErr::NotSupported);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, func_ptr, pop_eval_stack());
 
     // Pop parameters in reverse order
@@ -2026,8 +2037,8 @@ RtResultVoid Transformer::add_mkrefany(metadata::RtClass* klass)
 
     ir.klass = klass;
     ir.first = addr;
-    // Push TypedRef value
-    ir.destination = push_ref_or_ptr_to_eval_stack();
+    // A typed reference occupies the complete BCL-specific value layout.
+    UNWRAP_OR_RET_ERR_ON_FAIL(ir.destination, push_class_to_eval_stack(vm::Class::get_corlib_types().cls_typedreference));
     return emit_MkRefAny(ir);
 }
 
@@ -2212,7 +2223,13 @@ RtResultVoid Transformer::setup_args()
         auto ret_var_result = alloc_variable_by_typesig(_method->return_type, INVALID_EVAL_STACK_OFFSET);
         RET_ERR_ON_FAIL(ret_var_result);
         _ret_var = ret_var_result.unwrap();
-        assert(_ret_var->stack_object_size == _method->ret_stack_object_size);
+        if (_ret_var->stack_object_size != _method->ret_stack_object_size)
+        {
+            host::Services::logf(host::LogLevel::Error, "Return layout mismatch: %s.%s::%s token:0x%x slots:%u descriptor:%u", _method->parent->namespaze,
+                                 _method->parent->name, _method->name, _method->token, static_cast<unsigned>(_ret_var->stack_object_size),
+                                 static_cast<unsigned>(_method->ret_stack_object_size));
+            RET_ERR(RtErr::BadImageFormat);
+        }
     }
 
     const bool is_instance_method = vm::Method::is_instance(_method);

@@ -1,3 +1,4 @@
+#include "vm/method.h"
 #include "bcl/coreclr-net10/managed_layouts.h"
 #include "system_runtimetypehandle.h"
 
@@ -211,7 +212,8 @@ RtResult<bool> SystemRuntimeTypeHandle::is_generic_variable(const vm::RtReflecti
 RtResult<bool> SystemRuntimeTypeHandle::contains_generic_variables(const vm::RtReflectionRuntimeType* runtime_type) noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, type_sig, vm::Reflection::get_type_sig_from_runtime_type_object(runtime_type));
-    RET_OK(vm::Type::contains_generic_param(type_sig));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
+    RET_OK((vm::Class::is_generic(klass) && !vm::Class::is_generic_inst(klass)) || vm::Type::contains_generic_param(type_sig));
 }
 
 RtResult<vm::RtReflectionRuntimeType*> SystemRuntimeTypeHandle::get_base_type(const vm::RtReflectionRuntimeType* runtime_type) noexcept
@@ -684,6 +686,13 @@ static RtResultVoid contains_generic_variables_invoker(metadata::RtManagedMethod
                                                        const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
     auto runtime_type = EvalStackOp::get_param<const vm::RtReflectionRuntimeType*>(params, 0);
+    if (vm::Method::is_instance(method))
+    {
+        auto slot = EvalStackOp::get_param<const void* const*>(params, 0);
+        if (!slot)
+            RET_ERR(RtErr::NullReference);
+        UNWRAP_OR_RET_ERR_ON_FAIL(runtime_type, vm::Reflection::get_runtime_type_from_handle_arg(*slot));
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, result, SystemRuntimeTypeHandle::contains_generic_variables(runtime_type));
     EvalStackOp::set_return(ret, static_cast<int32_t>(result));
     RET_VOID_OK();
