@@ -1,4 +1,5 @@
 #include "bcl/adapter.h"
+#include "pinvokes/coreclr_qcall.h"
 #include "icalls/internal_call_stubs.h"
 #include "intrinsics/intrinsic_stubs.h"
 #include "vm/internal_calls.h"
@@ -19,6 +20,11 @@ void Adapter::register_internal_calls()
     icalls::InternalCallStubs::get_newobj_internal_call_entries(newobjEntries);
     for (auto& entry : newobjEntries)
         vm::InternalCalls::register_newobj_internal_call(entry.name, entry.invoker);
+}
+
+void Adapter::register_pinvokes()
+{
+    pinvokes::register_coreclr_qcall_pinvokes();
 }
 
 void Adapter::register_intrinsics()

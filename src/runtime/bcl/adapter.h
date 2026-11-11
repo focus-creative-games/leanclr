@@ -19,6 +19,7 @@ class Adapter
     static RtResultVoid validate_managed_layouts();
     static void register_internal_calls();
     static void register_intrinsics();
+    static void register_pinvokes();
 };
 } // namespace bcl
 } // namespace leanclr

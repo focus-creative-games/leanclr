@@ -21,6 +21,10 @@ void Adapter::register_internal_calls()
         vm::InternalCalls::register_newobj_internal_call(entry.name, entry.invoker);
 }
 
+void Adapter::register_pinvokes()
+{
+}
+
 void Adapter::register_intrinsics()
 {
     utils::Vector<vm::IntrinsicEntry> intrinsicEntries;

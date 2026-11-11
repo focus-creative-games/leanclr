@@ -159,7 +159,12 @@ static RtResultVoid exit_invoker_system_environment(metadata::RtManagedMethodPoi
 
 RtResult<vm::RtArray*> SystemEnvironment::get_command_line_args() noexcept
 {
-    RET_OK(vm::Environment::get_command_line_args());
+    auto* arguments = vm::Environment::get_command_line_args();
+    if (arguments == nullptr)
+        RET_ERR(RtErr::InvalidOperation);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(
+        vm::RtArray*, copy, LEANCLR_ARRAY_CLONE(arguments, gc::GcAllocSite::make_internal(__FILE__, __LINE__, "Environment::GetCommandLineArgs")));
+    RET_OK(copy);
 }
 
 /// @icall: System.Environment::GetCommandLineArgs

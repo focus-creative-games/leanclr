@@ -38,7 +38,8 @@ try {
         "TestExceptionMessageReadOnly", "TestGenericsDelegatesAndExceptions",
         "TestBoxingMetadata", "TestReflectionTypeOnly", "TestTypeEqualityOnly",
         "TestNestedThrowCatchOnly", "TestThrowTargetInvocationCatchOnly", "TestSpan",
-        "TestSpanStackalloc", "TestExceptionFilterControlFlow"
+        "TestSpanStackalloc", "TestExceptionFilterControlFlow",
+        "TestCommandLineArguments", "TestCommandLineCopies", "TestUnsupportedNativeEntry"
     )
     foreach ($entry in $entries) {
         Write-Host "Running $entry"

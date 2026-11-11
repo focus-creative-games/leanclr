@@ -1,4 +1,5 @@
 #include "pinvoke.h"
+#include "bcl/adapter.h"
 
 #include "method.h"
 #include "class.h"
@@ -90,6 +91,7 @@ RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata:
 // Initialize internal calls system
 void PInvokes::initialize()
 {
+    bcl::Adapter::register_pinvokes();
 }
 
 } // namespace vm

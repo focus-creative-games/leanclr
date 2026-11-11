@@ -46,74 +46,98 @@ RtResultVoid fn_interpreter_invoker(metadata::RtManagedMethodPointer method_poin
 RtResultVoid fn_not_implemented_internal_call_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                       const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
+#if LEANCLR_DEBUG || defined(LEANCLR_BCL_CORECLR_NET10)
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     host::Services::logf(host::LogLevel::Error, "Internal call invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    RET_ERR(RtErr::NotSupported);
+#else
     RETURN_NOT_IMPLEMENTED_ERROR();
+#endif
 }
 
 // Not implemented intrinsic invoker
 RtResultVoid fn_not_implemented_intrinsic_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                   const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
+#if LEANCLR_DEBUG || defined(LEANCLR_BCL_CORECLR_NET10)
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     host::Services::logf(host::LogLevel::Error, "Intrinsic invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    RET_ERR(RtErr::NotSupported);
+#else
     RETURN_NOT_IMPLEMENTED_ERROR();
+#endif
 }
 
 // PInvoke invoker (not implemented)
 RtResultVoid fn_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                 interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
+#if LEANCLR_DEBUG || defined(LEANCLR_BCL_CORECLR_NET10)
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     host::Services::logf(host::LogLevel::Error, "P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    RET_ERR(RtErr::NotSupported);
+#else
     RETURN_NOT_IMPLEMENTED_ERROR();
+#endif
 }
 
 // Not implemented PInvoke invoker
 RtResultVoid fn_not_implemented_pinvoke_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                 const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
+#if LEANCLR_DEBUG || defined(LEANCLR_BCL_CORECLR_NET10)
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     host::Services::logf(host::LogLevel::Error, "P/Invoke invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    RET_ERR(RtErr::NotSupported);
+#else
     RETURN_NOT_IMPLEMENTED_ERROR();
+#endif
 }
 
 // Not implemented runtime impl invoker
 RtResultVoid fn_not_implemented_runtime_impl_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                                      const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
+#if LEANCLR_DEBUG || defined(LEANCLR_BCL_CORECLR_NET10)
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     host::Services::logf(host::LogLevel::Error, "Runtime impl invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     // Placeholder implementation
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    RET_ERR(RtErr::NotSupported);
+#else
     RETURN_NOT_IMPLEMENTED_ERROR();
+#endif
 }
 
 // Not implemented generic invoker
 RtResultVoid fn_not_implemented_invoker(metadata::RtManagedMethodPointer method_pointer, const metadata::RtMethodInfo* method,
                                         const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
 {
-#if LEANCLR_DEBUG
+#if LEANCLR_DEBUG || defined(LEANCLR_BCL_CORECLR_NET10)
     utils::Utf8StringBuilder sb;
     RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::IL));
     host::Services::logf(host::LogLevel::Error, "Not implemented invoker not implemented for method: %s token:0x%0x\n", sb.get_const_chars(), method->token);
 #endif
     // Placeholder implementation
+#if defined(LEANCLR_BCL_CORECLR_NET10)
+    RET_ERR(RtErr::NotSupported);
+#else
     RETURN_NOT_IMPLEMENTED_ERROR();
+#endif
 }
 
 // Method pointer placeholder

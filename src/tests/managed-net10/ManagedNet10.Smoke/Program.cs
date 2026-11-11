@@ -858,6 +858,40 @@ internal static class Program
         return left + right;
     }
 
+    private static void TestCommandLineArrayOnly()
+    {
+        Require(Environment.GetCommandLineArgs().Length >= 1, "missing argv0");
+    }
+
+    private static void TestCommandLineStringOnly()
+    {
+        Require(Environment.GetCommandLineArgs()[0].Length > 0, "empty argv0");
+    }
+
+    private static void TestCommandLineContainsOnly()
+    {
+        Require("ManagedNet10.Smoke".Contains("ManagedNet10.Smoke", StringComparison.Ordinal), "contains failed");
+    }
+
+    private static void TestCommandLineCopies()
+    {
+        string[] first = Environment.GetCommandLineArgs();
+        string original = first[0];
+        first[0] = "mutated";
+        string[] second = Environment.GetCommandLineArgs();
+        Require(!ReferenceEquals(first, second) && second[0] == original, "argv storage escaped to managed code");
+    }
+
+    [DllImport("__leanclr_unsupported_native__", EntryPoint = "NoSuchNativeEntry")]
+    private static extern int UnsupportedNativeEntry();
+
+    private static void TestUnsupportedNativeEntry()
+    {
+        try { UnsupportedNativeEntry(); }
+        catch (NotSupportedException) { return; }
+        throw new Exception("unsupported native API returned success");
+    }
+
     private static void TestCommandLineArguments()
     {
         string[] args = Environment.GetCommandLineArgs();
