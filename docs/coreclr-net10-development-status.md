@@ -1,6 +1,6 @@
 # Minimal .NET 10 development status
 
-Updated 2026-11-11 on the self-owned `coreclr-net10` branch. Implementation work and target acceptance are recorded separately. This is a minimal runtime, not full Microsoft.NETCore.App compatibility. **Platform/SDK acceptance is not fully closed:** Linux, ARM64, UBSan and actual Godot/Unreal SDK runs were unavailable locally.
+Updated 2026-11-11 on the self-owned branch, renamed to `coreclr-minimal` on 2026-11-12. Implementation work and target acceptance are recorded separately. This is a minimal runtime, not full Microsoft.NETCore.App compatibility. **Platform/SDK acceptance is not fully closed:** Linux, ARM64, UBSan and actual Godot/Unreal SDK runs were unavailable locally.
 
 | Migration stage | Delivered implementation and commits | Local evidence / remaining acceptance |
 | --- | --- | --- |
@@ -34,4 +34,4 @@ Local toolchain: .NET SDK 10.0.204, CoreLib 10.0.8, MSVC 14.44.35207, Emscripten
 - Windows x64: `5B6700E2802AFDB2CC4863B096760A66442E89FD6EE5EDB718C697AE5CF33DDC`.
 - Wasm's x86 CoreCLR BCL: `E0457D3EBFF7AD8F87534D0163786C66F623B7118F2E82F22FA0E8B6D8F61A28`.
 
-Detailed evidence and boundaries: [API coverage](coreclr-net10-api-coverage.md), [AOT contract](coreclr-net10-aot-contract.md), [resource budget](coreclr-net10-resource-budget.md), [engine hosting](coreclr-net10-engine-host.md). `net10-platforms.yml` supplies Windows, Linux/ARM64/sanitizer and Wasm jobs and uploads their evidence when executed. All development commits use English; Core/Mono/third-party branch tips are unchanged, reports remain locally excluded, and nothing was pushed.
+Detailed evidence and boundaries: [API coverage](coreclr-net10-api-coverage.md), [AOT contract](coreclr-net10-aot-contract.md), [resource budget](coreclr-net10-resource-budget.md), [engine hosting](coreclr-net10-engine-host.md). `net10-platforms.yml` supplies Windows, Linux/ARM64/sanitizer and Wasm jobs and uploads their evidence when executed. All development commits use English; Core/Mono/third-party branch tips are unchanged, reports remain locally excluded, and no push was made during that development stage. The subsequent branch/publication layout is documented in architecture.md.

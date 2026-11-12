@@ -1,5 +1,10 @@
 name: Minimal net10 platforms
-on: [push, pull_request, workflow_dispatch]
+on:
+  push:
+    branches: [coreclr-minimal, coreclr-full]
+  pull_request:
+    branches: [coreclr-minimal, coreclr-full]
+  workflow_dispatch:
 
 jobs:
   windows:

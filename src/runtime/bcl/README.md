@@ -1,11 +1,8 @@
 # Runtime core, host services and BCL adapter
 
-Core now compiles as three object targets, composed into the existing `leanclr`
-static/shared library. The public C API is unchanged. This checkout supplies the
-Mono 4.5 BCL adapter; `LEANCLR_BCL_ADAPTER=MONO` is explicit, and other values are
-rejected until their adapter implementation is supplied. Core and Mono now share
-this implementation; deployment differences are host compositions, not separate
-runtime editions. See [architecture and branch migration](../../../docs/architecture.md).
+The runtime compiles as three object targets composed into the leanclr static/shared library. Public C and SDK-neutral hosting contracts stay in this repository; engine SDK plugins live in independent host repositories.
+
+This coreclr-minimal checkout supplies both MONO and CORECLR_NET10 adapters, selected through LEANCLR_BCL_ADAPTER. The Mono branches supply MONO. The coreclr-net10 tool profile and CORECLR_NET10 option identify the .NET 10 BCL, not a Git branch. API scope and platform acceptance remain explicit; neither the branch nor NATIVE implies full framework compatibility or multithreading. See [architecture and branch maintenance](../../../docs/architecture.md).
 
 | Layer | Target and sources | Responsibility |
 | --- | --- | --- |

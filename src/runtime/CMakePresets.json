@@ -45,6 +45,15 @@
       "cacheVariables": {
         "LEANCLR_HOST": "CUSTOM"
       }
+    },
+    {
+      "name": "coreclr-minimal",
+      "displayName": ".NET 10 CoreCLR BCL / minimal API scope / native host",
+      "inherits": "mono-base",
+      "cacheVariables": {
+        "LEANCLR_BCL_ADAPTER": "CORECLR_NET10",
+        "LEANCLR_HOST": "NATIVE"
+      }
     }
   ],
   "buildPresets": [
@@ -66,6 +75,11 @@
     {
       "name": "mono-custom",
       "configurePreset": "mono-custom",
+      "configuration": "Release"
+    },
+    {
+      "name": "coreclr-minimal",
+      "configurePreset": "coreclr-minimal",
       "configuration": "Release"
     }
   ]

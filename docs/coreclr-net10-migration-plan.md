@@ -4,6 +4,8 @@
 
 日期：2026-11-11。目标分支：`coreclr-net10`。本文用于审阅后续 minimal .NET 10 开发范围。
 
+2026-11-12 分支整理：当前分支已改为 `coreclr-minimal`。本文保留迁移当时的分支名与提交记录；BCL 配置 `CORECLR_NET10` 和工具 profile `coreclr-net10` 不变。
+
 ## 分支与合并方式
 
 按用户指定顺序，先将 LeanCLR 自有 `coreclr` 改名为 `coreclr-net10`，再接入最新 Mono 基线，最后合入 `coreclr-wqaetly` 的差异。自有旧分支以 `backup/coreclr-before-mono-integration-20261111` 保留。
