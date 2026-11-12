@@ -1,6 +1,10 @@
 {
   "version": 3,
-  "cmakeMinimumRequired": { "major": 3, "minor": 21, "patch": 0 },
+  "cmakeMinimumRequired": {
+    "major": 3,
+    "minor": 21,
+    "patch": 0
+  },
   "configurePresets": [
     {
       "name": "mono-base",
@@ -17,24 +21,52 @@
       "name": "mono-minimal",
       "displayName": "Mono BCL / portable host (formerly Core)",
       "inherits": "mono-base",
-      "cacheVariables": { "LEANCLR_HOST": "PORTABLE" }
+      "cacheVariables": {
+        "LEANCLR_HOST": "PORTABLE"
+      }
     },
     {
       "name": "mono-native",
       "displayName": "Mono BCL / native platform host (formerly Mono)",
       "inherits": "mono-base",
-      "cacheVariables": { "LEANCLR_HOST": "NATIVE" }
+      "cacheVariables": {
+        "LEANCLR_HOST": "NATIVE"
+      }
+    },
+    {
+      "name": "mono-full",
+      "displayName": "Mono full development target / native host (single-threaded today)",
+      "inherits": "mono-native"
     },
     {
       "name": "mono-custom",
       "displayName": "Mono BCL / application-supplied host",
       "inherits": "mono-base",
-      "cacheVariables": { "LEANCLR_HOST": "CUSTOM" }
+      "cacheVariables": {
+        "LEANCLR_HOST": "CUSTOM"
+      }
     }
   ],
   "buildPresets": [
-    { "name": "mono-minimal", "configurePreset": "mono-minimal", "configuration": "Release" },
-    { "name": "mono-native", "configurePreset": "mono-native", "configuration": "Release" },
-    { "name": "mono-custom", "configurePreset": "mono-custom", "configuration": "Release" }
+    {
+      "name": "mono-minimal",
+      "configurePreset": "mono-minimal",
+      "configuration": "Release"
+    },
+    {
+      "name": "mono-native",
+      "configurePreset": "mono-native",
+      "configuration": "Release"
+    },
+    {
+      "name": "mono-full",
+      "configurePreset": "mono-full",
+      "configuration": "Release"
+    },
+    {
+      "name": "mono-custom",
+      "configurePreset": "mono-custom",
+      "configuration": "Release"
+    }
   ]
 }
