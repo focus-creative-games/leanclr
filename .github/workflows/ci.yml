@@ -1,10 +1,10 @@
-name: Shared runtime and Mono compositions
+name: Runtime profiles and shared core
 
 on:
   push:
-    branches: [core, mono, main, master]
+    branches: [mono-minimal, mono-full, coreclr-minimal, coreclr-full]
   pull_request:
-    branches: [core, mono, main, master]
+    branches: [mono-minimal, mono-full, coreclr-minimal, coreclr-full]
   workflow_dispatch:
 
 permissions:

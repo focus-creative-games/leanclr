@@ -1,120 +1,57 @@
-# LeanCLR 架构与分支收敛
+# LeanCLR 架构与分支维护
 
-## 版本树
+## 最终分支结构
 
-Core 和 Mono 不再代表两套运行时实现。当前统一实现以重构后的 `core`
-为开发基线，`mono` 对齐该基线，作为迁移期兼容分支。构建结果由 BCL 和宿主选择决定，
-不能根据 Git 分支名称判断能力。
+| 长期分支 | 来源 | 定位 |
+| --- | --- | --- |
+| `mono-minimal` | 原 `core` | Mono BCL 的精简、可移植目标；主 clone 默认分支 |
+| `mono-full` | 原 `mono` | Mono BCL 的扩展平台/线程能力开发目标 |
+| `coreclr-minimal` | 原 `coreclr-net10` | .NET 10 CoreCLR BCL 的受控精简范围 |
+| `coreclr-full` | 尚不存在 | 有实际开发需求和实现后再建立，不创建占位分支 |
+
+`full` 不表示全部 BCL API 或多线程已经实现。两个 Mono 分支在改名前均位于 `771b1d0a`；此次只统一命名和维护方式，不用旧实现覆盖重构代码。CoreCLR 的后续迁移基于 `32990b5a` 保留全部已交付工作。
+
+GitHub 默认分支为 `mono-minimal`。本地使用一个主 clone checkout mono-minimal，其余两个运行时分支使用 linked worktree。目录名不参与能力选择。旧引擎、第三方和实验分支退出活跃分支结构；独有历史保存于本地离线 bundle 和 `refs/archive/branch-layout-20261112/...`，不作为 tag 推送，避免把同一 clone 中的私有开发历史发布到公开仓库。整理只修改官方 LeanCLR 远端，不修改 private 或第三方仓库。
+
+## 架构与宿主边界
 
 ```text
 LeanCLR
-├── Shared Runtime：唯一的类型系统、元数据、执行器、GC、分配与公共 API
+├── Shared Runtime：类型系统、元数据、解释器、LeanAOT、GC、分配与公共 API
 ├── BCL Adapter
-│   ├── Mono：当前实现
-│   └── CoreCLR：后续整合，当前仍在独立分支开发
-├── Host Provider
-│   ├── PORTABLE：C/C++ 标准库实现，不使用 Windows/POSIX SDK
-│   ├── NATIVE：原生平台服务
-│   └── CUSTOM：应用注入内存与宿主服务
-└── Host Integration
-    ├── Standalone：leanrun、样例及测试
-    └── Unity / Godot / UE：目标为适配包，本次不迁移其代码
+│   ├── MONO
+│   └── CORECLR_NET10（在 coreclr-minimal 中开发）
+├── Capability Scope：minimal / full（开发定位，不是自动启用所有 API）
+├── Host Provider：PORTABLE / NATIVE / CUSTOM
+└── Standalone：leanrun、简单样例、公共宿主契约测试
+
+Independent host repositories
+├── Unity / 团结引擎 SDK 插件
+├── Godot GDExtension 与对象/Variant/资源绑定
+└── Unreal 插件、模块、对象绑定与打包
 ```
 
-当前交付组合：
+不建立 standalone、unity、godot 或 UE 运行时分支，也不建立上述维度的笛卡尔积分支。主仓库保留 SDK 无关的公共 ABI、生命周期、线程/重入和错误契约及其测试；具体引擎 SDK 集成位于独立仓库。引擎适配器固定支持的 LeanCLR release/ABI 与引擎版本，不能包含运行时私有 BCL 布局或复制运行时核心。
 
-| 配置名 | BCL | 宿主 | 原版本对应 | 线程模型 |
-| --- | --- | --- | --- | --- |
-| `mono-minimal` | MONO | PORTABLE | Core 的精简部署定位 | SINGLE |
-| `mono-native` | MONO | NATIVE | Mono 的原生平台部署定位 | SINGLE |
-| `mono-custom` | MONO | CUSTOM | 应用接管宿主能力 | SINGLE |
+`src/runtime` 的核心、BCL、host 三层通过 CMake 对象目标独立编译；`cmake/verify_layers.cmake` 校验依赖。`src/tools/leanrun` 保留为最小 standalone 和排障入口，不需要引擎 SDK，也不需要新分支。当前平台服务选择 NATIVE 不会启用多线程；多线程需要线程状态、GC 协作和同步语义的独立实现。当前仅支持小端运行时与 C++17。
 
-Minimal 不表示完全禁止文件或时间 API：它仍提供已有标准库服务，应用也可以注入服务。
-要求完全接管服务、避免默认文件系统访问的宿主应选择 CUSTOM。
-Native 表示选择现有原生实现，不承诺所有平台 API 已完整实现。两种配置均支持
-解释执行与 LeanAOT；它们的 CLI/类型系统实现相同。
+## 构建入口与兼容性
 
-多线程需要运行时级别的线程状态、GC 协作、同步和测试，不能通过选择 NATIVE 开启。
-当前不提供 MULTI 构建选项。未来线程能力应作为独立维度实现，不能再创建一套运行时分支。
-目前只支持小端运行时宿主；C++17 是语言要求，不等于所有目标平台都已验证。
-
-## 代码与依赖树
-
-```text
-src/runtime/
-├── alloc, core, metadata, interp, gc, codegen, vm, ...
-│   └── leanclr-core-objects
-├── bcl/adapter.h              核心访问 BCL 的契约
-├── bcl/mono/                 Mono 布局、运行时语义和兼容桥接
-├── icalls, intrinsics, pinvokes, vmutils
-│   └── leanclr-bcl-mono-objects（保留原路径，避免破坏生成代码和集成）
-├── host/                     原生数据契约、服务表和宿主组合
-├── platform/                 不依赖托管对象的原生实现
-│   └── leanclr-host-objects
-└── CMakeLists.txt            将三个对象层组合为 leanclr 静态库或动态库
-```
-
-核心只通过 `bcl/adapter.h` 和宿主契约使用外部能力；宿主实现不包含托管对象、
-元数据或 Mono 私有布局。BCL 层负责托管参数转换与平台错误映射。
-`platform/rt_event.cpp` 当前是 BCL 的单线程事件模拟，由 BCL 对象层编译，
-不能当作原生多线程能力。
-
-`cmake/verify_layers.cmake` 在配置时验证依赖方向；现有对象目标分别编译三个层。
-这次保留已重构 core 的物理布局，不再为版本名称复制目录或引入另一套核心。
-详细接口见[运行时分层说明](../src/runtime/bcl/README.md)。
-
-## 构建
-
-以下命令可在 `core` 或 `mono` checkout 使用。脚本保留原来的 native 默认行为，
-不同宿主使用不同输出目录，避免复用另一组合的缓存或产物：
+底层 host provider 与 BCL 能力级别是不同维度。现有 `mono-minimal`、`mono-native`、`mono-custom` 构建预设和脚本参数继续有效；新增 `mono-full` 预设作为 mono-native 的显式别名。两个名称映射当前相同的原生服务范围，不能据此声称线程或完整平台 API 已交付。
 
 ```powershell
 scripts\runtime\build.bat Release x64 minimal
 scripts\runtime\build.bat Release x64 native
-scripts\runtime\build.bat Release x64 custom
+cmake --preset mono-full -S src/runtime
 ```
 
-```bash
-./scripts/runtime/build.sh Release minimal
-./scripts/runtime/build.sh Release native
-./scripts/runtime/build.sh Release custom
-```
+Linux/macOS 对应 `./scripts/runtime/build.sh Release minimal` 或 `native`。既有脚本默认仍为 Native。CoreCLR 的 `CORECLR_NET10` 与工具 profile `coreclr-net10` 保留版本语义，不随 Git 分支改名。
 
-也可以使用 CMake 3.21+ 的命名预设（运行时本身仍支持 CMake 3.15）：
+## 维护与验收
 
-```powershell
-cd src/runtime
-cmake --preset mono-minimal
-cmake --build --preset mono-minimal
-# 同理使用 mono-native 或 mono-custom；首次配置可追加 -A x64。
-```
+公共核心修复应在所有受影响分支同步，使用 merge/cherry-pick 保留审计记录，并各自运行 BCL 回归。minimal/full 通过明确的 API 清单和能力实现演进，不能通过分支名推断兼容率。运行时 ABI/GC/AOT 测试与引擎 SDK 加载、生命周期和打包测试分别验收。
 
-原有 CMake 集成不必使用预设：
-
-```powershell
-cmake -S src/runtime -B out/minimal -DLEANCLR_BCL_ADAPTER=MONO -DLEANCLR_HOST=PORTABLE
-cmake --build out/minimal --config Release
-```
-
-CUSTOM 构建成功不代表可直接启动；应用必须在第一次服务使用及初始化前配置完整分配器、
-UTC 和单调时钟等必需服务。缺少可选平台能力时遵循既有 NotSupported 契约。
-
-## 分支迁移与维护
-
-本次迁移起点：`core=8f5ab4ad`，`mono=8e024dfe`，共同祖先 `b5e4e46d`。
-`git cherry core mono` 确认 Mono 独有的 16 个提交均已有等价补丁进入 core。
-原 Mono 保留在 `backup/mono-before-core-unification-20261110`，随后执行
-`git rebase core`，全部等价提交被跳过，Mono 对齐 core，未使用旧文件覆盖重构结果。
-
-后续公共修改只在 core 基线实现，再让 mono 快进对齐；避免在 mono 上独立重写核心逻辑。
-迁移期保留两个分支名供现有集成使用，最终默认分支的重命名及远端分支清理另行处理。
-不要将原 Standard 的历史兼容率直接当作重构后配置的验证结果。
-
-CI 对 core、mono 都使用同一工作流，覆盖 Mono native 和 minimal 组合，
-并继续验证 custom、Wasm 及 sanitizer/fuzz 路径。新增平台或引擎先增加适配实现及
-明确的验证组合；不要承诺所有 BCL、宿主、平台和引擎的笛卡尔积。
-
-本次不修改 CoreCLR、Unity 分支，不增加多线程实现，也不发布或强推远端。
+2026-11-10 的 Core/Mono 统一记录：起点为 `core=8f5ab4ad`、`mono=8e024dfe`，共同祖先 `b5e4e46d`。Mono 独有的 16 个提交已有等价补丁进入 Core，rebase 后对齐共享核心；下列测试是当时的历史证据，不代表 Full 或所有平台已经通过。
 
 ## 本次本地验证（Windows x64 / Release）
 

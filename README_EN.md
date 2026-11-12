@@ -4,7 +4,7 @@ Language: [中文](./README.md) | [English](./README_EN.md)
 
 [![GitHub](https://img.shields.io/badge/GitHub-Repository-181717?logo=github)](https://github.com/focus-creative-games/leanclr) [![Gitee](https://img.shields.io/badge/Gitee-Repository-C71D23?logo=gitee)](https://gitee.com/focus-creative-games/leanclr)
 
-[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/focus-creative-games/leanclr/blob/main/LICENSE) [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/focus-creative-games/leanclr) [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.gg/esAYcM6RDQ)
+[![license](https://img.shields.io/badge/license-MIT-blue.svg)](https://github.com/focus-creative-games/leanclr/blob/mono-minimal/LICENSE) [![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/focus-creative-games/leanclr) [![Discord](https://img.shields.io/badge/Discord-Join-7289DA?logo=discord&logoColor=white)](https://discord.gg/esAYcM6RDQ)
 
 LeanCLR is a production-oriented CLR implementation. Its core goal is to provide high ECMA-335 compatibility, low integration complexity, and strong cross-platform capability, so developers can truly achieve **“Write C#, Run Anywhere.”**
 
@@ -82,43 +82,45 @@ LeanCLR already supports Unity and is actively integrating Godot and CoreCLR BCL
 
 Historical compatibility results before consolidation (not validation of every current composition):
 
-- **unity branch**: fully compatible with Unity 2019.4.x – 6000.3.x LTS IL2CPP BCL, passing all (thousands of) test cases
-- **mono branch**: historically 99.95% compatible with Mono 4.8 BCL, with one failing test; now aligned with refactored core and requiring validation per composition
-- **coreclr branch**: .NET 10 BCL support is in progress
+- **Historical unity branch (retired from runtime branches)**: fully compatible with Unity 2019.4.x – 6000.3.x LTS IL2CPP BCL, passing all (thousands of) test cases
+- **Former mono branch (now mono-full)**: historically 99.95% compatible with Mono 4.8 BCL, with one failing test; now aligned with refactored core and requiring validation per composition
+- **coreclr-minimal branch**: .NET 10 BCL support is in progress
+
+## Versions and branches
+
+Runtime branches follow **BCL × capability level**. Hosts and engines are adapters, not runtime branches:
+
+| Branch | Purpose | Status |
+| --- | --- | --- |
+| `mono-minimal` | Portable, minimal Mono BCL scope | Renamed from `core`; default checkout of the main clone |
+| `mono-full` | Development target for broader Mono platform and threading support | Renamed from `mono`; multithreading is not implemented yet |
+| `coreclr-minimal` | Minimal .NET 10 CoreCLR BCL scope | Renamed from `coreclr-net10`; acceptance follows the support inventory |
+| `coreclr-full` | Broader CoreCLR capability target | Not created; no placeholder branch |
+
+Full describes a development target, not complete BCL compatibility or implemented multithreading. The two Mono branches currently share the same runtime baseline. Synchronize applicable VM, GC, generic, interpreter and AOT fixes across runtime branches instead of copying the core for each host.
 
 ## Architecture and build compositions
 
-Core and Mono now share **one runtime implementation**, based on the refactored
-core baseline. The `core` and `mono` branch names remain during migration;
-build configuration selects deployment capabilities.
+This repository retains the public hosting API, SDK-neutral lifecycle/error contracts, `src/tools/leanrun`, small standalone examples and tests. **There is no standalone branch.** Unity, Godot and Unreal SDK plugins, object bindings, resources and packaging belong in separate host repositories and use public runtime interfaces rather than private BCL layouts.
 
-| Composition | BCL | Host | Threading |
+Branch scope and host providers are separate dimensions. PORTABLE, NATIVE and CUSTOM remain build choices:
+
+| CMake preset | BCL | Host | Threading |
 | --- | --- | --- | --- |
-| **mono-minimal** (formerly Core) | Mono | C/C++ library services without Windows/POSIX SDK dependencies | Single |
-| **mono-native** (formerly Mono) | Mono | Existing native platform services; API coverage varies | Single |
-| **mono-custom** | Mono | Application-supplied allocation, clocks, I/O and other services | Single |
+| `mono-minimal` | Mono | C/C++ library services without Windows/POSIX SDK dependencies | Single |
+| `mono-full` / `mono-native` | Mono | Existing native services; Full is a development target, not complete API coverage | Single |
+| `mono-custom` | Mono | Application-supplied allocation, clocks, I/O and other services | Single |
 
-All compositions share the type system, interpreter, LeanAOT and GC. Minimal
-retains standard-library I/O; choose Custom to take ownership of host services.
-Runtime hosts require little-endian storage and a C++17 toolchain; new targets
-still require validation. Native does not imply multithreading or complete OS API coverage.
+`mono-native` remains a compatible preset, not a retained branch. CoreCLR configuration lives on `coreclr-minimal`; `CORECLR_NET10` and tool profile `coreclr-net10` identify the BCL version and retain their names.
 
 ```powershell
 scripts\runtime\build.bat Release x64 minimal
 scripts\runtime\build.bat Release x64 native
 ```
 
-On Linux/macOS use `./scripts/runtime/build.sh Release minimal` or `native`.
-Native remains the default. The existing `leanclr` CMake target and public API
-remain unchanged.
+On Linux/macOS use `./scripts/runtime/build.sh Release minimal` or `native`. Existing scripts retain their Native default, the `leanclr` CMake target and public API. Select minimal/PORTABLE explicitly for the portable host; use CUSTOM to own all host services. Minimal retains standard-library I/O. Runtime hosts require little-endian storage and C++17; new targets require separate validation.
 
-CoreCLR BCL and Unity/Godot/UE integrations are intended to become compatibility
-and host adapters. Their current development status is unchanged; this migration
-only consolidates core and mono.
-
-See [architecture and branch migration](docs/architecture.md),
-[runtime layering](src/runtime/bcl/README.md), and
-[memory ownership and failure policy](src/runtime/alloc/README.md).
+See [architecture and branch maintenance](docs/architecture.md), [runtime layering](src/runtime/bcl/README.md), and [memory ownership and failure policy](src/runtime/alloc/README.md).
 
 ## Demo
 
