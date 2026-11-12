@@ -49,16 +49,15 @@ LeanCLR 的定位是补足上述空白：在保持 ECMA-335 高兼容的前提�
 | **HarmonyOS（鸿蒙）** | 鸿蒙生态 |
 | **WebAssembly** | Web 浏览器及小游戏平台 |
 
-## 生态与集成
+## 引擎宿主仓库
 
-LeanCLR 已支持 Unity 引擎，正在接入 Godot 与 CoreCLR BCL，并将持续扩展更多引擎和平台。
+Unity、Godot、Unreal Engine 的宿主适配在独立仓库维护，通过 LeanCLR 公共接口接入。三个仓库均已建立，仓库内容后续整理；本轮不据此宣称完成新的引擎 SDK 集成。
 
-| 平台 / 集成 | 状态 | 说明 |
-|------|------|------|
-| **Unity 及团结引擎 WebGL 和小游戏平台** | ✅ 完成 | [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) 是 LeanCLR 的 Unity 插件，发布游戏（不限于 WebGL/小游戏平台）时替换 IL2CPP 为 LeanCLR |
-| **Godot 全平台** | 🚧 开发中 | [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) 正在接入 Godot 引擎 |
-| **CoreCLR .NET 10 BCL** | 🚧 开发中 | coreclr-minimal 分支支持受控 .NET 10 BCL 范围 |
-| **Unreal Engine 全平台** | 📋 规划中 | 发布时间待定 |
+| 引擎 | 仓库 | 集成目标 |
+|------|------|----------|
+| Unity / 团结引擎 | [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | Unity 宿主适配及构建发布集成 |
+| Godot | [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) | Godot 宿主、对象与资源适配 |
+| Unreal Engine | [leanclr-ue](https://github.com/focus-creative-games/leanclr-ue) | UE 插件、模块及构建发布集成 |
 
 ## 项目状态
 
@@ -121,29 +120,6 @@ scripts\runtime\build.bat Release x64 native
 Linux/macOS 对应 `./scripts/runtime/build.sh Release minimal` 或 `native`。现有脚本的 Native 默认行为、CMake 目标 `leanclr` 和公共 API 保持兼容；需要精简宿主时显式选择 minimal/PORTABLE。Minimal 仍可使用已有标准库 I/O；完全接管服务时选择 CUSTOM。运行时要求小端平台和 C++17，新目标必须单独验证。
 
 详见[架构与分支维护](docs/architecture.md)、[运行时分层](src/runtime/bcl/README.md)及[内存所有权与失败处理](src/runtime/alloc/README.md)。
-
-## Demo
-
-### leanclr-demo
-
-[leanclr-demo](https://github.com/focus-creative-games/leanclr-demo) 提供两个平台的示例用于快速体验 LeanCLR 的功能：
-
-| 示例 | 说明 |
-|------|------|
-| **win64** | Windows x64 平台示例，运行 `run.bat` 即可执行 |
-| **h5** | WebAssembly 浏览器示例，通过 HTTP 服务器访问 `index.html` |
-
-### leanclr-unity-demo
-
-[leanclr-unity-demo](https://github.com/focus-creative-games/leanclr-unity-demo)项目展示如何使用leanclr-unity插件，在发布WebGL/小游戏/Win64目标平台时替换il2cpp为leanclr运行时。
-
-## 相关仓库
-
-| 仓库 | 说明 |
-|------|------|
-| [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | leanclr-unity 是 LeanCLR 的 Unity 插件，发布 WebGL / 小游戏平台时替换 IL2CPP 为 LeanCLR，大幅缩减包体、降低内存占用 |
-| [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) | LeanCLR Godot 插件（开发中） |
-| [hybridclr](https://github.com/focus-creative-games/hybridclr) | **HybridCLR**：特性完整、零成本、高性能、低内存的 Unity 全平台原生 C# 热更新方案 |
 
 ## 联系方式
 

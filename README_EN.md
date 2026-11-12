@@ -49,16 +49,15 @@ The native host targets the following platforms; API coverage and validation var
 | **HarmonyOS** | Harmony ecosystem |
 | **WebAssembly** | Web browsers and mini-game platforms |
 
-## Ecosystem & Integrations
+## Engine host repositories
 
-LeanCLR already supports Unity and is actively integrating Godot and CoreCLR BCL, with more engines and platforms to follow.
+Unity, Godot and Unreal Engine host adapters live in independent repositories and integrate through LeanCLR's public interfaces. All three repositories have been created; their contents will be organized separately. Repository creation does not imply newly completed engine SDK integration.
 
-| Platform / Integration | Status | Notes |
+| Engine | Repository | Integration target |
 |------|------|------|
-| **Unity / Unity China, WebGL and Mini-Game platforms** | ✅ Complete | [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity): replace IL2CPP with LeanCLR when shipping games (not limited to WebGL/mini-game platforms) |
-| **Godot (all platforms)** | 🚧 In development | [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) is being integrated with the Godot engine |
-| **CoreCLR .NET 10 BCL** | 🚧 In development | The `coreclr` branch is adding .NET 10 BCL support |
-| **Unreal Engine (all platforms)** | 📋 Planned | ETA TBD |
+| Unity / Unity China | [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | Unity hosting and build/deployment integration |
+| Godot | [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) | Godot hosting, objects and resources |
+| Unreal Engine | [leanclr-ue](https://github.com/focus-creative-games/leanclr-ue) | UE plugins, modules and build/deployment integration |
 
 ## Project Status
 
@@ -121,29 +120,6 @@ scripts\runtime\build.bat Release x64 native
 On Linux/macOS use `./scripts/runtime/build.sh Release minimal` or `native`. Existing scripts retain their Native default, the `leanclr` CMake target and public API. Select minimal/PORTABLE explicitly for the portable host; use CUSTOM to own all host services. Minimal retains standard-library I/O. Runtime hosts require little-endian storage and C++17; new targets require separate validation.
 
 See [architecture and branch maintenance](docs/architecture.md), [runtime layering](src/runtime/bcl/README.md), and [memory ownership and failure policy](src/runtime/alloc/README.md).
-
-## Demo
-
-### leanclr-demo
-
-[leanclr-demo](https://github.com/focus-creative-games/leanclr-demo) provides two demos for quickly trying LeanCLR:
-
-| Demo | Description |
-|------|------|
-| **win64** | Windows x64 demo; run `run.bat` |
-| **h5** | WebAssembly browser demo; open `index.html` via an HTTP server |
-
-### leanclr-unity-demo
-
-[leanclr-unity-demo](https://github.com/focus-creative-games/leanclr-unity-demo) shows how to use `leanclr-unity` to replace IL2CPP with LeanCLR when shipping to WebGL, mini-game, and Win64 targets.
-
-## Related Repositories
-
-| Repository | Description |
-|------|------|
-| [leanclr-unity](https://github.com/focus-creative-games/leanclr-unity) | Unity plugin for LeanCLR; replace IL2CPP on WebGL / mini-game targets to reduce package size and memory usage |
-| [leanclr-godot](https://github.com/focus-creative-games/leanclr-godot) | LeanCLR Godot plugin (in development) |
-| [hybridclr](https://github.com/focus-creative-games/hybridclr) | **HybridCLR**: full-featured, low-overhead, high-performance C# hot-update solution for Unity |
 
 ## Contact
 
