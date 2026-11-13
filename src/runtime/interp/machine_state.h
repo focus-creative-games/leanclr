@@ -41,7 +41,6 @@ struct InterpFrame
 
 struct MachineStateSavePoint;
 
-#if LEANCLR_BCL_CORECLR_NET10
 // Stack-linked native roots do not allocate and cannot exhaust the interpreter
 // frame reserve. Their lifetime covers callbacks and nested managed invocations.
 struct MethodArgumentRoots
@@ -89,8 +88,6 @@ struct IndirectArgumentRoots
     IndirectArgumentRoots& operator=(const IndirectArgumentRoots&) = delete;
 };
 
-#endif
-
 class MachineState
 {
   public:
@@ -128,9 +125,8 @@ class MachineState
         _frame_stack_top = new_top;
     }
 
-#if LEANCLR_BCL_CORECLR_NET10
     void visit_roots(gc::GcVisitObjectRoot visit, void* userdata) const;
-#endif
+
     InterpFrame* get_executing_frame_stack()
     {
         if (_frame_stack_top == 0)

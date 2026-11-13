@@ -14,7 +14,6 @@ namespace leanclr
 {
 namespace interp
 {
-#if LEANCLR_BCL_CORECLR_NET10
 MethodArgumentRoots* MethodArgumentRoots::current = nullptr;
 IndirectArgumentRoots* IndirectArgumentRoots::current = nullptr;
 
@@ -170,6 +169,7 @@ void MachineState::visit_roots(gc::GcVisitObjectRoot visit, void* userdata) cons
     }
     for (auto* roots = MethodArgumentRoots::current; roots != nullptr; roots = roots->previous)
         visit_method_argument_roots(roots->method, roots->args, roots->method->total_arg_stack_object_size, visit, userdata);
+#if LEANCLR_BCL_CORECLR_NET10
     for (uint32_t frame_idx = 0; frame_idx < _frame_stack_top; ++frame_idx)
     {
         const InterpFrame& frame = _frame_stack_base[frame_idx];
@@ -212,8 +212,24 @@ void MachineState::visit_roots(gc::GcVisitObjectRoot visit, void* userdata) cons
 
         visit_stack_object_roots(scan_begin, scan_end, visit, userdata);
     }
-}
+#else
+    for (uint32_t i = 0; i < _frame_stack_top; ++i)
+    {
+        const auto& frame = _frame_stack_base[i];
+        if (!frame.eval_stack_base || !frame.eval_stack_size)
+            continue;
+        auto* begin = frame.eval_stack_base;
+        auto* end = begin + frame.eval_stack_size;
+        const auto address = reinterpret_cast<uintptr_t>(begin);
+        const auto stack_begin = reinterpret_cast<uintptr_t>(_eval_stack_base);
+        const auto stack_end = reinterpret_cast<uintptr_t>(_eval_stack_base + _eval_stack_top);
+        if (address >= stack_begin && address < stack_end && end > _eval_stack_base + _eval_stack_top)
+            end = _eval_stack_base + _eval_stack_top;
+        visit_stack_object_roots(begin, end, visit, userdata);
+    }
 #endif
+}
+
 void MachineState::initialize()
 {
     MachineState& ms = get_global_machine_state();
@@ -235,16 +251,16 @@ void MachineState::initialize()
 
     ms._eval_stack_top = 0;
     ms._frame_stack_top = 0;
-#if LEANCLR_BCL_CORECLR_NET10
     static bool roots_registered = false;
     if (!roots_registered)
     {
         gc::GcRoots::register_visit_object_roots(visit_machine_state_roots);
+#if LEANCLR_BCL_CORECLR_NET10
         gc::GcRoots::register_visit_object_roots(Interpreter::visit_exception_roots);
+#endif
         gc::GcRoots::register_visit_object_roots(codegen::AotRootScope::visit_roots);
         roots_registered = true;
     }
-#endif
 }
 
 RtResult<RtStackObject*> MachineState::alloc_eval_stack(uint32_t size)
@@ -384,10 +400,8 @@ uint32_t MachineState::enter_frame_from_icall_or_intrinsic(const metadata::RtMet
         InterpFrame* frame = _frame_stack_base + _frame_stack_top;
         _frame_stack_top += 1;
         frame->method = method;
-#if LEANCLR_BCL_CORECLR_NET10 || LEANCLR_DEBUG
         frame->eval_stack_base = eval_stack_base;
         frame->eval_stack_size = eval_stack_size;
-#endif
 
 #if LEANCLR_BCL_CORECLR_NET10
         frame->root_scan_mode = root_scan_mode;
