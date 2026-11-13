@@ -65,3 +65,5 @@ strings. Test bookkeeping intentionally outlives runtime global destructors.
 The packed `Text` and nested text fixtures also cover real AOT callers. Generated
 managed structs containing references must use the runtime's natural GC-slot
 alignment, independently of their packed native Marshal representation.
+
+PrimitiveMatrix adds signed/unsigned limits, char/BOOL, float/double NaN and infinity, pointer-sized integers, generic scalar APIs, unaligned buffers and overwrite guards. Native tests run 10,000 cached int/BOOL conversions with no additional native allocations. The audit also checks unsigned unboxing: cast-compatible signed classes must not determine byte/ushort/char stack extension.

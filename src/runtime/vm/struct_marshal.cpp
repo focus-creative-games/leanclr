@@ -804,6 +804,12 @@ RtResultVoid StructMarshal::to_native_data(const RtClass* klass, const void* val
         std::memcpy(destination, managed, plan->value.size);
         RET_VOID_OK();
     }
+    if (plan->value.kind == Kind::Boolean || plan->value.kind == Kind::VariantBoolean || plan->value.kind == Kind::AnsiChar)
+    {
+        // Scalar conversions cannot fail or own resources, so no transactional
+        // staging allocation (or delete-old cleanup) is necessary.
+        return write_value(plan->value, managed, static_cast<uint8_t*>(destination));
+    }
     // Build into zeroed staging storage. A failure frees all fields built so far,
     // preserving the destination and its old resources even when delete_old=true.
     Buffer staging(plan->value.size);
