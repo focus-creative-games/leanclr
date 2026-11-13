@@ -4,6 +4,7 @@
 #include "icall_base.h"
 #include "vm/type.h"
 #include "vm/class.h"
+#include "vm/reflection_method_slots.h"
 #include "vm/rt_string.h"
 #include "vm/rt_array.h"
 #include "vm/array_class.h"
@@ -182,8 +183,11 @@ SystemRuntimeType::get_methods_by_name_native(vm::RtReflectionRuntimeType* runti
     RET_ERR_ON_FAIL(vm::Class::initialize_methods(klass));
 
     // Build list of matching methods
+    vm::ReflectionMethodSlots slots;
+    RET_ERR_ON_FAIL(slots.initialize(klass, (bind_flags & BINDING_FLAGS_DECLARED_ONLY) != 0));
     utils::Vector<const metadata::RtMethodInfo*> methods;
-    methods.reserve(klass->method_count);
+    if (!methods.try_reserve(klass->method_count))
+        RET_ERR(RtErr::OutOfMemory);
     bool case_insensitive = (bind_flags & BINDING_FLAGS_IGNORE_CASE) != 0 || list_type == MEMBER_LIST_TYPE_CASE_INSENSITIVE;
 
     // Traverse class hierarchy
@@ -234,7 +238,10 @@ SystemRuntimeType::get_methods_by_name_native(vm::RtReflectionRuntimeType* runti
                     continue;
             }
 
-            methods.push_back(method);
+            if (!slots.include(method))
+                continue;
+            if (!methods.try_push_back(method))
+                RET_ERR(RtErr::OutOfMemory);
         }
 
         // Stop if DeclaredOnly flag is set
