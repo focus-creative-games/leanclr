@@ -25,6 +25,21 @@ public static class Program
         catch (CultureNotFoundException) { }
         Console.WriteLine("PASS InvariantProfile");
     }
+    public static void EnvironmentRoundtrip()
+    {
+        const string name = "LEANCLR_GLOBALIZATION_ENV_TEST";
+        try
+        {
+            Environment.SetEnvironmentVariable(name, "value-\u4e2d\U0001f600");
+            Check(Environment.GetEnvironmentVariable(name) == "value-\u4e2d\U0001f600", "environment UTF roundtrip");
+            Environment.SetEnvironmentVariable(name, new string('x', 1024));
+            Check(Environment.GetEnvironmentVariable(name)!.Length == 1024, "large environment value");
+            Environment.SetEnvironmentVariable(name, null);
+            Check(Environment.GetEnvironmentVariable(name) == null, "missing environment variable");
+        }
+        finally { Environment.SetEnvironmentVariable(name, null); }
+        Console.WriteLine("PASS EnvironmentRoundtrip");
+    }
     public static void Main(string[] args)
     {
         Strings();

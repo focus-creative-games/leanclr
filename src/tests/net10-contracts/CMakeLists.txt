@@ -27,3 +27,11 @@ if(EMSCRIPTEN)
     target_link_options(net10-resources PRIVATE -O2 -sENVIRONMENT=node -sALLOW_MEMORY_GROWTH=1 -lnodefs.js
         "--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/../../benchmarks/aot-baseline/nodefs.js")
 endif()
+
+add_executable(net10-environment environment.cpp)
+target_link_libraries(net10-environment PRIVATE leanclr)
+add_test(NAME net10-environment COMMAND net10-environment)
+if(EMSCRIPTEN)
+    set_target_properties(net10-environment PROPERTIES SUFFIX ".js")
+    target_link_options(net10-environment PRIVATE -sENVIRONMENT=node -sEXIT_RUNTIME=1)
+endif()

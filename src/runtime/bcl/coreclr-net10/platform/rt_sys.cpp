@@ -15,6 +15,10 @@
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <limits>
+#include "alloc/scoped_buffer.h"
+#include "utils/encode_conv.h"
+#include "3rd/utf8/utf8.h"
 
 #ifdef LEANCLR_PLATFORM_POSIX
 #include <dirent.h>
@@ -224,11 +228,65 @@ uint32_t RtSys::get_environment_variable(const Utf16Char* variable_name, Utf16Ch
     return static_cast<uint32_t>(
         ::GetEnvironmentVariableW(reinterpret_cast<LPCWSTR>(variable_name), reinterpret_cast<LPWSTR>(value), static_cast<DWORD>(value_length)));
 #else
-    (void)variable_name;
-    (void)value;
-    (void)value_length;
-    s_last_win32_error = 203; // ERROR_ENVVAR_NOT_FOUND
-    return 0;
+    if (!variable_name || !*variable_name)
+    {
+        s_last_win32_error = 87; // ERROR_INVALID_PARAMETER
+        return 0;
+    }
+    const size_t name_length = static_cast<size_t>(utils::StringUtil::get_utf16chars_length(variable_name));
+    for (size_t i = 0; i < name_length; ++i)
+    {
+        const uint16_t c = variable_name[i];
+        if (c == '=' || (c >= 0xdc00 && c <= 0xdfff) ||
+            (c >= 0xd800 && c <= 0xdbff && (i + 1 == name_length || variable_name[i + 1] < 0xdc00 || variable_name[i + 1] > 0xdfff)))
+        {
+            s_last_win32_error = 87;
+            return 0;
+        }
+        if (c >= 0xd800 && c <= 0xdbff)
+            ++i;
+    }
+    size_t name_capacity;
+    alloc::ScopedBuffer<char, 256> name;
+    if (!utils::CheckedSize::multiply(name_length, size_t(4), name_capacity) || !utils::CheckedSize::add(name_capacity, size_t(1), name_capacity) ||
+        !name.try_allocate_zeroed(name_capacity))
+    {
+        s_last_win32_error = 8; // ERROR_NOT_ENOUGH_MEMORY
+        return 0;
+    }
+    size_t encoded_length;
+    utils::EncodeConv::utf16_to_utf8(variable_name, name_length, name.data(), encoded_length);
+    const char* source = std::getenv(name.data());
+    if (!source)
+    {
+        s_last_win32_error = 203; // ERROR_ENVVAR_NOT_FOUND
+        return 0;
+    }
+    const size_t bytes = std::strlen(source);
+    if (!utf8::is_valid(source, source + bytes))
+    {
+        s_last_win32_error = 1113; // ERROR_NO_UNICODE_TRANSLATION
+        return 0;
+    }
+    size_t capacity;
+    alloc::ScopedBuffer<Utf16Char, 256> decoded;
+    if (!utils::CheckedSize::add(bytes, size_t(1), capacity) || !decoded.try_allocate_zeroed(capacity))
+    {
+        s_last_win32_error = 8;
+        return 0;
+    }
+    size_t length;
+    utils::EncodeConv::utf8_to_utf16(source, bytes, decoded.data(), length);
+    if (length >= std::numeric_limits<uint32_t>::max())
+    {
+        s_last_win32_error = 8;
+        return 0;
+    }
+    s_last_win32_error = 0;
+    if (!value || value_length <= length)
+        return static_cast<uint32_t>(length + 1);
+    std::memcpy(value, decoded.data(), (length + 1) * sizeof(Utf16Char));
+    return static_cast<uint32_t>(length);
 #endif
 }
 
