@@ -38,6 +38,7 @@
 #include "vm/generic_class.h"
 #include "vm/gchandle.h"
 #include "vm/marshal.h"
+#include "vm/struct_marshal.h"
 #include "vm/method.h"
 #include "vm/object.h"
 #include "vm/pinvoke.h"
@@ -4209,8 +4210,9 @@ RtResultVoid marshal_size_of_helper_invoker(metadata::RtManagedMethodPointer, co
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, type_sig,
                                             vm::Reflection::get_type_sig_from_qcall_type_handle(qcall_type_handle, native_handle));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
-    RET_ERR_ON_FAIL(vm::Class::initialize_fields(klass));
-    interp::EvalStackOp::set_return(ret, static_cast<int32_t>(vm::Class::get_instance_size_without_object_header(klass)));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, size, vm::StructMarshal::size_of(klass));
+    interp::EvalStackOp::set_return(ret, size);
+
     RET_VOID_OK();
 }
 

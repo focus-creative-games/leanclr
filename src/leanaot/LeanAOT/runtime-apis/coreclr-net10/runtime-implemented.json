@@ -1,4 +1,7 @@
 [
+  "System.Runtime.InteropServices.Marshal::StructureToPtr<>",
+  "System.Runtime.InteropServices.Marshal::PtrToStructure<>",
+  "System.Runtime.InteropServices.Marshal::DestroyStructure<>",
   "System.Activator::CreateInstance<>",
   "System.AppDomain::DoUnhandledException(System.Exception)",
   "System.AppDomain::ExecuteAssembly(System.Reflection.Assembly,System.String[])",

@@ -161,6 +161,39 @@ namespace LeanAOT.ToCpp
             typeDefinesWriter.AddLine($"{elementTypeName} __inlineArrayPadding[{inlineArrayLength.Value - 1}];");
         }
 
+        private readonly Dictionary<ITypeDefOrRef, bool> _containsManagedReferences = new(TypeEqualityComparer.Instance);
+
+        private bool ContainsManagedReferences(TypeDetail type, HashSet<ITypeDefOrRef> visiting = null)
+        {
+            if (_containsManagedReferences.TryGetValue(type.Type, out bool cached)) return cached;
+            visiting ??= new HashSet<ITypeDefOrRef>(TypeEqualityComparer.Instance);
+            if (!visiting.Add(type.Type)) return true;
+            bool result = false;
+            foreach (var field in type.InstanceFieldsIncludeParent)
+            {
+                TypeSig sig = field.Type.RemovePinnedAndModifiers();
+                switch (sig.ElementType)
+                {
+                    case ElementType.String:
+                    case ElementType.Object:
+                    case ElementType.Class:
+                    case ElementType.Array:
+                    case ElementType.SZArray:
+                    case ElementType.ByRef:
+                    case ElementType.TypedByRef:
+                        result = true;
+                        break;
+                    case ElementType.GenericInst:
+                    case ElementType.ValueType:
+                        result = !MetaUtil.IsValueType(sig) || ContainsManagedReferences(_metadataService.GetTypeDetail(sig.ToTypeDefOrRef()), visiting);
+                        break;
+                }
+                if (result) break;
+            }
+            visiting.Remove(type.Type);
+            _containsManagedReferences[type.Type] = result;
+            return result;
+        }
         private void AddTypeNotStaticDefinition(TypeDetail type, CodeThrunkWriter typeDefinesWriter)
         {
             TypeDef typeDef = type.TypeDef;
@@ -178,6 +211,9 @@ namespace LeanAOT.ToCpp
                 classSize = 0;
                 packingSize = 0;
             }
+            // Match Class::setup_field_layout: managed GC slots require natural
+            // alignment even when the native StructLayout requests a smaller Pack.
+            if (packingSize != 0 && ContainsManagedReferences(type)) packingSize = 0;
             if (typeDef.IsValueType && typeDef.IsExplicitLayout)
             {
                 typeDefinesWriter.AddLine($"struct {type.InstanceTypeName}");
