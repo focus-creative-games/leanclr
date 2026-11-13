@@ -1,3 +1,4 @@
+#include <cstring>
 #include <cstdio>
 #include "machine_state.h"
 
@@ -146,9 +147,15 @@ static void visit_method_argument_roots(const metadata::RtMethodInfo* method, Rt
 
 static void visit_stack_object_roots(RtStackObject* scan_begin, RtStackObject* scan_end, gc::GcVisitObjectRoot visit, void* userdata)
 {
-    for (RtStackObject* slot = scan_begin; slot < scan_end; ++slot)
+    static_assert(sizeof(RtStackObject) % sizeof(vm::RtObject*) == 0, "Stack slots must contain whole pointer words");
+    // Value types are packed by byte size. On 32-bit targets a slot can hold
+    // two references; reading only slot->obj silently loses the upper word.
+    const auto* end = reinterpret_cast<const uint8_t*>(scan_end);
+    for (const auto* word = reinterpret_cast<const uint8_t*>(scan_begin); word < end; word += sizeof(vm::RtObject*))
     {
-        visit_object_if_valid(slot->obj, visit, userdata);
+        vm::RtObject* candidate;
+        std::memcpy(&candidate, word, sizeof(candidate));
+        visit_object_if_valid(candidate, visit, userdata);
     }
 }
 

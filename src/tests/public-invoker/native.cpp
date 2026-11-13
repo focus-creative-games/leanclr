@@ -1,6 +1,10 @@
 #include "callbacks.h"
 #include "alloc/general_allocation.h"
 #include "vm/runtime.h"
+#include "vm/object.h"
+#include "gc/garbage_collector.h"
+#include "interp/machine_state.h"
+#include <cstring>
 #include "vm/settings.h"
 #include "vm/assembly.h"
 #include "vm/class.h"
@@ -227,6 +231,31 @@ int main(int argc, char** argv)
     leanclr_invoke_with_buffer(abi_expected_method, public_args, nullptr, &output);
     CHECK(output != nullptr && abi_calls == calls_before_invalid);
     leanclr_invoke_with_buffer(nullptr, nullptr, nullptr, nullptr);
+#if LEANCLR_GC_MARK_SWEEP
+    // An unboxed two-reference struct occupies one 8-byte evaluation slot on
+    // 32-bit targets. Both pointer words must remain roots at a safepoint.
+    auto first_root = LEANCLR_NEWOBJ_INTERNAL(types.cls_object, "ABI packed root first");
+    auto second_root = LEANCLR_NEWOBJ_INTERNAL(types.cls_object, "ABI packed root second");
+    CHECK(first_root.is_ok() && second_root.is_ok());
+    vm::RtObject* packed_objects[2] = {first_root.unwrap(), second_root.unwrap()};
+    interp::RtStackObject packed_slots[(sizeof(packed_objects) + sizeof(interp::RtStackObject) - 1) / sizeof(interp::RtStackObject)]{};
+    std::memcpy(packed_slots, packed_objects, sizeof(packed_objects));
+    auto& machine = interp::MachineState::get_global_machine_state();
+    interp::MachineStateSavePoint saved(machine);
+    auto allocated_frame = machine.alloc_frame_stack();
+    CHECK(allocated_frame.is_ok());
+    auto* frame = allocated_frame.unwrap();
+    frame->method = &methods[0];
+    frame->eval_stack_base = packed_slots;
+    frame->eval_stack_size = sizeof(packed_slots) / sizeof(interp::RtStackObject);
+#if LEANCLR_BCL_CORECLR_NET10
+    frame->root_scan_mode = interp::InterpFrameRootScanMode::ExplicitObjectRoots;
+    frame->gc_live_stack_size = frame->eval_stack_size;
+#endif
+    gc::GarbageCollector::collect();
+    CHECK(gc::GarbageCollector::is_allocated_object(packed_objects[0]));
+    CHECK(gc::GarbageCollector::is_allocated_object(packed_objects[1]));
+#endif
     std::puts("PASS C public invoker ABI, exception handoff, OOM retry and allocation-free warm calls");
     return 0;
 }
