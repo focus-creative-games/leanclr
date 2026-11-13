@@ -54,13 +54,13 @@ public class Program
         try
         {
             Console.SetOut(w);
-            Console.WriteLine("中文\0end");
+            Console.WriteLine("\u4e2d\u6587\0end");
         }
         finally
         {
             Console.SetOut(original);
         }
-        Check(w.ToString() == "中文\0end" + Environment.NewLine, "unicode and embedded null");
+        Check(w.ToString() == "\u4e2d\u6587\0end" + Environment.NewLine, "unicode and embedded null");
     }
     public static void Error()
     {
