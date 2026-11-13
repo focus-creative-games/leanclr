@@ -394,6 +394,7 @@
         &&LABEL_CallAot,
         &&LABEL_CallRuntimeImplemented,
         &&LABEL_CalliInterp,
+        &&LABEL_CalliNative,
         &&LABEL_BoxRefInplace,
         &&LABEL_NewObjInterp,
         &&LABEL_NewValueTypeInterp,

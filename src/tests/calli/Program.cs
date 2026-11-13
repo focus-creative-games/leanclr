@@ -18,6 +18,26 @@ public unsafe class NativeSignatures {
 public unsafe class Program {
 static void Check(bool value,string message){if(!value)throw new Exception(message);}
 [AotMethod(false)] public static int UnmanagedInventory(IntPtr target){return ((delegate* unmanaged[Cdecl]<int,int>)(void*)target)(41);}
+public static IntPtr N0,N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11,N12,N13,N14;
+public static void Unmanaged(){
+ Check(((delegate* unmanaged[Cdecl]<int,int>)(void*)N0)(41)==42,"native int");
+ Check(((delegate* unmanaged[Cdecl]<int,double,float,long,double>)(void*)N1)(10,20.5,3,9)==42.5,"native mixed");
+ Check(((delegate* unmanaged[Cdecl]<int,double,int,double,int,double,int,double,int,double,int,double,double>)(void*)N2)(1,2,3,4,5,6,7,8,9,10,11,12)==78,"native register overflow");
+ int x=1;double y=2;((delegate* unmanaged[Cdecl]<ref int,out double,void>)(void*)N3)(ref x,out y);Check(x==42 && y==84,"native ref/out");
+ Check(!((delegate* unmanaged[Cdecl]<bool,bool>)(void*)N4)(true) && ((delegate* unmanaged[Cdecl]<bool,bool>)(void*)N4)(false),"native bool width");
+
+ Check(((delegate* unmanaged[Cdecl]<sbyte,sbyte>)(void*)N6)(-128)==-127,"native signed byte");
+ Check(((delegate* unmanaged[Cdecl]<byte,byte>)(void*)N7)(254)==255,"native byte");
+ Check(((delegate* unmanaged[Cdecl]<short,short>)(void*)N8)(-32768)==-32767,"native signed short");
+ Check(((delegate* unmanaged[Cdecl]<ushort,ushort>)(void*)N9)(65534)==65535,"native ushort");
+ Check(((delegate* unmanaged[Cdecl]<ulong,ulong>)(void*)N10)(ulong.MaxValue)==0,"native unsigned long");
+ int value=123;Check(((delegate* unmanaged[Cdecl]<void*,void*>)(void*)N11)(&value)==&value,"native pointer");
+ Check(((delegate* unmanaged[Stdcall]<double,double>)(void*)N12)(41)==42,"native stdcall");
+ Check(((delegate* unmanaged[Cdecl]<float,float>)(void*)N13)(1.5f)==3,"native float");
+ Check(((delegate* unmanaged[Cdecl]<nint,nint>)(void*)N14)(41)==42,"native intptr");
+}
+public static void NativeChar(){Check(((delegate* unmanaged[Cdecl]<char,char>)(void*)N5)('A')=='B',"ANSI char ASCII");Check(((delegate* unmanaged[Cdecl]<char,char>)(void*)N5)('\ufffe')=='@',"ANSI replacement char");}
+public static void NativeFailures(){bool caught=false;try{((delegate* unmanaged[Cdecl]<int,int>)(void*)0)(1);}catch(NullReferenceException){caught=true;}Check(caught,"null native target");caught=false;try{((delegate* unmanaged[Cdecl]<int,int>)(delegate* managed<int,int>)&Add)(1);}catch(ArgumentException){caught=true;}Check(caught,"managed descriptor is not a native target");}
 public static int Add(int value){return value+1;}
 public static float Float(float value){return value+2;}
 public static void Change(ref int value){value=42;}
@@ -46,5 +66,10 @@ public static void StackRoot(){delegate* managed<int> pointer=&CollectInt;Consum
 public static int Effects;
 public static void ThrowTarget(){Effects++;throw new InvalidOperationException();}
 public static void Exception(){Effects=0;delegate* managed<void> pointer=&ThrowTarget;bool caught=false;try{Effects++;pointer();}catch(InvalidOperationException){caught=true;}Check(caught && Effects==2,"no replay on handoff");}
-public static void Main(string[]args){typeof(Program).GetMethod(args[0]).Invoke(null,null);}
+public static void Main(string[]args){
+#if NET10_0_OR_GREATER
+ if(args.Length>1){var library=System.Runtime.InteropServices.NativeLibrary.Load(System.IO.Path.GetFullPath(args[1]));var get=(delegate* unmanaged[Cdecl]<int,IntPtr>)(void*)System.Runtime.InteropServices.NativeLibrary.GetExport(library,"calli_test_get_function");for(int i=0;i<15;i++)typeof(Program).GetField("N"+i).SetValue(null,get(i));}
+#endif
+ typeof(Program).GetMethod(args[0]).Invoke(null,null);}
+
 }}

@@ -1421,9 +1421,8 @@ RtResultVoid Transformer::add_callvirt(const metadata::RtMethodInfo* method)
 
 RtResultVoid Transformer::add_calli(const metadata::RtMethodSig& method_sig)
 {
-    // Parsing an unmanaged function-pointer type is supported independently of
-    // invoking its native ABI. The managed calli protocol cannot execute it.
-    RET_ERR_ON_FAIL(vm::Calli::validate_managed_signature(&method_sig));
+    if (metadata::RtMetadata::decode_sig_type(method_sig.flags) == metadata::RtSigType::Default)
+        RET_ERR_ON_FAIL(vm::Calli::validate_managed_signature(&method_sig));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, func_ptr, pop_eval_stack());
 
     // Pop parameters in reverse order

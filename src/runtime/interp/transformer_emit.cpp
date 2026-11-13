@@ -1,4 +1,5 @@
 #include "transformer.h"
+#include "vm/calli.h"
 #include "vm/class.h"
 #include "vm/field.h"
 #include "vm/reflection.h"
@@ -1171,8 +1172,17 @@ RtResultVoid Transformer::emit_CallRuntimeImplemented(InstructionOperands& outpu
 
 RtResultVoid Transformer::emit_Calli(InstructionOperands& output)
 {
-    output.opcode = OpCodeEnum::CalliInterp;
-    setup_inst_resolved_data(output, output.signature);
+    if (metadata::RtMetadata::decode_sig_type(output.signature->flags) == metadata::RtSigType::Default)
+    {
+        output.opcode = OpCodeEnum::CalliInterp;
+        setup_inst_resolved_data(output, output.signature);
+    }
+    else
+    {
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtCalliBridge*, bridge, vm::Calli::bind_native(output.signature));
+        output.opcode = OpCodeEnum::CalliNative;
+        setup_inst_resolved_data(output, bridge);
+    }
     // output.frame_base = output.frame_base;
     //  method_idx stores in arg3, it has been setup on start.
     return append_instruction(output);

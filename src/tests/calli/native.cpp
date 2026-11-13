@@ -27,6 +27,12 @@
 #include <unordered_map>
 
 using namespace leanclr;
+extern "C" void* calli_test_get_function(int32_t index);
+#if LEANCLR_CALLI_BRIDGES
+extern const metadata::RtCalliBridge g_calli_bridges[];
+extern const uint32_t g_calli_bridge_count;
+#endif
+
 #if LEANCLR_CALLI_AOT
 extern metadata::RtAotModulesData g_aot_modules_data;
 #endif
@@ -193,6 +199,9 @@ RtResultVoid run()
     check(suppressed->native_call_conv == static_cast<uint8_t>(metadata::RtSigType::C) && suppressed->calli_flags == 2 &&
           suppressed->call_conv_modifier_count == 2);
 #endif
+#if LEANCLR_CALLI_BRIDGES
+    RET_ERR_ON_FAIL(vm::Calli::register_native_bridges(g_calli_bridges, g_calli_bridge_count));
+#endif
     // Host registrations use complete ABI shapes and are reusable across modules.
     static const metadata::RtCalliAbiType abi_i4{8, sizeof(int32_t), alignof(int32_t), nullptr, 0};
     static const metadata::RtCalliAbiType* abi_args[]{&abi_i4};
@@ -209,7 +218,11 @@ RtResultVoid run()
     }
     check(allocations == bridge_allocations);
     // An absent signature cannot alias the registered integer ABI by arity.
-    check(vm::Calli::bind_native(stdcall_signature).is_err());
+    metadata::RtMethodSig absent{};
+    absent.flags = uint8_t(metadata::RtSigType::C);
+    absent.return_type = vm::Class::get_corlib_types().cls_double->by_val;
+    absent.params.push_back(vm::Class::get_corlib_types().cls_int32->by_val);
+    check(vm::Calli::bind_native(&absent).is_err());
 #if LEANCLR_BCL_CORECLR_NET10
     check(vm::Calli::bind_native(suppressed).is_err());
 #endif
@@ -260,6 +273,28 @@ RtResultVoid run()
         RET_ERR_ON_FAIL(vm::Object::unbox_any(result, vm::Class::get_corlib_types().cls_int32, &value, false));
         check(value == 42);
     }
+#if LEANCLR_CALLI_AOT || LEANCLR_CALLI_BRIDGES
+    for (int i = 0; i < 15; ++i)
+    {
+        char name[16];
+        std::snprintf(name, sizeof(name), "N%d", i);
+        void* address = calli_test_get_function(i);
+        RET_ERR_ON_FAIL(vm::Field::set_static_value(vm::Class::get_field_for_name(program, name, false), &address));
+    }
+    for (const auto* name : {"Unmanaged", "NativeFailures"
+#if LEANCLR_PLATFORM_WIN
+                             ,
+                             "NativeChar"
+#endif
+         })
+    {
+        const auto* entry = vm::Class::get_method_for_name(program, name, 0, false);
+#if LEANCLR_CALLI_AOT
+        check(entry->invoker_type == metadata::RtInvokerType::Aot);
+#endif
+        RET_ERR_ON_FAIL(vm::Runtime::invoke_array_arguments_with_run_cctor(entry, nullptr, nullptr));
+    }
+#endif
     std::puts("Calli signature and target contracts passed");
     RET_VOID_OK();
 }

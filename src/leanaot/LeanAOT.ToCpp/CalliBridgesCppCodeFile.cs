@@ -17,16 +17,21 @@ sealed class CalliBridgesCppCodeFile
     readonly List<object> sites = new();
     static Abi Type(TypeSig type, bool ret=false)
     {
+        if (type is ModifierSig) {
+            var raw=type;
+            while(raw is CModReqdSig m && m.Modifier.FullName is ("System.Runtime.InteropServices.InAttribute" or "System.Runtime.InteropServices.OutAttribute")) raw=raw.Next;
+            if(raw.ElementType==ElementType.ByRef)type=raw;
+        }
         if(type == null || type is ModifierSig || type is PinnedSig)throw new NotSupportedException("type-modifier");
         if(type.ElementType==ElementType.ByRef) {
-            Type(type.Next); return new Abi(15,"void*");
+            var payload=Type(type.Next); if(payload.Kind is 2 or 3)throw new NotSupportedException("byref-bool-char-marshalling"); return new Abi(15,"void*");
         }
         if(type.ElementType==ElementType.Ptr || type.ElementType==ElementType.I || type.ElementType==ElementType.U)return new Abi(15,"void*");
         if(type.ElementType==ElementType.ValueType && type.ToTypeDefOrRef().ResolveTypeDef() is { IsEnum:true } e)
             return Type(e.Fields.First(f=>!f.IsStatic).FieldType);
         return type.ElementType switch {
             ElementType.Void when ret => new Abi(1,"void"),
-            ElementType.Boolean => new Abi(2,"bool"), ElementType.Char=>new Abi(3,"uint16_t"),
+            ElementType.Boolean => new Abi(2,"int32_t"), ElementType.Char=>new Abi(3,"uint8_t"),
             ElementType.I1=>new Abi(4,"int8_t"), ElementType.U1=>new Abi(5,"uint8_t"),
             ElementType.I2=>new Abi(6,"int16_t"), ElementType.U2=>new Abi(7,"uint16_t"),
             ElementType.I4=>new Abi(8,"int32_t"), ElementType.U4=>new Abi(9,"uint32_t"),
@@ -80,11 +85,14 @@ sealed class CalliBridgesCppCodeFile
             text.AppendLine($"using Fn = {b.Ret.Cpp} (LEANCLR_PINVOKE_CALL_CDECL *)({string.Join(", ",b.Args.Select(a=>a.Cpp))});");
             string offset="0";
             for(int i=0;i<b.Args.Count;++i) {
-                text.AppendLine($"auto a{i} = codegen::get_eval_stack_value_as_type<{b.Args[i].Cpp}>(args + {offset});");
+                string read=$"codegen::get_eval_stack_value_as_type<{(b.Args[i].Kind==2?"bool":b.Args[i].Kind==3?"uint16_t":b.Args[i].Cpp)}>(args + {offset})";
+                if(b.Args[i].Kind==3)read=$"vm::Calli::char_to_native({read})";
+                text.AppendLine($"{b.Args[i].Cpp} a{i} = {read};");
                 offset+=$" + codegen::get_stack_object_size_for_type<{b.Args[i].Cpp}>()";
             }
             string call=$"reinterpret_cast<Fn>(target)({string.Join(", ",Enumerable.Range(0,b.Args.Count).Select(i=>$"a{i}"))})";
-            text.AppendLine(b.Ret.Kind==1?$"{call};":$"auto value = {call}; codegen::expand_argument_to_eval_stack(value, ret);");
+            string result=b.Ret.Kind==2?$"bool value = {call} != 0":b.Ret.Kind==3?$"uint16_t value = vm::Calli::char_from_native({call})":$"auto value = {call}";
+            text.AppendLine(b.Ret.Kind==1?$"{call};":$"{result}; codegen::expand_argument_to_eval_stack(value, ret);");
             text.AppendLine("}");
             if(b.Args.Count>0)text.AppendLine($"static const metadata::RtCalliAbiType* args_{n}[] = {{ {string.Join(", ",b.Args.Select(a=>"&type_"+a.Key))} }};");
             ++n;

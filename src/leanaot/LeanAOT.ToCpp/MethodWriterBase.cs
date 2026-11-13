@@ -2490,7 +2490,10 @@ namespace LeanAOT.ToCpp
                 _bodyWriter.AddLine($"{ConstStrings.StackObjectTypeName} __retBuf[{VmFunctionNames.GetStackObjectSizeForType}<{GetExactTypeName(callSite.RetType)}>()]{{}};");
                 retBuffer = "__retBuf";
             }
-            EmitThrowOnError(inst, $"leanclr::vm::Calli::invoke_managed(__site, {CurrentMethodReference}, {inst.Offset}u, {GetEvalVariableExprWithCast(target, ConstStrings.MethodInfoPtrTypeName)}, {argsBuffer}, {retBuffer})");
+            bool native = ((byte)callSite.CallingConvention & 15) != 0;
+            string entry = native ? "invoke_unmanaged" : "invoke_managed";
+            string targetType = native ? "void*" : ConstStrings.MethodInfoPtrTypeName;
+            EmitThrowOnError(inst, $"leanclr::vm::Calli::{entry}(__site, {CurrentMethodReference}, {inst.Offset}u, {GetEvalVariableExprWithCast(target, targetType)}, {argsBuffer}, {retBuffer})");
             if (returns)
                 _bodyWriter.AddLine($"{GetEvalVariableName(result)} = {MayFoldCast(GetExactTypeName(callSite.RetType), GetTypeName(result), $"{VmFunctionNames.GetEvalStackValueAsType}<{GetExactTypeName(callSite.RetType)}>({retBuffer})")};");
             _bodyWriter.DecreaseIndent();
