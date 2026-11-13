@@ -72,6 +72,15 @@ public class GenericDerived<T> : GenericBase<T>
         return x;
     }
 }
+public class Generic<T>
+{
+    public class Nested<U>
+    {
+    }
+}
+public class Pair<A, B>
+{
+}
 public class Program
 {
     static void Check(bool b, string message)
@@ -117,6 +126,47 @@ public class Program
     public static void NewSlots()
     {
         Check(Count(typeof(NewDerived), "V", BindingFlags.Instance | BindingFlags.Public) == 2, "distinct new slots");
+    }
+    public static void GenericDefinitionNames()
+    {
+        Type t = typeof(Generic<>);
+        Check(t.Name == "Generic`1" && t.FullName == "ReflectionMetadataTests.Generic`1", "definition name");
+        Check(t.ToString() == "ReflectionMetadataTests.Generic`1[T]", "definition display");
+        Check(t.AssemblyQualifiedName == t.FullName + ", " + t.Assembly.FullName, "definition assembly");
+        Check(typeof(Generic<>.Nested<>).FullName == "ReflectionMetadataTests.Generic`1+Nested`1", "nested definition");
+    }
+    public static void ClosedGenericNames()
+    {
+        Type t = typeof(Generic<string>);
+        string expected = "ReflectionMetadataTests.Generic`1[[" + typeof(string).AssemblyQualifiedName + "]]";
+        Check(t.FullName == expected, "closed full name: " + t.FullName);
+        Check(t.AssemblyQualifiedName == expected + ", " + t.Assembly.FullName, "closed assembly");
+        Check(t.ToString() == "ReflectionMetadataTests.Generic`1[System.String]", "closed display");
+        Type nested = typeof(Generic<int>.Nested<string>);
+        Check(nested.FullName == "ReflectionMetadataTests.Generic`1+Nested`1[[" + typeof(int).AssemblyQualifiedName +
+                                     "],[" + typeof(string).AssemblyQualifiedName + "]]",
+              "nested closed");
+    }
+    public static void OpenGenericNames()
+    {
+        Type p = typeof(Generic<>).GetGenericArguments()[0];
+        Check(p.FullName == null && p.AssemblyQualifiedName == null && p.ToString() == "T", "parameter");
+        Type partial = typeof(Pair<, >).MakeGenericType(typeof(int), p);
+        Check(partial.FullName == null && partial.AssemblyQualifiedName == null, "partial");
+        Check(partial.ToString() == "ReflectionMetadataTests.Pair`2[System.Int32,T]", "partial display");
+        Check(p.MakeArrayType().FullName == null && partial.MakeArrayType().FullName == null, "open arrays");
+        Check(p.MakeByRefType().FullName == null && p.MakePointerType().FullName == null, "open modifiers");
+    }
+    public static void ModifiedGenericNames()
+    {
+        Type t = typeof(Generic<string>);
+        Check(t.MakeArrayType().FullName == t.FullName + "[]", "closed array");
+        Check(t.MakeArrayType(2).FullName == t.FullName + "[,]", "closed rank");
+        Check(t.MakeByRefType().FullName == t.FullName + "&", "closed byref");
+        Check(t.MakePointerType().FullName == t.FullName + "*", "closed pointer");
+        Check(t.MakeArrayType().AssemblyQualifiedName == t.FullName + "[], " + t.Assembly.FullName,
+              "array assembly suffix");
+        Check(typeof(Generic<>).MakeArrayType().FullName == "ReflectionMetadataTests.Generic`1[]", "definition array");
     }
     public static void Main(string[] args)
     {

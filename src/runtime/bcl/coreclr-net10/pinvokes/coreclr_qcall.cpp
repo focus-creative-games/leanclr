@@ -58,6 +58,7 @@ namespace pinvokes
 namespace
 {
 constexpr int32_t FORMAT_NAMESPACE = 0x00000001;
+constexpr int32_t FORMAT_FULL_INSTANTIATION = 0x00000002;
 constexpr int32_t FORMAT_ASSEMBLY = 0x00000004;
 constexpr int32_t CALLING_CONVENTION_STANDARD = 0x0001;
 constexpr int32_t CALLING_CONVENTION_HAS_THIS = 0x0020;
@@ -388,7 +389,8 @@ RtResult<vm::RtString*> construct_type_name(void* qcall_type_handle, void* nativ
     }
     else if ((format_flags & FORMAT_NAMESPACE) != 0)
     {
-        RET_ERR_ON_FAIL(metadata::MetadataName::append_type_full_name(sb, type_sig, metadata::TypeNameFormat::FullName, false));
+        const auto format = (format_flags & FORMAT_FULL_INSTANTIATION) != 0 ? metadata::TypeNameFormat::FullName : metadata::TypeNameFormat::Reflection;
+        RET_ERR_ON_FAIL(metadata::MetadataName::append_type_full_name(sb, type_sig, format, false));
     }
     else
     {
