@@ -28,3 +28,5 @@ For Mono, compile Program.cs to ReflectionInvokeTests.dll with modern Roslyn usi
 `-target:library -nostdlib -r:<mono-4.5/mscorlib.dll>`, select the MONO adapter, and
 point the two test directories at that output and the Mono BCL. The portable Wasm
 runner must use a matching 32-bit CoreLib.
+
+The native target directly exercises RuntimeMethodHandle_InvokeMethod QCall with value, reference, nullable, null-pointer, GC, and exceptional arguments. CoreCLR's indirect argument root scope retains all typed source slots while inputs are materialized, including reference fields inside unboxed structs. The QCall frontend copies changed byrefs into the supplied slots only after successful invocation.

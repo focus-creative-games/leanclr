@@ -65,6 +65,30 @@ struct MethodArgumentRoots
     MethodArgumentRoots(const MethodArgumentRoots&) = delete;
     MethodArgumentRoots& operator=(const MethodArgumentRoots&) = delete;
 };
+
+// Native reflection arguments are pointers to typed storage, including unboxed
+// structs. Keep all inputs alive while earlier arguments are being boxed.
+struct IndirectArgumentRoots
+{
+    const metadata::RtMethodInfo* method;
+    void** args;
+    IndirectArgumentRoots* previous;
+    static IndirectArgumentRoots* current;
+
+    IndirectArgumentRoots(const metadata::RtMethodInfo* method, void** args) : method(method), args(args), previous(current)
+    {
+        current = this;
+    }
+
+    ~IndirectArgumentRoots()
+    {
+        current = previous;
+    }
+
+    IndirectArgumentRoots(const IndirectArgumentRoots&) = delete;
+    IndirectArgumentRoots& operator=(const IndirectArgumentRoots&) = delete;
+};
+
 #endif
 
 class MachineState

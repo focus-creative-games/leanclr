@@ -16,6 +16,7 @@ namespace interp
 {
 #if LEANCLR_BCL_CORECLR_NET10
 MethodArgumentRoots* MethodArgumentRoots::current = nullptr;
+IndirectArgumentRoots* IndirectArgumentRoots::current = nullptr;
 
 static void visit_machine_state_roots(gc::GcVisitObjectRoot visit, void* userdata)
 {
@@ -154,6 +155,19 @@ static void visit_stack_object_roots(RtStackObject* scan_begin, RtStackObject* s
 
 void MachineState::visit_roots(gc::GcVisitObjectRoot visit, void* userdata) const
 {
+    for (auto* roots = IndirectArgumentRoots::current; roots; roots = roots->previous)
+    {
+        if (!roots->args)
+            continue;
+        for (uint16_t i = 0; i < roots->method->parameter_count; ++i)
+        {
+            auto type = roots->method->parameters[i]->to_canonized();
+            type.by_ref = 1;
+            RtStackObject slot{};
+            slot.ptr = roots->args[i];
+            visit_typed_argument_roots(&type, &slot, visit, userdata);
+        }
+    }
     for (auto* roots = MethodArgumentRoots::current; roots != nullptr; roots = roots->previous)
         visit_method_argument_roots(roots->method, roots->args, roots->method->total_arg_stack_object_size, visit, userdata);
     for (uint32_t frame_idx = 0; frame_idx < _frame_stack_top; ++frame_idx)

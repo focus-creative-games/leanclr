@@ -5982,15 +5982,12 @@ RtResultVoid materialize_runtime_method_handle_invoke_args(const metadata::RtMet
         {
             RET_ERR(RtErr::ArgumentNull);
         }
-        if (parameter_type_sig->by_ref)
-        {
-            RET_ERR(RtErr::NotSupported);
-        }
-
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, parameter_class, vm::Class::get_class_from_typesig(parameter_type_sig));
         RET_ERR_ON_FAIL(vm::Class::initialize_all(parameter_class));
 
         void* arg = args[i];
+        if (parameter_type_sig->by_ref && arg == nullptr)
+            RET_ERR(RtErr::ArgumentNull);
         if (vm::Class::is_value_type(parameter_class))
         {
             if (arg == nullptr)
@@ -6032,7 +6029,13 @@ RtResultVoid runtime_method_handle_invoke_method_invoker(metadata::RtManagedMeth
     {
         RET_ERR(RtErr::ArgumentNull);
     }
+    interp::IndirectArgumentRoots input_roots(method, args);
     RtObjectSlotRootGuard roots;
+    if (target_slot)
+        roots.register_slot(target_slot);
+    roots.register_slot(reinterpret_cast<vm::RtObject**>(signature_slot));
+    *result_slot = nullptr;
+    roots.register_slot(result_slot);
     utils::Vector<vm::RtObject*> invoke_args;
     RET_ERR_ON_FAIL(materialize_runtime_method_handle_invoke_args(method, args, invoke_args, roots));
 
@@ -6042,7 +6045,21 @@ RtResultVoid runtime_method_handle_invoke_method_invoker(metadata::RtManagedMeth
                                             vm::Runtime::invoke_object_arguments_with_run_cctor(method, is_constructor ? nullptr : target, invoke_args_data,
                                                                                                 static_cast<int32_t>(method->parameter_count)));
 
-    *result_slot = result;
+    gc::GarbageCollector::write_barrier(result_slot, result);
+    // QCall arguments point at CoreLib's private invocation storage. The shared
+    // object invocation owns conversion and box isolation; commit into those
+    // caller-provided typed slots only after it succeeds.
+    for (size_t i = 0; i < static_cast<size_t>(method->parameter_count); ++i)
+    {
+        const auto* type = method->parameters[i];
+        if (!type->by_ref)
+            continue;
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type));
+        if (vm::Class::is_value_type(klass))
+            RET_ERR_ON_FAIL(vm::Object::unbox_any(invoke_args[i], klass, args[i], false));
+        else
+            gc::GarbageCollector::write_barrier(static_cast<vm::RtObject**>(args[i]), invoke_args[i]);
+    }
     RET_VOID_OK();
 }
 
