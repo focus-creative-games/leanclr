@@ -288,7 +288,9 @@ RtResultVoid Object::unbox_any(const RtObject* obj, const metadata::RtClass* kla
 
         if (extend_to_stack)
         {
-            extends_to_eval_stack(src, reinterpret_cast<interp::RtStackObject*>(dst), unbox_cast_klass);
+            // cast_class normalizes unsigned integers for cast compatibility.
+            // Stack extension must retain the requested type's signedness.
+            extends_to_eval_stack(src, reinterpret_cast<interp::RtStackObject*>(dst), element_class);
         }
         else
         {

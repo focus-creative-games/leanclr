@@ -174,6 +174,26 @@ RtResultVoid run()
     for (int i = 0; i < 10000; ++i)
         RET_ERR_ON_FAIL(vm::StructMarshal::to_native_data(plain, managed_plain, native_plain, false));
     check(allocations == initial_allocations);
+    // Primitive plans share the structure engine: no per-write native scratch
+    // allocation is needed, even for BOOL conversion and unaligned destinations.
+    const auto& types = vm::Class::get_corlib_types();
+    RET_ERR_ON_FAIL(vm::StructMarshal::size_of(types.cls_int32));
+    RET_ERR_ON_FAIL(vm::StructMarshal::size_of(types.cls_boolean));
+    int32_t number = INT32_MIN;
+    uint8_t boolean = 1;
+    uint8_t scalar[16]{};
+    const auto scalar_allocations = allocations;
+    for (int i = 0; i < 10000; ++i)
+    {
+        RET_ERR_ON_FAIL(vm::StructMarshal::to_native_data(types.cls_int32, &number, scalar + 1, false));
+        int32_t actual;
+        std::memcpy(&actual, scalar + 1, sizeof(actual));
+        check(actual == number);
+        RET_ERR_ON_FAIL(vm::StructMarshal::to_native_data(types.cls_boolean, &boolean, scalar + 1, true));
+        std::memcpy(&actual, scalar + 1, sizeof(actual));
+        check(actual == 1);
+    }
+    check(allocations == scalar_allocations);
     // Test native ownership without managed allocations or JIT/lazy metadata noise.
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, assembly->mod->get_class_by_nested_full_name("StructMarshalTests.Text", false, true));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(int32_t, size, vm::StructMarshal::size_of(klass));

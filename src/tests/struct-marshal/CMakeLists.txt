@@ -13,11 +13,11 @@ if(EMSCRIPTEN)
     endforeach()
 endif()
 enable_testing()
-foreach(entry All ConstructorSemantics NullPointer FailureCleanup Pressure)
+foreach(entry All PrimitiveMatrix ConstructorSemantics NullPointer FailureCleanup Pressure)
     add_test(NAME marshal-${entry} COMMAND leanrun -l "${LEANCLR_MARSHAL_MANAGED_DIR}" -l "${LEANCLR_MARSHAL_RUNTIME_DIR}"
         -e "StructMarshalTests.Program::${entry}" StructMarshalTests)
 endforeach()
 add_test(NAME marshal-native-memory COMMAND struct-marshal-memory "${LEANCLR_MARSHAL_MANAGED_DIR}" "${LEANCLR_MARSHAL_RUNTIME_DIR}")
 
-set_tests_properties(marshal-All marshal-ConstructorSemantics marshal-NullPointer marshal-FailureCleanup marshal-Pressure marshal-native-memory
+set_tests_properties(marshal-All marshal-PrimitiveMatrix marshal-ConstructorSemantics marshal-NullPointer marshal-FailureCleanup marshal-Pressure marshal-native-memory
     PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../..")
