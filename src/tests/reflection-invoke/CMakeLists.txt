@@ -1,0 +1,16 @@
+cmake_minimum_required(VERSION 3.15)
+project(reflection_invoke_contracts C CXX)
+add_subdirectory(../../tools/leanrun leanrun_build)
+set(LEANCLR_REFLECTION_MANAGED_DIR "" CACHE PATH "Managed test assembly directory")
+set(LEANCLR_REFLECTION_RUNTIME_DIR "" CACHE PATH "Matching BCL directory")
+if(EMSCRIPTEN)
+    set_target_properties(leanrun PROPERTIES SUFFIX ".js")
+    target_link_options(leanrun PRIVATE -sENVIRONMENT=node -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 -lnodefs.js
+        "--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/../../benchmarks/aot-baseline/nodefs.js")
+endif()
+enable_testing()
+foreach(entry RefValue OutValue NullRefValue RefObjects RefNullable RefEnum RefStruct OnException)
+    add_test(NAME reflection-${entry} COMMAND leanrun -l "${LEANCLR_REFLECTION_MANAGED_DIR}" -l "${LEANCLR_REFLECTION_RUNTIME_DIR}"
+        -e "ReflectionInvokeTests.Program::${entry}" ReflectionInvokeTests)
+    set_tests_properties(reflection-${entry} PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../..")
+endforeach()
