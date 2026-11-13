@@ -47,7 +47,7 @@ static utils::HashSet<void*>& get_s_big_object_arenas()
     return value;
 }
 
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
 struct HeapRange
 {
     uintptr_t begin;
@@ -158,7 +158,7 @@ static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, in
             continue;
         }
         size_t aligned_size = utils::MemOp::align_up(get_object_allocated_size(obj), GC_ALIGN);
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
         MarkSweepHeap::unregister_arena(obj);
 #endif
         GcFinalizer::on_object_freed(obj);
@@ -308,7 +308,7 @@ vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, 
         obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(aligned_size);
         if (obj != nullptr)
         {
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
             if (!MarkSweepHeap::register_arena(obj, aligned_size, nullptr))
             {
                 alloc::GeneralAllocation::free(obj);
@@ -359,7 +359,7 @@ vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, s
 
 #endif // LEANCLR_GC_MARK_SWEEP
 
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
 namespace leanclr
 {
 namespace gc

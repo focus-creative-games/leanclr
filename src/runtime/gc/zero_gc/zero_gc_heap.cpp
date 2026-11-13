@@ -90,7 +90,7 @@ vm::RtObject* ZeroGcHeap::allocate_array(const metadata::RtClass* arrClass, size
 
 #endif // LEANCLR_GC_ZERO_GC
 
-#if LEANCLR_BCL_CORECLR_NET10 && LEANCLR_GC_ZERO_GC
+#if LEANCLR_GC_ZERO_GC && LEANCLR_GC_ZERO_GC
 namespace leanclr
 {
 namespace gc

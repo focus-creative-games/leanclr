@@ -56,7 +56,7 @@ class ZeroGcHeap
     static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes);
 
   public:
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_ZERO_GC
     static bool is_allocated_object(const vm::RtObject* obj);
 
     // A noncollecting heap does not need to discover conservative roots.

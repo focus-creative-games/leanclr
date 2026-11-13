@@ -1427,7 +1427,7 @@ RtResultVoid Transformer::add_calli(const metadata::RtMethodSig& method_sig)
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, func_ptr, pop_eval_stack());
 
     // Pop parameters in reverse order
-    size_t param_count = method_sig.params.size() + vm::Method::has_this(&method_sig);
+    size_t param_count = method_sig.params.size() + (vm::Method::has_this(&method_sig) && !(method_sig.flags & uint8_t(metadata::RtSigType::ExplicitThis)));
     const Variable** params = nullptr;
     if (param_count > 0)
     {

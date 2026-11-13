@@ -228,7 +228,7 @@ SmallHeapArena* SizeClassPool::allocate_arena()
         return nullptr;
     }
     auto* arena = new (mem) SmallHeapArena(arena_data, _arena_size, _block_size);
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
     if (!MarkSweepHeap::register_arena(arena_data, _arena_size, arena))
     {
         arena->~SmallHeapArena();
@@ -242,7 +242,7 @@ SmallHeapArena* SizeClassPool::allocate_arena()
 void SizeClassPool::free_arena(SmallHeapArena* arena)
 {
     assert(arena != nullptr);
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
     MarkSweepHeap::unregister_arena(arena->data());
 #endif
     arena->~SmallHeapArena();
@@ -321,7 +321,7 @@ void SizeClassPool::sweep(const GCAliveObjectBitmap& alive_object_bitmap, int64_
 
 #endif // LEANCLR_GC_MARK_SWEEP
 
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
 namespace leanclr
 {
 namespace gc
@@ -363,7 +363,7 @@ bool SmallHeapArena::contains_allocated_block(const void* ptr) const
 } // namespace leanclr
 #endif
 
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
 namespace leanclr
 {
 namespace gc

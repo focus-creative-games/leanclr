@@ -14,7 +14,7 @@ namespace leanclr
 {
 namespace codegen
 {
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP || LEANCLR_GC_ZERO_GC
 AotRootScope* AotRootScope::current = nullptr;
 
 void AotRootScope::visit_roots(gc::GcVisitObjectRoot visit, void* userdata)

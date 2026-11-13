@@ -6,6 +6,7 @@ namespace LeanAOT.ToCpp
     partial class MethodWriterBase
     {
         private bool IsNet10Profile => GlobalServices.Inst.RuntimeApiCatalog?.ProfileName == "coreclr-net10";
+        private bool HasRuntimeGcRoots => IsNet10Profile || GlobalServices.Inst.RuntimeApiCatalog?.ProfileName == "mono-4.5";
         private readonly HashSet<string> _rootCapacityExpressions = new(StringComparer.Ordinal);
         private bool _rootSnapshotSeen;
 
@@ -22,10 +23,10 @@ namespace LeanAOT.ToCpp
 
         private void WriteRootSnapshot(Instruction instruction)
         {
-            if (!IsNet10Profile) return;
+            if (!HasRuntimeGcRoots) return;
             switch (instruction.OpCode.Code)
             {
-                case Code.Call: case Code.Callvirt: case Code.Newobj:
+                case Code.Call: case Code.Callvirt: case Code.Calli: case Code.Newobj:
                 case Code.Ldsfld: case Code.Ldsflda: case Code.Stsfld:
                     break;
                 default: return;

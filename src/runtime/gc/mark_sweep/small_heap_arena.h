@@ -63,7 +63,7 @@ class SmallHeapArena
     size_t sweep(const GCAliveObjectBitmap& alive_object_bitmap);
 
   public:
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
     bool contains_allocated_block(const void* ptr) const;
     vm::RtObject* find_object_containing(const void* ptr) const;
 
@@ -100,7 +100,7 @@ class SizeClassPool
     }
 
   public:
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
     bool contains_allocated_block(const void* ptr) const;
 #endif
 };

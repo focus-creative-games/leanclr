@@ -343,7 +343,7 @@ namespace leanclr
 {
 namespace codegen
 {
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP || LEANCLR_GC_ZERO_GC
 struct AotRootRange
 {
     const void* address;

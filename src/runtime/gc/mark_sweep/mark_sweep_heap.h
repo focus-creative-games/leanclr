@@ -51,7 +51,7 @@ class MarkSweepHeap
     static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes);
 
   public:
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
     static bool is_allocated_object(const vm::RtObject* obj);
     static vm::RtObject* find_object_containing(const void* ptr);
     static bool register_arena(void* start, size_t size, SmallHeapArena* arena);

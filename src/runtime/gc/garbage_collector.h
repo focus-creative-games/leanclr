@@ -37,7 +37,7 @@ class GarbageCollector
         GcHeapImpl::initialize(config);
     }
 
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP || LEANCLR_GC_ZERO_GC
     static bool is_allocated_object(const vm::RtObject* obj)
     {
         return GcHeapImpl::is_allocated_object(obj);

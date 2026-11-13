@@ -277,7 +277,7 @@ namespace LeanAOT.ToCpp
             foreach (var local in _localVariables)
             {
                 _forwardDeclaration.AddTypeForwardDefine(local.Type);
-                _localsWriter.AddLine($"{GetExactTypeName(local.Type)} {GetLocalName(local)}{(initLocals || (IsNet10Profile && NeedsRootType(local.Type)) ? " = {}" : "")};");
+                _localsWriter.AddLine($"{GetExactTypeName(local.Type)} {GetLocalName(local)}{(initLocals || (HasRuntimeGcRoots && NeedsRootType(local.Type)) ? " = {}" : "")};");
             }
         }
 
@@ -2459,23 +2459,42 @@ namespace LeanAOT.ToCpp
 
         private void EmitCalli(Instruction inst, MethodSig callSite)
         {
-            int paramCount = callSite.Params.Count;
-            var args = new List<EvalVariable>(_curState.runStackDatas.GetRange(_curState.runStackDatas.Count - paramCount - 1, paramCount));
-            var ftnVar = _curState.runStackDatas.Last();
-            Pop(paramCount + 1);
-
-            var argsStr = CreateMethodFunctionArgsWithCast(callSite, args);
-            string methodFunctionTypeDefine = CreateMethodFunctionTypeDefine(callSite);
-            string methodPointerVarName = GetMethodPointerFromFullReferenceMethodVariable($"({GetEvalVariableExprWithCast(ftnVar, ConstStrings.MethodInfoPtrTypeName)})", false);
-            if (!MetaUtil.IsVoidType(callSite.RetType))
+            bool implicitThis = ((byte)callSite.CallingConvention & 0x20) != 0 && ((byte)callSite.CallingConvention & 0x40) == 0;
+            int count = callSite.Params.Count + (implicitThis ? 1 : 0);
+            var args = new List<EvalVariable>(_curState.runStackDatas.GetRange(_curState.runStackDatas.Count - count - 1, count));
+            var types = new List<TypeSig>(callSite.Params);
+            if (implicitThis) types.Insert(0, _corlibTypes.IntPtr);
+            var target = _curState.runStackDatas.Last();
+            Pop(count + 1);
+            bool returns = !MetaUtil.IsVoidType(callSite.RetType);
+            EvalVariable result = returns ? PushStack(callSite.RetType) : null;
+            if (returns) _bodyWriter.AddLine($"{GetTypeName(result)} {GetEvalVariableName(result)};");
+            _bodyWriter.AddLine("{");
+            _bodyWriter.IncreaseIndent();
+            _bodyWriter.AddLine("static leanclr::vm::Calli::SiteCache __site{};");
+            string argsBuffer = "nullptr";
+            if (count != 0)
             {
-                var retVar = PushStack(callSite.RetType);
-                EmitDeclaringAssignOrThrow(inst, retVar, $"(({methodFunctionTypeDefine}){methodPointerVarName})({argsStr})");
+                _bodyWriter.AddLine("constexpr size_t ARG0_OFFSET = 0;");
+                for (int i=0; i<count-1; ++i)
+                    _bodyWriter.AddLine($"constexpr size_t ARG{i+1}_OFFSET = ARG{i}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{GetExactTypeName(types[i])}>();");
+                _bodyWriter.AddLine($"constexpr size_t ARGS_SIZE = ARG{count-1}_OFFSET + {VmFunctionNames.GetStackObjectSizeForType}<{GetExactTypeName(types[count-1])}>();");
+                _bodyWriter.AddLine($"{ConstStrings.StackObjectTypeName} __argsBuf[ARGS_SIZE]{{}};");
+                for (int i=0; i<count; ++i)
+                    _bodyWriter.AddLine($"{VmFunctionNames.ExpandArgumentToEvalStack}({GetEvalVariableName(args[i])}, __argsBuf + ARG{i}_OFFSET);");
+                argsBuffer = "__argsBuf";
             }
-            else
+            string retBuffer = "nullptr";
+            if (returns)
             {
-                EmitThrowOnError(inst, $"(({methodFunctionTypeDefine}){methodPointerVarName})({argsStr})");
+                _bodyWriter.AddLine($"{ConstStrings.StackObjectTypeName} __retBuf[{VmFunctionNames.GetStackObjectSizeForType}<{GetExactTypeName(callSite.RetType)}>()]{{}};");
+                retBuffer = "__retBuf";
             }
+            EmitThrowOnError(inst, $"leanclr::vm::Calli::invoke_managed(__site, {CurrentMethodReference}, {inst.Offset}u, {GetEvalVariableExprWithCast(target, ConstStrings.MethodInfoPtrTypeName)}, {argsBuffer}, {retBuffer})");
+            if (returns)
+                _bodyWriter.AddLine($"{GetEvalVariableName(result)} = {MayFoldCast(GetExactTypeName(callSite.RetType), GetTypeName(result), $"{VmFunctionNames.GetEvalStackValueAsType}<{GetExactTypeName(callSite.RetType)}>({retBuffer})")};");
+            _bodyWriter.DecreaseIndent();
+            _bodyWriter.AddLine("}");
         }
 
         private void EmitLdftn(Instruction inst, IMethod method)

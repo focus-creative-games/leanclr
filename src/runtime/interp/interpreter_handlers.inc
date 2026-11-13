@@ -2836,6 +2836,9 @@ LEANCLR_CASE_BEGIN_LITE(CalliInterp)
     if (vm::Method::is_static(target_method))
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
 
+    if (vm::Method::is_instance(target_method))
+        (eval_stack_base + ir->frame_base)[0].ptr = vm::Calli::value_receiver(target_method, (eval_stack_base + ir->frame_base)[0].ptr);
+
     if (target_method->invoker_type == metadata::RtInvokerType::Interpreter)
     {
         ENTER_INTERP_FRAME(target_method, ir->frame_base, reinterpret_cast<const uint8_t*>(ir + 1));

@@ -1,4 +1,4 @@
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Linq;
 using dnlib.DotNet;
 using LeanAOT.Core;
@@ -91,8 +91,8 @@ namespace LeanAOT.GenerationPlan
                     {
                         if (method.IsRuntime || method.IsAbstract || method.HasGenericParameters || method.DeclaringType.HasGenericParameters)
                             continue;
-                        string exceptionFallback = method.Body?.Instructions.Any(i => i.OpCode.Code == dnlib.DotNet.Emit.Code.Calli) == true
-                            ? "managed-calli" : AotExceptionPolicy.FallbackReason(method);
+                        string exceptionFallback = method.Body?.Instructions.Any(i => i.OpCode.Code == dnlib.DotNet.Emit.Code.Calli && (((byte)((MethodSig)i.Operand).CallingConvention & 0x0f) != 0)) == true
+                            ? "unmanaged-calli" : AotExceptionPolicy.FallbackReason(method);
                         if (exceptionFallback != null)
                         {
                             MethodFallbacks.Add(new GenericFallback { Caller = "", Token = method.MDToken.Raw, Target = method.FullName, Reason = exceptionFallback });
