@@ -25,6 +25,9 @@
 #include <unordered_map>
 
 using namespace leanclr;
+#if LEANCLR_REFLECTION_AOT
+extern metadata::RtAotModulesData g_aot_modules_data;
+#endif
 
 namespace
 {
@@ -140,6 +143,9 @@ bool loader(const char* name, const char* extension, vm::FileData& data)
 
 RtResultVoid run()
 {
+#if LEANCLR_REFLECTION_AOT
+    vm::Settings::set_aot_modules_data(&g_aot_modules_data);
+#endif
     RET_ERR_ON_FAIL(vm::Runtime::initialize());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, assembly, vm::Assembly::load_by_name("ReflectionInvokeTests"));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, program,
@@ -169,6 +175,14 @@ RtResultVoid run()
         call[1].ptr = args;
         return qcall->invoker(nullptr, nullptr, call, nullptr);
     };
+    // The only live reference is inside a later raw value argument. Boxing the
+    // first struct executes a .cctor that collects before that later value is boxed.
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, later_reference,
+                                            LEANCLR_NEWOBJ_INTERNAL(vm::Class::get_corlib_types().cls_object, "ReflectionTest::later_reference"));
+    int32_t first_value = 0;
+    void* later_args[] = {&first_value, &later_reference};
+    RET_ERR_ON_FAIL(invoke("LaterArgumentRoot", later_args));
+    check(result == later_reference);
     int32_t value = 1;
     void* one[] = {&value};
     RET_ERR_ON_FAIL(invoke("Change", one));
@@ -214,6 +228,9 @@ RtResultVoid run()
     RET_ERR_ON_FAIL(vm::Class::initialize_all(existing));
     const auto* constructor = vm::Class::get_method_for_name(existing, ".ctor", 0, false);
     check(constructor != nullptr);
+#if LEANCLR_REFLECTION_AOT
+    check(constructor->invoker_type == metadata::RtInvokerType::Aot);
+#endif
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, counters,
                                             assembly->mod->get_class_by_nested_full_name("ReflectionInvokeTests.ConstructorCounters", false, true));
     RET_ERR_ON_FAIL(vm::Class::initialize_all(counters));
@@ -259,6 +276,9 @@ RtResultVoid run()
     RET_ERR_ON_FAIL(vm::Class::initialize_all(value_class));
     const auto* value_constructor = vm::Class::get_method_for_name(value_class, ".ctor", 1, false);
     check(value_constructor != nullptr);
+#if LEANCLR_REFLECTION_AOT
+    check(value_constructor->invoker_type == metadata::RtInvokerType::Aot);
+#endif
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, boxed_value, LEANCLR_NEWOBJ_INTERNAL(value_class, "ReflectionTest::value"));
     gc::GcRoots::register_slot(&boxed_value);
     auto value_root = utils::make_scope_exit([&]() { gc::GcRoots::unregister_slot(&boxed_value); });
