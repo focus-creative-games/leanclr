@@ -159,6 +159,25 @@ static void visit_stack_object_roots(RtStackObject* scan_begin, RtStackObject* s
     }
 }
 
+// Exclude only metadata-proven scalar locals. Scanning reused, uninitialized
+// numeric storage as references can keep unrelated finalizable objects alive.
+static void visit_interpreter_frame_roots(const RtInterpMethodInfo* imi, RtStackObject* begin, RtStackObject* end, gc::GcVisitObjectRoot visit, void* userdata)
+{
+    RtStackObject* cursor = begin;
+    if (imi != nullptr && imi->gc_scalar_local_ranges != nullptr)
+    {
+        for (const auto* range = imi->gc_scalar_local_ranges; range->begin != range->end; ++range)
+        {
+            const size_t size = static_cast<size_t>(end - begin);
+            if (range->begin >= size)
+                break;
+            visit_stack_object_roots(cursor, begin + range->begin, visit, userdata);
+            cursor = begin + std::min<size_t>(range->end, size);
+        }
+    }
+    visit_stack_object_roots(cursor, end, visit, userdata);
+}
+
 void MachineState::visit_roots(gc::GcVisitObjectRoot visit, void* userdata) const
 {
     for (auto* roots = IndirectArgumentRoots::current; roots; roots = roots->previous)
@@ -188,7 +207,7 @@ void MachineState::visit_roots(gc::GcVisitObjectRoot visit, void* userdata) cons
         const auto stack_end = reinterpret_cast<uintptr_t>(_eval_stack_base + _eval_stack_top);
         if (address >= stack_begin && address < stack_end && end > _eval_stack_base + _eval_stack_top)
             end = _eval_stack_base + _eval_stack_top;
-        visit_stack_object_roots(begin, end, visit, userdata);
+        visit_interpreter_frame_roots(frame.method != nullptr ? frame.method->interp_data : nullptr, begin, end, visit, userdata);
     }
 }
 
