@@ -1,6 +1,6 @@
 # 第03条修复方案：支持 managed / unmanaged calli
 
-状态：已获批准，正在按 03-A 至 03-F 实施。适用于 mono-minimal、mono-full、coreclr-minimal 的共享执行层。
+状态：03-A 至 03-F 已实现；Windows x64 / Wasm32 已验收，其他平台保持能力门禁。详见 [实施与验收报告](calli-support-results-2026-11-13.md)。适用于 mono-minimal、mono-full、coreclr-minimal 的共享执行层。
 
 建议采用**签名驱动的静态 C++ ABI 桥接**：managed calli 调运行时 invoker；unmanaged calli 调按完整签名生成的原生桥。解释器和 AOT 共用签名与桥接注册协议，不要求 JIT，不把 libffi 设为 minimal 的必需依赖。
 
@@ -78,6 +78,6 @@ varargs、未实现的 ThisCall/FastCall 目标 ABI、SuppressGCTransition 等 m
 
 性能门槛：稳态不做签名解析/哈希查找、无逐次桥缓存扩容或原生临时分配；解释器执行为一次缓存桥入口分派和一次类型正确的间接调用。先给出实测基线，再决定时间开销阈值，不预先承诺不存在的数据。
 
-## 本轮待审阅决定
+## 实施状态
 
-建议批准以上 03-A 至 03-F，以“静态签名桥”为 minimal 的正式实现路径。libffi 仅作为今后 Full/桌面版处理构建期未知签名的可选后端评估，不引入 minimal 的必需依赖。按阶段提交实现与测试；通过对应平台验收后开放能力。
+本方案已获批准并实施。最小版本采用静态签名桥，不引入 libffi 必需依赖。实际支持子集、平台门禁、测试、性能/体积及提交索引以 [实施与验收报告](calli-support-results-2026-11-13.md) 为准。
