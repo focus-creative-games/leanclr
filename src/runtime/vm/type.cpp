@@ -288,6 +288,8 @@ RtResult<const metadata::RtTypeSig*> Type::resolve_assembly_qualified_name(metad
 
 RtResult<RtString*> Type::get_full_name(const metadata::RtTypeSig* typeSig, bool full_name, bool assembly_qualified)
 {
+    if (full_name && contains_generic_param(typeSig))
+        RET_OK(nullptr);
     utils::Utf8StringBuilder sb;
     metadata::TypeNameFormat format = full_name ? (assembly_qualified ? metadata::TypeNameFormat::AssemblyQualified : metadata::TypeNameFormat::FullName)
                                                 : metadata::TypeNameFormat::Reflection;

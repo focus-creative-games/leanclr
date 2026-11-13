@@ -167,7 +167,7 @@ RtResultVoid MetadataName::append_type_full_name(utils::Utf8StringBuilder& sb, c
     {
         const metadata::RtTypeSig* elementType = typeSig->data.element_type;
 
-        RET_ERR_ON_FAIL(append_type_full_name(sb, elementType, cur_format, false));
+        RET_ERR_ON_FAIL(append_type_full_name(sb, elementType, nextFormat, false));
         sb.append_cstr("[]");
 
         if (typeSig->by_ref)
@@ -187,7 +187,7 @@ RtResultVoid MetadataName::append_type_full_name(utils::Utf8StringBuilder& sb, c
     {
         const metadata::RtTypeSig* elementType = typeSig->data.element_type;
 
-        RET_ERR_ON_FAIL(append_type_full_name(sb, elementType, cur_format, false));
+        RET_ERR_ON_FAIL(append_type_full_name(sb, elementType, nextFormat, false));
         sb.append_char('*');
 
         if (typeSig->by_ref)
@@ -244,6 +244,9 @@ RtResultVoid MetadataName::append_type_full_name(utils::Utf8StringBuilder& sb, c
                 const metadata::RtGenericClass* genericClass = typeSig->data.generic_class;
                 const metadata::RtGenericInst* inst = genericClass->class_inst;
 
+                const TypeNameFormat argument_format = (cur_format == TypeNameFormat::FullName || cur_format == TypeNameFormat::AssemblyQualified)
+                                                           ? TypeNameFormat::AssemblyQualified
+                                                           : nextFormat;
                 sb.append_char(get_generic_param_start_separator(cur_format));
                 for (uint8_t i = 0; i < inst->generic_arg_count; ++i)
                 {
@@ -255,21 +258,21 @@ RtResultVoid MetadataName::append_type_full_name(utils::Utf8StringBuilder& sb, c
                     const metadata::RtTypeSig* argType = inst->generic_args[i];
                     metadata::RtElementType argEleType = argType->ele_type;
 
-                    if (nextFormat == TypeNameFormat::AssemblyQualified && argEleType != metadata::RtElementType::Var &&
+                    if (argument_format == TypeNameFormat::AssemblyQualified && argEleType != metadata::RtElementType::Var &&
                         argEleType != metadata::RtElementType::MVar)
                     {
                         sb.append_char('[');
-                        RET_ERR_ON_FAIL(append_type_full_name(sb, argType, nextFormat, false));
+                        RET_ERR_ON_FAIL(append_type_full_name(sb, argType, argument_format, false));
                         sb.append_char(']');
                     }
                     else
                     {
-                        RET_ERR_ON_FAIL(append_type_full_name(sb, argType, nextFormat, false));
+                        RET_ERR_ON_FAIL(append_type_full_name(sb, argType, argument_format, false));
                     }
                 }
                 sb.append_char(get_generic_param_end_separator(cur_format));
             }
-            else if (klass->generic_container)
+            else if (klass->generic_container && cur_format != TypeNameFormat::FullName && cur_format != TypeNameFormat::AssemblyQualified)
             {
                 const metadata::RtGenericContainer* gc = klass->generic_container;
                 sb.append_char(get_generic_param_start_separator(cur_format));
