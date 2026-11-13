@@ -73,6 +73,7 @@ RtResultVoid Class::init_corlib_classes(metadata::RtModuleDef* corlib)
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_array_type_mismatch_exception, get_class_must_exist(corlib, "System.ArrayTypeMismatchException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_out_of_memory_exception, get_class_must_exist(corlib, "System.OutOfMemoryException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_bad_image_format_exception, get_class_must_exist(corlib, "System.BadImageFormatException"));
+    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_file_not_found_exception, get_class_must_exist(corlib, "System.IO.FileNotFoundException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_entry_point_not_found_exception, get_class_must_exist(corlib, "System.EntryPointNotFoundException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_missing_member_exception, get_class_must_exist(corlib, "System.MissingMemberException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_not_supported_exception, get_class_must_exist(corlib, "System.NotSupportedException"));
@@ -183,6 +184,7 @@ RtResultVoid Class::verify_integrity_of_corlib_classes()
         t.cls_array_type_mismatch_exception,
         t.cls_out_of_memory_exception,
         t.cls_bad_image_format_exception,
+        t.cls_file_not_found_exception,
         t.cls_entry_point_not_found_exception,
         t.cls_missing_member_exception,
         t.cls_not_supported_exception,
