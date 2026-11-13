@@ -36,9 +36,31 @@ static void Append(utils::Vector<T>& entries, const utils::Span<T>& sub_entries)
     entries.push_range(sub_entries.begin(), sub_entries.size());
 }
 
+#if !LEANCLR_PLATFORM_WIN
+// The minimal profile has no ICU/NLS provider on these hosts. Use CoreLib's
+// invariant algorithms (including Unicode casing), not fake linguistic results.
+static RtResult<bool> minimal_globalization_invariant() noexcept
+{
+    RET_OK(true);
+}
+
+static RtResultVoid minimal_globalization_invariant_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
+                                                            interp::RtStackObject* ret) noexcept
+{
+    interp::EvalStackOp::set_return(ret, true);
+    RET_VOID_OK();
+}
+#endif
+
 void IntrinsicStubs::get_intrinsic_entries(utils::Vector<vm::IntrinsicEntry>& entries) noexcept
 {
     entries.reserve(1000);
+#if !LEANCLR_PLATFORM_WIN
+    entries.push_back({"System.Globalization.GlobalizationMode::get_Invariant()", (vm::IntrinsicFunction)minimal_globalization_invariant,
+                       minimal_globalization_invariant_invoker});
+    entries.push_back({"System.Globalization.GlobalizationMode::get_InvariantNoLoad()", (vm::IntrinsicFunction)minimal_globalization_invariant,
+                       minimal_globalization_invariant_invoker});
+#endif
     // append intrinsic entries from various classes
     Append(entries, SystemActivator::get_intrinsic_entries());
     Append(entries, SystemArray::get_intrinsic_entries());

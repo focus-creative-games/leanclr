@@ -3463,6 +3463,9 @@ RtResultVoid kernel32_get_cp_info_invoker(metadata::RtManagedMethodPointer, cons
 RtResultVoid kernel32_get_locale_info_ex_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                  interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     vm::RtString* locale_name = interp::EvalStackOp::get_param<vm::RtString*>(params, 0);
     uint32_t lc_type = interp::EvalStackOp::get_param<uint32_t>(params, 1);
     Utf16Char* locale_data = interp::EvalStackOp::get_param<Utf16Char*>(params, 2);
@@ -3477,6 +3480,9 @@ RtResultVoid kernel32_get_locale_info_ex_invoker(metadata::RtManagedMethodPointe
 RtResultVoid kernel32_get_locale_info_ex_ptr_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                      interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 0);
     uint32_t lc_type = interp::EvalStackOp::get_param<uint32_t>(params, 1);
     void* locale_data = interp::EvalStackOp::get_param<void*>(params, 2);
@@ -3497,6 +3503,9 @@ static int32_t LEANCLR_PINVOKE_CALL_WINAPI kernel32_get_locale_info_ex_native(in
 RtResultVoid kernel32_lcid_to_locale_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                   interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     int32_t locale_id = interp::EvalStackOp::get_param<int32_t>(params, 0);
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 1);
     int32_t locale_name_length = interp::EvalStackOp::get_param<int32_t>(params, 2);
@@ -3510,6 +3519,9 @@ RtResultVoid kernel32_lcid_to_locale_name_invoker(metadata::RtManagedMethodPoint
 RtResultVoid kernel32_locale_name_to_lcid_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                   interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 0);
     uint32_t flags = interp::EvalStackOp::get_param<uint32_t>(params, 1);
 
@@ -3521,6 +3533,9 @@ RtResultVoid kernel32_locale_name_to_lcid_invoker(metadata::RtManagedMethodPoint
 RtResultVoid kernel32_resolve_locale_name_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                   interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 0);
     Utf16Char* locale_name_buffer = interp::EvalStackOp::get_param<Utf16Char*>(params, 1);
     int32_t locale_name_buffer_length = interp::EvalStackOp::get_param<int32_t>(params, 2);
@@ -3565,6 +3580,9 @@ int32_t enum_system_locales_ex_managed_callback(Utf16Char* locale_name, uint32_t
 RtResultVoid kernel32_enum_system_locales_ex_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                      interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     auto callback = interp::EvalStackOp::get_param<const metadata::RtMethodInfo*>(params, 0);
     uint32_t flags = interp::EvalStackOp::get_param<uint32_t>(params, 1);
     void* context = interp::EvalStackOp::get_param<void*>(params, 2);
@@ -3583,6 +3601,9 @@ RtResultVoid kernel32_enum_system_locales_ex_invoker(metadata::RtManagedMethodPo
 RtResultVoid kernel32_get_calendar_info_ex_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                    interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 0);
     uint32_t calendar = interp::EvalStackOp::get_param<uint32_t>(params, 1);
     intptr_t reserved = interp::EvalStackOp::get_param<intptr_t>(params, 2);
@@ -3632,6 +3653,9 @@ int32_t enum_calendar_info_ex_ex_managed_callback(Utf16Char* calendar_info, uint
 RtResultVoid kernel32_enum_calendar_info_ex_ex_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                        interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     auto callback = interp::EvalStackOp::get_param<const metadata::RtMethodInfo*>(params, 0);
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 1);
     uint32_t calendar = interp::EvalStackOp::get_param<uint32_t>(params, 2);
@@ -3684,6 +3708,9 @@ int32_t enum_time_formats_ex_managed_callback(Utf16Char* time_format, void* cont
 RtResultVoid kernel32_enum_time_formats_ex_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                    interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     auto callback = interp::EvalStackOp::get_param<const metadata::RtMethodInfo*>(params, 0);
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 1);
     uint32_t flags = interp::EvalStackOp::get_param<uint32_t>(params, 2);
@@ -3702,6 +3729,9 @@ RtResultVoid kernel32_enum_time_formats_ex_invoker(metadata::RtManagedMethodPoin
 RtResultVoid kernel32_lc_map_string_ex_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 0);
     uint32_t map_flags = interp::EvalStackOp::get_param<uint32_t>(params, 1);
     Utf16Char* source = interp::EvalStackOp::get_param<Utf16Char*>(params, 2);
@@ -3721,6 +3751,9 @@ RtResultVoid kernel32_lc_map_string_ex_invoker(metadata::RtManagedMethodPointer,
 RtResultVoid kernel32_find_nls_string_ex_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                  interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 0);
     uint32_t find_flags = interp::EvalStackOp::get_param<uint32_t>(params, 1);
     Utf16Char* source = interp::EvalStackOp::get_param<Utf16Char*>(params, 2);
@@ -3741,6 +3774,9 @@ RtResultVoid kernel32_find_nls_string_ex_invoker(metadata::RtManagedMethodPointe
 RtResultVoid kernel32_find_string_ordinal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                   interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     uint32_t find_flags = interp::EvalStackOp::get_param<uint32_t>(params, 0);
     Utf16Char* source = interp::EvalStackOp::get_param<Utf16Char*>(params, 1);
     int32_t source_length = interp::EvalStackOp::get_param<int32_t>(params, 2);
@@ -3753,9 +3789,27 @@ RtResultVoid kernel32_find_string_ordinal_invoker(metadata::RtManagedMethodPoint
     RET_VOID_OK();
 }
 
+RtResultVoid kernel32_compare_string_ordinal_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                     interp::RtStackObject* ret) noexcept
+{
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
+    auto left = interp::EvalStackOp::get_param<const Utf16Char*>(params, 0);
+    auto left_length = interp::EvalStackOp::get_param<int32_t>(params, 1);
+    auto right = interp::EvalStackOp::get_param<const Utf16Char*>(params, 2);
+    auto right_length = interp::EvalStackOp::get_param<int32_t>(params, 3);
+    auto ignore_case = interp::EvalStackOp::get_param<int32_t>(params, 4);
+    interp::EvalStackOp::set_return(ret, platform::RtSys::compare_string_ordinal(left, left_length, right, right_length, ignore_case));
+    RET_VOID_OK();
+}
+
 RtResultVoid kernel32_compare_string_ex_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                 interp::RtStackObject* ret) noexcept
 {
+#if !LEANCLR_PLATFORM_WIN
+    RET_ERR(RtErr::NotSupported);
+#endif
     Utf16Char* locale_name = interp::EvalStackOp::get_param<Utf16Char*>(params, 0);
     uint32_t compare_flags = interp::EvalStackOp::get_param<uint32_t>(params, 1);
     Utf16Char* string1 = interp::EvalStackOp::get_param<Utf16Char*>(params, 2);
@@ -6922,6 +6976,9 @@ void register_coreclr_qcall_pinvokes() noexcept
         ".Kernel32::CompareStringEx(System.Char*,System.UInt32,System.Char*,System.Int32,System.Char*,System.Int32,System.Void*,System.Void*,System.IntPtr)",
         nullptr, kernel32_compare_string_ex_invoker);
     vm::PInvokes::register_pinvoke(".Kernel32::CompareStringEx", nullptr, kernel32_compare_string_ex_invoker);
+    vm::PInvokes::register_pinvoke("Interop/Kernel32::<CompareStringOrdinal>g____PInvoke|30_0", nullptr, kernel32_compare_string_ordinal_invoker);
+    vm::PInvokes::register_pinvoke("Kernel32::<CompareStringOrdinal>g____PInvoke|30_0", nullptr, kernel32_compare_string_ordinal_invoker);
+    vm::PInvokes::register_pinvoke(".Kernel32::<CompareStringOrdinal>g____PInvoke|30_0", nullptr, kernel32_compare_string_ordinal_invoker);
     vm::PInvokes::register_pinvoke("Interop/Kernel32::GetSystemInfo(Interop/Kernel32/SYSTEM_INFO*)", nullptr, kernel32_get_system_info_invoker);
     vm::PInvokes::register_pinvoke("Interop/Kernel32::GetSystemInfo", nullptr, kernel32_get_system_info_invoker);
     vm::PInvokes::register_pinvoke("Kernel32::GetSystemInfo(Interop/Kernel32/SYSTEM_INFO*)", nullptr, kernel32_get_system_info_invoker);

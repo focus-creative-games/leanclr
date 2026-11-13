@@ -34,6 +34,7 @@ class RtSys
                                       int32_t value_length, int32_t* found_length, void* version_information, void* reserved, intptr_t sort_handle);
     static int32_t find_string_ordinal(uint32_t find_flags, const Utf16Char* source, int32_t source_length, const Utf16Char* value, int32_t value_length,
                                        int32_t ignore_case);
+    static int32_t compare_string_ordinal(const Utf16Char* left, int32_t left_length, const Utf16Char* right, int32_t right_length, int32_t ignore_case);
     static int32_t compare_string_ex(const Utf16Char* locale_name, uint32_t compare_flags, const Utf16Char* string1, int32_t string1_length,
                                      const Utf16Char* string2, int32_t string2_length, void* version_information, void* reserved, intptr_t sort_handle);
     static int32_t double_to_string(double value, const char* format, char* buffer, int32_t buffer_size);

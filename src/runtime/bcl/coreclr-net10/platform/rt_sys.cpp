@@ -518,6 +518,16 @@ int32_t RtSys::find_string_ordinal(uint32_t find_flags, const Utf16Char* source,
 #endif
 }
 
+int32_t RtSys::compare_string_ordinal(const Utf16Char* left, int32_t left_length, const Utf16Char* right, int32_t right_length, int32_t ignore_case)
+{
+#ifdef LEANCLR_PLATFORM_WIN
+    return ::CompareStringOrdinal(reinterpret_cast<LPCWCH>(left), left_length, reinterpret_cast<LPCWCH>(right), right_length, ignore_case != 0);
+#else
+    s_last_win32_error = 120;
+    return 0;
+#endif
+}
+
 int32_t RtSys::compare_string_ex(const Utf16Char* locale_name, uint32_t compare_flags, const Utf16Char* string1, int32_t string1_length,
                                  const Utf16Char* string2, int32_t string2_length, void* version_information, void* reserved, intptr_t sort_handle)
 {
