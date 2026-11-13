@@ -21,6 +21,13 @@ class Calli
     static RtResultVoid invoke_managed(SiteCache& cache, const metadata::RtMethodInfo* caller, uint32_t il_offset, const metadata::RtMethodInfo* target,
                                        interp::RtStackObject* args, interp::RtStackObject* ret);
 
+    // Tables must remain alive for the runtime lifetime; registration is cold.
+    static RtResultVoid register_native_bridges(const metadata::RtCalliBridge* entries, uint32_t count);
+    static RtResult<const metadata::RtCalliBridge*> bind_native(const metadata::RtMethodSig* signature);
+    static RtResultVoid invoke_native(const metadata::RtCalliBridge* bridge, void* target, interp::RtStackObject* args, interp::RtStackObject* ret);
+    static RtResultVoid invoke_unmanaged(SiteCache& cache, const metadata::RtMethodInfo* caller, uint32_t offset, void* target, interp::RtStackObject* args,
+                                         interp::RtStackObject* ret);
+
     // Producers accept only trusted runtime metadata. Consumers validate membership
     // before dereferencing a possibly user-supplied function-pointer value.
     static void* value_receiver(const metadata::RtMethodInfo* target, void* receiver);

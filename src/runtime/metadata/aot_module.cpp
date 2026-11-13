@@ -1,4 +1,5 @@
 #include "aot_module.h"
+#include "vm/calli.h"
 #include "utils/hashmap.h"
 #include "utils/string_util.h"
 
@@ -35,6 +36,7 @@ RtResultVoid AotModule::register_aot_modules(const RtAotModulesData* initData)
             !entry.implementation.invoke_method_ptr || (i && initData->generic_method_entries[i - 1].key_hash > entry.key_hash))
             return RtErr::BadImageFormat;
     }
+    RET_ERR_ON_FAIL(vm::Calli::register_native_bridges(initData->calli_bridges, initData->calli_bridge_count));
     for (uint32_t i = 0; i < initData->module_count; i++)
     {
         const RtAotModuleData* moduleData = initData->modules[i];

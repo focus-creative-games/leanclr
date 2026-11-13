@@ -193,6 +193,26 @@ RtResultVoid run()
     check(suppressed->native_call_conv == static_cast<uint8_t>(metadata::RtSigType::C) && suppressed->calli_flags == 2 &&
           suppressed->call_conv_modifier_count == 2);
 #endif
+    // Host registrations use complete ABI shapes and are reusable across modules.
+    static const metadata::RtCalliAbiType abi_i4{8, sizeof(int32_t), alignof(int32_t), nullptr, 0};
+    static const metadata::RtCalliAbiType* abi_args[]{&abi_i4};
+    static const metadata::RtCalliBridge bridge{1, &abi_i4, abi_args, 1, [](void*, interp::RtStackObject*, interp::RtStackObject*) {}, "host int(int)"};
+    RET_ERR_ON_FAIL(vm::Calli::register_native_bridges(&bridge, 1));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtCalliBridge*, bound, vm::Calli::bind_native(cdecl_signature));
+    check(bound != nullptr);
+    const auto bridge_allocations = allocations;
+    for (int i = 0; i < 10000; ++i)
+    {
+        RET_ERR_ON_FAIL(vm::Calli::register_native_bridges(&bridge, 1));
+        auto repeated = vm::Calli::bind_native(cdecl_signature);
+        check(repeated.is_ok() && repeated.unwrap() == bound);
+    }
+    check(allocations == bridge_allocations);
+    // An absent signature cannot alias the registered integer ABI by arity.
+    check(vm::Calli::bind_native(stdcall_signature).is_err());
+#if LEANCLR_BCL_CORECLR_NET10
+    check(vm::Calli::bind_native(suppressed).is_err());
+#endif
     // A failed registry growth must leave existing entries intact and permit retry.
     auto* integer = vm::Class::get_corlib_types().cls_int32;
     RET_ERR_ON_FAIL(vm::Class::initialize_all(integer));

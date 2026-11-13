@@ -972,12 +972,44 @@ struct RtAotModuleData
     uint32_t return_protocol;
 };
 
+// Immutable, compiler-derived native ABI shapes. Kind uses ECMA element types;
+// native pointers/byrefs normalize to Ptr. Struct fields include physical offsets.
+struct RtCalliAbiType;
+
+struct RtCalliAbiField
+{
+    uint32_t offset;
+    const RtCalliAbiType* type;
+};
+
+struct RtCalliAbiType
+{
+    uint8_t kind;
+    uint32_t size, alignment;
+    const RtCalliAbiField* fields;
+    uint32_t field_count;
+};
+
+using RtCalliInvoker = void (*)(void*, interp::RtStackObject*, interp::RtStackObject*);
+
+struct RtCalliBridge
+{
+    uint8_t convention;
+    const RtCalliAbiType* return_type;
+    const RtCalliAbiType* const* parameters;
+    uint32_t parameter_count;
+    RtCalliInvoker invoke;
+    const char* diagnostic;
+};
+
 struct RtAotModulesData
 {
     const RtAotModuleData** modules;
     uint32_t module_count;
     const RtAotGenericMethodData* generic_method_entries;
     uint32_t generic_method_entry_count;
+    const RtCalliBridge* calli_bridges = nullptr;
+    uint32_t calli_bridge_count = 0;
 };
 
 typedef void (*ClassWalkCallback)(RtClass* klass, void* userData);

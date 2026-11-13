@@ -18,6 +18,7 @@ struct CalliSite
     metadata::RtMethodSig signature;
     uint32_t il_offset;
     const metadata::RtMethodInfo* last_target;
+    const metadata::RtCalliBridge* bridge;
 };
 
 namespace
@@ -181,7 +182,15 @@ RtResult<CalliSite*> get_site(const metadata::RtMethodInfo* caller, uint32_t off
     const metadata::RtGenericContainerContext gcc{caller->parent->generic_container, caller->generic_container};
     const auto* context = caller->generic_method ? &caller->generic_method->generic_context : nullptr;
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtMethodSig, signature, caller->parent->image->read_stadalone_method_sig(token, gcc, context));
-    RET_ERR_ON_FAIL(Calli::validate_managed_signature(&signature));
+    const metadata::RtCalliBridge* bridge = nullptr;
+    if (metadata::RtMetadata::decode_sig_type(signature.flags) == metadata::RtSigType::Default)
+    {
+        RET_ERR_ON_FAIL(Calli::validate_managed_signature(&signature));
+    }
+    else
+    {
+        UNWRAP_OR_RET_ERR_ON_FAIL(bridge, Calli::bind_native(&signature));
+    }
     // Native argument roots need complete value-type reference bitmaps before
     // the callee (including a type initializer) is allowed to collect.
     for (const auto* type : signature.params)
@@ -197,7 +206,7 @@ RtResult<CalliSite*> get_site(const metadata::RtMethodInfo* caller, uint32_t off
     auto* memory = alloc::GeneralAllocation::malloc_any<CalliSite>();
     if (!memory)
         RET_ERR(RtErr::OutOfMemory);
-    auto* site = new (memory) CalliSite{std::move(signature), offset, nullptr};
+    auto* site = new (memory) CalliSite{std::move(signature), offset, nullptr, bridge};
     size_t slot = site_slot(caller, offset, site_capacity);
     while (site_entries[slot].caller)
         slot = (slot + 1) & (site_capacity - 1);
@@ -207,6 +216,20 @@ RtResult<CalliSite*> get_site(const metadata::RtMethodInfo* caller, uint32_t off
 }
 } // namespace
 
+RtResultVoid Calli::invoke_unmanaged(SiteCache& cache, const metadata::RtMethodInfo* caller, uint32_t offset, void* target, interp::RtStackObject* args,
+                                     interp::RtStackObject* ret)
+{
+    if (!caller)
+        RET_ERR(RtErr::ArgumentNull);
+    if (cache.caller != caller || !cache.site || cache.site->il_offset != offset)
+    {
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(CalliSite*, site, get_site(caller, offset));
+        cache.caller = caller;
+        cache.site = site;
+    }
+    return invoke_native(cache.site->bridge, target, args, ret);
+}
+
 void* Calli::value_receiver(const metadata::RtMethodInfo* target, void* receiver)
 {
     if (!Method::is_instance(target) || !Class::is_value_type(target->parent) || !receiver)
@@ -215,6 +238,20 @@ void* Calli::value_receiver(const metadata::RtMethodInfo* target, void* receiver
     // ldvirtftn on a boxed value denotes an unboxing entry. Ordinary value this
     // pointers already address the payload (including stack/field interiors).
     return owner == receiver && owner->klass == target->parent ? static_cast<void*>(owner + 1) : receiver;
+}
+
+RtResultVoid Calli::invoke_native(const metadata::RtCalliBridge* bridge, void* target, interp::RtStackObject* args, interp::RtStackObject* ret)
+{
+    if (!target)
+        RET_ERR(RtErr::NullReference);
+    if (contains(reinterpret_cast<const metadata::RtMethodInfo*>(target)))
+        RET_ERR(RtErr::Argument);
+    if (!bridge || !bridge->invoke)
+        RET_ERR(RtErr::NotSupported);
+    if ((bridge->parameter_count && !args) || (bridge->return_type->kind != 1 && !ret))
+        RET_ERR(RtErr::ArgumentNull);
+    bridge->invoke(target, args, ret);
+    RET_VOID_OK();
 }
 
 RtResultVoid Calli::invoke_managed(SiteCache& cache, const metadata::RtMethodInfo* caller, uint32_t offset, const metadata::RtMethodInfo* target,

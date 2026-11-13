@@ -1532,6 +1532,8 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig_skip_prologue(uint8_t sigType
         if (!modifier_reader.try_read_compressed_uint32(index) || call_conv_modifier_count == 63)
             RET_ERR(RtErr::BadImageFormat);
         ++call_conv_modifier_count;
+        if (element == static_cast<uint8_t>(RtElementType::CModReqd))
+            calli_flags |= 1;
         const auto token = RtMetadata::decode_type_def_ref_spec_coded_index(index);
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, modifier, get_class_by_type_def_ref_spec_token(token, gcc, gc));
         uint8_t convention = 0;
