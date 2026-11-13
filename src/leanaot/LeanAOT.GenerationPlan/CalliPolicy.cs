@@ -4,17 +4,25 @@ using LeanAOT.Core;
 namespace LeanAOT.GenerationPlan;
 public static class CalliPolicy
 {
-    static bool Type(TypeSig t, bool ret=false)
+    public static bool Type(TypeSig t, bool ret=false, int depth=0)
     {
         if (t is ModifierSig) {
             var raw=t;
             while(raw is CModReqdSig m && m.Modifier.FullName is ("System.Runtime.InteropServices.InAttribute" or "System.Runtime.InteropServices.OutAttribute")) raw=raw.Next;
             if(raw.ElementType==ElementType.ByRef)t=raw;
         }
-        if(t==null || t is ModifierSig || t is PinnedSig)return false;
-        if(t.ElementType==ElementType.ByRef)return t.Next.ElementType is not (ElementType.Boolean or ElementType.Char) && Type(t.Next);
+        if(depth>16 || t==null || t is ModifierSig || t is PinnedSig)return false;
+        if(t.ElementType==ElementType.ByRef)return t.Next.ElementType is not (ElementType.Boolean or ElementType.Char) && Type(t.Next,false,depth+1);
         if(t.ElementType==ElementType.ValueType && t.ToTypeDefOrRef().ResolveTypeDef() is {IsEnum:true} e)
-            return Type(e.Fields.First(f=>!f.IsStatic).FieldType);
+            return Type(e.Fields.First(f=>!f.IsStatic).FieldType,false,depth+1);
+        if(t.ElementType is ElementType.ValueType or ElementType.GenericInst) {
+            var def=t.ToTypeDefOrRef().ResolveTypeDef();
+            if(def==null || !def.IsValueType || def.IsAutoLayout || t.ContainsGenericParameter || def.Namespace.String.StartsWith("System.Runtime.Intrinsics") ||
+                def.Namespace=="System.Numerics" && def.Name.String.StartsWith("Vector") || def.CustomAttributes.Any(a=>a.TypeFullName=="System.Runtime.CompilerServices.InlineArrayAttribute"))return false;
+            var ctx=t is GenericInstSig gi?new GenericArgumentContext(gi.GenericArguments,null):null;
+            var fields=def.Fields.Where(f=>!f.IsStatic).ToList();
+            return fields.Count>0 && fields.Count<=128 && fields.All(f=>!f.HasMarshalType && f.FieldType.ElementType is not (ElementType.Boolean or ElementType.Char) && Type(MetaUtil.Inflate(f.FieldType,ctx),false,depth+1));
+        }
         return t.ElementType==ElementType.Void && ret || (int)t.ElementType>=2 && (int)t.ElementType<=13 ||
             t.ElementType==ElementType.Ptr || t.ElementType==ElementType.I || t.ElementType==ElementType.U;
     }

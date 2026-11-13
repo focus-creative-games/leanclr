@@ -55,3 +55,14 @@ returns; bool/char byrefs need separate marshaling and currently reject. ANSI ch
 is enabled only on Windows and compared using the NativeChar case. Use ushort for
 an explicit 16-bit native value; Wasm char remains unsupported. SuppressGCTransition,
 MemberFunction, varargs and unknown/required convention modifiers remain rejected.
+
+Stage 03-E adds recursively checked blittable aggregate shapes. The table records
+C++ sizeof/alignof/offsetof, nested field types and offsets. Binding compares those
+against initialized runtime layouts. Tests cover 8-byte and 24-byte returns, float
+and double aggregates, nested ref values, Pack=1, explicit padding and overlapping
+union fields; the same C functions are compared on Windows .NET 10 and Wasm.
+
+AutoLayout, managed-reference fields, MarshalAs conversions, bool/char fields,
+SIMD/inline-array special types and unverified alignments are rejected. Shape
+recursion is limited to 16 and the per-bind nested-field budget to 128. Cold binding
+uses bounded scratch storage; hot calls retain just the cached immutable bridge.

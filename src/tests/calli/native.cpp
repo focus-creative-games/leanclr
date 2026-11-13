@@ -274,14 +274,14 @@ RtResultVoid run()
         check(value == 42);
     }
 #if LEANCLR_CALLI_AOT || LEANCLR_CALLI_BRIDGES
-    for (int i = 0; i < 15; ++i)
+    for (int i = 0; i < 23; ++i)
     {
         char name[16];
         std::snprintf(name, sizeof(name), "N%d", i);
         void* address = calli_test_get_function(i);
         RET_ERR_ON_FAIL(vm::Field::set_static_value(vm::Class::get_field_for_name(program, name, false), &address));
     }
-    for (const auto* name : {"Unmanaged", "NativeFailures"
+    for (const auto* name : {"Unmanaged", "NativeStructs", "NativeRejected", "NativeFailures"
 #if LEANCLR_PLATFORM_WIN
                              ,
                              "NativeChar"

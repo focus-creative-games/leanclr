@@ -83,6 +83,114 @@ static intptr_t native_int(intptr_t x)
     return x + 1;
 }
 
+typedef struct
+{
+    int32_t a, b;
+} Small;
+
+typedef struct
+{
+    int64_t a, b, c;
+} Triple;
+
+typedef struct
+{
+    float a, b;
+} FloatPair;
+
+typedef struct
+{
+    double a, b, c;
+} DoubleTriple;
+
+#pragma pack(push, 1)
+
+typedef struct
+{
+    uint8_t a;
+    int32_t b;
+    int16_t c;
+} Packed;
+
+#pragma pack(pop)
+
+typedef struct
+{
+    int64_t a;
+    int32_t b;
+    uint8_t padding[4];
+} Explicit;
+
+typedef struct
+{
+    Small s;
+    int64_t l;
+} Nested;
+
+static Small small_value(Small v)
+{
+    v.a++;
+    v.b += 2;
+    return v;
+}
+
+static Triple large_value(Triple v)
+{
+    v.a++;
+    v.b += 2;
+    v.c += 3;
+    return v;
+}
+
+static FloatPair float_value(FloatPair v)
+{
+    v.a++;
+    v.b += 2;
+    return v;
+}
+
+static DoubleTriple double_value(DoubleTriple v)
+{
+    v.a++;
+    v.b += 2;
+    v.c += 3;
+    return v;
+}
+
+static Packed packed_value(Packed v)
+{
+    v.a++;
+    v.b += 2;
+    v.c += 3;
+    return v;
+}
+
+static Explicit explicit_value(Explicit v)
+{
+    v.a++;
+    v.b += 2;
+    return v;
+}
+
+static void nested_value(Nested* v)
+{
+    v->s.a++;
+    v->s.b += 2;
+    v->l += 3;
+}
+
+typedef union
+{
+    int32_t i;
+    float f;
+} Union;
+
+static Union union_value(Union v)
+{
+    v.i += 2;
+    return v;
+}
+
 EXPORT void* calli_test_get_function(int32_t index)
 {
     switch (index)
@@ -117,6 +225,22 @@ EXPORT void* calli_test_get_function(int32_t index)
         return (void*)single;
     case 14:
         return (void*)native_int;
+    case 15:
+        return (void*)small_value;
+    case 16:
+        return (void*)large_value;
+    case 17:
+        return (void*)float_value;
+    case 18:
+        return (void*)double_value;
+    case 19:
+        return (void*)packed_value;
+    case 20:
+        return (void*)explicit_value;
+    case 21:
+        return (void*)nested_value;
+    case 22:
+        return (void*)union_value;
     default:
         return 0;
     }

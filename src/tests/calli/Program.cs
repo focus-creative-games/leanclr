@@ -1,11 +1,21 @@
 using System;
 using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 [AttributeUsage(AttributeTargets.Method)] public class AotMethodAttribute:Attribute {public AotMethodAttribute(bool enabled){}}
 namespace CalliTests {
 public class Receiver { public int Bias; public Receiver(int bias){Bias=bias;} public int Add(int value){return Bias+value;} public virtual int V(int value){return Bias+value;} }
 public class DerivedReceiver:Receiver {public DerivedReceiver(int value):base(value){} public override int V(int value){return Bias+value+1;} }
 public struct Cell {public int Value; public int Add(int value){return Value+value;} public override int GetHashCode(){return Value;} }
 public struct Triple {public long A,B,C;}
+public struct Small { public int A,B; }
+public struct FloatPair { public float A,B; }
+public struct DoubleTriple { public double A,B,C; }
+[StructLayout(LayoutKind.Sequential,Pack=1)] public struct Packed { public byte A; public int B; public short C; }
+[StructLayout(LayoutKind.Explicit,Size=16)] public struct Explicit { [FieldOffset(0)] public long A; [FieldOffset(8)] public int B; }
+[StructLayout(LayoutKind.Explicit)] public struct Union { [FieldOffset(0)] public int I; [FieldOffset(0)] public float F; }
+[StructLayout(LayoutKind.Auto)] public struct Auto {public int Value;}
+public struct Nested { public Small S; public long L; }
+public struct References {public object Value;}
 public class Payload {public int Value;}
 
 public unsafe class NativeSignatures {
@@ -18,7 +28,7 @@ public unsafe class NativeSignatures {
 public unsafe class Program {
 static void Check(bool value,string message){if(!value)throw new Exception(message);}
 [AotMethod(false)] public static int UnmanagedInventory(IntPtr target){return ((delegate* unmanaged[Cdecl]<int,int>)(void*)target)(41);}
-public static IntPtr N0,N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11,N12,N13,N14;
+public static IntPtr N0,N1,N2,N3,N4,N5,N6,N7,N8,N9,N10,N11,N12,N13,N14,N15,N16,N17,N18,N19,N20,N21,N22;
 public static void Unmanaged(){
  Check(((delegate* unmanaged[Cdecl]<int,int>)(void*)N0)(41)==42,"native int");
  Check(((delegate* unmanaged[Cdecl]<int,double,float,long,double>)(void*)N1)(10,20.5,3,9)==42.5,"native mixed");
@@ -36,7 +46,21 @@ public static void Unmanaged(){
  Check(((delegate* unmanaged[Cdecl]<float,float>)(void*)N13)(1.5f)==3,"native float");
  Check(((delegate* unmanaged[Cdecl]<nint,nint>)(void*)N14)(41)==42,"native intptr");
 }
+public static void NativeStructs(){
+ var small=((delegate* unmanaged[Cdecl]<Small,Small>)(void*)N15)(new Small{A=1,B=2});Check(small.A==2 && small.B==4,"small aggregate");
+ var large=((delegate* unmanaged[Cdecl]<Triple,Triple>)(void*)N16)(new Triple{A=3,B=4,C=5});Check(large.A==4 && large.B==6 && large.C==8,"hidden return aggregate");
+ var floats=((delegate* unmanaged[Cdecl]<FloatPair,FloatPair>)(void*)N17)(new FloatPair{A=1.25f,B=2.5f});Check(floats.A==2.25f && floats.B==4.5f,"float aggregate");
+ var doubles=((delegate* unmanaged[Cdecl]<DoubleTriple,DoubleTriple>)(void*)N18)(new DoubleTriple{A=1.25,B=2.5,C=3.75});Check(doubles.A==2.25 && doubles.B==4.5 && doubles.C==6.75,"double aggregate");
+ var packed=((delegate* unmanaged[Cdecl]<Packed,Packed>)(void*)N19)(new Packed{A=4,B=5,C=6});Check(packed.A==5 && packed.B==7 && packed.C==9,"packed aggregate");
+ var explicitValue=((delegate* unmanaged[Cdecl]<Explicit,Explicit>)(void*)N20)(new Explicit{A=5,B=6});Check(explicitValue.A==6 && explicitValue.B==8,"explicit aggregate");
+ var union=((delegate* unmanaged[Cdecl]<Union,Union>)(void*)N22)(new Union{I=40});Check(union.I==42,"overlapping explicit aggregate");
+ var nested=new Nested{S=new Small{A=1,B=2},L=3};((delegate* unmanaged[Cdecl]<ref Nested,void>)(void*)N21)(ref nested);Check(nested.S.A==2 && nested.S.B==4 && nested.L==6,"nested byref aggregate");
+}
 public static void NativeChar(){Check(((delegate* unmanaged[Cdecl]<char,char>)(void*)N5)('A')=='B',"ANSI char ASCII");Check(((delegate* unmanaged[Cdecl]<char,char>)(void*)N5)('\ufffe')=='@',"ANSI replacement char");}
+[AotMethod(false)] public static void RejectReferences(){((delegate* unmanaged[Cdecl]<References,void>)(void*)1)(new References());}
+[AotMethod(false)] public static void RejectAuto(){((delegate* unmanaged[Cdecl]<Auto,void>)(void*)1)(new Auto());}
+[AotMethod(false)] public static void RejectBoolByref(){bool value=false;((delegate* unmanaged[Cdecl]<ref bool,void>)(void*)1)(ref value);}
+public static void NativeRejected(){int count=0;try{RejectReferences();}catch(NotSupportedException){count++;}try{RejectAuto();}catch(NotSupportedException){count++;}try{RejectBoolByref();}catch(NotSupportedException){count++;}Check(count==3,"unsupported ABI signatures rejected before target");}
 public static void NativeFailures(){bool caught=false;try{((delegate* unmanaged[Cdecl]<int,int>)(void*)0)(1);}catch(NullReferenceException){caught=true;}Check(caught,"null native target");caught=false;try{((delegate* unmanaged[Cdecl]<int,int>)(delegate* managed<int,int>)&Add)(1);}catch(ArgumentException){caught=true;}Check(caught,"managed descriptor is not a native target");}
 public static int Add(int value){return value+1;}
 public static float Float(float value){return value+2;}
@@ -68,7 +92,7 @@ public static void ThrowTarget(){Effects++;throw new InvalidOperationException()
 public static void Exception(){Effects=0;delegate* managed<void> pointer=&ThrowTarget;bool caught=false;try{Effects++;pointer();}catch(InvalidOperationException){caught=true;}Check(caught && Effects==2,"no replay on handoff");}
 public static void Main(string[]args){
 #if NET10_0_OR_GREATER
- if(args.Length>1){var library=System.Runtime.InteropServices.NativeLibrary.Load(System.IO.Path.GetFullPath(args[1]));var get=(delegate* unmanaged[Cdecl]<int,IntPtr>)(void*)System.Runtime.InteropServices.NativeLibrary.GetExport(library,"calli_test_get_function");for(int i=0;i<15;i++)typeof(Program).GetField("N"+i).SetValue(null,get(i));}
+ if(args.Length>1){var library=System.Runtime.InteropServices.NativeLibrary.Load(System.IO.Path.GetFullPath(args[1]));var get=(delegate* unmanaged[Cdecl]<int,IntPtr>)(void*)System.Runtime.InteropServices.NativeLibrary.GetExport(library,"calli_test_get_function");for(int i=0;i<23;i++)typeof(Program).GetField("N"+i).SetValue(null,get(i));}
 #endif
  typeof(Program).GetMethod(args[0]).Invoke(null,null);}
 
