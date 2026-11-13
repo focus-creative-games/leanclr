@@ -552,7 +552,8 @@ int32_t Kernel32::get_console_cp()
 #ifdef LEANCLR_PLATFORM_WIN
     return static_cast<int32_t>(::GetConsoleCP());
 #else
-    return 0;
+    // Portable standard streams use UTF-8 bytes.
+    return 65001;
 #endif
 }
 
@@ -561,7 +562,8 @@ int32_t Kernel32::get_console_output_cp()
 #ifdef LEANCLR_PLATFORM_WIN
     return static_cast<int32_t>(::GetConsoleOutputCP());
 #else
-    return 0;
+    // Portable standard streams use UTF-8 bytes.
+    return 65001;
 #endif
 }
 
@@ -671,8 +673,17 @@ intptr_t Kernel32::get_std_handle(int32_t std_handle)
 #ifdef LEANCLR_PLATFORM_WIN
     return reinterpret_cast<intptr_t>(::GetStdHandle(static_cast<DWORD>(std_handle)));
 #else
-    (void)std_handle;
-    return static_cast<intptr_t>(-1);
+    switch (std_handle)
+    {
+    case -10:
+        return os::File::get_stdin();
+    case -11:
+        return os::File::get_stdout();
+    case -12:
+        return os::File::get_stderr();
+    default:
+        return static_cast<intptr_t>(-1);
+    }
 #endif
 }
 

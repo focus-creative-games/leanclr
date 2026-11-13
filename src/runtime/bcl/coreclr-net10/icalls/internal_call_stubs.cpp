@@ -98,22 +98,6 @@ RtResultVoid ensure_dynamic_code_supported_invoker(metadata::RtManagedMethodPoin
     RET_VOID_OK();
 }
 
-RtResultVoid console_write_line_string_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
-                                               interp::RtStackObject*) noexcept
-{
-    auto str = EvalStackOp::get_param<vm::RtString*>(params, 0);
-    if (str != nullptr)
-    {
-        utils::Utf8StringBuilder buffer(vm::String::get_chars_ptr(str), static_cast<size_t>(vm::String::get_length(str)));
-        std::printf("%s\n", buffer.get_const_chars());
-    }
-    else
-    {
-        std::printf("\n");
-    }
-    RET_VOID_OK();
-}
-
 void bench_host_write_header() noexcept
 {
     std::printf("BENCHMARK|ManagedNet10.Benchmarks|1\n");
@@ -221,7 +205,6 @@ void InternalCallStubs::get_internal_call_entries(utils::Vector<vm::InternalCall
     Append(entries, SystemSecurityCryptographyRNGCryptoServiceProvider::get_internal_call_entries());
     Append(entries, SystemSecuritySecurityManager::get_internal_call_entries());
     Append(entries, LeanCLRProfile::get_internal_call_entries());
-    entries.push_back({"System.Console::WriteLine(System.String)", nullptr, console_write_line_string_invoker});
     entries.push_back(
         {"ManagedNet10.Benchmarks.BenchHostNative::GetTimestamp()", (vm::InternalCallFunction)&bench_host_get_timestamp, bench_host_get_timestamp_invoker});
     entries.push_back({"ManagedNet10.Benchmarks.BenchHostNative::WriteBenchmark(System.String,System.Int32,System.Int64,System.Int64)",
