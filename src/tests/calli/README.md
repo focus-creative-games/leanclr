@@ -41,3 +41,17 @@ The runtime validates compiler-derived ABI shapes and hashes the complete shape,
 then compares collision candidates in full. Repeat registrations are allocation-free;
 a missing bridge reports its convention, return and parameter ABI shapes. Supported
 platform gates currently cover Windows x64 and Emscripten wasm32 only.
+
+Stage 03-D splits CalliNative IR from CalliInterp and caches the bound native
+bridge at translation. Generated AOT uses the same site protocol. Native tests
+obtain real C function addresses from native_fixture.c; they cover mixed floating
+point/integer ABI, twelve arguments, ref/out, narrow signed/unsigned results,
+pointers, native integers and null/managed-descriptor rejection. The shared fixture
+can also be loaded by `dotnet CalliTests.dll Unmanaged <fixture.dll>`.
+
+.NET 10 Windows comparison confirmed default calli bool is a 32-bit BOOL, while
+char is an ANSI byte with character conversion. Bool bridges normalize nonzero
+returns; bool/char byrefs need separate marshaling and currently reject. ANSI char
+is enabled only on Windows and compared using the NativeChar case. Use ushort for
+an explicit 16-bit native value; Wasm char remains unsupported. SuppressGCTransition,
+MemberFunction, varargs and unknown/required convention modifiers remain rejected.

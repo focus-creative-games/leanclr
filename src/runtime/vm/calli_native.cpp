@@ -2,6 +2,7 @@
 #include "alloc/general_allocation.h"
 #include "vm/class.h"
 #include <cstdio>
+#include "utils/encode_conv.h"
 #include <cstring>
 
 namespace leanclr
@@ -38,14 +39,14 @@ bool shape_valid(const RtCalliAbiType* t, unsigned depth = 0)
     {
     case 1:
         return t->size == 0 && t->alignment == 1;
-    case 2:
+    case 3:
     case 4:
     case 5:
         return t->size == 1 && t->alignment == 1;
-    case 3:
     case 6:
     case 7:
         return t->size == 2 && t->alignment == 2;
+    case 2:
     case 8:
     case 9:
     case 12:
@@ -97,11 +98,14 @@ bool equal_bridge(const RtCalliBridge& a, const RtCalliBridge& b)
 
 RtResult<RtCalliAbiType> runtime_type(const RtTypeSig* sig, bool allow_void)
 {
-    if (!sig || sig->pinned || sig->num_mods)
+    if (!sig || sig->pinned ||
+        (sig->num_mods && (!sig->by_ref || sig->num_mods != unsigned(bool(sig->field_or_param_attrs & 1)) + unsigned(bool(sig->field_or_param_attrs & 2)))))
         RET_ERR(RtErr::NotSupported);
     uint8_t kind = uint8_t(sig->ele_type);
     if (sig->by_ref)
     {
+        if (kind == 2 || kind == 3)
+            RET_ERR(RtErr::NotSupported);
         if (kind != 15 && kind != 24 && kind != 25 && !(kind >= 2 && kind <= 13))
             RET_ERR(RtErr::NotSupported);
         kind = 15;
@@ -119,20 +123,26 @@ RtResult<RtCalliAbiType> runtime_type(const RtTypeSig* sig, bool allow_void)
     uint32_t size = 0, alignment = 1;
     switch (kind)
     {
+    case 3:
+#if LEANCLR_PLATFORM_WIN
+        size = alignment = 1;
+        break;
+#else
+        RET_ERR(RtErr::NotSupported);
+#endif
     case 1:
         if (!allow_void || sig->by_ref)
             RET_ERR(RtErr::NotSupported);
         break;
-    case 2:
     case 4:
     case 5:
         size = alignment = 1;
         break;
-    case 3:
     case 6:
     case 7:
         size = alignment = 2;
         break;
+    case 2:
     case 8:
     case 9:
     case 12:
@@ -174,6 +184,24 @@ RtResult<uint8_t> convention(const RtMethodSig* sig)
 #endif
 }
 } // namespace
+
+uint8_t Calli::char_to_native(uint16_t value)
+{
+    Utf16Char input = static_cast<Utf16Char>(value);
+    char bytes[8]{};
+    size_t count = 0;
+    utils::EncodeConv::utf16_to_ansi(&input, 1, bytes, count);
+    return count ? static_cast<uint8_t>(bytes[0]) : uint8_t('?');
+}
+
+uint16_t Calli::char_from_native(uint8_t value)
+{
+    char input = static_cast<char>(value);
+    Utf16Char chars[4]{};
+    size_t count = 0;
+    utils::EncodeConv::ansi_to_utf16(&input, 1, chars, count);
+    return count ? static_cast<uint16_t>(chars[0]) : uint16_t(0xfffd);
+}
 
 RtResultVoid Calli::register_native_bridges(const metadata::RtCalliBridge* table, uint32_t count)
 {

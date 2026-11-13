@@ -1117,6 +1117,12 @@
         <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
     </tplopcode>
     <opcode name="CalliInterp" base="CalliInterp" />
+    <tplopcode name="CalliNative">
+        <param name="bridge_idx" arg="resolved_data_index" arg_kind="resolved_data" />
+        <param name="method_idx" arg="arg3" arg_kind="stack" />
+        <param name="frame_base" arg="frame_base" arg_kind="stack_const" />
+    </tplopcode>
+    <opcode name="CalliNative" base="CalliNative" />
     <tplopcode name="BoxRefInplace">
         <param name="src" arg="src" arg_kind="stack" />
         <param name="dst" arg="dst" arg_kind="stack" />

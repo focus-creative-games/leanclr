@@ -394,6 +394,7 @@ size_t OpCodes::s_opsizes[static_cast<size_t>(OpCodeEnum::__Count)] = {
     sizeof(CallAot),
     sizeof(CallRuntimeImplemented),
     sizeof(CalliInterp),
+    sizeof(CalliNative),
     sizeof(BoxRefInplace),
     sizeof(NewObjInterp),
     sizeof(NewValueTypeInterp),
@@ -3751,6 +3752,15 @@ uint8_t* OpCodes::write_instruction_to_data(uint8_t* codes, OpCodeEnum opcode, c
         ir->frame_base = static_cast<uint16_t>(operands.frame_base);
         return codes + sizeof(CalliInterp);
     }
+    case OpCodeEnum::CalliNative:
+    {
+        auto* ir = reinterpret_cast<CalliNative*>(codes);
+        ir->__code = static_cast<uint16_t>(opcode);
+        ir->bridge_idx = static_cast<uint16_t>(operands.resolved_index);
+        ir->method_idx = static_cast<uint16_t>(operands.third->eval_stack_offset);
+        ir->frame_base = static_cast<uint16_t>(operands.frame_base);
+        return codes + sizeof(CalliNative);
+    }
     case OpCodeEnum::BoxRefInplace:
     {
         auto* ir = reinterpret_cast<BoxRefInplace*>(codes);
@@ -4730,6 +4740,8 @@ bool OpCodes::validate_operands(OpCodeEnum opcode, const InstructionOperands& op
     case OpCodeEnum::CallRuntimeImplemented:
         return operands.resolved_index <= UINT16_MAX && operands.frame_base <= UINT16_MAX;
     case OpCodeEnum::CalliInterp:
+        return operands.resolved_index <= UINT16_MAX && operands.third != nullptr && operands.third->eval_stack_offset <= UINT16_MAX && operands.frame_base <= UINT16_MAX;
+    case OpCodeEnum::CalliNative:
         return operands.resolved_index <= UINT16_MAX && operands.third != nullptr && operands.third->eval_stack_offset <= UINT16_MAX && operands.frame_base <= UINT16_MAX;
     case OpCodeEnum::BoxRefInplace:
         return operands.first != nullptr && operands.first->eval_stack_offset <= UINT16_MAX && operands.destination != nullptr && operands.destination->eval_stack_offset <= UINT16_MAX && operands.resolved_index <= UINT16_MAX;

@@ -395,22 +395,23 @@ enum class OpCodeEnum : uint16_t
     CallAot = 390,
     CallRuntimeImplemented = 391,
     CalliInterp = 392,
-    BoxRefInplace = 393,
-    NewObjInterp = 394,
-    NewValueTypeInterp = 395,
-    NewObjInternalCall = 396,
-    NewObjIntrinsic = 397,
-    NewObjAot = 398,
-    NewValueTypeAot = 399,
-    Throw = 400,
-    Rethrow = 401,
-    LeaveTryWithFinally = 402,
-    LeaveCatchWithFinally = 403,
-    LeaveCatchWithoutFinally = 404,
-    EndFilter = 405,
-    EndFinally = 406,
-    EndFault = 407,
-    GetEnumLongHashCode = 408,
+    CalliNative = 393,
+    BoxRefInplace = 394,
+    NewObjInterp = 395,
+    NewValueTypeInterp = 396,
+    NewObjInternalCall = 397,
+    NewObjIntrinsic = 398,
+    NewObjAot = 399,
+    NewValueTypeAot = 400,
+    Throw = 401,
+    Rethrow = 402,
+    LeaveTryWithFinally = 403,
+    LeaveCatchWithFinally = 404,
+    LeaveCatchWithoutFinally = 405,
+    EndFilter = 406,
+    EndFinally = 407,
+    EndFault = 408,
+    GetEnumLongHashCode = 409,
     __Count,
 };
 
@@ -3830,6 +3831,14 @@ struct CalliInterp
 {
     uint16_t __code;
     uint16_t method_sig_idx;
+    uint16_t method_idx;
+    uint16_t frame_base;
+};
+
+struct CalliNative
+{
+    uint16_t __code;
+    uint16_t bridge_idx;
     uint16_t method_idx;
     uint16_t frame_base;
 };

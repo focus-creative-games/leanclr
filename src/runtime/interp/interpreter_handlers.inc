@@ -2809,6 +2809,20 @@ LEANCLR_CASE_BEGIN_LITE(CallRuntimeImplemented)
 }
 LEANCLR_CASE_END_LITE()
 
+LEANCLR_CASE_BEGIN_LITE(CalliNative)
+{
+    const auto* ir = reinterpret_cast<const ll::CalliNative*>(ip);
+    const auto* bridge = get_resolved_data<const metadata::RtCalliBridge>(imi, ir->bridge_idx);
+#if LEANCLR_BCL_CORECLR_NET10
+    frame->gc_live_stack_size = frame->eval_stack_size;
+#endif
+    void* target = get_stack_value_at<void*>(eval_stack_base, ir->method_idx);
+    RtStackObject* args = eval_stack_base + ir->frame_base;
+    HANDLE_RAISE_RUNTIME_ERROR_VOID(vm::Calli::invoke_native(bridge, target, args, args));
+    ip = reinterpret_cast<const uint8_t*>(ir + 1);
+}
+LEANCLR_CASE_END_LITE()
+
 LEANCLR_CASE_BEGIN_LITE(CalliInterp)
 {
     const auto* ir = reinterpret_cast<const ll::CalliInterp*>(ip);

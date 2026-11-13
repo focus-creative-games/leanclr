@@ -97,7 +97,10 @@ RtResultVoid Calli::validate_managed_signature(const metadata::RtMethodSig* sign
     if ((signature->flags & uint8_t(metadata::RtSigType::ExplicitThis)) && (!Method::has_this(signature) || signature->params.empty()))
         RET_ERR(RtErr::BadImageFormat);
     for (const auto* param : signature->params)
-        if (!param || param->is_void() || param->num_mods || param->pinned)
+        if (!param || param->is_void() ||
+            (param->num_mods &&
+             (!param->by_ref || param->num_mods != unsigned(bool(param->field_or_param_attrs & 1)) + unsigned(bool(param->field_or_param_attrs & 2)))) ||
+            param->pinned)
             RET_ERR(RtErr::NotSupported);
     RET_VOID_OK();
 }
