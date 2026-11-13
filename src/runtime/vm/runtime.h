@@ -42,6 +42,10 @@ class Runtime
 
     static RtResult<RtObject*> invoke_array_arguments_with_run_cctor(const metadata::RtMethodInfo* method, RtObject* obj, RtArray* params);
 
+    // Raw stackobject invocations always consume the caller's explicit this slot.
+    // For .ctor, params[0] is the existing reference object, or the unboxed value
+    // payload address for a value type. These APIs never allocate a new instance.
+    // Constructor allocation is selected by object/array invocation with obj == nullptr.
     static RtResultVoid invoke_stackobject_arguments_without_run_cctor(const metadata::RtMethodInfo* method, const interp::RtStackObject* params,
                                                                        interp::RtStackObject* ret) noexcept;
 

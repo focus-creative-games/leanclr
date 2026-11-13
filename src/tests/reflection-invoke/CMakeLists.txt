@@ -1,12 +1,16 @@
 cmake_minimum_required(VERSION 3.15)
 project(reflection_invoke_contracts C CXX)
 add_subdirectory(../../tools/leanrun leanrun_build)
+add_executable(reflection-invoke-native native.cpp)
+target_link_libraries(reflection-invoke-native PRIVATE leanclr)
 set(LEANCLR_REFLECTION_MANAGED_DIR "" CACHE PATH "Managed test assembly directory")
 set(LEANCLR_REFLECTION_RUNTIME_DIR "" CACHE PATH "Matching BCL directory")
 if(EMSCRIPTEN)
-    set_target_properties(leanrun PROPERTIES SUFFIX ".js")
-    target_link_options(leanrun PRIVATE -sENVIRONMENT=node -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 -lnodefs.js
+    foreach(target leanrun reflection-invoke-native)
+    set_target_properties(${target} PROPERTIES SUFFIX ".js")
+    target_link_options(${target} PRIVATE -sENVIRONMENT=node -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 -lnodefs.js
         "--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/../../benchmarks/aot-baseline/nodefs.js")
+    endforeach()
 endif()
 enable_testing()
 foreach(entry RefValue OutValue NullRefValue RefObjects RefNullable RefEnum RefStruct OnException)
@@ -14,3 +18,6 @@ foreach(entry RefValue OutValue NullRefValue RefObjects RefNullable RefEnum RefS
         -e "ReflectionInvokeTests.Program::${entry}" ReflectionInvokeTests)
     set_tests_properties(reflection-${entry} PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../..")
 endforeach()
+
+add_test(NAME reflection-native COMMAND reflection-invoke-native "${LEANCLR_REFLECTION_MANAGED_DIR}" "${LEANCLR_REFLECTION_RUNTIME_DIR}")
+set_tests_properties(reflection-native PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../..")
