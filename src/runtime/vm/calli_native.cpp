@@ -1,6 +1,7 @@
 #include "calli.h"
 #include "alloc/general_allocation.h"
 #include "vm/class.h"
+#include "vm/field.h"
 #include <cstdio>
 #include "utils/encode_conv.h"
 #include <cstring>
@@ -33,7 +34,22 @@ void number(uint64_t& hash, uint32_t value)
 
 bool shape_valid(const RtCalliAbiType* t, unsigned depth = 0)
 {
-    if (!t || depth > 16 || t->field_count || t->fields)
+    if (!t || depth > 16)
+        return false;
+    if (t->kind == 17)
+    {
+        if (!t->size || !t->alignment || (t->alignment & (t->alignment - 1)) || t->alignment > 8 || !t->field_count || t->field_count > 128 || !t->fields)
+            return false;
+        for (uint32_t i = 0; i < t->field_count; ++i)
+        {
+            const auto& f = t->fields[i];
+            if (!shape_valid(f.type, depth + 1) || f.type->kind == 1 || f.type->kind == 2 || f.type->kind == 3 || f.offset > t->size ||
+                f.type->size > t->size - f.offset)
+                return false;
+        }
+        return true;
+    }
+    if (t->field_count || t->fields)
         return false;
     switch (t->kind)
     {
@@ -68,6 +84,11 @@ void shape_hash(uint64_t& hash, const RtCalliAbiType& t)
     number(hash, t.size);
     number(hash, t.alignment);
     number(hash, t.field_count);
+    for (uint32_t i = 0; i < t.field_count; ++i)
+    {
+        number(hash, t.fields[i].offset);
+        shape_hash(hash, *t.fields[i].type);
+    }
 }
 
 uint64_t bridge_hash(const RtCalliBridge& b)
@@ -83,7 +104,12 @@ uint64_t bridge_hash(const RtCalliBridge& b)
 
 bool equal_type(const RtCalliAbiType& a, const RtCalliAbiType& b)
 {
-    return a.kind == b.kind && a.size == b.size && a.alignment == b.alignment && a.field_count == b.field_count;
+    if (a.kind != b.kind || a.size != b.size || a.alignment != b.alignment || a.field_count != b.field_count)
+        return false;
+    for (uint32_t i = 0; i < a.field_count; ++i)
+        if (a.fields[i].offset != b.fields[i].offset || !equal_type(*a.fields[i].type, *b.fields[i].type))
+            return false;
+    return true;
 }
 
 bool equal_bridge(const RtCalliBridge& a, const RtCalliBridge& b)
@@ -96,19 +122,28 @@ bool equal_bridge(const RtCalliBridge& a, const RtCalliBridge& b)
     return true;
 }
 
-RtResult<RtCalliAbiType> runtime_type(const RtTypeSig* sig, bool allow_void)
+struct ShapeArena
 {
-    if (!sig || sig->pinned ||
+    RtCalliAbiType types[128];
+    RtCalliAbiField fields[128];
+    uint32_t used = 0;
+};
+
+RtResult<RtCalliAbiType> runtime_type(const RtTypeSig* sig, bool allow_void, ShapeArena& arena, unsigned depth = 0)
+{
+    if (depth > 16 || !sig || sig->pinned ||
         (sig->num_mods && (!sig->by_ref || sig->num_mods != unsigned(bool(sig->field_or_param_attrs & 1)) + unsigned(bool(sig->field_or_param_attrs & 2)))))
         RET_ERR(RtErr::NotSupported);
     uint8_t kind = uint8_t(sig->ele_type);
     if (sig->by_ref)
     {
-        if (kind == 2 || kind == 3)
+        auto payload = *sig;
+        payload.by_ref = 0;
+        payload.num_mods = 0;
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtCalliAbiType, inner, runtime_type(&payload, false, arena, depth + 1));
+        if (inner.kind == 2 || inner.kind == 3)
             RET_ERR(RtErr::NotSupported);
-        if (kind != 15 && kind != 24 && kind != 25 && !(kind >= 2 && kind <= 13))
-            RET_ERR(RtErr::NotSupported);
-        kind = 15;
+        RET_OK((RtCalliAbiType{15, sizeof(void*), alignof(void*), nullptr, 0}));
     }
     if (kind == 24 || kind == 25)
         kind = 15;
@@ -117,7 +152,35 @@ RtResult<RtCalliAbiType> runtime_type(const RtTypeSig* sig, bool allow_void)
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, klass, Class::get_class_from_typesig(sig));
         RET_ERR_ON_FAIL(Class::initialize_all(klass));
         if (!Class::is_enum_type(klass))
-            RET_ERR(RtErr::NotSupported);
+        {
+            if (!Class::is_value_type(klass) || Class::get_has_references(klass) || !(klass->flags & uint32_t(RtTypeAttribute::LayoutMask)) ||
+                klass->alignment > 8 || std::strncmp(klass->namespaze, "System.Runtime.Intrinsics", 25) == 0 ||
+                (std::strcmp(klass->namespaze, "System.Numerics") == 0 && std::strncmp(klass->name, "Vector", 6) == 0))
+                RET_ERR(RtErr::NotSupported);
+            uint32_t count = 0;
+            for (uint16_t i = 0; i < klass->field_count; ++i)
+                if (!Field::is_static_included_literal_and_rva(klass->fields + i))
+                    ++count;
+            if (!count || count > 128 - arena.used)
+                RET_ERR(RtErr::NotSupported);
+            const auto first = arena.used;
+            arena.used += count;
+            uint32_t index = first;
+            for (uint16_t i = 0; i < klass->field_count; ++i)
+            {
+                const auto& f = klass->fields[i];
+                if (Field::is_static_included_literal_and_rva(&f))
+                    continue;
+                if (f.flags & uint32_t(RtFieldAttribute::HasFieldMarshal))
+                    RET_ERR(RtErr::NotSupported);
+                UNWRAP_OR_RET_ERR_ON_FAIL(arena.types[index], runtime_type(f.type_sig, false, arena, depth + 1));
+                if (arena.types[index].kind == 2 || arena.types[index].kind == 3)
+                    RET_ERR(RtErr::NotSupported);
+                arena.fields[index] = {f.offset, arena.types + index};
+                ++index;
+            }
+            RET_OK((RtCalliAbiType{17, klass->instance_size_without_header, klass->alignment, arena.fields + first, count}));
+        }
         kind = uint8_t(Class::get_enum_element_type(klass));
     }
     uint32_t size = 0, alignment = 1;
@@ -296,12 +359,13 @@ RtResult<const metadata::RtCalliBridge*> Calli::bind_native(const metadata::RtMe
         RET_ERR(RtErr::NotSupported);
     auto return_sig = *sig->return_type;
     return_sig.num_mods = 0;
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtCalliAbiType, ret, runtime_type(&return_sig, true));
+    ShapeArena arena{};
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtCalliAbiType, ret, runtime_type(&return_sig, true, arena));
     RtCalliAbiType args[256];
     const RtCalliAbiType* pointers[256];
     for (size_t i = 0; i < sig->params.size(); ++i)
     {
-        UNWRAP_OR_RET_ERR_ON_FAIL(args[i], runtime_type(sig->params[i], false));
+        UNWRAP_OR_RET_ERR_ON_FAIL(args[i], runtime_type(sig->params[i], false, arena));
         pointers[i] = args + i;
     }
     RtCalliBridge wanted{conv, &ret, pointers, uint32_t(sig->params.size()), nullptr, nullptr};
