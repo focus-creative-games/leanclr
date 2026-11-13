@@ -53,6 +53,7 @@ def main():
              ('ManagedNet10.GlobalizationContracts', 'ManagedNet10.GlobalizationContracts.Program', 'EnvironmentRoundtrip'),
              ('ReflectionMetadataTests', 'ReflectionMetadataTests.Program', 'AttributeMetadata'),
              ('ReflectionMetadataTests', 'ReflectionMetadataTests.Program', 'PropertyAttributeInstances'),
+             ('ReflectionMetadataTests', 'ReflectionMetadataTests.Program', 'FieldPseudoAttributes'),
              ('ReflectionMetadataTests', 'ReflectionMetadataTests.Program', 'ThrowingAttributeMetadata')]
     if invariant: cases.append(('ManagedNet10.GlobalizationContracts', 'ManagedNet10.GlobalizationContracts.Program', 'InvariantProfile'))
     if opts.target == 'wasm':

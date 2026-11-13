@@ -137,6 +137,11 @@ public class Decorated
     {
     }
 }
+[System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Explicit)]
+public struct PseudoAttributeProbe
+{
+    [System.Runtime.InteropServices.FieldOffset(8)] public int Field;
+}
 public class Program
 {
     static void Check(bool b, string message)
@@ -262,6 +267,14 @@ public class Program
         var data = CustomAttributeData.GetCustomAttributes(m);
         Check(data.Count == 1 && data[0].Constructor.DeclaringType == typeof(BombAttribute), "throwing metadata");
         Check(data[0].ConstructorArguments.Count == 0 && data[0].NamedArguments.Count == 0, "empty arguments");
+    }
+    public static void FieldPseudoAttributes()
+    {
+        var field = typeof(PseudoAttributeProbe).GetField("Field");
+        var attributes = field.GetCustomAttributes(typeof(System.Runtime.InteropServices.FieldOffsetAttribute), false);
+        Check(attributes.Length == 1 && ((System.Runtime.InteropServices.FieldOffsetAttribute)attributes[0]).Value == 8,
+              "field offset pseudo attribute");
+        Check(field.IsDefined(typeof(System.Runtime.InteropServices.FieldOffsetAttribute), false), "field offset IsDefined");
     }
     public static void PropertyAttributeInstances()
     {

@@ -245,72 +245,12 @@
     "header": "bcl/coreclr-net10/intrinsics/system_runtime_compilerservices_runtimehelpers.h"
   },
   {
-    "name": "System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeConstructorInfo,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::is_defined_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeConstructorInfo,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::get_custom_attributes_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
     "name": "System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimePropertyInfo,System.RuntimeType)",
     "func": "SystemReflectionCustomAttribute::is_defined_on_provider",
     "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
   },
   {
     "name": "System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimePropertyInfo,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::get_custom_attributes_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeEventInfo,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::is_defined_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeEventInfo,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::get_custom_attributes_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeFieldInfo,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::is_defined_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeFieldInfo,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::get_custom_attributes_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeParameterInfo,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::is_defined_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeParameterInfo,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::get_custom_attributes_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeAssembly,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::is_defined_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeAssembly,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::get_custom_attributes_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeModule,System.RuntimeType)",
-    "func": "SystemReflectionCustomAttribute::is_defined_on_provider",
-    "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
-  },
-  {
-    "name": "System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeModule,System.RuntimeType)",
     "func": "SystemReflectionCustomAttribute::get_custom_attributes_on_provider",
     "header": "bcl/coreclr-net10/intrinsics/system_reflection_customattribute.h"
   }

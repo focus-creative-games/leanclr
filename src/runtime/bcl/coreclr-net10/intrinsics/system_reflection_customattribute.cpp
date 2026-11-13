@@ -181,9 +181,9 @@ static RtResultVoid get_custom_attributes_data_internal_on_provider_invoker(meta
     RET_VOID_OK();
 }
 
-// CoreLib's field/property/event/constructor/parameter/module/assembly overloads
-// have TWO parameters. Do not reuse the three-parameter method overload or
-// interpret their provider object using a RuntimeMethodInfo layout.
+// The property overload has TWO parameters. Keep field/parameter and other
+// overloads in CoreLib so its pseudo-attribute synthesis remains authoritative.
+// Never interpret a property provider using a RuntimeMethodInfo layout.
 static RtResultVoid provider_is_defined_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                 interp::RtStackObject* ret) noexcept
 {
@@ -205,33 +205,9 @@ static RtResultVoid provider_get_attributes_invoker(metadata::RtManagedMethodPoi
 }
 
 static vm::IntrinsicEntry s_intrinsic_entries_system_reflection_customattribute[] = {
-    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeConstructorInfo,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
-    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeConstructorInfo,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
     {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimePropertyInfo,System.RuntimeType)",
      (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
     {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimePropertyInfo,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
-    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeEventInfo,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
-    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeEventInfo,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
-    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeFieldInfo,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
-    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeFieldInfo,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
-    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeParameterInfo,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
-    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeParameterInfo,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
-    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeAssembly,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
-    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeAssembly,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
-    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeModule,System.RuntimeType)",
-     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
-    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeModule,System.RuntimeType)",
      (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
     {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeMethodInfo,System.RuntimeType,System.Boolean)",
      (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined, is_defined_invoker},
