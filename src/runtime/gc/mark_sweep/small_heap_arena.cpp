@@ -3,6 +3,7 @@
 #if LEANCLR_GC_MARK_SWEEP
 
 #include "gc/gc_finalizer.h"
+#include "gc/mark_sweep/mark_sweep_heap.h"
 #include "utils/mem_op.h"
 
 namespace leanclr
@@ -226,12 +227,24 @@ SmallHeapArena* SizeClassPool::allocate_arena()
         alloc::GeneralAllocation::aligned_free(arena_data);
         return nullptr;
     }
-    return new (mem) SmallHeapArena(arena_data, _arena_size, _block_size);
+    auto* arena = new (mem) SmallHeapArena(arena_data, _arena_size, _block_size);
+#if LEANCLR_GC_MARK_SWEEP
+    if (!MarkSweepHeap::register_arena(arena_data, _arena_size, arena))
+    {
+        arena->~SmallHeapArena();
+        alloc::GeneralAllocation::free(arena);
+        return nullptr;
+    }
+#endif
+    return arena;
 }
 
 void SizeClassPool::free_arena(SmallHeapArena* arena)
 {
     assert(arena != nullptr);
+#if LEANCLR_GC_MARK_SWEEP
+    MarkSweepHeap::unregister_arena(arena->data());
+#endif
     arena->~SmallHeapArena();
     alloc::GeneralAllocation::free(arena);
 }
@@ -254,7 +267,8 @@ void* SizeClassPool::allocate_block()
         return _current_arena->allocate_block();
     }
 
-    if (!_arenas.try_reserve(_arenas.size() + 1)) return nullptr;
+    if (!_arenas.try_reserve(_arenas.size() + 1))
+        return nullptr;
     _current_arena = allocate_arena();
     if (_current_arena == nullptr)
     {
@@ -306,3 +320,65 @@ void SizeClassPool::sweep(const GCAliveObjectBitmap& alive_object_bitmap, int64_
 } // namespace leanclr
 
 #endif // LEANCLR_GC_MARK_SWEEP
+
+#if LEANCLR_GC_MARK_SWEEP
+namespace leanclr
+{
+namespace gc
+{
+vm::RtObject* SmallHeapArena::find_object_containing(const void* ptr) const
+{
+    const uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
+    const uintptr_t begin = reinterpret_cast<uintptr_t>(_data);
+    if (address < begin || address - begin >= _block_count * _block_size)
+        return nullptr;
+    const size_t index = (address - begin) / _block_size;
+    return is_block_in_use(index) ? reinterpret_cast<vm::RtObject*>(begin + index * _block_size) : nullptr;
+}
+
+bool SmallHeapArena::contains_allocated_block(const void* ptr) const
+{
+    if (ptr == nullptr || _data == nullptr)
+    {
+        return false;
+    }
+
+    uintptr_t block_addr = reinterpret_cast<uintptr_t>(ptr);
+    uintptr_t data_addr = reinterpret_cast<uintptr_t>(_data);
+    uintptr_t data_end = data_addr + _block_count * _block_size;
+    if (block_addr < data_addr || block_addr >= data_end)
+    {
+        return false;
+    }
+
+    uintptr_t offset = block_addr - data_addr;
+    if (offset % _block_size != 0)
+    {
+        return false;
+    }
+
+    return is_block_in_use(static_cast<size_t>(offset / _block_size));
+}
+} // namespace gc
+} // namespace leanclr
+#endif
+
+#if LEANCLR_GC_MARK_SWEEP
+namespace leanclr
+{
+namespace gc
+{
+bool SizeClassPool::contains_allocated_block(const void* ptr) const
+{
+    for (size_t i = 0; i < _arenas.size(); ++i)
+    {
+        if (_arenas[i]->contains_allocated_block(ptr))
+        {
+            return true;
+        }
+    }
+    return false;
+}
+} // namespace gc
+} // namespace leanclr
+#endif

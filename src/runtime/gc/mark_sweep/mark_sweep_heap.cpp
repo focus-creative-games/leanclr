@@ -47,6 +47,60 @@ static utils::HashSet<void*>& get_s_big_object_arenas()
     return value;
 }
 
+#if LEANCLR_GC_MARK_SWEEP
+struct HeapRange
+{
+    uintptr_t begin;
+    uintptr_t end;
+    SmallHeapArena* small_arena;
+};
+
+static utils::Vector<HeapRange>& heap_ranges()
+{
+    static utils::Vector<HeapRange> ranges;
+    return ranges;
+}
+
+static size_t range_lower_bound(uintptr_t address)
+{
+    const auto& ranges = heap_ranges();
+    size_t low = 0, high = ranges.size();
+    while (low < high)
+    {
+        const size_t mid = low + (high - low) / 2;
+        if (ranges[mid].begin < address)
+            low = mid + 1;
+        else
+            high = mid;
+    }
+    return low;
+}
+
+bool MarkSweepHeap::register_arena(void* start, size_t size, SmallHeapArena* arena)
+{
+    const uintptr_t address = reinterpret_cast<uintptr_t>(start);
+    if (size > UINTPTR_MAX - address)
+        return false;
+    auto& ranges = heap_ranges();
+    const size_t index = range_lower_bound(address);
+    const HeapRange range{address, address + size, arena};
+    if (!ranges.try_push_back(range))
+        return false;
+    for (size_t i = ranges.size() - 1; i > index; --i)
+        ranges[i] = ranges[i - 1];
+    ranges[index] = range;
+    return true;
+}
+
+void MarkSweepHeap::unregister_arena(void* start)
+{
+    auto& ranges = heap_ranges();
+    const size_t index = range_lower_bound(reinterpret_cast<uintptr_t>(start));
+    assert(index < ranges.size() && ranges[index].begin == reinterpret_cast<uintptr_t>(start));
+    ranges.erase(ranges.begin() + index);
+}
+#endif
+
 // constexpr size_t kMinSmallHeapBlockSize = 8;
 // constexpr size_t kMaxSmallHeapBlockSize = 256;
 // constexpr size_t kSmallHeapBlockSizeIncrement = GC_ALIGN;
@@ -104,6 +158,9 @@ static void sweep_big_objects(const GCAliveObjectBitmap& alive_object_bitmap, in
             continue;
         }
         size_t aligned_size = utils::MemOp::align_up(get_object_allocated_size(obj), GC_ALIGN);
+#if LEANCLR_GC_MARK_SWEEP
+        MarkSweepHeap::unregister_arena(obj);
+#endif
         GcFinalizer::on_object_freed(obj);
 #if LEANCLR_GC_DEBUG
         gc_debug_quarantine_object(obj, aligned_size);
@@ -251,6 +308,13 @@ vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, 
         obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(aligned_size);
         if (obj != nullptr)
         {
+#if LEANCLR_GC_MARK_SWEEP
+            if (!MarkSweepHeap::register_arena(obj, aligned_size, nullptr))
+            {
+                alloc::GeneralAllocation::free(obj);
+                return nullptr;
+            }
+#endif
             get_s_big_object_arenas().insert(obj);
         }
         else
@@ -294,3 +358,39 @@ vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, s
 } // namespace leanclr
 
 #endif // LEANCLR_GC_MARK_SWEEP
+
+#if LEANCLR_GC_MARK_SWEEP
+namespace leanclr
+{
+namespace gc
+{
+vm::RtObject* MarkSweepHeap::find_object_containing(const void* ptr)
+{
+    if (ptr == nullptr)
+        return nullptr;
+    const uintptr_t address = reinterpret_cast<uintptr_t>(ptr);
+    const auto& ranges = heap_ranges();
+    size_t index = range_lower_bound(address);
+    if (index == ranges.size() || ranges[index].begin != address)
+    {
+        if (index == 0)
+            return nullptr;
+        --index;
+    }
+    const auto& range = ranges[index];
+    if (address >= range.end)
+        return nullptr;
+    vm::RtObject* obj = range.small_arena != nullptr ? range.small_arena->find_object_containing(ptr) : reinterpret_cast<vm::RtObject*>(range.begin);
+    if (obj == nullptr || obj->klass == nullptr)
+        return nullptr;
+    // Do not accept free blocks, quarantine tombstones, or small-block padding.
+    return address - reinterpret_cast<uintptr_t>(obj) < get_object_allocated_size(obj) ? obj : nullptr;
+}
+
+bool MarkSweepHeap::is_allocated_object(const vm::RtObject* obj)
+{
+    return obj != nullptr && find_object_containing(obj) == obj;
+}
+} // namespace gc
+} // namespace leanclr
+#endif

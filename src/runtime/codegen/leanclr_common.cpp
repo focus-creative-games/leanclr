@@ -14,6 +14,38 @@ namespace leanclr
 {
 namespace codegen
 {
+AotRootScope* AotRootScope::current = nullptr;
+
+void AotRootScope::visit_roots(gc::GcVisitObjectRoot visit, void* userdata)
+{
+    const auto scan_range = [visit, userdata](const void* address, size_t size)
+    {
+        if (address == nullptr)
+            return;
+        const auto* bytes = static_cast<const uint8_t*>(address);
+        for (size_t offset = 0; offset + sizeof(uintptr_t) <= size; offset += sizeof(uintptr_t))
+        {
+            uintptr_t value;
+            std::memcpy(&value, bytes + offset, sizeof(value));
+            if (auto* object = gc::GarbageCollector::find_object_containing(reinterpret_cast<const void*>(value)))
+                visit(object, userdata);
+        }
+    };
+    for (auto* scope = current; scope != nullptr; scope = scope->previous)
+    {
+        for (size_t i = 0; i < scope->stable_range_count; ++i)
+        {
+            const auto& range = scope->stable_ranges[i];
+            const void* address = range.address;
+            if (range.indirect)
+                std::memcpy(&address, address, sizeof(address));
+            scan_range(address, range.size);
+        }
+        for (size_t i = 0; i < scope->count; ++i)
+            if (auto* object = gc::GarbageCollector::find_object_containing(reinterpret_cast<const void*>(scope->buffer[i])))
+                visit(object, userdata);
+    }
+}
 
 namespace
 {

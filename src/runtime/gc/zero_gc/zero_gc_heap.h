@@ -54,6 +54,17 @@ class ZeroGcHeap
     static vm::RtObject* allocate_object(const metadata::RtClass* klass, size_t size);
     // static vm::RtObject* allocate_object_not_contains_references(const metadata::RtClass* klass, size_t size);
     static vm::RtObject* allocate_array(const metadata::RtClass* arrClass, size_t totalBytes);
+
+  public:
+#if LEANCLR_GC_ZERO_GC
+    static bool is_allocated_object(const vm::RtObject* obj);
+
+    // A noncollecting heap does not need to discover conservative roots.
+    static vm::RtObject* find_object_containing(const void*)
+    {
+        return nullptr;
+    }
+#endif
 };
 
 } // namespace gc

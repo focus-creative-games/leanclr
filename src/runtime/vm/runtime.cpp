@@ -80,7 +80,7 @@ struct ObjectInvokeScope
     {
         for (auto* scope = current; scope; scope = scope->previous)
         {
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
             auto* array_owner = gc::GarbageCollector::find_object_containing(scope->parameters);
             if (array_owner)
                 visit(array_owner, context);
@@ -109,7 +109,7 @@ struct ObjectInvokeScope
                 data = static_cast<uint8_t*>(scope->return_buffer->ptr);
                 if (!data)
                     continue;
-#if LEANCLR_BCL_CORECLR_NET10
+#if LEANCLR_GC_MARK_SWEEP
                 auto* owner = gc::GarbageCollector::find_object_containing(data);
                 if (owner)
                     visit(owner, context);
@@ -708,9 +708,8 @@ static RtResult<RtObject*> invoke_object_arguments_impl(const metadata::RtMethod
     interp::RtStackObject* ret_buffer = buffers.ret_buffer;
     roots.return_buffer = ret_buffer;
 
-#if LEANCLR_BCL_CORECLR_NET10
     interp::MethodArgumentRoots native_roots(actual_method, arg_buffer);
-#endif
+
     // Invoke the method
     auto invoke_ptr = CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(actual_method->invoke_method_ptr);
     RET_ERR_ON_FAIL(invoke_ptr(actual_method->method_ptr, actual_method, arg_buffer, ret_buffer));
