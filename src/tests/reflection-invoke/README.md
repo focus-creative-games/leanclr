@@ -39,3 +39,10 @@ target is also distinguished from explicit allocation using a null target. The r
 claimed stackobject/newobj substitution did not reproduce on the current code.
 
 A CoreCLR native regression also makes the first value argument's type initializer collect before a later raw struct argument is boxed. All parameter layouts must be prepared before that first managed allocation, so the later struct's GC references are visible throughout materialization.
+
+For the raw native contract with actual compiled constructor bodies, generate
+ReflectionInvokeTests with LeanAOT for the selected BCL, then configure
+`LEANCLR_REFLECTION_AOT_CPP_DIR` with that generated directory. This links the AOT
+module into the native harness and asserts that both reference/value constructors
+have AOT invokers before checking the existing-this behavior; interpreter-only
+execution cannot accidentally satisfy this gate.
