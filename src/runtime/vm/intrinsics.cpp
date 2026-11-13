@@ -1,3 +1,4 @@
+#include "host_invokers.h"
 #include "intrinsics.h"
 #include "method.h"
 #include "class.h"
@@ -58,7 +59,10 @@ RtResult<const IntrinsicRegistry*> Intrinsics::get_intrinsic_by_method(const met
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = get_g_intrinsicMap().find(sb.get_const_chars());
         if (it != get_g_intrinsicMap().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second.invoker));
             RET_OK(&it->second);
+        }
     }
 
     {
@@ -66,7 +70,10 @@ RtResult<const IntrinsicRegistry*> Intrinsics::get_intrinsic_by_method(const met
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = get_g_intrinsicMap().find(sb.get_const_chars());
         if (it != get_g_intrinsicMap().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second.invoker));
             RET_OK(&it->second);
+        }
     }
     RET_OK(nullptr);
 }
@@ -96,7 +103,10 @@ RtResult<IntrinsicInvoker> Intrinsics::get_newobj_intrinsic_by_method(const meta
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = get_g_newobjIntrinsicMap().find(sb.get_const_chars());
         if (it != get_g_newobjIntrinsicMap().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second));
             RET_OK(it->second);
+        }
     }
 
     {
@@ -104,7 +114,10 @@ RtResult<IntrinsicInvoker> Intrinsics::get_newobj_intrinsic_by_method(const meta
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = get_g_newobjIntrinsicMap().find(sb.get_const_chars());
         if (it != get_g_newobjIntrinsicMap().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second));
             RET_OK(it->second);
+        }
     }
     RET_OK((IntrinsicInvoker) nullptr);
 }
