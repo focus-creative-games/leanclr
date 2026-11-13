@@ -1,3 +1,4 @@
+#include "host_invokers.h"
 #include "internal_calls.h"
 #include "method.h"
 #include "class.h"
@@ -92,7 +93,10 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_with_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = get_g_internalCallMap().find(sb.get_const_chars());
         if (it != get_g_internalCallMap().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second.invoker));
             RET_OK(&it->second);
+        }
     }
 
     // Try with method name without parameters
@@ -101,7 +105,10 @@ RtResult<const InternalCallRegistry*> InternalCalls::get_internal_call_by_method
         RET_ERR_ON_FAIL(metadata::MetadataName::append_method_full_name_without_params(sb, method, metadata::TypeNameFormat::InternalName));
         auto it = get_g_internalCallMap().find(sb.get_const_chars());
         if (it != get_g_internalCallMap().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second.invoker));
             RET_OK(&it->second);
+        }
     }
 
     RET_OK(nullptr);
@@ -133,7 +140,10 @@ RtResult<InternalCallInvoker> InternalCalls::get_newobj_internal_call_by_method(
         const char* fullName = sb.get_const_chars();
         auto it = get_g_newobjInternalCallMap().find(fullName);
         if (it != get_g_newobjInternalCallMap().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second));
             RET_OK(it->second);
+        }
     }
 
     // Try with method name without parameters
@@ -143,7 +153,10 @@ RtResult<InternalCallInvoker> InternalCalls::get_newobj_internal_call_by_method(
         const char* nameOnly = sb.get_const_chars();
         auto it = get_g_newobjInternalCallMap().find(nameOnly);
         if (it != get_g_newobjInternalCallMap().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second));
             RET_OK(it->second);
+        }
     }
 
     RET_OK((InternalCallInvoker) nullptr);
