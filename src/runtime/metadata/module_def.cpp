@@ -191,7 +191,16 @@ RtResultVoid RtModuleDef::load()
     RET_ERR_ON_FAIL(setup_assembly_name());
 
     _nameNoExt = _assemblyName.name;
-    _name = utils::StringUtil::concat(_assemblyName.name, ".dll");
+    // The display name belongs to the metadata pool, including failed loads.
+    const size_t name_length = std::strlen(_assemblyName.name);
+    if (name_length > SIZE_MAX - 5)
+        RET_ERR(RtErr::OutOfMemory);
+    auto* display_name = reinterpret_cast<char*>(_pool.malloc_zeroed(name_length + 5, alignof(char)));
+    if (!display_name)
+        RET_ERR(RtErr::OutOfMemory);
+    std::memcpy(display_name, _assemblyName.name, name_length);
+    std::memcpy(display_name + name_length, ".dll", 5);
+    _name = display_name;
 
     _corLib = strcmp(_nameNoExt, STR_CORLIB_NAME) == 0;
 

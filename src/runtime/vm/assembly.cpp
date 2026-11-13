@@ -89,6 +89,11 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(RtAppDomain* app_domain, 
 
 RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll_data, const AssemblyData* symbol_data_ptr)
 {
+    return load_from_data(dll_data, symbol_data_ptr, false);
+}
+
+RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll_data, const AssemblyData* symbol_data_ptr, bool defer_references)
+{
     auto dll_cleanup = utils::make_scope_exit(
         [dll_data]()
         {
@@ -132,6 +137,12 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
         auto ret_load = pdbImage->load();
         if (ret_load.is_err())
         {
+            const auto error = ret_load.unwrap_err();
+            if (error == RtErr::OutOfMemory)
+            {
+                alloc::GeneralAllocation::delete_any(pdbImage);
+                RET_ERR(error);
+            }
             log::InternalLogger::error("Failed to load PDB image. Please use portable pdb format. ignoring symbol data");
             alloc::GeneralAllocation::delete_any(pdbImage);
             pdbImage = nullptr;
@@ -163,7 +174,10 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
             host::Services::logf(host::LogLevel::Error, "Failed to load reference assemblies of module %s\n", mod->get_name_no_ext());
         });
     utils::Vector<metadata::RtAssembly*> ref_assemblies;
-    RET_ERR_ON_FAIL(mod->get_reference_assemblies(ref_assemblies));
+    if (!defer_references)
+    {
+        RET_ERR_ON_FAIL(mod->get_reference_assemblies(ref_assemblies));
+    }
     const metadata::RtAotModuleData* aotModuleData = metadata::AotModule::find_aot_module_by_name(mod->get_name_no_ext());
     if (aotModuleData != nullptr)
     {
@@ -181,7 +195,8 @@ RtResult<metadata::RtAssembly*> Assembly::load_from_data(const AssemblyData& dll
 
     // don't free mem pool if succ
     dll_cleanup.dismiss();
-    symbol_cleanup.dismiss();
+    if (pdbImage)
+        symbol_cleanup.dismiss();
     pool_cleanup.dismiss();
     pdb_cleanup.dismiss();
     assembly_cleanup.dismiss();
