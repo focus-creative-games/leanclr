@@ -263,6 +263,20 @@ public class Program
         Check(data.Count == 1 && data[0].Constructor.DeclaringType == typeof(BombAttribute), "throwing metadata");
         Check(data[0].ConstructorArguments.Count == 0 && data[0].NamedArguments.Count == 0, "empty arguments");
     }
+    public static void PropertyAttributeInstances()
+    {
+        var property = typeof(Decorated).GetProperty("Property");
+        Check(property.GetCustomAttributesData().Count == 1, "property metadata");
+        Check(property.IsDefined(typeof(MarkAttribute), false), "property IsDefined");
+        Check(Attribute.IsDefined(property, typeof(MarkAttribute)), "Attribute.IsDefined property");
+        Check(Counters.Constructors == 0 && Counters.Setters == 0 && Counters.TypeInitializers == 0, "IsDefined executed user code");
+        Check(property.GetCustomAttributes(typeof(MarkAttribute), false).Length == 1, "property typed instances");
+        Check(property.GetCustomAttributes(false).Length == 1, "property untyped instances");
+        Check(Counters.Constructors == 2 && Counters.Setters == 2, "property instance constructors and setters");
+        Check(!property.IsDefined(typeof(BombAttribute), false), "absent property attribute");
+        try { property.IsDefined(null, false); throw new Exception("null attribute type accepted"); }
+        catch (ArgumentNullException) { }
+    }
     public static void AttributeInstances()
     {
         var items = typeof(Decorated).GetCustomAttributes(typeof(MarkAttribute), false);
