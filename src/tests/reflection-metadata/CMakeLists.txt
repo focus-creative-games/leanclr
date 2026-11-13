@@ -1,0 +1,18 @@
+cmake_minimum_required(VERSION 3.15)
+project(reflection_metadata_contracts C CXX)
+add_subdirectory(../../tools/leanrun leanrun_build)
+set(LEANCLR_REFLECTION_MANAGED_DIR "" CACHE PATH "Managed test assembly directory")
+set(LEANCLR_REFLECTION_RUNTIME_DIR "" CACHE PATH "Matching BCL directory")
+if(EMSCRIPTEN)
+    foreach(target leanrun)
+    set_target_properties(${target} PROPERTIES SUFFIX ".js")
+    target_link_options(${target} PRIVATE -sENVIRONMENT=node -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 -lnodefs.js
+        "--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/../../benchmarks/aot-baseline/nodefs.js")
+    endforeach()
+endif()
+enable_testing()
+foreach(entry Overrides Overloads Protected Declared GenericOverrides NewSlots)
+    add_test(NAME reflection-${entry} COMMAND leanrun -l "${LEANCLR_REFLECTION_MANAGED_DIR}" -l "${LEANCLR_REFLECTION_RUNTIME_DIR}"
+        -e "ReflectionMetadataTests.Program::${entry}" ReflectionMetadataTests)
+    set_tests_properties(reflection-${entry} PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../..")
+endforeach()

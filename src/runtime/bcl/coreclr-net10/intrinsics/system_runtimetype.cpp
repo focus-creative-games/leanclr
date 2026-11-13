@@ -9,6 +9,7 @@
 #include "icalls/system_reflection_runtimepropertyinfo.h"
 #include "metadata/module_def.h"
 #include "vm/class.h"
+#include "vm/reflection_method_slots.h"
 #include "vm/customattribute.h"
 #include "vm/field.h"
 #include "vm/method.h"
@@ -302,6 +303,8 @@ RtResult<vm::RtArray*> SystemRuntimeType::get_methods(vm::RtReflectionRuntimeTyp
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type_sig));
 
+    vm::ReflectionMethodSlots slots;
+    RET_ERR_ON_FAIL(slots.initialize(klass, (binding_flags & BINDING_FLAGS_DECLARED_ONLY) != 0));
     utils::Vector<const metadata::RtMethodInfo*> methods;
     const metadata::RtClass* current_klass = klass;
     while (current_klass != nullptr)
@@ -314,7 +317,10 @@ RtResult<vm::RtArray*> SystemRuntimeType::get_methods(vm::RtReflectionRuntimeTyp
             {
                 continue;
             }
-            methods.push_back(method);
+            if (!slots.include(method))
+                continue;
+            if (!methods.try_push_back(method))
+                RET_ERR(RtErr::OutOfMemory);
         }
 
         if ((binding_flags & BINDING_FLAGS_DECLARED_ONLY) != 0)
