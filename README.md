@@ -100,7 +100,7 @@ LeanCLR 的运行时分支按 **BCL × 能力级别** 命名，宿主和引擎�
 
 ## 架构与构建配置
 
-本仓库保留公共宿主 API、SDK 无关的生命周期/错误契约、`src/tools/leanrun`、简单 standalone 示例及测试，**不创建 standalone 分支**。Unity、Godot、UE 的 SDK 插件、对象绑定、资源和打包集成由独立宿主仓库维护，通过公共 API 接入，不能依赖运行时私有 BCL 布局。
+本仓库保留公共宿主 API、SDK 无关的生命周期/错误契约、`src/tools/leanrun`、唯一的 standalone 示例 [`src/samples/startup`](src/samples/startup/README.md) 及测试，**不创建 standalone 分支**。Unity、Godot、UE 的 SDK 插件、对象绑定、资源和打包集成由独立宿主仓库维护，通过公共 API 接入，不能依赖运行时私有 BCL 布局。
 
 分支定位与底层 host provider 是不同维度。`PORTABLE`、`NATIVE`、`CUSTOM` 保留为构建选项，不创建相应分支：
 
