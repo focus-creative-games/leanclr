@@ -4751,6 +4751,15 @@ RtResultVoid runtime_method_handle_get_stub_if_needed_slow_invoker(metadata::RtM
     RET_VOID_OK();
 }
 
+RtResultVoid runtime_method_handle_get_function_pointer_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
+                                                                const interp::RtStackObject* params, interp::RtStackObject* ret) noexcept
+{
+    const auto handle = interp::EvalStackOp::get_param<intptr_t>(params, 0);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(intptr_t, pointer, icalls::SystemRuntimeMethodHandle::get_function_pointer(handle));
+    interp::EvalStackOp::set_return(ret, pointer);
+    RET_VOID_OK();
+}
+
 RtResultVoid runtime_method_handle_get_typical_method_definition_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*,
                                                                          const interp::RtStackObject* params, interp::RtStackObject*) noexcept
 {
@@ -7492,6 +7501,10 @@ void register_coreclr_qcall_pinvokes() noexcept
                                    nullptr, signature_get_custom_modifiers_at_offset_invoker);
     vm::PInvokes::register_pinvoke("System.Signature::GetCustomModifiersAtOffset", nullptr, signature_get_custom_modifiers_at_offset_invoker);
     vm::PInvokes::register_pinvoke("Signature_GetCustomModifiersAtOffset", nullptr, signature_get_custom_modifiers_at_offset_invoker);
+    vm::PInvokes::register_pinvoke("System.RuntimeMethodHandle::GetFunctionPointer(System.RuntimeMethodHandleInternal)", nullptr,
+                                   runtime_method_handle_get_function_pointer_invoker);
+    vm::PInvokes::register_pinvoke("System.RuntimeMethodHandle::GetFunctionPointer", nullptr, runtime_method_handle_get_function_pointer_invoker);
+    vm::PInvokes::register_pinvoke("RuntimeMethodHandle_GetFunctionPointer", nullptr, runtime_method_handle_get_function_pointer_invoker);
     vm::PInvokes::register_pinvoke("System.RuntimeMethodHandle::GetMethodBody(System.RuntimeMethodHandleInternal,System.Runtime.CompilerServices."
                                    "QCallTypeHandle,System.Runtime.CompilerServices.ObjectHandleOnStack)",
                                    nullptr, runtime_method_handle_get_method_body_invoker);

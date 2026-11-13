@@ -1,3 +1,4 @@
+#include "vm/calli.h"
 #include "bcl/coreclr-net10/managed_layouts.h"
 #include "system_runtimemethodhandle.h"
 
@@ -30,7 +31,8 @@ RtResult<intptr_t> SystemRuntimeMethodHandle::get_function_pointer(intptr_t meth
 
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, method_info,
                                             vm::Reflection::get_method_info_from_handle_arg(reinterpret_cast<const void*>(method)));
-    RET_OK(reinterpret_cast<intptr_t>(method_info->method_ptr));
+    RET_ERR_ON_FAIL(vm::Calli::register_managed_target(method_info));
+    RET_OK(reinterpret_cast<intptr_t>(method_info));
 }
 
 RtResult<int32_t> SystemRuntimeMethodHandle::get_attributes(const metadata::RtMethodInfo* method) noexcept

@@ -1,4 +1,5 @@
 #pragma once
+#include "vm/calli.h"
 #include "aot_result.h"
 #include "interface_dispatch.h"
 

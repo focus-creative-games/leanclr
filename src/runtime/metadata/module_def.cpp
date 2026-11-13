@@ -1286,6 +1286,8 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
 
         case RtElementType::CModReqd:
         {
+            if (result.num_mods == 63)
+                RET_ERR(RtErr::BadImageFormat);
             result.num_mods += 1;
             uint32_t encoded_index = 0;
             if (!reader.try_read_compressed_uint32(encoded_index))
@@ -1313,6 +1315,8 @@ RtResultVoid RtModuleDef::read_typesig_impl(utils::BinaryReader& reader, const R
         }
         case RtElementType::CModOpt:
         {
+            if (result.num_mods == 63)
+                RET_ERR(RtErr::BadImageFormat);
             result.num_mods += 1;
             uint32_t encoded_index = 0;
             if (!reader.try_read_compressed_uint32(encoded_index))
@@ -1518,10 +1522,57 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig_skip_prologue(uint8_t sigType
     {
         RET_ASSERT_ERR(RtErr::BadImageFormat);
     }
+    // Keep the ABI-bearing modifiers that read_typesig otherwise only counts.
+    // Scan a bounded reader copy, leaving the ordinary type decoder in charge of
+    // consuming/validating the complete signature.
+    auto modifier_reader = reader;
+    uint8_t native_call_conv = 0, calli_flags = 0, call_conv_modifier_count = 0;
+    for (; (sigType & static_cast<uint8_t>(RtSigType::TypeMask)) == static_cast<uint8_t>(RtSigType::Unmanaged);)
+    {
+        uint8_t element;
+        if (!modifier_reader.try_read_byte(element))
+            RET_ERR(RtErr::BadImageFormat);
+        if (element != static_cast<uint8_t>(RtElementType::CModOpt) && element != static_cast<uint8_t>(RtElementType::CModReqd))
+            break;
+        uint32_t index;
+        if (!modifier_reader.try_read_compressed_uint32(index) || call_conv_modifier_count == 63)
+            RET_ERR(RtErr::BadImageFormat);
+        ++call_conv_modifier_count;
+        const auto token = RtMetadata::decode_type_def_ref_spec_coded_index(index);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtClass*, modifier, get_class_by_type_def_ref_spec_token(token, gcc, gc));
+        uint8_t convention = 0;
+        if (std::strcmp(modifier->namespaze, "System.Runtime.CompilerServices") == 0)
+        {
+            if (std::strcmp(modifier->name, "CallConvCdecl") == 0)
+                convention = static_cast<uint8_t>(RtSigType::C);
+            else if (std::strcmp(modifier->name, "CallConvStdcall") == 0)
+                convention = static_cast<uint8_t>(RtSigType::StdCall);
+            else if (std::strcmp(modifier->name, "CallConvThiscall") == 0)
+                convention = static_cast<uint8_t>(RtSigType::ThisCall);
+            else if (std::strcmp(modifier->name, "CallConvFastcall") == 0)
+                convention = static_cast<uint8_t>(RtSigType::FastCall);
+            else if (std::strcmp(modifier->name, "CallConvSuppressGCTransition") == 0)
+                calli_flags |= 2;
+            else if (std::strcmp(modifier->name, "CallConvMemberFunction") == 0)
+                calli_flags |= 4;
+            else
+                calli_flags |= 1;
+        }
+        else
+            calli_flags |= 1;
+        if (convention)
+        {
+            if (native_call_conv && native_call_conv != convention)
+                calli_flags |= 1;
+            native_call_conv = convention;
+        }
+    }
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const RtTypeSig*, returnTypeSig, read_typesig(reader, gcc, gc));
 
     RtMethodSig methodSig;
 
+    if (!methodSig.params.try_reserve(paramCount))
+        RET_ERR(RtErr::OutOfMemory);
     methodSig.params.resize(paramCount);
     for (uint32_t i = 0; i < paramCount; i++)
     {
@@ -1530,6 +1581,9 @@ RtResult<RtMethodSig> RtModuleDef::read_method_sig_skip_prologue(uint8_t sigType
     methodSig.flags = sigType;
     methodSig.generic_param_count = static_cast<uint8_t>(genericParamCount);
     methodSig.return_type = returnTypeSig;
+    methodSig.native_call_conv = native_call_conv;
+    methodSig.calli_flags = calli_flags;
+    methodSig.call_conv_modifier_count = call_conv_modifier_count;
     RET_OK(methodSig);
 }
 

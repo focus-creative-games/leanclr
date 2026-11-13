@@ -84,6 +84,7 @@
     "System.Runtime.Loader.AssemblyLoadContext::GetLoadContextForAssembly(System.Runtime.CompilerServices.QCallAssembly)",
     "System.Runtime.Loader.AssemblyLoadContext::PrepareForAssemblyLoadContextRelease(System.IntPtr,System.IntPtr)",
     "System.Runtime.Loader.AssemblyLoadContext::GetLoadedAssemblies(System.Runtime.CompilerServices.ObjectHandleOnStack)",
+    "System.RuntimeMethodHandle::GetFunctionPointer(System.RuntimeMethodHandleInternal)",
     "System.RuntimeMethodHandle::GetIsCollectible(System.RuntimeMethodHandleInternal)",
     "System.Runtime.CompilerServices.RuntimeHelpers::CompileMethod(System.RuntimeMethodHandleInternal)",
     "System.Runtime.CompilerServices.RuntimeHelpers::PrepareMethod(System.RuntimeMethodHandleInternal,System.IntPtr*,System.Int32)",
