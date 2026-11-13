@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "alloc/general_allocation.h"
 #include "metadata/metadata_cache.h"
 #include "metadata/module_def.h"
@@ -61,7 +62,7 @@ static void check(bool ok, const char* message)
     }
 }
 
-static bool load(const char* name, const char* ext, vm::FileData& data)
+static bool load(const char* name, const char* ext, host::FileData& data)
 {
     std::ifstream file(dlls + "/" + name + "." + ext, std::ios::binary | std::ios::ate);
     if (!file)
@@ -205,7 +206,8 @@ int main(int argc, char** argv)
     check(argc >= 2, "DLL directory required");
     dlls = argv[1];
     const bool expected_aot = argc < 3 || std::strcmp(argv[2], "interpreted") != 0;
-    vm::Settings::set_file_loader(load);
+    if (!host::Services::set_file_loader(load))
+        leanclr::panic("Configure file loader before host services are used");
     vm::Settings::set_aot_modules_data(&g_aot_modules_data);
     check(vm::Runtime::initialize().is_ok(), "initialize runtime");
     auto assembly = vm::Assembly::load_by_name("GenericFixtures");
