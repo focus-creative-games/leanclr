@@ -20,7 +20,7 @@
 
 引入 managed / unmanaged 两种 calli IR。转换时依据 StandAloneSig、调用约定及 custom modifiers 决定分派，不能依据地址范围或指针低位猜测目标类型。
 
-managed 路径继续使用方法描述符与现有 invoker，保留实际实例、实例化泛型上下文、AOT/解释器目标选择。对可逃逸的 ldftn/ldvirtftn 描述符建立按需注册的有效目标索引，在解引用前检查；不为所有方法额外建一张常驻表。签名校验包含返回类型、参数类型、byref、HasThis/ExplicitThis、调用约定和实例化上下文，不能只校验参数数目。
+managed 路径继续使用方法描述符与现有 invoker，保留实际实例、实例化泛型上下文、AOT/解释器目标选择。对可逃逸的 ldftn/ldvirtftn 描述符建立按需注册的有效目标索引，在解引用前检查；不为所有方法额外建一张常驻表。签名校验包含返回类型、参数类型、byref、HasThis/ExplicitThis、调用约定和实例化上下文，不能只校验参数数目。03-A 同时审计所有取指针入口（含 RuntimeMethodHandle、delegate 的指针导出及 AOT ldftn），明确它们返回描述符还是原生 ABI 入口，防止同一个 IntPtr 被两条路径赋予相反含义。
 
 unmanaged 路径将地址作为真实原生函数指针，调用该签名对应的编译器生成桥。绝不转换为 RtMethodInfo 指针。非空任意原生地址的有效性仍由 unsafe 调用方保证，运行时不通过探测内存页来伪造地址验证。
 
