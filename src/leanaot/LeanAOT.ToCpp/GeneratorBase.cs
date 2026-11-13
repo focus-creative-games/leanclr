@@ -11,6 +11,11 @@ namespace LeanAOT.ToCpp
         {
             _config = conf;
             GlobalServices.Inst.ReferenceSharing = new ReferenceGenericSharing(conf.manifest.GenericMethodPlans, GlobalServices.Inst.Config.ShareReferenceGenerics);
+            if (GlobalServices.Inst.Config.CalliBridgesOnly)
+            {
+                new CalliBridgesCppCodeFile().Generate(conf.outputCodeDir, conf.manifest);
+                return;
+            }
             foreach (var assPlan in conf.manifest.AssemblyPlans.Values)
             {
                 GenerateAssembly(assPlan);

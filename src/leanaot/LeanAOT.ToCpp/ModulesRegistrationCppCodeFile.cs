@@ -69,12 +69,14 @@ namespace LeanAOT.ToCpp
             int genericCount = GlobalServices.Inst.ManifestService.Manifest.GenericMethodPlans.Count;
             if (genericCount > 0)
                 _implWriter.AddLine("extern const leanclr::metadata::RtAotGenericMethodData g_aot_generic_methods[];");
+            _implWriter.AddLine("extern const leanclr::metadata::RtCalliBridge g_calli_bridges[];\nextern const uint32_t g_calli_bridge_count;");
             _implWriter.AddLine($"{ConstStrings.ModulesDataDataTypeName} {ModuleGenerationUtil.GetGlobalAotModulesDataVariableName()} = {{");
             _implWriter.IncreaseIndent();
             _implWriter.AddLine($"{GetModuleListInitializationVariableName()},");
             _implWriter.AddLine($"{_mods.Count},");
             _implWriter.AddLine(genericCount > 0 ? "g_aot_generic_methods," : "nullptr,");
             _implWriter.AddLine($"{genericCount},");
+            _implWriter.AddLine("g_calli_bridges, g_calli_bridge_count,");
             _implWriter.DecreaseIndent();
             _implWriter.AddLine("};");
         }

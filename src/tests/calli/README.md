@@ -29,3 +29,15 @@ GC cases check payload contents after allocation pressure, not just pointer equa
 The EH case verifies that normal-path side effects are not replayed after handoff.
 
 Unmanaged calls remain rejected until signature bridges are linked and supported.
+
+Stage 03-C generates `calli_bridges.cpp` and `calli_bridges.json` by scanning all
+input IL, including excluded methods, and instantiated generic plans. Use
+`--calli-bridges-only` with the usual -a/-d/-o arguments to build signature bridges
+without compiling any managed method bodies. Link that file into the host and call
+`Calli::register_native_bridges(g_calli_bridges, g_calli_bridge_count)`; normal AOT
+module registration does this automatically. Tables have runtime lifetime.
+
+The runtime validates compiler-derived ABI shapes and hashes the complete shape,
+then compares collision candidates in full. Repeat registrations are allocation-free;
+a missing bridge reports its convention, return and parameter ABI shapes. Supported
+platform gates currently cover Windows x64 and Emscripten wasm32 only.

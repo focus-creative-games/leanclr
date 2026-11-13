@@ -174,6 +174,7 @@ namespace LeanAOT.ToCpp
 
         public override void GenerateGlobalInitializationCpp()
         {
+            new CalliBridgesCppCodeFile().Generate(_config.outputCodeDir, _config.manifest);
             GenerateGlobalGenericMethods();
             GenerateAllModuleRegistrationCpp();
             GenerateAllMethodInvokerCpp();

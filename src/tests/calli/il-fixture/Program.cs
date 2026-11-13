@@ -36,12 +36,17 @@ foreach(var name in new[]{"Instance","ExplicitThis","Virtual","ValueThis","Boxed
  }
  il.Add(Instruction.Create(OpCodes.Calli,sig));il.Add(Instruction.Create(OpCodes.Ret));
 }
+var native=new MethodDefUser("NativeInventory",MethodSig.CreateStatic(module.CorLibTypes.Int32,module.CorLibTypes.IntPtr),MethodImplAttributes.IL|MethodImplAttributes.Managed,MethodAttributes.Public|MethodAttributes.Static){Body=new CilBody{MaxStack=2}};
+type.Methods.Add(native);
+native.Body.Instructions.Add(Instruction.CreateLdcI4(41));native.Body.Instructions.Add(Instruction.Create(OpCodes.Ldarg_0));
+native.Body.Instructions.Add(Instruction.Create(OpCodes.Calli,new MethodSig(CallingConvention.C,0,module.CorLibTypes.Int32,new[]{module.CorLibTypes.Int32})));native.Body.Instructions.Add(Instruction.Create(OpCodes.Ret));
 module.Write(args[1]);
 
 if (args.Length > 2 && args[2] == "verify") {
  System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(args[0]));
  var assembly=System.Runtime.Loader.AssemblyLoadContext.Default.LoadFromAssemblyPath(Path.GetFullPath(args[1]));
  foreach(var method in assembly.GetType("CalliILTests.Program").GetMethods(System.Reflection.BindingFlags.Public|System.Reflection.BindingFlags.Static)) {
+ if(method.GetParameters().Length!=0)continue;
  if((int)method.Invoke(null,null)!=42)throw new Exception(method.Name);
  Console.WriteLine("CLR comparison passed: "+method.Name);
  }}
