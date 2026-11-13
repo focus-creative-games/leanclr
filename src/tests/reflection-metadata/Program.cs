@@ -1,5 +1,7 @@
 using System;
 using System.Reflection;
+[assembly:ReflectionMetadataTests.Mark("assembly", 7, Named = 8)]
+[module:ReflectionMetadataTests.Mark("module", 7, Named = 8)]
 namespace ReflectionMetadataTests
 {
 public class Base
@@ -80,6 +82,60 @@ public class Generic<T>
 }
 public class Pair<A, B>
 {
+}
+public static class Counters
+{
+    public static int Constructors;
+    public static int Setters;
+    public static int TypeInitializers;
+}
+[AttributeUsage(AttributeTargets.All)]
+public class MarkAttribute : Attribute
+{
+    static MarkAttribute()
+    {
+        Counters.TypeInitializers++;
+    }
+    public MarkAttribute(string text, int value)
+    {
+        Counters.Constructors++;
+    }
+    public int Named
+    {
+        get {
+            return 0;
+        }
+        set {
+            Counters.Setters++;
+        }
+    }
+}
+public class BombAttribute : Attribute
+{
+    public BombAttribute()
+    {
+        throw new InvalidOperationException("attribute constructor");
+    }
+}
+[Mark("type", 7, Named = 8)]
+public class Decorated
+{
+    [Mark("field", 7, Named = 8)]
+    public int Field;
+    [Mark("property", 7, Named = 8)]
+    public int Property { get; set; }
+    [Mark("event", 7, Named = 8)]
+    public event Action Event;
+    [Mark("method", 7, Named = 8)]
+    [return:Mark("return", 7, Named = 8)]
+    public int Method([Mark("parameter", 7, Named = 8)] int x)
+    {
+        return x;
+    }
+    [Bomb]
+    public void ThrowingAttribute()
+    {
+    }
 }
 public class Program
 {
@@ -167,6 +223,51 @@ public class Program
         Check(t.MakeArrayType().AssemblyQualifiedName == t.FullName + "[], " + t.Assembly.FullName,
               "array assembly suffix");
         Check(typeof(Generic<>).MakeArrayType().FullName == "ReflectionMetadataTests.Generic`1[]", "definition array");
+    }
+    static void CheckData(System.Collections.Generic.IList<CustomAttributeData> data, string label)
+    {
+        int count = 0;
+        foreach (var item in data)
+        {
+            if (item.Constructor.DeclaringType != typeof(MarkAttribute))
+                continue;
+            count++;
+            Check((string)item.ConstructorArguments[0].Value == label && (int)item.ConstructorArguments[1].Value == 7,
+                  "constructor metadata " + label);
+            Check(item.NamedArguments.Count == 1 && item.NamedArguments[0].MemberName == "Named" &&
+                      (int)item.NamedArguments[0].TypedValue.Value == 8,
+                  "named metadata " + label);
+        }
+        Check(count == 1, "attribute count " + label);
+        Check(Counters.Constructors == 0 && Counters.Setters == 0 && Counters.TypeInitializers == 0,
+              "metadata executed attribute code");
+    }
+    public static void AttributeMetadata()
+    {
+        Type t = typeof(Decorated);
+        CheckData(CustomAttributeData.GetCustomAttributes(t), "type");
+        CheckData(CustomAttributeData.GetCustomAttributes(t.GetField("Field")), "field");
+        CheckData(CustomAttributeData.GetCustomAttributes(t.GetProperty("Property")), "property");
+        CheckData(CustomAttributeData.GetCustomAttributes(t.GetEvent("Event")), "event");
+        MethodInfo m = t.GetMethod("Method");
+        CheckData(CustomAttributeData.GetCustomAttributes(m), "method");
+        CheckData(CustomAttributeData.GetCustomAttributes(m.GetParameters()[0]), "parameter");
+        CheckData(CustomAttributeData.GetCustomAttributes(m.ReturnParameter), "return");
+        CheckData(CustomAttributeData.GetCustomAttributes(t.Assembly), "assembly");
+        CheckData(CustomAttributeData.GetCustomAttributes(t.Module), "module");
+    }
+    public static void ThrowingAttributeMetadata()
+    {
+        var m = typeof(Decorated).GetMethod("ThrowingAttribute");
+        var data = CustomAttributeData.GetCustomAttributes(m);
+        Check(data.Count == 1 && data[0].Constructor.DeclaringType == typeof(BombAttribute), "throwing metadata");
+        Check(data[0].ConstructorArguments.Count == 0 && data[0].NamedArguments.Count == 0, "empty arguments");
+    }
+    public static void AttributeInstances()
+    {
+        var items = typeof(Decorated).GetCustomAttributes(typeof(MarkAttribute), false);
+        Check(items.Length == 1 && Counters.Constructors == 1 && Counters.Setters == 1,
+              "actual instances still execute user code");
     }
     public static void Main(string[] args)
     {

@@ -11,7 +11,7 @@ if(EMSCRIPTEN)
     endforeach()
 endif()
 enable_testing()
-foreach(entry Overrides Overloads Protected Declared GenericOverrides NewSlots GenericDefinitionNames ClosedGenericNames OpenGenericNames ModifiedGenericNames)
+foreach(entry Overrides Overloads Protected Declared GenericOverrides NewSlots GenericDefinitionNames ClosedGenericNames OpenGenericNames ModifiedGenericNames AttributeMetadata ThrowingAttributeMetadata AttributeInstances)
     add_test(NAME reflection-${entry} COMMAND leanrun -l "${LEANCLR_REFLECTION_MANAGED_DIR}" -l "${LEANCLR_REFLECTION_RUNTIME_DIR}"
         -e "ReflectionMetadataTests.Program::${entry}" ReflectionMetadataTests)
     set_tests_properties(reflection-${entry} PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../..")
