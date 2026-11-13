@@ -2466,6 +2466,7 @@ namespace LeanAOT.ToCpp
             MethodDetail methodDetail = _metadataService.GetMethodDetail(method);
             var methodVar = _runtimeResolvedMetadatas.GetMethodVariable(method, methodDetail);
             var retVar = PushStack(_corlibTypes.IntPtr);
+            EmitThrowOnError(inst, $"leanclr::vm::Calli::register_managed_target({methodVar.GetFullReferenceVariableName()})");
             _bodyWriter.AddLine($"{ConstStrings.MethodInfoPtrTypeName} {GetEvalVariableName(retVar)} = {methodVar.GetFullReferenceVariableName()};");
             EmitAssumeNotNull(retVar);
         }
@@ -2479,6 +2480,7 @@ namespace LeanAOT.ToCpp
             var retVar = PushStack(_corlibTypes.IntPtr);
             //var finalMethodVar = CreateTempVariable(ConstStrings.MethodInfoPtrTypeName);
             _bodyWriter.AddLine($"{VmFunctionNames.GOTO_DECLARING_ASSIGN_OR_THROW}({ConstStrings.MethodInfoPtrTypeName}, {GetEvalVariableName(retVar)}, {VmFunctionNames.GetVirtualMethodOnObj}({GetEvalVariableName(thisVar)}, {methodVar.GetFullReferenceVariableName()}), {CurrentMethodReference}, {GetCurrentIpOffset(inst)});");
+            EmitThrowOnError(inst, $"leanclr::vm::Calli::register_managed_target({GetEvalVariableName(retVar)})");
             EmitAssumeNotNull(retVar);
         }
 

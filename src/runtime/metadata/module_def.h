@@ -356,6 +356,7 @@ class RtModuleDef
     }
 
     RtResult<RtMethodSig> read_method_sig(utils::BinaryReader& reader, const RtGenericContainerContext& gcc, const RtGenericContext* gc);
+    RtResult<RtMethodSig> read_method_sig(utils::BinaryReader& reader, const RtGenericContainerContext& gcc, const RtGenericContext* gc, bool allow_unmanaged);
 
     RtResult<RtMethodSig> read_method_sig(uint32_t signature, const RtGenericContainerContext& gcc, const RtGenericContext* gc)
     {

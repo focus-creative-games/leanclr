@@ -367,9 +367,12 @@ enum class RtSigType : uint8_t
     Field = 0x6,
     LocalVar = 0x7,
     Property = 0x8,
+    Unmanaged = 0x9,
+    NativeVarArg = 0xB,
     MethodSpec = 0xA,
     GenericInst = 0x10,
     HasThis = 0x20,
+    ExplicitThis = 0x40,
     Sentinel = 0x41,
     TypeMask = 0x0F,
     FlagMask = 0xF0,
@@ -382,6 +385,10 @@ struct RtMethodSig
     uint8_t generic_param_count;
     const RtTypeSig* return_type;
     utils::Vector<const RtTypeSig*> params;
+    // Call-convention modifiers live on the return type in modern fnptr signatures.
+    uint8_t native_call_conv = 0;
+    uint8_t calli_flags = 0; // 1 unknown/conflicting, 2 SuppressGCTransition, 4 MemberFunction
+    uint8_t call_conv_modifier_count = 0;
 };
 
 // Property signature structure

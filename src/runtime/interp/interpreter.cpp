@@ -13,6 +13,7 @@
 #include "vm/object.h"
 #include "vm/rt_array.h"
 #include "vm/method.h"
+#include "vm/calli.h"
 #include "vm/runtime.h"
 #include "vm/internal_calls.h"
 #include "vm/intrinsics.h"

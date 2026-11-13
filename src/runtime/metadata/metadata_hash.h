@@ -63,6 +63,9 @@ struct MethodSigHash
     std::size_t operator()(const RtMethodSig* key) const
     {
         size_t h = (size_t)key->flags;
+        h = utils::HashUtil::combine_hash(h, key->native_call_conv);
+        h = utils::HashUtil::combine_hash(h, key->calli_flags);
+        h = utils::HashUtil::combine_hash(h, key->call_conv_modifier_count);
         h = utils::HashUtil::combine_hash(h, (size_t)key->generic_param_count);
         h = utils::HashUtil::combine_hash(h, MetadataHash::hash_type_sig_ignore_attrs(key->return_type));
         for (size_t i = 0; i < key->params.size(); ++i)

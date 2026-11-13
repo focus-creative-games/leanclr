@@ -1,3 +1,4 @@
+#include "vm/calli.h"
 #include <iterator>
 #include "bcl/mono/managed_layouts.h"
 #include "system_runtimemethodhandle.h"
@@ -17,7 +18,8 @@ RtResult<intptr_t> SystemRuntimeMethodHandle::get_function_pointer(intptr_t meth
     }
 
     const metadata::RtMethodInfo* method_info = reinterpret_cast<const metadata::RtMethodInfo*>(method);
-    RET_OK(reinterpret_cast<intptr_t>(method_info->method_ptr));
+    RET_ERR_ON_FAIL(vm::Calli::register_managed_target(method_info));
+    RET_OK(reinterpret_cast<intptr_t>(method_info));
 }
 
 /// @icall: System.RuntimeMethodHandle::GetFunctionPointer(System.IntPtr)

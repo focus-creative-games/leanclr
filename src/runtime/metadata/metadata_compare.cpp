@@ -96,6 +96,9 @@ bool MetadataCompare::is_method_signature_equal(const RtMethodInfo* a, const RtM
 
 bool MetadataCompare::is_method_signature_equal(const RtMethodSig* a, const RtMethodSig* b)
 {
+    if (a->params.size() != b->params.size() || a->native_call_conv != b->native_call_conv || a->calli_flags != b->calli_flags ||
+        a->call_conv_modifier_count != b->call_conv_modifier_count)
+        return false;
     if (a->flags != b->flags)
         return false;
     if (a->generic_param_count != b->generic_param_count)

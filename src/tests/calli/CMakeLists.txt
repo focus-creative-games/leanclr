@@ -1,0 +1,23 @@
+cmake_minimum_required(VERSION 3.15)
+project(calli_contracts C CXX)
+add_subdirectory(../../tools/leanrun leanrun_build)
+add_executable(calli-native native.cpp)
+target_link_libraries(calli-native PRIVATE leanclr)
+set(LEANCLR_CALLI_MANAGED_DIR "" CACHE PATH "Managed test assembly directory")
+set(LEANCLR_CALLI_RUNTIME_DIR "" CACHE PATH "Matching BCL directory")
+if(EMSCRIPTEN)
+    foreach(target leanrun calli-native)
+    set_target_properties(${target} PROPERTIES SUFFIX ".js")
+    target_link_options(${target} PRIVATE -sENVIRONMENT=node -sALLOW_MEMORY_GROWTH=1 -sEXIT_RUNTIME=1 -lnodefs.js
+        "--pre-js=${CMAKE_CURRENT_SOURCE_DIR}/../../benchmarks/aot-baseline/nodefs.js")
+    endforeach()
+endif()
+enable_testing()
+foreach(entry Managed ManagedRef ManagedGeneric FromHandle BadTarget NullTarget WrongSignature)
+    add_test(NAME calli-${entry} COMMAND leanrun -l "${LEANCLR_CALLI_MANAGED_DIR}" -l "${LEANCLR_CALLI_RUNTIME_DIR}"
+        -e "CalliTests.Program::${entry}" CalliTests)
+    set_tests_properties(calli-${entry} PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../..")
+endforeach()
+
+add_test(NAME calli-native COMMAND calli-native "${LEANCLR_CALLI_MANAGED_DIR}" "${LEANCLR_CALLI_RUNTIME_DIR}")
+set_tests_properties(calli-native PROPERTIES WORKING_DIRECTORY "${CMAKE_CURRENT_SOURCE_DIR}/../../..")
