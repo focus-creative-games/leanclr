@@ -51,6 +51,14 @@ extern "C"
 
     size_t leanclr_get_assemblies(LeanclrAssembly** out_assemblies, size_t out_assemblies_capacity, LeanclrException** out_exception)
     {
+        if (out_exception)
+            *out_exception = nullptr;
+        if (!out_assemblies && out_assemblies_capacity != 0)
+        {
+            if (out_exception)
+                *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            return 0;
+        }
         utils::Vector<metadata::RtModuleDef*> modules;
         metadata::RtModuleDef::get_registered_modules(modules);
         size_t to_copy = std::min(out_assemblies_capacity, modules.size());
@@ -71,6 +79,8 @@ extern "C"
         auto ret = vm::Assembly::load_by_name(assembly_name);
         if (ret.is_ok())
         {
+            if (out_exception)
+                *out_exception = nullptr;
             return reinterpret_cast<LeanclrAssembly*>(ret.unwrap());
         }
         else
@@ -419,11 +429,15 @@ extern "C"
     void leanclr_invoke_with_buffer(const LeanclrMethodInfo* method, const LeanclrStackObject* arg_buff, LeanclrStackObject* ret_buff,
                                     LeanclrException** out_exception)
     {
-        auto ret = vm::Runtime::invoke_stackobject_arguments_with_run_cctor((const metadata::RtMethodInfo*)method, (const interp::RtStackObject*)arg_buff,
-                                                                            (interp::RtStackObject*)ret_buff);
+        auto* target = reinterpret_cast<const metadata::RtMethodInfo*>(method);
+        const bool invalid = !target || (target->total_arg_stack_object_size && !arg_buff) || (target->ret_stack_object_size && !ret_buff);
+        auto ret = invalid ? RtResultVoid(RtErr::ArgumentNull)
+                           : vm::Runtime::invoke_stackobject_arguments_with_run_cctor(target, reinterpret_cast<const interp::RtStackObject*>(arg_buff),
+                                                                                      reinterpret_cast<interp::RtStackObject*>(ret_buff));
         if (ret.is_ok())
         {
-            out_exception = nullptr;
+            if (out_exception)
+                *out_exception = nullptr;
         }
         else
         {
