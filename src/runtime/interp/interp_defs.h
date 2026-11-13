@@ -75,8 +75,17 @@ struct RtInterpResumeEntry
     uint32_t code_offset;
 };
 
+// Half-open stack-slot ranges of primitive numeric locals, terminated by {0, 0}.
+// These can contain stale pointers when CoreLib uses SkipLocalsInit.
+struct RtInterpScalarLocalRange
+{
+    uint16_t begin;
+    uint16_t end;
+};
+
 struct RtInterpMethodInfo
 {
+    const RtInterpScalarLocalRange* gc_scalar_local_ranges;
     uint8_t* codes;
     const RtInterpExceptionClause* exception_clauses;
     const void** resolved_datas;
