@@ -2278,6 +2278,7 @@ LEANCLR_CASE_END()
 LEANCLR_CASE_BEGIN(Ldftn)
 {
     metadata::RtMethodInfo* method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
+    HANDLE_RAISE_RUNTIME_ERROR_VOID(vm::Calli::register_managed_target(method));
     set_stack_value_at(eval_stack_base, ir->dst, reinterpret_cast<void*>(method));
 }
 LEANCLR_CASE_END()
@@ -2292,6 +2293,7 @@ LEANCLR_CASE_BEGIN(Ldvirtftn)
     const metadata::RtMethodInfo* method = get_resolved_data<metadata::RtMethodInfo>(imi, ir->method_idx);
     assert(method->slot < method->parent->vtable_count);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtMethodInfo*, actual_method, vm::Method::get_virtual_method_impl(obj, method));
+    HANDLE_RAISE_RUNTIME_ERROR_VOID(vm::Calli::register_managed_target(actual_method));
     set_stack_value_at(eval_stack_base, ir->dst, actual_method);
 }
 LEANCLR_CASE_END()
@@ -2813,10 +2815,12 @@ LEANCLR_CASE_BEGIN_LITE(CalliInterp)
     const metadata::RtMethodSig* method_sig = get_resolved_data<const metadata::RtMethodSig>(imi, ir->method_sig_idx);
     const uint8_t* next_ip = reinterpret_cast<const uint8_t*>(ir + 1);
     const metadata::RtMethodInfo* target_method = get_stack_value_at<const metadata::RtMethodInfo*>(eval_stack_base, ir->method_idx);
-    if (target_method->parameter_count != method_sig->params.size())
-    {
-        RAISE_RUNTIME_ERROR(RtErr::ExecutionEngine);
-    }
+    HANDLE_RAISE_RUNTIME_ERROR_VOID(vm::Calli::validate_managed_target(method_sig, target_method));
+#if LEANCLR_BCL_CORECLR_NET10
+    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
+#endif
+    if (vm::Method::is_static(target_method))
+        TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
 
     if (target_method->invoker_type == metadata::RtInvokerType::Interpreter)
     {
@@ -2824,9 +2828,9 @@ LEANCLR_CASE_BEGIN_LITE(CalliInterp)
     }
     else
     {
-        ip = reinterpret_cast<const uint8_t*>(ir + 1);
         RtStackObject* frame_base = eval_stack_base + ir->frame_base;
         HANDLE_RAISE_RUNTIME_ERROR_VOID(target_method->invoke_method_ptr(target_method->method_ptr, target_method, frame_base, frame_base));
+        ip = reinterpret_cast<const uint8_t*>(ir + 1);
     }
 }
 LEANCLR_CASE_END_LITE()

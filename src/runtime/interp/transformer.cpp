@@ -6,6 +6,7 @@
 #include "metadata/aot_module.h"
 #include "basic_block_splitter.h"
 #include "vm/method.h"
+#include "vm/calli.h"
 #include "vm/class.h"
 #include "vm/rt_string.h"
 #include "vm/intrinsics.h"
@@ -1389,6 +1390,7 @@ RtResultVoid Transformer::add_callvirt(const metadata::RtMethodInfo* method)
 
 RtResultVoid Transformer::add_calli(const metadata::RtMethodSig& method_sig)
 {
+    RET_ERR_ON_FAIL(vm::Calli::validate_managed_signature(&method_sig));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const Variable*, func_ptr, pop_eval_stack());
 
     // Pop parameters in reverse order

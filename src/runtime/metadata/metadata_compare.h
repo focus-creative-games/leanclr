@@ -56,9 +56,7 @@ struct MethodSigCompare
 {
     bool operator()(const RtMethodSig* a, const RtMethodSig* b) const
     {
-        return a->flags == b->flags && a->generic_param_count == b->generic_param_count &&
-               MetadataCompare::is_typesig_equal_ignore_attrs(a->return_type, b->return_type, false) &&
-               MetadataCompare::is_typesigs_equal_ignore_attrs(a->params.data(), b->params.data(), a->params.size(), false);
+        return MetadataCompare::is_method_signature_equal(a, b);
     }
 };
 
