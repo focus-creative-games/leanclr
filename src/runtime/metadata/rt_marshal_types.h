@@ -247,42 +247,46 @@ struct RtMarshalSpec
 {
     RtMarshalNativeType native_type;
 
+    // native_type selects one payload. Fields within that payload coexist.
     union
     {
-        uint32_t size;
-    } fixed_sys_string;
+        struct
+        {
+            uint32_t size;
+        } fixed_sys_string;
 
-    union
-    {
-        RtMarshalVariantType variant_type;
-        const RtTypeSig* udt;
-    } safe_array;
+        struct
+        {
+            RtMarshalVariantType variant_type;
+            const RtTypeSig* udt;
+        } safe_array;
 
-    struct
-    {
-        uint32_t size;
-        RtMarshalNativeType array_element_type;
-    } fixed_array;
+        struct
+        {
+            uint32_t size;
+            RtMarshalNativeType array_element_type;
+        } fixed_array;
 
-    union
-    {
-        RtMarshalNativeType array_element_type;
-        uint32_t param_index;
-        uint32_t element_count;
-    } array;
+        struct
+        {
+            RtMarshalNativeType array_element_type;
+            uint32_t param_index;
+            uint32_t element_count;
+        } array;
 
-    union
-    {
-        RtMarshalUtf8Span guid;
-        RtMarshalUtf8Span type_name;
-        const RtTypeSig* custom_marshaler_type;
-        RtMarshalUtf8Span cookie;
-    } custom_marshaler;
+        struct
+        {
+            RtMarshalUtf8Span guid;
+            RtMarshalUtf8Span type_name;
+            const RtTypeSig* custom_marshaler_type;
+            RtMarshalUtf8Span cookie;
+        } custom_marshaler;
 
-    union
-    {
-        uint32_t iid_param_index;
-    } interface;
+        struct
+        {
+            uint32_t iid_param_index;
+        } interface;
+    };
 };
 
 struct RtSafeArrayBound

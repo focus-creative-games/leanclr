@@ -8,6 +8,7 @@
 #include "vm/field.h"
 #include "vm/settings.h"
 #include "vm/struct_marshal.h"
+#include "vm/marshal.h"
 #include "vm/rt_array.h"
 #include "vm/rt_string.h"
 #include "gc/garbage_collector.h"
@@ -135,6 +136,26 @@ RtResultVoid run()
 {
     RET_ERR_ON_FAIL(vm::Runtime::initialize());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, assembly, vm::Assembly::load_by_name("StructMarshalTests"));
+    // Read real FieldMarshal blobs: multiple values in a payload must survive
+    // subsequent reads, independently of native conversion support for that type.
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, metadata_class,
+                                            assembly->mod->get_class_by_nested_full_name("StructMarshalTests.MarshalMetadata", false, true));
+    RET_ERR_ON_FAIL(vm::Class::initialize_fields(metadata_class));
+    metadata::RtMarshalSpec spec{};
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, has_array,
+                                            vm::Marshal::get_marshal_spec(vm::Class::get_field_for_name(metadata_class, "Dynamic", false), spec));
+    check(has_array && spec.native_type == metadata::RtMarshalNativeType::Array);
+    check(spec.array.array_element_type == metadata::RtMarshalNativeType::I2 && spec.array.param_index == metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT &&
+          spec.array.element_count == metadata::RT_INVALID_PARAM_INDEX_OR_ELEMENT_COUNT);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, has_safe, vm::Marshal::get_marshal_spec(vm::Class::get_field_for_name(metadata_class, "Safe", false), spec));
+    check(has_safe && spec.native_type == metadata::RtMarshalNativeType::SafeArray);
+    check(spec.safe_array.variant_type == metadata::RtMarshalVariantType::I4 && spec.safe_array.udt == nullptr);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, has_custom,
+                                            vm::Marshal::get_marshal_spec(vm::Class::get_field_for_name(metadata_class, "Custom", false), spec));
+    check(has_custom && spec.native_type == metadata::RtMarshalNativeType::CustomMarshaler);
+    check(spec.custom_marshaler.guid.length == 0 && spec.custom_marshaler.type_name.length == 0);
+    check(spec.custom_marshaler.custom_marshaler_type != nullptr);
+    check(spec.custom_marshaler.cookie.length == 14 && std::memcmp(spec.custom_marshaler.cookie.data, "marshal-cookie", 14) == 0);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, program,
                                             assembly->mod->get_class_by_nested_full_name("StructMarshalTests.Program", false, true));
     RET_ERR_ON_FAIL(vm::Class::initialize_all(program));
