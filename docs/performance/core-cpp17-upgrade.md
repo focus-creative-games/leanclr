@@ -36,6 +36,8 @@
 | 工具和样例 | leanrun、startup、原生 P/Invoke、两个 Wasm 样例均构建通过；leanrun 和原生 P/Invoke 覆盖正常/异常输出 |
 | Mono 同步后的 Native + Mono BCL | 41/41；所有运行时代码包含 C++17 和紧凑初始化修复 |
 
+样例清理说明（2026-11-13）：上表及原始 JSON 中的 P/Invoke/Wasm 样例是历史验证记录；当前仅保留 `src/samples/startup`。P/Invoke ABI 验证由 `src/tests/public-invoker` 承担，`scripts/test/cpp17.py` 使用该测试覆盖原生和 Wasm，另构建 startup 的两个目标。
+
 本地版本：MSVC 19.44.35229.0，Emscripten 4.0.12（Clang 22.0.0），GCC 13.3.0，Node v22.12.0。两个 Wasm 样例只完成编译/链接，浏览器初始化及 JS 宿主没有在此轮执行。
 
 
