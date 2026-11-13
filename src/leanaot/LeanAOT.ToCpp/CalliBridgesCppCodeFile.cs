@@ -11,7 +11,9 @@ namespace LeanAOT.ToCpp;
 // One table belongs to the whole generation rather than any defining assembly.
 sealed class CalliBridgesCppCodeFile
 {
-    record Abi(int Kind, string Cpp) { public string Key => Kind.ToString(); }
+    record Abi(int Kind, string Cpp, TypeDetail Detail=null, List<(FieldDetail Field,Abi Type)> Fields=null) {
+        public string Key => Kind==17?"s"+Cpp:Kind.ToString();
+    }
     record Bridge(Abi Ret, List<Abi> Args) { public string Key => "1:"+Ret.Key+"("+string.Join(",",Args.Select(a=>a.Key))+")"; }
     readonly SortedDictionary<string,Bridge> bridges = new(StringComparer.Ordinal);
     readonly List<object> sites = new();
@@ -29,6 +31,11 @@ sealed class CalliBridgesCppCodeFile
         if(type.ElementType==ElementType.Ptr || type.ElementType==ElementType.I || type.ElementType==ElementType.U)return new Abi(15,"void*");
         if(type.ElementType==ElementType.ValueType && type.ToTypeDefOrRef().ResolveTypeDef() is { IsEnum:true } e)
             return Type(e.Fields.First(f=>!f.IsStatic).FieldType);
+        if(type.ElementType is ElementType.ValueType or ElementType.GenericInst) {
+            if(!CalliPolicy.Type(type))throw new NotSupportedException("non-blittable-struct:"+type.FullName);
+            var detail=GlobalServices.Inst.MetadataService.GetTypeDetail(type.ToTypeDefOrRef());
+            return new Abi(17,detail.InstanceTypeName,detail,detail.InstanceFieldsExcludeParent.Select(f=>(f,Type(f.Type))).ToList());
+        }
         return type.ElementType switch {
             ElementType.Void when ret => new Abi(1,"void"),
             ElementType.Boolean => new Abi(2,"int32_t"), ElementType.Char=>new Abi(3,"uint8_t"),
@@ -76,9 +83,22 @@ sealed class CalliBridgesCppCodeFile
         foreach(var assembly in manifest.AssemblyPlans.Values)
             foreach(var type in assembly.Module.GetTypes())foreach(var method in type.Methods)Scan(method);
         foreach(var plan in manifest.GenericMethodPlans)Scan(plan.Method.ResolveMethodDef(),MetaUtil.GetMethodGenericArgumentContext(plan.Method));
-        var text=new StringBuilder("#include \"codegen/leanclr_common.h\"\nusing namespace leanclr;\n");
-        var types=bridges.Values.SelectMany(b=>b.Args.Prepend(b.Ret)).GroupBy(t=>t.Key).Select(g=>g.First()).OrderBy(t=>t.Key).ToList();
-        foreach(var t in types)text.AppendLine($"static const metadata::RtCalliAbiType type_{t.Key} = {{ {t.Kind}, {(t.Kind==1?"0":$"sizeof({t.Cpp})")}, {(t.Kind==1?"1":$"alignof({t.Cpp})")}, nullptr, 0 }};");
+        var writer=new CodeWriter(Path.Combine(directory,"calli_bridge_types.h"));
+        var declarations=new ForwardDeclaration(writer.CreateThunkCollection("types"));
+        declarations.AddInclude(ConstStrings.CodegenCommonHeaderFileName);
+        var text=new StringBuilder("#include \"calli_bridge_types.h\"\nusing namespace leanclr;\n");
+        var emitted=new HashSet<string>();
+        void EmitType(Abi t) {
+            if(!emitted.Add(t.Key))return;
+            if(t.Fields!=null)foreach(var f in t.Fields)EmitType(f.Type);
+            if(t.Detail!=null) {
+                declarations.AddTypeForwardDefine(t.Detail.TypeSig);
+                text.AppendLine($"static const metadata::RtCalliAbiField fields_{t.Key}[] = {{ {string.Join(", ",t.Fields.Select(f=>$"{{offsetof({t.Cpp}, {f.Field.Name}), &type_{f.Type.Key}}}"))} }};");
+            }
+            text.AppendLine($"static const metadata::RtCalliAbiType type_{t.Key} = {{ {t.Kind}, {(t.Kind==1?"0":$"sizeof({t.Cpp})")}, {(t.Kind==1?"1":$"alignof({t.Cpp})")}, {(t.Detail==null?"nullptr":"fields_"+t.Key)}, {t.Fields?.Count??0} }};");
+        }
+        foreach(var bridge in bridges.Values)foreach(var type in bridge.Args.Prepend(bridge.Ret))EmitType(type);
+        writer.Save();
         int n=0;
         foreach(var b in bridges.Values) {
             text.AppendLine($"static void bridge_{n}(void* target, interp::RtStackObject* args, interp::RtStackObject* ret) {{");
@@ -87,7 +107,8 @@ sealed class CalliBridgesCppCodeFile
             for(int i=0;i<b.Args.Count;++i) {
                 string read=$"codegen::get_eval_stack_value_as_type<{(b.Args[i].Kind==2?"bool":b.Args[i].Kind==3?"uint16_t":b.Args[i].Cpp)}>(args + {offset})";
                 if(b.Args[i].Kind==3)read=$"vm::Calli::char_to_native({read})";
-                text.AppendLine($"{b.Args[i].Cpp} a{i} = {read};");
+                if(b.Args[i].Kind==17)text.AppendLine($"{b.Args[i].Cpp} a{i}{{}}; std::memcpy(&a{i}, args + {offset}, sizeof(a{i}));");
+                else text.AppendLine($"{b.Args[i].Cpp} a{i} = {read};");
                 offset+=$" + codegen::get_stack_object_size_for_type<{b.Args[i].Cpp}>()";
             }
             string call=$"reinterpret_cast<Fn>(target)({string.Join(", ",Enumerable.Range(0,b.Args.Count).Select(i=>$"a{i}"))})";
