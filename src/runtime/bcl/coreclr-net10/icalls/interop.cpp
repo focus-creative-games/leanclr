@@ -1079,9 +1079,8 @@ static vm::InternalCallEntry s_interop_internal_call_entries[] = {
      (vm::InternalCallFunction)&Interop::kernel32_copy_file_ex_private, kernel32_copy_file_ex_private_invoker},
     {"Interop/Kernel32::CreateDirectoryPrivate(System.String,Interop/Kernel32/SECURITY_ATTRIBUTES&)",
      (vm::InternalCallFunction)&Interop::kernel32_create_directory_private, kernel32_create_directory_private_invoker},
-    {"Interop/Kernel32::CreateFilePrivate(System.String,System.Int32,System.IO.FileShare,Interop/Kernel32/"
-     "SECURITY_ATTRIBUTES*,System.IO.FileMode,System.Int32,System.IntPtr)",
-     (vm::InternalCallFunction)&Interop::kernel32_create_file_private, kernel32_create_file_private_invoker},
+    // CoreLib must wrap the native CreateFile result in SafeFileHandle; the legacy
+    // Mono binding returns IntPtr and is not compatible with this managed signature.
     {"Interop/Kernel32::DeleteFilePrivate(System.String)", (vm::InternalCallFunction)&Interop::kernel32_delete_file_private,
      kernel32_delete_file_private_invoker},
     {"Interop/Kernel32::FindNextFile(Microsoft.Win32.SafeHandles.SafeFindHandle,Interop/Kernel32/WIN32_FIND_DATA&)",

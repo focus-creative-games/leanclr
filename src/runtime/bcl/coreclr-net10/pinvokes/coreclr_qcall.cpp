@@ -1,5 +1,6 @@
 #include "bcl/coreclr-net10/managed_layouts.h"
 #include "coreclr_qcall.h"
+#include "bcl/coreclr-net10/assembly_load_context.h"
 #include "intrinsics/system_runtime_compilerservices_runtimehelpers.h"
 
 #include <cstdio>
@@ -511,12 +512,32 @@ RtResult<vm::RtArray*> get_loaded_assemblies() noexcept
     RET_OK(assembly_array);
 }
 
-RtResultVoid assembly_load_context_initialize_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
+RtResultVoid assembly_load_context_initialize_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
                                                       interp::RtStackObject* ret) noexcept
 {
-    // LeanCLR currently runs all assemblies in one non-collectible load context.
-    // Return a stable non-null handle so CoreLib's AssemblyLoadContext bookkeeping can proceed.
-    interp::EvalStackOp::set_return(ret, reinterpret_cast<void*>(1));
+    auto handle = interp::EvalStackOp::get_param<void*>(params, 0);
+    const bool is_default = interp::EvalStackOp::get_param<int32_t>(params, 1) != 0;
+    const bool collectible = interp::EvalStackOp::get_param<int32_t>(params, 2) != 0;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(void*, context, bcl::AssemblyLoadContext::initialize(handle, is_default, collectible));
+    interp::EvalStackOp::set_return(ret, context);
+    RET_VOID_OK();
+}
+
+RtResultVoid assembly_load_context_stream_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                  interp::RtStackObject*) noexcept
+{
+    auto context = interp::EvalStackOp::get_param<void*>(params, 0);
+    auto image = interp::EvalStackOp::get_param<const uint8_t*>(params, 1);
+    auto size = interp::EvalStackOp::get_param<int32_t>(params, 2);
+    auto symbols = interp::EvalStackOp::get_param<const uint8_t*>(params, 3);
+    auto symbols_size = interp::EvalStackOp::get_param<int32_t>(params, 4);
+    auto output = interp::EvalStackOp::get_param<vm::RtObject**>(params, 5);
+    if (!output)
+        RET_ERR(RtErr::ArgumentNull);
+    *output = nullptr;
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, assembly, bcl::AssemblyLoadContext::load(context, image, size, symbols, symbols_size));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtReflectionAssembly*, reflected, vm::Reflection::get_assembly_reflection_object(assembly));
+    *output = reinterpret_cast<vm::RtObject*>(reflected);
     RET_VOID_OK();
 }
 
@@ -531,7 +552,7 @@ RtResultVoid assembly_load_context_get_for_assembly_invoker(metadata::RtManagedM
 RtResultVoid assembly_load_context_prepare_release_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
                                                            interp::RtStackObject*) noexcept
 {
-    RET_VOID_OK();
+    RET_ERR(RtErr::NotSupported);
 }
 
 RtResult<vm::RtString*> get_assembly_full_name(void* qcall_assembly, void* native_handle) noexcept
@@ -6985,6 +7006,11 @@ void register_coreclr_qcall_pinvokes() noexcept
                                    nullptr, assembly_get_loaded_assemblies_invoker);
     vm::PInvokes::register_pinvoke("System.Runtime.Loader.AssemblyLoadContext::GetLoadedAssemblies", nullptr, assembly_get_loaded_assemblies_invoker);
     vm::PInvokes::register_pinvoke("AssemblyNative_GetLoadedAssemblies", nullptr, assembly_get_loaded_assemblies_invoker);
+    vm::PInvokes::register_pinvoke("System.Runtime.Loader.AssemblyLoadContext::LoadFromStream(System.IntPtr,System.IntPtr,System.Int32,System.IntPtr,System."
+                                   "Int32,System.Runtime.CompilerServices.ObjectHandleOnStack)",
+                                   nullptr, assembly_load_context_stream_invoker);
+    vm::PInvokes::register_pinvoke("System.Runtime.Loader.AssemblyLoadContext::LoadFromStream", nullptr, assembly_load_context_stream_invoker);
+    vm::PInvokes::register_pinvoke("AssemblyNative_LoadFromStream", nullptr, assembly_load_context_stream_invoker);
     vm::PInvokes::register_pinvoke(
         "System.Runtime.Loader.AssemblyLoadContext::<InitializeAssemblyLoadContext>g____PInvoke|0_0(System.IntPtr,System.Int32,System.Int32)", nullptr,
         assembly_load_context_initialize_invoker);
