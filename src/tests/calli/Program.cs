@@ -27,6 +27,11 @@ namespace CalliTests
         public delegate* unmanaged[Cdecl, SuppressGCTransition]<int, int> Suppressed;
 #endif
     }
+    public unsafe class NativeSibling<T> where T : unmanaged
+    {
+        public static int Marker = 1;
+        [AotMethod(false)] public virtual T Invoke(IntPtr target, T left, T right) { return ((delegate* unmanaged[Cdecl]<T, T, T>)(void*)target)(left, right); }
+    }
     public unsafe class Program
     {
         static void Check(bool value, string message) { if (!value) throw new Exception(message); }
@@ -62,7 +67,15 @@ namespace CalliTests
             var nested = new Nested { S = new Small { A = 1, B = 2 }, L = 3 }; ((delegate* unmanaged[Cdecl]<ref Nested, void>)(void*)N21)(ref nested); Check(nested.S.A == 2 && nested.S.B == 4 && nested.L == 6, "nested byref aggregate");
         }
         [AotMethod(false)] public static T ExcludedNativeGeneric<T>(IntPtr target, T value) where T : unmanaged { return ((delegate* unmanaged[Cdecl]<T, T>)(void*)target)(value); }
-        public static void NativeGeneric() { Check(ExcludedNativeGeneric<uint>(N26, uint.MaxValue) == 0x7fffffff, "interpreter-only closed generic bridge census"); }
+        [AotMethod(false)] public static T ExcludedNativeForward<T>(IntPtr target, T value) where T : unmanaged { return ExcludedNativeGeneric<T>(target, value); }
+        [AotMethod(false)] public static int UnrelatedGrow<T>(int depth) { return depth == 0 ? 0 : UnrelatedGrow<T[]>(depth - 1) + 1; }
+        public static void NativeGeneric()
+        {
+            Check(new NativeSibling<uint>() != null, "constructed generic virtual bridge census");
+            Check(NativeSibling<ulong>.Marker == 1, "field-only generic virtual bridge census");
+            Check(UnrelatedGrow<uint>(0) == 0, "unrelated expanding generic census");
+            Check(ExcludedNativeForward<uint>(N26, uint.MaxValue) == 0x7fffffff, "interpreter-only transitive closed generic bridge census");
+        }
         [DllImport("__Internal", EntryPoint = "calli_bench_add", CallingConvention = CallingConvention.Cdecl)] public static extern int NamedAdd(int value);
         public static int BenchCalli(int count) { int sum = 0; var pointer = (delegate* unmanaged[Cdecl]<int, int>)(void*)N0; for (int i = 0; i < count; i++) sum += pointer(i & 255); return sum; }
         public static int BenchNamed(int count) { int sum = 0; for (int i = 0; i < count; i++) sum += NamedAdd(i & 255); return sum; }
