@@ -66,6 +66,8 @@ static metadata::RtClass* get_exception_klass_of_runtime_error(RtErr err)
         return types.cls_missing_method_exception;
     case RtErr::MissingMember:
         return types.cls_missing_member_exception;
+    case RtErr::FileNotFound:
+        return types.cls_file_not_found_exception;
     case RtErr::BadImageFormat:
         return types.cls_bad_image_format_exception;
     case RtErr::EntryPointNotFound:

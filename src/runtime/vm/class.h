@@ -68,6 +68,7 @@ struct CorLibTypes
     metadata::RtClass* cls_array_type_mismatch_exception;
     metadata::RtClass* cls_out_of_memory_exception;
     metadata::RtClass* cls_bad_image_format_exception;
+    metadata::RtClass* cls_file_not_found_exception;
     metadata::RtClass* cls_entry_point_not_found_exception;
     metadata::RtClass* cls_missing_member_exception;
     metadata::RtClass* cls_not_supported_exception;
