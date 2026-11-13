@@ -277,7 +277,7 @@ namespace LeanAOT.ToCpp
             foreach (var local in _localVariables)
             {
                 _forwardDeclaration.AddTypeForwardDefine(local.Type);
-                _localsWriter.AddLine($"{GetExactTypeName(local.Type)} {GetLocalName(local)}{(initLocals || (HasRuntimeGcRoots && NeedsRootType(local.Type)) ? " = {}" : "")};");
+                _localsWriter.AddLine($"{GetExactTypeName(local.Type)} {GetLocalName(local)}{(initLocals || NeedsRootType(local.Type) ? " = {}" : "")};");
             }
         }
 
@@ -2221,23 +2221,6 @@ namespace LeanAOT.ToCpp
                 _bodyWriter.AddLine($"{GetTypeName(retVar)} {GetEvalVariableName(retVar)};");
             }
 
-            if (IsNet10Profile && methodDetail.IsStatic && methodDetail.DeclaringTypeDef.IsInterface &&
-                (_curPrefixs & PrefixFlags.Constrained) != 0)
-            {
-                var constrained = ((ConstraintedData)_prefixData).ConstrainedType;
-                var typeVariable = _runtimeResolvedMetadatas.GetTypeVariable(constrained, _metadataService.GetTypeDetail(constrained));
-                var declaration = _runtimeResolvedMetadatas.GetMethodVariable(method, methodDetail);
-                var cached = typeVariable.GetStaticInterfaceMethodSubVariable(declaration);
-                var actual = NewEvalVariable(EvalDataType.I, null);
-                EmitDeclaringAssignOrThrow(inst, actual, cached.FullReferenceVariableName + ".result()");
-                string actualMethod = $"reinterpret_cast<const leanclr::metadata::RtMethodInfo*>({GetEvalVariableName(actual)})";
-                _bodyWriter.AddLine($"if (leanclr::vm::Class::is_cctor_not_finished(({actualMethod})->parent))");
-                _bodyWriter.BeginBlock();
-                EmitThrowOnError(inst, $"leanclr::vm::Runtime::run_class_static_constructor(({actualMethod})->parent)");
-                _bodyWriter.EndBlock();
-                EmitCallByMethodPointerDirectly(inst, methodDetail, actualMethod, args, retVar, false);
-                return;
-            }
             EmitCallCommon(inst, methodDetail, () => _runtimeResolvedMetadatas.GetMethodVariable(method, methodDetail).GetFullReferenceVariableName(), args, retVar);
         }
 
@@ -2248,7 +2231,7 @@ namespace LeanAOT.ToCpp
                 // for interface, we should check value type at runtime since it can be implemented by value type
                 return true;
             }
-            if (!GlobalServices.Inst.IsCoreLibraryModule(declaringTypeDef.Module))
+            if (!MetaUtil.IsCorlibOrSystemOrSystemCore(declaringTypeDef.Module))
             {
                 return false;
             }
@@ -3119,10 +3102,7 @@ namespace LeanAOT.ToCpp
             if (operand is ITypeDefOrRef type)
             {
                 RuntimeResolvedVariable typeVar = _runtimeResolvedMetadatas.GetTypeVariable(type, null);
-                if (IsNet10Profile)
-                    EmitDeclaringAssignOrThrow(inst, retVar, $"leanclr::codegen::get_runtime_type_handle({typeVar.GetFullReferenceVariableName()})");
-                else
-                    _bodyWriter.AddLine($"{ConstStrings.TypeSigPtrTypeName} {GetEvalVariableName(retVar)} = {typeVar.GetFullReferenceVariableName()}->by_val;");
+                _bodyWriter.AddLine($"{ConstStrings.TypeSigPtrTypeName} {GetEvalVariableName(retVar)} = {typeVar.GetFullReferenceVariableName()}->by_val;");
             }
             else if (operand is IMethod method && method.IsMethod)
             {
@@ -3181,13 +3161,7 @@ namespace LeanAOT.ToCpp
             string typeRefVarName = GetEvalVariableName(typedRefVar);
             TypeDetail typeDetail = _metadataService.GetTypeDetail(inflatedType);
             RuntimeResolvedVariable typeVar = _runtimeResolvedMetadatas.GetTypeVariable(inflatedType, typeDetail);
-            if (IsNet10Profile)
-            {
-                var handle = NewEvalVariable(EvalDataType.I, null);
-                EmitDeclaringAssignOrThrow(inst, handle, $"leanclr::codegen::get_runtime_type_handle({typeVar.GetFullReferenceVariableName()})");
-                _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"reinterpret_cast<intptr_t>({typeRefVarName}.type_handle) != {GetEvalVariableName(handle)}")})");
-            }
-            else if (MetaUtil.IsValueType(inflatedType.ToTypeSig()))
+            if (MetaUtil.IsValueType(inflatedType.ToTypeSig()))
             {
                 _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{typeRefVarName}.klass != {typeVar.GetFullReferenceVariableName()}")})");
             }
@@ -3220,17 +3194,8 @@ namespace LeanAOT.ToCpp
             RuntimeResolvedVariable typeVar = _runtimeResolvedMetadatas.GetTypeVariable(inflatedType, typeDetail);
             string retVarName = GetEvalVariableName(retVar);
             _bodyWriter.AddLine($"{ConstStrings.TypedByRefTypeName} {retVarName};");
-            if (IsNet10Profile)
-            {
-                var handle = NewEvalVariable(EvalDataType.I, null);
-                EmitDeclaringAssignOrThrow(inst, handle, $"leanclr::codegen::get_runtime_type_handle({typeVar.GetFullReferenceVariableName()})");
-                _bodyWriter.AddLine($"{retVarName}.type_handle = reinterpret_cast<const void*>({GetEvalVariableName(handle)});");
-            }
-            else
-            {
-                _bodyWriter.AddLine($"{retVarName}.type_handle = {typeVar.GetFullReferenceVariableName()}->by_val;");
-                _bodyWriter.AddLine($"{retVarName}.klass = {typeVar.GetFullReferenceVariableName()};");
-            }
+            _bodyWriter.AddLine($"{retVarName}.type_handle = {typeVar.GetFullReferenceVariableName()}->by_val;");
+            _bodyWriter.AddLine($"{retVarName}.klass = {typeVar.GetFullReferenceVariableName()};");
             _bodyWriter.AddLine($"{retVarName}.value = {GetEvalVariableExprWithCast(addrVar, "void*")};");
         }
 
