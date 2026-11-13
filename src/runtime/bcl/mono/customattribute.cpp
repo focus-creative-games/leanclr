@@ -19,6 +19,8 @@
 #include "gc/garbage_collector.h"
 #include "metadata/module_def.h"
 #include "const_strs.h"
+#include "gc/gc_roots.h"
+#include "utils/scope_guard.h"
 
 namespace leanclr
 {
@@ -1090,6 +1092,12 @@ static RtResult<CustomAttributeProvider> get_token_of_customattribute_provider(R
         provider.mod = mod;
         provider.token = mod->get_assembly_token();
     }
+    else if (obj_klass == corlib_types.cls_reflection_module)
+    {
+        auto* module = reinterpret_cast<RtReflectionModule*>(obj);
+        provider.mod = module->assembly->assembly->mod;
+        provider.token = provider.mod->get_module_token();
+    }
     else
     {
         metadata::RtModuleDef* mod = obj_klass->image;
@@ -1198,17 +1206,17 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(me
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(RtArray*, ca_data_arr,
                                              LEANCLR_NEW_SZARRAY_FROM_ELE_KLASS_INTERNAL(types.cls_customattributedata, (int32_t)rid_range.count,
                                                                                          "CustomAttribute::get_customattributes_data_on_target_token"));
+    gc::GcRoots::register_slot(reinterpret_cast<RtObject**>(&ca_data_arr));
+    auto array_root = utils::make_scope_exit([&]() { gc::GcRoots::unregister_slot(reinterpret_cast<RtObject**>(&ca_data_arr)); });
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtReflectionAssembly*, assembly_obj, Reflection::get_assembly_reflection_object(mod->get_assembly()));
     for (uint32_t i = 0; i < rid_range.count; ++i)
     {
         uint32_t ca_rid = rid_range.start_rid + i;
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtCustomAttributeRawData, raw_data, mod->get_custom_attribute_raw_data(ca_rid));
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca, read_custom_attribute(mod, &raw_data));
 
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL3(utils::BinaryReader, reader, mod->get_decoded_blob_reader(raw_data.dataBlobIndex));
-        RtArray* typed_arg_arr = nullptr;
-        RtArray* named_arg_arr = nullptr;
-        RET_ERR_ON_FAIL(resolve_customattribute_data_arguments(&reader, mod, raw_data.ctor, &typed_arg_arr, &named_arg_arr));
+        // CustomAttributeData owns a lazy metadata descriptor. Do not create the
+        // user's attribute or decode argument objects that this path discards.
 
         const void* ctor_args[4];
         UNWRAP_OR_RET_ERR_ON_FAIL(ctor_args[0], Reflection::get_method_reflection_object(raw_data.ctor, raw_data.ctor->parent));
@@ -1220,6 +1228,8 @@ RtResult<RtArray*> CustomAttribute::get_customattributes_data_on_target_token(me
 
         DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(RtObject*, ca_data_obj,
                                                 LEANCLR_NEWOBJ_INTERNAL(ca_data_ctor->parent, "CustomAttribute::get_customattributes_data_on_target_token"));
+        gc::GcRoots::register_slot(&ca_data_obj);
+        auto descriptor_root = utils::make_scope_exit([&]() { gc::GcRoots::unregister_slot(&ca_data_obj); });
         RET_ERR_ON_FAIL(Runtime::invoke_with_run_cctor(ca_data_ctor, ca_data_obj, ctor_args));
 
         // gc::GarbageCollector::write_barrier((RtObject**)Array::get_array_data_start_as<RtObject*>(ca_data_arr) + i, ca_data_obj);
