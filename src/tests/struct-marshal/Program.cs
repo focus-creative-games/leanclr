@@ -168,6 +168,76 @@ namespace StructMarshalTests
                 Marshal.FreeHGlobal(p);
             }
         }
+        public static void PrimitiveMatrix()
+        {
+            object unsignedByte = (byte)255;
+            object unsignedShort = (ushort)65535;
+            object character = (char)65535;
+            Check((int)(byte)unsignedByte == 255 && (int)(ushort)unsignedShort == 65535 && (int)(char)character == 65535,
+                  "unsigned stack extension");
+            object[] values = { (sbyte)-128,
+                                (sbyte)127,
+                                (byte)255,
+                                (short)-32768,
+                                (short)32767,
+                                (ushort)65535,
+                                int.MinValue,
+                                int.MaxValue,
+                                uint.MaxValue,
+                                long.MinValue,
+                                long.MaxValue,
+                                ulong.MaxValue,
+                                -1.25f,
+                                float.NaN,
+                                float.PositiveInfinity,
+                                -2.5,
+                                double.NaN,
+                                double.NegativeInfinity,
+                                false,
+                                true,
+                                'Z',
+                                new IntPtr(-1),
+                                new UIntPtr(uint.MaxValue) };
+            foreach (object value in values)
+            {
+                Type type = value.GetType();
+                int size = Size(type);
+                IntPtr allocation = Alloc(size + 1);
+                IntPtr p = IntPtr.Add(allocation, 1);
+                try
+                {
+                    Marshal.StructureToPtr(value, p, false);
+                    object actual = Marshal.PtrToStructure(p, type);
+                    Check(value.Equals(actual), "primitive roundtrip " + type.Name + " expected=" + value.ToString() +
+                                                    " actual=" + actual.ToString() + " native=" + Marshal.ReadByte(p));
+                    Marshal.StructureToPtr(value, p, true);
+                    Check(value.Equals(Marshal.PtrToStructure(p, type)), "primitive replacement " + type.Name);
+                    Marshal.DestroyStructure(p, type);
+                    Guard(p, size);
+                    Eq(Marshal.ReadByte(allocation), 0xCC, "unaligned prefix");
+                }
+                finally
+                {
+                    Marshal.FreeHGlobal(allocation);
+                }
+            }
+            IntPtr scalar = Alloc(8);
+            try
+            {
+                Marshal.StructureToPtr<uint>(uint.MaxValue, scalar, false);
+                Check(Marshal.PtrToStructure<uint>(scalar) == uint.MaxValue, "generic uint");
+                Marshal.StructureToPtr<long>(long.MinValue, scalar, false);
+                Check(Marshal.PtrToStructure<long>(scalar) == long.MinValue, "generic long");
+                Marshal.StructureToPtr<double>(-3.25, scalar, false);
+                Check(Marshal.PtrToStructure<double>(scalar) == -3.25, "generic double");
+                Marshal.DestroyStructure<double>(scalar);
+                Guard(scalar, 8);
+            }
+            finally
+            {
+                Marshal.FreeHGlobal(scalar);
+            }
+        }
         public static void PlainLayout()
         {
             Eq(Size(typeof(Plain)), IntPtr.Size == 8 ? 24 : 24, "plain size");
@@ -600,6 +670,7 @@ namespace StructMarshalTests
         public static void All()
         {
             Primitive();
+            PrimitiveMatrix();
             PlainLayout();
             Packing();
             Explicit();
