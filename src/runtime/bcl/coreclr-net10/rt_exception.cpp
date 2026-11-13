@@ -1,8 +1,6 @@
 #include "managed_layouts.h"
 #include "vm/rt_exception.h"
 #include "vm/class.h"
-#include "vm/assembly.h"
-#include "metadata/module_def.h"
 #include "vm/object.h"
 #include "vm/rt_string.h"
 #include "vm/stacktrace.h"
@@ -59,20 +57,7 @@ static metadata::RtClass* get_exception_klass_of_runtime_error(RtErr err)
     case RtErr::MissingMember:
         return types.cls_missing_member_exception;
     case RtErr::FileNotFound:
-    {
-        static metadata::RtClass* file_not_found = nullptr;
-        if (!file_not_found)
-        {
-            auto klass = Assembly::get_corlib()->mod->get_class_by_name2("System.IO", "FileNotFoundException", false, true);
-            if (klass.is_err())
-                return types.cls_execution_engine_exception;
-            auto initialized = Class::initialize_all(klass.unwrap());
-            if (initialized.is_err())
-                return types.cls_out_of_memory_exception;
-            file_not_found = klass.unwrap();
-        }
-        return file_not_found;
-    }
+        return types.cls_file_not_found_exception;
     case RtErr::BadImageFormat:
         return types.cls_bad_image_format_exception;
     case RtErr::EntryPointNotFound:

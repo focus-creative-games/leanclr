@@ -147,6 +147,18 @@ RtResultVoid run()
     vm::Settings::set_aot_modules_data(&g_aot_modules_data);
 #endif
     RET_ERR_ON_FAIL(vm::Runtime::initialize());
+    const auto* file_not_found = vm::Class::get_corlib_types().cls_file_not_found_exception;
+    check(file_not_found != nullptr && std::strcmp(file_not_found->namespaze, "System.IO") == 0 &&
+          std::strcmp(file_not_found->name, "FileNotFoundException") == 0);
+    const auto initialized_flags = file_not_found->init_flags;
+    for (int i = 0; i < 2; ++i)
+    {
+        auto* error = vm::Exception::raise_error_as_exception(RtErr::FileNotFound, nullptr, nullptr);
+        check(error != nullptr && reinterpret_cast<vm::RtObject*>(error)->klass == file_not_found);
+        check(file_not_found->init_flags == initialized_flags);
+        check(vm::Exception::get_and_clear_current_exception() == error);
+    }
+
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, assembly, vm::Assembly::load_by_name("ReflectionInvokeTests"));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, program,
                                             assembly->mod->get_class_by_nested_full_name("ReflectionInvokeTests.Program", false, true));

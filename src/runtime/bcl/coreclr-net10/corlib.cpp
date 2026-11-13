@@ -81,6 +81,7 @@ RtResultVoid Class::init_corlib_classes(metadata::RtModuleDef* corlib)
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_array_type_mismatch_exception, get_class_must_exist(corlib, "System.ArrayTypeMismatchException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_out_of_memory_exception, get_class_must_exist(corlib, "System.OutOfMemoryException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_bad_image_format_exception, get_class_must_exist(corlib, "System.BadImageFormatException"));
+    UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_file_not_found_exception, get_class_must_exist(corlib, "System.IO.FileNotFoundException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_entry_point_not_found_exception, get_class_must_exist(corlib, "System.EntryPointNotFoundException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_missing_member_exception, get_class_must_exist(corlib, "System.MissingMemberException"));
     UNWRAP_OR_RET_ERR_ON_FAIL(t.cls_not_supported_exception, get_class_must_exist(corlib, "System.NotSupportedException"));
@@ -190,6 +191,8 @@ static RtResultVoid verify_field_layout(metadata::RtClass* klass, const char* na
 RtResultVoid Class::verify_integrity_of_corlib_classes()
 {
     const CorLibTypes& t = get_corlib_types();
+    // Prepare the runtime error type during startup, before any failed file load.
+    RET_ERR_ON_FAIL(initialize_all(t.cls_file_not_found_exception));
     metadata::RtModuleDef* corlib = metadata::RtModuleDef::get_corlib_module();
     if (corlib != nullptr && std::strcmp(corlib->get_name_no_ext(), STR_SYSTEM_PRIVATE_CORELIB_NAME) == 0)
     {
