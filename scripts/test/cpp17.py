@@ -7,8 +7,8 @@ import os
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
-TARGETS = 'public-c public-cpp host-capabilities default-host-services host-services core-boundary foundation portable-memory integer-math bit-scan il-bounds string-allocation command-line aligned-allocation lifecycle container-allocation il-fuzz-smoke'.split()
-TESTS = '^(public-c|public-cpp|host-capabilities|default-host-services|host-services|core-boundary|layer-boundaries|foundation|portable-memory|integer-math|bit-scan|il-bounds|string-allocation|command-line|aligned-allocation|lifecycle-failure|lifecycle-before-start|container-allocation|il-fuzz-smoke)$'
+TARGETS = 'public-invoker public-c public-cpp host-capabilities default-host-services host-services core-boundary foundation portable-memory integer-math bit-scan il-bounds string-allocation command-line aligned-allocation lifecycle container-allocation il-fuzz-smoke'.split()
+TESTS = '^(public-invoker|public-c|public-cpp|host-capabilities|default-host-services|host-services|core-boundary|layer-boundaries|foundation|portable-memory|integer-math|bit-scan|il-bounds|string-allocation|command-line|aligned-allocation|lifecycle-failure|lifecycle-before-start|container-allocation|il-fuzz-smoke)$'
 
 
 def main():
@@ -56,7 +56,7 @@ def main():
     run(['cmake', '-S', negative, '-B', negative / 'build', '-A', 'x64'], 'old-native-configure')
     assert 'LeanCLR requires C++17' in run(['cmake', '--build', negative / 'build', '--config', 'Release'], 'old-native-build', False)
     assert 'LeanCLR requires C++17' in run([opts.emsdk.resolve() / 'upstream/emscripten/em++.bat', '-std=c++14', '-I', ROOT / 'src/runtime', '-c', negative / 'main.cpp', '-o', negative / 'old.o'], 'old-wasm-build', False)
-    for sample in ['tools/leanrun', 'samples/startup', 'samples/custom-pinvoke-x64']:
+    for sample in ['tools/leanrun', 'samples/startup']:
         name = Path(sample).name
         print('C++17 consumer build:', name, flush=True)
         directory = output / name
@@ -77,17 +77,18 @@ def main():
     (fixture / 'ToolFixture.cs').write_text('public static class Entry { public static void Main() {} public static void Fail() { throw new System.InvalidOperationException("cpp17-smoke"); } }\n')
     csc = Path(os.environ.get('WINDIR', 'C:/Windows')) / 'Microsoft.NET/Framework64/v4.0.30319/csc.exe'
     run([csc, '/nologo', '/noconfig', '/nostdlib+', '/target:library', '/out:' + str(fixture / 'ToolFixture.dll'), '/r:' + str(ROOT / 'src/libraries/mono-4.5/mscorlib.dll'), fixture / 'ToolFixture.cs'], 'tool-fixture')
-    for name, exe in [('leanrun', 'leanrun.exe'), ('custom-pinvoke-x64', 'custom-pinvoke.exe')]:
-        command = [output / name / 'bin/Release' / exe, '-l', fixture, '-l', ROOT / 'src/libraries/mono-4.5', 'ToolFixture', '-e']
-        assert 'ok!' in run([*command, 'Entry::Main'], name + '-normal')
-        failure = run([*command, 'Entry::Fail'], name + '-exception', False)
-        assert 'InvalidOperationException' in failure and 'cpp17-smoke' in failure, failure
-    for name in ['custom-pinvoke-wasm', 'lean-wasm']:
-        print('C++17 Wasm consumer build:', name, flush=True)
-        directory = output / name
-        run(['cmake', '-S', ROOT / 'src/samples' / name, '-B', directory, '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '-DLEANCLR_HOST=PORTABLE',
-             '-DCMAKE_TOOLCHAIN_FILE=' + str(opts.emsdk.resolve() / 'upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake')], name + '-configure')
-        run(['cmake', '--build', directory, '--parallel', '4'], name + '-build')
+    command = [output / 'leanrun/bin/Release/leanrun.exe', '-l', fixture, '-l', ROOT / 'src/libraries/mono-4.5', 'ToolFixture', '-e']
+    assert 'ok!' in run([*command, 'Entry::Main'], 'leanrun-normal')
+    failure = run([*command, 'Entry::Fail'], 'leanrun-exception', False)
+    assert 'InvalidOperationException' in failure and 'cpp17-smoke' in failure, failure
+    # PInvoke registration and managed exception handoff are covered by the
+    # public-invoker test in both the native and Wasm compositions above.
+    name = 'startup-wasm'
+    print('C++17 Wasm consumer build:', name, flush=True)
+    directory = output / name
+    run(['cmake', '-S', ROOT / 'src/samples/startup', '-B', directory, '-G', 'Ninja', '-DCMAKE_BUILD_TYPE=Release', '-DLEANCLR_HOST=PORTABLE',
+         '-DCMAKE_TOOLCHAIN_FILE=' + str(opts.emsdk.resolve() / 'upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake')], name + '-configure')
+    run(['cmake', '--build', directory, '--parallel', '4'], name + '-build')
     (output / 'results.json').write_text(json.dumps(dict(results=results, cpp20_probe=probe, commands=commands), indent=2) + '\n')
     print('C++17 composition, C++20 and minimum diagnostics passed', flush=True)
 
