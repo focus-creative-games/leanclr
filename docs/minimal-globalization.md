@@ -2,9 +2,12 @@
 
 The CoreCLR adapter preserves native Windows NLS on Windows. On other hosts,
 the minimal profile selects CoreLib's invariant globalization algorithms before
-first use, through runtime-bound GlobalizationMode getters. This applies to both
-Windows-flavor and Unix-flavor CoreLib; the usual BCL layout and pointer-width
-checks still apply. The AOT runtime-implemented catalog reserves these getters,
+first use, through runtime-bound GlobalizationMode getters. The validated gates
+use Windows-flavor CoreLib 10.0.8 of matching pointer width (win-x86 for Wasm32,
+win-x64 for 64-bit targets). Host OS and BCL flavor are different dimensions;
+this does not claim compatibility with arbitrary Unix or Mono runtime packs.
+The usual BCL layout and pointer-width checks still apply.
+The AOT runtime-implemented catalog reserves these getters,
 so generated code cannot replace the platform policy.
 
 Invariant mode supports Unicode casing, ordinal comparison/search, invariant

@@ -52,6 +52,7 @@ jobs:
           name: net10-windows
           path: |
             out/platform-contracts/**
+            out/net10-runtime-win-x64/provenance.json
             out/net10-aot-current/*.log
             out/net10-aot-current/results.json
             out/net10-aot-current/optimized/*.log
@@ -82,20 +83,21 @@ jobs:
           dotnet-version: |
             8.0.x
             10.0.204
-      - run: python3 scripts/dotnet10/integration.py --sanitizers '${{ matrix.sanitizers }}'
-      - name: Resolve target CoreLib
-        run: echo "NET10_RUNTIME=$(python3 -c "import sys; sys.path.insert(0,'scripts/dotnet10'); from integration import installed_runtime; print(installed_runtime())")" >> "$GITHUB_ENV"
+      - name: Fetch compatible 64-bit CoreLib flavor
+        run: echo "NET10_RUNTIME=$(python3 scripts/dotnet10/fetch-corelib.py --rid win-x64)" >> "$GITHUB_ENV"
+      - run: python3 scripts/dotnet10/integration.py --runtime "$NET10_RUNTIME" --sanitizers '${{ matrix.sanitizers }}'
       - run: python3 scripts/dotnet10/aot-contracts.py --runtime "$NET10_RUNTIME" --sanitizers '${{ matrix.sanitizers }}'
       - run: python3 scripts/test/aot-features.py --target native --profile coreclr-net10 --runtime-dir "$NET10_RUNTIME"
       - run: python3 scripts/dotnet10/platform-contracts.py --runtime "$NET10_RUNTIME"
-      - run: python3 scripts/dotnet10/engine-contracts.py --sanitizers '${{ matrix.sanitizers }}'
-      - run: python3 scripts/dotnet10/engine-contracts.py --shared --sanitizers '${{ matrix.sanitizers }}'
+      - run: python3 scripts/dotnet10/engine-contracts.py --runtime "$NET10_RUNTIME" --sanitizers '${{ matrix.sanitizers }}'
+      - run: python3 scripts/dotnet10/engine-contracts.py --shared --runtime "$NET10_RUNTIME" --sanitizers '${{ matrix.sanitizers }}'
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: net10-${{ matrix.name }}
           path: |
             out/platform-contracts/**
+            out/net10-runtime-win-x64/provenance.json
             out/net10-portable-gate/**/*.log
             out/net10-portable-gate/results.json
             out/net10-aot-current/*.log
@@ -148,6 +150,7 @@ jobs:
           name: net10-wasm
           path: |
             out/platform-contracts/**
+            out/net10-runtime-win-x64/provenance.json
             out/net10-aot-current/**/*.log
             out/net10-aot-current/**/results.json
             out/net10-engine-wasm-Release/*.log
