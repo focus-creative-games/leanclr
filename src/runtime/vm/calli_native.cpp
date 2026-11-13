@@ -3,7 +3,6 @@
 #include "vm/class.h"
 #include "vm/field.h"
 #include <cstdio>
-#include "utils/encode_conv.h"
 #include <cstring>
 
 namespace leanclr
@@ -228,6 +227,21 @@ RtResult<RtCalliAbiType> runtime_type(const RtTypeSig* sig, bool allow_void, Sha
     RET_OK((RtCalliAbiType{kind, size, alignment, nullptr, 0}));
 }
 
+void print_type(const RtCalliAbiType& type)
+{
+    std::fprintf(stderr, "%u/%u@%u", unsigned(type.kind), unsigned(type.size), unsigned(type.alignment));
+    if (type.field_count)
+    {
+        std::fputc('{', stderr);
+        for (uint32_t i = 0; i < type.field_count; ++i)
+        {
+            std::fprintf(stderr, "%s%u:", i ? "," : "", unsigned(type.fields[i].offset));
+            print_type(*type.fields[i].type);
+        }
+        std::fputc('}', stderr);
+    }
+}
+
 RtResult<uint8_t> convention(const RtMethodSig* sig)
 {
     if (!sig || sig->generic_param_count || sig->calli_flags || (sig->flags & 0xf0) || sig->params.size() > 256)
@@ -239,7 +253,8 @@ RtResult<uint8_t> convention(const RtMethodSig* sig)
         RET_ERR(RtErr::NotSupported);
     if (c != RtSigType::C && c != RtSigType::StdCall)
         RET_ERR(RtErr::NotSupported);
-#if (defined(_WIN32) && defined(_M_X64)) || defined(__EMSCRIPTEN__)
+#if (defined(_WIN32) && defined(_M_X64)) || (defined(__EMSCRIPTEN__) && UINTPTR_MAX == UINT32_MAX) || \
+    (defined(LEANCLR_CALLI_ABI_PROBE) && LEANCLR_CALLI_ABI_PROBE)
     // Both spellings use the platform C ABI here. Other ABIs require their own tests.
     RET_OK(uint8_t(1));
 #else
@@ -247,24 +262,6 @@ RtResult<uint8_t> convention(const RtMethodSig* sig)
 #endif
 }
 } // namespace
-
-uint8_t Calli::char_to_native(uint16_t value)
-{
-    Utf16Char input = static_cast<Utf16Char>(value);
-    char bytes[8]{};
-    size_t count = 0;
-    utils::EncodeConv::utf16_to_ansi(&input, 1, bytes, count);
-    return count ? static_cast<uint8_t>(bytes[0]) : uint8_t('?');
-}
-
-uint16_t Calli::char_from_native(uint8_t value)
-{
-    char input = static_cast<char>(value);
-    Utf16Char chars[4]{};
-    size_t count = 0;
-    utils::EncodeConv::ansi_to_utf16(&input, 1, chars, count);
-    return count ? static_cast<uint16_t>(chars[0]) : uint16_t(0xfffd);
-}
 
 RtResultVoid Calli::register_native_bridges(const metadata::RtCalliBridge* table, uint32_t count)
 {
@@ -380,9 +377,15 @@ RtResult<const metadata::RtCalliBridge*> Calli::bind_native(const metadata::RtMe
             slot = (slot + 1) & (capacity - 1);
         }
     }
-    std::fprintf(stderr, "LeanCLR: missing native calli bridge (conv=%u, return=%u/%u, params=", unsigned(conv), unsigned(ret.kind), unsigned(ret.size));
+    std::fprintf(stderr, "LeanCLR: missing native calli bridge (conv=%u, return=", unsigned(conv));
+    print_type(ret);
+    std::fprintf(stderr, ", params=");
     for (size_t i = 0; i < sig->params.size(); ++i)
-        std::fprintf(stderr, "%s%u/%u", i ? "," : "", unsigned(args[i].kind), unsigned(args[i].size));
+    {
+        if (i)
+            std::fputc(',', stderr);
+        print_type(args[i]);
+    }
     std::fprintf(stderr, "). Generate/link calli_bridges.cpp or register a host bridge.\n");
     RET_ERR(RtErr::NotSupported);
 }

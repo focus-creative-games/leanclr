@@ -66,3 +66,21 @@ AutoLayout, managed-reference fields, MarshalAs conversions, bool/char fields,
 SIMD/inline-array special types and unverified alignments are rejected. Shape
 recursion is limited to 16 and the per-bind nested-field budget to 128. Cold binding
 uses bounded scratch storage; hot calls retain just the cached immutable bridge.
+
+Stage 03-F adds repeated native-to-managed collection, interior/evaluation-stack
+roots, EH side-effect checks, transactional bridge OOM/retry, and paired benchmarks
+against a statically linked named P/Invoke. The named and calli loops call the same
+non-inlined C function; the harness checks equal results and no warm native allocations.
+`verify-native.ps1 -Benchmark` builds fixtures, checks bridge dedup/closed generic
+census, runs interpreter and actual AOT, and compares positive cases on .NET 10.
+
+Managed reference variance is supported; the interpreter caches its last validated
+target. Null-this calli uses the interpreter when its AOT body assumes non-null this.
+ABI-only guard/target code lives separately to prevent accidental runtime linking.
+Use LEANCLR_CALLI_SIZE_PROBES=ON for paired size probes (whole bridge table + guard,
+not a single bridge). Unsupported ANSI char wrappers are omitted on portable hosts.
+
+Linux x64/ARM64 CI jobs use the explicit LEANCLR_CALLI_ABI_PROBE validation flag.
+Their production capability stays disabled until actual ABI results are reviewed.
+All caches currently follow the runtime's SINGLE-thread ownership contract.
+See docs/calli-support-results-2026-11-13.md for measured results and limits.

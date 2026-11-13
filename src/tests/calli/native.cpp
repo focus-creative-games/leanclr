@@ -1,4 +1,5 @@
 #include "vm/calli.h"
+#include "interp/machine_state.h"
 #include "metadata/metadata_compare.h"
 #include "alloc/general_allocation.h"
 #include "metadata/module_def.h"
@@ -21,12 +22,17 @@
 #include "vm/rt_string.h"
 #include "gc/garbage_collector.h"
 #include <cstdio>
+#include <chrono>
+#include <algorithm>
 #include <cstdlib>
 #include <fstream>
 #include <string>
 #include <unordered_map>
 
 using namespace leanclr;
+extern "C" int32_t calli_bench_add(int32_t);
+extern "C" void calli_fixture_set_callback(void (*callback)(void));
+extern "C" int32_t calli_fixture_effect_count(void);
 extern "C" void* calli_test_get_function(int32_t index);
 #if LEANCLR_CALLI_BRIDGES
 extern const metadata::RtCalliBridge g_calli_bridges[];
@@ -152,12 +158,74 @@ bool loader(const char* name, const char* extension, vm::FileData& data)
     return false;
 }
 
+bool benchmark_requested = false;
+const metadata::RtMethodInfo* collect_entry = nullptr;
+RtErr callback_error = RtErr::None;
+
+void collect_callback()
+{
+    interp::RtStackObject result{};
+    auto status = vm::Runtime::invoke_stackobject_arguments_with_run_cctor(collect_entry, nullptr, &result);
+    if (status.is_err())
+        callback_error = status.unwrap_err();
+}
+
+RtResultVoid named_add_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* args, interp::RtStackObject* ret)
+{
+    ret->i32 = calli_bench_add(args[0].i32);
+    RET_VOID_OK();
+}
+
+RtResultVoid benchmark(metadata::RtClass* program)
+{
+    using Clock = std::chrono::steady_clock;
+    const auto* calli = vm::Class::get_method_for_name(program, "BenchCalli", 1, false);
+    const auto* named = vm::Class::get_method_for_name(program, "BenchNamed", 1, false);
+#if LEANCLR_CALLI_AOT
+    check(calli->invoker_type == metadata::RtInvokerType::Aot && named->invoker_type == metadata::RtInvokerType::Aot);
+#endif
+    interp::RtStackObject argument{}, ret{};
+    argument.i32 = 1;
+    auto start = Clock::now();
+    RET_ERR_ON_FAIL(vm::Runtime::invoke_stackobject_arguments_with_run_cctor(calli, &argument, &ret));
+    const auto cold_ns = std::chrono::duration<double, std::nano>(Clock::now() - start).count();
+    argument.i32 = 1000;
+    RET_ERR_ON_FAIL(vm::Runtime::invoke_stackobject_arguments_with_run_cctor(calli, &argument, &ret));
+    RET_ERR_ON_FAIL(vm::Runtime::invoke_stackobject_arguments_with_run_cctor(named, &argument, &ret));
+    const auto before = allocations;
+    argument.i32 = 100000;
+    double calli_samples[5], named_samples[5];
+    for (int i = 0; i < 5; ++i)
+    {
+        start = Clock::now();
+        RET_ERR_ON_FAIL(vm::Runtime::invoke_stackobject_arguments_with_run_cctor(calli, &argument, &ret));
+        calli_samples[i] = std::chrono::duration<double, std::nano>(Clock::now() - start).count() / argument.i32;
+        const int32_t sum = ret.i32;
+        start = Clock::now();
+        RET_ERR_ON_FAIL(vm::Runtime::invoke_stackobject_arguments_with_run_cctor(named, &argument, &ret));
+        named_samples[i] = std::chrono::duration<double, std::nano>(Clock::now() - start).count() / argument.i32;
+        check(sum == ret.i32 && sum == 12842320);
+    }
+    check(before == allocations);
+    std::sort(calli_samples, calli_samples + 5);
+    std::sort(named_samples, named_samples + 5);
+    std::printf("CALLI_BENCH {\"aot\":%s,\"cold_one_call_ns\":%.0f,\"calli_ns\":%.2f,\"named_pinvoke_ns\":%.2f,\"warm_native_allocations\":0}\n",
+#if LEANCLR_CALLI_AOT
+                "true",
+#else
+                "false",
+#endif
+                cold_ns, calli_samples[2], named_samples[2]);
+    RET_VOID_OK();
+}
+
 RtResultVoid run()
 {
 #if LEANCLR_CALLI_AOT
     vm::Settings::set_aot_modules_data(&g_aot_modules_data);
 #endif
     RET_ERR_ON_FAIL(vm::Runtime::initialize());
+    vm::PInvokes::register_pinvoke("[CalliTests]CalliTests.Program::NamedAdd", reinterpret_cast<vm::PInvokeFunction>(calli_bench_add), named_add_invoker);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, assembly, vm::Assembly::load_by_name("CalliTests"));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, program, assembly->mod->get_class_by_nested_full_name("CalliTests.Program", false, true));
     RET_ERR_ON_FAIL(vm::Class::initialize_all(program));
@@ -226,6 +294,25 @@ RtResultVoid run()
 #if LEANCLR_BCL_CORECLR_NET10
     check(vm::Calli::bind_native(suppressed).is_err());
 #endif
+    // Native registration failure is transactional and leaves earlier bindings usable.
+    static const metadata::RtCalliAbiType* many_args[64];
+    static metadata::RtCalliBridge growth[65];
+    for (unsigned i = 0; i < 64; ++i)
+        many_args[i] = &abi_i4;
+    for (unsigned i = 0; i < 65; ++i)
+        growth[i] = {1, &abi_i4, many_args, i, bridge.invoke, "growth probe"};
+    attempts = 0;
+    fail_at = 1;
+    auto growth_result = vm::Calli::register_native_bridges(growth, 65);
+    fail_at = 0;
+    check(growth_result.is_err() && growth_result.unwrap_err() == RtErr::OutOfMemory);
+    auto retained = vm::Calli::bind_native(cdecl_signature);
+    check(retained.is_ok() && retained.unwrap() == bound);
+    RET_ERR_ON_FAIL(vm::Calli::register_native_bridges(growth, 65));
+    static const metadata::RtCalliAbiType bad_i4{8, 8, 8, nullptr, 0};
+    auto malformed = bridge;
+    malformed.return_type = &bad_i4;
+    check(vm::Calli::register_native_bridges(&malformed, 1).is_err());
     // A failed registry growth must leave existing entries intact and permit retry.
     auto* integer = vm::Class::get_corlib_types().cls_int32;
     RET_ERR_ON_FAIL(vm::Class::initialize_all(integer));
@@ -247,8 +334,8 @@ RtResultVoid run()
         }
     }
     check(failed_growth);
-    for (const auto* name : {"Managed", "ManagedRef", "ManagedGeneric", "FromHandle", "GenericCaller", "StructReturn", "RefReturn", "Mixed", "Collect",
-                             "StackRoot", "Exception", "BadTarget", "NullTarget", "WrongSignature"})
+    for (const auto* name : {"SharedSuite", "Managed", "ManagedRef", "ManagedGeneric", "FromHandle", "GenericCaller", "StructReturn", "RefReturn", "Mixed",
+                             "Collect", "StackRoot", "Exception", "BadTarget", "NullTarget", "WrongSignature"})
     {
         auto* entry = vm::Class::get_method_for_name(program, name, 0, false);
         check(entry != nullptr);
@@ -261,7 +348,7 @@ RtResultVoid run()
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, il_program,
                                             il_assembly->mod->get_class_by_nested_full_name("CalliILTests.Program", false, true));
     RET_ERR_ON_FAIL(vm::Class::initialize_all(il_program));
-    for (const auto* name : {"Instance", "ExplicitThis", "Virtual", "ValueThis", "BoxedVirtual"})
+    for (const auto* name : {"Instance", "ExplicitThis", "Virtual", "ValueThis", "BoxedVirtual", "NullThis"})
     {
         auto* entry = vm::Class::get_method_for_name(il_program, name, 0, false);
         check(entry != nullptr);
@@ -274,14 +361,17 @@ RtResultVoid run()
         check(value == 42);
     }
 #if LEANCLR_CALLI_AOT || LEANCLR_CALLI_BRIDGES
-    for (int i = 0; i < 23; ++i)
+    for (int i = 0; i < 27; ++i)
     {
         char name[16];
         std::snprintf(name, sizeof(name), "N%d", i);
         void* address = calli_test_get_function(i);
         RET_ERR_ON_FAIL(vm::Field::set_static_value(vm::Class::get_field_for_name(program, name, false), &address));
     }
-    for (const auto* name : {"Unmanaged", "NativeStructs", "NativeRejected", "NativeFailures"
+    collect_entry = vm::Class::get_method_for_name(program, "CollectInt", 0, false);
+    calli_fixture_set_callback(collect_callback);
+    const auto effects_before = calli_fixture_effect_count();
+    for (const auto* name : {"Unmanaged", "NativeStructs", "NativeRejected", "NativeFailures", "NativeCollect", "NativeException", "NativeGeneric"
 #if LEANCLR_PLATFORM_WIN
                              ,
                              "NativeChar"
@@ -292,8 +382,17 @@ RtResultVoid run()
 #if LEANCLR_CALLI_AOT
         check(entry->invoker_type == metadata::RtInvokerType::Aot);
 #endif
-        RET_ERR_ON_FAIL(vm::Runtime::invoke_array_arguments_with_run_cctor(entry, nullptr, nullptr));
+        const auto frames = interp::MachineState::get_global_machine_state().get_frame_stack_top();
+        for (int repeat = 0; repeat < (std::strcmp(name, "NativeCollect") == 0 ? 8 : 1); ++repeat)
+        {
+            RET_ERR_ON_FAIL(vm::Runtime::invoke_array_arguments_with_run_cctor(entry, nullptr, nullptr));
+            check(interp::MachineState::get_global_machine_state().get_frame_stack_top() == frames && interp::MethodArgumentRoots::current == nullptr &&
+                  interp::IndirectArgumentRoots::current == nullptr);
+        }
     }
+    check(callback_error == RtErr::None && calli_fixture_effect_count() == effects_before + 1);
+    if (benchmark_requested)
+        RET_ERR_ON_FAIL(benchmark(program));
 #endif
     std::puts("Calli signature and target contracts passed");
     RET_VOID_OK();
@@ -325,8 +424,9 @@ InstallCallbacks install_callbacks __attribute__((init_priority(101)));
 
 int main(int argc, char** argv)
 {
-    if (argc != 3)
+    if (argc != 3 && argc != 4)
         return 2;
+    benchmark_requested = argc == 4 && std::strcmp(argv[3], "--benchmark") == 0;
     dirs[0] = argv[1];
     dirs[1] = argv[2];
     vm::Settings::set_file_loader(loader);

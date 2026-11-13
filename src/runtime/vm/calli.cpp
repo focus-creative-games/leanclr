@@ -1,4 +1,6 @@
 #include "calli.h"
+#include "interp/interpreter.h"
+#include "interp/machine_state.h"
 #include "alloc/general_allocation.h"
 #include "metadata/metadata_compare.h"
 #include "vm/method.h"
@@ -8,6 +10,7 @@
 #include "metadata/module_def.h"
 #include "utils/little_endian.h"
 #include <new>
+#include <cstdio>
 
 namespace leanclr
 {
@@ -20,71 +23,6 @@ struct CalliSite
     const metadata::RtMethodInfo* last_target;
     const metadata::RtCalliBridge* bridge;
 };
-
-namespace
-{
-// Open addressing gives fallible growth and allocation-free repeated ldftn/calli.
-// Only escaped managed targets occupy this process-owned metadata index.
-const metadata::RtMethodInfo** targets = nullptr;
-size_t capacity = 0, count = 0;
-
-size_t slot_for(const metadata::RtMethodInfo* method, size_t size)
-{
-    auto key = reinterpret_cast<uintptr_t>(method) / alignof(metadata::RtMethodInfo);
-    key ^= key >> 16;
-    key *= uintptr_t(0x9e3779b1u);
-    return static_cast<size_t>(key) & (size - 1);
-}
-
-bool contains(const metadata::RtMethodInfo* method)
-{
-    if (!method || !capacity)
-        return false;
-    auto slot = slot_for(method, capacity);
-    while (targets[slot])
-    {
-        if (targets[slot] == method)
-            return true;
-        slot = (slot + 1) & (capacity - 1);
-    }
-    return false;
-}
-} // namespace
-
-RtResultVoid Calli::register_managed_target(const metadata::RtMethodInfo* method)
-{
-    if (!method)
-        RET_ERR(RtErr::ArgumentNull);
-    if (contains(method))
-        RET_VOID_OK();
-    if (!capacity || count >= capacity - capacity / 4)
-    {
-        if (capacity > SIZE_MAX / 2 / sizeof(*targets))
-            RET_ERR(RtErr::OutOfMemory);
-        const size_t next = capacity ? capacity * 2 : 16;
-        auto* replacement = alloc::GeneralAllocation::calloc_any<const metadata::RtMethodInfo*>(next);
-        if (!replacement)
-            RET_ERR(RtErr::OutOfMemory);
-        for (size_t i = 0; i < capacity; ++i)
-        {
-            if (!targets[i])
-                continue;
-            auto slot = slot_for(targets[i], next);
-            while (replacement[slot])
-                slot = (slot + 1) & (next - 1);
-            replacement[slot] = targets[i];
-        }
-        alloc::GeneralAllocation::free(targets);
-        targets = replacement;
-        capacity = next;
-    }
-    auto slot = slot_for(method, capacity);
-    while (targets[slot])
-        slot = (slot + 1) & (capacity - 1);
-    targets[slot] = method;
-    ++count;
-    RET_VOID_OK();
-}
 
 RtResultVoid Calli::validate_managed_signature(const metadata::RtMethodSig* signature)
 {
@@ -105,11 +43,44 @@ RtResultVoid Calli::validate_managed_signature(const metadata::RtMethodSig* sign
     RET_VOID_OK();
 }
 
+namespace
+{
+RtResult<bool> reference_conversion(const metadata::RtTypeSig* from, const metadata::RtTypeSig* to)
+{
+    if (from->by_ref || to->by_ref)
+        RET_OK(false);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, source, Class::get_class_from_typesig(from));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, destination, Class::get_class_from_typesig(to));
+    RET_ERR_ON_FAIL(Class::initialize_all(source));
+    RET_ERR_ON_FAIL(Class::initialize_all(destination));
+    RET_OK(Class::is_reference_type(source) && Class::is_reference_type(destination) && Class::is_assignable_from(source, destination));
+}
+
+RtResultVoid compatible_type(const metadata::RtTypeSig* from, const metadata::RtTypeSig* to)
+{
+    if (metadata::MetadataCompare::is_typesig_equal_ignore_attrs(from, to, false))
+        RET_VOID_OK();
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, convertible, reference_conversion(from, to));
+    if (!convertible)
+        RET_ERR(RtErr::Argument);
+    RET_VOID_OK();
+}
+} // namespace
+
+RtResultVoid Calli::validate_managed_binding(ManagedBinding& binding, const metadata::RtMethodInfo* target)
+{
+    if (binding.target && binding.target == target)
+        RET_VOID_OK();
+    RET_ERR_ON_FAIL(validate_managed_target(binding.signature, target));
+    binding.target = target;
+    RET_VOID_OK();
+}
+
 RtResultVoid Calli::validate_managed_target(const metadata::RtMethodSig* signature, const metadata::RtMethodInfo* target)
 {
     if (!target)
         RET_ERR(RtErr::NullReference);
-    if (!contains(target))
+    if (!is_managed_target(target))
         RET_ERR(RtErr::Argument);
     RET_ERR_ON_FAIL(validate_managed_signature(signature));
     if (Method::contains_not_instantiated_generic_param(target))
@@ -119,13 +90,15 @@ RtResultVoid Calli::validate_managed_target(const metadata::RtMethodSig* signatu
     if (explicit_this)
     {
         const auto* this_type = Class::is_value_type(target->parent) ? target->parent->by_ref : target->parent->by_val;
-        if (!metadata::MetadataCompare::is_typesig_equal_ignore_attrs(this_type, signature->params[0], false))
-            RET_ERR(RtErr::Argument);
+        RET_ERR_ON_FAIL(compatible_type(signature->params[0], this_type));
     }
-    if (Method::is_instance(target) != Method::has_this(signature) || target->parameter_count != signature->params.size() - first ||
-        !metadata::MetadataCompare::is_typesig_equal_ignore_attrs(target->return_type, signature->return_type, false) ||
-        !metadata::MetadataCompare::is_typesigs_equal_ignore_attrs(target->parameters, signature->params.data() + first, target->parameter_count, false))
+    if (Method::is_instance(target) != Method::has_this(signature) || target->parameter_count != signature->params.size() - first)
         RET_ERR(RtErr::Argument);
+    // Function pointer conversions permit reference covariance for the return and
+    // contravariance for parameters. Byrefs and value representations stay exact.
+    RET_ERR_ON_FAIL(compatible_type(target->return_type, signature->return_type));
+    for (uint16_t i = 0; i < target->parameter_count; ++i)
+        RET_ERR_ON_FAIL(compatible_type(signature->params[i + first], target->parameters[i]));
     RET_VOID_OK();
 }
 
@@ -142,7 +115,10 @@ size_t site_capacity = 0, site_count = 0;
 
 size_t site_slot(const metadata::RtMethodInfo* caller, uint32_t offset, size_t size)
 {
-    return (slot_for(caller, size) ^ (static_cast<size_t>(offset) * size_t(0x85ebca6bu))) & (size - 1);
+    auto key = reinterpret_cast<uintptr_t>(caller) / alignof(metadata::RtMethodInfo);
+    key ^= key >> 16;
+    key *= uintptr_t(0x9e3779b1u);
+    return (static_cast<size_t>(key) ^ (static_cast<size_t>(offset) * size_t(0x85ebca6bu))) & (size - 1);
 }
 
 RtResult<CalliSite*> get_site(const metadata::RtMethodInfo* caller, uint32_t offset)
@@ -192,7 +168,14 @@ RtResult<CalliSite*> get_site(const metadata::RtMethodInfo* caller, uint32_t off
     }
     else
     {
-        UNWRAP_OR_RET_ERR_ON_FAIL(bridge, Calli::bind_native(&signature));
+        auto binding = Calli::bind_native(&signature);
+        if (binding.is_err())
+        {
+            std::fprintf(stderr, "LeanCLR calli caller: [%s]%s.%s::%s IL_%04X\n", caller->parent->image->get_name_no_ext(), caller->parent->namespaze,
+                         caller->parent->name, caller->name, unsigned(offset));
+            RET_ERR(binding.unwrap_err());
+        }
+        bridge = binding.unwrap();
     }
     // Native argument roots need complete value-type reference bitmaps before
     // the callee (including a type initializer) is allowed to collect.
@@ -243,20 +226,6 @@ void* Calli::value_receiver(const metadata::RtMethodInfo* target, void* receiver
     return owner == receiver && owner->klass == target->parent ? static_cast<void*>(owner + 1) : receiver;
 }
 
-RtResultVoid Calli::invoke_native(const metadata::RtCalliBridge* bridge, void* target, interp::RtStackObject* args, interp::RtStackObject* ret)
-{
-    if (!target)
-        RET_ERR(RtErr::NullReference);
-    if (contains(reinterpret_cast<const metadata::RtMethodInfo*>(target)))
-        RET_ERR(RtErr::Argument);
-    if (!bridge || !bridge->invoke)
-        RET_ERR(RtErr::NotSupported);
-    if ((bridge->parameter_count && !args) || (bridge->return_type->kind != 1 && !ret))
-        RET_ERR(RtErr::ArgumentNull);
-    bridge->invoke(target, args, ret);
-    RET_VOID_OK();
-}
-
 RtResultVoid Calli::invoke_managed(SiteCache& cache, const metadata::RtMethodInfo* caller, uint32_t offset, const metadata::RtMethodInfo* target,
                                    interp::RtStackObject* args, interp::RtStackObject* ret)
 {
@@ -278,8 +247,17 @@ RtResultVoid Calli::invoke_managed(SiteCache& cache, const metadata::RtMethodInf
     }
     if ((target->total_arg_stack_object_size && !args) || (!site->signature.return_type->is_void() && !ret))
         RET_ERR(RtErr::ArgumentNull);
-    if (Method::is_instance(target) && !args[0].ptr)
-        RET_ERR(RtErr::NullReference);
+    // Ordinary generated instance bodies assume non-null this. A calli may legally
+    // pass null to a body that never accesses it; interpret this rare case instead
+    // of violating the C++ optimizer's non-null contract.
+    if (Method::is_instance(target) && !args[0].ptr && target->invoker_type == metadata::RtInvokerType::Aot)
+    {
+        interp::MethodArgumentRoots roots(target, args);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const interp::RtStackObject*, value, interp::Interpreter::execute(target, args));
+        if (target->ret_stack_object_size)
+            std::memcpy(ret, value, target->ret_stack_object_size * sizeof(interp::RtStackObject));
+        RET_VOID_OK();
+    }
     if (Method::is_instance(target))
         args[0].ptr = value_receiver(target, args[0].ptr);
     return Runtime::invoke_stackobject_arguments_with_run_cctor(target, args, ret);

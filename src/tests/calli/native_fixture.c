@@ -7,7 +7,12 @@
 #define EXPORT
 #define STDCALL
 #endif
-static int32_t add(int32_t x)
+#if defined(_MSC_VER)
+#define NOINLINE __declspec(noinline)
+#else
+#define NOINLINE __attribute__((noinline))
+#endif
+EXPORT NOINLINE int32_t calli_bench_add(int32_t x)
 {
     return x + 1;
 }
@@ -30,7 +35,7 @@ static void byref(int32_t* x, double* y)
 
 static int32_t boolean(int32_t x)
 {
-    return !x;
+    return x ? 0 : 256;
 }
 
 static uint8_t character(uint8_t x)
@@ -191,12 +196,50 @@ static Union union_value(Union v)
     return v;
 }
 
+static void (*collect_callback)(void);
+static int32_t effects;
+
+EXPORT void calli_fixture_set_callback(void (*callback)(void))
+{
+    collect_callback = callback;
+}
+
+EXPORT int32_t calli_fixture_effect_count(void)
+{
+    return effects;
+}
+
+static int32_t native_collect(int32_t* value)
+{
+    if (collect_callback)
+        collect_callback();
+    return *value;
+}
+
+static int32_t native_collect_stack(void)
+{
+    if (collect_callback)
+        collect_callback();
+    return 1;
+}
+
+static int32_t native_effect(int32_t x)
+{
+    ++effects;
+    return x + 1;
+}
+
+static uint32_t native_generic(uint32_t value)
+{
+    return value ^ UINT32_C(0x80000000);
+}
+
 EXPORT void* calli_test_get_function(int32_t index)
 {
     switch (index)
     {
     case 0:
-        return (void*)add;
+        return (void*)calli_bench_add;
     case 1:
         return (void*)mixed;
     case 2:
@@ -241,6 +284,14 @@ EXPORT void* calli_test_get_function(int32_t index)
         return (void*)nested_value;
     case 22:
         return (void*)union_value;
+    case 23:
+        return (void*)native_collect;
+    case 24:
+        return (void*)native_collect_stack;
+    case 25:
+        return (void*)native_effect;
+    case 26:
+        return (void*)native_generic;
     default:
         return 0;
     }
