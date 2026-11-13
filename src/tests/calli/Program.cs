@@ -17,6 +17,7 @@ public unsafe class NativeSignatures {
 }
 public unsafe class Program {
 static void Check(bool value,string message){if(!value)throw new Exception(message);}
+[AotMethod(false)] public static int UnmanagedInventory(IntPtr target){return ((delegate* unmanaged[Cdecl]<int,int>)(void*)target)(41);}
 public static int Add(int value){return value+1;}
 public static float Float(float value){return value+2;}
 public static void Change(ref int value){value=42;}

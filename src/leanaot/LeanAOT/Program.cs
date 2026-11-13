@@ -17,6 +17,9 @@ internal class Program
     /// </summary>
     private sealed class CliOptions
     {
+        [Option("calli-bridges-only", HelpText = "Generate native calli signature bridges for interpreted assemblies without AOT bodies.")]
+        public bool CalliBridgesOnly { get; set; }
+
         [Option('d', Required = false, HelpText = "DLL search directory. Can be specified multiple times. Not required if every --assembly is a full path to a .dll.")]
         public IEnumerable<string> DllSearchPaths { get; set; }
 
@@ -552,6 +555,7 @@ internal class Program
 
     private static void ApplyIl2CppOptionsToGlobalConfig(GlobalConfig config, CliOptions options)
     {
+        config.CalliBridgesOnly = options.CalliBridgesOnly;
         config.ConvertToCpp = options.ConvertToCpp;
         config.EnableAnalytics = options.EnableAnalytics;
         config.EmitNullChecks = options.EmitNullChecks;
