@@ -46,7 +46,7 @@ void EncodeConv::ansi_to_utf16(const AnsiChar* ansi_str, size_t ansi_len, Utf16C
 #if LEANCLR_PLATFORM_WIN
     const char* const ansi_bytes = ansi_str;
     const int cb = static_cast<int>(ansi_len);
-    const int cch = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, ansi_bytes, cb, reinterpret_cast<wchar_t*>(out_utf16_str), INT_MAX);
+    const int cch = MultiByteToWideChar(CP_ACP, GetACP() == CP_UTF8 ? 0 : MB_PRECOMPOSED, ansi_bytes, cb, reinterpret_cast<wchar_t*>(out_utf16_str), INT_MAX);
     if (cch == 0)
     {
         out_utf16_len = 0;
