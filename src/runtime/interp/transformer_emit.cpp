@@ -1175,7 +1175,9 @@ RtResultVoid Transformer::emit_Calli(InstructionOperands& output)
     if (metadata::RtMetadata::decode_sig_type(output.signature->flags) == metadata::RtSigType::Default)
     {
         output.opcode = OpCodeEnum::CalliInterp;
-        setup_inst_resolved_data(output, output.signature);
+        auto* binding = _mod->get_mem_pool().malloc_any_zeroed<vm::Calli::ManagedBinding>();
+        binding->signature = output.signature;
+        setup_inst_resolved_data(output, binding);
     }
     else
     {

@@ -1,0 +1,40 @@
+name: Calli contracts
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/runtime/**'
+      - 'src/leanaot/**'
+      - 'src/tests/calli/**'
+      - 'src/tests/managed/SharedTests/Instructions/Funcs/TC_calli.cs'
+      - '.github/workflows/calli-contracts.yml'
+permissions:
+  contents: read
+jobs:
+  native:
+    strategy:
+      fail-fast: false
+      matrix:
+        runner: [windows-latest, ubuntu-24.04, ubuntu-24.04-arm]
+    # Linux jobs are explicit ABI probes; they do not enable production capability.
+    if: github.event_name == 'workflow_dispatch' || github.event_name == 'pull_request'
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: |
+            8.0.x
+            10.0.x
+      - name: Validate native calli
+        shell: pwsh
+        run: |
+          $probe = '${{ runner.os }}' -ne 'Windows'
+          ./src/tests/calli/verify-native.ps1 -AbiProbe:$probe -Benchmark
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: calli-${{ matrix.runner }}
+          path: |
+            out/calli/verification/generated-*/calli_bridges.json
+            out/calli/verification/native-*/Testing/Temporary/LastTest.log

@@ -10,6 +10,14 @@ struct CalliSite;
 class Calli
 {
   public:
+    struct ManagedBinding
+    {
+        const metadata::RtMethodSig* signature;
+        const metadata::RtMethodInfo* target;
+    };
+
+    static RtResultVoid validate_managed_binding(ManagedBinding& binding, const metadata::RtMethodInfo* target);
+
     // A tiny per-emitted-callsite fast cache. A shared generic body can switch
     // caller contexts; the process index retains one site per actual caller/IP.
     struct SiteCache
@@ -37,6 +45,9 @@ class Calli
     static RtResultVoid register_managed_target(const metadata::RtMethodInfo* method);
     static RtResultVoid validate_managed_target(const metadata::RtMethodSig* signature, const metadata::RtMethodInfo* target);
     static RtResultVoid validate_managed_signature(const metadata::RtMethodSig* signature);
+
+  private:
+    static bool is_managed_target(const metadata::RtMethodInfo* target);
 };
 } // namespace vm
 } // namespace leanclr

@@ -1,1 +1,7 @@
-<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><AllowUnsafeBlocks>true</AllowUnsafeBlocks><ImplicitUsings>disable</ImplicitUsings></PropertyGroup><ItemGroup><Compile Remove="il-fixture/**/*.cs" /></ItemGroup></Project>
+<Project Sdk="Microsoft.NET.Sdk"><PropertyGroup><OutputType>Exe</OutputType><TargetFramework>net10.0</TargetFramework><AllowUnsafeBlocks>true</AllowUnsafeBlocks><ImplicitUsings>disable</ImplicitUsings></PropertyGroup><ItemGroup><Compile Remove="il-fixture/**/*.cs" /></ItemGroup><ItemGroup>
+<Compile Include="../managed/SharedTests/Instructions/Funcs/TC_calli.cs" Link="SharedCalliTests.cs" />
+<Compile Include="../managed/Common/TestCaseBase.cs" Link="TestCaseBase.cs" />
+<Compile Include="../managed/Common/UnitTestAttribute.cs" Link="UnitTestAttribute.cs" />
+<Compile Include="../managed/Common/Assert.cs" Link="Assert.cs" />
+</ItemGroup>
+</Project>
