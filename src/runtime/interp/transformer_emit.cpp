@@ -1402,6 +1402,42 @@ RtResult<const RtInterpMethodInfo*> Transformer::build_interp_method_info()
     interp_method->max_stack_object_size = static_cast<uint16_t>(_max_eval_stack_size);
     interp_method->init_locals = need_init_locals();
 
+    // Record only numeric local ranges, coalescing adjacent slots. Keep native
+    // integers/pointers and value types conservative; their bytes may own refs.
+    utils::Vector<RtInterpScalarLocalRange> scalar_ranges;
+    for (size_t i = 0; i < _local_vars_count; ++i)
+    {
+        const Variable* local = _local_vars[i];
+        switch (local->reduce_type)
+        {
+        case metadata::RtArgOrLocOrFieldReduceType::I1:
+        case metadata::RtArgOrLocOrFieldReduceType::U1:
+        case metadata::RtArgOrLocOrFieldReduceType::I2:
+        case metadata::RtArgOrLocOrFieldReduceType::U2:
+        case metadata::RtArgOrLocOrFieldReduceType::I4:
+        case metadata::RtArgOrLocOrFieldReduceType::I8:
+        case metadata::RtArgOrLocOrFieldReduceType::R4:
+        case metadata::RtArgOrLocOrFieldReduceType::R8:
+        {
+            const auto begin = static_cast<uint16_t>(local->eval_stack_offset);
+            const auto end = static_cast<uint16_t>(local->eval_stack_offset + local->stack_object_size);
+            if (!scalar_ranges.empty() && scalar_ranges.back().end == begin)
+                scalar_ranges.back().end = end;
+            else
+                scalar_ranges.push_back({begin, end});
+            break;
+        }
+        default:
+            break;
+        }
+    }
+    if (!scalar_ranges.empty())
+    {
+        auto* ranges = pool.calloc_any<RtInterpScalarLocalRange>(scalar_ranges.size() + 1);
+        std::memcpy(ranges, scalar_ranges.data(), scalar_ranges.size() * sizeof(RtInterpScalarLocalRange));
+        interp_method->gc_scalar_local_ranges = ranges;
+    }
+
     RET_ERR_ON_FAIL(build_codes(interp_method));
     RET_ERR_ON_FAIL(build_exception_clauses(interp_method));
 

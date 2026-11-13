@@ -255,6 +255,29 @@ int main(int argc, char** argv)
     gc::GarbageCollector::collect();
     CHECK(gc::GarbageCollector::is_allocated_object(packed_objects[0]));
     CHECK(gc::GarbageCollector::is_allocated_object(packed_objects[1]));
+
+    auto stale = LEANCLR_NEWOBJ_INTERNAL(types.cls_object, "scalar local stale reference");
+    CHECK(stale.is_ok());
+    interp::RtStackObject reused_slots[2]{};
+    reused_slots[0].obj = stale.unwrap();
+    reused_slots[1].obj = packed_objects[0];
+    const interp::RtInterpScalarLocalRange scalar_ranges[] = {{0, 1}, {0, 0}};
+    interp::RtInterpMethodInfo scalar_info{};
+    scalar_info.gc_scalar_local_ranges = scalar_ranges;
+    scalar_info.total_arg_and_local_stack_object_size = 1;
+    metadata::RtMethodInfo scalar_method{};
+    scalar_method.interp_data = &scalar_info;
+    frame->method = &scalar_method;
+    frame->eval_stack_base = reused_slots;
+    frame->eval_stack_size = 2;
+#if LEANCLR_BCL_CORECLR_NET10
+    frame->root_scan_mode = interp::InterpFrameRootScanMode::InterpreterFrame;
+    frame->gc_live_stack_size = 2;
+#endif
+    gc::GarbageCollector::collect();
+    CHECK(!gc::GarbageCollector::is_allocated_object(stale.unwrap()));
+    CHECK(gc::GarbageCollector::is_allocated_object(packed_objects[0]));
+
 #endif
     std::puts("PASS C public invoker ABI, exception handoff, OOM retry and allocation-free warm calls");
     return 0;
