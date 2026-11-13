@@ -1,3 +1,4 @@
+#include "host_invokers.h"
 #include "pinvoke.h"
 #include "bcl/adapter.h"
 
@@ -56,13 +57,19 @@ RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata:
         const char* signature_with_module = sb.get_const_chars();
         auto it = get_g_internalcall_map().find(signature_with_module);
         if (it != get_g_internalcall_map().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second.invoker));
             RET_OK(&it->second);
+        }
 
         // signature: Namespace.Class.Method(params)
         const char* signature_without_module = sb.get_const_chars() + length;
         it = get_g_internalcall_map().find(signature_without_module);
         if (it != get_g_internalcall_map().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second.invoker));
             RET_OK(&it->second);
+        }
     }
 
     // Try with method name without parameters
@@ -78,11 +85,17 @@ RtResult<const PInvokeRegistry*> PInvokes::get_pinvoke_by_method(const metadata:
         const char* signature_with_module = sb.get_const_chars();
         auto it = get_g_internalcall_map().find(signature_with_module);
         if (it != get_g_internalcall_map().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second.invoker));
             RET_OK(&it->second);
+        }
         const char* signature_without_module = sb.get_const_chars() + length;
         it = get_g_internalcall_map().find(signature_without_module);
         if (it != get_g_internalcall_map().end())
+        {
+            RET_ERR_ON_FAIL(HostInvokers::bind(method, it->first, it->second.invoker));
             RET_OK(&it->second);
+        }
     }
 
     RET_OK(nullptr);

@@ -15,8 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 env:
-  NATIVE_TARGETS: public-c public-cpp host-capabilities default-host-services host-services core-boundary foundation portable-memory integer-math bit-scan il-bounds string-allocation command-line aligned-allocation lifecycle container-allocation il-fuzz-smoke
-  NATIVE_TESTS: '^(public-c|public-cpp|public-cpp20|host-capabilities|environment-exit|default-host-services|host-services|core-boundary|layer-boundaries|foundation|portable-memory|integer-math|bit-scan|il-bounds|string-allocation|command-line|aligned-allocation|lifecycle-failure|lifecycle-before-start|container-allocation|il-fuzz-smoke)$'
+  NATIVE_TARGETS: public-invoker public-c public-cpp host-capabilities default-host-services host-services core-boundary foundation portable-memory integer-math bit-scan il-bounds string-allocation command-line aligned-allocation lifecycle container-allocation il-fuzz-smoke
+  NATIVE_TESTS: '^(public-invoker|public-c|public-cpp|public-cpp20|host-capabilities|environment-exit|default-host-services|host-services|core-boundary|layer-boundaries|foundation|portable-memory|integer-math|bit-scan|il-bounds|string-allocation|command-line|aligned-allocation|lifecycle-failure|lifecycle-before-start|container-allocation|il-fuzz-smoke)$'
 
 jobs:
   aot-features:

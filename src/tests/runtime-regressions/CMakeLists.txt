@@ -194,3 +194,8 @@ if(NOT LEANCLR_BUILD_IL_FUZZER)
     target_compile_features(il-fuzz-smoke PRIVATE cxx_std_17)
     add_test(NAME il-fuzz-smoke COMMAND il-fuzz-smoke)
 endif()
+
+if(LEANCLR_BCL_ADAPTER STREQUAL "MONO")
+    set(LEANCLR_PUBLIC_INVOKER_RUNTIME_DIR "src/libraries/mono-4.5" CACHE STRING "Matching BCL directory")
+    add_subdirectory(../public-invoker public-invoker)
+endif()

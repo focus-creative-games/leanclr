@@ -1,5 +1,6 @@
 
 #include "public/leanclr.h"
+#include "invoker_bridge.h"
 
 #include "vm/pinvoke.h"
 #include "vm/method.h"
@@ -18,6 +19,9 @@ struct LeanclrStackObject
 {
     uint64_t __value;
 };
+
+static_assert(sizeof(LeanclrStackObject) == sizeof(interp::RtStackObject), "Public stack slot size must match the interpreter ABI");
+static_assert(alignof(LeanclrStackObject) == alignof(interp::RtStackObject), "Public stack slot alignment must match the interpreter ABI");
 
 #ifdef __cplusplus
 extern "C"
@@ -138,11 +142,13 @@ extern "C"
         }                                                                                                                                   \
     }
 
-    void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass*** out_class_buf, size_t* out_class_buf_capacity, LeanclrException** out_exception)
+    void leanclr_get_classes(LeanclrModuleDef* mod, bool export_only, LeanclrClass*** out_class_buf, size_t* out_class_buf_capacity,
+                             LeanclrException** out_exception)
     {
         if (!out_class_buf || !out_class_buf_capacity)
         {
-            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            if (out_exception)
+                *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
             return;
         }
         auto& class_buf = *out_class_buf;
@@ -203,7 +209,8 @@ extern "C"
     {
         if (!out_interfaces || !out_count)
         {
-            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            if (out_exception)
+                *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
             return;
         }
         auto& interfaces = *out_interfaces;
@@ -224,7 +231,8 @@ extern "C"
     {
         if (!out_nested_classes || !out_count)
         {
-            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            if (out_exception)
+                *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
             return;
         }
         auto& nested_classes = *out_nested_classes;
@@ -240,7 +248,8 @@ extern "C"
     {
         if (!out_methods || !out_count)
         {
-            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            if (out_exception)
+                *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
             return;
         }
         auto& methods = *out_methods;
@@ -264,7 +273,8 @@ extern "C"
     {
         if (!out_fields || !out_count)
         {
-            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            if (out_exception)
+                *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
             return;
         }
         auto& fields = *out_fields;
@@ -288,7 +298,8 @@ extern "C"
     {
         if (!out_properties || !out_count)
         {
-            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            if (out_exception)
+                *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
             return;
         }
         auto& properties = *out_properties;
@@ -312,7 +323,8 @@ extern "C"
     {
         if (!out_events || !out_count)
         {
-            if (out_exception) *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
+            if (out_exception)
+                *out_exception = reinterpret_cast<LeanclrException*>(vm::Exception::raise_error_as_exception(RtErr::ArgumentNull, nullptr, nullptr));
             return;
         }
         auto& events = *out_events;
@@ -366,27 +378,42 @@ extern "C"
 
     void leanclr_register_pinvoke_func(const char* name, LeanclrMethodPointer func, LeanclrMethodInvoker invoker)
     {
-        vm::PInvokes::register_pinvoke(name, (metadata::RtManagedMethodPointer)func, (vm::PInvokeInvoker)invoker);
+        const char* owned_name;
+        metadata::RtInvokeMethodPointer bridge;
+        if (public_impl::prepare_invoker(public_impl::InvokerKind::PInvoke, name, invoker, owned_name, bridge))
+            vm::PInvokes::register_pinvoke(owned_name, func, bridge);
     }
 
     void leanclr_register_internal_call_func(const char* name, LeanclrMethodPointer func, LeanclrMethodInvoker invoker)
     {
-        vm::InternalCalls::register_internal_call(name, (metadata::RtManagedMethodPointer)func, (vm::InternalCallInvoker)invoker);
+        const char* owned_name;
+        metadata::RtInvokeMethodPointer bridge;
+        if (public_impl::prepare_invoker(public_impl::InvokerKind::InternalCall, name, invoker, owned_name, bridge))
+            vm::InternalCalls::register_internal_call(owned_name, func, bridge);
     }
 
     void leanclr_register_newobj_internal_call_func(const char* name, LeanclrMethodInvoker invoker)
     {
-        vm::InternalCalls::register_newobj_internal_call(name, (vm::InternalCallInvoker)invoker);
+        const char* owned_name;
+        metadata::RtInvokeMethodPointer bridge;
+        if (public_impl::prepare_invoker(public_impl::InvokerKind::NewObjectInternalCall, name, invoker, owned_name, bridge))
+            vm::InternalCalls::register_newobj_internal_call(owned_name, bridge);
     }
 
     void leanclr_register_intrinsic_func(const char* name, LeanclrMethodPointer func, LeanclrMethodInvoker invoker)
     {
-        vm::Intrinsics::register_intrinsic(name, (metadata::RtManagedMethodPointer)func, (vm::IntrinsicInvoker)invoker);
+        const char* owned_name;
+        metadata::RtInvokeMethodPointer bridge;
+        if (public_impl::prepare_invoker(public_impl::InvokerKind::Intrinsic, name, invoker, owned_name, bridge))
+            vm::Intrinsics::register_intrinsic(owned_name, func, bridge);
     }
 
     void leanclr_register_newobj_intrinsic_func(const char* name, LeanclrMethodInvoker invoker)
     {
-        vm::Intrinsics::register_newobj_intrinsic(name, (vm::IntrinsicInvoker)invoker);
+        const char* owned_name;
+        metadata::RtInvokeMethodPointer bridge;
+        if (public_impl::prepare_invoker(public_impl::InvokerKind::NewObjectIntrinsic, name, invoker, owned_name, bridge))
+            vm::Intrinsics::register_newobj_intrinsic(owned_name, bridge);
     }
 
     void leanclr_invoke_with_buffer(const LeanclrMethodInfo* method, const LeanclrStackObject* arg_buff, LeanclrStackObject* ret_buff,

@@ -87,9 +87,14 @@ extern "C"
     LEANCLR_API size_t leanclr_get_return_value_stack_object_size(const LeanclrMethodInfo* method);
 
     typedef void (*LeanclrMethodPointer)(void);
+    // Five-argument C callback ABI. The runtime supplies a non-null exception
+    // output initialized to NULL. Set it to a managed exception to fail; otherwise
+    // write the return buffer. Never throw a C++ exception across this boundary.
     typedef void (*LeanclrMethodInvoker)(LeanclrMethodPointer method_ptr, const LeanclrMethodInfo* method, const LeanclrStackObject* args,
                                          LeanclrStackObject* ret, LeanclrException** exception);
 
+    // Register on the runtime owner thread before the target is first resolved.
+    // Registration copies the name; callback code must outlive the runtime.
     LEANCLR_API void leanclr_register_pinvoke_func(const char* name, LeanclrMethodPointer func, LeanclrMethodInvoker invoker);
     LEANCLR_API void leanclr_register_internal_call_func(const char* name, LeanclrMethodPointer func, LeanclrMethodInvoker invoker);
     LEANCLR_API void leanclr_register_newobj_internal_call_func(const char* name, LeanclrMethodInvoker invoker);
