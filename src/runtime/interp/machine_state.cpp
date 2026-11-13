@@ -5,11 +5,186 @@
 #include "profile/profile.h"
 #include "vm/settings.h"
 #include "interpreter.h"
+#include "codegen/leanclr_common.h"
+#include "gc/garbage_collector.h"
+#include "vm/class.h"
+#include "vm/method.h"
 
 namespace leanclr
 {
 namespace interp
 {
+MethodArgumentRoots* MethodArgumentRoots::current = nullptr;
+IndirectArgumentRoots* IndirectArgumentRoots::current = nullptr;
+
+static void visit_machine_state_roots(gc::GcVisitObjectRoot visit, void* userdata)
+{
+    MachineState::get_global_machine_state().visit_roots(visit, userdata);
+}
+
+static void visit_object_if_valid(vm::RtObject* obj, gc::GcVisitObjectRoot visit, void* userdata)
+{
+    obj = gc::GarbageCollector::find_object_containing(obj);
+    if (obj != nullptr)
+    {
+        visit(obj, userdata);
+    }
+}
+
+static size_t get_stack_object_size_for_type_sig(const metadata::RtTypeSig* type_sig)
+{
+    auto reduce_result = InterpDefs::get_reduce_type_and_size_by_typesig(type_sig);
+    if (reduce_result.is_err())
+    {
+        return 1;
+    }
+    return InterpDefs::get_stack_object_size_by_byte_size(reduce_result.unwrap().byte_size);
+}
+
+static void visit_value_type_roots(const metadata::RtClass* klass, uint8_t* value_data, gc::GcVisitObjectRoot visit, void* userdata)
+{
+    if (klass == nullptr || klass->gc_bitmap_word_count == 0 || value_data == nullptr)
+    {
+        return;
+    }
+
+    const size_t bits_per_word = vm::Class::kBitsPerWord;
+    for (size_t word_index = 0; word_index < klass->gc_bitmap_word_count; ++word_index)
+    {
+        size_t word = klass->gc_bitmap[word_index];
+        for (size_t bit = 0; word != 0 && bit < bits_per_word; ++bit)
+        {
+            if ((word & (static_cast<size_t>(1) << bit)) != 0)
+            {
+                size_t bit_index = word_index * bits_per_word + bit;
+                const size_t object_offset = bit_index * sizeof(void*);
+                if (object_offset < vm::RT_OBJECT_HEADER_SIZE)
+                    continue;
+                auto slot = reinterpret_cast<vm::RtObject**>(value_data + (object_offset - vm::RT_OBJECT_HEADER_SIZE));
+                visit_object_if_valid(*slot, visit, userdata);
+                word &= ~(static_cast<size_t>(1) << bit);
+            }
+        }
+    }
+}
+
+static void visit_typed_argument_roots(const metadata::RtTypeSig* type_sig, RtStackObject* slot, gc::GcVisitObjectRoot visit, void* userdata)
+{
+    if (type_sig == nullptr || slot == nullptr)
+    {
+        return;
+    }
+
+    metadata::RtTypeSig byval_type_sig{};
+    const metadata::RtTypeSig* value_type_sig = type_sig;
+    if (type_sig->by_ref)
+    {
+        // A scalar or reference field byref must retain its owning heap object,
+        // in addition to any references stored in the field itself.
+        visit_object_if_valid(reinterpret_cast<vm::RtObject*>(slot->ptr), visit, userdata);
+        byval_type_sig = type_sig->to_canonized_without_byref();
+        value_type_sig = &byval_type_sig;
+    }
+
+    auto klass_result = vm::Class::get_class_from_typesig(value_type_sig);
+    if (klass_result.is_err())
+    {
+        return;
+    }
+    const metadata::RtClass* klass = klass_result.unwrap();
+
+    if (vm::Class::is_reference_type(klass))
+    {
+        vm::RtObject* obj = nullptr;
+        if (type_sig->by_ref)
+        {
+            obj = slot->ptr != nullptr ? *reinterpret_cast<vm::RtObject**>(slot->ptr) : nullptr;
+        }
+        else
+        {
+            obj = slot->obj;
+        }
+        visit_object_if_valid(obj, visit, userdata);
+        return;
+    }
+
+    if (!vm::Class::get_has_references(klass))
+    {
+        return;
+    }
+
+    uint8_t* value_data = type_sig->by_ref ? reinterpret_cast<uint8_t*>(slot->ptr) : reinterpret_cast<uint8_t*>(slot);
+    visit_value_type_roots(klass, value_data, visit, userdata);
+}
+
+static void visit_method_argument_roots(const metadata::RtMethodInfo* method, RtStackObject* args, uint32_t arg_stack_size, gc::GcVisitObjectRoot visit,
+                                        void* userdata)
+{
+    if (method == nullptr || args == nullptr || arg_stack_size == 0)
+    {
+        return;
+    }
+
+    size_t offset = 0;
+    if (vm::Method::is_instance(method))
+    {
+        const metadata::RtTypeSig* this_type_sig = vm::Class::is_value_type(method->parent) ? method->parent->by_ref : method->parent->by_val;
+        if (offset < arg_stack_size)
+        {
+            visit_typed_argument_roots(this_type_sig, args + offset, visit, userdata);
+        }
+        offset += get_stack_object_size_for_type_sig(this_type_sig);
+    }
+
+    for (uint16_t i = 0; i < method->parameter_count && offset < arg_stack_size; ++i)
+    {
+        const metadata::RtTypeSig* parameter_type_sig = method->parameters[i];
+        visit_typed_argument_roots(parameter_type_sig, args + offset, visit, userdata);
+        offset += get_stack_object_size_for_type_sig(parameter_type_sig);
+    }
+}
+
+static void visit_stack_object_roots(RtStackObject* scan_begin, RtStackObject* scan_end, gc::GcVisitObjectRoot visit, void* userdata)
+{
+    for (RtStackObject* slot = scan_begin; slot < scan_end; ++slot)
+    {
+        visit_object_if_valid(slot->obj, visit, userdata);
+    }
+}
+
+void MachineState::visit_roots(gc::GcVisitObjectRoot visit, void* userdata) const
+{
+    for (auto* roots = IndirectArgumentRoots::current; roots; roots = roots->previous)
+    {
+        if (!roots->args)
+            continue;
+        for (uint16_t i = 0; i < roots->method->parameter_count; ++i)
+        {
+            auto type = roots->method->parameters[i]->to_canonized();
+            type.by_ref = 1;
+            RtStackObject slot{};
+            slot.ptr = roots->args[i];
+            visit_typed_argument_roots(&type, &slot, visit, userdata);
+        }
+    }
+    for (auto* roots = MethodArgumentRoots::current; roots != nullptr; roots = roots->previous)
+        visit_method_argument_roots(roots->method, roots->args, roots->method->total_arg_stack_object_size, visit, userdata);
+    for (uint32_t i = 0; i < _frame_stack_top; ++i)
+    {
+        const auto& frame = _frame_stack_base[i];
+        if (!frame.eval_stack_base || !frame.eval_stack_size)
+            continue;
+        auto* begin = frame.eval_stack_base;
+        auto* end = begin + frame.eval_stack_size;
+        const auto address = reinterpret_cast<uintptr_t>(begin);
+        const auto stack_begin = reinterpret_cast<uintptr_t>(_eval_stack_base);
+        const auto stack_end = reinterpret_cast<uintptr_t>(_eval_stack_base + _eval_stack_top);
+        if (address >= stack_begin && address < stack_end && end > _eval_stack_base + _eval_stack_top)
+            end = _eval_stack_base + _eval_stack_top;
+        visit_stack_object_roots(begin, end, visit, userdata);
+    }
+}
+
 void MachineState::initialize()
 {
     MachineState& ms = get_global_machine_state();
@@ -31,6 +206,13 @@ void MachineState::initialize()
 
     ms._eval_stack_top = 0;
     ms._frame_stack_top = 0;
+    static bool roots_registered = false;
+    if (!roots_registered)
+    {
+        gc::GcRoots::register_visit_object_roots(visit_machine_state_roots);
+        gc::GcRoots::register_visit_object_roots(codegen::AotRootScope::visit_roots);
+        roots_registered = true;
+    }
 }
 
 RtResult<RtStackObject*> MachineState::alloc_eval_stack(uint32_t size)
@@ -159,11 +341,9 @@ uint32_t MachineState::enter_frame_from_icall_or_intrinsic(const metadata::RtMet
         InterpFrame* frame = _frame_stack_base + _frame_stack_top;
         _frame_stack_top += 1;
         frame->method = method;
-#if LEANCLR_DEBUG
         frame->eval_stack_base = nullptr;
         frame->eval_stack_size = 0;
         frame->ip = nullptr;
-#endif
     }
     return old_frame_top;
 }

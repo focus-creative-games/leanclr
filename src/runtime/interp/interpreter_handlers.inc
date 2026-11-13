@@ -2816,11 +2816,11 @@ LEANCLR_CASE_BEGIN_LITE(CalliInterp)
     const uint8_t* next_ip = reinterpret_cast<const uint8_t*>(ir + 1);
     const metadata::RtMethodInfo* target_method = get_stack_value_at<const metadata::RtMethodInfo*>(eval_stack_base, ir->method_idx);
     HANDLE_RAISE_RUNTIME_ERROR_VOID(vm::Calli::validate_managed_target(method_sig, target_method));
-#if LEANCLR_BCL_CORECLR_NET10
-    SAVE_GC_CALL_STACK(ir->frame_base, target_method);
-#endif
     if (vm::Method::is_static(target_method))
         TRY_RUN_CLASS_STATIC_CCTOR(target_method->parent);
+
+    if (vm::Method::is_instance(target_method))
+        (eval_stack_base + ir->frame_base)[0].ptr = vm::Calli::value_receiver(target_method, (eval_stack_base + ir->frame_base)[0].ptr);
 
     if (target_method->invoker_type == metadata::RtInvokerType::Interpreter)
     {

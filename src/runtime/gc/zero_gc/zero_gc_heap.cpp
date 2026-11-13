@@ -64,7 +64,8 @@ vm::RtObject* ZeroGcHeap::allocate_object(const metadata::RtClass* klass, size_t
 {
     assert(size >= sizeof(vm::RtObject));
     auto obj = (vm::RtObject*)alloc::GeneralAllocation::malloc_zeroed(size);
-    if (!obj) return nullptr;
+    if (!obj)
+        return nullptr;
     obj->klass = const_cast<metadata::RtClass*>(klass);
     GcFinalizer::on_object_allocated(obj);
     s_used_bytes += size;
@@ -88,3 +89,16 @@ vm::RtObject* ZeroGcHeap::allocate_array(const metadata::RtClass* arrClass, size
 } // namespace leanclr
 
 #endif // LEANCLR_GC_ZERO_GC
+
+#if LEANCLR_GC_ZERO_GC && LEANCLR_GC_ZERO_GC
+namespace leanclr
+{
+namespace gc
+{
+bool ZeroGcHeap::is_allocated_object(const vm::RtObject* obj)
+{
+    return obj != nullptr && obj->klass != nullptr;
+}
+} // namespace gc
+} // namespace leanclr
+#endif

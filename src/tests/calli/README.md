@@ -15,6 +15,17 @@ Build CalliTests.csproj and configure this CMake directory with LEANCLR_CALLI_MA
 and LEANCLR_CALLI_RUNTIME_DIR. For Mono compile Program.cs with modern Roslyn using
 -unsafe -target:library -nostdlib against mono-4.5/mscorlib.dll, and select MONO.
 
-Unmanaged signature parsing is tested independently of call execution. At this stage
-execution still rejects unmanaged conventions, ExplicitThis and unsupported modifiers;
-subsequent 03-B to 03-F commits add those capabilities only behind their platform gates.
+Stage 03-B adds managed calli AOT via the uniform invoker, preserving actual generic
+caller contexts and mixed AOT/interpreter targets. A per-site fast cache avoids
+reparsing signatures on warm calls. Runtime and generated roots protect arguments,
+locals and evaluation-stack references across collection. Mono also scans its live
+interpreter frames through the checked heap-owner index.
+
+The dnlib fixture tool emits real instance, explicit-this, virtual, value-this and
+boxed virtual IL. Its optional `verify` argument runs those five cases on .NET 10.
+Configure LEANCLR_CALLI_AOT_CPP_DIR to link generated bodies into calli-native;
+the harness asserts that tested entry points really use AOT invokers.
+GC cases check payload contents after allocation pressure, not just pointer equality.
+The EH case verifies that normal-path side effects are not replayed after handoff.
+
+Unmanaged calls remain rejected until signature bridges are linked and supported.

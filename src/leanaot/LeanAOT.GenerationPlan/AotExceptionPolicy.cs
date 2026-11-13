@@ -17,6 +17,7 @@ namespace LeanAOT.GenerationPlan
                 case ElementType.I4: case ElementType.U4: case ElementType.I8: case ElementType.U8:
                 case ElementType.R4: case ElementType.R8: case ElementType.String: case ElementType.Object:
                 case ElementType.Class: case ElementType.SZArray: case ElementType.Array: return true;
+                case ElementType.FnPtr: return true;
                 case ElementType.GenericInst: return !((GenericInstSig)type).GenericType.IsValueType;
                 default: return false;
             }
@@ -43,14 +44,21 @@ namespace LeanAOT.GenerationPlan
                             (eh.HandlerEnd == null || other.TryStart.Offset < eh.HandlerEnd.Offset)) return "eh-handler-inside-finally";
             }
             foreach (var inst in method.Body.Instructions)
+            {
+                // Catch handlers execute only after interpreter handoff. Their
+                // address-taking instructions do not create aliases on the AOT
+                // normal path and must not disqualify an otherwise safe snapshot.
+                if (method.Body.ExceptionHandlers.Any(eh => eh.HandlerType == ExceptionHandlerType.Catch &&
+                    inst.Offset >= eh.HandlerStart.Offset && (eh.HandlerEnd == null || inst.Offset < eh.HandlerEnd.Offset))) continue;
                 switch (inst.OpCode.Code)
                 {
                     case Code.Ldloca: case Code.Ldloca_S: case Code.Ldarga: case Code.Ldarga_S:
                     case Code.Ldflda: case Code.Ldsflda: case Code.Ldelema: case Code.Unbox:
-                    case Code.Localloc: case Code.Cpblk: case Code.Initblk: case Code.Calli:
+                    case Code.Localloc: case Code.Cpblk: case Code.Initblk:
                     case Code.Mkrefany: case Code.Refanyval: case Code.Arglist: case Code.Jmp:
                     case Code.Tailcall: return "eh-address-or-native-control";
                 }
+            }
             return null;
         }
     }

@@ -27,6 +27,9 @@
 #include <unordered_map>
 
 using namespace leanclr;
+#if LEANCLR_CALLI_AOT
+extern metadata::RtAotModulesData g_aot_modules_data;
+#endif
 #if LEANCLR_REFLECTION_AOT
 extern metadata::RtAotModulesData g_aot_modules_data;
 #endif
@@ -145,6 +148,9 @@ bool loader(const char* name, const char* extension, vm::FileData& data)
 
 RtResultVoid run()
 {
+#if LEANCLR_CALLI_AOT
+    vm::Settings::set_aot_modules_data(&g_aot_modules_data);
+#endif
     RET_ERR_ON_FAIL(vm::Runtime::initialize());
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, assembly, vm::Assembly::load_by_name("CalliTests"));
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, program, assembly->mod->get_class_by_nested_full_name("CalliTests.Program", false, true));
@@ -208,6 +214,32 @@ RtResultVoid run()
         }
     }
     check(failed_growth);
+    for (const auto* name : {"Managed", "ManagedRef", "ManagedGeneric", "FromHandle", "GenericCaller", "StructReturn", "RefReturn", "Mixed", "Collect",
+                             "StackRoot", "Exception", "BadTarget", "NullTarget", "WrongSignature"})
+    {
+        auto* entry = vm::Class::get_method_for_name(program, name, 0, false);
+        check(entry != nullptr);
+#if LEANCLR_CALLI_AOT
+        check(entry->invoker_type == metadata::RtInvokerType::Aot);
+#endif
+        RET_ERR_ON_FAIL(vm::Runtime::invoke_array_arguments_with_run_cctor(entry, nullptr, nullptr));
+    }
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtAssembly*, il_assembly, vm::Assembly::load_by_name("CalliILTests"));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, il_program,
+                                            il_assembly->mod->get_class_by_nested_full_name("CalliILTests.Program", false, true));
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(il_program));
+    for (const auto* name : {"Instance", "ExplicitThis", "Virtual", "ValueThis", "BoxedVirtual"})
+    {
+        auto* entry = vm::Class::get_method_for_name(il_program, name, 0, false);
+        check(entry != nullptr);
+#if LEANCLR_CALLI_AOT
+        check(entry->invoker_type == metadata::RtInvokerType::Aot);
+#endif
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, result, vm::Runtime::invoke_array_arguments_with_run_cctor(entry, nullptr, nullptr));
+        int32_t value = 0;
+        RET_ERR_ON_FAIL(vm::Object::unbox_any(result, vm::Class::get_corlib_types().cls_int32, &value, false));
+        check(value == 42);
+    }
     std::puts("Calli signature and target contracts passed");
     RET_VOID_OK();
 }

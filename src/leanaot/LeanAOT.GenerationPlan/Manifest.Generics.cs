@@ -75,7 +75,7 @@ namespace LeanAOT.GenerationPlan
                 if (_genericKeys.Contains(key) || rejected.Contains(key)) return;
                 string reason = null;
                 if (!def.HasBody || def.IsAbstract || def.IsRuntime || def.IsPinvokeImpl || def.IsInternalCall) reason = "unsupported-body";
-                else if (def.Body.Instructions.Any(i => i.OpCode.Code == dnlib.DotNet.Emit.Code.Calli)) reason = "managed-calli";
+                else if (def.Body.Instructions.Any(i => i.OpCode.Code == dnlib.DotNet.Emit.Code.Calli && (((byte)((MethodSig)i.Operand).CallingConvention & 0x0f) != 0))) reason = "unmanaged-calli";
                 else if (def.CallingConvention == CallingConvention.VarArg) reason = "vararg";
                 else if ((ctx.typeArgsStack?.Count ?? 0) != def.DeclaringType.GenericParameters.Count ||
                          (ctx.methodArgsStack?.Count ?? 0) != def.GenericParameters.Count ||

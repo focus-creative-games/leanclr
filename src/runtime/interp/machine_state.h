@@ -4,6 +4,7 @@
 #include <cstdint>
 
 #include "interp_defs.h"
+#include "gc/gc_roots.h"
 #include "utils/rt_span.h"
 
 namespace leanclr
@@ -27,10 +28,59 @@ struct InterpFrame
 
 struct MachineStateSavePoint;
 
+// Stack-linked native roots do not allocate and cannot exhaust the interpreter
+// frame reserve. Their lifetime covers callbacks and nested managed invocations.
+struct MethodArgumentRoots
+{
+    const metadata::RtMethodInfo* method;
+    RtStackObject* args;
+    MethodArgumentRoots* previous;
+    static MethodArgumentRoots* current;
+
+    MethodArgumentRoots(const metadata::RtMethodInfo* method, const RtStackObject* args)
+        : method(method), args(const_cast<RtStackObject*>(args)), previous(current)
+    {
+        current = this;
+    }
+
+    ~MethodArgumentRoots()
+    {
+        current = previous;
+    }
+
+    MethodArgumentRoots(const MethodArgumentRoots&) = delete;
+    MethodArgumentRoots& operator=(const MethodArgumentRoots&) = delete;
+};
+
+// Native reflection arguments are pointers to typed storage, including unboxed
+// structs. Keep all inputs alive while earlier arguments are being boxed.
+struct IndirectArgumentRoots
+{
+    const metadata::RtMethodInfo* method;
+    void** args;
+    IndirectArgumentRoots* previous;
+    static IndirectArgumentRoots* current;
+
+    IndirectArgumentRoots(const metadata::RtMethodInfo* method, void** args) : method(method), args(args), previous(current)
+    {
+        current = this;
+    }
+
+    ~IndirectArgumentRoots()
+    {
+        current = previous;
+    }
+
+    IndirectArgumentRoots(const IndirectArgumentRoots&) = delete;
+    IndirectArgumentRoots& operator=(const IndirectArgumentRoots&) = delete;
+};
+
 class MachineState
 {
   public:
     static void initialize();
+    void visit_roots(gc::GcVisitObjectRoot visit, void* userdata) const;
+
     static MachineState& get_global_machine_state()
     {
         static MachineState machine_state;
