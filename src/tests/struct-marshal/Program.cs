@@ -631,3 +631,25 @@ namespace StructMarshalTests
         }
     }
 }
+namespace StructMarshalTests
+{
+    // These fields test metadata decoding only; they do not enable these native conversions.
+    public class MarshalMetadata
+    {
+        [MarshalAs(UnmanagedType.LPArray, ArraySubType = UnmanagedType.I2)]
+        public short[] Dynamic;
+        [MarshalAs(UnmanagedType.SafeArray, SafeArraySubType = VarEnum.VT_I4)]
+        public Array Safe;
+        [MarshalAs(UnmanagedType.CustomMarshaler, MarshalTypeRef = typeof(CustomMarshaller), MarshalCookie = "marshal-cookie")]
+        public object Custom;
+    }
+    public sealed class CustomMarshaller : ICustomMarshaler
+    {
+        public static ICustomMarshaler GetInstance(string cookie) { throw new NotSupportedException(); }
+        public void CleanUpManagedData(object value) { throw new NotSupportedException(); }
+        public void CleanUpNativeData(IntPtr value) { throw new NotSupportedException(); }
+        public int GetNativeDataSize() { throw new NotSupportedException(); }
+        public IntPtr MarshalManagedToNative(object value) { throw new NotSupportedException(); }
+        public object MarshalNativeToManaged(IntPtr value) { throw new NotSupportedException(); }
+    }
+}

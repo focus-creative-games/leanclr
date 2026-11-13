@@ -33,8 +33,8 @@ dotnet build src/tests/struct-marshal/StructMarshalTests.csproj -c Release -o ou
 dotnet out/struct-marshal/net10/StructMarshalTests.dll
 ```
 
-For Mono, compile `Program.cs` as `StructMarshalTests.dll` with a C# compiler
-referencing the repository's Mono BCL (Framework csc is sufficient on Windows).
+For Mono, compile `Program.cs` as `StructMarshalTests.dll` with Roslyn csc,
+using `-nostdlib` and referencing the repository's Mono `mscorlib.dll`.
 
 Configure the CTest runner with the matching managed fixture and BCL directories:
 
@@ -52,6 +52,9 @@ Use BCL adapter `MONO` and host `PORTABLE` to verify mono-minimal; use host
 CoreLib. The test Node host mounts the repository at `/host`; configure fixture
 and BCL paths under that mount. Keep those inputs inside the repository and
 quote directory arguments such as `/host/src/libraries/mono-4.5`.
+
+`native.cpp` also decodes real LPArray, SafeArray and custom-marshaler metadata
+and checks that all fields in each tagged payload survive subsequent reads.
 
 `native.cpp` tracks allocations from before runtime startup. It verifies that
 10,000 cached blittable writes perform no allocations; repeated replacement
