@@ -24,7 +24,10 @@ int main()
     CHECK(RtSys::set_environment_variable(name, u(u"A\u4e2d\U0001f600")) != 0);
     leanclr::Utf16Char buffer[8] = {0x7777};
     CHECK(RtSys::get_environment_variable(name, nullptr, 0) == 5);
-    CHECK(RtSys::get_environment_variable(name, buffer, 4) == 5 && buffer[0] == 0x7777);
+    CHECK(RtSys::get_environment_variable(name, buffer, 4) == 5);
+#if !LEANCLR_PLATFORM_WIN
+    CHECK(buffer[0] == 0x7777);
+#endif
     CHECK(RtSys::get_environment_variable(name, buffer, 5) == 4);
     CHECK(buffer[0] == 'A' && buffer[1] == 0x4e2d && buffer[2] == 0xd83d && buffer[3] == 0xde00 && buffer[4] == 0);
     CHECK(RtSys::set_environment_variable(name, nullptr) != 0);

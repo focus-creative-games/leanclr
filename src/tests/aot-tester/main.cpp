@@ -1,4 +1,4 @@
-#if defined(_MSC_VER) && defined(_DEBUG)
+﻿#if defined(_MSC_VER) && defined(_DEBUG)
 #include <crtdbg.h>
 #endif
 #include <cstdlib>
@@ -242,6 +242,13 @@ static int run(const std::string& dll_name, const std::vector<std::string>& dll_
     }
 
     // Invoke entry method
+#if defined(LEANCLR_REQUIRE_AOT_ENTRY)
+    if (entry_method->invoker_type != metadata::RtInvokerType::Aot)
+    {
+        std::cerr << "Entry did not bind to generated AOT code\n";
+        return 1;
+    }
+#endif
     auto invoke_result = vm::Runtime::invoke_array_arguments_with_run_cctor(entry_method, nullptr, nullptr);
     if (invoke_result.is_err())
     {

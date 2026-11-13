@@ -21,9 +21,13 @@ public static class Program
         Check(CultureInfo.CurrentCulture.Name == "", "minimal non-Windows culture must be invariant");
         Check(12.5.ToString(CultureInfo.InvariantCulture) == "12.5", "invariant numbers");
         Check(new DateTime(2026, 11, 13).ToString("yyyy-MM-dd", CultureInfo.InvariantCulture) == "2026-11-13", "invariant date");
+        UnsupportedCulture();
+        Console.WriteLine("PASS InvariantProfile");
+    }
+    private static void UnsupportedCulture()
+    {
         try { _ = new CultureInfo("tr-TR"); throw new Exception("unsupported culture accepted"); }
         catch (CultureNotFoundException) { }
-        Console.WriteLine("PASS InvariantProfile");
     }
     public static void EnvironmentRoundtrip()
     {

@@ -35,6 +35,8 @@ jobs:
           $env:PATH = "$($asan.DirectoryName);$env:PATH"
           python scripts/dotnet10/aot-contracts.py --runtime "$runtime" --configuration RelWithDebInfo --asan
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
+          python scripts/dotnet10/platform-contracts.py --runtime "$runtime"
+          if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python scripts/dotnet10/aot-contracts.py --runtime "$runtime" --variant optimized
           if ($LASTEXITCODE) { exit $LASTEXITCODE }
           python scripts/test/aot-features.py --target native --profile coreclr-net10 --runtime-dir "$runtime"
@@ -49,6 +51,7 @@ jobs:
         with:
           name: net10-windows
           path: |
+            out/platform-contracts/**
             out/net10-aot-current/*.log
             out/net10-aot-current/results.json
             out/net10-aot-current/optimized/*.log
@@ -84,6 +87,7 @@ jobs:
         run: echo "NET10_RUNTIME=$(python3 -c "import sys; sys.path.insert(0,'scripts/dotnet10'); from integration import installed_runtime; print(installed_runtime())")" >> "$GITHUB_ENV"
       - run: python3 scripts/dotnet10/aot-contracts.py --runtime "$NET10_RUNTIME" --sanitizers '${{ matrix.sanitizers }}'
       - run: python3 scripts/test/aot-features.py --target native --profile coreclr-net10 --runtime-dir "$NET10_RUNTIME"
+      - run: python3 scripts/dotnet10/platform-contracts.py --runtime "$NET10_RUNTIME"
       - run: python3 scripts/dotnet10/engine-contracts.py --sanitizers '${{ matrix.sanitizers }}'
       - run: python3 scripts/dotnet10/engine-contracts.py --shared --sanitizers '${{ matrix.sanitizers }}'
       - uses: actions/upload-artifact@v4
@@ -91,6 +95,7 @@ jobs:
         with:
           name: net10-${{ matrix.name }}
           path: |
+            out/platform-contracts/**
             out/net10-portable-gate/**/*.log
             out/net10-portable-gate/results.json
             out/net10-aot-current/*.log
@@ -128,6 +133,7 @@ jobs:
           python3 scripts/test/aot-features.py --target wasm --profile coreclr-net10 --runtime-dir "$runtime" --emsdk .emsdk
           foreign=$(python3 -c "import sys; sys.path.insert(0,'scripts/dotnet10'); from integration import installed_runtime; print(installed_runtime())")
           python3 scripts/dotnet10/check-bitness-rejection.py --node --runner out/net10-aot-current/wasm/native/bin/aot-tester.js --foreign-runtime "$foreign"
+          python3 scripts/dotnet10/platform-contracts.py --target wasm --runtime "$runtime" --emsdk .emsdk
           python3 scripts/dotnet10/engine-contracts.py --target wasm --runtime "$runtime" --emsdk .emsdk
           cmake -S src/tests/net10-contracts -B out/net10-resources-wasm -G Ninja -DCMAKE_BUILD_TYPE=Release -DLEANCLR_HOST=PORTABLE -DCMAKE_CROSSCOMPILING_EMULATOR=node -DCMAKE_TOOLCHAIN_FILE="$PWD/.emsdk/upstream/emscripten/cmake/Modules/Platform/Emscripten.cmake" -DLEANCLR_NET10_RUNTIME_DIR="$runtime"
           cmake --build out/net10-resources-wasm --parallel 4
@@ -141,6 +147,7 @@ jobs:
         with:
           name: net10-wasm
           path: |
+            out/platform-contracts/**
             out/net10-aot-current/**/*.log
             out/net10-aot-current/**/results.json
             out/net10-engine-wasm-Release/*.log
