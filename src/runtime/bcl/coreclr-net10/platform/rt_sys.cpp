@@ -1010,7 +1010,7 @@ int32_t RtSys::convert_error_pal_to_platform(int32_t error)
 int32_t RtSys::convert_error_platform_to_pal(int32_t error)
 {
 #ifdef LEANCLR_PLATFORM_POSIX
-    return os::io_error_internal::errno_to_monoio(error);
+    return os::io_error_internal::errno_to_io_error(error);
 #else
     return error;
 #endif
