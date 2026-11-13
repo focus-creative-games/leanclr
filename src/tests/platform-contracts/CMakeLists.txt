@@ -21,3 +21,5 @@ foreach(target platform-interp platform-aot platform-environment)
 endforeach()
 enable_testing()
 add_test(NAME platform-environment COMMAND platform-environment)
+
+add_subdirectory(../public-invoker public-invoker)

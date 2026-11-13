@@ -71,6 +71,8 @@ def main():
             results.append(dict(mode=mode, entry=entry, passed=True))
     env_exe = build / ('platform-environment.js' if opts.target == 'wasm' else 'Release/platform-environment.exe' if os.name == 'nt' else 'platform-environment')
     run(['node', env_exe] if opts.target == 'wasm' else [env_exe], 'environment-buffer')
+    public_exe = build / ('bin/public-invoker.js' if opts.target == 'wasm' else 'bin/Release/public-invoker.exe' if os.name == 'nt' else 'bin/public-invoker')
+    run(['node', public_exe, runtime] if opts.target == 'wasm' else [public_exe, runtime], 'public-invoker-abi')
     environment = dict(os.environ)
     if invariant: environment['DOTNET_SYSTEM_GLOBALIZATION_INVARIANT'] = '1'
     run(['dotnet', directories[0] / 'ManagedNet10.GlobalizationContracts.dll', *(['invariant'] if invariant else [])], 'stock-globalization', environment)
