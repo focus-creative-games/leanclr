@@ -12,6 +12,35 @@ public enum Code : short
     A = 1,
     B = 2
 }
+public static class ConstructorCounters
+{
+    public static int Calls;
+    public static int Initializers;
+    public static object Last;
+}
+public class Existing
+{
+    public int Value;
+    static Existing()
+    {
+        ConstructorCounters.Initializers++;
+    }
+    public Existing()
+    {
+        ConstructorCounters.Calls++;
+        ConstructorCounters.Last = this;
+        Value = 42;
+    }
+}
+public struct ExistingValue
+{
+    public int Value;
+    public ExistingValue(int value)
+    {
+        ConstructorCounters.Calls++;
+        Value = value;
+    }
+}
 public class Program
 {
     static void Check(bool b, string label)
