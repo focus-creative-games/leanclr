@@ -10,10 +10,7 @@ namespace vm
 {
 
 static const char* g_domain_name = nullptr;
-static const char* g_config_dir = nullptr;
-static const char* g_data_dir = nullptr;
 static const char* g_temp_dir = nullptr;
-static const char* g_config = nullptr;
 
 static const char* g_commandline_arguments[1024] = {nullptr};
 static int32_t g_commandline_arguments_count = 0;
@@ -54,30 +51,6 @@ void Settings::set_domain_name(const char* domain_name)
     g_domain_name = utils::StringUtil::strdup(domain_name);
 }
 
-const char* Settings::get_config_dir()
-{
-    return g_config_dir;
-}
-
-void Settings::set_config_dir(const char* config_dir)
-{
-    assert(config_dir != nullptr);
-    assert(g_config_dir == nullptr);
-    g_config_dir = utils::StringUtil::strdup(config_dir);
-}
-
-const char* Settings::get_data_dir()
-{
-    return g_data_dir;
-}
-
-void Settings::set_data_dir(const char* data_dir)
-{
-    assert(data_dir != nullptr);
-    assert(g_data_dir == nullptr);
-    g_data_dir = utils::StringUtil::strdup(data_dir);
-}
-
 const char* Settings::get_temp_dir()
 {
     return g_temp_dir;
@@ -90,29 +63,6 @@ void Settings::set_temp_dir(const char* temp_dir)
     g_temp_dir = utils::StringUtil::strdup(temp_dir);
 }
 
-void Settings::set_config(const char* executablePath)
-{
-    assert(executablePath != nullptr);
-    assert(g_config == nullptr);
-    g_config = utils::StringUtil::strdup(executablePath);
-}
-
-const char* Settings::get_config()
-{
-    return g_config;
-}
-
-FileLoader Settings::get_file_loader()
-{
-    return host::Services::get_callbacks().load_assembly;
-}
-
-void Settings::set_file_loader(FileLoader loader)
-{
-    if (!host::Services::set_file_loader(loader))
-        leanclr::panic("Configure file loader before host services are used");
-}
-
 void Settings::set_internal_functions_initializer(InternalFunctionInitializer initializer)
 {
     g_internal_functions_initializer = initializer;
@@ -121,17 +71,6 @@ void Settings::set_internal_functions_initializer(InternalFunctionInitializer in
 InternalFunctionInitializer Settings::get_internal_functions_initializer()
 {
     return g_internal_functions_initializer;
-}
-
-void Settings::set_debugger_log_function(DebuggerLogFunc log_func)
-{
-    if (!host::Services::set_debugger_log(log_func))
-        leanclr::panic("Configure debugger logger before host services are used");
-}
-
-DebuggerLogFunc Settings::get_debugger_log_function()
-{
-    return host::Services::get_callbacks().debugger_log;
 }
 
 void Settings::set_report_unhandled_exception_function(ReportUnhandledExceptionFunc func)

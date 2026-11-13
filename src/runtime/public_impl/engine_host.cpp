@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "public/engine_host.h"
 #include "alloc/general_allocation.h"
 #include "metadata/module_def.h"
@@ -52,7 +53,7 @@ LeanclrEngineStatus runtime_error(LeanclrEngineError* out, RtErr error, const ch
     return report(out, status, phase, error);
 }
 
-bool load_file(const char* name, const char* extension, vm::FileData& out)
+bool load_file(const char* name, const char* extension, host::FileData& out)
 {
     LeanclrEngineFile file{};
     const int32_t found = session.config.load_file(session.config.context, name, extension, &file);
@@ -178,7 +179,8 @@ LeanclrEngineStatus leanclr_engine_start(const LeanclrEngineConfig* config, Lean
         session.state.store(LEANCLR_ENGINE_FAILED, std::memory_order_release);
         return report(error, LEANCLR_ENGINE_INVALID_STATE, "Runtime is already owned");
     }
-    vm::Settings::set_file_loader(load_file);
+    if (!host::Services::set_file_loader(load_file))
+        return fail(report(error, LEANCLR_ENGINE_INVALID_STATE, "Configure host services before first use"));
     vm::Settings::set_aot_modules_data(static_cast<const metadata::RtAotModulesData*>(config->aot_modules));
 #if LEANCLR_BCL_CORECLR_NET10
     if (config->max_type_handles)

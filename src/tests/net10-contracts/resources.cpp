@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "../aot-returns/test_assert.h"
 #include "vm/gchandle.h"
 #include "vm/class.h"
@@ -34,7 +35,7 @@ static void check(bool condition)
 
 static std::string runtime_directory;
 
-static bool load(const char* name, const char* extension, vm::FileData& data)
+static bool load(const char* name, const char* extension, host::FileData& data)
 {
     std::ifstream file(runtime_directory + "/" + name + "." + extension, std::ios::binary | std::ios::ate);
     if (!file)
@@ -67,7 +68,8 @@ int main(int argc, char** argv)
     if (membership)
     {
         runtime_directory = argv[3];
-        vm::Settings::set_file_loader(load);
+        if (!host::Services::set_file_loader(load))
+            leanclr::panic("Configure file loader before host services are used");
         check(vm::Runtime::initialize().is_ok());
         auto reference_array = vm::ArrayClass::get_szarray_class_from_element_class(vm::Class::get_corlib_types().cls_string);
         check(reference_array.is_ok());

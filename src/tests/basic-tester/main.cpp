@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include <cstdlib>
 #include <csignal>
 #include <cstdio>
@@ -69,7 +70,7 @@ static std::string get_executable_directory()
 #endif
 }
 
-static bool assembly_file_loader(const char* assembly_name, const char* ext, vm::FileData& file_data)
+static bool assembly_file_loader(const char* assembly_name, const char* ext, host::FileData& file_data)
 {
     for (const auto& dir : g_lib_dirs)
     {
@@ -456,7 +457,8 @@ int main()
     std::cout << "Startup test successful!" << std::endl;
 
     setup_default_lib_dirs();
-    vm::Settings::set_file_loader(assembly_file_loader);
+    if (!host::Services::set_file_loader(assembly_file_loader))
+        leanclr::panic("Configure file loader before host services are used");
     const char* argv[] = {
         "leanclr",
     };

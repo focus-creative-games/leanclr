@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "alloc/general_allocation.h"
 #include "metadata/module_def.h"
 #include "vm/assembly.h"
@@ -109,7 +110,7 @@ void* tracked_aligned_realloc(void* p, size_t size, size_t alignment)
 
 const char* dirs[2];
 
-bool loader(const char* name, const char* extension, vm::FileData& data)
+bool loader(const char* name, const char* extension, host::FileData& data)
 {
     for (const auto* dir : dirs)
     {
@@ -250,7 +251,8 @@ int main(int argc, char** argv)
         return 2;
     dirs[0] = argv[1];
     dirs[1] = argv[2];
-    vm::Settings::set_file_loader(loader);
+    if (!host::Services::set_file_loader(loader))
+        leanclr::panic("Configure file loader before host services are used");
     auto result = run();
     if (result.is_err())
     {

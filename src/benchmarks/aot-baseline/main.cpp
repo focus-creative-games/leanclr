@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "alloc/general_allocation.h"
 #include "metadata/module_def.h"
 #include "vm/assembly.h"
@@ -19,7 +20,7 @@ using namespace leanclr;
 extern metadata::RtAotModulesData g_aot_modules_data;
 static std::string library_path;
 
-static bool load(const char* name, const char* extension, vm::FileData& data)
+static bool load(const char* name, const char* extension, host::FileData& data)
 {
     std::ifstream file(library_path + "/" + name + "." + extension, std::ios::binary | std::ios::ate);
     if (!file)
@@ -55,7 +56,8 @@ int main(int argc, char** argv)
     library_path = argv[1];
     const int n = argc >= 3 ? std::atoi(argv[2]) : 2000000;
     require(n > 0, "Iterations must be positive");
-    vm::Settings::set_file_loader(load);
+    if (!host::Services::set_file_loader(load))
+        leanclr::panic("Configure file loader before host services are used");
     vm::Settings::set_aot_modules_data(&g_aot_modules_data);
     auto init = vm::Runtime::initialize();
     require(init.is_ok(), "Initialization failed");

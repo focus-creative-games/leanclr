@@ -10,7 +10,6 @@
 #include "utils/scope_guard.h"
 #include "metadata/pe_image_reader.h"
 #include "const_strs.h"
-#include "settings.h"
 #include "rt_array.h"
 #include "class.h"
 #include "reflection.h"
@@ -50,12 +49,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
     {
         RET_OK(mod->get_assembly());
     }
-    auto file_loader = vm::Settings::get_file_loader();
-    if (!file_loader)
-    {
-        RET_ERR(RtErr::FileNotFound);
-    }
-    FileData dllFileData = {};
+    host::FileData dllFileData = {};
     auto result = host::Services::load_assembly(name, "dll", dllFileData);
     if (!result)
     {
@@ -66,7 +60,7 @@ RtResult<metadata::RtAssembly*> Assembly::load_by_name(const char* name)
 
     AssemblyData* pdb_data_ptr = nullptr;
     AssemblyData pdb_data;
-    FileData pdb_file_data = {};
+    host::FileData pdb_file_data = {};
     if (host::Services::load_assembly(name, "pdb", pdb_file_data))
     {
         pdb_data = AssemblyData{pdb_file_data.data, pdb_file_data.length, pdb_file_data.shared};

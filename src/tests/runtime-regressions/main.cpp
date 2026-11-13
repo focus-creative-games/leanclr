@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "fake-host-services.h"
 #include "interp/machine_state.h"
 #include "bcl/mono/managed_layouts.h"
@@ -50,7 +51,7 @@ static void check(bool condition, const char* message)
     }
 }
 
-static bool load_file(const char* name, const char* ext, vm::FileData& output)
+static bool load_file(const char* name, const char* ext, host::FileData& output)
 {
     if (std::strcmp(name, "RegressionFixtures") == 0 && std::strcmp(ext, "dll") == 0)
     {
@@ -549,7 +550,7 @@ static void integer_arithmetic()
 
 static void unaligned_image()
 {
-    vm::FileData file;
+    host::FileData file;
     check(load_file("mscorlib", "dll", file), "load image bytes");
     auto* bytes = static_cast<uint8_t*>(alloc::GeneralAllocation::malloc(file.length + 8));
     check(bytes != nullptr, "allocate shifted image");
@@ -600,7 +601,8 @@ int main(int argc, char** argv)
         callbacks.log = host_integration_log;
         check(host::Services::configure(callbacks), "install managed integration host");
     }
-    vm::Settings::set_file_loader(load_file);
+    if (!host::Services::set_file_loader(load_file))
+        leanclr::panic("Configure file loader before host services are used");
     const char* args[] = {"runtime-regressions"};
     vm::Settings::set_command_line_arguments(1, args);
     vm::Settings::set_gc_mode(gc::GCMode::DISABLED);

@@ -579,7 +579,7 @@ flowchart TD
     C --> D
     E["Godot project.godot"] --> F["GDExtension: nkg_leanclr_bridge"]
     F --> G["NkgLeanClrRuntimeBridge.configure(managedDir + bclDir)"]
-    G --> H["Runtime::initialize + Settings::set_file_loader"]
+    G --> H["host::Services::set_file_loader + Runtime::initialize"]
     H --> I["Assembly::load_by_name(sample assembly)"]
     I --> J["绑定 PlaneGameBridge 静态入口"]
     K["NkgLeanClrPlaneHost._process(delta)"] --> L["ClearInput / Press* / StepSessionCommandBytes"]

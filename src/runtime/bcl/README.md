@@ -83,11 +83,12 @@ under `bcl/mono/platform`, rather than leaking managed types into native host
 providers or core. Custom stream handles can be passed directly to managed
 `FileStream`; path-based BCL APIs can also invoke those additional PAL operations.
 
-`vm::Settings` file-loader/debugger setters remain startup facades over the same
-table, and their typedefs alias host-native types. Setters used after freeze fail
-explicitly; new code can use the boolean host API to report a configuration error.
-A null debugger logger disables that channel before startup. Native callback
-buffers are borrowed for the duration of a call and must not be retained.
+Configure assembly loading and debugger logging through `host::Services`;
+`vm::Settings` no longer provides those setters or host-type aliases.
+`set_file_loader`, `set_debugger_log`, and `configure` return false after freeze;
+check their results before starting the runtime. A null debugger logger disables
+that channel before startup. Native callback buffers are borrowed for the duration
+of a call and must not be retained.
 
 Assembly loader success returns `host::FileData`. `shared=true` borrows bytes that
 must remain valid for the loaded module; `shared=false` transfers bytes that must

@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -37,7 +38,7 @@ static std::string get_current_working_directory()
     return std::string(buffer);
 }
 
-static bool assembly_file_loader(const char* assembly_name, const char* extension, vm::FileData& file_data)
+static bool assembly_file_loader(const char* assembly_name, const char* extension, host::FileData& file_data)
 {
     for (const auto& dir : g_lib_dirs)
     {
@@ -95,7 +96,8 @@ int main()
 {
     setup_default_lib_dirs();
 
-    vm::Settings::set_file_loader(assembly_file_loader);
+    if (!host::Services::set_file_loader(assembly_file_loader))
+        leanclr::panic("Configure file loader before host services are used");
     auto result = vm::Runtime::initialize();
     if (result.is_err())
     {
