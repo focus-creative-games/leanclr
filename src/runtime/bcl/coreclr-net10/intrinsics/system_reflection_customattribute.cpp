@@ -26,6 +26,27 @@ RtResult<bool> SystemReflectionCustomAttribute::is_defined(vm::RtReflectionMetho
     return vm::CustomAttribute::has_customattribute_on_method(method_info, attr_klass);
 }
 
+RtResult<bool> SystemReflectionCustomAttribute::is_defined_on_provider(vm::RtObject* provider, vm::RtReflectionRuntimeType* attribute_type) noexcept
+{
+    if (!provider || !attribute_type)
+        RET_ERR(RtErr::ArgumentNull);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, signature,
+                                            vm::Reflection::get_type_sig_from_reflection_type_object(&attribute_type->reflection_type));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(signature));
+    return vm::CustomAttribute::has_attribute(provider, klass);
+}
+
+RtResult<vm::RtArray*> SystemReflectionCustomAttribute::get_custom_attributes_on_provider(vm::RtObject* provider,
+                                                                                          vm::RtReflectionRuntimeType* attribute_type) noexcept
+{
+    if (!provider || !attribute_type)
+        RET_ERR(RtErr::ArgumentNull);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(const metadata::RtTypeSig*, signature,
+                                            vm::Reflection::get_type_sig_from_reflection_type_object(&attribute_type->reflection_type));
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(signature));
+    return vm::CustomAttribute::get_customattributes_on_target_object(provider, klass);
+}
+
 RtResult<bool> SystemReflectionCustomAttribute::is_defined_on_type(vm::RtReflectionRuntimeType* type, vm::RtReflectionRuntimeType* attribute_type,
                                                                    bool inherit) noexcept
 {
@@ -160,7 +181,58 @@ static RtResultVoid get_custom_attributes_data_internal_on_provider_invoker(meta
     RET_VOID_OK();
 }
 
+// CoreLib's field/property/event/constructor/parameter/module/assembly overloads
+// have TWO parameters. Do not reuse the three-parameter method overload or
+// interpret their provider object using a RuntimeMethodInfo layout.
+static RtResultVoid provider_is_defined_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                interp::RtStackObject* ret) noexcept
+{
+    auto provider = interp::EvalStackOp::get_param<vm::RtObject*>(params, 0);
+    auto type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, found, SystemReflectionCustomAttribute::is_defined_on_provider(provider, type));
+    interp::EvalStackOp::set_return(ret, found);
+    RET_VOID_OK();
+}
+
+static RtResultVoid provider_get_attributes_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject* params,
+                                                    interp::RtStackObject* ret) noexcept
+{
+    auto provider = interp::EvalStackOp::get_param<vm::RtObject*>(params, 0);
+    auto type = interp::EvalStackOp::get_param<vm::RtReflectionRuntimeType*>(params, 1);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtArray*, attributes, SystemReflectionCustomAttribute::get_custom_attributes_on_provider(provider, type));
+    interp::EvalStackOp::set_return(ret, attributes);
+    RET_VOID_OK();
+}
+
 static vm::IntrinsicEntry s_intrinsic_entries_system_reflection_customattribute[] = {
+    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeConstructorInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
+    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeConstructorInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
+    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimePropertyInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
+    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimePropertyInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
+    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeEventInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
+    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeEventInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
+    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeFieldInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
+    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeFieldInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
+    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeParameterInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
+    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeParameterInfo,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
+    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeAssembly,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
+    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeAssembly,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
+    {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeModule,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined_on_provider, provider_is_defined_invoker},
+    {"System.Reflection.CustomAttribute::GetCustomAttributes(System.Reflection.RuntimeModule,System.RuntimeType)",
+     (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::get_custom_attributes_on_provider, provider_get_attributes_invoker},
     {"System.Reflection.CustomAttribute::IsDefined(System.Reflection.RuntimeMethodInfo,System.RuntimeType,System.Boolean)",
      (vm::IntrinsicFunction)&SystemReflectionCustomAttribute::is_defined, is_defined_invoker},
     {"System.Reflection.CustomAttribute::IsDefined(System.RuntimeType,System.RuntimeType,System.Boolean)",
