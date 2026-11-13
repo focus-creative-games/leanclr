@@ -200,6 +200,33 @@ int main(int argc, char** argv)
     for (int n = 0; n < 10000; ++n)
         CHECK(bridges[0](abi_method_marker, &methods[0], &argument, &result).is_ok());
     CHECK(allocations == warmed && !abi_failures);
+    LeanclrException* output = abi_exception;
+    auto* public_args = reinterpret_cast<const LeanclrStackObject*>(&argument);
+    auto* public_result = reinterpret_cast<LeanclrStackObject*>(&result);
+    leanclr_invoke_with_buffer(abi_expected_method, public_args, public_result, &output);
+    CHECK(output == nullptr && result.i32 == -12328);
+    abi_raise = 1;
+    leanclr_invoke_with_buffer(abi_expected_method, public_args, public_result, &output);
+    CHECK(output == abi_exception);
+    abi_raise = 0;
+    leanclr_invoke_with_buffer(abi_expected_method, public_args, public_result, &output);
+    CHECK(output == nullptr);
+    leanclr_invoke_with_buffer(abi_expected_method, public_args, public_result, nullptr);
+    CHECK(leanclr_load_assembly(types.cls_object->image->get_name_no_ext(), &output) != nullptr && output == nullptr);
+    output = abi_exception;
+    LeanclrAssembly* assembly[1];
+    CHECK(leanclr_get_assemblies(assembly, 1, &output) == 1 && output == nullptr);
+    output = abi_exception;
+    CHECK(leanclr_get_assemblies(nullptr, 0, &output) == 0 && output == nullptr);
+    CHECK(leanclr_get_assemblies(nullptr, 1, &output) == 0 && output != nullptr);
+    const int calls_before_invalid = abi_calls;
+    leanclr_invoke_with_buffer(nullptr, public_args, public_result, &output);
+    CHECK(output != nullptr && abi_calls == calls_before_invalid);
+    leanclr_invoke_with_buffer(abi_expected_method, nullptr, public_result, &output);
+    CHECK(output != nullptr && abi_calls == calls_before_invalid);
+    leanclr_invoke_with_buffer(abi_expected_method, public_args, nullptr, &output);
+    CHECK(output != nullptr && abi_calls == calls_before_invalid);
+    leanclr_invoke_with_buffer(nullptr, nullptr, nullptr, nullptr);
     std::puts("PASS C public invoker ABI, exception handoff, OOM retry and allocation-free warm calls");
     return 0;
 }
