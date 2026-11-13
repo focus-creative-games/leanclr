@@ -37,3 +37,5 @@ field updates, exact constructor count, one-time type initialization, and preser
 of the return buffer for void constructors. Object-based invocation with an existing
 target is also distinguished from explicit allocation using a null target. The report's
 claimed stackobject/newobj substitution did not reproduce on the current code.
+
+A CoreCLR native regression also makes the first value argument's type initializer collect before a later raw struct argument is boxed. All parameter layouts must be prepared before that first managed allocation, so the later struct's GC references are visible throughout materialization.

@@ -41,6 +41,12 @@ public struct ExistingValue
         Value = value;
     }
 }
+public struct CollectOnBox
+{
+    public int Value;
+    static CollectOnBox() { GC.Collect(); }
+}
+public struct LaterPayload { public object Reference; }
 public class Program
 {
     static void Check(bool b, string label)
@@ -148,6 +154,11 @@ public class Program
         {
         }
         Check((int)a[0] == 1 && (string)a[1] == "old", "no copyback after throw");
+    }
+    public static object LaterArgumentRoot(CollectOnBox first, LaterPayload second)
+    {
+        Check(second.Reference != null && second.Reference.GetType() == typeof(object), "later argument survived boxing GC");
+        return second.Reference;
     }
     public static void Main(string[] args)
     {

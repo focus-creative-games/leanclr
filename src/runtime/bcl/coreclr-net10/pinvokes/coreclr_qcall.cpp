@@ -10,6 +10,7 @@
 
 #include "const_strs.h"
 #include "alloc/general_allocation.h"
+#include "alloc/scoped_buffer.h"
 #include "gc/gc_roots.h"
 #include "icalls/system_enum.h"
 #include "icalls/system_runtimemethodhandle.h"
@@ -5962,7 +5963,8 @@ RtResultVoid custom_attribute_create_custom_attribute_instance_invoker(metadata:
 }
 
 RtResultVoid materialize_runtime_method_handle_invoke_args(const metadata::RtMethodInfo* method, void** args, utils::Vector<vm::RtObject*>& invoke_args,
-                                                           RtObjectSlotRootGuard& roots) noexcept
+                                                           RtObjectSlotRootGuard& roots,
+                                                           alloc::ScopedBuffer<metadata::RtClass*, 16>& parameter_classes) noexcept
 {
     assert(method != nullptr);
 
@@ -5976,27 +5978,28 @@ RtResultVoid materialize_runtime_method_handle_invoke_args(const metadata::RtMet
         RET_ERR(RtErr::ArgumentNull);
     }
 
+    if (!parameter_classes.try_allocate_zeroed(parameter_count) || !invoke_args.try_reserve(parameter_count))
+        RET_ERR(RtErr::OutOfMemory);
+    // Boxing an early argument can run its type initializer and collect. Resolve
+    // every later argument's reference bitmap before the first managed allocation.
+    for (size_t i = 0; i < parameter_count; ++i)
+    {
+        const auto* type = method->parameters[i];
+        if (!type)
+            RET_ERR(RtErr::ArgumentNull);
+        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type));
+        RET_ERR_ON_FAIL(vm::Class::initialize_all(klass));
+        parameter_classes.data()[i] = klass;
+        if ((type->by_ref || vm::Class::is_value_type(klass)) && !args[i])
+            RET_ERR(RtErr::ArgumentNull);
+    }
     invoke_args.resize(parameter_count);
     for (size_t i = 0; i < parameter_count; ++i)
     {
-        const metadata::RtTypeSig* parameter_type_sig = method->parameters[i];
-        if (parameter_type_sig == nullptr)
-        {
-            RET_ERR(RtErr::ArgumentNull);
-        }
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, parameter_class, vm::Class::get_class_from_typesig(parameter_type_sig));
-        RET_ERR_ON_FAIL(vm::Class::initialize_all(parameter_class));
-
+        auto* parameter_class = parameter_classes.data()[i];
         void* arg = args[i];
-        if (parameter_type_sig->by_ref && arg == nullptr)
-            RET_ERR(RtErr::ArgumentNull);
         if (vm::Class::is_value_type(parameter_class))
         {
-            if (arg == nullptr)
-            {
-                RET_ERR(RtErr::ArgumentNull);
-            }
-
             DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, boxed_arg,
                                                     LEANCLR_BOX_OBJECT_INTERNAL(parameter_class, arg, "RuntimeMethodHandle_InvokeMethod"));
             invoke_args[i] = boxed_arg;
@@ -6039,7 +6042,8 @@ RtResultVoid runtime_method_handle_invoke_method_invoker(metadata::RtManagedMeth
     *result_slot = nullptr;
     roots.register_slot(result_slot);
     utils::Vector<vm::RtObject*> invoke_args;
-    RET_ERR_ON_FAIL(materialize_runtime_method_handle_invoke_args(method, args, invoke_args, roots));
+    alloc::ScopedBuffer<metadata::RtClass*, 16> parameter_classes;
+    RET_ERR_ON_FAIL(materialize_runtime_method_handle_invoke_args(method, args, invoke_args, roots, parameter_classes));
 
     vm::RtObject** invoke_args_data = invoke_args.size() > 0 ? invoke_args.data() : nullptr;
     vm::RtObject* target = target_slot != nullptr ? *target_slot : nullptr;
@@ -6056,7 +6060,7 @@ RtResultVoid runtime_method_handle_invoke_method_invoker(metadata::RtManagedMeth
         const auto* type = method->parameters[i];
         if (!type->by_ref)
             continue;
-        DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(type));
+        auto* klass = parameter_classes.data()[i];
         if (vm::Class::is_value_type(klass))
             RET_ERR_ON_FAIL(vm::Object::unbox_any(invoke_args[i], klass, args[i], false));
         else

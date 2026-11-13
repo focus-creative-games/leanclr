@@ -169,6 +169,14 @@ RtResultVoid run()
         call[1].ptr = args;
         return qcall->invoker(nullptr, nullptr, call, nullptr);
     };
+    // The only live reference is inside a later raw value argument. Boxing the
+    // first struct executes a .cctor that collects before that later value is boxed.
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, later_reference,
+                                            LEANCLR_NEWOBJ_INTERNAL(vm::Class::get_corlib_types().cls_object, "ReflectionTest::later_reference"));
+    int32_t first_value = 0;
+    void* later_args[] = {&first_value, &later_reference};
+    RET_ERR_ON_FAIL(invoke("LaterArgumentRoot", later_args));
+    check(result == later_reference);
     int32_t value = 1;
     void* one[] = {&value};
     RET_ERR_ON_FAIL(invoke("Change", one));
