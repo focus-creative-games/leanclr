@@ -258,7 +258,7 @@ struct RtMarshalSpec
         const RtTypeSig* udt;
     } safe_array;
 
-    union
+    struct
     {
         uint32_t size;
         RtMarshalNativeType array_element_type;

@@ -1,5 +1,6 @@
 #include "managed_layouts.h"
 #include "vm/marshal.h"
+#include "vm/struct_marshal.h"
 
 #include "alloc/general_allocation.h"
 #include "vm/rt_string.h"
@@ -142,69 +143,46 @@ void Marshal::free_array(void* ptr)
     alloc::GeneralAllocation::free(ptr);
 }
 
-static RtResultVoid structure_to_ptr_impl(vm::RtObject* obj, void* ptr)
-{
-    RETURN_NOT_IMPLEMENTED_ERROR();
-}
-
-static RtResultVoid ptr_to_structure_impl(void* ptr, vm::RtObject* obj)
-{
-    RETURN_NOT_IMPLEMENTED_ERROR();
-}
-
-static RtResultVoid destroy_structure_impl(void* ptr, const metadata::RtClass* klass)
-{
-    RETURN_NOT_IMPLEMENTED_ERROR();
-}
-
 RtResultVoid Marshal::ptr_to_structure(void* ptr, vm::RtObject* obj)
 {
-    return ptr_to_structure_impl(ptr, obj);
+    return StructMarshal::from_native(ptr, obj);
 }
 
 RtResult<vm::RtObject*> Marshal::ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type)
 {
+    if (!ref_type)
+        RET_ERR(RtErr::ArgumentNull);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, Class::get_class_from_typesig(ref_type->type_handle));
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, obj, LEANCLR_NEWOBJ_INTERNAL(klass, "Marshal::ptr_to_structure_type"));
-    RET_ERR_ON_FAIL(ptr_to_structure_impl(ptr, obj));
-    RET_OK(obj);
+    return StructMarshal::from_native(ptr, klass);
 }
 
 RtResultVoid Marshal::structure_to_ptr(vm::RtObject* obj, void* ptr, bool delete_old)
 {
-    if (delete_old)
-    {
-        RET_ERR_ON_FAIL(destroy_structure_impl(ptr, obj->klass));
-    }
-    return structure_to_ptr_impl(obj, ptr);
+    return StructMarshal::to_native(obj, ptr, delete_old);
 }
 
 RtResultVoid Marshal::destroy_structure(void* ptr, vm::RtReflectionType* ref_type)
 {
+    if (!ref_type)
+        RET_ERR(RtErr::ArgumentNull);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, Class::get_class_from_typesig(ref_type->type_handle));
-    RET_ERR_ON_FAIL(Class::initialize_all(klass));
-    return destroy_structure_impl(ptr, klass);
+    return StructMarshal::destroy(ptr, klass);
 }
 
 RtResult<int32_t> Marshal::sizeof_type(vm::RtReflectionType* ref_type)
 {
-    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, vm::Class::get_class_from_typesig(ref_type->type_handle));
-    RET_ERR_ON_FAIL(Class::initialize_fields(klass));
-    int32_t size = static_cast<int32_t>(vm::Class::get_instance_size_without_object_header(klass));
-    RET_OK(size);
+    if (!ref_type)
+        RET_ERR(RtErr::ArgumentNull);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, Class::get_class_from_typesig(ref_type->type_handle));
+    return StructMarshal::size_of(klass);
 }
 
 RtResult<intptr_t> Marshal::offset_of(vm::RtReflectionType* ref_type, const char* field_name)
 {
+    if (!ref_type)
+        RET_ERR(RtErr::ArgumentNull);
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, Class::get_class_from_typesig(ref_type->type_handle));
-    RET_ERR_ON_FAIL(Class::initialize_fields(klass));
-    const metadata::RtFieldInfo* field_info = Class::get_field_for_name(klass, field_name, false);
-    if (!field_info)
-    {
-        RET_ERR(RtErr::FileNotFound);
-    }
-    int32_t offset = static_cast<int32_t>(Field::get_field_offset_excludes_object_header_for_all_type(field_info));
-    RET_OK(static_cast<intptr_t>(offset));
+    return StructMarshal::offset_of(klass, field_name);
 }
 
 RtResult<RtDelegate*> Marshal::marshal_function_pointer_to_delegate(metadata::RtNativeMethodPointer ptr, metadata::RtClass* delegate_class)

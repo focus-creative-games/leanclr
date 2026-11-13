@@ -87,6 +87,35 @@ static RtResultVoid get_new_line_invoker(metadata::RtManagedMethodPointer, const
     RET_VOID_OK();
 }
 
+// Mono Marshal's .cctor uses this predicate to select its character ABI. Pure
+// memory marshalling must remain usable when a portable host has no OS query.
+RtResult<bool> SystemEnvironment::get_is_running_on_windows() noexcept
+{
+    int64_t value = 0;
+    const int32_t error = host::Services::query_integer(host::IntegerQuery::PlatformId, &value);
+    if (error == host::NotSupported)
+    {
+#if LEANCLR_PLATFORM_WIN
+        RET_OK(true);
+#else
+        RET_OK(false);
+#endif
+    }
+    if (error)
+        return bcl::host_error(error);
+    if (value < 0 || value > 6)
+        RET_ERR(RtErr::InvalidOperation);
+    RET_OK(value < 4);
+}
+
+static RtResultVoid get_is_running_on_windows_invoker(metadata::RtManagedMethodPointer, const metadata::RtMethodInfo*, const interp::RtStackObject*,
+                                                      interp::RtStackObject* ret) noexcept
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(bool, value, SystemEnvironment::get_is_running_on_windows());
+    EvalStackOp::set_return(ret, value);
+    RET_VOID_OK();
+}
+
 RtResult<int32_t> SystemEnvironment::get_platform() noexcept
 {
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::Platform, value, vm::Environment::get_platform());
@@ -353,6 +382,7 @@ static RtResultVoid get_page_size_invoker(metadata::RtManagedMethodPointer, cons
 }
 
 static vm::InternalCallEntry s_internal_call_entries_system_environment[] = {
+    {"System.Environment::get_IsRunningOnWindows", (vm::InternalCallFunction)SystemEnvironment::get_is_running_on_windows, get_is_running_on_windows_invoker},
     {"System.Environment::get_ExitCode", (vm::InternalCallFunction)SystemEnvironment::get_exit_code, get_exit_code_invoker},
     {"System.Environment::set_ExitCode", (vm::InternalCallFunction)SystemEnvironment::set_exit_code, set_exit_code_invoker},
     {"System.Environment::get_HasShutdownStarted", (vm::InternalCallFunction)SystemEnvironment::get_has_shutdown_started, get_has_shutdown_started_invoker},
