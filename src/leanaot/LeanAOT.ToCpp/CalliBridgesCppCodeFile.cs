@@ -99,6 +99,57 @@ sealed class CalliBridgesCppCodeFile
     {
         var inputs = manifest.AssemblyPlans.Values.Select(p => p.Module).ToHashSet();
         var planned = manifest.GenericMethodPlans.Select(p => p.Method.ResolveMethodDef()).ToHashSet();
+        // Determine reachability on method definitions before expanding type arguments.
+        // Unrelated expanding recursion (for example Grow<T> -> Grow<T[]>) must
+        // not consume the native calli census budget.
+        bool HasNativeCalli(MethodDef method) => method?.Body?.Instructions.Any(i =>
+            i.OpCode.Code == Code.Calli && ((byte)((MethodSig)i.Operand).CallingConvention & 15) != 0) == true;
+        bool Eligible(MethodDef method) => method?.Body != null &&
+            (inputs.Contains(method.Module) || planned.Contains(method) || HasNativeCalli(method));
+        var definitions = new HashSet<MethodDef>();
+        var pendingDefinitions = new Queue<MethodDef>();
+        var callers = new Dictionary<MethodDef, HashSet<MethodDef>>();
+        var nativeReachable = new HashSet<MethodDef>();
+        void AddDefinition(MethodDef method)
+        {
+            if (Eligible(method) && definitions.Add(method)) pendingDefinitions.Enqueue(method);
+        }
+        foreach (var module in inputs)
+            foreach (var type in module.GetTypes()) foreach (var method in type.Methods) AddDefinition(method);
+        foreach (var method in planned) AddDefinition(method);
+        while (pendingDefinitions.Count > 0)
+        {
+            var method = pendingDefinitions.Dequeue();
+            if (HasNativeCalli(method)) nativeReachable.Add(method);
+            void AddDependency(MethodDef dependency, MethodDef caller = null)
+            {
+                if (!Eligible(dependency)) return;
+                AddDefinition(dependency);
+                if (!callers.TryGetValue(dependency, out var parents)) callers.Add(dependency, parents = new());
+                parents.Add(caller ?? method);
+            }
+            foreach (var instruction in method.Body.Instructions)
+            {
+                if (instruction.Operand is IMethod target && target.IsMethod)
+                {
+                    var targetDefinition = target.ResolveMethodDef();
+                    AddDependency(targetDefinition);
+                    if (targetDefinition != null && inputs.Contains(targetDefinition.Module) && targetDefinition.DeclaringType.HasGenericParameters)
+                        foreach (var member in targetDefinition.DeclaringType.Methods.Where(m => !m.HasGenericParameters)) AddDependency(member, targetDefinition);
+                }
+                else if (instruction.Operand is IField field && field.IsField)
+                {
+                    var cctor = field.DeclaringType.ResolveTypeDef()?.FindStaticConstructor();
+                    AddDependency(cctor);
+                    if (cctor != null && inputs.Contains(cctor.Module) && cctor.DeclaringType.HasGenericParameters)
+                        foreach (var member in cctor.DeclaringType.Methods.Where(m => !m.HasGenericParameters)) AddDependency(member, cctor);
+                }
+            }
+        }
+        var pendingReachable = new Queue<MethodDef>(nativeReachable);
+        while (pendingReachable.Count > 0)
+            if (callers.TryGetValue(pendingReachable.Dequeue(), out var parents))
+                foreach (var parent in parents) if (nativeReachable.Add(parent)) pendingReachable.Enqueue(parent);
         var closedClasses = new HashSet<string>(StringComparer.Ordinal);
         var queue = new Queue<(IMethod Method, int Depth)>();
         var seen = new HashSet<string>(StringComparer.Ordinal);
@@ -107,7 +158,7 @@ sealed class CalliBridgesCppCodeFile
             if (candidate == null || !candidate.IsMethod) return;
             var def = candidate.ResolveMethodDef();
             if (def?.Body == null) return;
-            if (!inputs.Contains(def.Module) && !planned.Contains(def) && !def.Body.Instructions.Any(i => i.OpCode.Code == Code.Calli && ((byte)((MethodSig)i.Operand).CallingConvention & 15) != 0)) return;
+            if (!nativeReachable.Contains(def)) return;
             var context = MetaUtil.GetMethodGenericArgumentContext(candidate);
             if ((context?.typeArgsStack?.Count ?? 0) == 0 && (context?.methodArgsStack?.Count ?? 0) == 0) return;
             if ((context.typeArgsStack ?? new List<TypeSig>()).Concat(context.methodArgsStack ?? new List<TypeSig>()).Any(t => t.ContainsGenericParameter)) return;
