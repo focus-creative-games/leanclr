@@ -1,5 +1,10 @@
 [
   {
+    "name": "System.Environment::get_IsRunningOnWindows",
+    "func": "SystemEnvironment::get_is_running_on_windows",
+    "header": "icalls/system_environment.h"
+  },
+{
     "name": "Interop/BCrypt::BCryptGenRandom(System.IntPtr,System.Byte*,System.Int32,System.Int32)",
     "func": "Interop::bcrypt_gen_random",
     "header": "icalls/interop.h"

@@ -188,16 +188,18 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::ptr_to_structure(void* ptr, vm
 {
     if (!ptr || !obj)
     {
-        RET_ERR(RtErr::Argument);
+        RET_ERR(RtErr::ArgumentNull);
     }
+    if (vm::Class::is_value_type(obj->klass))
+        RET_ERR(RtErr::Argument);
     return vm::Marshal::ptr_to_structure(ptr, obj);
 }
 
 RtResult<vm::RtObject*> SystemRuntimeInteropServicesMarshal::ptr_to_structure_type(void* ptr, vm::RtReflectionType* ref_type) noexcept
 {
-    if (!ptr || !ref_type)
+    if (!ref_type)
     {
-        RET_ERR(RtErr::Argument);
+        RET_ERR(RtErr::ArgumentNull);
     }
     return vm::Marshal::ptr_to_structure_type(ptr, ref_type);
 }
@@ -206,16 +208,16 @@ RtResultVoid SystemRuntimeInteropServicesMarshal::structure_to_ptr(vm::RtObject*
 {
     if (!obj || !ptr)
     {
-        RET_ERR(RtErr::Argument);
+        RET_ERR(RtErr::ArgumentNull);
     }
     return vm::Marshal::structure_to_ptr(obj, ptr, delete_old);
 }
 
 RtResultVoid SystemRuntimeInteropServicesMarshal::destroy_structure(void* ptr, vm::RtReflectionType* ref_type) noexcept
 {
-    if (!ptr || !ref_type)
+    if (!ref_type)
     {
-        RET_ERR(RtErr::Argument);
+        RET_ERR(RtErr::ArgumentNull);
     }
     return vm::Marshal::destroy_structure(ptr, ref_type);
 }

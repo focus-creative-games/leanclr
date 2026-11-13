@@ -19,6 +19,7 @@ class SystemEnvironment
     static RtResult<vm::RtString*> get_machine_name() noexcept;
     static RtResult<vm::RtString*> get_new_line() noexcept;
     static RtResult<int32_t> get_platform() noexcept;
+    static RtResult<bool> get_is_running_on_windows() noexcept;
     static RtResult<vm::RtString*> get_os_version_string() noexcept;
     static RtResult<int32_t> get_tick_count() noexcept;
     static RtResult<vm::RtString*> get_user_name() noexcept;
