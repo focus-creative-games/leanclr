@@ -39,7 +39,7 @@ try {
         Invoke-Checked dotnet $arguments
         $inventory = Get-Content "$generated/calli_bridges.json" -Raw | ConvertFrom-Json
         $unique = @($inventory.sites | Where-Object status -eq generated | Select-Object -ExpandProperty signature -Unique)
-        if ($unique.Count -ne $inventory.bridge_count -or "1:9(9)" -notin $unique) { throw "Signature dedup or interpreter-only generic closure census failed" }
+        if ($unique.Count -ne $inventory.bridge_count -or "1:9(9)" -notin $unique -or "1:9(9,9)" -notin $unique -or "1:11(11,11)" -notin $unique) { throw "Signature dedup or interpreter-only generic closure census failed" }
         if ($mode -eq "bridges-only" -and (Get-ChildItem $generated -Filter "*.method_body*.cpp")) { throw "Bridge-only generation emitted managed bodies" }
         $build = "$BuildRoot/native-$mode"
         $options = @("-S", "src/tests/calli", "-B", $build, "-DLEANCLR_BCL_ADAPTER=$adapter", "-DLEANCLR_HOST=NATIVE",
