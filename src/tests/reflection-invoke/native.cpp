@@ -9,6 +9,7 @@
 #include "vm/settings.h"
 #include "vm/pinvoke.h"
 #include "vm/object.h"
+#include "utils/scope_guard.h"
 #include "bcl/adapter.h"
 #if LEANCLR_BCL_CORECLR_NET10
 #include "bcl/coreclr-net10/managed_layouts.h"
@@ -153,6 +154,7 @@ RtResultVoid run()
     DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, signature_object, LEANCLR_NEWOBJ_INTERNAL(signature_class, "ReflectionTest::signature"));
     auto* signature_slot = reinterpret_cast<vm::RtSignature*>(signature_object);
     gc::GcRoots::register_slot(&signature_object);
+    auto signature_root = utils::make_scope_exit([&]() { gc::GcRoots::unregister_slot(&signature_object); });
     vm::RtObject* result = nullptr;
     vm::RtObject* target = nullptr;
     interp::RtStackObject call[5]{};
@@ -205,6 +207,69 @@ RtResultVoid run()
     check(n1[vm::Field::get_nullable_has_value_field(nullable_class)->offset] == 0 &&
           n2[vm::Field::get_nullable_has_value_field(nullable_class)->offset] == 1 && nullable_value == 44);
 #endif
+    // The stackobject API consumes an explicit this argument, even for .ctor.
+    // It must never silently allocate a replacement instance.
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, existing,
+                                            assembly->mod->get_class_by_nested_full_name("ReflectionInvokeTests.Existing", false, true));
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(existing));
+    const auto* constructor = vm::Class::get_method_for_name(existing, ".ctor", 0, false);
+    check(constructor != nullptr);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, counters,
+                                            assembly->mod->get_class_by_nested_full_name("ReflectionInvokeTests.ConstructorCounters", false, true));
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(counters));
+    const auto* calls_field = vm::Class::get_field_for_name(counters, "Calls", false);
+    const auto* initializers_field = vm::Class::get_field_for_name(counters, "Initializers", false);
+    const auto* last_field = vm::Class::get_field_for_name(counters, "Last", false);
+    const auto* value_field = vm::Class::get_field_for_name(existing, "Value", false);
+    int32_t initializers = -1;
+    RET_ERR_ON_FAIL(vm::Field::get_static_value(initializers_field, &initializers));
+    check(initializers == 0);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, instance, LEANCLR_NEWOBJ_INTERNAL(existing, "ReflectionTest::existing"));
+    gc::GcRoots::register_slot(&instance);
+    auto instance_root = utils::make_scope_exit([&]() { gc::GcRoots::unregister_slot(&instance); });
+    interp::RtStackObject ctor_args[2]{};
+    ctor_args[0].obj = instance;
+    interp::RtStackObject ctor_return{};
+    ctor_return.i64 = 0x12345678;
+    RET_ERR_ON_FAIL(vm::Runtime::invoke_stackobject_arguments_with_run_cctor(constructor, ctor_args, &ctor_return));
+    int32_t calls = 0;
+    int32_t field_value = 0;
+    vm::RtObject* last = nullptr;
+    RET_ERR_ON_FAIL(vm::Field::get_instance_value(value_field, instance, &field_value));
+    RET_ERR_ON_FAIL(vm::Field::get_static_value(calls_field, &calls));
+    RET_ERR_ON_FAIL(vm::Field::get_static_value(initializers_field, &initializers));
+    RET_ERR_ON_FAIL(vm::Field::get_static_value(last_field, &last));
+    check(field_value == 42 && calls == 1 && initializers == 1 && last == instance && ctor_return.i64 == 0x12345678);
+    RET_ERR_ON_FAIL(vm::Runtime::invoke_stackobject_arguments_without_run_cctor(constructor, ctor_args, &ctor_return));
+    RET_ERR_ON_FAIL(vm::Field::get_static_value(calls_field, &calls));
+    check(calls == 2);
+    // Object invocation likewise uses an existing target, and only a null target
+    // selects allocation semantics.
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, existing_result,
+                                            vm::Runtime::invoke_object_arguments_with_run_cctor(constructor, instance, nullptr, 0));
+    check(existing_result == nullptr);
+    RET_ERR_ON_FAIL(vm::Field::get_static_value(last_field, &last));
+    check(last == instance);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, allocated_result,
+                                            vm::Runtime::invoke_object_arguments_with_run_cctor(constructor, nullptr, nullptr, 0));
+    RET_ERR_ON_FAIL(vm::Field::get_static_value(last_field, &last));
+    check(allocated_result && allocated_result != instance && last == allocated_result);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, value_class,
+                                            assembly->mod->get_class_by_nested_full_name("ReflectionInvokeTests.ExistingValue", false, true));
+    RET_ERR_ON_FAIL(vm::Class::initialize_all(value_class));
+    const auto* value_constructor = vm::Class::get_method_for_name(value_class, ".ctor", 1, false);
+    check(value_constructor != nullptr);
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(vm::RtObject*, boxed_value, LEANCLR_NEWOBJ_INTERNAL(value_class, "ReflectionTest::value"));
+    gc::GcRoots::register_slot(&boxed_value);
+    auto value_root = utils::make_scope_exit([&]() { gc::GcRoots::unregister_slot(&boxed_value); });
+    ctor_args[0].ptr = boxed_value + 1;
+    ctor_args[1].i32 = 99;
+    RET_ERR_ON_FAIL(vm::Runtime::invoke_stackobject_arguments_with_run_cctor(value_constructor, ctor_args, &ctor_return));
+    std::memcpy(&field_value, boxed_value + 1, sizeof(field_value));
+    check(field_value == 99 && boxed_value->klass == value_class);
+    RET_ERR_ON_FAIL(vm::Field::get_static_value(calls_field, &calls));
+    RET_ERR_ON_FAIL(vm::Field::get_static_value(initializers_field, &initializers));
+    check(calls == 5 && initializers == 1);
     std::puts("Reflection native invocation contracts passed");
     RET_VOID_OK();
 }

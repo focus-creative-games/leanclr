@@ -30,3 +30,10 @@ point the two test directories at that output and the Mono BCL. The portable Was
 runner must use a matching 32-bit CoreLib.
 
 The native target directly exercises RuntimeMethodHandle_InvokeMethod QCall with value, reference, nullable, null-pointer, GC, and exceptional arguments. CoreCLR's indirect argument root scope retains all typed source slots while inputs are materialized, including reference fields inside unboxed structs. The QCall frontend copies changed byrefs into the supplied slots only after successful invocation.
+
+The common native constructor contracts call the actual stackobject API on an existing
+reference object and an unboxed value payload. They check original-object identity,
+field updates, exact constructor count, one-time type initialization, and preservation
+of the return buffer for void constructors. Object-based invocation with an existing
+target is also distinguished from explicit allocation using a null target. The report's
+claimed stackobject/newobj substitution did not reproduce on the current code.
