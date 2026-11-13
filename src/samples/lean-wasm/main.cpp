@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include <cstdlib>
 #include <vector>
 
@@ -103,7 +104,7 @@ extern "C" EMSCRIPTEN_KEEPALIVE int32_t invoke_method(metadata::RtAssembly* asse
     return 0;
 }
 
-static bool local_assembly_loader(const char* assembly_name, const char* extension, vm::FileData& file_data)
+static bool local_assembly_loader(const char* assembly_name, const char* extension, host::FileData& file_data)
 {
     byte* buf = nullptr;
     size_t size = 0;
@@ -128,7 +129,8 @@ extern "C" EMSCRIPTEN_KEEPALIVE int32_t initialize_runtime()
         return 0; // Already initialized
     }
 
-    vm::Settings::set_file_loader(local_assembly_loader);
+    if (!host::Services::set_file_loader(local_assembly_loader))
+        leanclr::panic("Configure file loader before host services are used");
     auto result = vm::Runtime::initialize();
     if (result.is_err())
     {

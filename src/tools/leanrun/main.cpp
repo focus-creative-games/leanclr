@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include <cstdlib>
 #include <fstream>
 #include <iostream>
@@ -29,7 +30,7 @@ using namespace leanclr;
 // Global library search directories
 static std::vector<std::string> g_lib_dirs;
 
-static bool assembly_file_loader(const char* assembly_name, const char* extension, vm::FileData& file_data)
+static bool assembly_file_loader(const char* assembly_name, const char* extension, host::FileData& file_data)
 {
     for (const auto& dir : g_lib_dirs)
     {
@@ -335,7 +336,8 @@ int main(int argc, char* argv[])
     g_lib_dirs = std::move(lib_dirs);
 
     // Set assembly loader
-    vm::Settings::set_file_loader(assembly_file_loader);
+    if (!host::Services::set_file_loader(assembly_file_loader))
+        leanclr::panic("Configure file loader before host services are used");
 
     // Run
     int result = run(dll_name, dll_args, entry_spec.empty() ? nullptr : &entry_spec);

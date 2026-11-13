@@ -1,5 +1,5 @@
+#include "host/services.h"
 #include "vm/runtime.h"
-#include "vm/settings.h"
 #include "vm/environment.h"
 #include <cstdlib>
 using namespace leanclr;
@@ -31,7 +31,8 @@ int main(int argc, char**)
     }
     else
     {
-        vm::Settings::set_file_loader(loader);
+        if (!host::Services::set_file_loader(loader))
+            leanclr::panic("Configure file loader before host services are used");
         auto failed = vm::Runtime::initialize();
         check(failed.is_err());
         check(vm::Runtime::get_state() == vm::Runtime::State::Failed && attempts == 1);

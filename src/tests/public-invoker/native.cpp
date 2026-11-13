@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "callbacks.h"
 #include "alloc/general_allocation.h"
 #include "vm/runtime.h"
@@ -63,7 +64,7 @@ InstallCallbacks install_callbacks;
 #else
 InstallCallbacks install_callbacks __attribute__((init_priority(101)));
 #endif
-bool load(const char* name, const char* extension, vm::FileData& data)
+bool load(const char* name, const char* extension, host::FileData& data)
 {
     std::ifstream file(runtime_dir + "/" + name + "." + extension, std::ios::binary | std::ios::ate);
     if (!file)
@@ -98,7 +99,8 @@ int main(int argc, char** argv)
     CHECK(argc == 2);
     runtime_dir = argv[1];
     CHECK(callbacks_installed);
-    vm::Settings::set_file_loader(load);
+    if (!host::Services::set_file_loader(load))
+        leanclr::panic("Configure file loader before host services are used");
     CHECK(leanclr_initialize_runtime() == 0);
     const auto& types = vm::Class::get_corlib_types();
     metadata::RtMethodInfo methods[13]{};

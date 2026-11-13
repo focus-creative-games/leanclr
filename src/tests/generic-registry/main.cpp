@@ -1,3 +1,4 @@
+#include "host/services.h"
 #include "../aot-returns/test_assert.h"
 #include "registry_checks.h"
 #include "interp/machine_state.h"
@@ -38,7 +39,7 @@ static void check(bool value, const char* message)
     }
 }
 
-static bool load(const char* name, const char* extension, vm::FileData& data)
+static bool load(const char* name, const char* extension, host::FileData& data)
 {
     std::ifstream stream(dlls + "/" + name + "." + extension, std::ios::binary | std::ios::ate);
     if (!stream)
@@ -470,7 +471,8 @@ int main(int argc, char** argv)
     configure_test_assertions();
     check(argc >= 2, "DLL directory required");
     dlls = argv[1];
-    vm::Settings::set_file_loader(load);
+    if (!host::Services::set_file_loader(load))
+        leanclr::panic("Configure file loader before host services are used");
     vm::Settings::set_aot_modules_data(&g_aot_modules_data);
     check(vm::Runtime::initialize().is_ok(), "initialize runtime");
 #ifdef GENERIC_REGISTRY_DISABLED
