@@ -5,6 +5,7 @@
 #include "vm/object.h"
 #include "vm/rt_array.h"
 #include "vm/class.h"
+#include "vm/runtime.h"
 #include "interp/eval_stack_op.h"
 
 namespace leanclr
@@ -14,6 +15,50 @@ namespace vm
 RtResultVoid Delegate::initialize()
 {
     RET_VOID_OK();
+}
+
+static bool is_simple_reference_return(metadata::RtElementType type)
+{
+    using metadata::RtElementType;
+    return type == RtElementType::Object || type == RtElementType::String || type == RtElementType::Class || type == RtElementType::SZArray ||
+           type == RtElementType::Array;
+}
+
+const metadata::RtMethodInfo* Delegate::get_singlecast_aot_target(RtObject* delegate_object, const metadata::RtMethodInfo* invoke, RtObject*& target) noexcept
+{
+    if (!delegate_object)
+        return nullptr;
+    auto* delegate_value = reinterpret_cast<RtMulticastDelegate*>(delegate_object);
+    const auto& binding = delegate_value->dele;
+    const auto* method = binding.method;
+    if (delegate_value->deles || binding.method_is_virtual || !method || method->invoker_type != metadata::RtInvokerType::Aot ||
+        method->parameter_count != invoke->parameter_count)
+        return nullptr;
+    // Reflection may bind an enum-returning delegate to its underlying integer
+    // return type (and vice versa). Those can select different packed/status-out
+    // protocols despite identical value bits. Keep such conversions in the
+    // target's actual invoker rather than guessing its typed return ABI.
+    const auto actual_return = method->return_type->ele_type;
+    const auto expected_return = invoke->return_type->ele_type;
+    if (actual_return != expected_return && !(is_simple_reference_return(actual_return) && is_simple_reference_return(expected_return)))
+        return nullptr;
+    if (Method::is_static(method))
+    {
+        // Open static only. Bound-first-argument static methods have a different
+        // parameter count and are deliberately handled by the general invoker.
+        if (Class::is_cctor_not_finished(method->parent))
+            return nullptr;
+        target = nullptr;
+    }
+    else
+    {
+        // Keep open instance and boxed value-type this adjustment in the slow
+        // path. Reference-type closed instance calls have the normal typed ABI.
+        if (!binding.target || Class::is_value_type(method->parent))
+            return nullptr;
+        target = binding.target;
+    }
+    return method;
 }
 
 RtResult<RtMulticastDelegate*> Delegate::create_delegate_from_reflection(RtReflectionType* delegate_type, RtObject* target,
@@ -160,8 +205,17 @@ RtResultVoid Delegate::invoke_delegate_invoker(metadata::RtManagedMethodPointer 
         default:
             RET_ASSERT_ERR(RtErr::ExecutionEngine);
         }
-        RET_ERR_ON_FAIL(CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(target_method->invoke_method_ptr)(target_method->method_ptr, target_method, final_args,
-                                                                                                s_tempReturnValueBuffer));
+        if (Method::is_static(target_method) && Class::is_cctor_not_finished(target_method->parent))
+            RET_ERR_ON_FAIL(Runtime::run_class_static_constructor(target_method->parent));
+        auto method_pointer = target_method->method_ptr;
+        if (curr_del->method_is_virtual && Method::is_instance(target_method) && !Class::is_value_type(target_method->parent))
+        {
+            auto* receiver = interp::EvalStackOp::get_param<RtObject*>(final_args, 0);
+            UNWRAP_OR_RET_ERR_ON_FAIL(target_method, Method::get_virtual_method_impl(receiver, target_method));
+            method_pointer = target_method->virtual_method_ptr;
+        }
+        RET_ERR_ON_FAIL(
+            CAST_AS_NOEXCEP_INVOKE_METHOD_POINTER(target_method->invoke_method_ptr)(method_pointer, target_method, final_args, s_tempReturnValueBuffer));
     }
     // If there is a return value, set it to the ret buffer
     if (method->ret_stack_object_size > 0)

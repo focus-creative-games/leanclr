@@ -1,0 +1,10 @@
+Internal ctest changing into directory: D:/workspace/wasmclr/leanclr-mono-miminal/out/aot-hotspots/build
+Test project D:/workspace/wasmclr/leanclr-mono-miminal/out/aot-hotspots/build
+    Start 1: hotspot-aot
+1/2 Test #1: hotspot-aot ......................   Passed    0.02 sec
+    Start 2: hotspot-interpreter
+2/2 Test #2: hotspot-interpreter ..............   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 2
+
+Total Test time (real) =   0.05 sec

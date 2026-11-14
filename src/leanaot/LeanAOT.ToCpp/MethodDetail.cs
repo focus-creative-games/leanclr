@@ -259,14 +259,14 @@ namespace LeanAOT.ToCpp
             return $"typedef {CreateRelaxMethodFunctionTypeDefine(cppTypedefName)}";
         }
 
-        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null, bool? lightweight = null, bool? packedInt32 = null, bool? statusOut = null)
+        public string CreateRelaxMethodFunctionPointerTypeForCast(bool? genericContext = null, bool? lightweight = null, bool? packedInt32 = null, bool? statusOut = null, bool skipThis = false)
         {
             var sb = new StringBuilder();
             bool output = ReturnProtocol.UsesStatusOut(_retType, statusOut ?? (!lightweight.HasValue && GlobalServices.Inst.Config.StatusOutAotReturns));
             sb.Append(output ? "leanclr::RtErr" : MethodGenerationUtil.GetResultTypeName(_retType, lightweight, packedInt32));
             sb.Append(" (*)(");
             bool first = true;
-            foreach (var param in _paramsIncludeThis)
+            foreach (var param in _paramsIncludeThis.Skip(skipThis ? 1 : 0))
             {
                 if (first)
                     first = false;

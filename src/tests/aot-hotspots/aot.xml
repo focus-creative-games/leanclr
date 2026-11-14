@@ -1,0 +1,8 @@
+<aot>
+  <assembly fullname="*" aot="0" />
+  <assembly fullname="HotspotFixtures" aot="1">
+    <type fullname="HotspotFixtures">
+      <method name="StaticInterpreted" aot="0" />
+    </type>
+  </assembly>
+</aot>

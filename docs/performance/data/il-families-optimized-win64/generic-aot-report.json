@@ -1,0 +1,44 @@
+{
+  "schema": 1,
+  "max_instances": 2048,
+  "max_depth": 32,
+  "return_protocol": "result",
+  "packed_int32_returns": false,
+  "status_out_returns": false,
+  "return_protocol_flags": 0,
+  "interface_call_cache": false,
+  "interface_call_cache_entries": 0,
+  "profiled_interface_caches": false,
+  "interface_cache_decisions": [],
+  "generic_registry": "global-sorted-fnv1a64",
+  "reference_generic_sharing": false,
+  "shared_reference_bindings": [],
+  "generic_body_count": 1,
+  "instances": [
+    {
+      "method": "System.UInt32 Benchmarks::Identity\u003CSystem.UInt32\u003E(System.UInt32)",
+      "key": "66:AotBaseline, Version=0.0.0.0, Culture=neutral, PublicKeyToken=null06000003::88:9:75:mscorlib, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e08902000195",
+      "depth": 1
+    }
+  ],
+  "fallbacks": [
+    {
+      "Caller": "System.UInt32 Benchmarks::Delegate(System.Int32,System.UInt32)",
+      "Token": 167772164,
+      "Target": "System.UInt32 System.Func\u00602\u003CSystem.UInt32,System.UInt32\u003E::Invoke(System.UInt32)",
+      "Reason": "unsupported-body"
+    },
+    {
+      "Caller": "System.Void Benchmarks::.cctor()",
+      "Token": 167772174,
+      "Target": "System.Void System.Func\u00602\u003CSystem.UInt32,System.UInt32\u003E::.ctor(System.Object,System.IntPtr)",
+      "Reason": "unsupported-body"
+    }
+  ],
+  "method_fallbacks": [],
+  "normal_path_methods": [
+    "System.UInt32 Benchmarks::EhNormal(System.Int32,System.UInt32)",
+    "System.UInt32 Benchmarks::EhThrow(System.Int32,System.UInt32)"
+  ],
+  "generic_normal_path_methods": []
+}
