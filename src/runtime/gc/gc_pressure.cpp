@@ -33,7 +33,14 @@ void GcPressure::on_alloc(size_t bytes)
 {
     s_state.bytes_allocated_since_last_gc = add_saturated(s_state.bytes_allocated_since_last_gc, bytes);
     s_total_allocated_bytes = add_saturated(s_total_allocated_bytes, bytes);
-    if (s_state.objects_allocated_since_last_gc < INT32_MAX) s_state.objects_allocated_since_last_gc++;
+    if (s_state.objects_allocated_since_last_gc < INT32_MAX)
+        s_state.objects_allocated_since_last_gc++;
+}
+
+void GcPressure::on_alloc(size_t bytes, int64_t used)
+{
+    s_used_size = used;
+    on_alloc(bytes);
 }
 
 void GcPressure::record_external(int64_t bytes)

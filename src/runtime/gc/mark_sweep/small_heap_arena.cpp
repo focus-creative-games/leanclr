@@ -12,7 +12,7 @@ namespace gc
 {
 
 #if LEANCLR_GC_DEBUG
-static bool is_zeroed(void* block, size_t size)
+bool SmallHeapArena::is_zeroed(void* block, size_t size)
 {
     uint8_t* block_data = reinterpret_cast<uint8_t*>(block);
     for (size_t i = 0; i < size; i++)
@@ -34,17 +34,6 @@ bool SmallHeapArena::is_block_in_use(size_t index) const
 bool SmallHeapArena::is_block_free(size_t index) const
 {
     return !is_block_in_use(index);
-}
-
-void SmallHeapArena::set_block_in_use(size_t index)
-{
-    const size_t word_index = index / kBitsPerUseWord;
-    const size_t bit_index = index % kBitsPerUseWord;
-    const size_t mask = static_cast<size_t>(1) << bit_index;
-    assert(word_index < kMaxUseChunkCount);
-    const bool word_was_empty = _use_bits[word_index] == 0;
-    _use_bits[word_index] |= mask;
-    _chunk_in_use_mask |= static_cast<uint64_t>(1) << word_index;
 }
 
 void SmallHeapArena::clear_block_in_use(size_t index)
@@ -79,41 +68,26 @@ size_t SmallHeapArena::slot_index(void* block_ptr) const
     return static_cast<size_t>((block_addr - data_addr) / _block_size);
 }
 
-void SmallHeapArena::rebuild_free_list()
-{
-    FreeBlockHeader* new_free_list = nullptr;
-    for (size_t i = 0; i < _block_count; i++)
-    {
-        if (!is_block_free(i))
-        {
-            continue;
-        }
-        FreeBlockHeader* free_block = reinterpret_cast<FreeBlockHeader*>(block_at(i));
-        free_block->next_free = new_free_list;
-        new_free_list = free_block;
-    }
-    _free_list = new_free_list;
-}
-
 void SmallHeapArena::release_data()
 {
     alloc::GeneralAllocation::aligned_free(_data);
     _data = nullptr;
     _block_count = 0;
+    _next_unused = 0;
     _free_list = nullptr;
     _chunk_in_use_mask = 0;
 }
 
 SmallHeapArena::SmallHeapArena(void* arena_data, size_t arena_size, size_t block_size)
-    : _data(arena_data), _free_list(nullptr), _block_size(block_size), _block_count(arena_size / block_size), _use_bits{}, _chunk_in_use_mask(0)
+    : _data(arena_data), _free_list(nullptr), _block_size(block_size), _block_count(static_cast<uint16_t>(arena_size / block_size)), _next_unused(0),
+      _use_bits{}, _chunk_in_use_mask(0)
 {
     assert(arena_data != nullptr);
     assert(arena_size > 0);
     assert(block_size >= sizeof(FreeBlockHeader));
     assert(block_size >= sizeof(void*));
     assert(_block_count > 0);
-    assert(_block_count <= kMaxBlockCount);
-    rebuild_free_list();
+    assert(arena_size / block_size <= kMaxBlockCount);
 }
 
 SmallHeapArena::~SmallHeapArena()
@@ -121,25 +95,9 @@ SmallHeapArena::~SmallHeapArena()
     release_data();
 }
 
-void* SmallHeapArena::allocate_block()
-{
-    if (_free_list == nullptr)
-    {
-        return nullptr;
-    }
-    FreeBlockHeader* free_block = _free_list;
-    _free_list = (FreeBlockHeader*)free_block->next_free;
-    free_block->next_free = nullptr;
-#if LEANCLR_GC_DEBUG
-    LEANCLR_GC_ASSERT(is_zeroed(free_block, _block_size), "free_block is not zeroed");
-#endif
-    set_block_in_use(slot_index(free_block));
-    return free_block;
-}
-
 bool SmallHeapArena::is_full()
 {
-    return _free_list == nullptr;
+    return _free_list == nullptr && _next_unused == _block_count;
 }
 
 bool SmallHeapArena::is_empty() const
@@ -249,26 +207,26 @@ void SizeClassPool::free_arena(SmallHeapArena* arena)
     alloc::GeneralAllocation::free(arena);
 }
 
-void* SizeClassPool::allocate_block()
+void* SizeClassPool::allocate_block_slow()
 {
-    if (LEANCLR_LIKELY(_current_arena != nullptr))
-    {
-        void* block = _current_arena->allocate_block();
-        if (LEANCLR_LIKELY(block != nullptr))
-        {
-            return block;
-        }
-        _current_arena = nullptr;
-    }
-
     _current_arena = find_next_not_full_arena();
     if (LEANCLR_LIKELY(_current_arena != nullptr))
     {
         return _current_arena->allocate_block();
     }
 
-    if (!_arenas.try_reserve(_arenas.size() + 1))
-        return nullptr;
+    // Reserve geometrically before allocating/registering the arena. Exact
+    // reserve(size+1) copies the pointer array on every refill (quadratic work).
+    if (_arenas.size() == _arenas.capacity())
+    {
+        const size_t maximum = SIZE_MAX / sizeof(SmallHeapArena*);
+        const size_t capacity = _arenas.capacity();
+        if (capacity == maximum)
+            return nullptr;
+        const size_t next = capacity == 0 ? 8 : (capacity > maximum / 2 ? maximum : capacity * 2);
+        if (!_arenas.try_reserve(next))
+            return nullptr;
+    }
     _current_arena = allocate_arena();
     if (_current_arena == nullptr)
     {

@@ -1,0 +1,222 @@
+{
+  "commands": [
+    [
+      "dotnet",
+      "build",
+      "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\leanaot\\LeanAOT\\LeanAOT.csproj",
+      "-c",
+      "Release"
+    ],
+    [
+      "dotnet",
+      "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+      "-d",
+      "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-array-allocator\\managed",
+      "-d",
+      "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\libraries\\mono-4.5",
+      "-a",
+      "AotBaseline",
+      "-o",
+      "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-array-allocator\\generated",
+      "--leanaot-aot-rule-file",
+      "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\benchmarks\\il-families\\aot.xml"
+    ],
+    [
+      "cmake",
+      "-S",
+      "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\benchmarks\\il-families",
+      "-B",
+      "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-array-allocator\\native",
+      "-A",
+      "x64",
+      "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+      "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-array-allocator\\generated",
+      "-DLEANCLR_GC_DEBUG=OFF",
+      "-DLEANCLR_ENABLE_PROFILE=OFF"
+    ],
+    [
+      "cmake",
+      "--build",
+      "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-array-allocator\\native",
+      "--config",
+      "Release",
+      "--parallel",
+      "4"
+    ]
+  ],
+  "baseline_manifest": {
+    "commands": [
+      [
+        "dotnet",
+        "build",
+        "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\leanaot\\LeanAOT\\LeanAOT.csproj",
+        "-c",
+        "Release"
+      ],
+      [
+        "dotnet",
+        "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+        "-d",
+        "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families-optimized\\managed",
+        "-d",
+        "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\libraries\\mono-4.5",
+        "-a",
+        "AotBaseline",
+        "-o",
+        "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families-optimized\\generated",
+        "--leanaot-aot-rule-file",
+        "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\benchmarks\\il-families\\aot.xml"
+      ],
+      [
+        "cmake",
+        "-S",
+        "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\benchmarks\\il-families",
+        "-B",
+        "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families-optimized\\native",
+        "-A",
+        "x64",
+        "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+        "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families-optimized\\generated",
+        "-DLEANCLR_GC_DEBUG=OFF",
+        "-DLEANCLR_ENABLE_PROFILE=OFF"
+      ],
+      [
+        "cmake",
+        "--build",
+        "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families-optimized\\native",
+        "--config",
+        "Release",
+        "--parallel",
+        "4"
+      ]
+    ],
+    "baseline_manifest": {
+      "commands": [
+        [
+          "C:\\WINDOWS\\Microsoft.NET\\Framework64\\v4.0.30319\\csc.exe",
+          "/nologo",
+          "/noconfig",
+          "/optimize+",
+          "/nostdlib+",
+          "/target:exe",
+          "/out:D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\managed\\AotBaseline.dll",
+          "/r:D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\libraries\\mono-4.5\\mscorlib.dll",
+          "/r:D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\libraries\\mono-4.5\\System.dll",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\benchmarks\\il-families\\Benchmarks.cs"
+        ],
+        [
+          "dotnet",
+          "build",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\leanaot\\LeanAOT\\LeanAOT.csproj",
+          "-c",
+          "Release"
+        ],
+        [
+          "dotnet",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\dotnet\\LeanAOT\\Release\\net8.0\\LeanAOT.dll",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\managed",
+          "-d",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\libraries\\mono-4.5",
+          "-a",
+          "AotBaseline",
+          "-o",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\generated",
+          "--leanaot-aot-rule-file",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\benchmarks\\il-families\\aot.xml"
+        ],
+        [
+          "cmake",
+          "-S",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\src\\benchmarks\\il-families",
+          "-B",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\native",
+          "-A",
+          "x64",
+          "-DCMAKE_TRY_COMPILE_CONFIGURATION=Release",
+          "-DLEANCLR_BENCH_GENERATED_DIR=D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\generated",
+          "-DLEANCLR_ENABLE_PROFILE=OFF",
+          "-DLEANCLR_GC_DEBUG=OFF"
+        ],
+        [
+          "cmake",
+          "--build",
+          "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\native",
+          "--config",
+          "Release",
+          "--parallel",
+          "4"
+        ],
+        [
+          "D:\\UnityHubs\\2022.3.62f3\\Editor\\Data\\il2cpp\\build\\deploy\\UnityLinker.exe",
+          "--platform=WindowsDesktop",
+          "--architecture=x64",
+          "--dotnetprofile=unityaot-win32",
+          "--dotnetruntime=il2cpp",
+          "--rule-set=Conservative",
+          "--include-assembly=D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\managed\\AotBaseline.dll",
+          "--search-directory=D:\\UnityHubs\\2022.3.62f3\\Editor\\Data\\MonoBleedingEdge\\lib\\mono\\unityaot-win32",
+          "--out=D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\il2cpp-unitylinked",
+          "--include-profile-descriptors",
+          "--include-profile-search-dirs",
+          "--core-action=link",
+          "--i18n=none"
+        ],
+        [
+          "D:\\UnityHubs\\2022.3.62f3\\Editor\\Data\\il2cpp\\build\\deploy\\il2cpp.exe",
+          "--convert-to-cpp",
+          "--compile-cpp",
+          "--libil2cpp-static",
+          "--dont-deploy-baselib",
+          "--platform=WindowsDesktop",
+          "--architecture=x64",
+          "--configuration=Release",
+          "--dotnetprofile=unityaot-win32",
+          "--directory=D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\il2cpp-unitylinked",
+          "--generatedcppdir=D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\il2cpp-generated",
+          "--outputpath=D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\il2cpp\\AotBaseline.exe",
+          "--cachedirectory=D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\il2cpp-cache",
+          "--additional-libraries=D:\\UnityHubs\\2022.3.62f3\\Editor\\Data\\PlaybackEngines\\windowsstandalonesupport\\Variations\\win64_player_nondevelopment_il2cpp\\baselib.dll.lib",
+          "--emit-null-checks",
+          "--enable-array-bounds-check",
+          "--enable-divide-by-zero-check",
+          "--enable-stacktrace",
+          "--jobs=4"
+        ]
+      ],
+      "standalone_thread_hook": true
+    },
+    "reused_managed_input": true,
+    "reused_il2cpp": true,
+    "sha256": {
+      "out\\performance\\il-families\\native\\Release\\il-aot.exe": "f7966f9a361d3451ddbcc479e972a2be0c9d362514fc12d4df8cddbb03f3fbc2",
+      "out\\performance\\il-families\\native\\runtime\\Release\\leanclr.lib": "54ac583a03852cec6d2cff11f3b74d7559dad69b66b8e79ec750eee8cf3ef7a6",
+      "out\\performance\\il-families-optimized\\native\\Release\\il-aot.exe": "94dcded8eb2c4d9a76b4d8903653900ec77a38efc0dce1658b2e986f18dd1114",
+      "out\\performance\\il-families-optimized\\native\\runtime\\Release\\leanclr.lib": "350eac0b5c66a676383a6c5cb6f96f247bf5f6ab637330b2dc1290ff5d8bf68c",
+      "out\\performance\\il-families-optimized\\managed\\AotBaseline.dll": "586a76d1bbfe32c00a81ad84538be300a7db2d9aa2229beb56f4c4d1258ebf5c"
+    },
+    "artifact_bytes": {
+      "out\\performance\\il-families\\native\\Release\\il-aot.exe": 896512,
+      "out\\performance\\il-families\\native\\runtime\\Release\\leanclr.lib": 6591042,
+      "out\\performance\\il-families-optimized\\native\\Release\\il-aot.exe": 898560,
+      "out\\performance\\il-families-optimized\\native\\runtime\\Release\\leanclr.lib": 6599032,
+      "out\\performance\\il-families-optimized\\managed\\AotBaseline.dll": 9728
+    }
+  },
+  "reused_managed_input": true,
+  "reused_il2cpp": true,
+  "sha256": {
+    "out\\performance\\il-families-optimized\\native\\Release\\il-aot.exe": "94dcded8eb2c4d9a76b4d8903653900ec77a38efc0dce1658b2e986f18dd1114",
+    "out\\performance\\il-families-optimized\\native\\runtime\\Release\\leanclr.lib": "350eac0b5c66a676383a6c5cb6f96f247bf5f6ab637330b2dc1290ff5d8bf68c",
+    "out\\performance\\il-array-allocator\\native\\Release\\il-aot.exe": "5b68b4ec64d7a9ebe406dc850f2045dc77a7d4e44ac586524bc34ae94af965cd",
+    "out\\performance\\il-array-allocator\\native\\runtime\\Release\\leanclr.lib": "f3222bda06ca70ed468f2d34b92426457be0deebb23fc553d10b78d7915125c8",
+    "out\\performance\\il-array-allocator\\managed\\AotBaseline.dll": "586a76d1bbfe32c00a81ad84538be300a7db2d9aa2229beb56f4c4d1258ebf5c"
+  },
+  "artifact_bytes": {
+    "out\\performance\\il-families-optimized\\native\\Release\\il-aot.exe": 898560,
+    "out\\performance\\il-families-optimized\\native\\runtime\\Release\\leanclr.lib": 6599032,
+    "out\\performance\\il-array-allocator\\native\\Release\\il-aot.exe": 898048,
+    "out\\performance\\il-array-allocator\\native\\runtime\\Release\\leanclr.lib": 6598826,
+    "out\\performance\\il-array-allocator\\managed\\AotBaseline.dll": 9728
+  }
+}

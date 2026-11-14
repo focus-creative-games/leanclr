@@ -41,6 +41,20 @@ all 26 kernels with a same-session old AOT control, then repeats the three
 hotspots with identical iteration counts on four native backends. See the
 [production report](../../docs/performance/il-hotspots-optimized-win64.md).
 
+For the subsequent allocator optimization, preserve the c64a033d binaries in
+`out/performance/il-families-optimized/` and use a separate output directory:
+
+```powershell
+python scripts/benchmarks/run_il_optimized.py --baseline out/performance/il-families-optimized --output out/performance/il-array-allocator
+python scripts/benchmarks/profile_array_allocator.py
+python scripts/benchmarks/report_array_allocator.py
+```
+
+The [allocator report](../../docs/performance/newarray-allocator-win64.md) includes
+count scaling, separate Win64 memory probes, metadata capacity costs, and
+virgin/recycled-block, OOM, quarantine and finalizer validation. Memory polling
+runs are excluded from latency summaries.
+
 These are isolated P0/P1 experiments. They do not change the production Result
 ABI or LeanAOT code generator. See the measured [review report](../../docs/performance/p0-p1.md).
 

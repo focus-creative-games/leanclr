@@ -33,3 +33,12 @@ Retained object accounting is not process RSS or reserved arena capacity.
 
 The allocation cache is limited to two pointer widths. No delegate or array
 instance layout changes are permitted by these optimizations.
+
+Allocator boundaries additionally cover 16/24/96/256/8192-byte blocks, the
+maximum 2048-slot arena, word boundaries, unused trailing bytes, partial sweep
+followed by recycled/virgin allocation, full exhaustion and refill. Survivor
+payloads stay intact, blocks are zeroed, debug quarantine prevents reuse, and
+the arena metadata size budget is unchanged. Fault injection covers capacity
+reservation and arena metadata failure after acquiring aligned payload, then
+recovery and balanced release. Reference-array elements still finalize exactly
+once after their array root is released; debug array allocations preserve sites.
