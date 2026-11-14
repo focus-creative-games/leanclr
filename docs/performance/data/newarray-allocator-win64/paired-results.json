@@ -1,0 +1,943 @@
+{
+  "samples": [
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 40.39325,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "aot",
+      "sample": 0
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.301785,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 0
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.58201,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 0
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 7.74605,
+      "engine": "net10",
+      "sample": 0
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.92991,
+      "engine": "il2cpp",
+      "sample": 0
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.714915,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 0
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 31.54835,
+      "engine": "il2cpp",
+      "sample": 0
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 0.989095,
+      "engine": "il2cpp",
+      "sample": 0
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 1.59877,
+      "engine": "net10",
+      "sample": 0
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 51.15355,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "before-aot",
+      "sample": 0
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 0.93949,
+      "engine": "net10",
+      "sample": 0
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.712515,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 0
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.896725,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 1
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 1.59322,
+      "engine": "net10",
+      "sample": 1
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 7.842,
+      "engine": "net10",
+      "sample": 1
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.702795,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 1
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 0.98731,
+      "engine": "il2cpp",
+      "sample": 1
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.31761,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 1
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.03513,
+      "engine": "net10",
+      "sample": 1
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 32.31925,
+      "engine": "il2cpp",
+      "sample": 1
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 50.4255,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "before-aot",
+      "sample": 1
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 40.7755,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "aot",
+      "sample": 1
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.826105,
+      "engine": "il2cpp",
+      "sample": 1
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.726625,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 1
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 7.32715,
+      "engine": "net10",
+      "sample": 2
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.709035,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 2
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 1.62446,
+      "engine": "net10",
+      "sample": 2
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.813815,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 2
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 40.4502,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "aot",
+      "sample": 2
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.71199,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 2
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.87191,
+      "engine": "il2cpp",
+      "sample": 2
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.26618,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 2
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.0556,
+      "engine": "net10",
+      "sample": 2
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 53.59285,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "before-aot",
+      "sample": 2
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 31.3278,
+      "engine": "il2cpp",
+      "sample": 2
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 0.992975,
+      "engine": "il2cpp",
+      "sample": 2
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.51165,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 3
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.698515,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 3
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 1.609415,
+      "engine": "net10",
+      "sample": 3
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.7074,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 3
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.81078,
+      "engine": "il2cpp",
+      "sample": 3
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 50.1761,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "before-aot",
+      "sample": 3
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.043965,
+      "engine": "net10",
+      "sample": 3
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 7.8634,
+      "engine": "net10",
+      "sample": 3
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.28487,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 3
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 42.1893,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "aot",
+      "sample": 3
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 0.988655,
+      "engine": "il2cpp",
+      "sample": 3
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 32.208,
+      "engine": "il2cpp",
+      "sample": 3
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.6813,
+      "engine": "il2cpp",
+      "sample": 4
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.721435,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 4
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.601725,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 4
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 7.77285,
+      "engine": "net10",
+      "sample": 4
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 40.12865,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "aot",
+      "sample": 4
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 1.59009,
+      "engine": "net10",
+      "sample": 4
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 54.30195,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "before-aot",
+      "sample": 4
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 31.9833,
+      "engine": "il2cpp",
+      "sample": 4
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.949875,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 4
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.720245,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 4
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.070275,
+      "engine": "il2cpp",
+      "sample": 4
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 0.88337,
+      "engine": "net10",
+      "sample": 4
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.316725,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 5
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 53.4494,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "before-aot",
+      "sample": 5
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 41.57945,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "aot",
+      "sample": 5
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 1.606735,
+      "engine": "net10",
+      "sample": 5
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 31.60365,
+      "engine": "il2cpp",
+      "sample": 5
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.71787,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 5
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.698595,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 5
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 0.92058,
+      "engine": "net10",
+      "sample": 5
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 7.78365,
+      "engine": "net10",
+      "sample": 5
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.977165,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 5
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.76897,
+      "engine": "il2cpp",
+      "sample": 5
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 0.992255,
+      "engine": "il2cpp",
+      "sample": 5
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.714555,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 6
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.726655,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 6
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.05963,
+      "engine": "net10",
+      "sample": 6
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 1.60757,
+      "engine": "net10",
+      "sample": 6
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 31.91215,
+      "engine": "il2cpp",
+      "sample": 6
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 55.4036,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "before-aot",
+      "sample": 6
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.733125,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "before-aot",
+      "sample": 6
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 7.35265,
+      "engine": "net10",
+      "sample": 6
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 1.025495,
+      "engine": "il2cpp",
+      "sample": 6
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 42.07185,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "engine": "aot",
+      "sample": 6
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.823985,
+      "engine": "il2cpp",
+      "sample": 6
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 4.3511,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "engine": "aot",
+      "sample": 6
+    }
+  ],
+  "summary": [
+    {
+      "workload": "Cast",
+      "engine": "before-aot",
+      "iterations": 20000000,
+      "median_ns": 1.71787,
+      "min_ns": 1.698515,
+      "max_ns": 1.726655
+    },
+    {
+      "workload": "Cast",
+      "engine": "aot",
+      "iterations": 20000000,
+      "median_ns": 1.71199,
+      "min_ns": 1.698595,
+      "max_ns": 1.720245
+    },
+    {
+      "workload": "Cast",
+      "engine": "il2cpp",
+      "iterations": 20000000,
+      "median_ns": 0.992255,
+      "min_ns": 0.98731,
+      "max_ns": 1.070275
+    },
+    {
+      "workload": "Cast",
+      "engine": "net10",
+      "iterations": 20000000,
+      "median_ns": 1.03513,
+      "min_ns": 0.88337,
+      "max_ns": 1.05963
+    },
+    {
+      "workload": "Delegate",
+      "engine": "before-aot",
+      "iterations": 20000000,
+      "median_ns": 4.733125,
+      "min_ns": 4.51165,
+      "max_ns": 4.977165
+    },
+    {
+      "workload": "Delegate",
+      "engine": "aot",
+      "iterations": 20000000,
+      "median_ns": 4.301785,
+      "min_ns": 3.949875,
+      "max_ns": 4.3511
+    },
+    {
+      "workload": "Delegate",
+      "engine": "il2cpp",
+      "iterations": 20000000,
+      "median_ns": 3.823985,
+      "min_ns": 3.6813,
+      "max_ns": 3.92991
+    },
+    {
+      "workload": "Delegate",
+      "engine": "net10",
+      "iterations": 20000000,
+      "median_ns": 1.606735,
+      "min_ns": 1.59009,
+      "max_ns": 1.62446
+    },
+    {
+      "workload": "NewArray",
+      "engine": "before-aot",
+      "iterations": 2000000,
+      "median_ns": 53.4494,
+      "min_ns": 50.1761,
+      "max_ns": 55.4036
+    },
+    {
+      "workload": "NewArray",
+      "engine": "aot",
+      "iterations": 2000000,
+      "median_ns": 40.7755,
+      "min_ns": 40.12865,
+      "max_ns": 42.1893
+    },
+    {
+      "workload": "NewArray",
+      "engine": "il2cpp",
+      "iterations": 2000000,
+      "median_ns": 31.91215,
+      "min_ns": 31.3278,
+      "max_ns": 32.31925
+    },
+    {
+      "workload": "NewArray",
+      "engine": "net10",
+      "iterations": 2000000,
+      "median_ns": 7.77285,
+      "min_ns": 7.32715,
+      "max_ns": 7.8634
+    }
+  ],
+  "affinity_mask": 4
+}

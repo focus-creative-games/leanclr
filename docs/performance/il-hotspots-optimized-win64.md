@@ -1,5 +1,7 @@
 # Cast、Delegate、NewArray 正式优化与 Win64 复测
 
+后续分配器优化已完成，见 [NewArray 分配器更新报告](newarray-allocator-win64.md)。本文保留 c64a033d 对应的上一轮记录。
+
 日期：2026-11-14。当前基础提交 `e17687660ef9b17a11f9e8eb1446f2e2d284151d` 加配套未提交优化。正式修改了 LeanAOT 生成器及 LeanCLR 辅助函数；没有使用诊断版 probes.h 替换生成代码。原 [基准](il-families-win64.md) 与 [原因分析](il-hotspots-win64.md) 保留为优化前记录。
 
 ## 收益

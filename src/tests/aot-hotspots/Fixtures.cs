@@ -7,6 +7,7 @@ public static class HotspotFixtures
     public class Middle : Base { }
     public sealed class Leaf : Middle { public override int Add(int x) { return Value + x + 1; } }
     public sealed class Unrelated { }
+    public sealed class Finalized { public static int Count; ~Finalized() { ++Count; } }
     public struct Pair { public long A, B; public object Ref; }
     public struct Counter { public int Value; public int Add(int x) { return Value += x; } }
     public enum Code { High = unchecked((int)0xFEDCBA98) }
@@ -139,6 +140,16 @@ public static class HotspotFixtures
         return 0;
     }
     public static int ReleaseGC() { Root = null; return 0; }
+    public static int PrepareFinalizerArray()
+    {
+        Finalized.Count = 0;
+        Finalized[] values = New<Finalized>(3);
+        values[1] = new Finalized();
+        Root = values;
+        return 0;
+    }
+    public static int VerifyFinalizerAlive() { Check(Finalized.Count == 0 && ((Finalized[])Root)[1] != null); return 0; }
+    public static int VerifyFinalizerReleased() { Check(Finalized.Count == 1); return 0; }
 
     [MethodImpl(MethodImplOptions.NoInlining)] static int Invoke(Func<int, int> f, int x) { return f(x); }
     public static int Errors()

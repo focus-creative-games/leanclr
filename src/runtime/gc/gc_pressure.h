@@ -27,6 +27,7 @@ class GcPressure
     static void set_config(const GcPressureConfig& config);
 
     static void on_alloc(size_t bytes);
+    static void on_alloc(size_t bytes, int64_t used);
     static void record_external(int64_t bytes);
     static void on_collect();
 

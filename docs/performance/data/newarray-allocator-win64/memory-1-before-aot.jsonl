@@ -1,0 +1,1 @@
+{"workload":"NewArray","iterations":2000000,"checksum":"582651411","ns_per_op":51.691450,"entry":"aot","interpreted_ir":false,"gc_count_delta":0,"used_bytes_delta":192000024}
