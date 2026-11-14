@@ -143,6 +143,11 @@ const metadata::RtMethodInfo* String::get_redirected_ctor_method()
 
 RtString* String::create_string_from_utf16chars(const Utf16Char* str, int32_t length)
 {
+    return create_string_from_utf16bytes(reinterpret_cast<const uint8_t*>(str), length);
+}
+
+RtString* String::create_string_from_utf16bytes(const uint8_t* str, int32_t length)
+{
     if (length < 0 || (length != 0 && str == nullptr))
         return nullptr;
     RtString* newString = fast_allocate_string(length);

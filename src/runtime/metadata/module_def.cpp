@@ -176,7 +176,7 @@ RtResult<vm::RtString*> RtModuleDef::get_user_string(uint32_t index)
     }
     if (str_size % 2 == 1)
     {
-        vm::RtString* newStr = vm::String::create_string_from_utf16chars(reinterpret_cast<const uint16_t*>(data + size_length), (str_size - 1) / 2);
+        vm::RtString* newStr = vm::String::create_string_from_utf16bytes(data + size_length, (str_size - 1) / 2);
         _userStringMap.insert({index, newStr});
         RET_OK(newStr);
     }

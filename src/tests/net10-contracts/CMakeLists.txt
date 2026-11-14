@@ -38,3 +38,8 @@ if(EMSCRIPTEN)
     set_target_properties(net10-environment PROPERTIES SUFFIX ".js")
     target_link_options(net10-environment PRIVATE -sENVIRONMENT=node -sEXIT_RUNTIME=1)
 endif()
+
+if(LEANCLR_NET10_RUNTIME_DIR)
+    set(LEANCLR_PUBLIC_INVOKER_RUNTIME_DIR "${LEANCLR_NET10_RUNTIME_DIR}" CACHE STRING "Matching BCL directory")
+    add_subdirectory(../public-invoker public-invoker)
+endif()

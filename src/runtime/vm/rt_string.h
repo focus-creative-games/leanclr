@@ -13,6 +13,8 @@ class String
     static RtResultVoid initialize();
     static RtString* get_empty_string();
     static RtString* create_string_from_utf16chars(const Utf16Char* str, int32_t length);
+    // Length is in UTF-16 code units. Byte-backed input need not be aligned.
+    static RtString* create_string_from_utf16bytes(const uint8_t* str, int32_t length);
     static RtString* create_string_from_utf8chars(const char* str, int32_t length);
 
     static RtString* create_string_from_utf8cstr(const char* str)
