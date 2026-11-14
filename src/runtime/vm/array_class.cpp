@@ -540,13 +540,15 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
     alloc::MemPool& mem_pool = klass->image->get_mem_pool();
 
     metadata::RtInterfaceOffset* interface_vtable_offsets = mem_pool.calloc_any<metadata::RtInterfaceOffset>(new_offsets.size());
-    std::memcpy(interface_vtable_offsets, new_offsets.data(), new_offsets.size() * sizeof(metadata::RtInterfaceOffset));
+    if (!new_offsets.empty())
+        std::memcpy(interface_vtable_offsets, new_offsets.data(), new_offsets.size() * sizeof(metadata::RtInterfaceOffset));
     klass->interface_vtable_offsets = interface_vtable_offsets;
     klass->interface_vtable_offset_count = static_cast<uint16_t>(new_offsets.size());
 
     // Build new vtable: copy parent, then interfaces
     metadata::RtVirtualInvokeData* new_vtables = mem_pool.calloc_any<metadata::RtVirtualInvokeData>(total_vtable_count);
-    std::memcpy(new_vtables, parent->vtable, parent->vtable_count * sizeof(metadata::RtVirtualInvokeData));
+    if (parent->vtable_count != 0)
+        std::memcpy(new_vtables, parent->vtable, parent->vtable_count * sizeof(metadata::RtVirtualInvokeData));
 
     const char* iface_ilist = "IList`1";
     const char* iface_icollection = "ICollection`1";
@@ -559,7 +561,8 @@ RtResultVoid ArrayClass::setup_vtables(metadata::RtClass* klass)
     for (size_t i = 0; i < klass->interface_count; ++i)
     {
         const metadata::RtClass* iface = klass->interfaces[i];
-        std::memcpy(new_vtables + current_slot, iface->vtable, iface->vtable_count * sizeof(metadata::RtVirtualInvokeData));
+        if (iface->vtable_count != 0)
+            std::memcpy(new_vtables + current_slot, iface->vtable, iface->vtable_count * sizeof(metadata::RtVirtualInvokeData));
 
         const char* iface_name = iface->name;
         const Vector<ArrayTemplateMethod>* method_list = nullptr;

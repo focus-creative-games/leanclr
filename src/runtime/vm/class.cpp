@@ -1280,7 +1280,8 @@ RtResultVoid Class::setup_methods_typedef(metadata::RtClass* klass)
         size_t paramCount = methodSig.params.size();
         method->parameter_count = static_cast<uint16_t>(paramCount);
         method->parameters = pool.calloc_any<const metadata::RtTypeSig*>(paramCount);
-        std::memcpy(method->parameters, methodSig.params.data(), sizeof(metadata::RtTypeSig*) * paramCount);
+        if (paramCount != 0)
+            std::memcpy(method->parameters, methodSig.params.data(), sizeof(metadata::RtTypeSig*) * paramCount);
 
         if (genericContainer)
         {
@@ -1820,7 +1821,8 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
     }
 
     metadata::RtInterfaceOffset* interface_vtable_offsets = pool.calloc_any<metadata::RtInterfaceOffset>(new_interface_vtable_offsets.size());
-    std::memcpy(interface_vtable_offsets, new_interface_vtable_offsets.data(), new_interface_vtable_offsets.size() * sizeof(metadata::RtInterfaceOffset));
+    if (!new_interface_vtable_offsets.empty())
+        std::memcpy(interface_vtable_offsets, new_interface_vtable_offsets.data(), new_interface_vtable_offsets.size() * sizeof(metadata::RtInterfaceOffset));
     klass->interface_vtable_offsets = interface_vtable_offsets;
     klass->interface_vtable_offset_count = static_cast<uint16_t>(new_interface_vtable_offsets.size());
 
@@ -1959,7 +1961,8 @@ RtResultVoid Class::setup_vtable_typedef(metadata::RtClass* klass)
     }
 
     metadata::RtVirtualInvokeData* vtable = pool.calloc_any<metadata::RtVirtualInvokeData>(new_vtable.size());
-    std::memcpy(vtable, new_vtable.data(), new_vtable.size() * sizeof(metadata::RtVirtualInvokeData));
+    if (!new_vtable.empty())
+        std::memcpy(vtable, new_vtable.data(), new_vtable.size() * sizeof(metadata::RtVirtualInvokeData));
     klass->vtable = vtable;
     klass->vtable_count = static_cast<uint16_t>(new_vtable.size());
 

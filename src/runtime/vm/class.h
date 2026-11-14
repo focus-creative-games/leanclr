@@ -545,7 +545,8 @@ class Class
     static void get_gc_bitmap(const metadata::RtClass* klass, size_t* bitmaps, size_t& bitmaps_size)
     {
         bitmaps_size = get_gc_bitmap_size(klass);
-        std::memcpy(bitmaps, klass->gc_bitmap, bitmaps_size);
+        if (bitmaps_size != 0)
+            std::memcpy(bitmaps, klass->gc_bitmap, bitmaps_size);
     }
 
     static bool has_reference_at_offset_includes_object_header(const metadata::RtClass* klass, size_t offset_includes_object_header)
