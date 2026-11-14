@@ -1,0 +1,79 @@
+{
+  "samples": [
+    {
+      "engine": "aot",
+      "sample": 1,
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "peak_working_set_bytes": 225562624,
+      "observed_peak_private_bytes": 222179328,
+      "peak_pagefile_bytes": 222273536,
+      "successful_polls": 98
+    },
+    {
+      "engine": "before-aot",
+      "sample": 2,
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "peak_working_set_bytes": 255205376,
+      "observed_peak_private_bytes": 251801600,
+      "peak_pagefile_bytes": 251973632,
+      "successful_polls": 116
+    },
+    {
+      "engine": "before-aot",
+      "sample": 0,
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "peak_working_set_bytes": 251052032,
+      "observed_peak_private_bytes": 247840768,
+      "peak_pagefile_bytes": 247840768,
+      "successful_polls": 120
+    },
+    {
+      "engine": "before-aot",
+      "sample": 1,
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "peak_working_set_bytes": 254472192,
+      "observed_peak_private_bytes": 251064320,
+      "peak_pagefile_bytes": 251260928,
+      "successful_polls": 107
+    },
+    {
+      "engine": "aot",
+      "sample": 0,
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "peak_working_set_bytes": 225558528,
+      "observed_peak_private_bytes": 222285824,
+      "peak_pagefile_bytes": 222285824,
+      "successful_polls": 86
+    },
+    {
+      "engine": "aot",
+      "sample": 2,
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "peak_working_set_bytes": 225513472,
+      "observed_peak_private_bytes": 222281728,
+      "peak_pagefile_bytes": 222281728,
+      "successful_polls": 87
+    }
+  ],
+  "logical_cpu": 2,
+  "poll_seconds": 0.001,
+  "notes": "Separate memory-only runs; polling latency is excluded from timing datasets."
+}

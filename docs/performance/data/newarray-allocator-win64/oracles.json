@@ -1,0 +1,517 @@
+[
+  {
+    "workload": "Allocation",
+    "iterations": 4599663,
+    "checksum": "1483868852"
+  },
+  {
+    "workload": "ArrayLoad",
+    "iterations": 63503877,
+    "checksum": "1161483258"
+  },
+  {
+    "workload": "ArrayStore",
+    "iterations": 100000000,
+    "checksum": "1442372292"
+  },
+  {
+    "workload": "Boxing",
+    "iterations": 5479598,
+    "checksum": "1396253609"
+  },
+  {
+    "workload": "Branch",
+    "iterations": 100000000,
+    "checksum": "3800897965"
+  },
+  {
+    "workload": "ByRef",
+    "iterations": 84671854,
+    "checksum": "1734503017"
+  },
+  {
+    "workload": "Calls",
+    "iterations": 90145801,
+    "checksum": "4081296574"
+  },
+  {
+    "workload": "Cast",
+    "iterations": 54028032,
+    "checksum": "2078774035"
+  },
+  {
+    "workload": "Checked",
+    "iterations": 100000000,
+    "checksum": "110483"
+  },
+  {
+    "workload": "Convert",
+    "iterations": 24871346,
+    "checksum": "24957394"
+  },
+  {
+    "workload": "Delegate",
+    "iterations": 20917968,
+    "checksum": "3358771171"
+  },
+  {
+    "workload": "DivRem",
+    "iterations": 29911453,
+    "checksum": "4180630173"
+  },
+  {
+    "workload": "EhNormal",
+    "iterations": 100000000,
+    "checksum": "2795301907"
+  },
+  {
+    "workload": "EhThrow",
+    "iterations": 2997987,
+    "checksum": "1711574841"
+  },
+  {
+    "workload": "Field",
+    "iterations": 100000000,
+    "checksum": "3936467859"
+  },
+  {
+    "workload": "Float32",
+    "iterations": 69867824,
+    "checksum": "94208"
+  },
+  {
+    "workload": "Float64",
+    "iterations": 72575839,
+    "checksum": "190464"
+  },
+  {
+    "workload": "Generic",
+    "iterations": 100000000,
+    "checksum": "3022393619"
+  },
+  {
+    "workload": "Int32",
+    "iterations": 99598815,
+    "checksum": "236563196"
+  },
+  {
+    "workload": "Int64",
+    "iterations": 93489310,
+    "checksum": "53367826"
+  },
+  {
+    "workload": "Interface",
+    "iterations": 21181643,
+    "checksum": "183264274"
+  },
+  {
+    "workload": "NewArray",
+    "iterations": 2619135,
+    "checksum": "3737288271"
+  },
+  {
+    "workload": "StaticField",
+    "iterations": 100000000,
+    "checksum": "3936467859"
+  },
+  {
+    "workload": "Struct",
+    "iterations": 11825333,
+    "checksum": "102360464"
+  },
+  {
+    "workload": "Switch",
+    "iterations": 48725653,
+    "checksum": "1411840916"
+  },
+  {
+    "workload": "Virtual",
+    "iterations": 23124910,
+    "checksum": "605237047"
+  },
+  {
+    "workload": "Allocation",
+    "iterations": 4467957,
+    "checksum": "2921425434"
+  },
+  {
+    "workload": "ArrayLoad",
+    "iterations": 63565476,
+    "checksum": "1917717520"
+  },
+  {
+    "workload": "Boxing",
+    "iterations": 4418852,
+    "checksum": "1335332887"
+  },
+  {
+    "workload": "ByRef",
+    "iterations": 83698608,
+    "checksum": "3004532419"
+  },
+  {
+    "workload": "Cast",
+    "iterations": 59795630,
+    "checksum": "1214625241"
+  },
+  {
+    "workload": "Convert",
+    "iterations": 24758597,
+    "checksum": "24805961"
+  },
+  {
+    "workload": "Delegate",
+    "iterations": 22118124,
+    "checksum": "2539523167"
+  },
+  {
+    "workload": "EhThrow",
+    "iterations": 3251922,
+    "checksum": "1537670911"
+  },
+  {
+    "workload": "Float32",
+    "iterations": 72656307,
+    "checksum": "100352"
+  },
+  {
+    "workload": "Float64",
+    "iterations": 72656307,
+    "checksum": "100352"
+  },
+  {
+    "workload": "Interface",
+    "iterations": 20917968,
+    "checksum": "3459903347"
+  },
+  {
+    "workload": "NewArray",
+    "iterations": 2303226,
+    "checksum": "1012360843"
+  },
+  {
+    "workload": "Struct",
+    "iterations": 11829603,
+    "checksum": "1853645310"
+  },
+  {
+    "workload": "Switch",
+    "iterations": 55072265,
+    "checksum": "3210648515"
+  },
+  {
+    "workload": "Virtual",
+    "iterations": 24218774,
+    "checksum": "1497899239"
+  },
+  {
+    "workload": "Allocation",
+    "iterations": 3671278,
+    "checksum": "3346476521"
+  },
+  {
+    "workload": "Boxing",
+    "iterations": 3733819,
+    "checksum": "904752272"
+  },
+  {
+    "workload": "ByRef",
+    "iterations": 72415491,
+    "checksum": "4088274168"
+  },
+  {
+    "workload": "Calls",
+    "iterations": 63503877,
+    "checksum": "4037372394"
+  },
+  {
+    "workload": "Cast",
+    "iterations": 100000000,
+    "checksum": "748377363"
+  },
+  {
+    "workload": "Convert",
+    "iterations": 24536126,
+    "checksum": "24572651"
+  },
+  {
+    "workload": "Delegate",
+    "iterations": 31767330,
+    "checksum": "1075306461"
+  },
+  {
+    "workload": "DivRem",
+    "iterations": 31782738,
+    "checksum": "4259139496"
+  },
+  {
+    "workload": "EhThrow",
+    "iterations": 22110661,
+    "checksum": "3206770237"
+  },
+  {
+    "workload": "Float32",
+    "iterations": 72495550,
+    "checksum": "122880"
+  },
+  {
+    "workload": "Float64",
+    "iterations": 72495550,
+    "checksum": "122880"
+  },
+  {
+    "workload": "Generic",
+    "iterations": 63076041,
+    "checksum": "1770964094"
+  },
+  {
+    "workload": "Int32",
+    "iterations": 100000000,
+    "checksum": "2226157278"
+  },
+  {
+    "workload": "Int64",
+    "iterations": 100000000,
+    "checksum": "1265156635"
+  },
+  {
+    "workload": "Interface",
+    "iterations": 21955106,
+    "checksum": "3752420751"
+  },
+  {
+    "workload": "NewArray",
+    "iterations": 3127165,
+    "checksum": "511198807"
+  },
+  {
+    "workload": "Struct",
+    "iterations": 9997864,
+    "checksum": "793179742"
+  },
+  {
+    "workload": "Switch",
+    "iterations": 52936997,
+    "checksum": "314364406"
+  },
+  {
+    "workload": "Virtual",
+    "iterations": 24156287,
+    "checksum": "3983475978"
+  },
+  {
+    "workload": "Allocation",
+    "iterations": 1541443,
+    "checksum": "1176967736"
+  },
+  {
+    "workload": "ArrayLoad",
+    "iterations": 4143913,
+    "checksum": "4203186695"
+  },
+  {
+    "workload": "ArrayStore",
+    "iterations": 2810532,
+    "checksum": "3326372407"
+  },
+  {
+    "workload": "Boxing",
+    "iterations": 1811587,
+    "checksum": "273987192"
+  },
+  {
+    "workload": "Branch",
+    "iterations": 4769376,
+    "checksum": "3800897965"
+  },
+  {
+    "workload": "ByRef",
+    "iterations": 3808461,
+    "checksum": "896532114"
+  },
+  {
+    "workload": "Calls",
+    "iterations": 4429903,
+    "checksum": "1339351316"
+  },
+  {
+    "workload": "Cast",
+    "iterations": 2316905,
+    "checksum": "1458595070"
+  },
+  {
+    "workload": "Checked",
+    "iterations": 4800117,
+    "checksum": "440229"
+  },
+  {
+    "workload": "Convert",
+    "iterations": 3527993,
+    "checksum": "3580241"
+  },
+  {
+    "workload": "Delegate",
+    "iterations": 2560000,
+    "checksum": "1656360979"
+  },
+  {
+    "workload": "DivRem",
+    "iterations": 3682418,
+    "checksum": "4259139484"
+  },
+  {
+    "workload": "EhNormal",
+    "iterations": 3896777,
+    "checksum": "800786727"
+  },
+  {
+    "workload": "EhThrow",
+    "iterations": 3021345,
+    "checksum": "3552524613"
+  },
+  {
+    "workload": "Field",
+    "iterations": 5301407,
+    "checksum": "1274879028"
+  },
+  {
+    "workload": "Float32",
+    "iterations": 5273253,
+    "checksum": "71680"
+  },
+  {
+    "workload": "Float64",
+    "iterations": 5005804,
+    "checksum": "217088"
+  },
+  {
+    "workload": "Generic",
+    "iterations": 4516297,
+    "checksum": "1031850878"
+  },
+  {
+    "workload": "Int32",
+    "iterations": 4855597,
+    "checksum": "2504666106"
+  },
+  {
+    "workload": "Int64",
+    "iterations": 4740054,
+    "checksum": "41532423"
+  },
+  {
+    "workload": "Interface",
+    "iterations": 3060999,
+    "checksum": "1989722810"
+  },
+  {
+    "workload": "NewArray",
+    "iterations": 1113932,
+    "checksum": "2281721187"
+  },
+  {
+    "workload": "StaticField",
+    "iterations": 5848817,
+    "checksum": "279370639"
+  },
+  {
+    "workload": "Struct",
+    "iterations": 1601642,
+    "checksum": "3280094200"
+  },
+  {
+    "workload": "Switch",
+    "iterations": 3442559,
+    "checksum": "1763184077"
+  },
+  {
+    "workload": "Virtual",
+    "iterations": 2921019,
+    "checksum": "2756212658"
+  },
+  {
+    "workload": "Allocation",
+    "iterations": 8839493,
+    "checksum": "996230186"
+  },
+  {
+    "workload": "ArrayLoad",
+    "iterations": 62119440,
+    "checksum": "4223598160"
+  },
+  {
+    "workload": "Boxing",
+    "iterations": 7094944,
+    "checksum": "1437599923"
+  },
+  {
+    "workload": "ByRef",
+    "iterations": 100000000,
+    "checksum": "3022393619"
+  },
+  {
+    "workload": "Calls",
+    "iterations": 100000000,
+    "checksum": "3022393619"
+  },
+  {
+    "workload": "Checked",
+    "iterations": 84128346,
+    "checksum": "730392"
+  },
+  {
+    "workload": "Convert",
+    "iterations": 21202198,
+    "checksum": "21299505"
+  },
+  {
+    "workload": "Delegate",
+    "iterations": 63627195,
+    "checksum": "1981685008"
+  },
+  {
+    "workload": "DivRem",
+    "iterations": 22559725,
+    "checksum": "4048294935"
+  },
+  {
+    "workload": "EhThrow",
+    "iterations": 53850441,
+    "checksum": "3674623765"
+  },
+  {
+    "workload": "Float32",
+    "iterations": 72736953,
+    "checksum": "112640"
+  },
+  {
+    "workload": "Float64",
+    "iterations": 72736953,
+    "checksum": "112640"
+  },
+  {
+    "workload": "Interface",
+    "iterations": 63565476,
+    "checksum": "2993890699"
+  },
+  {
+    "workload": "NewArray",
+    "iterations": 3182440,
+    "checksum": "2280620659"
+  },
+  {
+    "workload": "Struct",
+    "iterations": 16625062,
+    "checksum": "2999967798"
+  },
+  {
+    "workload": "Switch",
+    "iterations": 56157659,
+    "checksum": "3959068565"
+  },
+  {
+    "workload": "Virtual",
+    "iterations": 96803546,
+    "checksum": "3443873951"
+  }
+]

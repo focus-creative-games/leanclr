@@ -286,7 +286,8 @@ void MarkSweepHeap::set_gc_mode(GCMode mode)
     s_gc_mode = mode;
 }
 
-vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite* site)
+template <bool RegisterFinalizer>
+static vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, const GcAllocSite* site)
 {
     if (size < sizeof(vm::RtObject) || size > SIZE_MAX - (GC_ALIGN - 1))
         return nullptr;
@@ -323,35 +324,37 @@ vm::RtObject* allocate_object_impl(const metadata::RtClass* klass, size_t size, 
         }
     }
     obj->klass = const_cast<metadata::RtClass*>(klass);
-    GcFinalizer::on_object_allocated(obj);
+    if constexpr (RegisterFinalizer)
+        GcFinalizer::on_object_allocated(obj);
 #if LEANCLR_GC_DEBUG
     obj->__sync_block = site != nullptr ? const_cast<GcAllocSite*>(site->intern_site()) : nullptr;
 #endif
     s_used_bytes += charged_size;
     s_heap_bytes += charged_size;
-    GcPressure::set_used_size(s_used_bytes);
-    GcPressure::on_alloc(aligned_size);
+    GcPressure::on_alloc(aligned_size, s_used_bytes);
     return obj;
 }
 
 vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, size_t size, const GcAllocSite& site)
 {
-    return allocate_object_impl(klass, size, &site);
+    return allocate_object_impl<true>(klass, size, &site);
 }
 
 vm::RtObject* MarkSweepHeap::allocate_object(const metadata::RtClass* klass, size_t size)
 {
-    return allocate_object_impl(klass, size, nullptr);
+    return allocate_object_impl<true>(klass, size, nullptr);
 }
 
 vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes, const GcAllocSite& site)
 {
-    return allocate_object(arrClass, totalBytes);
+    assert(vm::Class::is_array_or_szarray(arrClass));
+    return allocate_object_impl<false>(arrClass, totalBytes, &site);
 }
 
 vm::RtObject* MarkSweepHeap::allocate_array(const metadata::RtClass* arrClass, size_t totalBytes)
 {
-    return allocate_object(arrClass, totalBytes);
+    assert(vm::Class::is_array_or_szarray(arrClass));
+    return allocate_object_impl<false>(arrClass, totalBytes, nullptr);
 }
 
 } // namespace gc
