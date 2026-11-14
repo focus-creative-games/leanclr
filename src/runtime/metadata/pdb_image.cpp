@@ -21,7 +21,8 @@ void PdbImage::add_ir2il_map_for_method(const RtMethodInfo* method_info, const M
 {
     // TODO merge entries in same sequence point
     IR2ILMapEntry* entries_copy = _pool.calloc_any<IR2ILMapEntry>(map_info.entries.size());
-    std::memcpy(entries_copy, map_info.entries.data(), sizeof(IR2ILMapEntry) * map_info.entries.size());
+    if (!map_info.entries.empty())
+        std::memcpy(entries_copy, map_info.entries.data(), sizeof(IR2ILMapEntry) * map_info.entries.size());
 
     MethodIR2ILMapInfo new_map_info;
     new_map_info.entries = utils::Span<IR2ILMapEntry>{entries_copy, map_info.entries.size()};

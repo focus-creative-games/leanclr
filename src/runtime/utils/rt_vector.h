@@ -130,6 +130,8 @@ class Vector
 
     void push_range(const T* begin, size_t count)
     {
+        if (count == 0)
+            return;
         if (count > SIZE_MAX - size_)
             leanclr::panic("Vector size overflow");
         reserve(size_ + count);
