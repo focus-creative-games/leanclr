@@ -520,7 +520,13 @@ bool set_file_times_by_handle(int fd, const FileBasicInfo& info)
     timeval times[2];
     times[0] = info.LastAccessTime > 0 ? file_time_to_timeval(info.LastAccessTime) : file_time_to_timeval(stat_access_time(st));
     times[1] = info.LastWriteTime > 0 ? file_time_to_timeval(info.LastWriteTime) : file_time_to_timeval(stat_write_time(st));
+#if defined(__ANDROID__)
+    const timespec precise_times[2] = {{times[0].tv_sec, static_cast<long>(times[0].tv_usec) * 1000},
+                                       {times[1].tv_sec, static_cast<long>(times[1].tv_usec) * 1000}};
+    if (::futimens(fd, precise_times) != 0)
+#else
     if (::futimes(fd, times) != 0)
+#endif
     {
         set_last_error_from_errno(errno);
         return false;

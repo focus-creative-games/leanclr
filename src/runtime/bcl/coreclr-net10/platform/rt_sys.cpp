@@ -1096,7 +1096,7 @@ uint8_t* RtSys::str_error_r(int32_t error, uint8_t* buffer, int32_t buffer_size)
     if (rc != 0)
         return nullptr;
     return buffer;
-#elif defined(__GLIBC__)
+#elif defined(__GLIBC__) || (defined(__ANDROID__) && defined(_GNU_SOURCE) && __ANDROID_API__ >= 23)
     char* msg = ::strerror_r(error, out, static_cast<size_t>(buffer_size));
     if (msg == nullptr)
         return nullptr;

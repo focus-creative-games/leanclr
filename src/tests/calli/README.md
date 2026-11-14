@@ -40,7 +40,7 @@ module registration does this automatically. Tables have runtime lifetime.
 The runtime validates compiler-derived ABI shapes and hashes the complete shape,
 then compares collision candidates in full. Repeat registrations are allocation-free;
 a missing bridge reports its convention, return and parameter ABI shapes. Supported
-platform gates currently cover Windows x64 and Emscripten wasm32 only.
+platform gates currently cover Windows x64, Android x86_64, and Emscripten wasm32.
 
 Stage 03-D splits CalliNative IR from CalliInterp and caches the bound native
 bridge at translation. Generated AOT uses the same site protocol. Native tests
@@ -84,3 +84,12 @@ Linux x64/ARM64 CI jobs use the explicit LEANCLR_CALLI_ABI_PROBE validation flag
 Their production capability stays disabled until actual ABI results are reviewed.
 All caches currently follow the runtime's SINGLE-thread ownership contract.
 See docs/calli-support-results-2026-11-13.md for measured results and limits.
+
+Android validation (2026-11-14): NDK r29, x86_64/API 24, generated AOT bridges
+and the existing native contract suite passed on an x86_64 emulator for both
+Mono profiles and the CoreCLR profile, without LEANCLR_CALLI_ABI_PROBE. The suite
+covers managed/native calls, aggregates, GC roots, exception paths, rejection,
+and allocation failure. CoreCLR Android ARM64/API 21 also cross-compiles;
+native calli on ARM64 remains disabled in production. CoreCLR POSIX checks on
+the emulator verify strerror_r and file timestamps. Bionic's GNU strerror_r
+selection requires both _GNU_SOURCE and API >= 23; API 21/22 retain POSIX semantics.
