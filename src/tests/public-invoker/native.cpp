@@ -10,6 +10,7 @@
 #include "vm/assembly.h"
 #include "vm/class.h"
 #include "vm/rt_exception.h"
+#include "vm/rt_string.h"
 #include "vm/pinvoke.h"
 #include "vm/internal_calls.h"
 #include "vm/intrinsics.h"
@@ -102,6 +103,22 @@ int main(int argc, char** argv)
     if (!host::Services::set_file_loader(load))
         leanclr::panic("Configure file loader before host services are used");
     CHECK(leanclr_initialize_runtime() == 0);
+    // #US/#Blob payloads can start at an odd byte offset. Preserve code units,
+    // including embedded NUL, surrogate pairs and unpaired surrogates.
+    alignas(Utf16Char) const uint8_t utf16_bytes[] = {0xff, 0x41, 0x00, 0x00, 0x00, 0x2d, 0x4e, 0x3d, 0xd8, 0x00, 0xde, 0x00, 0xd8};
+    const Utf16Char utf16_expected[] = {0x0041, 0x0000, 0x4e2d, 0xd83d, 0xde00, 0xd800};
+    auto* decoded = vm::String::create_string_from_utf16bytes(utf16_bytes + 1, 6);
+    CHECK(decoded != nullptr && decoded->length == 6);
+    CHECK(std::memcmp(vm::String::get_chars_ptr(decoded), utf16_expected, sizeof(utf16_expected)) == 0);
+    CHECK(vm::String::get_chars_ptr(decoded)[6] == 0);
+    decoded = vm::String::create_string_from_utf16chars(reinterpret_cast<const Utf16Char*>(utf16_bytes + 1), 6);
+    CHECK(decoded != nullptr && decoded->length == 6);
+    CHECK(std::memcmp(vm::String::get_chars_ptr(decoded), utf16_expected, sizeof(utf16_expected)) == 0);
+    CHECK(vm::String::create_string_from_utf16bytes(nullptr, 1) == nullptr);
+    CHECK(vm::String::create_string_from_utf16bytes(utf16_bytes + 1, -1) == nullptr);
+    decoded = vm::String::create_string_from_utf16bytes(nullptr, 0);
+    CHECK(decoded != nullptr && decoded->length == 0);
+
     const auto& types = vm::Class::get_corlib_types();
     metadata::RtMethodInfo methods[13]{};
     char names[13][40];
