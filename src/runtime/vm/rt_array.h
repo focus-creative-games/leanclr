@@ -11,10 +11,36 @@ namespace leanclr
 {
 namespace vm
 {
+// One bounded entry per generated method/element token. No per-array overhead.
+struct SzArrayAllocationCache
+{
+    const metadata::RtClass* klass;
+    uint32_t element_size;
+};
+
 class Array
 {
   public:
     static RtResult<ArrayLayout> get_array_layout(const metadata::RtClass* klass, int32_t length);
+
+    static RtResultVoid initialize_szarray_allocation_cache(const metadata::RtClass* element, SzArrayAllocationCache& cache);
+
+    static RtResult<RtArray*> __new_szarray_cached(const metadata::RtClass* element, int32_t length,
+                                                   SzArrayAllocationCache& cache LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
+    {
+        if (length < 0)
+            RET_ERR(RtErr::Overflow);
+        if (!cache.klass || cache.klass->element_class != element)
+            RET_ERR_ON_FAIL(initialize_szarray_allocation_cache(element, cache));
+        ArrayLayout layout;
+        if (!ArrayLayout::try_compute(cache.element_size, static_cast<size_t>(length), 0, layout))
+            RET_ERR(RtErr::OutOfMemory);
+        auto* array = reinterpret_cast<RtArray*>(gc::GarbageCollector::allocate_array(cache.klass, layout.allocation_size LEANCLR_GC_CALL_SITE_PARAM));
+        if (!array)
+            RET_ERR(RtErr::OutOfMemory);
+        array->length = length;
+        RET_OK(array);
+    }
 
     // Array creation methods
     static size_t get_array_allocation_size(const metadata::RtClass* klass, int32_t length);

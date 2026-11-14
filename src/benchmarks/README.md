@@ -1,5 +1,46 @@
 # Performance experiments
 
+## Win64 IL instruction families
+
+`il-families` compares 26 same-IL kernels on the pure LeanCLR interpreter,
+default LeanAOT, Unity 2022.3.62f3 IL2CPP and .NET 10.0.8 optimized JIT.
+It covers integer/floating arithmetic, conversion, checked operations, branches,
+arrays, fields, byref, calls, virtual/interface/delegate dispatch, structs,
+generics, type checks, boxing, allocations and exception paths.
+
+```powershell
+python scripts/benchmarks/run_il_families.py --unity D:/UnityHubs/2022.3.62f3
+python scripts/benchmarks/report_il_families.py
+```
+
+The runner validates results, pins measurement processes to one logical CPU,
+calibrates per-engine iteration counts and records seven randomized rounds.
+See [the measured report](../../docs/performance/il-families-win64.md) for build
+settings, raw samples, variability, IL inventories and AOT fallback details.
+The .NET configuration disables tiering and ReadyToRun; IL2CPP is a standalone
+CLI build, not a Unity Player. These are kernel timings, not per-opcode costs.
+
+For generated-code ablations of Delegate, Cast and NewArray, run
+`python scripts/benchmarks/probe_il_hotspots.py`, then use `--sweep-only` for
+NewArray count scaling. See [the hotspot analysis](../../docs/performance/il-hotspots-win64.md).
+These probes reuse the baseline runtime library and do not modify production
+code. GC counters show the LeanCLR allocation loop does not automatically
+collect; its allocation results measure heap growth, not GC steady state.
+
+Production optimization verification uses the preserved baseline binaries:
+
+```powershell
+python scripts/test/aot-hotspots.py --all-protocols
+python scripts/test/aot-hotspots.py --gc-debug
+python scripts/benchmarks/run_il_optimized.py
+python scripts/benchmarks/report_il_optimized.py
+```
+
+This builds production generated code in a separate output directory, measures
+all 26 kernels with a same-session old AOT control, then repeats the three
+hotspots with identical iteration counts on four native backends. See the
+[production report](../../docs/performance/il-hotspots-optimized-win64.md).
+
 These are isolated P0/P1 experiments. They do not change the production Result
 ABI or LeanAOT code generator. See the measured [review report](../../docs/performance/p0-p1.md).
 

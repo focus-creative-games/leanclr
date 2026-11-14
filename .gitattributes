@@ -1,0 +1,2 @@
+# IL inventories have a fourth, optionally empty TSV field.
+docs/performance/data/**/il-inventory.tsv whitespace=-blank-at-eol

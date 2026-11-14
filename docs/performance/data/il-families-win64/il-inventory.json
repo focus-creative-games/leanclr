@@ -1,0 +1,880 @@
+{
+  "Benchmarks::MakeData": {
+    "opcodes": {
+      "ldc.i4": 1,
+      "newarr": 1,
+      "stloc.0": 1,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.0": 3,
+      "ldloc.1": 4,
+      "conv.u": 1,
+      "ldc.i4.s": 1,
+      "mul": 1,
+      "ldc.i4.3": 1,
+      "add": 2,
+      "stelem.i4": 1,
+      "ldc.i4.1": 1,
+      "conv.u8": 1,
+      "ldlen": 1,
+      "conv.i4": 1,
+      "conv.i8": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Step": {
+    "opcodes": {
+      "ldarg.0": 1,
+      "ldc.i4": 2,
+      "mul": 1,
+      "add": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Identity": {
+    "opcodes": {
+      "ldarg.0": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::RefStep": {
+    "opcodes": {
+      "ldarg.0": 2,
+      "ldind.u4": 1,
+      "ldc.i4": 2,
+      "mul": 1,
+      "add": 1,
+      "stind.i4": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::QuadStep": {
+    "opcodes": {
+      "ldarga.s": 9,
+      "ldfld": 8,
+      "ldc.i4": 1,
+      "mul": 1,
+      "add": 2,
+      "stfld": 4,
+      "dup": 3,
+      "xor": 2,
+      "ldarg.0": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::BoxValue": {
+    "opcodes": {
+      "ldarg.0": 1,
+      "box": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::NewBox": {
+    "opcodes": {
+      "newobj": 1,
+      "stloc.0": 1,
+      "ldloc.0": 2,
+      "ldarg.0": 1,
+      "stfld": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks+Box::.ctor"
+    ]
+  },
+  "Benchmarks::Keep": {
+    "opcodes": {
+      "ldarg.0": 1,
+      "stsfld": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Int32": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldarg.1": 3,
+      "ldc.i4": 2,
+      "mul": 1,
+      "add": 2,
+      "ldc.i4.s": 1,
+      "shr.un": 1,
+      "xor": 1,
+      "starg.s": 1,
+      "ldloc.0": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Int64": {
+    "opcodes": {
+      "ldarg.1": 1,
+      "conv.u8": 1,
+      "stloc.0": 2,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.0": 4,
+      "ldc.i8": 2,
+      "mul": 1,
+      "add": 2,
+      "ldc.i4.s": 2,
+      "shr.un": 2,
+      "xor": 2,
+      "ldloc.1": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "conv.u4": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::DivRem": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldloc.0": 3,
+      "ldc.i4.s": 1,
+      "and": 1,
+      "ldc.i4.3": 1,
+      "add": 4,
+      "stloc.1": 1,
+      "ldarg.1": 3,
+      "ldloc.1": 2,
+      "div.un": 1,
+      "rem.un": 1,
+      "ldc.i4": 1,
+      "starg.s": 1,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Float32": {
+    "opcodes": {
+      "ldarg.1": 1,
+      "ldc.i4": 1,
+      "and": 2,
+      "ldc.i4.1": 2,
+      "add": 3,
+      "conv.r.un": 1,
+      "conv.r4": 2,
+      "stloc.0": 2,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.0": 2,
+      "ldc.r4": 2,
+      "mul": 2,
+      "ldloc.1": 3,
+      "ldc.i4.s": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "conv.u4": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Float64": {
+    "opcodes": {
+      "ldarg.1": 1,
+      "ldc.i4": 1,
+      "and": 2,
+      "ldc.i4.1": 2,
+      "add": 3,
+      "conv.r.un": 1,
+      "conv.r8": 2,
+      "stloc.0": 2,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.0": 2,
+      "ldc.r8": 2,
+      "mul": 2,
+      "ldloc.1": 3,
+      "ldc.i4.s": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "conv.u4": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Convert": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldarg.1": 3,
+      "ldc.i4": 1,
+      "and": 1,
+      "conv.r8": 1,
+      "stloc.1": 1,
+      "ldloc.1": 1,
+      "ldc.r8": 1,
+      "mul": 1,
+      "conv.u4": 1,
+      "ldc.i4.8": 1,
+      "shr.un": 1,
+      "conv.u2": 1,
+      "add": 3,
+      "ldloc.0": 3,
+      "starg.s": 1,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Checked": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldarg.1": 2,
+      "ldc.i4": 2,
+      "and": 2,
+      "ldc.i4.s": 1,
+      "mul.ovf.un": 1,
+      "ldloc.0": 3,
+      "conv.ovf.u4": 1,
+      "add.ovf.un": 1,
+      "starg.s": 1,
+      "ldc.i4.1": 1,
+      "add": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Branch": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 2,
+      "ldarg.1": 4,
+      "ldc.i4": 4,
+      "and": 1,
+      "brtrue.s": 1,
+      "mul": 1,
+      "add": 2,
+      "starg.s": 2,
+      "ldc.i4.3": 1,
+      "shr.un": 1,
+      "xor": 1,
+      "ldloc.0": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Switch": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 9,
+      "ldarg.1": 11,
+      "ldc.i4.7": 1,
+      "and": 1,
+      "stloc.1": 1,
+      "ldloc.1": 1,
+      "switch": 1,
+      "ldc.i4.s": 5,
+      "add": 5,
+      "starg.s": 9,
+      "ldc.i4": 4,
+      "xor": 2,
+      "mul": 3,
+      "ldc.i4.1": 2,
+      "shr.un": 1,
+      "ldloc.0": 2,
+      "ldarg.0": 1,
+      "blt": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::ArrayLoad": {
+    "opcodes": {
+      "ldsfld": 1,
+      "stloc.0": 1,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldarg.1": 3,
+      "ldc.i4.s": 1,
+      "mul": 1,
+      "ldloc.0": 1,
+      "ldc.i4.8": 1,
+      "shr.un": 1,
+      "ldc.i4": 1,
+      "and": 1,
+      "conv.u": 1,
+      "ldelem.u4": 1,
+      "add": 2,
+      "starg.s": 1,
+      "ldloc.1": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::ArrayStore": {
+    "opcodes": {
+      "call": 1,
+      "stloc.0": 1,
+      "ldc.i4.0": 2,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.1": 3,
+      "ldc.i4": 1,
+      "and": 1,
+      "stloc.2": 1,
+      "ldloc.0": 3,
+      "ldloc.2": 2,
+      "ldarg.1": 2,
+      "ldc.i4.s": 1,
+      "mul": 1,
+      "ldelem.u4": 2,
+      "add": 2,
+      "dup": 1,
+      "starg.s": 1,
+      "stelem.i4": 1,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "xor": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks::MakeData"
+    ]
+  },
+  "Benchmarks::Field": {
+    "opcodes": {
+      "newobj": 1,
+      "stloc.2": 1,
+      "ldloc.2": 2,
+      "ldarg.1": 1,
+      "stfld": 2,
+      "stloc.0": 1,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.0": 3,
+      "ldfld": 2,
+      "ldc.i4": 1,
+      "mul": 1,
+      "ldloc.1": 3,
+      "add": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks+Box::.ctor"
+    ]
+  },
+  "Benchmarks::StaticField": {
+    "opcodes": {
+      "ldarg.1": 1,
+      "stsfld": 2,
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldsfld": 2,
+      "ldc.i4": 1,
+      "mul": 1,
+      "ldloc.0": 3,
+      "add": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::ByRef": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldarga.s": 1,
+      "call": 1,
+      "ldloc.0": 2,
+      "ldc.i4.1": 1,
+      "add": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ldarg.1": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks::RefStep"
+    ]
+  },
+  "Benchmarks::Calls": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldarg.1": 2,
+      "call": 1,
+      "starg.s": 1,
+      "ldloc.0": 2,
+      "ldc.i4.1": 1,
+      "add": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks::Step"
+    ]
+  },
+  "Benchmarks::Virtual": {
+    "opcodes": {
+      "ldsfld": 1,
+      "stloc.0": 1,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.0": 1,
+      "ldloc.1": 3,
+      "ldc.i4.1": 2,
+      "and": 1,
+      "ldelem.ref": 1,
+      "ldarg.1": 2,
+      "callvirt": 1,
+      "starg.s": 1,
+      "add": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks+Box::Apply"
+    ]
+  },
+  "Benchmarks::Interface": {
+    "opcodes": {
+      "ldsfld": 1,
+      "stloc.0": 1,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.0": 1,
+      "ldloc.1": 3,
+      "ldc.i4.1": 2,
+      "and": 1,
+      "ldelem.ref": 1,
+      "ldarg.1": 2,
+      "callvirt": 1,
+      "starg.s": 1,
+      "add": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks+IOp::Apply"
+    ]
+  },
+  "Benchmarks::Delegate": {
+    "opcodes": {
+      "ldsfld": 1,
+      "stloc.0": 1,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.0": 1,
+      "ldarg.1": 2,
+      "callvirt": 1,
+      "starg.s": 1,
+      "ldloc.1": 2,
+      "ldc.i4.1": 1,
+      "add": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "System.Func`2[System.UInt32,System.UInt32]::Invoke"
+    ]
+  },
+  "Benchmarks::Struct": {
+    "opcodes": {
+      "ldloca.s": 9,
+      "initobj": 1,
+      "ldarg.1": 1,
+      "stfld": 4,
+      "ldc.i4.s": 2,
+      "ldc.i4.7": 1,
+      "ldloc.2": 1,
+      "stloc.0": 2,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 1,
+      "ldloc.0": 1,
+      "call": 1,
+      "ldloc.1": 2,
+      "ldc.i4.1": 1,
+      "add": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ldfld": 4,
+      "xor": 3,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks::QuadStep"
+    ]
+  },
+  "Benchmarks::Generic": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldarg.1": 2,
+      "ldc.i4": 2,
+      "mul": 1,
+      "add": 2,
+      "call": 1,
+      "starg.s": 1,
+      "ldloc.0": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks::Identity"
+    ]
+  },
+  "Benchmarks::Cast": {
+    "opcodes": {
+      "ldsfld": 1,
+      "stloc.0": 1,
+      "ldc.i4.0": 1,
+      "stloc.1": 2,
+      "br.s": 2,
+      "ldloc.0": 1,
+      "ldloc.1": 3,
+      "ldc.i4.1": 2,
+      "and": 1,
+      "ldelem.ref": 1,
+      "stloc.2": 1,
+      "ldloc.2": 2,
+      "castclass": 1,
+      "stloc.3": 1,
+      "ldarg.1": 2,
+      "ldc.i4.s": 1,
+      "mul": 1,
+      "isinst": 1,
+      "brtrue.s": 1,
+      "ldc.i4.3": 1,
+      "ldc.i4.7": 1,
+      "add": 3,
+      "ldloc.3": 1,
+      "ldfld": 1,
+      "starg.s": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::Boxing": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldarg.1": 2,
+      "call": 2,
+      "stloc.1": 1,
+      "ldloc.1": 2,
+      "unbox.any": 1,
+      "ldc.i4": 2,
+      "mul": 1,
+      "add": 2,
+      "starg.s": 1,
+      "ldloc.0": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks::BoxValue",
+      "Benchmarks::Keep"
+    ]
+  },
+  "Benchmarks::Allocation": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldarg.1": 2,
+      "call": 2,
+      "stloc.1": 1,
+      "ldloc.1": 2,
+      "ldfld": 1,
+      "ldc.i4": 2,
+      "mul": 1,
+      "add": 2,
+      "starg.s": 1,
+      "ldloc.0": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks::NewBox",
+      "Benchmarks::Keep"
+    ]
+  },
+  "Benchmarks::NewArray": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldc.i4.s": 3,
+      "newarr": 1,
+      "stloc.1": 1,
+      "ldloc.1": 4,
+      "call": 1,
+      "ldloc.0": 4,
+      "and": 2,
+      "ldarg.1": 2,
+      "stelem.i4": 1,
+      "ldelem.u4": 1,
+      "ldc.i4": 1,
+      "mul": 1,
+      "ldlen": 1,
+      "conv.i4": 1,
+      "add": 2,
+      "starg.s": 1,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "Benchmarks::Keep"
+    ]
+  },
+  "Benchmarks::EhNormal": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldarg.1": 3,
+      "ldc.i4": 2,
+      "mul": 1,
+      "add": 2,
+      "starg.s": 2,
+      "leave.s": 1,
+      "ldc.i4.s": 1,
+      "xor": 1,
+      "endfinally": 1,
+      "ldloc.0": 2,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks::EhThrow": {
+    "opcodes": {
+      "ldc.i4.0": 1,
+      "stloc.0": 2,
+      "br.s": 1,
+      "ldloc.0": 3,
+      "ldc.i4": 3,
+      "and": 1,
+      "brtrue.s": 1,
+      "newobj": 1,
+      "throw": 1,
+      "ldarg.1": 4,
+      "mul": 1,
+      "add": 3,
+      "starg.s": 3,
+      "leave.s": 3,
+      "pop": 1,
+      "ldc.i4.s": 1,
+      "xor": 1,
+      "ldc.i4.7": 1,
+      "endfinally": 1,
+      "ldc.i4.1": 1,
+      "ldarg.0": 1,
+      "blt.s": 1,
+      "ret": 1
+    },
+    "calls": [
+      "System.ArgumentException::.ctor"
+    ]
+  },
+  "Benchmarks::Dispatch": {
+    "opcodes": {
+      "ldarg.0": 1,
+      "stloc.0": 1,
+      "ldloc.0": 1,
+      "switch": 1,
+      "br": 1,
+      "ldarg.1": 26,
+      "ldarg.2": 26,
+      "call": 26,
+      "ret": 26
+    },
+    "calls": [
+      "Benchmarks::Int32",
+      "Benchmarks::Int64",
+      "Benchmarks::DivRem",
+      "Benchmarks::Float32",
+      "Benchmarks::Float64",
+      "Benchmarks::Convert",
+      "Benchmarks::Checked",
+      "Benchmarks::Branch",
+      "Benchmarks::Switch",
+      "Benchmarks::ArrayLoad",
+      "Benchmarks::ArrayStore",
+      "Benchmarks::Field",
+      "Benchmarks::StaticField",
+      "Benchmarks::ByRef",
+      "Benchmarks::Calls",
+      "Benchmarks::Virtual",
+      "Benchmarks::Interface",
+      "Benchmarks::Delegate",
+      "Benchmarks::Struct",
+      "Benchmarks::Generic",
+      "Benchmarks::Cast",
+      "Benchmarks::Boxing",
+      "Benchmarks::Allocation",
+      "Benchmarks::NewArray",
+      "Benchmarks::EhNormal",
+      "Benchmarks::EhThrow"
+    ]
+  },
+  "Benchmarks::Main": {
+    "opcodes": {
+      "ldarg.0": 2,
+      "ldc.i4.0": 4,
+      "ldelem.ref": 3,
+      "call": 11,
+      "stloc.0": 1,
+      "ldc.i4.1": 3,
+      "stloc.1": 1,
+      "stloc.2": 2,
+      "br.s": 1,
+      "ldloc.0": 3,
+      "ldloc.1": 4,
+      "ldc.i4": 1,
+      "ldc.i4.s": 3,
+      "pop": 1,
+      "ldloc.2": 2,
+      "add": 1,
+      "ldc.i4.3": 2,
+      "blt.s": 1,
+      "stloc.3": 1,
+      "stloc.s": 4,
+      "newarr": 1,
+      "ldloc.s": 12,
+      "ldstr": 6,
+      "stelem.ref": 9,
+      "ldsfld": 2,
+      "ldc.i4.2": 1,
+      "box": 2,
+      "ldc.i4.4": 1,
+      "ldc.i4.5": 1,
+      "ldc.i4.6": 1,
+      "ldc.i4.7": 1,
+      "ldloc.3": 1,
+      "sub": 1,
+      "conv.r8": 3,
+      "ldc.r8": 1,
+      "div": 2,
+      "mul": 1,
+      "ldloca.s": 1,
+      "ldc.i4.8": 1,
+      "ret": 1
+    },
+    "calls": [
+      "System.Int32::Parse",
+      "System.Math::Min",
+      "Benchmarks::Dispatch",
+      "System.Diagnostics.Stopwatch::GetTimestamp",
+      "System.Globalization.CultureInfo::get_InvariantCulture",
+      "System.Double::ToString",
+      "System.String::Concat",
+      "System.Console::WriteLine"
+    ]
+  },
+  "Benchmarks+Box::Apply": {
+    "opcodes": {
+      "ldarg.1": 1,
+      "ldc.i4": 2,
+      "mul": 1,
+      "add": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks+OtherBox::Apply": {
+    "opcodes": {
+      "ldarg.1": 1,
+      "ldc.i4": 1,
+      "mul": 1,
+      "ldc.i4.1": 1,
+      "add": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks+Op::Apply": {
+    "opcodes": {
+      "ldarg.1": 1,
+      "ldc.i4": 2,
+      "mul": 1,
+      "add": 1,
+      "ret": 1
+    },
+    "calls": []
+  },
+  "Benchmarks+OtherOp::Apply": {
+    "opcodes": {
+      "ldarg.1": 1,
+      "ldc.i4": 1,
+      "mul": 1,
+      "ldc.i4.1": 1,
+      "add": 1,
+      "ret": 1
+    },
+    "calls": []
+  }
+}

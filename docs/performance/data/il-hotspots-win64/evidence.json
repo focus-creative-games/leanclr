@@ -1,0 +1,15 @@
+{
+  "baseline_commit": "5f38658b20cf76213614f5d58c1ab86369b81ee7",
+  "analysis_checkout_commit": "e17687660ef9b17a11f9e8eb1446f2e2d284151d",
+  "sha256": {
+    "src/benchmarks/il-families/probes.h": "ffe0a7e7e31d7600850235ba7b6a1833d4125dc0f251831c8814fef7cef1eb63",
+    "src/benchmarks/il-families/main.cpp": "168c5b0c4d70d44b0b15a7f1f9b61727767cfde13b751443a8505d5a5b849fde",
+    "scripts/benchmarks/probe_il_hotspots.py": "bcbe769420ab12e6986eb7df27c5291f48e73322884c3c5ef4310c9b2bad4476",
+    "out/performance/il-families/managed/AotBaseline.dll": "586a76d1bbfe32c00a81ad84538be300a7db2d9aa2229beb56f4c4d1258ebf5c",
+    "out/performance/il-families/native/runtime/Release/leanclr.lib": "54ac583a03852cec6d2cff11f3b74d7559dad69b66b8e79ec750eee8cf3ef7a6",
+    "out/performance/il-families/generated/AotBaseline.method_body_part1.cpp": "6e0f7286bdc01e3a0557568b2e4456aee162db7393f9bde4044215e8a5195187",
+    "out/performance/il-hotspots/generated/AotBaseline.method_body_part1.cpp": "6637a131923684247fa568dd5ff7130009d772cf16ce4cece27256d52af07fb7",
+    "out/performance/il-hotspots/main.cpp": "3a5b4a49100135514b41f6604c62baa07007d339c8334407db526f69e84d6b52"
+  },
+  "configuration": "MSVC Release /O2 /Ob2 /DNDEBUG; affinity=4; baseline runtime static library reused; GC debug off; no profiling"
+}

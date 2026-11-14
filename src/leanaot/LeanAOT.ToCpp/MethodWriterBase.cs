@@ -2569,6 +2569,15 @@ namespace LeanAOT.ToCpp
             }
         }
 
+        private string GetTypeCheckFunction(ITypeDefOrRef targetType, TypeDetail detail, bool cast)
+        {
+            // Keep the full algorithm for arrays, variance and boxed values.
+            if (targetType.ToTypeSig().ElementType == ElementType.Class && detail.TypeDef != null &&
+                !detail.TypeDef.IsInterface && !detail.TypeDef.IsValueType && !detail.TypeDef.HasGenericParameters)
+                return detail.TypeDef.IsSealed ? "leanclr::codegen::is_inst_sealed" : "leanclr::codegen::is_inst_class";
+            return cast ? VmFunctionNames.CastClass : VmFunctionNames.IsInst;
+        }
+
         private void EmitCastClass(Instruction inst, ITypeDefOrRef targetType)
         {
             var srcObj = Pop();
@@ -2576,7 +2585,8 @@ namespace LeanAOT.ToCpp
             string srcVarName = GetEvalVariableName(srcObj);
             TypeDetail typeDetail = _metadataService.GetTypeDetail(targetType);
             RuntimeResolvedVariable targetTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(targetType, typeDetail);
-            _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{srcVarName} != nullptr && {VmFunctionNames.CastClass}({srcVarName}, {targetTypeVar.GetFullReferenceVariableName()}) == nullptr")})");
+            string check = GetTypeCheckFunction(targetType, typeDetail, true);
+            _bodyWriter.AddLine($"if ({GetUnlikelyExpr($"{srcVarName} != nullptr && {check}({srcVarName}, {targetTypeVar.GetFullReferenceVariableName()}) == nullptr")})");
             _bodyWriter.AddLine("{");
             _bodyWriter.IncreaseIndent();
             EmitThrowRuntimeError(inst, "InvalidCast");
@@ -2592,7 +2602,8 @@ namespace LeanAOT.ToCpp
             string srcVarName = GetEvalVariableName(srcObj);
             TypeDetail typeDetail = _metadataService.GetTypeDetail(targetType);
             RuntimeResolvedVariable targetTypeVar = _runtimeResolvedMetadatas.GetTypeVariable(targetType, typeDetail);
-            _bodyWriter.AddLine($"{GetTypeName(dstObj)} {GetEvalVariableName(dstObj)} = {srcVarName} ? {VmFunctionNames.IsInst}(({ConstStrings.ObjectPtrTypeName}){srcVarName}, {targetTypeVar.GetFullReferenceVariableName()}) : nullptr;");
+            string check = GetTypeCheckFunction(targetType, typeDetail, false);
+            _bodyWriter.AddLine($"{GetTypeName(dstObj)} {GetEvalVariableName(dstObj)} = {srcVarName} ? {check}(({ConstStrings.ObjectPtrTypeName}){srcVarName}, {targetTypeVar.GetFullReferenceVariableName()}) : nullptr;");
         }
 
         private void EmitUnbox(Instruction inst, ITypeDefOrRef targetType)
@@ -2906,7 +2917,8 @@ namespace LeanAOT.ToCpp
             TypeDetail typeDetail = _metadataService.GetTypeDetail(operand);
             RuntimeResolvedVariable elementKlassVar = _runtimeResolvedMetadatas.GetTypeVariable(operand, typeDetail);
             string sizeVarExpr = GetVariableMayCast(indexVar, "int32_t");
-            EmitDeclaringAssignOrThrow(inst, retVar, $"{VmFunctionNames.NewSZArrayFromEleKlass}({elementKlassVar.GetFullReferenceVariableName()}, {sizeVarExpr}, \"{_method.FullName}\")");
+            var allocationCache = elementKlassVar.GetSzArrayAllocationCache();
+            EmitDeclaringAssignOrThrow(inst, retVar, $"LEANCLR_CODEGEN_NEW_SZARRAY_CACHED({elementKlassVar.GetFullReferenceVariableName()}, {sizeVarExpr}, {allocationCache.FullReferenceVariableName}, \"{_method.FullName}\")");
             EmitAssumeCondition($"({sizeVarExpr}) >= 0");
             string arrVarExpr = GetVariableMayCast(retVar, ConstStrings.ArrayPtrTypeName);
             EmitAssumeCondition($"({sizeVarExpr}) == ({arrVarExpr})->length");
