@@ -38,40 +38,21 @@ namespace LeanAOT.ToCpp
             return _totalWriter.CodeSize > maxSize;
         }
 
-        public void AddDirectCallBridgeImpl(DirectCallBridgeInfo directCallBridgeInfo)
+        private void WriteAotDispatch(MethodDetail methodDetail, bool skipThis = false)
         {
-            if (!_addedDirectCallBridgeInfos.Add(directCallBridgeInfo))
-            {
-                return;
-            }
-
-            MethodDetail methodDetail = directCallBridgeInfo.method;
-            _forwardDeclaration.AddMethodForwardDeclaration(methodDetail.Method);
-
-            _directCallBridgeImplWriter.AddLine();
-            _directCallBridgeImplWriter.AddLine($"{directCallBridgeInfo.GenerateMethodDeclaring()}");
-            _directCallBridgeImplWriter.BeginBlock();
-
-            var parametersIncludeThis = methodDetail.ParamsIncludeThis;
-            string methodVarName = "__method";
-            string callvirVarName = "__callvir";
-
-            _directCallBridgeImplWriter.AddLine($"if ({VmFunctionNames.IsAotMethod}({methodVarName}))");
-            _directCallBridgeImplWriter.BeginBlock();
-            _directCallBridgeImplWriter.AddLine($"{ConstStrings.ManagedMethodPointerTypeName} __method_pointer = {callvirVarName} ? {methodVarName}->{ConstStrings.VirtualMethodPointerFieldName} : {methodVarName}->{ConstStrings.MethodPointerFieldName};");
             // Interface/base signatures do not determine the implementation's
             // context ABI. A generic class can implement a non-generic interface
             // and a non-generic class can implement a closed generic interface.
-            var plainArgs = MethodGenerationUtil.CreateMethodFunctionArgsWithoutCast(methodDetail);
+            var plainArgs = string.Join(", ", methodDetail.ParamsIncludeThis.Skip(skipThis ? 1 : 0).Select(p => p.Name));
             var contextArgs = plainArgs.Length == 0 ? "__method" : plainArgs + ", __method";
             void WriteAotCall(bool lightweight, bool packedInt32 = false, bool statusOut = false)
             {
                 _directCallBridgeImplWriter.AddLine("if (__method->generic_method != nullptr)");
                 _directCallBridgeImplWriter.BeginBlock();
-                string contextCall = $"(({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(true, lightweight, packedInt32, statusOut)})__method_pointer)";
+                string contextCall = $"(({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(true, lightweight, packedInt32, statusOut, skipThis)})__method_pointer)";
                 _directCallBridgeImplWriter.AddLine("return " + (statusOut ? ReturnProtocol.InvokeStatusOut(methodDetail.RetType, contextCall, contextArgs) : $"{contextCall}({contextArgs})") + ";");
                 _directCallBridgeImplWriter.EndBlock();
-                string plainCall = $"(({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(false, lightweight, packedInt32, statusOut)})__method_pointer)";
+                string plainCall = $"(({methodDetail.CreateRelaxMethodFunctionPointerTypeForCast(false, lightweight, packedInt32, statusOut, skipThis)})__method_pointer)";
                 _directCallBridgeImplWriter.AddLine("return " + (statusOut ? ReturnProtocol.InvokeStatusOut(methodDetail.RetType, plainCall, plainArgs) : $"{plainCall}({plainArgs})") + ";");
             }
             if (ReturnProtocol.IsLightweight(methodDetail.RetType, true))
@@ -96,6 +77,54 @@ namespace LeanAOT.ToCpp
                 _directCallBridgeImplWriter.EndBlock();
             }
             WriteAotCall(false);
+        }
+
+        private void WriteDelegateFastPath(MethodDetail methodDetail)
+        {
+            var w = _directCallBridgeImplWriter;
+            w.AddLine("leanclr::vm::RtObject* __delegate_target = nullptr;");
+            w.AddLine("const auto* __delegate_method = leanclr::vm::Delegate::get_singlecast_aot_target(__this, __method, __delegate_target);");
+            w.AddLine("if (__delegate_method)");
+            w.BeginBlock();
+            w.AddLine("const auto* __method = __delegate_method;");
+            w.AddLine("auto __method_pointer = __method->method_ptr;");
+            w.AddLine("if (__delegate_target == nullptr)");
+            w.BeginBlock();
+            WriteAotDispatch(methodDetail, true);
+            w.EndBlock();
+            w.AddLine("else");
+            w.BeginBlock();
+            w.AddLine("__this = __delegate_target;");
+            WriteAotDispatch(methodDetail);
+            w.EndBlock();
+            w.EndBlock();
+        }
+
+        public void AddDirectCallBridgeImpl(DirectCallBridgeInfo directCallBridgeInfo)
+        {
+            if (!_addedDirectCallBridgeInfos.Add(directCallBridgeInfo))
+            {
+                return;
+            }
+
+            MethodDetail methodDetail = directCallBridgeInfo.method;
+            _forwardDeclaration.AddMethodForwardDeclaration(methodDetail.Method);
+
+            _directCallBridgeImplWriter.AddLine();
+            _directCallBridgeImplWriter.AddLine($"{directCallBridgeInfo.GenerateMethodDeclaring()}");
+            _directCallBridgeImplWriter.BeginBlock();
+
+            var parametersIncludeThis = methodDetail.ParamsIncludeThis;
+            string methodVarName = "__method";
+            string callvirVarName = "__callvir";
+
+            if (directCallBridgeInfo.delegateInvoke)
+                WriteDelegateFastPath(methodDetail);
+
+            _directCallBridgeImplWriter.AddLine($"if ({VmFunctionNames.IsAotMethod}({methodVarName}))");
+            _directCallBridgeImplWriter.BeginBlock();
+            _directCallBridgeImplWriter.AddLine($"{ConstStrings.ManagedMethodPointerTypeName} __method_pointer = {callvirVarName} ? {methodVarName}->{ConstStrings.VirtualMethodPointerFieldName} : {methodVarName}->{ConstStrings.MethodPointerFieldName};");
+            WriteAotDispatch(methodDetail);
             _directCallBridgeImplWriter.EndBlock();
             _directCallBridgeImplWriter.AddLine($"else");
             _directCallBridgeImplWriter.BeginBlock();

@@ -116,6 +116,19 @@ namespace LeanAOT.ToCpp
             return subVariable;
         }
 
+        public SubRuntimeResolvedVariable GetSzArrayAllocationCache()
+        {
+            const string key = "szarray_allocation";
+            if (!subVariables.TryGetValue(key, out var variable))
+            {
+                string name = $"{GetVariableName()}_{key}";
+                variable = new SubRuntimeResolvedVariable(key, name, $"{owner.GetSubResolveMetadatasVariableName()}.{name}",
+                    "leanclr::vm::SzArrayAllocationCache", "{}");
+                subVariables.Add(key, variable);
+            }
+            return variable;
+        }
+
         public string GetFullReferenceVariableNameBeforeInit()
         {
             return $"{owner.GetResolveMetadatasVariableName()}.{GetVariableName()}";

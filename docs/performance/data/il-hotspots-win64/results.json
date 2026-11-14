@@ -1,0 +1,888 @@
+{
+  "samples": [
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 74.99685,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 0,
+      "engine": "base"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 11.215525,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 0,
+      "engine": "base"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 73.6568,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 0,
+      "engine": "array-class"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 65.5683,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 0,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.683555,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 0,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.148435,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 0,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 4.11193,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 0,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.112865,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 0,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 13.283155,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 0,
+      "engine": "base"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.447835,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 1,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 75.2334,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 1,
+      "engine": "base"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.683995,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 1,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 10.893765,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 1,
+      "engine": "base"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 16.27083,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 1,
+      "engine": "base"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 67.51315,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 1,
+      "engine": "array-class"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 55.90495,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 1,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.081845,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 1,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.6361,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 1,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.61576,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 2,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 11.081975,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 2,
+      "engine": "base"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 83.6073,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 2,
+      "engine": "base"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 66.69035,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 2,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.021585,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 2,
+      "engine": "array-class"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 62.81265,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 2,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 13.59011,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 2,
+      "engine": "base"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.62821,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 2,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.126075,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 2,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 13.110845,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 3,
+      "engine": "base"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 52.65355,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 3,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.660895,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 3,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 10.969415,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 3,
+      "engine": "base"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 72.38875,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 3,
+      "engine": "base"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.26212,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 3,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.62819,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 3,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.01152,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 3,
+      "engine": "array-class"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 76.0131,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 3,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.931155,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 4,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 11.339675,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 4,
+      "engine": "base"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.60762,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 4,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 13.73447,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 4,
+      "engine": "base"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.06275,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 4,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 53.1349,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 4,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.056975,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 4,
+      "engine": "array-class"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 74.91645,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 4,
+      "engine": "base"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 71.0208,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 4,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.169335,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 5,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 55.4229,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 5,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 68.7841,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 5,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 13.69898,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 5,
+      "engine": "base"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.5717,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 5,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.63385,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 5,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 11.113865,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 5,
+      "engine": "base"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 73.268,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 5,
+      "engine": "base"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.02331,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 5,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 11.018155,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 6,
+      "engine": "base"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.57978,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 6,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.15218,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 6,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Delegate",
+      "iterations": 20000000,
+      "checksum": "2210372883",
+      "ns_per_op": 3.190075,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 6,
+      "engine": "array-class"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 67.82825,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 6,
+      "engine": "array-class"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 13.326245,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 6,
+      "engine": "base"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 54.45535,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 6,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "Cast",
+      "iterations": 20000000,
+      "checksum": "1893667091",
+      "ns_per_op": 2.62202,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 24,
+      "sample": 6,
+      "engine": "array-layout"
+    },
+    {
+      "workload": "NewArray",
+      "iterations": 2000000,
+      "checksum": "582651411",
+      "ns_per_op": 74.71785,
+      "entry": "aot",
+      "interpreted_ir": false,
+      "gc_count_delta": 0,
+      "used_bytes_delta": 192000024,
+      "sample": 6,
+      "engine": "base"
+    }
+  ],
+  "summary": [
+    {
+      "workload": "Delegate",
+      "engine": "base",
+      "median_ns": 11.081975,
+      "min_ns": 10.893765,
+      "max_ns": 11.339675,
+      "gc_count_delta": [
+        0
+      ],
+      "used_bytes_delta": [
+        24
+      ]
+    },
+    {
+      "workload": "Delegate",
+      "engine": "array-class",
+      "median_ns": 3.056975,
+      "min_ns": 3.01152,
+      "max_ns": 3.190075,
+      "gc_count_delta": [
+        0
+      ],
+      "used_bytes_delta": [
+        24
+      ]
+    },
+    {
+      "workload": "Delegate",
+      "engine": "array-layout",
+      "median_ns": 3.15218,
+      "min_ns": 3.06275,
+      "max_ns": 3.447835,
+      "gc_count_delta": [
+        0
+      ],
+      "used_bytes_delta": [
+        24
+      ]
+    },
+    {
+      "workload": "Cast",
+      "engine": "base",
+      "median_ns": 13.59011,
+      "min_ns": 13.110845,
+      "max_ns": 16.27083,
+      "gc_count_delta": [
+        0
+      ],
+      "used_bytes_delta": [
+        24
+      ]
+    },
+    {
+      "workload": "Cast",
+      "engine": "array-class",
+      "median_ns": 2.660895,
+      "min_ns": 2.5717,
+      "max_ns": 4.11193,
+      "gc_count_delta": [
+        0
+      ],
+      "used_bytes_delta": [
+        24
+      ]
+    },
+    {
+      "workload": "Cast",
+      "engine": "array-layout",
+      "median_ns": 2.62819,
+      "min_ns": 2.60762,
+      "max_ns": 2.683555,
+      "gc_count_delta": [
+        0
+      ],
+      "used_bytes_delta": [
+        24
+      ]
+    },
+    {
+      "workload": "NewArray",
+      "engine": "base",
+      "median_ns": 74.91645,
+      "min_ns": 72.38875,
+      "max_ns": 83.6073,
+      "gc_count_delta": [
+        0
+      ],
+      "used_bytes_delta": [
+        192000024
+      ]
+    },
+    {
+      "workload": "NewArray",
+      "engine": "array-class",
+      "median_ns": 68.7841,
+      "min_ns": 66.69035,
+      "max_ns": 76.0131,
+      "gc_count_delta": [
+        0
+      ],
+      "used_bytes_delta": [
+        192000024
+      ]
+    },
+    {
+      "workload": "NewArray",
+      "engine": "array-layout",
+      "median_ns": 55.4229,
+      "min_ns": 52.65355,
+      "max_ns": 65.5683,
+      "gc_count_delta": [
+        0
+      ],
+      "used_bytes_delta": [
+        192000024
+      ]
+    }
+  ],
+  "affinity_mask": 4,
+  "baseline_runtime_lib": "D:\\workspace\\wasmclr\\leanclr-mono-miminal\\out\\performance\\il-families\\native\\runtime\\Release\\leanclr.lib",
+  "runtime_lib_sha256": "54ac583a03852cec6d2cff11f3b74d7559dad69b66b8e79ec750eee8cf3ef7a6",
+  "baseline_managed_sha256": "586a76d1bbfe32c00a81ad84538be300a7db2d9aa2229beb56f4c4d1258ebf5c",
+  "reference_checksums": {
+    "Delegate": "2210372883",
+    "Cast": "1893667091",
+    "NewArray": "582651411"
+  }
+}

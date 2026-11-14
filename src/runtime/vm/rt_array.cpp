@@ -44,6 +44,16 @@ size_t Array::get_array_bounds_offset(const metadata::RtClass* klass, int32_t le
 
 // Array creation methods
 
+RtResultVoid Array::initialize_szarray_allocation_cache(const metadata::RtClass* element, SzArrayAllocationCache& cache)
+{
+    DECLARING_AND_UNWRAP_OR_RET_ERR_ON_FAIL(metadata::RtClass*, klass, ArrayClass::get_szarray_class_from_element_class(element));
+    RET_ERR_ON_FAIL(Class::initialize_all(klass));
+    // Do not publish a cache entry until metadata initialization succeeds.
+    cache.element_size = Class::get_stack_location_size(element);
+    cache.klass = klass;
+    RET_VOID_OK();
+}
+
 RtResult<RtArray*> Array::__new_szarray_from_array_klass(const metadata::RtClass* klass, int32_t length LEANCLR_GC_DECLARE_CALL_SITE_PARAM)
 {
     assert(klass);

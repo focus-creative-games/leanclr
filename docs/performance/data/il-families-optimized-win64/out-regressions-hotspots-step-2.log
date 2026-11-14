@@ -1,0 +1,90 @@
+Internal ctest changing into directory: D:/workspace/wasmclr/leanclr-mono-miminal/out/regressions-hotspots
+Test project D:/workspace/wasmclr/leanclr-mono-miminal/out/regressions-hotspots
+      Start  1: public-c
+ 1/42 Test  #1: public-c .........................   Passed    0.01 sec
+      Start  2: public-cpp
+ 2/42 Test  #2: public-cpp .......................   Passed    0.01 sec
+      Start  3: host-capabilities
+ 3/42 Test  #3: host-capabilities ................   Passed    0.01 sec
+      Start  4: environment-exit
+ 4/42 Test  #4: environment-exit .................   Passed    0.02 sec
+      Start  5: default-host-services
+ 5/42 Test  #5: default-host-services ............   Passed    0.01 sec
+      Start  6: host-services
+ 6/42 Test  #6: host-services ....................   Passed    0.01 sec
+      Start  7: core-boundary
+ 7/42 Test  #7: core-boundary ....................   Passed    0.01 sec
+      Start  8: layer-boundaries
+ 8/42 Test  #8: layer-boundaries .................   Passed    0.09 sec
+      Start  9: il-bounds
+ 9/42 Test  #9: il-bounds ........................   Passed    0.01 sec
+      Start 10: foundation
+10/42 Test #10: foundation .......................   Passed    0.01 sec
+      Start 11: portable-memory
+11/42 Test #11: portable-memory ..................   Passed    0.01 sec
+      Start 12: integer-math
+12/42 Test #12: integer-math .....................   Passed    0.01 sec
+      Start 13: bit-scan
+13/42 Test #13: bit-scan .........................   Passed    0.01 sec
+      Start 14: failed-initializer
+14/42 Test #14: failed-initializer ...............   Passed    0.03 sec
+      Start 15: invocation-buffers
+15/42 Test #15: invocation-buffers ...............   Passed    0.03 sec
+      Start 16: weak-finalizers
+16/42 Test #16: weak-finalizers ..................   Passed    0.02 sec
+      Start 17: allocation-failures
+17/42 Test #17: allocation-failures ..............   Passed    0.03 sec
+      Start 18: loader-once
+18/42 Test #18: loader-once ......................   Passed    0.03 sec
+      Start 19: integer-arithmetic
+19/42 Test #19: integer-arithmetic ...............   Passed    0.03 sec
+      Start 20: packed-memory
+20/42 Test #20: packed-memory ....................   Passed    0.03 sec
+      Start 21: managed-host-services
+21/42 Test #21: managed-host-services ............   Passed    0.03 sec
+      Start 22: type-system
+22/42 Test #22: type-system ......................   Passed    0.03 sec
+      Start 23: nested-reference-layout
+23/42 Test #23: nested-reference-layout ..........   Passed    0.03 sec
+      Start 24: binary-il
+24/42 Test #24: binary-il ........................   Passed    0.02 sec
+      Start 25: invalid-layouts
+25/42 Test #25: invalid-layouts ..................   Passed    0.02 sec
+      Start 26: failed-module
+26/42 Test #26: failed-module ....................   Passed    0.02 sec
+      Start 27: zero-arrays
+27/42 Test #27: zero-arrays ......................   Passed    0.02 sec
+      Start 28: clone-arrays
+28/42 Test #28: clone-arrays .....................   Passed    0.02 sec
+      Start 29: metadata-bounds
+29/42 Test #29: metadata-bounds ..................   Passed    0.02 sec
+      Start 30: exported-types
+30/42 Test #30: exported-types ...................   Passed    0.02 sec
+      Start 31: gc-accounting
+31/42 Test #31: gc-accounting ....................   Passed    0.02 sec
+      Start 32: compressed-signed
+32/42 Test #32: compressed-signed ................   Passed    0.02 sec
+      Start 33: unaligned-image
+33/42 Test #33: unaligned-image ..................   Passed    0.03 sec
+      Start 34: string-allocation
+34/42 Test #34: string-allocation ................   Passed    0.01 sec
+      Start 35: command-line
+35/42 Test #35: command-line .....................   Passed    0.04 sec
+      Start 36: aligned-allocation
+36/42 Test #36: aligned-allocation ...............   Passed    0.01 sec
+      Start 37: lifecycle-failure
+37/42 Test #37: lifecycle-failure ................   Passed    0.01 sec
+      Start 38: lifecycle-before-start
+38/42 Test #38: lifecycle-before-start ...........   Passed    0.01 sec
+      Start 39: lifecycle-success
+39/42 Test #39: lifecycle-success ................   Passed    0.02 sec
+      Start 40: container-allocation
+40/42 Test #40: container-allocation .............   Passed    0.01 sec
+      Start 41: il-fuzz-smoke
+41/42 Test #41: il-fuzz-smoke ....................   Passed    0.02 sec
+      Start 42: public-invoker
+42/42 Test #42: public-invoker ...................   Passed    0.02 sec
+
+100% tests passed, 0 tests failed out of 42
+
+Total Test time (real) =   0.83 sec

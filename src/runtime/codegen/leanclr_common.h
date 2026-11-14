@@ -443,6 +443,13 @@ inline metadata::RtModuleDef* get_module(const char* module_name)
 #define LEANCLR_CODEGEN_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, managed_method) \
     LEANCLR_NEW_MDARRAY_FROM_ELE_KLASS(ele_klass, rank, lengths, lower_bounds, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
 
+#if LEANCLR_GC_DEBUG
+#define LEANCLR_CODEGEN_NEW_SZARRAY_CACHED(ele_class, length, cache, managed_method) \
+    ::leanclr::vm::Array::__new_szarray_cached(ele_class, length, cache, ::leanclr::gc::GcAllocSite::make_codegen(__FILE__, __LINE__, managed_method))
+#else
+#define LEANCLR_CODEGEN_NEW_SZARRAY_CACHED(ele_class, length, cache, managed_method) ::leanclr::vm::Array::__new_szarray_cached(ele_class, length, cache)
+#endif
+
 void* resolve_metadata_token(metadata::RtModuleDef* mod, uint32_t token, const metadata::RtMethodInfo* generic_method_info);
 void resolve_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, void** resolved_metadatas);
 void resolve_generic_metadata_tokens(metadata::RtModuleDef* mod, const uint32_t* tokens, size_t count, const metadata::RtMethodInfo* generic_method_info,
@@ -575,6 +582,22 @@ inline RtResult<const metadata::RtMethodInfo*> get_virtual_method_impl(vm::RtObj
 
 inline vm::RtObject* is_inst(vm::RtObject* obj, const metadata::RtClass* klass) noexcept
 {
+    return vm::Object::is_inst(obj, klass);
+}
+
+// Only for concrete, non-array reference classes selected by the generator.
+inline vm::RtObject* is_inst_sealed(vm::RtObject* obj, const metadata::RtClass* klass) noexcept
+{
+    return obj && obj->klass == klass ? obj : nullptr;
+}
+
+inline vm::RtObject* is_inst_class(vm::RtObject* obj, const metadata::RtClass* klass) noexcept
+{
+    if (!obj)
+        return nullptr;
+    if (vm::Class::has_initialized_part(obj->klass, metadata::RtClassInitPart::SuperTypes) &&
+        vm::Class::has_initialized_part(klass, metadata::RtClassInitPart::SuperTypes))
+        return vm::Class::has_class_parent_fast(obj->klass, klass) ? obj : nullptr;
     return vm::Object::is_inst(obj, klass);
 }
 

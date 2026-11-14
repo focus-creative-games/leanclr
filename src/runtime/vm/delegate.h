@@ -11,6 +11,9 @@ class Delegate
   public:
     // Static initializer
     static RtResultVoid initialize();
+    // AOT typed-call fast path. Returns null for bindings needing the general
+    // invoker. No new delegate fields, caches or per-call allocations.
+    static const metadata::RtMethodInfo* get_singlecast_aot_target(RtObject* delegate_object, const metadata::RtMethodInfo* invoke, RtObject*& target) noexcept;
     static RtResult<RtMulticastDelegate*> create_delegate_from_reflection(RtReflectionType* delegate_type, RtObject* target,
                                                                           const metadata::RtMethodInfo* method, bool throw_on_bind) noexcept;
     static RtResultVoid constructor_delegate(RtMulticastDelegate* del, RtObject* target, const metadata::RtMethodInfo* method) noexcept;

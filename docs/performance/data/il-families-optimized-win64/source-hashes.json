@@ -1,0 +1,22 @@
+{
+  "source_hashes": {
+    "src\\leanaot\\LeanAOT.ToCpp\\DirectCallBridgeService.cs": "22a7ff62b34a3d19701de390cef0ec5437b07b02b9930e47dbfd9d45c9fc6abd",
+    "src\\leanaot\\LeanAOT.ToCpp\\MethodDetail.cs": "998eea60d8cd54872c1f10cd2fa45bc2ab79e3cdabc40085ec3f3b6aab9ecbe2",
+    "src\\leanaot\\LeanAOT.ToCpp\\MethodDirectCallBridgeCodeFilePart.cs": "8131962024ed2555ff4f05b5dfebb1e330b668a87fa7adceae16fccd9f8a9db0",
+    "src\\leanaot\\LeanAOT.ToCpp\\MethodWriterBase.cs": "ee9432bb229a3ba56c57fe4c5d3b346066585f746c618bdab249d1e6364b9cf4",
+    "src\\leanaot\\LeanAOT.ToCpp\\RuntimeResolvedMetadatas.cs": "5d7d47c8dbf505b0ff909966262425376d806a588c9df9ccbd866ee13ce5c315",
+    "src\\runtime\\bcl\\mono\\delegate.cpp": "1d459308f6607912b0d6fe527477b0846af61578493926394ec0153f42ecda24",
+    "src\\runtime\\codegen\\leanclr_common.h": "535531c552d78a8440a54632fc753012214970c74ca8a88f6c3441420610fd7b",
+    "src\\runtime\\vm\\delegate.h": "db2fabcd23e1cd236523d6d1176dbc1dff16bfa664dae3e65690f7321c61a475",
+    "src\\runtime\\vm\\rt_array.cpp": "35ae49101a91ff51ced6a026485e2b1de3fb7506559092cc0fdc78d533f8d97e",
+    "src\\runtime\\vm\\rt_array.h": "4ace4840f99d3bc91c1f528f215d2dcd11f243738b1c6f86e65a0e173a4dcea5",
+    "src\\tests\\aot-hotspots\\aot.xml": "ed96facc4d0192faed1069427e24be4e23ce0f2c6c17151153b2839c6f6f5a03",
+    "src\\tests\\aot-hotspots\\CMakeLists.txt": "a2749090fe9f98210b6d5368702734a68d3e558331a5c7840249f7e5417a36aa",
+    "src\\tests\\aot-hotspots\\Fixtures.cs": "b635dcf0286cbff0400e10975895192950d11660f5ff22bf69bc344b486828f1",
+    "src\\tests\\aot-hotspots\\main.cpp": "a8d25b1731bef22ea7182b076dd187ffa6318ff73993ea45e3a418b7e4cbb7b2",
+    "src\\tests\\aot-hotspots\\README.md": "638a21b29b7072acb4d8cd970e2b02ef1436229fdfe8f9b25a7c92f46b36d572"
+  },
+  "array_cache_count": 6,
+  "win64_cache_bytes": 96,
+  "delegate_bridge_count": 1
+}

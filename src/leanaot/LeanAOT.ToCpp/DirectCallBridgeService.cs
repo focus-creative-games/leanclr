@@ -8,6 +8,7 @@ namespace LeanAOT.ToCpp
     {
         public string name;
         public MethodDetail method;
+        public bool delegateInvoke;
 
         public string GenerateMethodDeclaring()
         {
@@ -29,7 +30,9 @@ namespace LeanAOT.ToCpp
 
         public DirectCallBridgeInfo GetDirectCallBridgeInfo(MethodDetail methodDetail)
         {
-            string name = GetDirectCallBridgeName(methodDetail);
+            bool delegateInvoke = !methodDetail.IsStatic && methodDetail.MethodDef?.Name == "Invoke" &&
+                MetaUtil.IsDerivedFromMulticastDelegate(methodDetail.MethodDef.DeclaringType);
+            string name = GetDirectCallBridgeName(methodDetail) + (delegateInvoke ? "_delegate" : "");
             if (_directCallBridgeInfos.TryGetValue(name, out var info))
             {
                 return info;
@@ -38,6 +41,7 @@ namespace LeanAOT.ToCpp
             {
                 name = name,
                 method = methodDetail,
+                delegateInvoke = delegateInvoke,
             };
             _directCallBridgeInfos[name] = newInfo;
             return newInfo;
