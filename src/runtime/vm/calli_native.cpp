@@ -253,7 +253,7 @@ RtResult<uint8_t> convention(const RtMethodSig* sig)
         RET_ERR(RtErr::NotSupported);
     if (c != RtSigType::C && c != RtSigType::StdCall)
         RET_ERR(RtErr::NotSupported);
-#if (defined(_WIN32) && defined(_M_X64)) || (defined(__EMSCRIPTEN__) && UINTPTR_MAX == UINT32_MAX) || \
+#if (defined(_WIN32) && defined(_M_X64)) || (defined(__ANDROID__) && defined(__x86_64__)) || (defined(__EMSCRIPTEN__) && UINTPTR_MAX == UINT32_MAX) || \
     (defined(LEANCLR_CALLI_ABI_PROBE) && LEANCLR_CALLI_ABI_PROBE)
     // Both spellings use the platform C ABI here. Other ABIs require their own tests.
     RET_OK(uint8_t(1));
