@@ -179,6 +179,50 @@ RtResultVoid Delegate::initialize()
     RET_VOID_OK();
 }
 
+static bool is_simple_reference_return(metadata::RtElementType type)
+{
+    using metadata::RtElementType;
+    return type == RtElementType::Object || type == RtElementType::String || type == RtElementType::Class || type == RtElementType::SZArray ||
+           type == RtElementType::Array;
+}
+
+const metadata::RtMethodInfo* Delegate::get_singlecast_aot_target(RtObject* delegate_object, const metadata::RtMethodInfo* invoke, RtObject*& target) noexcept
+{
+    if (!delegate_object)
+        return nullptr;
+    auto* delegate_value = reinterpret_cast<RtMulticastDelegate*>(delegate_object);
+    const auto& binding = delegate_value->dele;
+    const auto* method = get_target_method(&binding);
+    if (delegate_value->invocation_list || delegate_value->invocation_count != 0 || !method || !Method::is_devirtualed(method) ||
+        method->invoker_type != metadata::RtInvokerType::Aot || method->parameter_count != invoke->parameter_count)
+        return nullptr;
+    // Reflection may bind an enum-returning delegate to its underlying integer
+    // return type (and vice versa). Those can select different packed/status-out
+    // protocols despite identical value bits. Keep such conversions in the
+    // target's actual invoker rather than guessing its typed return ABI.
+    const auto actual_return = method->return_type->ele_type;
+    const auto expected_return = invoke->return_type->ele_type;
+    if (actual_return != expected_return && !(is_simple_reference_return(actual_return) && is_simple_reference_return(expected_return)))
+        return nullptr;
+    if (Method::is_static(method))
+    {
+        // Open static only. Bound-first-argument static methods have a different
+        // parameter count and are deliberately handled by the general invoker.
+        if (Class::is_cctor_not_finished(method->parent))
+            return nullptr;
+        target = nullptr;
+    }
+    else
+    {
+        // Keep open instance and boxed value-type this adjustment in the slow
+        // path. Reference-type closed instance calls have the normal typed ABI.
+        if (!binding.target || Class::is_value_type(method->parent))
+            return nullptr;
+        target = binding.target;
+    }
+    return method;
+}
+
 const metadata::RtMethodInfo* Delegate::get_target_method(const RtDelegate* del) noexcept
 {
     return del == nullptr ? nullptr : reinterpret_cast<const metadata::RtMethodInfo*>(del->method_ptr);
