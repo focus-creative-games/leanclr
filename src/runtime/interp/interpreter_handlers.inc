@@ -268,7 +268,7 @@ LEANCLR_CASE_BEGIN_LITE(BeqR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left == right && !std::isunordered(left, right))
+    if (left == right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -286,7 +286,7 @@ LEANCLR_CASE_BEGIN_LITE(BeqR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left == right && !std::isunordered(left, right))
+    if (left == right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -336,7 +336,7 @@ LEANCLR_CASE_BEGIN_LITE(BgeR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left >= right && !std::isunordered(left, right))
+    if (left >= right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -354,7 +354,7 @@ LEANCLR_CASE_BEGIN_LITE(BgeR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left >= right && !std::isunordered(left, right))
+    if (left >= right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -404,7 +404,7 @@ LEANCLR_CASE_BEGIN_LITE(BgtR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left > right && !std::isunordered(left, right))
+    if (left > right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -422,7 +422,7 @@ LEANCLR_CASE_BEGIN_LITE(BgtR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left > right && !std::isunordered(left, right))
+    if (left > right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -472,7 +472,7 @@ LEANCLR_CASE_BEGIN_LITE(BleR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left <= right && !std::isunordered(left, right))
+    if (left <= right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -490,7 +490,7 @@ LEANCLR_CASE_BEGIN_LITE(BleR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left <= right && !std::isunordered(left, right))
+    if (left <= right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -540,7 +540,7 @@ LEANCLR_CASE_BEGIN_LITE(BltR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left < right && !std::isunordered(left, right))
+    if (left < right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -558,7 +558,7 @@ LEANCLR_CASE_BEGIN_LITE(BltR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left < right && !std::isunordered(left, right))
+    if (left < right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -608,7 +608,7 @@ LEANCLR_CASE_BEGIN_LITE(BneUnR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left != right || std::isunordered(left, right))
+    if (left != right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -626,7 +626,7 @@ LEANCLR_CASE_BEGIN_LITE(BneUnR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left != right || std::isunordered(left, right))
+    if (left != right)
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -669,6 +669,7 @@ LEANCLR_CASE_BEGIN_LITE(BgeUnI8)
 }
 LEANCLR_CASE_END_LITE()
 
+// Negate the opposite ordered relation so that NaN also takes the branch.
 LEANCLR_CASE_BEGIN_LITE(BgeUnR4)
 {
     const auto* ir = (ll::BgeUnR4*)ip;
@@ -676,7 +677,7 @@ LEANCLR_CASE_BEGIN_LITE(BgeUnR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left >= right || std::isunordered(left, right))
+    if (!(left < right))
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -694,7 +695,7 @@ LEANCLR_CASE_BEGIN_LITE(BgeUnR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left >= right || std::isunordered(left, right))
+    if (!(left < right))
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -744,7 +745,7 @@ LEANCLR_CASE_BEGIN_LITE(BgtUnR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left > right || std::isunordered(left, right))
+    if (!(left <= right))
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -762,7 +763,7 @@ LEANCLR_CASE_BEGIN_LITE(BgtUnR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left > right || std::isunordered(left, right))
+    if (!(left <= right))
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -812,7 +813,7 @@ LEANCLR_CASE_BEGIN_LITE(BleUnR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left <= right || std::isunordered(left, right))
+    if (!(left > right))
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -830,7 +831,7 @@ LEANCLR_CASE_BEGIN_LITE(BleUnR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left <= right || std::isunordered(left, right))
+    if (!(left > right))
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -880,7 +881,7 @@ LEANCLR_CASE_BEGIN_LITE(BltUnR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    if (left < right || std::isunordered(left, right))
+    if (!(left >= right))
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -898,7 +899,7 @@ LEANCLR_CASE_BEGIN_LITE(BltUnR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    if (left < right || std::isunordered(left, right))
+    if (!(left >= right))
     {
         ip = reinterpret_cast<const uint8_t*>(ip + ir->target_offset);
     }
@@ -1394,7 +1395,7 @@ LEANCLR_CASE_BEGIN(CeqR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    dst->i32 = (left == right && !std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (left == right) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
@@ -1405,7 +1406,7 @@ LEANCLR_CASE_BEGIN(CeqR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    dst->i32 = (left == right && !std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (left == right) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
@@ -1434,7 +1435,7 @@ LEANCLR_CASE_BEGIN(CgtR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    dst->i32 = (left > right && !std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (left > right) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
@@ -1445,7 +1446,7 @@ LEANCLR_CASE_BEGIN(CgtR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    dst->i32 = (left > right && !std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (left > right) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
@@ -1474,7 +1475,7 @@ LEANCLR_CASE_BEGIN(CgtUnR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    dst->i32 = (left > right || std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (!(left <= right)) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
@@ -1485,7 +1486,7 @@ LEANCLR_CASE_BEGIN(CgtUnR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    dst->i32 = (left > right || std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (!(left <= right)) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
@@ -1514,7 +1515,7 @@ LEANCLR_CASE_BEGIN(CltR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    dst->i32 = (left < right && !std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (left < right) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
@@ -1525,7 +1526,7 @@ LEANCLR_CASE_BEGIN(CltR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    dst->i32 = (left < right && !std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (left < right) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
@@ -1554,7 +1555,7 @@ LEANCLR_CASE_BEGIN(CltUnR4)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     float left = op1->f32;
     float right = op2->f32;
-    dst->i32 = (left < right || std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (!(left >= right)) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
@@ -1565,7 +1566,7 @@ LEANCLR_CASE_BEGIN(CltUnR8)
     RtStackObject* op2 = eval_stack_base + ir->arg2;
     double left = op1->f64;
     double right = op2->f64;
-    dst->i32 = (left < right || std::isunordered(left, right)) ? 1 : 0;
+    dst->i32 = (!(left >= right)) ? 1 : 0;
 }
 LEANCLR_CASE_END()
 
